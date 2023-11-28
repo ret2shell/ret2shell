@@ -75,7 +75,7 @@ regex = "1.10"
 nanoid = "0.4"
 deunicode = "1.4"
 sanitizer = "0.1"
-roxmltree = "0.18"
+roxmltree = "0.19"
 # Logger
 tracing = "0.1"
 tracing-core = "0.1"
