@@ -23,7 +23,7 @@ async-recursion = "1.0"
 rustls = "0.21"
 rustls-native-certs = "0.6"
 # Web Framework
-axum = { version = "0.6", features = [
+axum = { version = "0.7", features = [
     "headers",
     "ws",
     "http2",
