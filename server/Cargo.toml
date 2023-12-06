@@ -90,7 +90,7 @@ tracing-core = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tracing-appender = "0.2"
 # Cache
-redis = { version = "0.23", features = [
+redis = { version = "0.24", features = [
   "tokio-comp",
   "tokio-rustls-comp",
   "cluster-async",
