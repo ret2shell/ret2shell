@@ -22,7 +22,7 @@
     "@playwright/test": "^1.40.1",
     "@sveltejs/adapter-auto": "^2.1.1",
     "@sveltejs/adapter-static": "^2.0.3",
-    "@sveltejs/kit": "^1.29.0",
+    "@sveltejs/kit": "^2.0.3",
     "@tailwindcss/typography": "^0.5.10",
     "@types/ace": "^0.0.52",
     "@types/howler": "^2.2.11",
