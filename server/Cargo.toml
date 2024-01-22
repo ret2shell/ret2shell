@@ -118,7 +118,7 @@ biosvg = "0.1"
 # WebSocket Reflector
 wsrx = { version = "0.1", features = ["web"] }
 # Kubernetes
-kube = { version = "0.87", features = [
+kube = { version = "0.88", features = [
   "config",
   "client",
   "rustls-tls",
