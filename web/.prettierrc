@@ -3,16 +3,8 @@
   "singleQuote": true,
   "trailingComma": "es5",
   "printWidth": 120,
-  "plugins": ["prettier-plugin-svelte"],
   "semi": false,
-  "overrides": [
-    {
-      "files": "*.svelte",
-      "options": {
-        "parser": "svelte"
-      }
-    }
-  ],
   "bracketSpacing": true,
-  "htmlWhitespaceSensitivity": "ignore"
+  "htmlWhitespaceSensitivity": "ignore",
+  "arrowParens": "avoid"
 }

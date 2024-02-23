@@ -5,6 +5,8 @@ use crate::migrator::{
     m20210101_000002_create_user::User, m20210101_000007_create_challenge::Challenge,
 };
 
+use super::m20210101_000008_create_team::Team;
+
 pub struct Migration;
 
 impl MigrationName for Migration {
@@ -18,6 +20,7 @@ pub enum Instance {
     Table,
     Id,
     UserId,
+    TeamId,
     ChallengeId,
     StartedAt,
     RenewCount,
@@ -78,6 +81,14 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .from(Instance::Table, Instance::UserId)
                             .to(User::Table, User::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::SetNull),
+                    )
+                    .col(ColumnDef::new(Instance::TeamId).big_integer())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .from(Instance::Table, Instance::TeamId)
+                            .to(Team::Table, Team::Id)
                             .on_update(ForeignKeyAction::Cascade)
                             .on_delete(ForeignKeyAction::SetNull),
                     )

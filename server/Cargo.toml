@@ -65,7 +65,7 @@ mime_guess = "2.0"
 mime = "0.3"
 image = { version = "0.24", features = ["webp-encoder"] }
 aho-corasick = "1.1"
-clap = { version = "4.4", features = ["derive"] }
+clap = { version = "4.5", features = ["derive"] }
 colored = "2.1"
 base64 = "0.21"
 regex = "1.10"
