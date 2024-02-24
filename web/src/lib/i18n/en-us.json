@@ -1,8 +1,37 @@
 {
   "platform": {
-    "name": "Ret 2 Shell"
+    "name": "Ret 2 Shell",
+    "subject": "Fight for all the beauty in the world"
   },
   "wiki": {
     "title": "Wiki"
+  },
+  "training": {
+    "title": "Training"
+  },
+  "game": {
+    "title": "Games"
+  },
+  "bulletin": {
+    "title": "Bulletin"
+  },
+  "admin": {
+    "title": "Admin"
+  },
+  "theme": {
+    "colorScheme": "color scheme",
+    "language": "Language"
+  },
+  "calendar": {
+    "scrollToView": "Scroll down to view calendar"
+  },
+  "about": {
+    "donate": "Donate",
+    "source": "Support"
+  },
+  "account": {
+    "login": {
+      "title": "Login"
+    }
   }
 }

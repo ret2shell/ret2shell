@@ -1,8 +1,37 @@
 {
   "platform": {
-    "name": "Ret へ Shell"
+    "name": "Ret へ Shell",
+    "subject": "世界のすべての利益のために戦う"
   },
   "wiki": {
     "title": "知識"
+  },
+  "training": {
+    "title": "練習する"
+  },
+  "game": {
+    "title": "コンペ"
+  },
+  "bulletin": {
+    "title": "アナウンス"
+  },
+  "admin": {
+    "title": "管理"
+  },
+  "theme": {
+    "colorScheme": "光と闇のテーマ",
+    "language": "言語 / Language"
+  },
+  "calendar": {
+    "scrollToView": "下にスクロールしてカレンダーを表示します"
+  },
+  "about": {
+    "donate": "寄付する",
+    "source": "サポート"
+  },
+  "account": {
+    "login": {
+      "title": "ログイン"
+    }
   }
 }

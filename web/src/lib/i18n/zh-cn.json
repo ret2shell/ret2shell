@@ -1,8 +1,37 @@
 {
   "platform": {
-    "name": "回归终端"
+    "name": "回归终端",
+    "subject": "为世间的所有美好而战"
   },
   "wiki": {
     "title": "知识"
+  },
+  "training": {
+    "title": "训练"
+  },
+  "game": {
+    "title": "赛事"
+  },
+  "bulletin": {
+    "title": "公告"
+  },
+  "admin": {
+    "title": "管理"
+  },
+  "theme": {
+    "colorScheme": "明暗主题",
+    "language": "语言 / Language"
+  },
+  "calendar": {
+    "scrollToView": "向下滚动查看日历"
+  },
+  "about": {
+    "donate": "捐助",
+    "source": "支持"
+  },
+  "account": {
+    "login": {
+      "title": "登录"
+    }
   }
 }

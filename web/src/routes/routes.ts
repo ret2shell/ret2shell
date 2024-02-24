@@ -10,7 +10,23 @@ export const routes = {
     },
     {
       path: '/wiki',
-      component: lazy(() => import('./wiki')),
+      component: lazy(() => import('./wiki/layout')),
+      children: [
+        {
+          path: '/',
+          component: lazy(() => import('./wiki/index')),
+        },
+      ],
+    },
+    {
+      path: '/magic',
+      component: lazy(() => import('./magic/layout')),
+      children: [
+        {
+          path: '/',
+          component: lazy(() => import('./magic/index')),
+        },
+      ],
     },
   ],
 }

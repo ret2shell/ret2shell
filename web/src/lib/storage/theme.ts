@@ -21,7 +21,7 @@ export const [themeStore, setThemeStore] = makePersisted(
   createStore({
     theme: 'cyber',
     locale: systemPrefersLocale,
-    colorScheme: systemPrefersColorScheme ? 'dark' : 'light',
+    colorScheme: (systemPrefersColorScheme ? 'dark' : 'light') as 'dark' | 'light',
   }),
   { name: 'theme' }
 )
@@ -30,7 +30,7 @@ export function setTheme(theme: string) {
   setThemeStore('theme', theme)
 }
 
-export function setColorScheme(colorScheme: string) {
+export function setColorScheme(colorScheme: 'dark' | 'light') {
   setThemeStore('colorScheme', colorScheme)
 }
 
