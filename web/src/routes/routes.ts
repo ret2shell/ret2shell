@@ -8,5 +8,9 @@ export const routes = {
       path: '/',
       component: lazy(() => import('./index')),
     },
+    {
+      path: '/wiki',
+      component: lazy(() => import('./wiki')),
+    },
   ],
 }

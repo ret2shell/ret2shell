@@ -7,6 +7,7 @@
 * {
   -ms-overflow-style: none;
   scrollbar-width: none;
+  @apply text-base;
 }
 *::-webkit-scrollbar {
   display: none;

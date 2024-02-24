@@ -1,25 +1,37 @@
-declare const __DEV__: boolean;
+declare const __DEV__: boolean
 declare module '*.svg' {
-  const src: string;
-  export default src;
+  const src: string
+  export default src
 }
 declare module '*.png' {
-  const src: string;
-  export default src;
+  const src: string
+  export default src
+}
+declare module '*.jpg' {
+  const src: string
+  export default src
+}
+declare module '*.webp' {
+  const src: string
+  export default src
+}
+declare module '*.jpeg' {
+  const src: string
+  export default src
 }
 declare module '*.module.css' {
-  const styles: Record<string, string>;
-  export default styles;
+  const styles: Record<string, string>
+  export default styles
 }
 declare module '*.module.sass' {
-  const styles: Record<string, string>;
-  export default styles;
+  const styles: Record<string, string>
+  export default styles
 }
 declare module '*.module.scss' {
-  const styles: Record<string, string>;
-  export default styles;
+  const styles: Record<string, string>
+  export default styles
 }
 declare module '*.module.less' {
-  const styles: Record<string, string>;
-  export default styles;
+  const styles: Record<string, string>
+  export default styles
 }

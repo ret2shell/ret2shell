@@ -1,8 +1,3 @@
-import { platformStore } from '../lib/storage/platform'
-import { t } from '../lib/storage/theme'
-
-function page() {
+export default function () {
   return <></>
 }
-
-export default page

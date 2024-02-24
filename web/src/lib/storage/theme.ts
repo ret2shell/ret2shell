@@ -34,6 +34,11 @@ export function setColorScheme(colorScheme: string) {
   setThemeStore('colorScheme', colorScheme)
 }
 
+export function setLocale(locale: Locale) {
+  setThemeStore('locale', locale)
+  setTimeout(() => location.reload())
+}
+
 export function fullTheme() {
   return `${themeStore.theme}-${themeStore.colorScheme}`
 }

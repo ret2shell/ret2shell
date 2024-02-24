@@ -11,7 +11,8 @@
     }
   ],
   "files.associations": {
-    "*.css": "tailwindcss"
+    "*.css": "tailwindcss",
+    "*.scss": "tailwindcss"
   },
   "rust-analyzer.showUnlinkedFileNotification": false,
   "prettier.bracketSpacing": false,
@@ -38,5 +39,7 @@
   },
   "[css]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "i18n-ally.localesPaths": ["web/src/lib/i18n"],
+  "i18n-ally.keystyle": "nested"
 }
