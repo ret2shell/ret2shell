@@ -109,7 +109,6 @@ function TitleBar() {
           </ul>
           <div class="flex-1"></div>
           <DiyBox />
-          <Link>{t('account.login.title')}</Link>
         </div>
       </div>
     </>
@@ -135,7 +134,7 @@ export default function (props: { children?: JSX.Element }) {
             }, 500)
           }
         }, 100)
-      })
+      }, 1000)
     }
   })
   return (

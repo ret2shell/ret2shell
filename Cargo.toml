@@ -1,4 +1,4 @@
 [workspace]
-members = ['server', 'keygen']
-default-members = ['server']
+members = ['crates/keygen', 'crates/migrator', 'crates/entity']
+default-members = ['crates/keygen', 'crates/migrator', 'crates/entity']
 resolver = "2"
