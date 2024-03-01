@@ -2,9 +2,9 @@
 
 use chrono::{
     serde::ts_seconds::{deserialize as from_ts, serialize as to_ts},
-    DateTime, Utc,
+    DateTime, TimeZone, Utc,
 };
-use sea_orm::entity::prelude::*;
+use sea_orm::{entity::prelude::*, ActiveValue, Condition, IntoActiveModel, Iterable, QuerySelect};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default)]
@@ -42,3 +42,67 @@ impl Related<super::user::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+pub async fn get_list(
+    conn: &DatabaseConnection, start_time: i64, end_time: i64,
+) -> Result<Vec<Model>, DbErr> {
+    let start_time = Utc
+        .timestamp_opt(start_time, 0)
+        .single()
+        .ok_or(DbErr::Custom("invalid timestamp of start_at".to_owned()))?;
+    let end_time = Utc
+        .timestamp_opt(end_time, 0)
+        .single()
+        .ok_or(DbErr::Custom("invalid timestamp of end_at".to_owned()))?;
+    let models = Entity::find()
+        .select_only()
+        .columns(Column::iter().filter(|c| !matches!(c, Column::Intro)))
+        .filter(
+            Condition::any()
+                .add(
+                    Condition::all()
+                        .add(Column::StartAt.gt(start_time))
+                        .add(Column::StartAt.lt(end_time)),
+                )
+                .add(
+                    Condition::all()
+                        .add(Column::EndAt.gt(start_time))
+                        .add(Column::EndAt.lt(end_time)),
+                )
+                .add(
+                    Condition::all()
+                        .add(Column::StartAt.lt(start_time))
+                        .add(Column::EndAt.gt(end_time)),
+                ),
+        )
+        .all(conn)
+        .await?;
+    Ok(models)
+}
+
+pub async fn get(conn: &DatabaseConnection, id: i64) -> Result<Model, DbErr> {
+    Entity::find_by_id(id)
+        .one(conn)
+        .await?
+        .ok_or(DbErr::RecordNotFound("calendar".to_owned()))
+}
+
+pub async fn create(conn: &DatabaseConnection, calendar: Model) -> Result<Model, DbErr> {
+    let active_model = ActiveModel {
+        id: ActiveValue::NotSet,
+        ..calendar.into_active_model().reset_all()
+    };
+    active_model.insert(conn).await
+}
+
+pub async fn update(conn: &DatabaseConnection, id: i64, calendar: Model) -> Result<Model, DbErr> {
+    let active_model = ActiveModel {
+        id: ActiveValue::Unchanged(id),
+        ..calendar.into_active_model().reset_all()
+    };
+    active_model.update(conn).await
+}
+
+pub async fn delete(conn: &DatabaseConnection, id: i64) -> Result<(), DbErr> {
+    Entity::delete_by_id(id).exec(conn).await.map(|_| ())
+}

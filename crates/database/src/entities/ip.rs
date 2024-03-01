@@ -2,6 +2,8 @@
 
 use sea_orm::entity::prelude::*;
 
+use super::user;
+
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "ip")]
 pub struct Model {
@@ -33,3 +35,14 @@ impl Related<super::user::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+pub async fn get_ip_list(db: &DatabaseConnection, user_id: i64) -> Result<Vec<Model>, DbErr> {
+    let user = user::Entity::find()
+        .filter(Column::Id.eq(user_id))
+        .one(db)
+        .await?;
+    match user {
+        Some(user) => Ok(user.find_related(Entity).all(db).await?),
+        None => Err(DbErr::RecordNotFound("user".to_string())),
+    }
+}

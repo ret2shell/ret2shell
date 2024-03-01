@@ -38,6 +38,8 @@ pub enum Relation {
         on_delete = "Cascade"
     )]
     Publisher,
+    #[sea_orm(has_many = "super::comment_closure::Entity")]
+    Closure,
 }
 
 impl Related<super::article::Entity> for Entity {
@@ -49,6 +51,12 @@ impl Related<super::article::Entity> for Entity {
 impl Related<super::user::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Publisher.def()
+    }
+}
+
+impl Related<super::comment_closure::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Closure.def()
     }
 }
 

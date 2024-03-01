@@ -2,8 +2,8 @@ use sea_orm_migration::prelude::*;
 use sea_query::Keyword::CurrentTimestamp;
 
 use super::{
-    m_20240101_000002_create_user::User, m_20240104_000003_create_team::Team,
-    m_20240104_000004_create_challenge::Challenge,
+    m_20240101_000002_create_user::User, m_20240104_000001_create_game::Game,
+    m_20240104_000003_create_team::Team, m_20240104_000004_create_challenge::Challenge,
 };
 
 pub struct Migration;
@@ -23,6 +23,7 @@ pub enum Audit {
     ChallengeId,
     UserId,
     TeamId,
+    GameId,
     State, // Confirmed, Pending, Ignored
 }
 
@@ -68,6 +69,14 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .from(Audit::Table, Audit::TeamId)
                             .to(Team::Table, Team::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .col(ColumnDef::new(Audit::GameId).big_integer().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .from(Audit::Table, Audit::GameId)
+                            .to(Game::Table, Game::Id)
                             .on_update(ForeignKeyAction::Cascade)
                             .on_delete(ForeignKeyAction::Cascade),
                     )
