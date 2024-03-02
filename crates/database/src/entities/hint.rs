@@ -4,7 +4,9 @@ use chrono::{
     serde::ts_seconds::{deserialize as from_ts, serialize as to_ts},
     DateTime, Utc,
 };
-use sea_orm::{entity::prelude::*, Condition, IntoSimpleExpr, RelationTrait};
+use sea_orm::{
+    entity::prelude::*, ActiveValue, Condition, IntoActiveModel, IntoSimpleExpr, RelationTrait,
+};
 use sea_query::{BinOper, Expr, Query, SimpleExpr};
 use serde::{Deserialize, Serialize};
 
@@ -25,7 +27,8 @@ pub struct Model {
     /// Auto release hint at this time.
     #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
     pub release_at: DateTime<Utc>,
-    /// Only release this hint when no solves of the challenge at `release_at` time.
+    /// Only release this hint when no solves of the challenge at `release_at`
+    /// time.
     pub no_solves_only: bool,
 }
 
@@ -94,6 +97,19 @@ pub async fn get_list(
     sql.all(db).await
 }
 
+pub async fn create(db: &DatabaseConnection, hint: Model) -> Result<Model, DbErr> {
+    let hint = ActiveModel {
+        id: ActiveValue::NotSet,
+        created_at: ActiveValue::Set(Utc::now()),
+        ..hint.into_active_model().reset_all()
+    };
+    hint.insert(db).await
+}
+
+pub async fn delete(db: &DatabaseConnection, hint_id: i64) -> Result<(), DbErr> {
+    Entity::delete_by_id(hint_id).exec(db).await.map(|_| ())
+}
+
 // #[cfg(test)]
 // mod tests {
 //     use super::get_list;
@@ -103,11 +119,12 @@ pub async fn get_list(
 //     async fn test_get_hints() {
 //         let mut connect_options = ConnectOptions::new(
 //             // development only
-//             "postgresql://ret2shell:P@ssw02dInD3v3l0pm3nt@localhost:5432/ret2shell",
+//
+// "postgresql://ret2shell:P@ssw02dInD3v3l0pm3nt@localhost:5432/ret2shell",
 //         );
 //         connect_options.acquire_timeout(std::time::Duration::from_secs(15));
 
-//         let db: DatabaseConnection = Database::connect(connect_options).await.unwrap();
-//         println!("{:?}", get_list(&db, 1, false).await.unwrap());
-//     }
+//         let db: DatabaseConnection =
+// Database::connect(connect_options).await.unwrap();         println!("{:?}",
+// get_list(&db, 1, false).await.unwrap());     }
 // }

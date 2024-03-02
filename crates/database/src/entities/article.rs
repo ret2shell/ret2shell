@@ -8,10 +8,9 @@ use sea_orm::{
     entity::prelude::*, ActiveValue, IntoActiveModel, Iterable, JoinType, QueryOrder, QuerySelect,
 };
 use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use super::article_closure;
-
-use serde_repr::{Deserialize_repr, Serialize_repr};
 
 #[derive(
     Clone,

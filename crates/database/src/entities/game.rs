@@ -4,10 +4,9 @@ use chrono::{
     serde::ts_seconds::{deserialize as from_ts, serialize as to_ts},
     DateTime, Utc,
 };
+use num_derive::{FromPrimitive, ToPrimitive};
 use sea_orm::{entity::prelude::*, ActiveValue, IntoActiveModel};
 use serde::{Deserialize, Serialize};
-
-use num_derive::{FromPrimitive, ToPrimitive};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 #[derive(
