@@ -4,7 +4,7 @@ use chrono::{
     serde::ts_seconds::{deserialize as from_ts, serialize as to_ts},
     DateTime, Utc,
 };
-use sea_orm::entity::prelude::*;
+use sea_orm::{entity::prelude::*, ActiveValue, IntoActiveModel, QueryOrder};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
@@ -74,3 +74,64 @@ impl Related<super::user::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+pub async fn get_page(
+    db: &DatabaseConnection, page: u64, page_size: u64, challenge_id: Option<i64>,
+    user_id: Option<i64>, team_id: Option<i64>,
+) -> Result<(Vec<Model>, u64), DbErr> {
+    let mut sql = Entity::find();
+    if let Some(challenge_id) = challenge_id {
+        sql = sql.filter(Column::ChallengeId.eq(challenge_id));
+    }
+    if let Some(user_id) = user_id {
+        sql = sql.filter(Column::UserId.eq(user_id));
+    }
+    if let Some(team_id) = team_id {
+        sql = sql.filter(Column::TeamId.eq(team_id));
+    }
+    sql = sql
+        .order_by_desc(Column::Running)
+        .order_by_desc(Column::StartedAt);
+    let paginator = sql.into_model().paginate(db, page_size);
+    let total = paginator.num_pages().await?;
+    let instances = paginator.fetch_page(page - 1).await?;
+    Ok((instances, total))
+}
+
+pub async fn get_by_user_id(db: &DatabaseConnection, user_id: i64) -> Result<Option<Model>, DbErr> {
+    Entity::find()
+        .filter(Column::UserId.eq(user_id))
+        .filter(Column::Running.eq(true))
+        .one(db)
+        .await
+}
+
+pub async fn get_list_by_team_id(
+    db: &DatabaseConnection, team_id: i64,
+) -> Result<Vec<Model>, DbErr> {
+    Entity::find()
+        .filter(Column::TeamId.eq(team_id))
+        .filter(Column::Running.eq(true))
+        .all(db)
+        .await
+}
+
+pub async fn create(db: &DatabaseConnection, instance: Model) -> Result<Model, DbErr> {
+    let instance = ActiveModel {
+        id: ActiveValue::NotSet,
+        ..instance.into_active_model().reset_all()
+    };
+    instance.insert(db).await
+}
+
+pub async fn update(db: &DatabaseConnection, instance: Model) -> Result<Model, DbErr> {
+    let instance = ActiveModel {
+        id: ActiveValue::Unchanged(instance.id),
+        ..instance.into_active_model().reset_all()
+    };
+    instance.update(db).await
+}
+
+pub async fn delete(db: &DatabaseConnection, id: i64) -> Result<(), DbErr> {
+    Entity::delete_by_id(id).exec(db).await.map(|_| ())
+}

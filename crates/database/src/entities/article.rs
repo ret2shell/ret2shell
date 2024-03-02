@@ -145,8 +145,7 @@ pub async fn get_page(
 /// This tree feature are provided to support the wiki implemention.
 /// So you should cache the tree result to avoid the performance issue.
 pub async fn get_tree(
-    db: &DatabaseConnection, parent_id: i64, depth: i32, access_policy: AccessPolicy,
-    with_draft: bool,
+    db: &DatabaseConnection, parent_id: i64, access_policy: AccessPolicy, with_draft: bool,
 ) -> Result<Vec<Model>, DbErr> {
     let mut sql = Entity::find();
     sql = sql
@@ -156,7 +155,7 @@ pub async fn get_tree(
     sql = sql
         .join(JoinType::InnerJoin, Relation::Closure.def())
         .filter(article_closure::Column::Ancestor.eq(parent_id));
-    sql = sql.filter(article_closure::Column::Depth.eq(depth));
+    // sql = sql.filter(article_closure::Column::Depth.eq(depth));
     if !with_draft {
         sql = sql.filter(Column::Draft.eq(false));
     }

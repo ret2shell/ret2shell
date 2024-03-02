@@ -111,7 +111,7 @@ pub async fn get(db: &DatabaseConnection, id: i64) -> Result<Option<Model>, DbEr
 }
 
 pub async fn get_page(
-    db: &DatabaseConnection, game_id: i64, page: u64, page_size: u64, with_hidden: bool,
+    db: &DatabaseConnection, page: u64, page_size: u64, game_id: i64, with_hidden: bool,
 ) -> Result<(Vec<Model>, u64), DbErr> {
     let mut sql = Entity::find()
         .filter(Column::GameId.eq(game_id))

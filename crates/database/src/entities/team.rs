@@ -5,9 +5,12 @@ use chrono::{
     DateTime, Utc,
 };
 use num_derive::{FromPrimitive, ToPrimitive};
-use sea_orm::{entity::prelude::*, FromJsonQueryResult};
+use sea_orm::{entity::prelude::*, ActiveValue, Condition, FromJsonQueryResult, IntoActiveModel};
+use sea_query::Func;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
+
+use super::user;
 
 #[derive(
     Clone,
@@ -29,8 +32,8 @@ pub enum State {
     Banned = 0,
     #[default]
     Pending = 1,
-    Passed = 2,
-    Hidden = 3,
+    Hidden = 2,
+    Passed = 3,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
@@ -156,4 +159,60 @@ impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get(db: &DatabaseConnection, id: i64) -> Result<Option<Model>, DbErr> {
     Entity::find_by_id(id).one(db).await
+}
+
+pub async fn get_by_user_id(
+    db: &DatabaseConnection, game_id: i64, user_id: i64,
+) -> Result<Option<Model>, DbErr> {
+    let (_, team): (user::Model, Option<Model>) = match user::Entity::find_by_id(user_id)
+        .find_also_related(Entity)
+        .filter(Column::GameId.eq(game_id))
+        .one(db)
+        .await?
+    {
+        Some((user, team)) => (user, team),
+        None => {
+            return Ok(None);
+        }
+    };
+    Ok(team)
+}
+
+pub async fn get_page(
+    db: &DatabaseConnection, game_id: i64, page: u64, page_size: u64, min_state: Option<State>,
+    filter: Option<String>,
+) -> Result<(Vec<Model>, u64), DbErr> {
+    let state = min_state.unwrap_or(State::Passed);
+    let mut sql = Entity::find()
+        .filter(Column::GameId.eq(game_id))
+        .filter(Column::State.gte(state));
+    sql = filter_sql(sql, filter)?;
+    let paginator = sql.into_model().paginate(db, page_size);
+    let total = paginator.num_pages().await?;
+    let teams = paginator.fetch_page(page - 1).await?;
+    Ok((teams, total))
+}
+
+fn filter_sql(mut sql: Select<Entity>, filter: Option<String>) -> Result<Select<Entity>, DbErr> {
+    if let Some(filter) = filter {
+        let mut cond = Condition::any();
+        if let Ok(num) = filter.parse::<i64>() {
+            cond = cond.add(Column::Id.eq(num));
+            cond = cond.add(Column::State.eq(num));
+        }
+        let filter = format!("%{}%", filter.to_ascii_lowercase());
+        cond = cond.add(Expr::expr(Func::lower(Expr::col(Column::Name))).like(filter.clone()));
+        sql = sql.filter(cond);
+    };
+    Ok(sql)
+}
+
+pub async fn create(db: &DatabaseConnection, team: Model) -> Result<Model, DbErr> {
+    let team = ActiveModel {
+        id: ActiveValue::NotSet,
+        last_active_at: ActiveValue::Set(Utc::now()),
+        history: ActiveValue::Set(TeamScoreHistoryList::new()),
+        ..team.into_active_model().reset_all()
+    };
+    team.insert(db).await
 }

@@ -4,8 +4,12 @@ use chrono::{
     serde::ts_seconds::{deserialize as from_ts, serialize as to_ts},
     DateTime, Utc,
 };
-use sea_orm::entity::prelude::*;
+use sea_orm::{
+    entity::prelude::*, ActiveValue, IntoActiveModel, JoinType, QueryOrder, QuerySelect,
+};
 use serde::{Deserialize, Serialize};
+
+use super::comment_closure;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default)]
 #[sea_orm(table_name = "comment")]
@@ -61,3 +65,39 @@ impl Related<super::comment_closure::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+pub async fn get_list(
+    db: &DatabaseConnection, page: u64, page_size: u64, article_id: i64,
+) -> Result<(Vec<Model>, u64), DbErr> {
+    let sql = Entity::find().filter(Column::ArticleId.eq(article_id));
+    let paginator = sql.into_model().paginate(db, page_size);
+    let total = paginator.num_pages().await?;
+    let comments = paginator.fetch_page(page - 1).await?;
+    Ok((comments, total))
+}
+
+pub async fn get_tree(db: &DatabaseConnection, parent_id: i64) -> Result<Vec<Model>, DbErr> {
+    let mut sql = Entity::find();
+    sql = sql
+        .join(JoinType::InnerJoin, Relation::Closure.def())
+        .filter(comment_closure::Column::Ancestor.eq(parent_id));
+    let articles = sql
+        .order_by_desc(Column::CreatedAt)
+        .into_model()
+        .all(db)
+        .await?;
+    Ok(articles)
+}
+
+pub async fn create(db: &DatabaseConnection, comment: Model) -> Result<Model, DbErr> {
+    let comment = ActiveModel {
+        id: ActiveValue::NotSet,
+        created_at: ActiveValue::Set(Utc::now()),
+        ..comment.into_active_model().reset_all()
+    };
+    comment.insert(db).await
+}
+
+pub async fn delete(db: &DatabaseConnection, id: i64) -> Result<(), DbErr> {
+    Entity::delete_by_id(id).exec(db).await.map(|_| ())
+}

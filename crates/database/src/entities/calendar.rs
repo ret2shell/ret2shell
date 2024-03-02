@@ -80,11 +80,8 @@ pub async fn get_list(
     Ok(models)
 }
 
-pub async fn get(conn: &DatabaseConnection, id: i64) -> Result<Model, DbErr> {
-    Entity::find_by_id(id)
-        .one(conn)
-        .await?
-        .ok_or(DbErr::RecordNotFound("calendar".to_owned()))
+pub async fn get(conn: &DatabaseConnection, id: i64) -> Result<Option<Model>, DbErr> {
+    Entity::find_by_id(id).one(conn).await
 }
 
 pub async fn create(conn: &DatabaseConnection, calendar: Model) -> Result<Model, DbErr> {

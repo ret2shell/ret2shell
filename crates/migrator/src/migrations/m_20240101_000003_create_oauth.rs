@@ -53,7 +53,7 @@ impl MigrationTrait for Migration {
                             .on_update(ForeignKeyAction::Cascade)
                             .on_delete(ForeignKeyAction::SetNull),
                     )
-                    .col(ColumnDef::new(Oauth::Provider).string_len(127).not_null())
+                    .col(ColumnDef::new(Oauth::Provider).string_len(63).not_null())
                     .col(
                         ColumnDef::new(Oauth::AuthKey)
                             .string_len(127)
@@ -71,6 +71,16 @@ impl MigrationTrait for Migration {
                             .timestamp_with_time_zone()
                             .not_null(),
                     )
+                    .to_owned(),
+            )
+            .await?;
+        manager
+            .create_index(
+                Index::create()
+                    .table(Oauth::Table)
+                    .col(Oauth::UserId)
+                    .col(Oauth::Provider)
+                    .unique()
                     .to_owned(),
             )
             .await
