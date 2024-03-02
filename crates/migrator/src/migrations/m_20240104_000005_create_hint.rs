@@ -19,6 +19,8 @@ pub enum Hint {
     ChallengeId,
     Content,
     Cost,
+    ReleaseAt,
+    NoSolvesOnly,
 }
 
 #[async_trait::async_trait]
@@ -51,6 +53,8 @@ impl MigrationTrait for Migration {
                     )
                     .col(ColumnDef::new(Hint::Content).text().not_null())
                     .col(ColumnDef::new(Hint::Cost).integer().not_null())
+                    .col(ColumnDef::new(Hint::ReleaseAt).timestamp_with_time_zone())
+                    .col(ColumnDef::new(Hint::NoSolvesOnly).boolean().not_null())
                     .to_owned(),
             )
             .await

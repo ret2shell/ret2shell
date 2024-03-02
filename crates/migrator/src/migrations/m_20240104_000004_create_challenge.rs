@@ -22,7 +22,6 @@ pub enum Challenge {
     Tag,
     ScoreRange,
     CurrentScore,
-    Decay,
     Bucket,
 }
 
@@ -77,7 +76,6 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .default(CurrentTimestamp),
                     )
-                    .col(ColumnDef::new(Challenge::Decay).integer().not_null())
                     .col(ColumnDef::new(Challenge::Bucket).string_len(127).not_null())
                     .to_owned(),
             )

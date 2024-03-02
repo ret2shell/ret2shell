@@ -3,12 +3,40 @@ use chrono::{
     serde::ts_seconds::{deserialize as from_ts, serialize as to_ts},
     DateTime, Utc,
 };
+use num_derive::{FromPrimitive, ToPrimitive};
 use sea_orm::{
     entity::prelude::*, ActiveValue, IntoActiveModel, Iterable, JoinType, QueryOrder, QuerySelect,
 };
 use serde::{Deserialize, Serialize};
 
 use super::article_closure;
+
+use serde_repr::{Deserialize_repr, Serialize_repr};
+
+#[derive(
+    Clone,
+    Debug,
+    Default,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Serialize_repr,
+    Deserialize_repr,
+    EnumIter,
+    DeriveActiveEnum,
+    FromPrimitive,
+    ToPrimitive,
+)]
+#[repr(i32)]
+#[sea_orm(rs_type = "i32", db_type = "Integer")]
+pub enum AccessPolicy {
+    #[default]
+    Bulletin = 0,
+    Wiki = 1,
+    Game = 2,
+    WriteUp = 3,
+    Answer = 4,
+}
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default)]
 #[sea_orm(table_name = "article")]
@@ -23,7 +51,7 @@ pub struct Model {
     #[sea_orm(column_type = "Text", nullable)]
     pub content: Option<String>,
     pub publisher_id: i64,
-    pub access_policy: i32,
+    pub access_policy: AccessPolicy,
     pub enable_comment: bool,
     pub weight: i32,
     pub draft: bool,
@@ -89,8 +117,8 @@ pub async fn get(
 }
 
 pub async fn get_page(
-    db: &DatabaseConnection, page: u64, page_size: u64, access_policy: i32, with_draft: bool,
-    with_all: bool,
+    db: &DatabaseConnection, page: u64, page_size: u64, access_policy: AccessPolicy,
+    with_draft: bool, with_all: bool,
 ) -> Result<(Vec<Model>, u64), DbErr> {
     let mut sql = Entity::find();
     sql = sql
@@ -118,7 +146,8 @@ pub async fn get_page(
 /// This tree feature are provided to support the wiki implemention.
 /// So you should cache the tree result to avoid the performance issue.
 pub async fn get_tree(
-    db: &DatabaseConnection, parent_id: i64, depth: i32, access_policy: i32, with_draft: bool,
+    db: &DatabaseConnection, parent_id: i64, depth: i32, access_policy: AccessPolicy,
+    with_draft: bool,
 ) -> Result<Vec<Model>, DbErr> {
     let mut sql = Entity::find();
     sql = sql

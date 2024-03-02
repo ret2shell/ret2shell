@@ -4,8 +4,27 @@ use chrono::{
     serde::ts_seconds::{deserialize as from_ts, serialize as to_ts},
     DateTime, Utc,
 };
-use sea_orm::entity::prelude::*;
+use sea_orm::{
+    entity::prelude::*, ActiveValue, FromJsonQueryResult, IntoActiveModel, Iterable, QueryOrder,
+    QuerySelect,
+};
 use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
+pub struct ScoreRange {
+    pub initial: i32,
+    pub minimum: i32,
+    pub decay: i32,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
+pub struct Tag {
+    name: String,
+    primary: bool,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
+pub struct TagList(pub Vec<Tag>);
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default)]
 #[sea_orm(table_name = "challenge")]
@@ -13,18 +32,17 @@ pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i64,
     pub name: String,
+    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
+    pub updated_at: DateTime<Utc>,
     #[sea_orm(column_type = "Text")]
     pub content: Option<String>,
     pub hidden: bool,
     pub game_id: i64,
     #[sea_orm(column_type = "JsonBinary")]
-    pub tag: Json,
+    pub tag: TagList,
     #[sea_orm(column_type = "JsonBinary")]
-    pub score_range: Json,
+    pub score_range: ScoreRange,
     pub current_score: i32,
-    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
-    pub updated_at: DateTime<Utc>,
-    pub decay: i32,
     pub bucket: Option<String>,
 }
 
@@ -87,3 +105,52 @@ impl Related<super::submission::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+pub async fn get(db: &DatabaseConnection, id: i64) -> Result<Option<Model>, DbErr> {
+    Entity::find_by_id(id).one(db).await
+}
+
+pub async fn get_page(
+    db: &DatabaseConnection, game_id: i64, page: u64, page_size: u64, with_hidden: bool,
+) -> Result<(Vec<Model>, u64), DbErr> {
+    let mut sql = Entity::find()
+        .filter(Column::GameId.eq(game_id))
+        .select_only()
+        .columns(Column::iter().filter(|c| !matches!(c, Column::Content | Column::Bucket)));
+    if !with_hidden {
+        sql = sql.filter(Column::Hidden.eq(false));
+    }
+    let paginator = sql
+        .order_by_asc(Column::Id)
+        .into_model()
+        .paginate(db, page_size);
+    let total = paginator.num_pages().await?;
+    let challenges = paginator.fetch_page(page - 1).await?;
+    Ok((challenges, total))
+}
+
+pub async fn create(db: &DatabaseConnection, challenge: Model) -> Result<Model, DbErr> {
+    let challenge = ActiveModel {
+        id: ActiveValue::NotSet,
+        updated_at: ActiveValue::Set(Utc::now()),
+        current_score: ActiveValue::Set(challenge.score_range.initial.clone()),
+        ..challenge.into_active_model().reset_all()
+    };
+    challenge.insert(db).await
+}
+
+pub async fn update(db: &DatabaseConnection, challenge: Model) -> Result<Model, DbErr> {
+    let challenge = ActiveModel {
+        id: ActiveValue::Unchanged(challenge.id),
+        updated_at: ActiveValue::Set(Utc::now()),
+        current_score: ActiveValue::NotSet,
+        bucket: ActiveValue::NotSet,
+        game_id: ActiveValue::NotSet,
+        ..challenge.into_active_model().reset_all()
+    };
+    challenge.update(db).await
+}
+
+pub async fn delete(db: &DatabaseConnection, id: i64) -> Result<(), DbErr> {
+    Entity::delete_by_id(id).exec(db).await.map(|_| ())
+}

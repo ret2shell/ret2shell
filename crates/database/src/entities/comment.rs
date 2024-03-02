@@ -17,7 +17,7 @@ pub struct Model {
     pub article_id: i64,
     pub publisher_id: i64,
     #[sea_orm(column_type = "Text")]
-    pub content: Option<String>,
+    pub content: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

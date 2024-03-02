@@ -192,13 +192,13 @@ pub async fn get(db: &DatabaseConnection, user_id: i64) -> Result<Option<Model>,
 }
 
 pub async fn get_by_account_or_email(
-    db: &DatabaseConnection, account: &str,
+    db: &DatabaseConnection, n: &str,
 ) -> Result<Option<Model>, DbErr> {
     Entity::find()
         .filter(
             Condition::any()
-                .add(Column::Account.eq(account))
-                .add(Expr::expr(Func::lower(Expr::col(Column::Email))).eq(account.to_lowercase())),
+                .add(Column::Account.eq(n))
+                .add(Expr::expr(Func::lower(Expr::col(Column::Email))).eq(n.to_lowercase())),
         )
         .one(db)
         .await

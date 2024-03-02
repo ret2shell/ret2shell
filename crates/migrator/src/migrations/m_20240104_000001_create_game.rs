@@ -58,11 +58,7 @@ impl MigrationTrait for Migration {
                     )
                     .col(ColumnDef::new(Game::Name).string_len(255).not_null())
                     .col(ColumnDef::new(Game::Brief).string_len(255).not_null())
-                    .col(
-                        ColumnDef::new(Game::IntroductionId)
-                            .big_integer()
-                            .not_null(),
-                    )
+                    .col(ColumnDef::new(Game::IntroductionId).big_integer())
                     .foreign_key(
                         ForeignKey::create()
                             .from(Game::Table, Game::IntroductionId)

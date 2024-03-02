@@ -78,16 +78,6 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Submission::Solved).boolean().not_null())
                     .to_owned(),
             )
-            .await?;
-        manager
-            .create_index(
-                Index::create()
-                    .table(Submission::Table)
-                    .col(Submission::TeamId)
-                    .col(Submission::ChallengeId)
-                    .unique()
-                    .to_owned(),
-            )
             .await
     }
 
