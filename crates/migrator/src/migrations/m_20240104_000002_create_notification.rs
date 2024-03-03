@@ -1,7 +1,7 @@
 use sea_orm_migration::prelude::*;
 use sea_query::Keyword::CurrentTimestamp;
 
-use super::m_20240104_000001_create_game::Game;
+use super::{m_20240101_000002_create_user::User, m_20240104_000001_create_game::Game};
 
 pub struct Migration;
 
@@ -19,6 +19,7 @@ pub enum Notification {
     Content,
     PublishedAt,
     GameId,
+    PublisherId,
 }
 
 #[async_trait::async_trait]
@@ -56,6 +57,18 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .from(Notification::Table, Notification::GameId)
                             .to(Game::Table, Game::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .col(
+                        ColumnDef::new(Notification::PublisherId)
+                            .big_integer()
+                            .not_null(),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .from(Notification::Table, Notification::PublisherId)
+                            .to(User::Table, User::Id)
                             .on_update(ForeignKeyAction::Cascade)
                             .on_delete(ForeignKeyAction::Cascade),
                     )

@@ -20,8 +20,8 @@ pub enum Challenge {
     Hidden,
     GameId,
     Tag,
-    ScoreRange,
-    CurrentScore,
+    ScoreRule,
+    Score,
     Bucket,
 }
 
@@ -60,12 +60,12 @@ impl MigrationTrait for Migration {
                             .default("[]"),
                     )
                     .col(
-                        ColumnDef::new(Challenge::ScoreRange)
+                        ColumnDef::new(Challenge::ScoreRule)
                             .json_binary()
                             .not_null(),
                     )
                     .col(
-                        ColumnDef::new(Challenge::CurrentScore)
+                        ColumnDef::new(Challenge::Score)
                             .integer()
                             .not_null()
                             .default(0),

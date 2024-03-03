@@ -60,7 +60,7 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .unique_key(),
                     )
-                    .col(ColumnDef::new(Oauth::Data).text())
+                    .col(ColumnDef::new(Oauth::Data).json_binary())
                     .col(
                         ColumnDef::new(Oauth::CreatedAt)
                             .timestamp_with_time_zone()

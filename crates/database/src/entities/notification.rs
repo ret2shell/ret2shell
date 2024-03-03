@@ -4,7 +4,7 @@ use chrono::{
     serde::ts_seconds::{deserialize as from_ts, serialize as to_ts},
     DateTime, Utc,
 };
-use sea_orm::{entity::prelude::*, ActiveValue, IntoActiveModel};
+use sea_orm::{entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
@@ -18,6 +18,19 @@ pub struct Model {
     #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
     pub published_at: DateTime<Utc>,
     pub game_id: i64,
+    pub uploader_id: i64,
+}
+
+#[derive(Clone, Serialize, Deserialize, FromQueryResult)]
+pub struct ExModel {
+    pub id: i64,
+    pub title: String,
+    pub content: String,
+    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
+    pub published_at: DateTime<Utc>,
+    pub game_id: i64,
+    pub uploader_id: i64,
+    pub uploader_name: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -30,11 +43,25 @@ pub enum Relation {
         on_delete = "Cascade"
     )]
     Game,
+    #[sea_orm(
+        belongs_to = "super::user::Entity",
+        from = "Column::UploaderId",
+        to = "super::user::Column::Id",
+        on_update = "Cascade",
+        on_delete = "Cascade"
+    )]
+    Uploader,
 }
 
 impl Related<super::game::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Game.def()
+    }
+}
+
+impl Related<super::user::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Uploader.def()
     }
 }
 

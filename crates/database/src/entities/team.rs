@@ -5,7 +5,10 @@ use chrono::{
     DateTime, Utc,
 };
 use num_derive::{FromPrimitive, ToPrimitive};
-use sea_orm::{entity::prelude::*, ActiveValue, Condition, FromJsonQueryResult, IntoActiveModel};
+use sea_orm::{
+    entity::prelude::*, ActiveValue, Condition, FromJsonQueryResult, FromQueryResult,
+    IntoActiveModel,
+};
 use sea_query::Func;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
@@ -72,6 +75,39 @@ pub struct Model {
     pub history: TeamScoreHistoryList,
     #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
     pub last_active_at: DateTime<Utc>,
+}
+
+impl Model {
+    pub fn desentisize(&self) -> Self {
+        Self {
+            token: None,
+            ..self.clone()
+        }
+    }
+}
+
+#[derive(Clone, Serialize, Deserialize, FromQueryResult)]
+pub struct ExModel {
+    pub id: i64,
+    pub name: String,
+    pub game_id: i64,
+    pub token: Option<String>,
+    pub state: State,
+    pub institute_id: Option<i64>,
+    pub institute_name: Option<String>,
+    pub score: i32,
+    pub history: TeamScoreHistoryList,
+    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
+    pub last_active_at: DateTime<Utc>,
+}
+
+impl ExModel {
+    pub fn desentisize(&self) -> Self {
+        Self {
+            token: None,
+            ..self.clone()
+        }
+    }
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

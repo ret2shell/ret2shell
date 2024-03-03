@@ -8,8 +8,8 @@ use chrono::{
 };
 use num_derive::{FromPrimitive, ToPrimitive};
 use sea_orm::{
-    entity::prelude::*, ActiveValue, Condition, FromJsonQueryResult, IntoActiveModel, Iterable,
-    Order, QueryOrder, QuerySelect,
+    entity::prelude::*, ActiveValue, Condition, FromJsonQueryResult, FromQueryResult,
+    IntoActiveModel, Iterable, Order, QueryOrder, QuerySelect,
 };
 use sea_query::Func;
 use serde::{Deserialize, Serialize};
@@ -69,6 +69,25 @@ impl Model {
     }
 }
 
+#[derive(Clone, Serialize, Deserialize, FromQueryResult)]
+pub struct ExModel {
+    pub id: i64,
+    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
+    pub registered_at: DateTime<Utc>,
+    pub account: String,
+    pub nickname: String,
+    #[serde(skip_serializing)]
+    pub password: Option<String>,
+    pub email: Option<String>,
+    pub description: Option<String>,
+    pub avatar: Option<String>,
+    pub institute_id: Option<i64>,
+    pub institute_name: Option<String>,
+    pub permissions: Permissions,
+    pub hidden: bool,
+    pub banned: bool,
+}
+
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
     #[sea_orm(has_many = "super::article::Entity")]
@@ -99,6 +118,8 @@ pub enum Relation {
     User2Ip,
     #[sea_orm(has_many = "super::user2_team::Entity")]
     User2Team,
+    #[sea_orm(has_many = "super::notification::Entity")]
+    Notification,
 }
 
 impl Related<super::article::Entity> for Entity {
@@ -182,6 +203,12 @@ impl Related<super::team::Entity> for Entity {
     }
     fn via() -> Option<RelationDef> {
         Some(super::user2_team::Relation::User.def().rev())
+    }
+}
+
+impl Related<super::notification::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Notification.def()
     }
 }
 

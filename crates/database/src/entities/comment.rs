@@ -5,7 +5,8 @@ use chrono::{
     DateTime, Utc,
 };
 use sea_orm::{
-    entity::prelude::*, ActiveValue, IntoActiveModel, JoinType, QueryOrder, QuerySelect,
+    entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel, JoinType, QueryOrder,
+    QuerySelect,
 };
 use serde::{Deserialize, Serialize};
 
@@ -21,6 +22,17 @@ pub struct Model {
     pub article_id: i64,
     pub publisher_id: i64,
     #[sea_orm(column_type = "Text")]
+    pub content: String,
+}
+
+#[derive(Clone, Serialize, Deserialize, FromQueryResult)]
+pub struct ExModel {
+    pub id: i64,
+    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
+    pub created_at: DateTime<Utc>,
+    pub article_id: i64,
+    pub publisher_id: i64,
+    pub publisher_name: String,
     pub content: String,
 }
 

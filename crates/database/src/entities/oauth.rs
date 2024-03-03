@@ -4,7 +4,7 @@ use chrono::{
     serde::ts_seconds::{deserialize as from_ts, serialize as to_ts},
     DateTime, Utc,
 };
-use sea_orm::{entity::prelude::*, ActiveValue, IntoActiveModel};
+use sea_orm::{entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
@@ -17,8 +17,23 @@ pub struct Model {
     pub provider: String,
     #[sea_orm(unique)]
     pub auth_key: String,
-    #[sea_orm(column_type = "Text", nullable)]
-    pub data: Option<String>,
+    #[sea_orm(column_type = "JsonBinary", nullable)]
+    pub data: Option<Json>,
+    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
+    pub created_at: DateTime<Utc>,
+    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Clone, Serialize, Deserialize, FromQueryResult)]
+pub struct ExModel {
+    pub id: i64,
+    pub user_id: i64,
+    pub user_name: String,
+    pub institute_id: Option<i64>,
+    pub institute_name: Option<String>,
+    pub provider: String,
+    pub data: Option<Json>,
     #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
     pub created_at: DateTime<Utc>,
     #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]

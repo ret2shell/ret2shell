@@ -4,7 +4,7 @@ use chrono::{
     serde::ts_seconds::{deserialize as from_ts, serialize as to_ts},
     DateTime, Utc,
 };
-use sea_orm::{entity::prelude::*, ActiveValue, IntoActiveModel};
+use sea_orm::{entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
@@ -20,6 +20,20 @@ pub struct Model {
     pub hint_id: Option<i64>,
     pub team_id: i64,
     pub challenge_id: Option<i64>,
+}
+
+#[derive(Clone, Serialize, Deserialize, FromQueryResult)]
+pub struct ExModel {
+    pub id: i64,
+    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
+    pub created_at: DateTime<Utc>,
+    pub reason: String,
+    pub score: i32,
+    pub hint_id: Option<i64>,
+    pub team_id: i64,
+    pub team_name: String,
+    pub challenge_id: Option<i64>,
+    pub challenge_name: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

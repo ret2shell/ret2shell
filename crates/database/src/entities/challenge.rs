@@ -11,7 +11,7 @@ use sea_orm::{
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
-pub struct ScoreRange {
+pub struct ScoreRule {
     pub initial: i32,
     pub minimum: i32,
     pub decay: i32,
@@ -41,8 +41,8 @@ pub struct Model {
     #[sea_orm(column_type = "JsonBinary")]
     pub tag: TagList,
     #[sea_orm(column_type = "JsonBinary")]
-    pub score_range: ScoreRange,
-    pub current_score: i32,
+    pub score_rule: ScoreRule,
+    pub score: i32,
     pub bucket: Option<String>,
 }
 
@@ -133,7 +133,7 @@ pub async fn create(db: &DatabaseConnection, challenge: Model) -> Result<Model, 
     let challenge = ActiveModel {
         id: ActiveValue::NotSet,
         updated_at: ActiveValue::Set(Utc::now()),
-        current_score: ActiveValue::Set(challenge.score_range.initial.clone()),
+        score: ActiveValue::Set(challenge.score_rule.initial.clone()),
         ..challenge.into_active_model().reset_all()
     };
     challenge.insert(db).await
@@ -143,7 +143,7 @@ pub async fn update(db: &DatabaseConnection, challenge: Model) -> Result<Model, 
     let challenge = ActiveModel {
         id: ActiveValue::Unchanged(challenge.id),
         updated_at: ActiveValue::Set(Utc::now()),
-        current_score: ActiveValue::NotSet,
+        score: ActiveValue::NotSet,
         bucket: ActiveValue::NotSet,
         game_id: ActiveValue::NotSet,
         ..challenge.into_active_model().reset_all()

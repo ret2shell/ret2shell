@@ -5,7 +5,8 @@ use chrono::{
 };
 use num_derive::{FromPrimitive, ToPrimitive};
 use sea_orm::{
-    entity::prelude::*, ActiveValue, IntoActiveModel, Iterable, JoinType, QueryOrder, QuerySelect,
+    entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel, Iterable, JoinType,
+    QueryOrder, QuerySelect,
 };
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
@@ -50,6 +51,24 @@ pub struct Model {
     #[sea_orm(column_type = "Text", nullable)]
     pub content: Option<String>,
     pub publisher_id: i64,
+    pub access_policy: AccessPolicy,
+    pub enable_comment: bool,
+    pub weight: i32,
+    pub draft: bool,
+    pub published: bool,
+}
+
+#[derive(Clone, Serialize, Deserialize, FromQueryResult)]
+pub struct ExModel {
+    pub id: i64,
+    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
+    pub created_at: DateTime<Utc>,
+    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
+    pub updated_at: DateTime<Utc>,
+    pub title: String,
+    pub content: Option<String>,
+    pub publisher_id: i64,
+    pub publisher_name: String,
     pub access_policy: AccessPolicy,
     pub enable_comment: bool,
     pub weight: i32,

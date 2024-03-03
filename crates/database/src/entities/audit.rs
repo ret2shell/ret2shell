@@ -5,7 +5,7 @@ use chrono::{
     DateTime, Utc,
 };
 use num_derive::{FromPrimitive, ToPrimitive};
-use sea_orm::{entity::prelude::*, ActiveValue, IntoActiveModel, QueryOrder};
+use sea_orm::{entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel, QueryOrder};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -45,6 +45,23 @@ pub struct Model {
     pub user_id: i64,
     pub team_id: i64,
     pub game_id: i64,
+    pub state: State,
+}
+
+#[derive(Clone, Serialize, Deserialize, FromQueryResult)]
+pub struct ExModel {
+    pub id: i64,
+    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
+    pub created_at: DateTime<Utc>,
+    pub reason: String,
+    pub challenge_id: i64,
+    pub challenge_name: String,
+    pub user_id: i64,
+    pub user_name: String,
+    pub team_id: i64,
+    pub team_name: String,
+    pub game_id: i64,
+    pub game_name: String,
     pub state: State,
 }
 

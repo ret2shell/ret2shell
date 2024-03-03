@@ -4,7 +4,7 @@ use chrono::{
     serde::ts_seconds::{deserialize as from_ts, serialize as to_ts},
     DateTime, Utc,
 };
-use sea_orm::{entity::prelude::*, ActiveValue, IntoActiveModel, QueryOrder};
+use sea_orm::{entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel, QueryOrder};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
@@ -13,16 +13,34 @@ pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i64,
     pub name: String,
-    pub inner_addr: String,
+    pub inner_addr: Option<String>,
     #[sea_orm(unique)]
     pub proxy_addr: String,
     #[sea_orm(column_type = "JsonBinary")]
-    pub data: Json,
+    pub data: Option<Json>,
     pub renew_count: i32,
     #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
     pub started_at: DateTime<Utc>,
     pub user_id: Option<i64>,
     pub team_id: Option<i64>,
+    pub challenge_id: i64,
+    pub running: bool,
+}
+
+#[derive(Clone, Serialize, Deserialize, FromQueryResult)]
+pub struct ExModel {
+    pub id: i64,
+    pub name: String,
+    pub inner_addr: Option<String>,
+    pub proxy_addr: String,
+    pub data: Option<Json>,
+    pub renew_count: i32,
+    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
+    pub started_at: DateTime<Utc>,
+    pub user_id: Option<i64>,
+    pub user_name: Option<String>,
+    pub team_id: Option<i64>,
+    pub team_name: Option<String>,
     pub challenge_id: i64,
     pub running: bool,
 }

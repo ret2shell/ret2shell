@@ -4,7 +4,10 @@ use chrono::{
     serde::ts_seconds::{deserialize as from_ts, serialize as to_ts},
     DateTime, TimeZone, Utc,
 };
-use sea_orm::{entity::prelude::*, ActiveValue, Condition, IntoActiveModel, Iterable, QuerySelect};
+use sea_orm::{
+    entity::prelude::*, ActiveValue, Condition, FromQueryResult, IntoActiveModel, Iterable,
+    QuerySelect,
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default)]
@@ -21,6 +24,20 @@ pub struct Model {
     #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
     pub end_at: DateTime<Utc>,
     pub reporter_id: Option<i64>,
+}
+
+#[derive(Clone, Serialize, Deserialize, FromQueryResult)]
+pub struct ExModel {
+    pub id: i64,
+    pub name: String,
+    pub intro: Option<String>,
+    pub link: String,
+    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
+    pub start_at: DateTime<Utc>,
+    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
+    pub end_at: DateTime<Utc>,
+    pub reporter_id: Option<i64>,
+    pub reporter_name: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
