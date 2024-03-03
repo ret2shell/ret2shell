@@ -1,4 +1,21 @@
 [workspace]
-members = ['crates/keygen', 'crates/migrator', 'crates/database']
-default-members = ['crates/keygen', 'crates/migrator', 'crates/database']
+members = [
+  'crates/auditor',
+  'crates/bucket',
+  'crates/cache',
+  'crates/captcha',
+  'crates/checker',
+  'crates/cluster',
+  'crates/config',
+  'crates/database',
+  'crates/email',
+  'crates/license',
+  'crates/logger',
+  'crates/media',
+  'crates/migrator',
+  'crates/oauth',
+  'crates/queue',
+  'crates/server',
+  'crates/traffic',
+]
 resolver = "2"
