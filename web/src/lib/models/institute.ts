@@ -1,8 +1,7 @@
-export interface Institute {
+export type Institute = {
   id: number
   name: string
   description: string | null
-  validator: string
-  data: string | null
   logo: string | null
+  provider: string | null
 }

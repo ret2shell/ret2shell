@@ -1,0 +1,31 @@
+[package]
+name = "r2s-database"
+version = "0.5.6"
+edition = "2021"
+rust-version = "1.76.0"
+description = "Database for Ret2Shell - A feature-riches CTF challenge platform."
+authors = ["Reverier-Xu <reverier.xu@woooo.tech>"]
+publish = false
+homepage = "https://r2s.woooo.tech/"
+keywords = ["ctf", "challenge", "platform", "security", "education"]
+resolver = "2"
+
+[dependencies]
+sea-orm = { version = "0.12", features = [
+  "sqlx-postgres",
+  "runtime-tokio-rustls",
+  "macros",
+  "mock",
+] }
+sea-orm-migration = "0.12"
+sea-query = "0.30"
+serde = { version = "1.0", features = ["derive"] }
+serde_repr = "0.1"
+serde_json = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+num-derive = "0.4"
+num-traits = "0.2"
+tokio = { version = "1.36", features = ["full"] }
+
+[lib]
+path = "src/lib.rs"

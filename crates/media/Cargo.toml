@@ -1,0 +1,13 @@
+[package]
+name = "r2s-media"
+version = "0.5.6"
+edition = "2021"
+rust-version = "1.76.0"
+description = "Media storage for Ret2Shell - A feature-riches CTF challenge platform."
+authors = ["Reverier-Xu <reverier.xu@woooo.tech>"]
+publish = false
+homepage = "https://r2s.woooo.tech/"
+keywords = ["ctf", "challenge", "platform", "security", "education"]
+resolver = "2"
+[lib]
+path = "src/lib.rs"

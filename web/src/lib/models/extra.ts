@@ -1,9 +1,11 @@
-export interface Extra {
+export type Extra = {
   id: number
   created_at: number
-  team_id: number
   reason: string
   score: number
-  hint_id: number | null
-  challenge_id: number | null
+  hint_id: number
+  team_id: number
+  team_name?: string
+  challenge_id: number
+  challenge_name?: string
 }

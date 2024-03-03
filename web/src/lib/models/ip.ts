@@ -1,4 +1,4 @@
-export interface IpAddress {
+export type Ip = {
   id: number
   address: string
 }

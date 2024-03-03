@@ -1,4 +1,4 @@
-export interface Platform {
+export type PlatformConfig = {
   name: string
   footer_info: string
   footer_url: string
@@ -8,166 +8,49 @@ export interface Platform {
   hide_maker: boolean
 }
 
-export enum Validator {
-  None = 0,
-  Image = 1,
-  Pow = 2,
-  RecaptchaV3 = 3,
-  HCaptcha = 4,
-}
-
-export interface Captcha {
+export type CaptchaConfig = {
   enabled: boolean
   difficulty: number
-  validator: Validator
+  validator: string
 }
 
-export interface Auth {
+export type AuthConfig = {
   signing_key: string
   buffer_time: number
   expires_time: number
+  oauth_keys: { [key: string]: { id: string; key: string } }
 }
 
-export interface Email {
+export type EmailConfig = {
   enabled: boolean
   host: string
   port: number
   sender: string
   username: string
   password: string
-  tls: 'none' | 'tls' | 'starttls'
+  tls: string
   reset_password_email_body: string
   reset_password_email_subject: string
   verify_email_body: string
   verify_email_subject: string
 }
 
-export interface Media {
+export type MediaConfig = {
   anti_theft: boolean
   limit: number
 }
 
-export interface Pusher {
+export type AutomateConfig = {
   enabled: boolean
-  token: string
+  token: String
 }
 
-export interface Config {
-  id?: number
-  platform?: Platform
-  captcha?: Captcha
-  auth?: Auth
-  email?: Email
-  media?: Media
-  pusher?: Pusher
-}
-
-export interface CPULoad {
-  user: number
-  system: number
-}
-
-export interface Memory {
-  total: number
-  free: number
-}
-
-export interface Disk {
-  total: number
-  free: number
-  avail: number
-  fs_type: string
-  fs_mounted_from: string
-  fs_mounted_on: string
-}
-
-export interface PlatformStat {
-  cpu: CPULoad[]
-  memory: Memory
-  swap: Memory
-  disks: Disk[]
-  uptime: number
-}
-
-export interface ClusterInfo {
-  default_namespace: string
-  configs: {
-    items: {
-      apiVersion: string
-      data?: {
-        since?: string
-        clusterDNS?: string
-        clusterDomain?: string
-      }
-    }[]
-  }
-  version: {
-    buildDate: string
-    compiler: string
-    gitCommit: string
-    gitTreeState: string
-    gitVersion: string
-    goVersion: string
-    major: string
-    minor: string
-    platform: string
-  }
-  nodes: {
-    metadata: {
-      resourceVersion: string
-    }
-    items: {
-      apiVersion: string
-      kind: string
-      metadata: {
-        createTimestamp: string
-        name: string
-        resourceVersion: string
-        uid: string
-      }
-      spec: {
-        podCIDR: string
-        podCIDRs: string[]
-        providerID: string
-      }
-      status: {
-        addresses: {
-          address: string
-          type: string
-        }[]
-        allocatable: {
-          cpu: string
-          'ephemeral-storage': string
-          memory: string
-          pods: string
-        }
-        capacity: {
-          cpu: string
-          'ephemeral-storage': string
-          memory: string
-          pods: string
-        }
-        conditions: {
-          lastHeartbeatTime: string
-          lastTransitionTime: string
-          message: string
-          reason: string
-          status: string
-          type: string
-        }[]
-        nodeInfo: {
-          architecture: string
-          bootID: string
-          containerRuntimeVersion: string
-          kernelVersion: string
-          kubeProxyVersion: string
-          kubeletVersion: string
-          machineID: string
-          operatingSystem: string
-          osImage: string
-          systemUUID: string
-        }
-      }
-    }[]
-  }
+export type Config = {
+  id: number
+  platform: PlatformConfig
+  captcha: CaptchaConfig
+  auth: AuthConfig
+  email: EmailConfig
+  media: MediaConfig
+  automate: AutomateConfig
 }

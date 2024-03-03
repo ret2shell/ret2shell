@@ -1,37 +1,45 @@
 {
-    "i18n-ally.localesPaths": [
-        "web/src/lib/i18n"
-    ],
-    "i18n-ally.keystyle": "nested",
-    "sqltools.connections": [
-        {
-            "previewLimit": 50,
-            "server": "localhost",
-            "port": 5432,
-            "driver": "PostgreSQL",
-            "name": "ret2shell",
-            "database": "ret2shell",
-            "username": "ret2shell"
-        }
-    ],
-    "rust-analyzer.showUnlinkedFileNotification": false,
-    "prettier.bracketSpacing": false,
-    "prettier.configPath": "web/.prettierrc",
-    "prettier.ignorePath": "web/.prettierignore",
-    "prettier.prettierPath": "web/node_modules/prettier/index.cjs",
-    "prettier.requireConfig": true,
-    "prettier.singleQuote": true,
-    "javascript.format.enable": false,
-    "typescript.format.enable": false,
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "[rust]": {
-        "editor.defaultFormatter": "rust-lang.rust-analyzer"
-    },
-    "[svelte]": {
-        "editor.defaultFormatter": "svelte.svelte-vscode"
-    },
-    "[toml]": {
-      "editor.defaultFormatter": "tamasfe.even-better-toml"
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "ret2shell",
+      "database": "ret2shell",
+      "username": "ret2shell"
     }
+  ],
+  "files.associations": {
+    "*.css": "tailwindcss",
+    "*.scss": "tailwindcss"
+  },
+  "rust-analyzer.showUnlinkedFileNotification": false,
+  "prettier.bracketSpacing": false,
+  "prettier.configPath": "web/.prettierrc",
+  "prettier.ignorePath": "web/.prettierignore",
+  "prettier.prettierPath": "web/node_modules/prettier/index.cjs",
+  "prettier.requireConfig": true,
+  "prettier.singleQuote": true,
+  "javascript.format.enable": false,
+  "typescript.format.enable": false,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[rust]": {
+    "editor.defaultFormatter": "rust-lang.rust-analyzer"
+  },
+  "[svelte]": {
+    "editor.defaultFormatter": "svelte.svelte-vscode"
+  },
+  "[toml]": {
+    "editor.defaultFormatter": "tamasfe.even-better-toml"
+  },
+  "[sass]": {
+    "editor.defaultFormatter": "syler.sass-indented"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "i18n-ally.localesPaths": ["web/src/lib/i18n"],
+  "i18n-ally.keystyle": "nested"
 }

@@ -1,0 +1,37 @@
+{
+  "platform": {
+    "name": "回歸終端",
+    "subject": "為世間的所有美好而戰"
+  },
+  "wiki": {
+    "title": "知識"
+  },
+  "training": {
+    "title": "訓練"
+  },
+  "game": {
+    "title": "賽事"
+  },
+  "bulletin": {
+    "title": "公告"
+  },
+  "admin": {
+    "title": "管理"
+  },
+  "theme": {
+    "colorScheme": "明暗主題",
+    "language": "語言 / Language"
+  },
+  "calendar": {
+    "scrollToView": "向下捲動查看日曆"
+  },
+  "about": {
+    "donate": "捐款",
+    "source": "支援"
+  },
+  "account": {
+    "login": {
+      "title": "登入"
+    }
+  }
+}

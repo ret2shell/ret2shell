@@ -1,0 +1,44 @@
+[package]
+name = "r2s-server"
+version = "0.5.6"
+edition = "2021"
+rust-version = "1.76.0"
+description = "Server for Ret2Shell - A feature-riches CTF challenge platform."
+authors = ["Reverier-Xu <reverier.xu@woooo.tech>"]
+publish = false
+homepage = "https://r2s.woooo.tech/"
+keywords = ["ctf", "challenge", "platform", "security", "education"]
+resolver = "2"
+
+[dependencies]
+tokio = { version = "1.36", features = ["full"] }
+tokio-util = "0.7"
+tokio-stream = "0.1"
+futures = "0.3"
+axum = { version = "0.7", features = [
+  "ws",
+  "http2",
+  "multipart",
+  "macros",
+  "tower-log",
+  "tracing",
+] }
+axum-extra = { version = "0.9", features = [
+  "typed-header",
+  "query",
+  "multipart",
+  "typed-routing",
+  "async-read-body",
+] }
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "fs", "trace"] }
+jsonwebtoken = { version = "9.2", default-features = false }
+bcrypt = "0.15"
+argon2 = "0.5"
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "r2s-server"
+path = "src/main.rs"

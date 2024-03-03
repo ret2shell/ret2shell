@@ -1,0 +1,31 @@
+[package]
+name = "r2s-migrator"
+version = "0.5.6"
+edition = "2021"
+rust-version = "1.76.0"
+description = "Database migrator for Ret2Shell - A feature-riches CTF challenge platform."
+authors = ["Reverier-Xu <reverier.xu@woooo.tech>"]
+publish = false
+homepage = "https://r2s.woooo.tech/"
+keywords = ["ctf", "challenge", "platform", "security", "education"]
+resolver = "2"
+
+[dependencies]
+tokio = { version = "1.36", features = ["full"] }
+
+sea-orm = { version = "0.12", features = [
+  "sqlx-postgres",
+  "runtime-tokio-rustls",
+  "macros",
+] }
+sea-orm-migration = "0.12"
+sea-query = "0.30"
+
+tracing = "0.1"
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "r2s-migrator"
+path = "src/main.rs"

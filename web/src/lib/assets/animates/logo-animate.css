@@ -1,0 +1,211 @@
+@-webkit-keyframes animate-svg-stroke-1 {
+  0% {
+    stroke-dashoffset: 542.1497802734375px;
+    stroke-dasharray: 542.1497802734375px;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+    stroke-dasharray: 542.1497802734375px;
+  }
+}
+
+@keyframes animate-svg-stroke-1 {
+  0% {
+    stroke-dashoffset: 542.1497802734375px;
+    stroke-dasharray: 542.1497802734375px;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+    stroke-dasharray: 542.1497802734375px;
+  }
+}
+
+@-webkit-keyframes animate-svg-fill-1 {
+  0% {
+    fill: transparent;
+  }
+
+  100% {
+    fill: rgb(0, 120, 214);
+  }
+}
+
+@keyframes animate-svg-fill-1 {
+  0% {
+    fill: transparent;
+  }
+
+  100% {
+    fill: rgb(0, 120, 214);
+  }
+}
+
+.svg-elem-1 {
+  -webkit-animation:
+    animate-svg-stroke-1 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0s both,
+    animate-svg-fill-1 0.7s cubic-bezier(0.47, 0, 0.745, 0.715) 0.8s both;
+  animation:
+    animate-svg-stroke-1 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0s both,
+    animate-svg-fill-1 0.7s cubic-bezier(0.47, 0, 0.745, 0.715) 0.8s both;
+}
+
+@-webkit-keyframes animate-svg-stroke-2 {
+  0% {
+    stroke-dashoffset: 380.1159973144531px;
+    stroke-dasharray: 380.1159973144531px;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+    stroke-dasharray: 380.1159973144531px;
+  }
+}
+
+@keyframes animate-svg-stroke-2 {
+  0% {
+    stroke-dashoffset: 380.1159973144531px;
+    stroke-dasharray: 380.1159973144531px;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+    stroke-dasharray: 380.1159973144531px;
+  }
+}
+
+@-webkit-keyframes animate-svg-fill-2 {
+  0% {
+    fill: transparent;
+  }
+
+  100% {
+    fill: rgb(214, 0, 0);
+  }
+}
+
+@keyframes animate-svg-fill-2 {
+  0% {
+    fill: transparent;
+  }
+
+  100% {
+    fill: rgb(214, 0, 0);
+  }
+}
+
+.svg-elem-2 {
+  -webkit-animation:
+    animate-svg-stroke-2 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0.12s both,
+    animate-svg-fill-2 0.7s cubic-bezier(0.47, 0, 0.745, 0.715) 0.9s both;
+  animation:
+    animate-svg-stroke-2 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0.12s both,
+    animate-svg-fill-2 0.7s cubic-bezier(0.47, 0, 0.745, 0.715) 0.9s both;
+}
+
+@-webkit-keyframes animate-svg-stroke-3 {
+  0% {
+    stroke-dashoffset: 327.6473693847656px;
+    stroke-dasharray: 327.6473693847656px;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+    stroke-dasharray: 327.6473693847656px;
+  }
+}
+
+@keyframes animate-svg-stroke-3 {
+  0% {
+    stroke-dashoffset: 327.6473693847656px;
+    stroke-dasharray: 327.6473693847656px;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+    stroke-dasharray: 327.6473693847656px;
+  }
+}
+
+@-webkit-keyframes animate-svg-fill-3 {
+  0% {
+    fill: transparent;
+  }
+
+  100% {
+    fill: rgb(128, 128, 128);
+  }
+}
+
+@keyframes animate-svg-fill-3 {
+  0% {
+    fill: transparent;
+  }
+
+  100% {
+    fill: rgb(128, 128, 128);
+  }
+}
+
+.svg-elem-3 {
+  -webkit-animation:
+    animate-svg-stroke-3 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0.24s both,
+    animate-svg-fill-3 0.7s cubic-bezier(0.47, 0, 0.745, 0.715) 1s both;
+  animation:
+    animate-svg-stroke-3 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0.24s both,
+    animate-svg-fill-3 0.7s cubic-bezier(0.47, 0, 0.745, 0.715) 1s both;
+}
+
+@-webkit-keyframes animate-svg-stroke-4 {
+  0% {
+    stroke-dashoffset: 56.82680892944336px;
+    stroke-dasharray: 56.82680892944336px;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+    stroke-dasharray: 56.82680892944336px;
+  }
+}
+
+@keyframes animate-svg-stroke-4 {
+  0% {
+    stroke-dashoffset: 56.82680892944336px;
+    stroke-dasharray: 56.82680892944336px;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+    stroke-dasharray: 56.82680892944336px;
+  }
+}
+
+@-webkit-keyframes animate-svg-fill-4 {
+  0% {
+    fill: transparent;
+  }
+
+  100% {
+    fill: rgb(128, 128, 128);
+  }
+}
+
+@keyframes animate-svg-fill-4 {
+  0% {
+    fill: transparent;
+  }
+
+  100% {
+    fill: rgb(128, 128, 128);
+  }
+}
+
+.svg-elem-4 {
+  -webkit-animation:
+    animate-svg-stroke-4 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0.36s both,
+    animate-svg-fill-4 0.7s cubic-bezier(0.47, 0, 0.745, 0.715) 1.1s both;
+  animation:
+    animate-svg-stroke-4 1s cubic-bezier(0.47, 0, 0.745, 0.715) 0.36s both,
+    animate-svg-fill-4 0.7s cubic-bezier(0.47, 0, 0.745, 0.715) 1.1s both;
+}
