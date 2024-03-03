@@ -69,7 +69,7 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .default(CurrentTimestamp),
                     )
-                    .col(ColumnDef::new(Instance::UserId).big_integer())
+                    .col(ColumnDef::new(Instance::UserId).big_integer().not_null())
                     .foreign_key(
                         ForeignKey::create()
                             .from(Instance::Table, Instance::UserId)

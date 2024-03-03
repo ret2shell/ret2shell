@@ -31,6 +31,7 @@ pub struct ExModel {
     #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
     pub created_at: DateTime<Utc>,
     pub article_id: i64,
+    pub article_name: String,
     pub publisher_id: i64,
     pub publisher_name: String,
     pub content: String,

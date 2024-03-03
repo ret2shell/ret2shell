@@ -35,15 +35,18 @@ pub struct PolicyGame {
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct PolicyUser {
-    pub institute_id: Option<i64>,
+    pub restrict: bool,
+    pub institutes: Vec<i64>,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct PolicyStatistics {
-    pub institute_id: Option<i64>,
+    pub restrict: bool,
+    pub institutes: Vec<i64>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
+#[serde(untagged)]
 pub enum PolicyRule {
     Game(PolicyGame),
     User(PolicyUser),

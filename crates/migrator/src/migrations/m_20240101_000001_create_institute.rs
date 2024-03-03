@@ -35,11 +35,7 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Institute::Name).string_len(127).not_null())
                     .col(ColumnDef::new(Institute::Description).text())
                     .col(ColumnDef::new(Institute::Logo).string_len(127))
-                    .col(
-                        ColumnDef::new(Institute::Provider)
-                            .string_len(63)
-                            .not_null(),
-                    )
+                    .col(ColumnDef::new(Institute::Provider).string_len(63))
                     .to_owned(),
             )
             .await

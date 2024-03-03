@@ -37,11 +37,12 @@ pub struct ExModel {
     pub renew_count: i32,
     #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
     pub started_at: DateTime<Utc>,
-    pub user_id: Option<i64>,
-    pub user_name: Option<String>,
+    pub user_id: i64,
+    pub user_name: String,
     pub team_id: Option<i64>,
     pub team_name: Option<String>,
     pub challenge_id: i64,
+    pub challenge_name: String,
     pub running: bool,
 }
 

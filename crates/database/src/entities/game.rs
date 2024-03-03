@@ -5,7 +5,7 @@ use chrono::{
     DateTime, Utc,
 };
 use num_derive::{FromPrimitive, ToPrimitive};
-use sea_orm::{entity::prelude::*, ActiveValue, IntoActiveModel};
+use sea_orm::{entity::prelude::*, ActiveValue, FromJsonQueryResult, IntoActiveModel};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -29,6 +29,11 @@ pub enum HostType {
     #[default]
     CTFTraining = 0,
     CTFGame = 1,
+}
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
+pub struct AccessPolicy {
+    pub restrict: bool,
+    pub institutes: Vec<i64>,
 }
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
@@ -55,7 +60,7 @@ pub struct Model {
     pub host_type: HostType,
     pub team_size: i32,
     #[sea_orm(column_type = "JsonBinary")]
-    pub access_policy: Json,
+    pub access_policy: AccessPolicy,
     pub cover: Option<String>,
     pub logo: Option<String>,
     pub enable_audit: bool,
