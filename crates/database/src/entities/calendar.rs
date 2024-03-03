@@ -6,7 +6,7 @@ use chrono::{
 };
 use sea_orm::{
     entity::prelude::*, ActiveValue, Condition, FromQueryResult, IntoActiveModel, Iterable,
-    QuerySelect,
+    JoinType, QuerySelect,
 };
 use serde::{Deserialize, Serialize};
 
@@ -61,7 +61,7 @@ impl Related<super::user::Entity> for Entity {
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get_list(
-    conn: &DatabaseConnection, start_time: i64, end_time: i64,
+    db: &DatabaseConnection, start_time: i64, end_time: i64,
 ) -> Result<Vec<Model>, DbErr> {
     let start_time = Utc
         .timestamp_opt(start_time, 0)
@@ -92,31 +92,40 @@ pub async fn get_list(
                         .add(Column::EndAt.gt(end_time)),
                 ),
         )
-        .all(conn)
+        .all(db)
         .await?;
     Ok(models)
 }
 
-pub async fn get(conn: &DatabaseConnection, id: i64) -> Result<Option<Model>, DbErr> {
-    Entity::find_by_id(id).one(conn).await
+pub async fn get(db: &DatabaseConnection, id: i64) -> Result<Option<Model>, DbErr> {
+    Entity::find_by_id(id).one(db).await
 }
 
-pub async fn create(conn: &DatabaseConnection, calendar: Model) -> Result<Model, DbErr> {
+pub async fn get_ex(db: &DatabaseConnection, id: i64) -> Result<Option<ExModel>, DbErr> {
+    Entity::find_by_id(id)
+        .join(JoinType::InnerJoin, Relation::Reporter.def())
+        .column_as(super::user::Column::Nickname, "reporter_name")
+        .into_model()
+        .one(db)
+        .await
+}
+
+pub async fn create(db: &DatabaseConnection, calendar: Model) -> Result<Model, DbErr> {
     let active_model = ActiveModel {
         id: ActiveValue::NotSet,
         ..calendar.into_active_model().reset_all()
     };
-    active_model.insert(conn).await
+    active_model.insert(db).await
 }
 
-pub async fn update(conn: &DatabaseConnection, id: i64, calendar: Model) -> Result<Model, DbErr> {
+pub async fn update(db: &DatabaseConnection, id: i64, calendar: Model) -> Result<Model, DbErr> {
     let active_model = ActiveModel {
         id: ActiveValue::Unchanged(id),
         ..calendar.into_active_model().reset_all()
     };
-    active_model.update(conn).await
+    active_model.update(db).await
 }
 
-pub async fn delete(conn: &DatabaseConnection, id: i64) -> Result<(), DbErr> {
-    Entity::delete_by_id(id).exec(conn).await.map(|_| ())
+pub async fn delete(db: &DatabaseConnection, id: i64) -> Result<(), DbErr> {
+    Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

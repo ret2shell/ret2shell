@@ -4,8 +4,12 @@ use chrono::{
     serde::ts_seconds::{deserialize as from_ts, serialize as to_ts},
     DateTime, Utc,
 };
-use sea_orm::{entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel};
+use sea_orm::{
+    entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel, JoinType, QuerySelect,
+};
 use serde::{Deserialize, Serialize};
+
+use super::{institute, user};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "oauth")]
@@ -77,6 +81,18 @@ impl ActiveModelBehavior for ActiveModel {}
 pub async fn get_list(db: &DatabaseConnection, user_id: i64) -> Result<Vec<Model>, DbErr> {
     Entity::find()
         .filter(Column::UserId.eq(user_id))
+        .all(db)
+        .await
+}
+
+pub async fn get_list_ex(db: &DatabaseConnection, user_id: i64) -> Result<Vec<ExModel>, DbErr> {
+    Entity::find()
+        .join(JoinType::InnerJoin, Relation::User.def())
+        .join(JoinType::InnerJoin, Relation::Institute.def())
+        .column_as(user::Column::Nickname, "user_name")
+        .column_as(institute::Column::Name, "institute_name")
+        .filter(Column::UserId.eq(user_id))
+        .into_model()
         .all(db)
         .await
 }

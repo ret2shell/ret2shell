@@ -252,3 +252,16 @@ pub async fn create(db: &DatabaseConnection, team: Model) -> Result<Model, DbErr
     };
     team.insert(db).await
 }
+
+pub async fn update(db: &DatabaseConnection, team: Model) -> Result<Model, DbErr> {
+    let team = ActiveModel {
+        id: ActiveValue::Unchanged(team.id),
+        game_id: ActiveValue::Unchanged(team.game_id),
+        ..team.into_active_model().reset_all()
+    };
+    team.insert(db).await
+}
+
+pub async fn delete(db: &DatabaseConnection, id: i64) -> Result<(), DbErr> {
+    Entity::delete_by_id(id).exec(db).await.map(|_| ())
+}

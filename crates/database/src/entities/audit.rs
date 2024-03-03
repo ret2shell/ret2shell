@@ -5,9 +5,14 @@ use chrono::{
     DateTime, Utc,
 };
 use num_derive::{FromPrimitive, ToPrimitive};
-use sea_orm::{entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel, QueryOrder};
+use sea_orm::{
+    entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel, JoinType, QueryOrder,
+    QuerySelect,
+};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
+
+use super::{challenge, team, user};
 
 #[derive(
     Clone,
@@ -118,6 +123,41 @@ pub async fn get_page(
     user_id: Option<i64>, challenge_id: Option<i64>, state: Option<State>,
 ) -> Result<(Vec<Model>, u64), DbErr> {
     let mut sql = Entity::find();
+    if let Some(game_id) = game_id {
+        sql = sql.filter(Column::GameId.eq(game_id));
+    }
+    if let Some(team_id) = team_id {
+        sql = sql.filter(Column::TeamId.eq(team_id));
+    }
+    if let Some(user_id) = user_id {
+        sql = sql.filter(Column::UserId.eq(user_id));
+    }
+    if let Some(challenge_id) = challenge_id {
+        sql = sql.filter(Column::ChallengeId.eq(challenge_id));
+    }
+    if let Some(state) = state {
+        sql = sql.filter(Column::State.eq(state));
+    }
+    let paginator = sql
+        .order_by_desc(Column::CreatedAt)
+        .into_model()
+        .paginate(db, page_size);
+    let total = paginator.num_pages().await?;
+    let articles = paginator.fetch_page(page - 1).await?;
+    Ok((articles, total))
+}
+
+pub async fn get_page_ex(
+    db: &DatabaseConnection, page: u64, page_size: u64, game_id: Option<i64>, team_id: Option<i64>,
+    user_id: Option<i64>, challenge_id: Option<i64>, state: Option<State>,
+) -> Result<(Vec<ExModel>, u64), DbErr> {
+    let mut sql = Entity::find()
+        .join(JoinType::InnerJoin, Relation::Challenge.def())
+        .join(JoinType::InnerJoin, Relation::Team.def())
+        .join(JoinType::InnerJoin, Relation::User.def())
+        .column_as(challenge::Column::Name, "challenge_name")
+        .column_as(team::Column::Name, "team_name")
+        .column_as(user::Column::Nickname, "user_name");
     if let Some(game_id) = game_id {
         sql = sql.filter(Column::GameId.eq(game_id));
     }

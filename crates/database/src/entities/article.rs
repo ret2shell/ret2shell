@@ -120,18 +120,17 @@ impl Related<super::article_closure::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
-pub async fn get(
-    db: &DatabaseConnection, article_id: i64, with_content: bool,
-) -> Result<Model, DbErr> {
-    let mut sql = Entity::find_by_id(article_id);
-    if !with_content {
-        sql = sql
-            .select_only()
-            .columns(Column::iter().filter(|c| !matches!(c, Column::Content)));
-    }
-    sql.one(db)
-        .await?
-        .ok_or(DbErr::RecordNotFound("article".to_owned()))
+pub async fn get(db: &DatabaseConnection, article_id: i64) -> Result<Option<Model>, DbErr> {
+    Entity::find_by_id(article_id).one(db).await
+}
+
+pub async fn get_ex(db: &DatabaseConnection, article_id: i64) -> Result<Option<ExModel>, DbErr> {
+    Entity::find_by_id(article_id)
+        .join(JoinType::InnerJoin, Relation::Publisher.def())
+        .column_as(super::user::Column::Nickname, "publisher_name")
+        .into_model()
+        .one(db)
+        .await
 }
 
 pub async fn get_page(

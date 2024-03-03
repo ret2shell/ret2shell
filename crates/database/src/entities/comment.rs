@@ -10,6 +10,8 @@ use sea_orm::{
 };
 use serde::{Deserialize, Serialize};
 
+use super::{article, user};
+
 use super::comment_closure;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default)]
@@ -31,7 +33,7 @@ pub struct ExModel {
     #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
     pub created_at: DateTime<Utc>,
     pub article_id: i64,
-    pub article_name: String,
+    pub article_title: String,
     pub publisher_id: i64,
     pub publisher_name: String,
     pub content: String,
@@ -89,8 +91,40 @@ pub async fn get_list(
     Ok((comments, total))
 }
 
+pub async fn get_list_ex(
+    db: &DatabaseConnection, page: u64, page_size: u64, article_id: i64,
+) -> Result<(Vec<ExModel>, u64), DbErr> {
+    let sql = Entity::find()
+        .join(JoinType::InnerJoin, Relation::Publisher.def())
+        .join(JoinType::InnerJoin, Relation::Article.def())
+        .column_as(user::Column::Nickname, "publisher_name")
+        .column_as(article::Column::Title, "article_title")
+        .filter(Column::ArticleId.eq(article_id));
+    let paginator = sql.into_model().paginate(db, page_size);
+    let total = paginator.num_pages().await?;
+    let comments = paginator.fetch_page(page - 1).await?;
+    Ok((comments, total))
+}
+
 pub async fn get_tree(db: &DatabaseConnection, parent_id: i64) -> Result<Vec<Model>, DbErr> {
     let mut sql = Entity::find();
+    sql = sql
+        .join(JoinType::InnerJoin, Relation::Closure.def())
+        .filter(comment_closure::Column::Ancestor.eq(parent_id));
+    let articles = sql
+        .order_by_desc(Column::CreatedAt)
+        .into_model()
+        .all(db)
+        .await?;
+    Ok(articles)
+}
+
+pub async fn get_tree_ex(db: &DatabaseConnection, parent_id: i64) -> Result<Vec<ExModel>, DbErr> {
+    let mut sql = Entity::find()
+        .join(JoinType::InnerJoin, Relation::Publisher.def())
+        .join(JoinType::InnerJoin, Relation::Article.def())
+        .column_as(user::Column::Nickname, "publisher_name")
+        .column_as(article::Column::Title, "article_title");
     sql = sql
         .join(JoinType::InnerJoin, Relation::Closure.def())
         .filter(comment_closure::Column::Ancestor.eq(parent_id));
