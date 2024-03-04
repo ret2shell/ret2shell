@@ -10,9 +10,7 @@ use sea_orm::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::{article, user};
-
-use super::comment_closure;
+use super::{article, comment_closure, user};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default)]
 #[sea_orm(table_name = "comment")]

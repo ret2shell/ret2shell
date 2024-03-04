@@ -53,22 +53,7 @@ pub struct Auth {
     pub signing_key: String,
     pub buffer_time: i64,
     pub expires_time: i64,
-    pub oauth_keys: Option<OAuthKeys>,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize, FromJsonQueryResult, PartialEq, Eq)]
-pub struct OAuthKey {
-    pub id: String,
-    pub key: String,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize, FromJsonQueryResult, PartialEq, Eq)]
-pub struct OAuthKeys {
-    pub github: Option<OAuthKey>,
-    pub gitlab: Option<OAuthKey>,
-    pub google: Option<OAuthKey>,
-    pub xdu: Option<OAuthKey>,
-    pub qq: Option<OAuthKey>,
+    pub oauth_keys: Option<Json>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, FromJsonQueryResult, PartialEq, Eq)]

@@ -1,6 +1,6 @@
 [package]
 name = "r2s-auditor"
-version = "0.5.6"
+version = "1.0.0"
 edition = "2021"
 rust-version = "1.76.0"
 description = "Auditor for Ret2Shell - A feature-riches CTF challenge platform."
@@ -9,6 +9,12 @@ publish = false
 homepage = "https://r2s.woooo.tech/"
 keywords = ["ctf", "challenge", "platform", "security", "education"]
 resolver = "2"
+
+[dependencies]
+aho-corasick = "1.1"
+tokio = { version = "1.36", features = ["full"] }
+thiserror = "1.0"
+tracing = "0.1"
 
 [lib]
 path = "src/lib.rs"

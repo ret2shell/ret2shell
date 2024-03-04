@@ -8,10 +8,18 @@ export type PlatformConfig = {
   hide_maker: boolean
 }
 
+export enum Validator {
+  None,
+  Image,
+  Pow,
+  RecaptchaV3,
+  HCaptcha,
+}
+
 export type CaptchaConfig = {
   enabled: boolean
   difficulty: number
-  validator: string
+  validator: Validator
 }
 
 export type AuthConfig = {

@@ -1,6 +1,6 @@
 {
   "name": "ret2shell",
-  "version": "0.5.6",
+  "version": "1.0.0",
   "dependencies": {
     "@fontsource/jetbrains-mono": "^5.0.18",
     "@kobalte/core": "^0.12.2",

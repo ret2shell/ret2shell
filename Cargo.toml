@@ -10,7 +10,6 @@ members = [
   'crates/database',
   'crates/email',
   'crates/license',
-  'crates/logger',
   'crates/media',
   'crates/migrator',
   'crates/oauth',

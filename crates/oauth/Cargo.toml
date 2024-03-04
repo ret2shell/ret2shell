@@ -1,6 +1,6 @@
 [package]
 name = "r2s-oauth"
-version = "0.5.6"
+version = "1.0.0"
 edition = "2021"
 rust-version = "1.76.0"
 description = "OAuth/OAuth2 wrapper for Ret2Shell - A feature-riches CTF challenge platform."
@@ -9,6 +9,10 @@ publish = false
 homepage = "https://r2s.woooo.tech/"
 keywords = ["ctf", "challenge", "platform", "security", "education"]
 resolver = "2"
+
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
 
 [lib]
 path = "src/lib.rs"

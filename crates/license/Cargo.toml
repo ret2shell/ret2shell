@@ -1,6 +1,6 @@
 [package]
 name = "r2s-license"
-version = "0.5.6"
+version = "1.0.0"
 edition = "2021"
 rust-version = "1.76.0"
 description = "License checker for Ret2Shell - A feature-riches CTF challenge platform."

@@ -60,11 +60,11 @@ pub struct Model {
 }
 
 impl Model {
-    pub fn desentisize(&self) -> Self {
+    pub fn desentisize(self) -> Self {
         Self {
             password: None,
             email: None,
-            ..self.clone()
+            ..self
         }
     }
 }

@@ -27,10 +27,10 @@ pub struct Model {
 }
 
 impl Model {
-    pub fn desentisize(&self) -> Self {
+    pub fn desentisize(self) -> Self {
         Self {
             content: None,
-            ..self.clone()
+            ..self
         }
     }
 }
@@ -51,10 +51,10 @@ pub struct ExModel {
 }
 
 impl ExModel {
-    pub fn desentisize(&self) -> Self {
+    pub fn desentisize(self) -> Self {
         Self {
             content: None,
-            ..self.clone()
+            ..self
         }
     }
 }

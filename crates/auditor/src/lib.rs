@@ -1,0 +1,30 @@
+use aho_corasick::AhoCorasick;
+use thiserror::Error;
+
+pub mod filter;
+pub mod monitor;
+
+#[derive(Clone, Debug)]
+pub struct Auditor {
+    pub filter: AhoCorasick,
+}
+
+impl Auditor {
+    /// check if the content contains sensitive words, return true when sensitive contents detected.
+    pub fn audit_content(&self, src: &str) -> bool {
+        filter::check_text(&self.filter, src)
+    }
+}
+
+#[derive(Error, Debug)]
+pub enum AuditorError {
+    #[error("word filter error: {0}")]
+    WordFilterError(#[from] filter::WordFilterError),
+}
+
+pub async fn initialize(sensitive_word_list: &str) -> Result<Auditor, AuditorError> {
+    let word_filter = filter::initialize(sensitive_word_list).await?;
+    Ok(Auditor {
+        filter: word_filter,
+    })
+}
