@@ -1,9 +1,13 @@
-use serde::{Deserialize, Serialize};
+use async_nats::jetstream::consumer::pull::Stream;
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct Email {
-    pub name: String,
-    pub email: String,
-    pub subject: String,
-    pub content: String,
+mod traits;
+mod worker;
+
+pub use traits::{EmailConfig, EmailCtx, EmailError, EmailRequest};
+use worker::email_worker;
+
+pub async fn initialize(messages: Stream) -> Result<(), EmailError> {
+    let future = email_worker(messages);
+    tokio::spawn(future);
+    Ok(())
 }

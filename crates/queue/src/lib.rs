@@ -1,6 +1,6 @@
 //! Provides message queue for other modules.
 
-use async_nats::jetstream::{self, context::PublishAckFuture};
+use async_nats::jetstream::{self, consumer::pull::Stream, context::PublishAckFuture};
 use serde::Serialize;
 use thiserror::Error;
 
@@ -51,7 +51,7 @@ impl Queue {
         Ok(())
     }
 
-    pub async fn subscribe(&self, subject: &str) -> Result<impl futures::Stream, QueueError> {
+    pub async fn subscribe(&self, subject: &str) -> Result<Stream, QueueError> {
         let subject = subject.to_string();
         let stream = self
             .context
