@@ -10,5 +10,19 @@ homepage = "https://r2s.woooo.tech/"
 keywords = ["ctf", "challenge", "platform", "security", "education"]
 resolver = "2"
 
+[dependencies]
+hex = "0.4"
+ring = "0.17"
+clap = { version = "4.4", features = ["derive"] }
+serde_json = "1.0"
+chrono = "0.4"
+base64 = "0.22"
+serde = { version = "1.0", features = ["derive"] }
+thiserror = "1.0"
+
 [lib]
 path = "src/lib.rs"
+
+[[bin]]
+name = "r2s-license"
+path = "src/main.rs"
