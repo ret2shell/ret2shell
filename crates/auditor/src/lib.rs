@@ -4,14 +4,16 @@ use thiserror::Error;
 pub mod filter;
 pub mod monitor;
 
-/// Auditor is a struct that contains some components to audit sensitive informations.
+/// Auditor is a struct that contains some components to audit sensitive
+/// informations.
 #[derive(Clone, Debug)]
 pub struct Auditor {
     pub filter: AhoCorasick,
 }
 
 impl Auditor {
-    /// check if the content contains sensitive words, return true when sensitive contents detected.
+    /// check if the content contains sensitive words, return true when
+    /// sensitive contents detected.
     pub fn audit_content(&self, src: &str) -> bool {
         filter::check_text(&self.filter, src)
     }

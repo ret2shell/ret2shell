@@ -16,7 +16,8 @@ pub enum WordFilterError {
     AhoCorasickError(#[from] aho_corasick::BuildError),
 }
 
-/// Reads a file containing sensitive words and returns a `BTreeSet` of those words.
+/// Reads a file containing sensitive words and returns a `BTreeSet` of those
+/// words.
 pub async fn read_sensitive_word_file(path: &str) -> Result<BTreeSet<String>, WordFilterError> {
     let mut set = BTreeSet::<String>::new();
     let f = File::open(path).await?;

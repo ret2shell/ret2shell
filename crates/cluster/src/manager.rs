@@ -9,8 +9,6 @@ use kube::{
 };
 use serde::Serialize;
 
-use crate::traits::InstanceConfig;
-
 use super::traits::ClusterError;
 
 #[derive(Clone)]

@@ -105,7 +105,8 @@ impl Cache {
         Ok(())
     }
 
-    // increase a number value with delta, will create the key with value `0` if not exists and then increase it & return
+    // increase a number value with delta, will create the key with value `0` if not
+    // exists and then increase it & return
     pub async fn incr(&mut self, key: &str, delta: i64) -> Result<i64, CacheError<RedisError>> {
         let mut conn = self.pool.get().await?;
         let domain_key = with_domain!(self.domain, key);
