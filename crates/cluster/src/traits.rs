@@ -1,7 +1,18 @@
-/// Configuration for service settings.
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
 
-/// `ClusterConfig` is a configuration struct for managing service settings.
+#[derive(Error, Debug)]
+pub enum ClusterError {
+    #[error("kube error: {0}")]
+    KubeError(#[from] kube::Error),
+    #[error("failed to infer config: {0}")]
+    InferConfigError(#[from] kube::config::InferConfigError),
+    #[error("failed to load kube config: {0}")]
+    KubeConfigError(#[from] kube::config::KubeconfigError),
+    #[error("need declare namespace: {0}")]
+    NeedNamespace(String),
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ClusterConfig {
     /// `try_default` is a flag to try to use the default service account.
@@ -18,6 +29,18 @@ pub struct ClusterConfig {
     /// it will be used as `ret2shellType=<challenge_node_selector>`,
     /// you should setup the node selector in your kubernetes cluster first.
     pub challenge_node_selector: Option<String>,
+}
 
-    pub proxy_image: Option<String>,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ContainerConfig {
+    pub image: String,
+    pub cpu: String,
+    pub memory: String,
+    pub storage: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InstanceConfig {
+    containers: Vec<ContainerConfig>,
+    port: u16,
 }

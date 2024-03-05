@@ -4,6 +4,7 @@ use thiserror::Error;
 pub mod filter;
 pub mod monitor;
 
+/// Auditor is a struct that contains some components to audit sensitive informations.
 #[derive(Clone, Debug)]
 pub struct Auditor {
     pub filter: AhoCorasick,
@@ -22,6 +23,11 @@ pub enum AuditorError {
     WordFilterError(#[from] filter::WordFilterError),
 }
 
+/// Initializes the auditor with a list of sensitive words.
+///
+/// * `sensitive_word_list` - The path to a file containing sensitive words.
+///
+/// Returns a new `Auditor` instance.
 pub async fn initialize(sensitive_word_list: &str) -> Result<Auditor, AuditorError> {
     let word_filter = filter::initialize(sensitive_word_list).await?;
     Ok(Auditor {

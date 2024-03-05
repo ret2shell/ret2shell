@@ -10,7 +10,12 @@ mod utils;
 use traits::ValidatorType;
 pub use traits::{Captcha, CaptchaError, CaptchaValidator};
 
-pub async fn generate_captcha(validator: &str, difficulty: &u16) -> Result<Captcha, CaptchaError> {
+/// Generate a captcha. you should desentisize the captcha before sending it to the client,
+/// and store the original captcha object into cache.
+///
+/// * `validator` - The type of the validator.
+/// * `difficulty` - The difficulty of the captcha.
+pub async fn generate(validator: &str, difficulty: &u16) -> Result<Captcha, CaptchaError> {
     match validator {
         "none" => Ok(Captcha {
             id: "".to_string(),
@@ -26,7 +31,12 @@ pub async fn generate_captcha(validator: &str, difficulty: &u16) -> Result<Captc
     }
 }
 
-pub async fn check_captcha(
+/// Check if the answer is correct.
+///
+/// * `validator` - The type of the validator.
+/// * `captcha` - The captcha object from `generate` function, should be fetched from cache.
+/// * `answer` - The answer from the client.
+pub async fn check(
     validator: &ValidatorType, captcha: &Captcha, answer: &str,
 ) -> Result<bool, CaptchaError> {
     match validator {

@@ -1,4 +1,4 @@
-use async_nats::jetstream::consumer::pull::Stream;
+use async_nats::jetstream::{self, consumer::pull::Stream, AckKind};
 use futures::StreamExt;
 use lettre::{
     message::{header, SinglePart},
@@ -56,24 +56,32 @@ async fn send_email_impl(config: &EmailConfig, email: &EmailCtx) -> Result<(), E
     Ok(())
 }
 
+async fn process_message(message: jetstream::Message) -> Result<(), EmailError> {
+    let email = String::from_utf8(message.message.payload.to_vec())?;
+    let req = serde_json::from_str::<EmailRequest>(&email)?;
+    let mut retry_count = 3;
+    while retry_count > 0 {
+        if let Err(err) = send_email_impl(&req.config, &req.email).await {
+            error!("Failed to send email: {:?}", err);
+            retry_count -= 1;
+        } else {
+            info!("Successfully sent email: {:?}", req);
+            message.ack_with(AckKind::Ack).await.ok();
+            return Ok(());
+        }
+    }
+    error!("Failed to send email {req:?} after 3 retries, dropped.");
+    message.ack_with(AckKind::Term).await.ok();
+    Ok(())
+}
+
 pub async fn email_worker(mut messages: Stream) -> Result<(), EmailError> {
     while let Some(message) = messages.next().await {
         if let Ok(message) = message {
-            let email = String::from_utf8(message.message.payload.to_vec());
-            if let Ok(email) = email {
-                if let Ok(req) = serde_json::from_str::<EmailRequest>(&email) {
-                    if let Err(err) = send_email_impl(&req.config, &req.email).await {
-                        error!("Failed to send email: {:?}", err);
-                    } else {
-                        info!("Successfully sent email: {:?}", req);
-                        message.ack().await.ok();
-                    }
-                } else {
-                    error!("Failed to deserialize email: {:?}", email);
-                }
-            } else {
-                error!("Failed to convert email message to string: {:?}", email);
-            }
+            process_message(message)
+                .await
+                .map_err(|e| error!("Failed to process message: {:?}", e))
+                .ok();
         } else {
             error!("Failed to receive message from nats: {:?}", message);
         }

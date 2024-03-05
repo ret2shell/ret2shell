@@ -35,6 +35,14 @@ impl Cache {
         Self { pool, domain: None }
     }
 
+    /// Set the domain for the cache for the following operations.
+    ///
+    /// * `domain` - The domain to set.
+    ///
+    /// ```rust
+    /// cache.at("user").set("name", "John").await?;
+    /// cache.at("user").get("name").await?;
+    /// ```
     pub fn at(&self, domain: &str) -> Self {
         Self {
             domain: Some(domain.to_owned()),
@@ -165,7 +173,11 @@ impl Cache {
 }
 
 /// Init the cache manager.
+///
+/// * `nodes` - The redis nodes.
+/// * `max_connections` - The max connections for each node.
 pub async fn initialize(nodes: &[String], max_connections: u16) -> Result<Cache, RedisError> {
+    debug!("initialize cache manager with nodes: {nodes:?}, max_connections: {max_connections}");
     Ok(Cache::from(
         manager::new_redis_pool(nodes, max_connections).await?,
     ))

@@ -255,6 +255,10 @@ impl PoolLike for ClusteredRedisPool {
     }
 }
 
+/// Create a new redis pool.
+///
+/// * `nodes` - A list of redis nodes.
+/// * `max_connections` - The maximum number of connections in the pool.
 pub async fn new_redis_pool(
     nodes: &[String], max_connections: u16,
 ) -> Result<RedisPool, RedisError> {
