@@ -107,10 +107,4 @@ impl Cluster {
         let namespace = api.create(&Default::default(), &namespace).await?;
         Ok(namespace)
     }
-
-    pub async fn create_instance(
-        &self, instance: &InstanceConfig,
-    ) -> Result<impl Serialize, ClusterError> {
-        Ok(())
-    }
 }
