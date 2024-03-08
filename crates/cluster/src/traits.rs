@@ -1,4 +1,6 @@
+use num_derive::{FromPrimitive, ToPrimitive};
 use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -43,4 +45,32 @@ pub struct ContainerConfig {
 pub struct InstanceConfig {
     containers: Vec<ContainerConfig>,
     port: u16,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Default,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Serialize_repr,
+    Deserialize_repr,
+    FromPrimitive,
+    ToPrimitive,
+)]
+#[repr(i32)]
+pub enum State {
+    #[default]
+    Pending = 0,
+    Running = 1,
+    Succeeded = 2,
+    Failed = 3,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Instance {
+    pub name: String,
+    pub inner_addr: String,
+    pub state: State,
 }

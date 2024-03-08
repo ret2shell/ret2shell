@@ -4,13 +4,39 @@ use chrono::{
     serde::ts_seconds::{deserialize as from_ts, serialize as to_ts},
     DateTime, Utc,
 };
+use num_derive::{FromPrimitive, ToPrimitive};
 use sea_orm::{
     entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel, JoinType, QueryOrder,
     QuerySelect,
 };
 use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use super::{challenge, team, user};
+
+#[derive(
+    Clone,
+    Debug,
+    Default,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Serialize_repr,
+    Deserialize_repr,
+    EnumIter,
+    DeriveActiveEnum,
+    FromPrimitive,
+    ToPrimitive,
+)]
+#[repr(i32)]
+#[sea_orm(rs_type = "i32", db_type = "Integer")]
+pub enum State {
+    #[default]
+    Pending = 0,
+    Running = 1,
+    Succeeded = 2,
+    Failed = 3,
+}
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "instance")]
@@ -29,7 +55,9 @@ pub struct Model {
     pub user_id: Option<i64>,
     pub team_id: Option<i64>,
     pub challenge_id: i64,
-    pub running: bool,
+    pub state: State,
+    #[sea_orm(column_type = "JsonBinary")]
+    pub config: Option<Json>,
 }
 
 #[derive(Clone, Serialize, Deserialize, FromQueryResult)]
@@ -48,7 +76,7 @@ pub struct ExModel {
     pub team_name: Option<String>,
     pub challenge_id: i64,
     pub challenge_name: String,
-    pub running: bool,
+    pub state: State,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -114,7 +142,7 @@ pub async fn get_page(
         sql = sql.filter(Column::TeamId.eq(team_id));
     }
     sql = sql
-        .order_by_desc(Column::Running)
+        .order_by_asc(Column::State)
         .order_by_desc(Column::StartedAt);
     let paginator = sql.into_model().paginate(db, page_size);
     let total = paginator.num_pages().await?;
@@ -143,7 +171,7 @@ pub async fn get_page_ex(
         sql = sql.filter(Column::TeamId.eq(team_id));
     }
     sql = sql
-        .order_by_desc(Column::Running)
+        .order_by_asc(Column::State)
         .order_by_desc(Column::StartedAt);
     let paginator = sql.into_model().paginate(db, page_size);
     let total = paginator.num_pages().await?;
@@ -151,56 +179,58 @@ pub async fn get_page_ex(
     Ok((instances, total))
 }
 
-pub async fn get_by_user_id(db: &DatabaseConnection, user_id: i64) -> Result<Option<Model>, DbErr> {
-    Entity::find()
-        .filter(Column::UserId.eq(user_id))
-        .filter(Column::Running.eq(true))
-        .one(db)
-        .await
+pub async fn get_by_user_id(
+    db: &DatabaseConnection, user_id: i64, with_all: bool,
+) -> Result<Option<Model>, DbErr> {
+    let mut sql = Entity::find().filter(Column::UserId.eq(user_id));
+    if !with_all {
+        sql = sql.filter(Column::State.lte(State::Running));
+    }
+    sql.one(db).await
 }
 
 pub async fn get_by_user_id_ex(
-    db: &DatabaseConnection, user_id: i64,
+    db: &DatabaseConnection, user_id: i64, with_all: bool,
 ) -> Result<Option<ExModel>, DbErr> {
-    Entity::find()
+    let mut sql = Entity::find()
         .join(JoinType::InnerJoin, Relation::Team.def())
         .join(JoinType::InnerJoin, Relation::Challenge.def())
         .join(JoinType::InnerJoin, Relation::User.def())
         .column_as(user::Column::Nickname, "user_name")
         .column_as(team::Column::Name, "team_name")
         .column_as(challenge::Column::Name, "challenge_name")
-        .filter(Column::UserId.eq(user_id))
-        .filter(Column::Running.eq(true))
-        .into_model()
-        .one(db)
-        .await
+        .filter(Column::UserId.eq(user_id));
+    if !with_all {
+        sql = sql.filter(Column::State.lte(State::Running));
+    }
+    sql.into_model().one(db).await
 }
 
 pub async fn get_list_by_team_id(
-    db: &DatabaseConnection, team_id: i64,
+    db: &DatabaseConnection, team_id: i64, with_all: bool,
 ) -> Result<Vec<Model>, DbErr> {
-    Entity::find()
-        .filter(Column::TeamId.eq(team_id))
-        .filter(Column::Running.eq(true))
-        .all(db)
-        .await
+    let mut sql = Entity::find().filter(Column::TeamId.eq(team_id));
+    if !with_all {
+        sql = sql.filter(Column::State.lte(State::Running));
+    }
+    sql.all(db).await
 }
 
 pub async fn get_list_by_team_id_ex(
-    db: &DatabaseConnection, team_id: i64,
+    db: &DatabaseConnection, team_id: i64, with_all: bool,
 ) -> Result<Vec<ExModel>, DbErr> {
-    Entity::find()
+    let mut sql = Entity::find()
         .join(JoinType::InnerJoin, Relation::Team.def())
         .join(JoinType::InnerJoin, Relation::Challenge.def())
         .join(JoinType::InnerJoin, Relation::User.def())
         .column_as(user::Column::Nickname, "user_name")
         .column_as(team::Column::Name, "team_name")
         .column_as(challenge::Column::Name, "challenge_name")
-        .filter(Column::TeamId.eq(team_id))
-        .filter(Column::Running.eq(true))
-        .into_model()
-        .all(db)
-        .await
+        .filter(Column::TeamId.eq(team_id));
+    if !with_all {
+        sql = sql.filter(Column::State.lte(State::Running));
+    }
+    sql.into_model().all(db).await
 }
 
 pub async fn create(db: &DatabaseConnection, instance: Model) -> Result<Model, DbErr> {

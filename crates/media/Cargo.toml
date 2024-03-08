@@ -9,5 +9,10 @@ publish = false
 homepage = "https://r2s.woooo.tech/"
 keywords = ["ctf", "challenge", "platform", "security", "education"]
 resolver = "2"
+
+[dependencies]
+tokio = { version = "1.0", features = ["full"] }
+
+
 [lib]
 path = "src/lib.rs"

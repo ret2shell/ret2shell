@@ -11,8 +11,6 @@ keywords = ["ctf", "challenge", "platform", "security", "education"]
 resolver = "2"
 
 [dependencies]
-r2s-cache = { version = "1.0.0", path = "../cache" }
-r2s-database = { version = "1.0.0", path = "../database" }
 nanoid = "0.4"
 ring = "0.17"
 thiserror = "1.0"
