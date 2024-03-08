@@ -1,3 +1,7 @@
+use chrono::{
+    serde::ts_seconds::{deserialize as from_ts, serialize as to_ts},
+    DateTime, Utc,
+};
 use num_derive::{FromPrimitive, ToPrimitive};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
@@ -73,4 +77,11 @@ pub struct Instance {
     pub name: String,
     pub inner_addr: String,
     pub state: State,
+    pub config: InstanceConfig,
+    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
+    pub started_at: DateTime<Utc>,
+    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
+    pub created_at: DateTime<Utc>,
+    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
+    pub stoped_at: DateTime<Utc>,
 }

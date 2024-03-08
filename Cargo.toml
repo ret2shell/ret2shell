@@ -1,20 +1,3 @@
 [workspace]
-members = [
-  'crates/auditor',
-  'crates/bucket',
-  'crates/cache',
-  'crates/captcha',
-  'crates/checker',
-  'crates/cluster',
-  'crates/config',
-  'crates/database',
-  'crates/email',
-  'crates/license',
-  'crates/media',
-  'crates/migrator',
-  'crates/oauth',
-  'crates/queue',
-  'crates/server',
-  'crates/traffic',
-]
+members = ['crates/*']
 resolver = "2"

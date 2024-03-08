@@ -52,6 +52,10 @@ pub struct Model {
     pub renew_count: i32,
     #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
     pub started_at: DateTime<Utc>,
+    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
+    pub created_at: DateTime<Utc>,
+    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
+    pub stoped_at: DateTime<Utc>,
     pub user_id: Option<i64>,
     pub team_id: Option<i64>,
     pub challenge_id: i64,
