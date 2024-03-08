@@ -1,5 +1,5 @@
 use chrono::{
-    serde::ts_seconds::{deserialize as from_ts, serialize as to_ts},
+    serde::{ts_seconds, ts_seconds_option},
     DateTime, Utc,
 };
 use num_derive::{FromPrimitive, ToPrimitive};
@@ -78,10 +78,10 @@ pub struct Instance {
     pub inner_addr: String,
     pub state: State,
     pub config: InstanceConfig,
-    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
-    pub started_at: DateTime<Utc>,
-    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
+    #[serde(with = "ts_seconds_option")]
+    pub started_at: Option<DateTime<Utc>>,
+    #[serde(with = "ts_seconds")]
     pub created_at: DateTime<Utc>,
-    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
-    pub stoped_at: DateTime<Utc>,
+    #[serde(with = "ts_seconds_option")]
+    pub stoped_at: Option<DateTime<Utc>>,
 }

@@ -2,10 +2,7 @@
 
 use std::str::FromStr;
 
-use chrono::{
-    serde::ts_seconds::{deserialize as from_ts, serialize as to_ts},
-    DateTime, Utc,
-};
+use chrono::{serde::ts_seconds, DateTime, Utc};
 use num_derive::{FromPrimitive, ToPrimitive};
 use sea_orm::{
     entity::prelude::*, ActiveValue, Condition, FromJsonQueryResult, FromQueryResult,
@@ -40,7 +37,7 @@ pub struct Permissions(pub Vec<Permission>);
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i64,
-    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
+    #[serde(with = "ts_seconds")]
     pub registered_at: DateTime<Utc>,
     #[sea_orm(unique)]
     pub account: String,
@@ -72,7 +69,7 @@ impl Model {
 #[derive(Clone, Serialize, Deserialize, FromQueryResult)]
 pub struct ExModel {
     pub id: i64,
-    #[serde(deserialize_with = "from_ts", serialize_with = "to_ts")]
+    #[serde(with = "ts_seconds")]
     pub registered_at: DateTime<Utc>,
     pub account: String,
     pub nickname: String,

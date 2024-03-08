@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon'
+
 export enum Permission {
   Basic,
   Verified,
@@ -13,7 +15,7 @@ export enum Permission {
 
 export type User = {
   id: number
-  registered_at: number
+  registered_at: DateTime
   account: string
   nickname: string
   email: string | null

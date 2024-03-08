@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon'
+
 export enum ArticleAccessPolicy {
   Bulletin = 0,
   Wiki = 1,
@@ -8,8 +10,8 @@ export enum ArticleAccessPolicy {
 
 export type Article = {
   id: number
-  created_at: number
-  updated_at: number
+  created_at: DateTime
+  updated_at: DateTime
   title: string
   content: string | null
   publisher_id: number

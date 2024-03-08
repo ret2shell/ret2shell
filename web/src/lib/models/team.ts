@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon'
+
 export enum TeamState {
   Banned = 0,
   Pending = 1,
@@ -7,9 +9,9 @@ export enum TeamState {
 
 export type TeamScoreHistory = {
   score: number
-  time: number
+  changed_at: DateTime
   challenge_id: number | null
-  blood_state: number|null
+  blood_state: number | null
 }
 
 export type Team = {
@@ -22,5 +24,5 @@ export type Team = {
   institute_name?: string
   score: number
   history: TeamScoreHistory[]
-  last_active_at: number
+  last_active_at: DateTime
 }

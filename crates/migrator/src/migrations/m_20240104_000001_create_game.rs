@@ -71,21 +71,9 @@ impl MigrationTrait for Migration {
                             .timestamp_with_time_zone()
                             .not_null(),
                     )
-                    .col(
-                        ColumnDef::new(Game::EndAt)
-                            .timestamp_with_time_zone()
-                            .not_null(),
-                    )
-                    .col(
-                        ColumnDef::new(Game::RegisterAt)
-                            .timestamp_with_time_zone()
-                            .not_null(),
-                    )
-                    .col(
-                        ColumnDef::new(Game::ArchiveAt)
-                            .timestamp_with_time_zone()
-                            .not_null(),
-                    )
+                    .col(ColumnDef::new(Game::EndAt).timestamp_with_time_zone())
+                    .col(ColumnDef::new(Game::RegisterAt).timestamp_with_time_zone())
+                    .col(ColumnDef::new(Game::ArchiveAt).timestamp_with_time_zone())
                     .col(ColumnDef::new(Game::Hidden).boolean().not_null())
                     .col(ColumnDef::new(Game::Offline).boolean().not_null())
                     .col(ColumnDef::new(Game::Frozen).boolean().not_null())

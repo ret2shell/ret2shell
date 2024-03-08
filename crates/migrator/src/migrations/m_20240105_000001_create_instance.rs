@@ -22,12 +22,15 @@ pub enum Instance {
     TeamId,
     ChallengeId,
     StartedAt,
+    CreatedAt,
+    StopedAt,
     RenewCount,
     Name,
     Data,
     InnerAddr,
     ProxyAddr,
-    Running,
+    State,
+    Config,
 }
 
 #[async_trait::async_trait]
@@ -63,12 +66,14 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .default(0),
                     )
+                    .col(ColumnDef::new(Instance::StartedAt).timestamp_with_time_zone())
                     .col(
-                        ColumnDef::new(Instance::StartedAt)
+                        ColumnDef::new(Instance::CreatedAt)
                             .timestamp_with_time_zone()
                             .not_null()
                             .default(CurrentTimestamp),
                     )
+                    .col(ColumnDef::new(Instance::StopedAt).timestamp_with_time_zone())
                     .col(ColumnDef::new(Instance::UserId).big_integer().not_null())
                     .foreign_key(
                         ForeignKey::create()
@@ -95,7 +100,8 @@ impl MigrationTrait for Migration {
                             .from(Instance::Table, Instance::ChallengeId)
                             .to(Challenge::Table, Challenge::Id),
                     )
-                    .col(ColumnDef::new(Instance::Running).boolean().not_null())
+                    .col(ColumnDef::new(Instance::State).integer().not_null())
+                    .col(ColumnDef::new(Instance::Config).json_binary().not_null())
                     .to_owned(),
             )
             .await

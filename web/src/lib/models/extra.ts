@@ -1,6 +1,8 @@
+import { DateTime } from 'luxon'
+
 export type Extra = {
   id: number
-  created_at: number
+  created_at: DateTime
   reason: string
   score: number
   hint_id: number

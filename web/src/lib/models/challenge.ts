@@ -1,7 +1,9 @@
+import { DateTime } from 'luxon'
+
 export type Challenge = {
   id: number
   name: string
-  updated_at: number
+  updated_at: DateTime
   content: string | null
   hidden: boolean
   game_id: number

@@ -8,3 +8,7 @@ export const [accountStore, setAccountStore] = makePersisted(
   }),
   { name: 'account' }
 )
+
+export const userReset = () => {
+  setAccountStore({ name: null, token: null })
+}

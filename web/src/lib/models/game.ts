@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon'
+
 export enum HostType {
   CTFTraining = 0,
   CTFGame = 1,
@@ -10,14 +12,14 @@ export type GameAccessPolicy = {
 
 export type Game = {
   id: number
-  updated_at: number
+  updated_at: DateTime
   name: string
   brief: string
   introduction_id: number
-  start_at: number
-  end_at: number
-  register_at: number
-  archive_at: number
+  start_at: DateTime
+  end_at: DateTime
+  register_at: DateTime
+  archive_at: DateTime
   hidden: boolean
   offline: boolean
   frozen: boolean

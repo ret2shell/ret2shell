@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon'
+
 export enum AuditState {
   Pending = 0,
   Misjudged = 1,
@@ -6,7 +8,7 @@ export enum AuditState {
 
 export type Audit = {
   id: number
-  created_at: number
+  created_at: DateTime
   reason: string
   challenge_id: number
   challenge_name?: string
