@@ -6,6 +6,7 @@ import Popover from '../lib/widgets/popover'
 import Link from '../lib/widgets/link'
 import Button from '../lib/widgets/button'
 import Card from '../lib/widgets/card'
+import Calendar from './calendar'
 
 export default function () {
   return (
@@ -14,7 +15,7 @@ export default function () {
         <div class="absolute h-full w-full overflow-scroll snap-mandatory snap-y">
           <section class="h-full min-h-full snap-center flex flex-col items-center justify-center relative">
             <div class="flex-1" />
-            <h1 class="text-3xl font-semibold">
+            <h1 class="text-3xl font-bold">
               &nbsp;&nbsp;
               <span>[&nbsp;{platformStore.name || t('platform.name')}&nbsp;]</span>
               &nbsp;
@@ -25,14 +26,15 @@ export default function () {
             </a>
             <div class="flex-1" />
             <div class="h-24" />
-            <div class="absolute bottom-4 flex flex-row flex-wrap items-center justify-center h-auto p-2 space-x-2">
-              <p class="inline-flex justify-center items-center flex-wrap !py-0 px-4 opacity-60 font-bold">
+            <div class="absolute bottom-4 flex flex-row flex-wrap items-center justify-center h-auto p-2 space-x-2 opacity-60">
+              <Button ghost>
                 (C) 2022 - {new Date().getFullYear()}&nbsp;
-                <a class="hover:underline" href={platformStore.footer_url}>
+                <a class="hover:underline" href={platformStore.footer_url} target="_blank">
                   {platformStore.footer_info}
                 </a>
                 <Show when={!platformStore.hide_maker}>
-                  <span>&nbsp;|&nbsp;By&nbsp;</span>
+                  <span class="opacity-40">|</span>
+                  <span>By</span>
                   <a class="hover:underline" href="https://github.com/ret2shell" target="_blank">
                     {t('platform.name')}
                   </a>
@@ -43,22 +45,27 @@ export default function () {
                     {platformStore.record}
                   </a>
                 </Show>
-              </p>
-              <Button ghost>
-                <span class="opacity-60">{t('calendar.scrollToView')}</span>
-                <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5 opacity-60" />
               </Button>
-              <Link ghost square href="/magic">
-                <span class="icon-[fluent--gift-20-regular] w-5 h-5 opacity-60" />
+              <Button
+                ghost
+                onClick={() => {
+                  document.getElementById('index-calendar')?.scrollIntoView({ behavior: 'smooth' })
+                }}
+              >
+                <span>{t('calendar.scrollToView')}</span>
+                <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5" />
+              </Button>
+              <Link square href="/magic" ghost>
+                <span class="icon-[fluent--gift-20-regular] w-5 h-5" />
               </Link>
               <Popover
-                padding="p-2"
                 ghost
+                padding="p-2"
                 square
-                btnContent={<span class="icon-[fluent--info-20-regular] w-5 h-5 opacity-60"></span>}
+                btnContent={<span class="icon-[fluent--info-20-regular] w-5 h-5"></span>}
               >
                 <div class="w-max flex flex-col space-y-2">
-                  <Card class="flex flex-row items-center space-x-4 p-4 px-8">
+                  <Card class="flex flex-row items-center space-x-6 p-4 px-8">
                     <LogoAnimate width={64} height={64} />
                     <div class="flex flex-col space-y-1">
                       <h2 class="text-2xl font-bold flex flex-row">
@@ -95,6 +102,12 @@ export default function () {
                 </div>
               </Popover>
             </div>
+          </section>
+          <section
+            id="index-calendar"
+            class="h-full min-h-full snap-center flex flex-col items-center justify-center relative"
+          >
+            <Calendar />
           </section>
         </div>
       </div>

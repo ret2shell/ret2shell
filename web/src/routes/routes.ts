@@ -9,12 +9,62 @@ export const routes = {
       component: lazy(() => import('./index')),
     },
     {
+      path: '/account',
+      component: lazy(() => import('./account/layout')),
+      children: [
+        {
+          path: '/',
+          component: lazy(() => import('./account/index')),
+        },
+      ],
+    },
+    {
       path: '/wiki',
       component: lazy(() => import('./wiki/layout')),
       children: [
         {
           path: '/',
           component: lazy(() => import('./wiki/index')),
+        },
+      ],
+    },
+    {
+      path: '/training',
+      component: lazy(() => import('./training/layout')),
+      children: [
+        {
+          path: '/',
+          component: lazy(() => import('./training/index')),
+        },
+      ],
+    },
+    {
+      path: '/game',
+      component: lazy(() => import('./game/layout')),
+      children: [
+        {
+          path: '/',
+          component: lazy(() => import('./game/index')),
+        },
+      ],
+    },
+    {
+      path: '/bulletin',
+      component: lazy(() => import('./bulletin/layout')),
+      children: [
+        {
+          path: '/',
+          component: lazy(() => import('./bulletin/index')),
+        },
+      ],
+    },
+    {
+      path: '/admin',
+      component: lazy(() => import('./admin/layout')),
+      children: [
+        {
+          path: '/',
+          component: lazy(() => import('./admin/index')),
         },
       ],
     },

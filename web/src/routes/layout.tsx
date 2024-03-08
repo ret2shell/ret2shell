@@ -100,7 +100,7 @@ function TitleBar() {
   return (
     <>
       <div id="page-top" />
-      <div class="h-16 border-b border-b-layer-content/10 w-auto bg-layer/60 backdrop-blur z-50 print:hidden sticky top-0 left-0">
+      <div class="h-16 border-b border-b-layer-content/10 w-auto bg-layer/60 backdrop-blur z-50 print:hidden sticky top-0 left-0 transition-colors duration-700">
         <div class="bg-layer-content/5 w-full h-full px-2 py-0 flex flex-row items-center space-x-2">
           <GlobalTitleLink />
           <div class="w-4"></div>

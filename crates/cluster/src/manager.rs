@@ -32,6 +32,13 @@ impl Cluster {
         }
     }
 
+    /// Set the namespace for the cluster
+    ///
+    /// Example:
+    ///
+    /// ```rust
+    /// cluster.at("challenge").some_operations().await;
+    /// ```
     pub fn at(&self, namespace: &str) -> Self {
         Self {
             namespace: Some(namespace.to_owned()),

@@ -219,14 +219,14 @@
   }
 
   &-square {
-    @apply py-3 px-3 rounded-lg;
+    @apply py-3 px-4 rounded-lg;
 
     &.btn-md {
-      @apply py-3 px-3 rounded-lg;
+      @apply py-3 px-4 rounded-lg;
     }
 
     &.btn-sm {
-      @apply py-1 px-1 rounded-md;
+      @apply py-1 px-2 rounded-md;
     }
   }
 

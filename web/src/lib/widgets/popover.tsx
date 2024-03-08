@@ -35,7 +35,14 @@ export default function (props: {
     <Popover.Root fitViewport placement={props.placement}>
       <Popover.Trigger classList={classList}>{props.btnContent}</Popover.Trigger>
       <Popover.Portal>
-        <Popover.Content class={`focus:outline-none ${props.padding}`}>{props.children}</Popover.Content>
+        <Popover.Content
+          class={`${props.padding}`}
+          onOpenAutoFocus={e => {
+            e.preventDefault()
+          }}
+        >
+          {props.children}
+        </Popover.Content>
       </Popover.Portal>
     </Popover.Root>
   )

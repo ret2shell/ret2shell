@@ -30,6 +30,7 @@ pub enum HostType {
     CTFTraining = 0,
     CTFGame = 1,
 }
+
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct AccessPolicy {
     pub restrict: bool,
