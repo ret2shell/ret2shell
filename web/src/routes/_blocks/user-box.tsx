@@ -1,11 +1,11 @@
 import { Show } from 'solid-js'
-import { accountStore } from '../lib/storage/account'
-import Link from '../lib/widgets/link'
-import Popover from '../lib/widgets/popover'
-import Avatar from '../lib/widgets/avatar'
-import Card from '../lib/widgets/card'
-import { t } from '../lib/storage/theme'
-import Button from '../lib/widgets/button'
+import { accountStore } from '../../lib/storage/account'
+import Link from '../../lib/widgets/link'
+import Popover from '../../lib/widgets/popover'
+import Avatar from '../../lib/widgets/avatar'
+import Card from '../../lib/widgets/card'
+import { t } from '../../lib/storage/theme'
+import Button from '../../lib/widgets/button'
 
 export default function UserBox() {
   return (
@@ -13,9 +13,8 @@ export default function UserBox() {
       <Show
         when={accountStore.token}
         fallback={
-          <Link href="/account/login">
+          <Link href="/account/login" ghost square>
             <span class="icon-[fluent--person-20-regular] w-5 h-5" />
-            <span>{t('account.login.title')}</span>
           </Link>
         }
       >

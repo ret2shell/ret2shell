@@ -13,7 +13,17 @@
     "title": "Games",
     "challenge": {
       "title": "Challenges"
-    }
+    },
+    "scoreboard": {
+      "title": "Scoreboard"
+    },
+    "writeup": {
+      "title": "Write-up"
+    },
+    "admin": {
+      "title": "Admin"
+    },
+    "exit": "Exit"
   },
   "bulletin": {
     "title": "Bulletin"

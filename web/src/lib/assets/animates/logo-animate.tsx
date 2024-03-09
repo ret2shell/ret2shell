@@ -1,9 +1,10 @@
+import { ComponentProps } from 'solid-js'
 import './logo-animate.css'
 
-export default function (props: { width?: number; height?: number }) {
+export default function (props: ComponentProps<'svg'>) {
   const { width, height } = { width: 256, height: 256, ...props }
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 256 256">
+    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} {...props} viewBox="0 0 256 256">
       <g>
         <path
           fill="#0078D6"

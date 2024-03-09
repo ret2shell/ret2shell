@@ -13,7 +13,17 @@
     "title": "赛事",
     "challenge": {
       "title": "题目"
-    }
+    },
+    "scoreboard": {
+      "title": "积分板"
+    },
+    "writeup": {
+      "title": "题解"
+    },
+    "admin": {
+      "title": "管理"
+    },
+    "exit": "退出"
   },
   "bulletin": {
     "title": "公告"

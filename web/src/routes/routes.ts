@@ -16,6 +16,40 @@ export const routes = {
           path: '/',
           component: lazy(() => import('./account/index')),
         },
+        {
+          path: '/login',
+          component: lazy(() => import('./account/login/index')),
+        },
+        {
+          path: '/logout',
+          component: lazy(() => import('./account/logout/index')),
+        },
+        {
+          path: '/register',
+          component: lazy(() => import('./account/register/index')),
+        },
+        {
+          path: '/forgot',
+          component: lazy(() => import('./account/forgot/index')),
+        },
+        {
+          path: '/reset',
+          component: lazy(() => import('./account/reset/index')),
+        },
+        {
+          path: '/verify',
+          component: lazy(() => import('./account/verify/index')),
+        },
+        {
+          path: '/settings',
+          component: lazy(() => import('./account/settings/layout')),
+          children: [
+            {
+              path: '/',
+              component: lazy(() => import('./account/settings/index')),
+            },
+          ],
+        },
       ],
     },
     {

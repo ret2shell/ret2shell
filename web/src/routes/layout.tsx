@@ -6,9 +6,9 @@ import Link from '../lib/widgets/link'
 import LogoAnimate from '../lib/assets/animates/logo-animate'
 import Background from '../lib/blocks/background'
 import { useLocation } from '@solidjs/router'
-import InstanceBox from './instance-box'
-import UserBox from './user-box'
-import DiyBox from './diy-box'
+import InstanceBox from './_blocks/instance-box'
+import UserBox from './_blocks/user-box'
+import DiyBox from './_blocks/diy-box'
 import { gameStore } from '../lib/storage/game'
 import { HostType } from '../lib/models/game'
 import { accountStore } from '../lib/storage/account'
@@ -17,9 +17,19 @@ import { Permission } from '../lib/models/user'
 function GlobalTitleLink() {
   return (
     <Link ghost href="/">
-      <LogoAnimate width={24} height={24} />
+      <LogoAnimate class="hidden lg:inline-block" width={24} height={24} />
       <span></span>
       <span>{platformStore.name || t('platform.name')}</span>
+    </Link>
+  )
+}
+
+function GameTitleLink() {
+  return (
+    <Link ghost href={`/games/${gameStore.current?.id}/`}>
+      <LogoAnimate width={24} height={24} />
+      <span></span>
+      <span>{gameStore.current?.name}</span>
     </Link>
   )
 }
@@ -81,6 +91,32 @@ function GameNav() {
           <span>{t('game.challenge.title')}</span>
         </Link>
       </li>
+      <li>
+        <Link href={`/games/${gameStore.current?.id}/scoreboard`} activeMatch="prefix" ghost justify="start">
+          <span class="icon-[fluent--trophy-20-regular] w-5 h-5" />
+          <span>{t('game.scoreboard.title')}</span>
+        </Link>
+      </li>
+      <Show when={(gameStore.current?.archive_at.diffNow().toMillis() || 0) < 0}>
+        <li>
+          <Link href={`/games/${gameStore.current?.id}/writeups`} activeMatch="prefix" ghost justify="start">
+            <span class="icon-[fluent--book-open-20-regular] w-5 h-5" />
+            <span>{t('game.writeup.title')}</span>
+          </Link>
+        </li>
+      </Show>
+      <li>
+        <Link href={`/games/${gameStore.current?.id}/admin`} activeMatch="prefix" ghost justify="start">
+          <span class="icon-[fluent--book-open-20-regular] w-5 h-5" />
+          <span>{t('game.admin.title')}</span>
+        </Link>
+      </li>
+      <li>
+        <Link href={`/games/`} activeMatch="prefix" ghost justify="start" level="warning">
+          <span class="icon-[fluent--arrow-exit-20-regular] w-5 h-5" />
+          <span>{t('game.exit')}</span>
+        </Link>
+      </li>
     </>
   )
 }
@@ -91,7 +127,11 @@ function TitleBar() {
       <div id="page-top" />
       <div class="h-16 border-b border-b-layer-content/15 w-auto bg-layer/60 backdrop-blur z-50 print:hidden sticky top-0 left-0 transition-colors duration-700">
         <div class="bg-layer-content/5 w-full h-full px-2 py-0 flex flex-row items-center space-x-2">
-          <GlobalTitleLink />
+          <Switch fallback={<GlobalTitleLink />}>
+            <Match when={gameStore.current && gameStore.current.host_type === HostType.CTFGame}>
+              <GameTitleLink />
+            </Match>
+          </Switch>
           <div class="w-4"></div>
           <ul class="flex flex-row space-x-2">
             <Switch fallback={<GlobalNav />}>

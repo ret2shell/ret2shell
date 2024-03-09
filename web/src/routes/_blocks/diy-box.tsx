@@ -1,8 +1,8 @@
-import DarkmodeButton from '../lib/blocks/darkmode-button'
-import { setLocale } from '../lib/storage/theme'
-import Button from '../lib/widgets/button'
-import Card from '../lib/widgets/card'
-import Popover from '../lib/widgets/popover'
+import DarkmodeButton from '../../lib/blocks/darkmode-button'
+import { setLocale } from '../../lib/storage/theme'
+import Button from '../../lib/widgets/button'
+import Card from '../../lib/widgets/card'
+import Popover from '../../lib/widgets/popover'
 
 export default function DiyBox() {
   return (

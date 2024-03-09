@@ -13,7 +13,17 @@
     "title": "コンペ",
     "challenge": {
       "title": "トピック"
-    }
+    },
+    "scoreboard": {
+      "title": "スコアボード"
+    },
+    "writeup": {
+      "title": "答え"
+    },
+    "admin": {
+      "title": "管理"
+    },
+    "exit": "やめる"
   },
   "bulletin": {
     "title": "アナウンス"
