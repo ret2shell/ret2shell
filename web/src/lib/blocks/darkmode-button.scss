@@ -1,7 +1,7 @@
 :root {
   --darkmode-ease: cubic-bezier(0.4, -0.3, 0.6, 1.3);
   --darkmode-clr-background-day: #1b7fcc;
-  --darkmode-clr-background-night: #070b34;
+  --darkmode-clr-background-night: #0d1231;
 
   --darkmode-clr-sun: #fce570;
   --darkmode-clr-sun-lgt: #ffffe3;
@@ -24,6 +24,11 @@
   overflow: hidden;
   isolation: isolate;
   transition: all 0.75s var(--darkmode-ease);
+
+  .darkmode-stars {
+    @apply transition-transform duration-700 absolute top-0 left-0 w-auto h-full animate-none translate-x-full -translate-y-full;
+  }
+
   .darkmode-button {
     position: absolute;
     left: 0.25em;
@@ -96,6 +101,9 @@
 
   &[data-color-scheme='dark'] {
     background-color: var(--darkmode-clr-background-night);
+    .darkmode-stars {
+      @apply animate-pulse translate-x-0 translate-y-0;
+    }
     .darkmode-button {
       background: radial-gradient(#eee, transparent);
       background-color: var(--darkmode-clr-moon);
@@ -123,20 +131,5 @@
       bottom: -2em;
       scale: 3;
     }
-
-    canvas.darkmode-stars {
-      opacity: 1;
-    }
-  }
-
-  canvas.darkmode-stars {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    opacity: 0;
-    transition: all 0.75s ease;
   }
 }

@@ -60,12 +60,12 @@ export default function () {
               </Link>
               <Popover
                 ghost
-                padding="p-2"
+                padding="pb-2"
                 square
                 btnContent={<span class="icon-[fluent--info-20-regular] w-5 h-5"></span>}
               >
                 <div class="w-max flex flex-col space-y-2">
-                  <Card class="flex flex-row items-center space-x-6 p-4 px-8">
+                  <Card contentClass="flex flex-row items-center space-x-6 p-4 px-8">
                     <LogoAnimate width={64} height={64} />
                     <div class="flex flex-col space-y-1">
                       <h2 class="text-2xl font-bold flex flex-row">
@@ -86,7 +86,7 @@ export default function () {
                       </p>
                     </div>
                   </Card>
-                  <Card class="flex flex-row p-2 space-x-2">
+                  <Card contentClass="flex flex-row p-2 space-x-2">
                     <Link href="mailto:ret2shell@woooo.tech" ghost size="sm">
                       <span class="icon-[fluent--mail-20-regular] w-5 h-5"></span>
                       <span class="font-normal opacity-60">ret2shell@woooo.tech</span>

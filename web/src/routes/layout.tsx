@@ -1,15 +1,14 @@
 import { JSX, Show, createSignal, onMount } from 'solid-js'
 import { platformStore } from '../lib/storage/platform'
-import { setLocale, t } from '../lib/storage/theme'
+import { t } from '../lib/storage/theme'
 import { Motion, Presence } from 'solid-motionone'
 import Link from '../lib/widgets/link'
 import LogoAnimate from '../lib/assets/animates/logo-animate'
-import Popover from '../lib/widgets/popover'
-import Card from '../lib/widgets/card'
-import Button from '../lib/widgets/button'
-import DarkmodeButton from '../lib/blocks/darkmode-button'
 import Background from '../lib/blocks/background'
 import { useLocation } from '@solidjs/router'
+import InstanceBox from './instance-box'
+import UserBox from './user-box'
+import DiyBox from './diy-box'
 
 function GlobalTitleLink() {
   return (
@@ -58,49 +57,11 @@ function GlobalNav() {
   )
 }
 
-function DiyBox() {
-  return (
-    <>
-      <Popover btnContent={<span class="icon-[fluent--wand-20-regular] w-5 h-5" />} square ghost padding="pt-4">
-        <div class="flex flex-col space-y-2">
-          <Card class="p-2 flex flex-row space-x-2">
-            <DarkmodeButton />
-          </Card>
-          <Card class="p-2 flex flex-col space-y-2">
-            <ul class="flex flex-row">
-              <li class="w-full">
-                <Button class="w-full" onClick={() => setLocale('zh_cn')} square ghost justify="center">
-                  <span>简</span>
-                </Button>
-              </li>
-              <li class="w-full">
-                <Button class="w-full" onClick={() => setLocale('zh_tw')} square ghost justify="center">
-                  <span>繁</span>
-                </Button>
-              </li>
-              <li class="w-full">
-                <Button class="w-full" onClick={() => setLocale('en_us')} square ghost justify="center">
-                  <span>En</span>
-                </Button>
-              </li>
-              <li class="w-full">
-                <Button class="w-full" onClick={() => setLocale('ja_jp')} square ghost justify="center">
-                  <span>な</span>
-                </Button>
-              </li>
-            </ul>
-          </Card>
-        </div>
-      </Popover>
-    </>
-  )
-}
-
 function TitleBar() {
   return (
     <>
       <div id="page-top" />
-      <div class="h-16 border-b border-b-layer-content/10 w-auto bg-layer/60 backdrop-blur z-50 print:hidden sticky top-0 left-0 transition-colors duration-700">
+      <div class="h-16 border-b border-b-layer-content/15 w-auto bg-layer/60 backdrop-blur z-50 print:hidden sticky top-0 left-0 transition-colors duration-700">
         <div class="bg-layer-content/5 w-full h-full px-2 py-0 flex flex-row items-center space-x-2">
           <GlobalTitleLink />
           <div class="w-4"></div>
@@ -108,7 +69,9 @@ function TitleBar() {
             <GlobalNav />
           </ul>
           <div class="flex-1"></div>
+          <InstanceBox />
           <DiyBox />
+          <UserBox />
         </div>
       </div>
     </>

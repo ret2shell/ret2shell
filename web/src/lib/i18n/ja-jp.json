@@ -32,6 +32,22 @@
   "account": {
     "login": {
       "title": "ログイン"
-    }
+    },
+    "settings": {
+      "title": "ユーザー設定"
+    },
+    "logout": "サインアウト"
+  },
+  "instance": {
+    "disconnected": "WSRXが接続されていません",
+    "connected": "WSRXが接続されています",
+    "retryLinkWsrx": "接続してみる",
+    "downloadWsrx": "WSRXをダウンロード",
+    "copyWsrxAddr": "WSRXアドレスをコピーする",
+    "copyLocalAddr": "ローカルアドレスをコピーする",
+    "openLocalAddr": "直接開く",
+    "renew": "延長時間",
+    "stop": "環境を終了する",
+    "needLocalDaemon": "使用するにはローカル WSRX に接続する必要があります"
   }
 }

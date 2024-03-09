@@ -32,6 +32,22 @@
   "account": {
     "login": {
       "title": "Login"
-    }
+    },
+    "settings": {
+      "title": "user settings"
+    },
+    "logout": "sign out"
+  },
+  "instance": {
+    "disconnected": "Not connected to WSRX",
+    "connected": "Connected to WSRX",
+    "retryLinkWsrx": "try to connect",
+    "downloadWsrx": "Download WSRX",
+    "copyWsrxAddr": "Copy WSRX Address",
+    "copyLocalAddr": "Copy local address",
+    "openLocalAddr": "Open directly",
+    "renew": "Renew timer",
+    "stop": "Terminate environment",
+    "needLocalDaemon": "Need to connect to local WSRX to use"
   }
 }

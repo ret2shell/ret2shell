@@ -2,9 +2,8 @@
   "name": "ret2shell",
   "version": "1.0.0",
   "dependencies": {
+    "@ark-ui/solid": "^2.2.0",
     "@fontsource/jetbrains-mono": "^5.0.19",
-    "@kobalte/core": "^0.12.3",
-    "@kobalte/utils": "^0.9.0",
     "@modular-forms/solid": "^0.20.0",
     "@solid-primitives/audio": "^1.3.17",
     "@solid-primitives/clipboard": "^1.5.10",

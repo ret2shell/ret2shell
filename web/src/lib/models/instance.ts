@@ -38,3 +38,9 @@ export type Instance = {
   state: InstanceState
   config: InstanceConfig
 }
+
+export type Traffic = {
+  instance_id: number
+  local_addr: string
+  delay: number
+}

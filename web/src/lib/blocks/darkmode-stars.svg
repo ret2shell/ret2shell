@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="483.116" height="179.238" version="1.1" id="svg17" sodipodi:docname="darkmode-stars.svg"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25, custom)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <defs id="defs8">
+      <clipPath id="a" clipPathUnits="userSpaceOnUse">
+         <path d="M-419.256 265.55h612v-612h-612Z" id="path1" />
+      </clipPath>
+      <clipPath id="c" clipPathUnits="userSpaceOnUse">
+         <path d="M-209.39 402.174h612v-612h-612Z" id="path2" />
+      </clipPath>
+      <clipPath id="d" clipPathUnits="userSpaceOnUse">
+         <path d="M-308.566 195.751h612v-612h-612Z" id="path3" />
+      </clipPath>
+      <clipPath id="e" clipPathUnits="userSpaceOnUse">
+         <path d="M-390.41 184.968h612v-612h-612Z" id="path4" />
+      </clipPath>
+      <clipPath id="f" clipPathUnits="userSpaceOnUse">
+         <path d="M-228.877 266.342h612v-612h-612Z" id="path5" />
+      </clipPath>
+      <clipPath id="g" clipPathUnits="userSpaceOnUse">
+         <path d="M-223.347 350.94h612v-612h-612Z" id="path6" />
+      </clipPath>
+      <clipPath id="h" clipPathUnits="userSpaceOnUse">
+         <path d="M-300.366 341.204h612v-612h-612Z" id="path7" />
+      </clipPath>
+   </defs>
+   <path
+      d="m0 0 6.078 7.859-2.354-9.652 9.934.147-9.014-4.177 6.309-7.676-8.887 4.444L0-18.773l-2.066 9.718-8.887-4.444 6.309 7.676-9.014 4.177 9.933-.147-2.354 9.652z"
+      clip-path="url(#a)" style="fill:#cecece;fill-opacity:1;fill-rule:nonzero;stroke:none"
+      transform="matrix(1.12853 0 0 -1.12853 408.766 114.283)" id="path9" />
+   <path
+      d="m0 0 3.868 5.001L2.37-1.142l6.321.094-5.736-2.658L6.97-8.59 1.315-5.762 0-11.946l-1.315 6.184L-6.97-8.59l4.015 4.884-5.736 2.658 6.321-.094-1.498 6.143z"
+      clip-path="url(#c)" style="fill:#cecece;fill-opacity:1;fill-rule:nonzero;stroke:none"
+      transform="matrix(1.12853 0 0 -1.12853 81.833 118.853)" id="path10" />
+   <path
+      d="m0 0 2.461 3.182-.953-3.908 4.022.059-3.65-1.691 2.555-3.108L.837-3.667 0-7.602l-.837 3.935-3.599-1.799 2.556 3.108-3.651 1.691 4.023-.059-.953 3.908z"
+      clip-path="url(#d)" style="fill:#cecece;fill-opacity:1;fill-rule:nonzero;stroke:none"
+      transform="matrix(1.12853 0 0 -1.12853 46.308 36.431)" id="path11" />
+   <path
+      d="m0 0 2.461 3.182-.953-3.908 4.022.059-3.65-1.691 2.555-3.108L.837-3.667 0-7.602l-.837 3.935-3.599-1.799 2.555 3.108-3.65 1.691 4.023-.059-.954 3.908z"
+      clip-path="url(#e)" style="fill:#cecece;fill-opacity:1;fill-rule:nonzero;stroke:none"
+      transform="matrix(1.12853 0 0 -1.12853 269.62 58.68)" id="path12" />
+   <path
+      d="m0 0 2.461 3.182-.953-3.908 4.023.059L1.88-2.358l2.555-3.108L.837-3.667 0-7.602l-.837 3.935-3.598-1.799 2.555 3.108-3.651 1.691 4.023-.059-.953 3.908z"
+      clip-path="url(#f)" style="fill:#cecece;fill-opacity:1;fill-rule:nonzero;stroke:none"
+      transform="matrix(1.12853 0 0 -1.12853 209.45 132.157)" id="path13" />
+   <path
+      d="m0 0 2.461 3.183-.953-3.91 4.023.061L1.88-2.357l2.556-3.109-3.599 1.8L0-7.602l-.836 3.936-3.599-1.8 2.555 3.109-3.65 1.691 4.022-.061-.953 3.91z"
+      clip-path="url(#g)" style="fill:#cecece;fill-opacity:1;fill-rule:nonzero;stroke:none"
+      transform="matrix(1.12853 0 0 -1.12853 119.396 73.401)" id="path14" />
+   <path
+      d="m0 0 3.868 5.001L2.37-1.142l6.321.095-5.736-2.658L6.97-8.59 1.315-5.762 0-11.946l-1.315 6.184L-6.97-8.59l4.015 4.885-5.736 2.658 6.321-.095-1.498 6.143z"
+      clip-path="url(#h)" style="fill:#cecece;fill-opacity:1;fill-rule:nonzero;stroke:none"
+      transform="matrix(1.12853 0 0 -1.12853 348.636 45.232)" id="path15" />
+   <path
+      d="M 157.43586,123.99094 165.286,130.25494 161.75386,120.853 170.13786,115.323 160.10486,115.77694 157.43586,106.09494 l -2.669,9.682 -10.033,-0.454 8.384,5.53 -3.532,9.402 z"
+      clip-path="url(#i)" style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none" id="dropped-star" />
+   <path d="m174.362 101.15 65.87-85.447" style="fill:#cecece;stroke:#cecece;stroke-opacity:1" id="path16"
+      class="stroke-dash-1" />
+   <path d="m164.166 101.762 65.339-85.943" class="stroke-dash-2"
+      style="fill:#cecece;stroke:#cecece;stroke-opacity:1;stroke-width:1" id="path17" />
+   <style id="style17">
+      #dropped-star {
+         transform-origin: 157.48px 120px;
+         animation: spin 1s infinite linear;
+      }
+
+      @keyframes spin {
+         0% {
+            transform: rotate(0deg);
+         }
+
+         100% {
+            transform: rotate(360deg);
+         }
+      }
+
+      .stroke-dash-1 {
+         stroke-dasharray: 140;
+         stroke-dashoffset: 140;
+         animation: dash-1 2s infinite linear;
+      }
+
+      @keyframes dash-1 {
+         to {
+            stroke-dashoffset: -140;
+         }
+      }
+
+      .stroke-dash-2 {
+         stroke-dasharray: 160;
+         stroke-dashoffset: 160;
+         animation: dash-2 4s 1s infinite linear;
+      }
+
+      @keyframes dash-2 {
+         to {
+            stroke-dashoffset: -160;
+         }
+      }
+   </style>
+</svg>

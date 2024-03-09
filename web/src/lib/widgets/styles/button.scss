@@ -1,9 +1,9 @@
 .btn {
   @apply gap-2 font-bold no-underline duration-200 ease-out backdrop-blur;
-  @apply inline-flex shrink-0 cursor-pointer select-none flex-wrap items-center text-center;
+  @apply inline-flex shrink-0 cursor-pointer select-none items-center text-center;
   @apply text-layer-content outline-layer-content bg-layer-content/10;
   /* default md size */
-  @apply py-3 px-4 rounded-lg min-h-12;
+  @apply px-4 rounded-lg min-h-12;
 
   &:active:hover,
   &:active:focus {
@@ -26,11 +26,11 @@
   }
 
   &-md {
-    @apply py-3 px-4 rounded-lg min-h-12;
+    @apply px-4 rounded-lg min-h-12;
   }
 
   &-sm {
-    @apply py-1 px-2 rounded-md min-h-8;
+    @apply px-2 rounded-md min-h-8;
   }
 
   &-primary {
@@ -219,14 +219,14 @@
   }
 
   &-square {
-    @apply py-3 px-4 rounded-lg;
+    @apply p-0 rounded-lg;
 
     &.btn-md {
-      @apply py-3 px-4 rounded-lg;
+      @apply rounded-lg min-h-12 min-w-12;
     }
 
     &.btn-sm {
-      @apply py-1 px-2 rounded-md;
+      @apply rounded-md min-h-8 min-w-8;
     }
   }
 

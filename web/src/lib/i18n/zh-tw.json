@@ -32,6 +32,22 @@
   "account": {
     "login": {
       "title": "登入"
-    }
+    },
+    "settings": {
+      "title": "使用者設定"
+    },
+    "logout": "登出登入"
+  },
+  "instance": {
+    "disconnected": "WSRX 未連接",
+    "connected": "WSRX 已連接",
+    "retryLinkWsrx": "嘗試連接",
+    "downloadWsrx": "下載 WSRX",
+    "copyWsrxAddr": "複製WSRX地址",
+    "copyLocalAddr": "複製本地地址",
+    "openLocalAddr": "直接打開",
+    "renew": "延長時間",
+    "stop": "終止環境",
+    "needLocalDaemon": "需要連接本地WSRX才能使用"
   }
 }
