@@ -26,7 +26,7 @@
   transition: all 0.75s var(--darkmode-ease);
 
   .darkmode-stars {
-    @apply transition-transform duration-700 absolute top-0 left-0 w-auto h-full animate-none translate-x-full -translate-y-full;
+    @apply transition-transform duration-700 absolute top-0 left-0 w-auto h-full animate-none translate-x-1/3 -translate-y-full;
   }
 
   .darkmode-button {

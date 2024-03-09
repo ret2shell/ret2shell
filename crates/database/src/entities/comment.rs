@@ -2,12 +2,11 @@
 
 use chrono::{serde::ts_seconds, DateTime, Utc};
 use sea_orm::{
-    entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel, JoinType, QueryOrder,
-    QuerySelect,
+    entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel, JoinType, QuerySelect,
 };
 use serde::{Deserialize, Serialize};
 
-use super::{article, comment_closure, user};
+use super::{article, user};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default)]
 #[sea_orm(table_name = "comment")]
@@ -52,8 +51,6 @@ pub enum Relation {
         on_delete = "Cascade"
     )]
     Publisher,
-    #[sea_orm(has_many = "super::comment_closure::Entity")]
-    Closure,
 }
 
 impl Related<super::article::Entity> for Entity {
@@ -65,12 +62,6 @@ impl Related<super::article::Entity> for Entity {
 impl Related<super::user::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Publisher.def()
-    }
-}
-
-impl Related<super::comment_closure::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Closure.def()
     }
 }
 
@@ -99,36 +90,6 @@ pub async fn get_list_ex(
     let total = paginator.num_pages().await?;
     let comments = paginator.fetch_page(page - 1).await?;
     Ok((comments, total))
-}
-
-pub async fn get_tree(db: &DatabaseConnection, parent_id: i64) -> Result<Vec<Model>, DbErr> {
-    let mut sql = Entity::find();
-    sql = sql
-        .join(JoinType::InnerJoin, Relation::Closure.def())
-        .filter(comment_closure::Column::Ancestor.eq(parent_id));
-    let articles = sql
-        .order_by_desc(Column::CreatedAt)
-        .into_model()
-        .all(db)
-        .await?;
-    Ok(articles)
-}
-
-pub async fn get_tree_ex(db: &DatabaseConnection, parent_id: i64) -> Result<Vec<ExModel>, DbErr> {
-    let mut sql = Entity::find()
-        .join(JoinType::InnerJoin, Relation::Publisher.def())
-        .join(JoinType::InnerJoin, Relation::Article.def())
-        .column_as(user::Column::Nickname, "publisher_name")
-        .column_as(article::Column::Title, "article_title");
-    sql = sql
-        .join(JoinType::InnerJoin, Relation::Closure.def())
-        .filter(comment_closure::Column::Ancestor.eq(parent_id));
-    let articles = sql
-        .order_by_desc(Column::CreatedAt)
-        .into_model()
-        .all(db)
-        .await?;
-    Ok(articles)
 }
 
 pub async fn create(db: &DatabaseConnection, comment: Model) -> Result<Model, DbErr> {

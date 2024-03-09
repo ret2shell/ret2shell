@@ -17,6 +17,7 @@ pub enum Article {
     CreatedAt,
     UpdatedAt,
     Title,
+    Path,
     Content,
     PublisherId,
     AccessPolicy,
@@ -53,6 +54,12 @@ impl MigrationTrait for Migration {
                             .default(CurrentTimestamp),
                     )
                     .col(ColumnDef::new(Article::Title).string_len(127).not_null())
+                    .col(
+                        ColumnDef::new(Article::Path)
+                            .json_binary()
+                            .not_null()
+                            .default("[]"),
+                    )
                     .col(ColumnDef::new(Article::Content).text())
                     .col(
                         ColumnDef::new(Article::PublisherId)

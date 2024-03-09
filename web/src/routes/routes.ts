@@ -39,12 +39,12 @@ export const routes = {
       ],
     },
     {
-      path: '/game',
-      component: lazy(() => import('./game/layout')),
+      path: '/games',
+      component: lazy(() => import('./games/layout')),
       children: [
         {
           path: '/',
-          component: lazy(() => import('./game/index')),
+          component: lazy(() => import('./games/index')),
         },
       ],
     },

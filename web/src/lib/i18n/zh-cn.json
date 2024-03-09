@@ -10,7 +10,10 @@
     "title": "训练"
   },
   "game": {
-    "title": "赛事"
+    "title": "赛事",
+    "challenge": {
+      "title": "题目"
+    }
   },
   "bulletin": {
     "title": "公告"

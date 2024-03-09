@@ -25,12 +25,12 @@ export default function InstanceBox() {
   onCleanup(() => clearInterval(timer))
   return (
     <>
-      <Popover btnContent={<span class="icon-[fluent--link-20-regular] w-5 h-5" />} square ghost padding="pt-2">
+      <Popover btnContent={<span class="icon-[fluent--pair-20-regular] w-5 h-5" />} square ghost padding="pt-2">
         <div class="flex flex-col space-y-2 w-96">
           <Card contentClass="p-2 flex flex-row space-x-2">
             <Button class="flex-1" justify="start" ghost title={t('instance.retryLinkWsrx')} size="sm">
               <span
-                class={`icon-[fluent--desktop-20-regular] w-5 h-5 ${wsrxStore.daemon ? 'text-success' : 'text-warning'}`}
+                class={`icon-[fluent--pair-20-regular] w-5 h-5 ${wsrxStore.daemon ? 'text-success' : 'text-warning'}`}
               />
               <span class={wsrxStore.daemon ? 'text-success font-bold' : 'text-warning'}>
                 {wsrxStore.daemon ? t('instance.connected') : t('instance.disconnected')}

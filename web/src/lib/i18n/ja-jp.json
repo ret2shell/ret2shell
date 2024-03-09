@@ -1,7 +1,7 @@
 {
   "platform": {
     "name": "Ret へ Shell",
-    "subject": "世界のすべての利益のために戦う"
+    "subject": "世界中のすべての良いもののために"
   },
   "wiki": {
     "title": "知識"
@@ -10,7 +10,10 @@
     "title": "練習する"
   },
   "game": {
-    "title": "コンペ"
+    "title": "コンペ",
+    "challenge": {
+      "title": "トピック"
+    }
   },
   "bulletin": {
     "title": "アナウンス"

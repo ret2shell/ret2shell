@@ -2,13 +2,11 @@
 use chrono::{serde::ts_seconds, DateTime, Utc};
 use num_derive::{FromPrimitive, ToPrimitive};
 use sea_orm::{
-    entity::prelude::*, ActiveValue, FromQueryResult, IntoActiveModel, Iterable, JoinType,
-    QueryOrder, QuerySelect,
+    entity::prelude::*, ActiveValue, FromJsonQueryResult, FromQueryResult, IntoActiveModel,
+    Iterable, JoinType, QueryOrder, QuerySelect,
 };
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
-
-use super::article_closure;
 
 #[derive(
     Clone,
@@ -35,6 +33,9 @@ pub enum AccessPolicy {
     Answer = 4,
 }
 
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
+pub struct ArticlePath(pub Vec<String>);
+
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default)]
 #[sea_orm(table_name = "article")]
 pub struct Model {
@@ -45,6 +46,8 @@ pub struct Model {
     #[serde(with = "ts_seconds")]
     pub updated_at: DateTime<Utc>,
     pub title: String,
+    #[sea_orm(column_type = "JsonBinary")]
+    pub path: ArticlePath,
     #[sea_orm(column_type = "Text", nullable)]
     pub content: Option<String>,
     pub publisher_id: i64,
@@ -87,8 +90,6 @@ pub enum Relation {
         on_delete = "Cascade"
     )]
     Publisher,
-    #[sea_orm(has_many = "super::article_closure::Entity")]
-    Closure,
 }
 
 impl Related<super::comment::Entity> for Entity {
@@ -106,12 +107,6 @@ impl Related<super::game::Entity> for Entity {
 impl Related<super::user::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Publisher.def()
-    }
-}
-
-impl Related<super::article_closure::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Closure.def()
     }
 }
 
@@ -155,32 +150,24 @@ pub async fn get_page(
     Ok((articles, total))
 }
 
-/// Get the tree of articles.
-///
-/// This tree feature are provided to support the wiki implemention.
-/// So you should cache the tree result to avoid the performance issue.
 pub async fn get_tree(
-    db: &DatabaseConnection, parent_id: i64, access_policy: AccessPolicy, with_draft: bool,
+    db: &DatabaseConnection, access_policy: AccessPolicy, with_draft: bool, with_all: bool,
 ) -> Result<Vec<Model>, DbErr> {
     let mut sql = Entity::find();
     sql = sql
         .select_only()
         .columns(Column::iter().filter(|c| !matches!(c, Column::Content)))
         .filter(Column::AccessPolicy.eq(access_policy));
-    sql = sql
-        .join(JoinType::InnerJoin, Relation::Closure.def())
-        .filter(article_closure::Column::Ancestor.eq(parent_id));
-    // sql = sql.filter(article_closure::Column::Depth.eq(depth));
     if !with_draft {
         sql = sql.filter(Column::Draft.eq(false));
     }
-    let articles = sql
+    if !with_all {
+        sql = sql.filter(Column::Published.eq(true));
+    }
+    sql = sql
         .order_by_desc(Column::Weight)
-        .order_by_desc(Column::CreatedAt)
-        .into_model()
-        .all(db)
-        .await?;
-    Ok(articles)
+        .order_by_desc(Column::CreatedAt);
+    sql.all(db).await
 }
 
 pub async fn create(db: &DatabaseConnection, article: Model) -> Result<Model, DbErr> {

@@ -10,7 +10,10 @@
     "title": "Training"
   },
   "game": {
-    "title": "Games"
+    "title": "Games",
+    "challenge": {
+      "title": "Challenges"
+    }
   },
   "bulletin": {
     "title": "Bulletin"

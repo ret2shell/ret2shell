@@ -1,4 +1,4 @@
-import { JSX, Show, createSignal, onMount } from 'solid-js'
+import { JSX, Match, Show, Switch, createSignal, onMount } from 'solid-js'
 import { platformStore } from '../lib/storage/platform'
 import { t } from '../lib/storage/theme'
 import { Motion, Presence } from 'solid-motionone'
@@ -9,6 +9,10 @@ import { useLocation } from '@solidjs/router'
 import InstanceBox from './instance-box'
 import UserBox from './user-box'
 import DiyBox from './diy-box'
+import { gameStore } from '../lib/storage/game'
+import { HostType } from '../lib/models/game'
+import { accountStore } from '../lib/storage/account'
+import { Permission } from '../lib/models/user'
 
 function GlobalTitleLink() {
   return (
@@ -36,7 +40,7 @@ function GlobalNav() {
         </Link>
       </li>
       <li>
-        <Link href="/game" activeMatch="prefix" ghost justify="start">
+        <Link href="/games" activeMatch="prefix" ghost justify="start">
           <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
           <span>{t('game.title')}</span>
         </Link>
@@ -47,10 +51,34 @@ function GlobalNav() {
           <span>{t('bulletin.title')}</span>
         </Link>
       </li>
+      <Show
+        when={
+          accountStore.token &&
+          accountStore.info &&
+          (accountStore.info?.permissions.includes(Permission.Statistics) ||
+            accountStore.info?.permissions.includes(Permission.DevOps) ||
+            accountStore.info?.permissions.includes(Permission.User) ||
+            accountStore.info?.permissions.includes(Permission.Host))
+        }
+      >
+        <li>
+          <Link href="/admin" activeMatch="prefix" ghost justify="start">
+            <span class="icon-[fluent--organization-20-regular] w-5 h-5" />
+            <span>{t('admin.title')}</span>
+          </Link>
+        </li>
+      </Show>
+    </>
+  )
+}
+
+function GameNav() {
+  return (
+    <>
       <li>
-        <Link href="/admin" activeMatch="prefix" ghost justify="start">
-          <span class="icon-[fluent--organization-20-regular] w-5 h-5" />
-          <span>{t('admin.title')}</span>
+        <Link href={`/games/${gameStore.current?.id}/challenges`} activeMatch="prefix" ghost justify="start">
+          <span class="icon-[fluent--code-20-regular] w-5 h-5" />
+          <span>{t('game.challenge.title')}</span>
         </Link>
       </li>
     </>
@@ -66,7 +94,11 @@ function TitleBar() {
           <GlobalTitleLink />
           <div class="w-4"></div>
           <ul class="flex flex-row space-x-2">
-            <GlobalNav />
+            <Switch fallback={<GlobalNav />}>
+              <Match when={gameStore.current && gameStore.current.host_type === HostType.CTFGame}>
+                <GameNav />
+              </Match>
+            </Switch>
           </ul>
           <div class="flex-1"></div>
           <InstanceBox />
