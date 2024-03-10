@@ -33,6 +33,40 @@ axum-extra = { version = "0.9", features = [
 tower = "0.4"
 tower-http = { version = "0.5", features = ["cors", "fs", "trace"] }
 jsonwebtoken = { version = "9.2", default-features = false }
+thiserror = "1.0"
+clap = { version = "4.4", features = ["derive"] }
+colored = "2.1"
+anyhow = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# System stat
+systemstat = { version = "0.2", features = ["serde"] }
+rustc_version = "0.4"
+git-version = "0.3"
+
+# Logger
+tracing = "0.1"
+tracing-core = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-appender = "0.2"
+
+# local crates
+r2s-auditor = { version = "1.0.0", path = "../auditor" }
+r2s-bucket = { version = "1.0.0", path = "../bucket" }
+r2s-cache = { version = "1.0.0", path = "../cache" }
+r2s-captcha = { version = "1.0.0", path = "../captcha" }
+r2s-checker = { version = "1.0.0", path = "../checker" }
+r2s-cluster = { version = "1.0.0", path = "../cluster" }
+r2s-config = { version = "1.0.0", path = "../config" }
+r2s-database = { version = "1.0.0", path = "../database" }
+r2s-email = { version = "1.0.0", path = "../email" }
+r2s-license = { version = "1.0.0", path = "../license" }
+r2s-media = { version = "1.0.0", path = "../media" }
+r2s-migrator = { version = "1.0.0", path = "../migrator" }
+r2s-oauth = { version = "1.0.0", path = "../oauth" }
+r2s-queue = { version = "1.0.0", path = "../queue" }
+r2s-traffic = { version = "1.0.0", path = "../traffic" }
 
 [lib]
 path = "src/lib.rs"

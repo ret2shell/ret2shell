@@ -38,7 +38,8 @@ impl Cache {
     ///
     /// * `domain` - The domain for the cache.
     ///
-    /// You should call this function at each time you want to get some data from the cache.
+    /// You should call this function at each time you want to get some data
+    /// from the cache.
     ///
     /// ```rust
     /// cache.at("email").set("example@woooo.tech", "114514").await?;
@@ -53,7 +54,8 @@ impl Cache {
     /// }
     /// ```
     ///
-    /// use cache directly without `domain` set will cause a `DomainNeeded` error.
+    /// use cache directly without `domain` set will cause a `DomainNeeded`
+    /// error.
     pub fn at(&self, domain: &str) -> Self {
         Cache {
             domain: Some(domain.to_string()),
@@ -156,7 +158,8 @@ impl Cache {
 
 /// Init the cache manager.
 ///
-/// * `url` - The redis url, supports centralized / clustered and sentinel-layered node.
+/// * `url` - The redis url, supports centralized / clustered and
+///   sentinel-layered node.
 /// * `max_connections` - The max connections for each node.
 pub async fn initialize(url: &str) -> Result<Cache, CacheError> {
     debug!("initialize cache manager with url: {url:?}");

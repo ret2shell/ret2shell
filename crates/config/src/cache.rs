@@ -6,5 +6,4 @@ use serde::{Deserialize, Serialize};
 pub struct CacheConfig {
     /// The url of the cache server.
     pub url: String,
-    pub max_connections: Option<u16>,
 }

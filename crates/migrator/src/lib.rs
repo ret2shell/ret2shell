@@ -1,6 +1,6 @@
 //! Used to init the new database and migrate the database from old versions.
 
-use sea_orm::{ConnectOptions, Database, DatabaseConnection};
+use sea_orm::{ConnectOptions, DatabaseConnection};
 use sea_orm_migration::prelude::*;
 use tracing::log::LevelFilter;
 
@@ -36,16 +36,21 @@ impl MigratorTrait for Migrator {
     }
 }
 
-pub async fn initialize(dsn: &str) -> Result<DatabaseConnection, DbErr> {
+#[derive(Clone, Debug)]
+pub struct Database {
+    pub conn: DatabaseConnection,
+}
+
+pub async fn initialize(dsn: &str) -> Result<Database, DbErr> {
     let mut connect_options = ConnectOptions::new(dsn);
     connect_options
         .acquire_timeout(std::time::Duration::from_secs(15))
         .sqlx_logging(true)
         .sqlx_logging_level(LevelFilter::Debug);
 
-    let db: DatabaseConnection = Database::connect(connect_options).await?;
-    Migrator::up(&db, None).await?;
-    Ok(db)
+    let conn = sea_orm::Database::connect(connect_options).await?;
+    Migrator::up(&conn, None).await?;
+    Ok(Database { conn })
 }
 
 pub async fn down(dsn: &str) -> Result<(), DbErr> {
@@ -54,7 +59,7 @@ pub async fn down(dsn: &str) -> Result<(), DbErr> {
         .sqlx_logging(true)
         .sqlx_logging_level(LevelFilter::Debug);
 
-    let db: DatabaseConnection = Database::connect(connect_options).await?;
+    let db: DatabaseConnection = sea_orm::Database::connect(connect_options).await?;
     Migrator::down(&db, None).await?;
     Ok(())
 }

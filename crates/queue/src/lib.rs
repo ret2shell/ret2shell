@@ -68,13 +68,15 @@ impl Queue {
 }
 
 pub async fn initialize(
-    addr: &str, tls: bool, token: Option<&str>, user: Option<&str>, password: Option<&str>,
+    addr: &str, tls: Option<bool>, token: Option<String>, user: Option<String>,
+    password: Option<String>,
 ) -> Result<Queue, QueueError> {
+    let tls = tls.unwrap_or(false);
     let mut options = async_nats::ConnectOptions::new().require_tls(tls);
     if let Some(token) = token {
-        options = options.token(token.to_owned());
+        options = options.token(token);
     } else if let (Some(user), Some(password)) = (user, password) {
-        options = options.user_and_password(user.to_owned(), password.to_owned())
+        options = options.user_and_password(user, password)
     }
     let client = options.connect(addr).await?;
     Ok(Queue::new(jetstream::new(client)))

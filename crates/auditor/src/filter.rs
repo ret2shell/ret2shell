@@ -30,14 +30,20 @@ pub async fn read_sensitive_word_file(path: &str) -> Result<BTreeSet<String>, Wo
 }
 
 /// Initializes the Aho-Corasick automaton for sensitive word filtering.
-pub async fn initialize(sensitive_word_list: &str) -> Result<AhoCorasick, WordFilterError> {
+pub async fn initialize(
+    sensitive_word_list: &Option<String>,
+) -> Result<Option<AhoCorasick>, WordFilterError> {
     debug!(
-        "initializing word filter with file: {}",
+        "initializing word filter with file: {:?}",
         sensitive_word_list
     );
-    let sensitive_words = read_sensitive_word_file(&sensitive_word_list).await?;
-    let ac = AhoCorasick::new(sensitive_words)?;
-    return Ok(ac);
+    if let Some(sensitive_word_list) = sensitive_word_list {
+        let sensitive_words = read_sensitive_word_file(&sensitive_word_list).await?;
+        let ac = AhoCorasick::new(sensitive_words)?;
+        Ok(Some(ac))
+    } else {
+        Ok(None)
+    }
 }
 
 /// Checks if a given text contains any sensitive words using the Aho-Corasick

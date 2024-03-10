@@ -15,7 +15,6 @@ sea-orm = { version = "0.12", features = [
   "sqlx-postgres",
   "runtime-tokio-rustls",
   "macros",
-  "mock",
 ] }
 sea-orm-migration = "0.12"
 sea-query = "0.30"
