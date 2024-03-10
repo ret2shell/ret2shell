@@ -1,22 +1,12 @@
-//! The in-memory cache provider, which is used to store the temporary data like
-//! user's token.
-//!
-//! The cache provider is implemented by using the `fred` crate and `redis`.
+use std::fmt::Display;
 
-pub mod cluster;
-pub mod manager;
-
-pub use manager::{CacheError, RedisPool};
-use manager::{PoolLike, PooledConnectionLike};
-pub use redis::RedisError;
-use serde::Deserialize;
+use fred::prelude::*;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use tracing::debug;
+pub use traits::CacheError;
 
-#[derive(Clone, Debug)]
-pub struct Cache {
-    pool: RedisPool,
-    domain: Option<String>,
-}
+mod traits;
 
 macro_rules! with_domain {
     ($domain:expr, $key:expr) => {
@@ -24,162 +14,153 @@ macro_rules! with_domain {
             "{}:{}",
             $domain
                 .clone()
-                .ok_or(CacheError::DomainNeeded($key.to_owned()))?,
+                .ok_or(CacheError::DomainNeeded($key.to_string()))?,
             $key
         )
     };
 }
 
+#[derive(Debug, Clone)]
+pub struct Cache {
+    client: RedisClient,
+    domain: Option<String>,
+}
+
 impl Cache {
-    pub fn from(pool: RedisPool) -> Self {
-        Self { pool, domain: None }
+    pub fn new(client: RedisClient) -> Self {
+        Cache {
+            client,
+            domain: None,
+        }
     }
 
-    /// Set the domain for the cache for the following operations.
+    /// Set the domain for the cache.
     ///
-    /// * `domain` - The domain to set.
+    /// * `domain` - The domain for the cache.
+    ///
+    /// You should call this function at each time you want to get some data from the cache.
     ///
     /// ```rust
-    /// cache.at("user").set("name", "John").await?;
-    /// cache.at("user").get("name").await?;
+    /// cache.at("email").set("example@woooo.tech", "114514").await?;
     /// ```
+    ///
+    /// or scope it in a function:
+    ///
+    /// ```rust
+    /// async fn some_user_endpoint(State(cache): State<Cache>, ...) -> impl IntoResponse {
+    ///     let cache = cache.at("user");
+    ///     ...
+    /// }
+    /// ```
+    ///
+    /// use cache directly without `domain` set will cause a `DomainNeeded` error.
     pub fn at(&self, domain: &str) -> Self {
-        Self {
-            domain: Some(domain.to_owned()),
-            ..self.to_owned()
+        Cache {
+            domain: Some(domain.to_string()),
+            ..self.clone()
         }
     }
 
-    // get a value
     pub async fn get(
-        &mut self, key: &str,
-    ) -> Result<Option<impl Deserialize>, CacheError<RedisError>> {
-        let mut conn = self.pool.get().await?;
+        &self, key: impl Into<RedisKey> + Send + Display,
+    ) -> Result<impl Deserialize, CacheError> {
         let domain_key = with_domain!(self.domain, key);
-        let value: Option<String> = conn.get(&domain_key).await?;
-        if let Some(value) = value {
-            debug!("get from key {domain_key}, value: {value}");
-            Ok(Some(serde_json::from_str(&value)?))
-        } else {
-            Ok(None)
-        }
+        let result = self.client.get::<Value, _>(domain_key).await?;
+        Ok(result)
     }
 
-    // get a value and then delete it
-    pub async fn get_del(
-        &mut self, key: &str,
-    ) -> Result<Option<impl Deserialize>, CacheError<RedisError>> {
-        let mut conn = self.pool.get().await?;
+    pub async fn getdel(
+        &self, key: impl Into<RedisKey> + Send + Display,
+    ) -> Result<impl Deserialize, CacheError> {
         let domain_key = with_domain!(self.domain, key);
-        let value: Option<String> = conn.get_del(&domain_key).await?;
-        if let Some(value) = value {
-            debug!("get from key {domain_key}, value: {value}, deleted.");
-            Ok(Some(serde_json::from_str(&value)?))
-        } else {
-            Ok(None)
-        }
+        let result = self.client.getdel::<Value, _>(domain_key).await?;
+        Ok(result)
     }
 
-    // set value
     pub async fn set(
-        &mut self, key: &str, value: impl serde::Serialize,
-    ) -> Result<(), CacheError<RedisError>> {
-        let mut conn = self.pool.get().await?;
+        &self, key: impl Into<RedisKey> + Send + Display, value: impl Serialize + Send,
+    ) -> Result<(), CacheError> {
         let domain_key = with_domain!(self.domain, key);
         let value = serde_json::to_string(&value)?;
-        conn.set(&domain_key, &value).await?;
-        debug!("set key {domain_key}, value: {value}");
-        Ok(())
-    }
-
-    // set value with expire time
-    pub async fn set_ex(
-        &mut self, key: &str, value: impl serde::Serialize, seconds: u64,
-    ) -> Result<(), CacheError<RedisError>> {
-        let mut conn = self.pool.get().await?;
-        let domain_key = with_domain!(self.domain, key);
-        let value = serde_json::to_string(&value)?;
-        conn.pset_ex(&domain_key, &value, seconds.saturating_mul(1000))
+        self.client
+            .set(domain_key, value, None, None, false)
             .await?;
-        debug!("set key {domain_key}, value: {value} with expiry: {seconds}");
         Ok(())
     }
 
-    // increase a number value with delta, will create the key with value `0` if not
-    // exists and then increase it & return
-    pub async fn incr(&mut self, key: &str, delta: i64) -> Result<i64, CacheError<RedisError>> {
-        let mut conn = self.pool.get().await?;
+    pub async fn set_ex(
+        &self, key: impl Into<RedisKey> + Send + Display, value: impl Serialize + Send, ttl: i64,
+    ) -> Result<(), CacheError> {
         let domain_key = with_domain!(self.domain, key);
-        let r = conn.incr(&domain_key, &delta).await?;
-        debug!("incr key {domain_key}, delta: {delta}, result in: {r}");
-        Ok(r)
-    }
-
-    // set the expire time of the key
-    pub async fn expire(&mut self, key: &str, seconds: i64) -> Result<(), CacheError<RedisError>> {
-        let mut conn = self.pool.get().await?;
-        let domain_key = with_domain!(self.domain, key);
-        conn.expire(&domain_key, seconds).await?;
-        debug!("expire key {domain_key}, seconds: {seconds}");
+        let value = serde_json::to_string(&value)?;
+        self.client
+            .set(domain_key, value, Some(Expiration::EX(ttl)), None, false)
+            .await?;
         Ok(())
     }
 
-    // delete a key
-    pub async fn del(&mut self, key: &str) -> Result<(), CacheError<RedisError>> {
-        let mut conn = self.pool.get().await?;
+    pub async fn incr(&self, key: impl Into<RedisKey> + Send + Display) -> Result<i64, CacheError> {
         let domain_key = with_domain!(self.domain, key);
-        conn.del(&domain_key).await?;
-        debug!("del key {domain_key}");
+        let result = self.client.incr(domain_key).await?;
+        Ok(result)
+    }
+
+    pub async fn expire(
+        &self, key: impl Into<RedisKey> + Send + Display, ttl: i64,
+    ) -> Result<(), CacheError> {
+        let domain_key = with_domain!(self.domain, key);
+        self.client.expire(domain_key, ttl).await?;
         Ok(())
     }
 
-    // push value into list
+    pub async fn del(&self, key: impl Into<RedisKey> + Send + Display) -> Result<(), CacheError> {
+        let domain_key = with_domain!(self.domain, key);
+        self.client.del(domain_key).await?;
+        Ok(())
+    }
+
+    pub async fn exists(
+        &self, key: impl Into<RedisKey> + Send + Display,
+    ) -> Result<bool, CacheError> {
+        let domain_key = with_domain!(self.domain, key);
+        let result = self.client.exists(domain_key).await?;
+        Ok(result)
+    }
+
     pub async fn push(
-        &mut self, key: &str, value: impl serde::Serialize,
-    ) -> Result<(), CacheError<RedisError>> {
-        let mut conn = self.pool.get().await?;
+        &self, key: impl Into<RedisKey> + Send + Display, value: impl Serialize + Send,
+    ) -> Result<(), CacheError> {
         let domain_key = with_domain!(self.domain, key);
         let value = serde_json::to_string(&value)?;
-        conn.rpush(&domain_key, &value).await?;
-        debug!("push key {domain_key}, value: {value}");
+        self.client.lpush(domain_key, value).await?;
         Ok(())
     }
 
-    // pop value from list
     pub async fn pop(
-        &mut self, key: &str, count: Option<core::num::NonZeroUsize>,
-    ) -> Result<Option<impl Deserialize>, CacheError<RedisError>> {
-        let mut conn = self.pool.get().await?;
+        &self, key: impl Into<RedisKey> + Send + Display,
+    ) -> Result<Value, CacheError> {
         let domain_key = with_domain!(self.domain, key);
-        let value: Option<String> = conn.lpop(&domain_key, count).await?;
-        if let Some(value) = value {
-            debug!("pop from key {domain_key}, value: {value}");
-            Ok(Some(serde_json::from_str(&value)?))
-        } else {
-            Ok(None)
-        }
+        let result = self.client.lpop::<Value, _>(domain_key, None).await?;
+        Ok(result)
     }
 
-    // remove value from list
     pub async fn rem(
-        &mut self, key: &str, count: isize, value: impl serde::Serialize,
-    ) -> Result<(), CacheError<RedisError>> {
-        let mut conn = self.pool.get().await?;
+        &self, key: impl Into<RedisKey> + Send + Display, value: impl Serialize + Send,
+    ) -> Result<(), CacheError> {
         let domain_key = with_domain!(self.domain, key);
         let value = serde_json::to_string(&value)?;
-        conn.lrem(&domain_key, count, &value).await?;
-        debug!("rem key {domain_key}, count: {count}, value: {value}");
+        self.client.lrem(domain_key, 0, value).await?;
         Ok(())
     }
 }
 
 /// Init the cache manager.
 ///
-/// * `nodes` - The redis nodes.
+/// * `url` - The redis url, supports centralized / clustered and sentinel-layered node.
 /// * `max_connections` - The max connections for each node.
-pub async fn initialize(nodes: &[String], max_connections: u16) -> Result<Cache, RedisError> {
-    debug!("initialize cache manager with nodes: {nodes:?}, max_connections: {max_connections}");
-    Ok(Cache::from(
-        manager::new_redis_pool(nodes, max_connections).await?,
-    ))
+pub async fn initialize(url: &str) -> Result<Cache, CacheError> {
+    debug!("initialize cache manager with url: {url:?}");
+    let config = RedisConfig::from_url(url)?;
+    let client = RedisClient::new(config, None, None, None);
+    Ok(Cache::new(client))
 }

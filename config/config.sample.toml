@@ -6,17 +6,11 @@ path = './data/bucket'
 
 [cache]
 # Cluster supports here.
-# Multiple nodes will automatically enable the cluster mode,
-# Otherwise, the single mode will be used.
-# If the node list is empty, the server will refuse to start.
-nodes = [
-    'redis://localhost:6379',
-    #'redis://localhost:6380',
-    #'redis://admin:password@localhost:6381',
-    #'rediss://localhost:6382',
-]
-# The maximum number of connections allowed in the pool.
-max_connections = 32
+# redis://username:password@foo.com:6379/1
+# rediss://username:password@foo.com:6379/1
+# redis-cluster://username:password@foo.com:30001?node=bar.com:30002&node=baz.com:30003
+# redis-sentinel://username:password@foo.com:6379/1?sentinelServiceName=fakename&node=foo.com:30001&node=bar.com:30002
+url = 'redis://localhost:6379'
 
 [database]
 db = 'ret2shell'

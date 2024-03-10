@@ -1,7 +1,8 @@
 {
   "platform": {
     "name": "回歸終端",
-    "subject": "為世間的所有美好而戰"
+    "subject": "為世間的所有美好而戰",
+    "diyBox": "語言與明暗主題"
   },
   "wiki": {
     "title": "知識"
@@ -49,7 +50,8 @@
     "settings": {
       "title": "使用者設定"
     },
-    "logout": "登出登入"
+    "logout": "登出登入",
+    "box": "使用者詳情"
   },
   "instance": {
     "disconnected": "WSRX 未連接",
@@ -61,6 +63,7 @@
     "openLocalAddr": "直接打開",
     "renew": "延長時間",
     "stop": "終止環境",
-    "needLocalDaemon": "需要連接本地WSRX才能使用"
+    "needLocalDaemon": "需要連接本地WSRX才能使用",
+    "box": "動態環境連接"
   }
 }

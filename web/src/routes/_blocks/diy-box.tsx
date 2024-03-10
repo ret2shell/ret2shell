@@ -1,5 +1,5 @@
 import DarkmodeButton from '../../lib/blocks/darkmode-button'
-import { setLocale } from '../../lib/storage/theme'
+import { setLocale, t } from '../../lib/storage/theme'
 import Button from '../../lib/widgets/button'
 import Card from '../../lib/widgets/card'
 import Popover from '../../lib/widgets/popover'
@@ -7,7 +7,13 @@ import Popover from '../../lib/widgets/popover'
 export default function DiyBox() {
   return (
     <>
-      <Popover btnContent={<span class="icon-[fluent--wand-20-regular] w-5 h-5" />} square ghost padding="pt-2">
+      <Popover
+        btnContent={<span class="icon-[fluent--wand-20-regular] w-5 h-5" />}
+        square
+        ghost
+        padding="pt-2"
+        title={t('platform.diyBox')}
+      >
         <div class="flex flex-col space-y-2">
           <Card>
             <DarkmodeButton />

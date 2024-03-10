@@ -1,7 +1,8 @@
 {
   "platform": {
     "name": "Ret へ Shell",
-    "subject": "世界中のすべての良いもののために"
+    "subject": "世界中のすべての良いもののために",
+    "diyBox": "言語と明暗のテーマ"
   },
   "wiki": {
     "title": "知識"
@@ -49,7 +50,8 @@
     "settings": {
       "title": "ユーザー設定"
     },
-    "logout": "サインアウト"
+    "logout": "サインアウト",
+    "box": "ユーザーの詳細"
   },
   "instance": {
     "disconnected": "WSRXが接続されていません",
@@ -61,6 +63,7 @@
     "openLocalAddr": "直接開く",
     "renew": "延長時間",
     "stop": "環境を終了する",
-    "needLocalDaemon": "使用するにはローカル WSRX に接続する必要があります"
+    "needLocalDaemon": "使用するにはローカル WSRX に接続する必要があります",
+    "box": "動的環境接続"
   }
 }

@@ -25,7 +25,13 @@ export default function InstanceBox() {
   onCleanup(() => clearInterval(timer))
   return (
     <>
-      <Popover btnContent={<span class="icon-[fluent--pair-20-regular] w-5 h-5" />} square ghost padding="pt-2">
+      <Popover
+        btnContent={<span class="icon-[fluent--pair-20-regular] w-5 h-5" />}
+        square
+        ghost
+        padding="pt-2"
+        title={t('instance.box')}
+      >
         <div class="flex flex-col space-y-2 w-96">
           <Card contentClass="p-2 flex flex-row space-x-2">
             <Button class="flex-1" justify="start" ghost title={t('instance.retryLinkWsrx')} size="sm">

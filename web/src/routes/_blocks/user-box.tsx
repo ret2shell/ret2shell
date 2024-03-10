@@ -13,12 +13,13 @@ export default function UserBox() {
       <Show
         when={accountStore.token}
         fallback={
-          <Link href="/account/login" ghost square>
+          <Link href="/account/login" ghost square title={t('account.login.title')}>
             <span class="icon-[fluent--person-20-regular] w-5 h-5" />
           </Link>
         }
       >
         <Popover
+          title={t('account.box')}
           btnContent={
             <Avatar
               class="w-8 h-8"

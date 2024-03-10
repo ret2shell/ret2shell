@@ -15,6 +15,7 @@ export default function (props: {
   square?: boolean
   type?: 'button' | 'submit' | 'reset'
   padding?: string
+  title?: string
 }) {
   const classList = {
     btn: true,
@@ -32,7 +33,9 @@ export default function (props: {
   }
   return (
     <Popover.Root autoFocus={false}>
-      <Popover.Trigger classList={classList}>{props.btnContent}</Popover.Trigger>
+      <Popover.Trigger classList={classList} title={props.title}>
+        {props.btnContent}
+      </Popover.Trigger>
       <Portal>
         <Popover.Positioner>
           <Popover.Content class={`${props.padding}`}>{props.children}</Popover.Content>

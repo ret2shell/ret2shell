@@ -1,7 +1,8 @@
 {
   "platform": {
     "name": "Ret 2 Shell",
-    "subject": "Fight for all the beauty in the world"
+    "subject": "Fight for all the beauty in the world",
+    "diyBox": "Language and  themes"
   },
   "wiki": {
     "title": "Wiki"
@@ -49,7 +50,8 @@
     "settings": {
       "title": "user settings"
     },
-    "logout": "sign out"
+    "logout": "sign out",
+    "box": "User detail"
   },
   "instance": {
     "disconnected": "Not connected to WSRX",
@@ -61,6 +63,7 @@
     "openLocalAddr": "Open directly",
     "renew": "Renew timer",
     "stop": "Terminate environment",
-    "needLocalDaemon": "Need to connect to local WSRX to use"
+    "needLocalDaemon": "Need to connect to local WSRX to use",
+    "box": "dynamic environment connection"
   }
 }
