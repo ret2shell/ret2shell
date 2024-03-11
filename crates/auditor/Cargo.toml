@@ -16,5 +16,7 @@ tokio = { version = "1.36", features = ["full"] }
 thiserror = "1.0"
 tracing = "0.1"
 
+r2s-config = { version = "1.0.0", path = "../config" }
+
 [lib]
 path = "src/lib.rs"

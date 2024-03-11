@@ -32,10 +32,14 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 pub mod auditor;
+pub mod auth;
+pub mod automate;
 pub mod bucket;
 pub mod cache;
+pub mod captcha;
 pub mod cluster;
 pub mod database;
+pub mod email;
 pub mod logging;
 pub mod media;
 pub mod queue;
@@ -54,24 +58,19 @@ pub enum ConfigError {
 /// Represents the configuration for the whole application.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GlobalConfig {
-    /// The configuration for the audit module.
-    pub audit: Option<auditor::AuditorConfig>,
-    /// The configuration for the bucket module.
-    pub bucket: bucket::BucketConfig,
-    /// The configuration for the cache module.
-    pub cache: cache::CacheConfig,
-    /// The configuration for the database module.
-    pub database: database::DatabaseConfig,
-    /// The configuration for the logging module.
-    pub logging: logging::LoggingConfig,
-    /// The configuration for the media module.
-    pub media: media::MediaConfig,
-    /// The configuration for the message queue.
-    pub queue: queue::QueueConfig,
-    /// The configuration for the server.
-    pub server: server::ServerConfig,
-    /// The configuration for the k3s cluster.
-    pub cluster: cluster::ClusterConfig,
+    pub auditor: Option<auditor::Config>,
+    pub auth: Option<auth::Config>,
+    pub automate: Option<automate::Config>,
+    pub bucket: Option<bucket::Config>,
+    pub cache: Option<cache::Config>,
+    pub captcha: Option<captcha::Config>,
+    pub cluster: Option<cluster::Config>,
+    pub database: Option<database::Config>,
+    pub email: Option<email::Config>,
+    pub logging: Option<logging::Config>,
+    pub media: Option<media::Config>,
+    pub queue: Option<queue::Config>,
+    pub server: Option<server::Config>,
 
     /// The file path of the configuration file, not serialized or deserialized.
     #[serde(skip_serializing)]

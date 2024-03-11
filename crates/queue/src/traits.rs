@@ -15,4 +15,6 @@ pub enum QueueError {
     CreateStreamError(#[from] jetstream::context::CreateStreamError),
     #[error("failed to get stream: {0}")]
     StreamError(#[from] jetstream::consumer::StreamError),
+    #[error("message queue config not found")]
+    ConfigNotFound,
 }

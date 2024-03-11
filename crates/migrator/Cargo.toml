@@ -22,6 +22,8 @@ sea-query = "0.30"
 
 tracing = "0.1"
 
+r2s-config = { version = "1.0.0", path = "../config" }
+
 [lib]
 path = "src/lib.rs"
 

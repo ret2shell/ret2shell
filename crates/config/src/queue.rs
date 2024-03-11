@@ -1,9 +1,10 @@
 //! NATS message queue configuration
+use sea_orm::FromJsonQueryResult;
 use serde::{Deserialize, Serialize};
 
 /// Represents the configuration for a NATS message queue.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct QueueConfig {
+#[derive(Clone, Debug, Serialize, Deserialize, FromJsonQueryResult, PartialEq, Eq)]
+pub struct Config {
     /// The hostname or IP address of the NATS server.
     pub host: String,
     /// The port number on which the NATS server is listening, default to 4222.
@@ -23,7 +24,7 @@ pub struct QueueConfig {
     pub tls: Option<bool>,
 }
 
-impl QueueConfig {
+impl Config {
     pub fn addr(&self) -> String {
         format!("{}:{}", self.host, self.port.unwrap_or(4222))
     }

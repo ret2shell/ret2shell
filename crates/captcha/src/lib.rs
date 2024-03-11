@@ -7,7 +7,7 @@ pub mod recaptcha;
 mod traits;
 mod utils;
 
-use traits::ValidatorType;
+use r2s_config::captcha::ValidatorType;
 pub use traits::{Captcha, CaptchaError, CaptchaValidator};
 
 /// Generate a captcha. you should desentisize the captcha before sending it to
@@ -15,19 +15,24 @@ pub use traits::{Captcha, CaptchaError, CaptchaValidator};
 ///
 /// * `validator` - The type of the validator.
 /// * `difficulty` - The difficulty of the captcha.
-pub async fn generate(validator: &str, difficulty: &u16) -> Result<Captcha, CaptchaError> {
+pub async fn generate(
+    validator: &ValidatorType, difficulty: &u16,
+) -> Result<Captcha, CaptchaError> {
     match validator {
-        "none" => Ok(Captcha {
+        &ValidatorType::None => Ok(Captcha {
             id: "".to_string(),
             validator: ValidatorType::None,
             challenge: "".to_string(),
             criteria: None,
         }),
-        "image" => Ok(image::ImageValidator::generate_captcha(*difficulty).await?),
-        "pow" => Ok(pow::PowValidator::generate_captcha(*difficulty).await?),
-        "recaptcha_v3" => Ok(recaptcha::ReCaptchaV3Validator::generate_captcha(*difficulty).await?),
-        "hcaptcha" => Ok(hcaptcha::HCaptchaValidator::generate_captcha(*difficulty).await?),
-        n => Err(CaptchaError::UnknownType(n.to_string())),
+        &ValidatorType::Image => Ok(image::ImageValidator::generate_captcha(*difficulty).await?),
+        &ValidatorType::Pow => Ok(pow::PowValidator::generate_captcha(*difficulty).await?),
+        &ValidatorType::RecaptchaV3 => {
+            Ok(recaptcha::ReCaptchaV3Validator::generate_captcha(*difficulty).await?)
+        }
+        &ValidatorType::HCaptcha => {
+            Ok(hcaptcha::HCaptchaValidator::generate_captcha(*difficulty).await?)
+        }
     }
 }
 

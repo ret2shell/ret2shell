@@ -1,7 +1,8 @@
+use r2s_config::captcha::ValidatorType;
 use serde::{Deserialize, Serialize};
 
 use super::{
-    traits::{Captcha, CaptchaError, CaptchaValidator, ValidatorType},
+    traits::{Captcha, CaptchaError, CaptchaValidator},
     utils::sha256sum_str,
 };
 

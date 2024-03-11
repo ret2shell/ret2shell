@@ -1,9 +1,10 @@
 //! The configuration for logging in the application.
+use sea_orm::FromJsonQueryResult;
 use serde::{Deserialize, Serialize};
 
 /// `LoggingConfig` represents the configuration for logging in the application.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LoggingConfig {
+#[derive(Clone, Debug, Serialize, Deserialize, FromJsonQueryResult, PartialEq, Eq)]
+pub struct Config {
     /// `directory` is the path to the directory where log files will be stored.
     pub directory: String,
     /// `level` is the minimum log level that will be recorded (e.g., "info",

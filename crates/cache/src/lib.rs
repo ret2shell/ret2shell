@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
 use fred::prelude::*;
+use r2s_config::cache;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tracing::debug;
@@ -161,9 +162,11 @@ impl Cache {
 /// * `url` - The redis url, supports centralized / clustered and
 ///   sentinel-layered node.
 /// * `max_connections` - The max connections for each node.
-pub async fn initialize(url: &str) -> Result<Cache, CacheError> {
-    debug!("initialize cache manager with url: {url:?}");
-    let config = RedisConfig::from_url(url)?;
+pub async fn initialize(config: &Option<cache::Config>) -> Result<Cache, CacheError> {
+    let config = config.clone().ok_or(CacheError::ConfigNeeded)?;
+    debug!("initialize cache manager with url: {:?}", config.url);
+    let config = RedisConfig::from_url(&config.url)?;
     let client = RedisClient::new(config, None, None, None);
+    client.init().await?;
     Ok(Cache::new(client))
 }

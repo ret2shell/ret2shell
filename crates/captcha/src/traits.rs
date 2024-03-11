@@ -1,21 +1,9 @@
+use r2s_config::captcha::ValidatorType;
 use serde::{Deserialize, Serialize};
-use serde_repr::{Deserialize_repr, Serialize_repr};
 use thiserror::Error;
 
-/// Validator enum for different types of captcha validation
-#[derive(Serialize_repr, Deserialize_repr, Default, Clone, Debug, PartialEq, Eq)]
-#[repr(i32)]
-pub enum ValidatorType {
-    None,
-    #[default]
-    Image,
-    Pow,
-    RecaptchaV3,
-    HCaptcha,
-}
-
 /// Captcha struct for storing captcha data
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Serialize, Deserialize, Default, Debug, Clone)]
 pub struct Captcha {
     /// Unique identifier for the captcha
     pub id: String,

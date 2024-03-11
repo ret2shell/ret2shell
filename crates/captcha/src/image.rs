@@ -1,4 +1,6 @@
-use super::traits::{Captcha, CaptchaError, CaptchaValidator, ValidatorType};
+use r2s_config::captcha::ValidatorType;
+
+use super::traits::{Captcha, CaptchaError, CaptchaValidator};
 
 pub struct ImageValidator;
 #[async_trait::async_trait]

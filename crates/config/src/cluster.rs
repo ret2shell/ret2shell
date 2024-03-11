@@ -1,9 +1,10 @@
+use sea_orm::FromJsonQueryResult;
 /// Configuration for service settings.
 use serde::{Deserialize, Serialize};
 
 /// `ClusterConfig` is a configuration struct for managing service settings.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ClusterConfig {
+#[derive(Serialize, Deserialize, Clone, Debug, FromJsonQueryResult, PartialEq, Eq)]
+pub struct Config {
     /// `try_default` is a flag to try to use the default service account.
     /// maybe useful when running ret2shell inside a kubernetes cluster,
     /// and want to use the same cluster to launch challenge pods.

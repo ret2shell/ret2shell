@@ -1,4 +1,5 @@
 use aho_corasick::AhoCorasick;
+use r2s_config::auditor;
 use thiserror::Error;
 
 pub mod filter;
@@ -34,8 +35,11 @@ pub enum AuditorError {
 /// * `sensitive_word_list` - The path to a file containing sensitive words.
 ///
 /// Returns a new `Auditor` instance.
-pub async fn initialize(sensitive_word_list: &Option<String>) -> Result<Auditor, AuditorError> {
-    let word_filter = filter::initialize(sensitive_word_list).await?;
+pub async fn initialize(config: &Option<auditor::Config>) -> Result<Auditor, AuditorError> {
+    let config = config.clone().unwrap_or(auditor::Config {
+        sensitive_word_list: None,
+    });
+    let word_filter = filter::initialize(&config.sensitive_word_list).await?;
     Ok(Auditor {
         filter: word_filter,
     })

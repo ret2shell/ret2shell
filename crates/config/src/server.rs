@@ -1,9 +1,9 @@
 //! This module contains the configuration for a server.
+use sea_orm::FromJsonQueryResult;
 use serde::{Deserialize, Serialize};
 
-/// Represents the configuration for a server.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ServerConfig {
+#[derive(Serialize, Deserialize, Clone, Debug, FromJsonQueryResult, PartialEq, Eq)]
+pub struct Config {
     /// The host address of the server.
     pub host: String,
     /// The port number on which the server is listening.
@@ -18,16 +18,24 @@ pub struct ServerConfig {
     pub cors_origins: String,
     /// Initialize token
     pub init_token: String,
+
+    pub name: Option<String>,
+    pub footer_info: Option<String>,
+    pub footer_url: Option<String>,
+    pub subject_info: Option<String>,
+    pub subject_url: Option<String>,
+    pub record: Option<String>,
+    pub hide_maker: Option<bool>,
 }
 
-impl ServerConfig {
+impl Config {
     /// Returns the external link prefix for the server, including the protocol
     /// (http or https).
     ///
     /// # Example
     ///
     /// ```
-    /// let config = ServerConfig {
+    /// let config = server::StaticConfig {
     ///     host: "localhost".to_string(),
     ///     port: 8080,
     ///     external_host: "example.com".to_string(),

@@ -20,6 +20,13 @@ serde = { version = "1.0", features = ["derive"] }
 async-trait = "0.1"
 serde_repr = "0.1"
 serde_json = "1.0"
+tokio = { version = "1.0", features = ["full"] }
+
+r2s-config = { version = "1.0.0", path = "../config" }
 
 [lib]
 path = "src/lib.rs"
+
+[[bin]]
+name = "r2s-captcha"
+path = "src/main.rs"

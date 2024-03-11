@@ -12,7 +12,7 @@ pub struct GlobalState {
     pub config: GlobalConfig,
     pub db: Database,
     pub cache: Cache,
-    pub auditor: Option<Auditor>,
+    pub auditor: Auditor,
     pub queue: Queue,
     pub cluster: Cluster,
     pub license: License,

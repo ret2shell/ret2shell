@@ -11,4 +11,6 @@ pub enum CacheError {
     DomainNeeded(String),
     #[error("other error: {0}")]
     Other(String),
+    #[error("cache config is needed")]
+    ConfigNeeded,
 }

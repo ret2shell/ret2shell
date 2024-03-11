@@ -1,9 +1,10 @@
 //! Contains the configuration for a database connection.
+use sea_orm::FromJsonQueryResult;
 use serde::{Deserialize, Serialize};
 
 /// Represents the configuration for a database connection.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct DatabaseConfig {
+#[derive(Serialize, Deserialize, Clone, Debug, FromJsonQueryResult, PartialEq, Eq)]
+pub struct Config {
     /// The name of the database.
     pub db: String,
     /// The hostname of the database server.
@@ -18,7 +19,7 @@ pub struct DatabaseConfig {
     pub ssl_mode: String,
 }
 
-impl DatabaseConfig {
+impl Config {
     /// Constructs a Data Source Name (DSN) string from the current
     /// configuration.
     pub fn dsn(&self) -> String {

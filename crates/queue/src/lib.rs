@@ -1,6 +1,9 @@
 //! Provides message queue for other modules.
 
+use std::time::Duration;
+
 use async_nats::jetstream::{self, consumer::pull::Stream, context::PublishAckFuture};
+use r2s_config::queue;
 use serde::Serialize;
 
 mod traits;
@@ -67,17 +70,19 @@ impl Queue {
     }
 }
 
-pub async fn initialize(
-    addr: &str, tls: Option<bool>, token: Option<String>, user: Option<String>,
-    password: Option<String>,
-) -> Result<Queue, QueueError> {
-    let tls = tls.unwrap_or(false);
+pub async fn initialize(config: &Option<queue::Config>) -> Result<Queue, QueueError> {
+    let config = config.clone().ok_or(QueueError::ConfigNotFound)?;
+    let tls = config.tls.unwrap_or(false);
+    let addr = config.addr();
     let mut options = async_nats::ConnectOptions::new().require_tls(tls);
-    if let Some(token) = token {
+    if let Some(ping_interval) = config.ping_interval {
+        options = options.ping_interval(Duration::from_secs(ping_interval));
+    }
+    if let Some(token) = config.token {
         options = options.token(token);
-    } else if let (Some(user), Some(password)) = (user, password) {
+    } else if let (Some(user), Some(password)) = (config.user, config.password) {
         options = options.user_and_password(user, password)
     }
-    let client = options.connect(addr).await?;
+    let client = options.connect(&addr).await?;
     Ok(Queue::new(jetstream::new(client)))
 }

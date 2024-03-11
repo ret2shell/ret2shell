@@ -6,6 +6,7 @@
 
 use std::path::Path;
 
+use r2s_config::logging;
 use thiserror::Error;
 use tracing_appender::{non_blocking, non_blocking::WorkerGuard, rolling};
 use tracing_subscriber::{fmt::Layer, prelude::*, EnvFilter};
@@ -18,10 +19,22 @@ pub enum LoggerError {
 
 /// Initialize the logger.
 pub async fn initialize(
-    directory: &str, level: &str, file_log: bool, console_log: bool,
+    config: &Option<logging::Config>,
 ) -> Result<(WorkerGuard, WorkerGuard), LoggerError> {
-    tokio::fs::create_dir_all(directory).await?;
-    let file_appender = rolling::daily(Path::new(directory).canonicalize()?, "ret2shell.log");
+    let config = config.clone().unwrap_or(logging::Config {
+        level: "info".to_string(),
+        log_to_file: true,
+        log_to_console: true,
+        directory: "./log".to_string(),
+    });
+    let logging::Config {
+        level,
+        log_to_file: file_log,
+        log_to_console: console_log,
+        directory,
+    } = config;
+    tokio::fs::create_dir_all(&directory).await?;
+    let file_appender = rolling::daily(Path::new(&directory).canonicalize()?, "ret2shell.log");
     // println!("log config: {:?}", config.logging);
 
     let (non_blocking_file, _file_guard) = non_blocking(file_appender);

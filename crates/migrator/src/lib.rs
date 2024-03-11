@@ -1,5 +1,6 @@
 //! Used to init the new database and migrate the database from old versions.
 
+use r2s_config::database;
 use sea_orm::{ConnectOptions, DatabaseConnection};
 use sea_orm_migration::prelude::*;
 use tracing::log::LevelFilter;
@@ -41,8 +42,11 @@ pub struct Database {
     pub conn: DatabaseConnection,
 }
 
-pub async fn initialize(dsn: &str) -> Result<Database, DbErr> {
-    let mut connect_options = ConnectOptions::new(dsn);
+pub async fn initialize(config: &Option<database::Config>) -> Result<Database, DbErr> {
+    let config = config
+        .clone()
+        .ok_or(DbErr::Custom("database config not found".to_string()))?;
+    let mut connect_options = ConnectOptions::new(&config.dsn());
     connect_options
         .acquire_timeout(std::time::Duration::from_secs(15))
         .sqlx_logging(true)
@@ -53,8 +57,11 @@ pub async fn initialize(dsn: &str) -> Result<Database, DbErr> {
     Ok(Database { conn })
 }
 
-pub async fn down(dsn: &str) -> Result<(), DbErr> {
-    let mut connect_options = ConnectOptions::new(dsn);
+pub async fn down(config: &Option<database::Config>) -> Result<(), DbErr> {
+    let config = config
+        .clone()
+        .ok_or(DbErr::Custom("database config not found".to_string()))?;
+    let mut connect_options = ConnectOptions::new(&config.dsn());
     connect_options
         .sqlx_logging(true)
         .sqlx_logging_level(LevelFilter::Debug);

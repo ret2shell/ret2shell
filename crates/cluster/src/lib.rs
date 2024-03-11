@@ -7,9 +7,11 @@ mod manager;
 mod traits;
 
 pub use manager::Cluster;
-pub use traits::{ClusterConfig, ClusterError};
+use r2s_config::cluster;
+pub use traits::ClusterError;
 
-pub async fn initialize(config: ClusterConfig) -> Result<Cluster, ClusterError> {
+pub async fn initialize(config: &Option<cluster::Config>) -> Result<Cluster, ClusterError> {
+    let config = config.clone().ok_or(ClusterError::ConfigNeeded)?;
     let client = if config.try_default {
         Client::try_default().await?
     } else if config.auto_infer {
