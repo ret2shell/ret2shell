@@ -12,12 +12,19 @@ impl MigrationName for Migration {
 pub enum Config {
     Table,
     Id,
+    Auditor,
     Auth,
-    Captcha,
-    Email,
-    Media,
-    Platform,
     Automate,
+    Bucket,
+    Cache,
+    Captcha,
+    Cluster,
+    Database,
+    Email,
+    Logging,
+    Media,
+    Queue,
+    Server,
 }
 
 #[async_trait::async_trait]
@@ -34,42 +41,19 @@ impl MigrationTrait for Migration {
                             .auto_increment()
                             .primary_key(),
                     )
-                    .col(
-                        ColumnDef::new(Config::Platform)
-                            .json_binary()
-                            .not_null()
-                            .default("{}"),
-                    )
-                    .col(
-                        ColumnDef::new(Config::Captcha)
-                            .json_binary()
-                            .not_null()
-                            .default("{}"),
-                    )
-                    .col(
-                        ColumnDef::new(Config::Email)
-                            .json_binary()
-                            .not_null()
-                            .default("{}"),
-                    )
-                    .col(
-                        ColumnDef::new(Config::Media)
-                            .json_binary()
-                            .not_null()
-                            .default("{}"),
-                    )
-                    .col(
-                        ColumnDef::new(Config::Automate)
-                            .json_binary()
-                            .not_null()
-                            .default("{}"),
-                    )
-                    .col(
-                        ColumnDef::new(Config::Auth)
-                            .json_binary()
-                            .not_null()
-                            .default("{}"),
-                    )
+                    .col(ColumnDef::new(Config::Auditor).json_binary())
+                    .col(ColumnDef::new(Config::Auth).json_binary())
+                    .col(ColumnDef::new(Config::Automate).json_binary())
+                    .col(ColumnDef::new(Config::Bucket).json_binary())
+                    .col(ColumnDef::new(Config::Cache).json_binary())
+                    .col(ColumnDef::new(Config::Captcha).json_binary())
+                    .col(ColumnDef::new(Config::Cluster).json_binary())
+                    .col(ColumnDef::new(Config::Database).json_binary())
+                    .col(ColumnDef::new(Config::Email).json_binary())
+                    .col(ColumnDef::new(Config::Logging).json_binary())
+                    .col(ColumnDef::new(Config::Media).json_binary())
+                    .col(ColumnDef::new(Config::Queue).json_binary())
+                    .col(ColumnDef::new(Config::Server).json_binary())
                     .to_owned(),
             )
             .await

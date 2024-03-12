@@ -35,7 +35,7 @@ pub fn greet() {
 }
 
 pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
-    let (_console_guard, _file_guard) = logger::initialize(&config.logging).await?;
+    let (console_guard, file_guard) = logger::initialize(&config.logging).await?;
     warn!(">> Server initialization started <<");
     let license = match r2s_license::check_license() {
         Ok(license) => license,
@@ -73,8 +73,8 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
         cluster,
     };
 
-    drop(_console_guard);
-    drop(_file_guard);
+    drop(console_guard);
+    drop(file_guard);
     Ok(())
 }
 
