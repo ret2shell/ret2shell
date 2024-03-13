@@ -3,14 +3,16 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
     "noEmit": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
+    "types": ["vite/client"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "sourceMap": true,
     "strict": true
   },
-  "include": ["src", "farm.config.mjs"]
+  "include": ["src", "vite.config.mts"]
 }

@@ -2,7 +2,7 @@ import { luxonReviver } from '../models/utils'
 import { accountStore, setAccountStore, userReset } from '../storage/account'
 import ky from 'ky'
 
-export const api_root = process.env.FARM_API_ROOT || '/api'
+export const api_root = import.meta.env.VITE_API_ROOT || '/api'
 
 const api = ky.extend({
   parseJson: (text: string) => JSON.parse(text, luxonReviver),

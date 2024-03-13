@@ -218,9 +218,9 @@ function TitleBar() {
 
 export default function (props: { children?: JSX.Element }) {
   const platformName = `\xa0\xa0[\xa0${platformStore.name || t('platform.name')}\xa0]\xa0`
-  let [platformTyped, setPlatformTyped] = createSignal('')
-  let [hideAnimation, setHideAnimation] = createSignal(false)
-  let showAnimation = useLocation().pathname === '/'
+  const [platformTyped, setPlatformTyped] = createSignal('')
+  const [hideAnimation, setHideAnimation] = createSignal(false)
+  const showAnimation = useLocation().pathname === '/'
 
   onMount(() => {
     if (showAnimation) {
@@ -255,7 +255,7 @@ export default function (props: { children?: JSX.Element }) {
               <Background />
               <div class="w-full h-full flex flex-col items-center pt-16 pb-24">
                 <div class="flex-1" />
-                <h1 class="text-3xl font-bold z-50">
+                <h1 class="text-3xl font-bold z-50 opacity-80">
                   {platformTyped()}
                   <span class="text-primary animate-ping">_</span>
                 </h1>

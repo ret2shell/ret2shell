@@ -9,7 +9,6 @@ export type Dict = Flatten<RawDict>
 export async function fetchDictionary(locale: Locale): Promise<Dict> {
   let dict: RawDict
   // NOTE: workaround for dynamic import
-  // Farm won't resolve the dynamic import correctly
   switch (locale) {
     case 'en_us':
       dict = await import('./en-us.json')

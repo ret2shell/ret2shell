@@ -15,7 +15,7 @@ export default function () {
         <div class="absolute h-full w-full overflow-scroll snap-mandatory snap-y">
           <section class="h-full min-h-full snap-center flex flex-col items-center justify-center relative">
             <div class="flex-1" />
-            <h1 class="text-3xl font-bold">
+            <h1 class="text-3xl font-bold opacity-80">
               &nbsp;&nbsp;
               <span>[&nbsp;{platformStore.name || t('platform.name')}&nbsp;]</span>
               &nbsp;
@@ -55,7 +55,7 @@ export default function () {
                 <span>{t('calendar.scrollToView')}</span>
                 <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5" />
               </Button>
-              <Link square href="/magic" ghost>
+              <Link square href="/magic/sakana" ghost>
                 <span class="icon-[fluent--gift-20-regular] w-5 h-5" />
               </Link>
               <Popover

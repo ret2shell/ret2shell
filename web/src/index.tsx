@@ -13,11 +13,11 @@ import { onMount } from 'solid-js'
 import Background from './lib/blocks/background'
 
 function checkEdition() {
-  const compact_edition = process.env.FARM_COMPAT_EDITION
+  const compact_edition = import.meta.env.VITE_COMPAT_EDITION
   const edition = localStorage.getItem('edition')
   const needReload = localStorage.length !== 0 && edition !== compact_edition
   if (compact_edition && needReload) {
-    let systemPrefersLocale = (window.navigator.language || window.navigator.languages[0])
+    const systemPrefersLocale = (window.navigator.language || window.navigator.languages[0])
       .replace('-', '_')
       .toLowerCase()
     switch (systemPrefersLocale) {

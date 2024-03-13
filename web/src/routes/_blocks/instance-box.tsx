@@ -20,8 +20,8 @@ export default function InstanceBox() {
       ((instance.renew_count + 1) * 3600 * 10)
     )
   }
-  let [now, setNow] = createSignal(DateTime.now())
-  let timer = setInterval(() => setNow(DateTime.now()), 1000)
+  const [now, setNow] = createSignal(DateTime.now())
+  const timer = setInterval(() => setNow(DateTime.now()), 1000)
   onCleanup(() => clearInterval(timer))
   return (
     <>
@@ -53,7 +53,7 @@ export default function InstanceBox() {
             </Link>
           </Card>
           <For each={wsrxStore.instances}>
-            {(instance, _i) => (
+            {instance => (
               <Card contentClass="p-2 flex flex-col space-y-2">
                 <div class="flex flex-col">
                   <div class="inline-flex flex-row justify-start items-center p-2 space-x-2">

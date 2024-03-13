@@ -5,7 +5,6 @@ import Popover from '../../lib/widgets/popover'
 import Avatar from '../../lib/widgets/avatar'
 import Card from '../../lib/widgets/card'
 import { t } from '../../lib/storage/theme'
-import Button from '../../lib/widgets/button'
 
 export default function UserBox() {
   return (

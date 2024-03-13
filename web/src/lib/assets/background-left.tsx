@@ -8,7 +8,7 @@ export default function () {
         viewBox="0 0 960 1080"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <g fill="none" stroke="#0078D6" stroke-width="2" stroke-opacity="0.3">
+        <g fill="none" stroke="#0078D6" stroke-width="2" stroke-opacity="0.2">
           <path
             class="path"
             clip-path="url(#b)"

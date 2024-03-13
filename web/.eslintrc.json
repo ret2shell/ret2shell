@@ -1,8 +1,15 @@
 {
   "root": true,
-  "extends": "../../.eslintrc.base.json",
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
   "parserOptions": {
-    "project": ["./examples/solid/tsconfig.json"]
+    "sourceType": "module",
+    "ecmaVersion": 2020
   },
-  "rules": {}
+  "env": {
+    "browser": true,
+    "es2017": true,
+    "node": true
+  }
 }

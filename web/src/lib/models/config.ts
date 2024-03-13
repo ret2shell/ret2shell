@@ -50,7 +50,7 @@ export type MediaConfig = {
 
 export type AutomateConfig = {
   enabled: boolean
-  token: String
+  token: string
 }
 
 export type Config = {

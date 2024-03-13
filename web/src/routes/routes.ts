@@ -110,6 +110,10 @@ export const routes = {
           path: '/',
           component: lazy(() => import('./magic/index')),
         },
+        {
+          path: '/sakana',
+          component: lazy(() => import('./magic/sakana/index')),
+        },
       ],
     },
   ],

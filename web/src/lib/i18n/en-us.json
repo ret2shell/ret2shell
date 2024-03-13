@@ -65,5 +65,9 @@
     "stop": "Terminate environment",
     "needLocalDaemon": "Need to connect to local WSRX to use",
     "box": "dynamic environment connection"
+  },
+  "magic": {
+    "illustration": "illustration",
+    "source": "source"
   }
 }

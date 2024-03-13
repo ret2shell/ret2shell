@@ -65,5 +65,9 @@
     "stop": "終止環境",
     "needLocalDaemon": "需要連接本地WSRX才能使用",
     "box": "動態環境連接"
+  },
+  "magic": {
+    "illustration": "插畫",
+    "source": "來源"
   }
 }

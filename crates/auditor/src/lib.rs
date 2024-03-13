@@ -4,6 +4,7 @@ use thiserror::Error;
 
 pub mod filter;
 pub mod monitor;
+pub mod traits;
 
 /// Auditor is a struct that contains some components to audit sensitive
 /// informations.

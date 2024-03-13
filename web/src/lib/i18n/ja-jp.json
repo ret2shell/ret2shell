@@ -65,5 +65,9 @@
     "stop": "環境を終了する",
     "needLocalDaemon": "使用するにはローカル WSRX に接続する必要があります",
     "box": "動的環境接続"
+  },
+  "magic": {
+    "illustration": "図",
+    "source": "ソース"
   }
 }
