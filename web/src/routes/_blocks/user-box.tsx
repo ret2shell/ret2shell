@@ -1,10 +1,10 @@
 import { Show } from 'solid-js'
-import { accountStore } from '../../lib/storage/account'
-import Link from '../../lib/widgets/link'
-import Popover from '../../lib/widgets/popover'
-import Avatar from '../../lib/widgets/avatar'
-import Card from '../../lib/widgets/card'
-import { t } from '../../lib/storage/theme'
+import { accountStore } from '@storage/account'
+import Link from '@widgets/link'
+import Popover from '@widgets/popover'
+import Avatar from '@widgets/avatar'
+import Card from '@widgets/card'
+import { t } from '@storage/theme'
 
 export default function UserBox() {
   return (

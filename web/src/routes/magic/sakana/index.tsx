@@ -1,10 +1,10 @@
 import 'sakana-widget/lib/index.css'
 import SakanaWidget, { type SakanaWidgetCharacter } from 'sakana-widget'
-import xdsecMascot from '../../../lib/assets/imgs/xdsec-mascot.webp'
-import vidarMascot from '../../../lib/assets/imgs/vidar-mascot.webp'
-import cnssMascot from '../../../lib/assets/imgs/cnss-mascot.webp'
-import { t } from '../../../lib/storage/theme'
-import Link from '../../../lib/widgets/link'
+import xdsecMascot from '@assets/imgs/xdsec-mascot.webp'
+import vidarMascot from '@assets/imgs/vidar-mascot.webp'
+import cnssMascot from '@assets/imgs/cnss-mascot.webp'
+import { t } from '@storage/theme'
+import Link from '@widgets/link'
 import { onMount } from 'solid-js'
 
 export default function () {

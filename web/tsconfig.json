@@ -12,7 +12,19 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "sourceMap": true,
-    "strict": true
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@lib/*": ["src/lib/*"],
+      "@api/*": ["src/lib/api/*"],
+      "@assets/*": ["src/lib/assets/*"],
+      "@blocks/*": ["src/lib/blocks/*"],
+      "@models/*": ["src/lib/models/*"],
+      "@storage/*": ["src/lib/storage/*"],
+      "@widgets/*": ["src/lib/widgets/*"],
+      "@routes/*": ["src/routes/*"]
+    }
   },
   "include": ["src", "vite.config.mts"]
 }

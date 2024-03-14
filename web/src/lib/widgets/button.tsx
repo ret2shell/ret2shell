@@ -1,6 +1,6 @@
 import './styles/button.scss'
-import { ComponentProps, JSX, Show, children } from 'solid-js'
-import Spin from '../assets/animates/spin'
+import { ComponentProps, JSX, Show, children, splitProps } from 'solid-js'
+import Spin from '@assets/animates/spin'
 
 export default function (
   props: ComponentProps<'button'> & {
@@ -15,22 +15,35 @@ export default function (
     square?: boolean
   }
 ) {
+  const [others, btnProps] = splitProps(props, [
+    'children',
+    'level',
+    'size',
+    'ghost',
+    'bold',
+    'justify',
+    'uppercase',
+    'loading',
+    'square',
+  ])
   const classList = {
     btn: true,
     // btn-primary btn-info btn-success btn-warning btn-error
-    [`btn-${props.level}`]: !!props.level,
+    [`btn-${others.level}`]: !!others.level,
     // btn-sm btn-md
-    [`btn-${props.size || 'md'}`]: true,
-    'btn-ghost': props.ghost,
-    'btn-bold': props.bold,
+    [`btn-${others.size || 'md'}`]: true,
+    'btn-ghost': others.ghost,
+    'btn-bold': others.bold,
     // justify-start justify-center justify-end
-    [`justify-${props.justify || 'center'}`]: true,
-    uppercase: props.uppercase,
-    disabled: props.disabled,
-    'btn-square': props.square,
+    [`justify-${others.justify || 'center'}`]: true,
+    uppercase: others.uppercase,
+    disabled: btnProps.disabled,
+    'btn-square': others.square,
+    ...btnProps.classList,
   }
+
   return (
-    <button {...props} classList={classList}>
+    <button {...btnProps} classList={classList}>
       <Show when={props.loading}>
         <Spin />
       </Show>

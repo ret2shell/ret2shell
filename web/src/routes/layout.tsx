@@ -1,20 +1,20 @@
 import { JSX, Match, Show, Switch, createSignal, onMount } from 'solid-js'
-import { platformStore } from '../lib/storage/platform'
-import { t } from '../lib/storage/theme'
+import { platformStore } from '@storage/platform'
+import { t } from '@storage/theme'
 import { Motion, Presence } from 'solid-motionone'
-import Link from '../lib/widgets/link'
-import LogoAnimate from '../lib/assets/animates/logo-animate'
-import Background from '../lib/blocks/background'
+import Link from '@widgets/link'
+import LogoAnimate from '@assets/animates/logo-animate'
+import Background from '@blocks/background'
 import { useLocation } from '@solidjs/router'
 import InstanceBox from './_blocks/instance-box'
 import UserBox from './_blocks/user-box'
 import DiyBox from './_blocks/diy-box'
-import { gameStore } from '../lib/storage/game'
-import { HostType } from '../lib/models/game'
-import { accountStore } from '../lib/storage/account'
-import { Permission } from '../lib/models/user'
-import Popover from '../lib/widgets/popover'
-import Card from '../lib/widgets/card'
+import { gameStore } from '@storage/game'
+import { HostType } from '@models/game'
+import { accountStore } from '@storage/account'
+import { Permission } from '@models/user'
+import Popover from '@widgets/popover'
+import Card from '@widgets/card'
 
 function GlobalTitleLink() {
   return (
@@ -242,30 +242,28 @@ export default function (props: { children?: JSX.Element }) {
     <>
       <TitleBar />
       {props.children}
-      <Show when={showAnimation}>
-        <Presence exitBeforeEnter>
-          <Show when={!hideAnimation()}>
-            <Motion.div
-              class="fixed top-0 left-0 w-screen h-screen bg-layer z-50"
-              initial={{ opacity: 1 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Background />
-              <div class="w-full h-full flex flex-col items-center pt-16 pb-24">
-                <div class="flex-1" />
-                <h1 class="text-3xl font-bold z-50 opacity-80">
-                  {platformTyped()}
-                  <span class="text-primary animate-ping">_</span>
-                </h1>
-                <div class="text-xl opacity-0 mt-8">&nbsp;</div>
-                <div class="flex-1" />
-              </div>
-            </Motion.div>
-          </Show>
-        </Presence>
-      </Show>
+      <Presence exitBeforeEnter>
+        <Show when={showAnimation && !hideAnimation()}>
+          <Motion.div
+            class="fixed top-0 left-0 w-screen h-screen bg-layer z-50"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Background />
+            <div class="w-full h-full flex flex-col items-center pt-16 pb-24">
+              <div class="flex-1" />
+              <h1 class="text-3xl font-bold z-50 opacity-80">
+                {platformTyped()}
+                <span class="text-primary animate-ping">_</span>
+              </h1>
+              <div class="text-xl opacity-0 mt-8">&nbsp;</div>
+              <div class="flex-1" />
+            </div>
+          </Motion.div>
+        </Show>
+      </Presence>
     </>
   )
 }

@@ -1,7 +1,7 @@
 import { createStore } from 'solid-js/store'
-import { Game } from '../models/game'
-import { Team } from '../models/team'
-import { User } from '../models/user'
+import { Game } from '@models/game'
+import { Team } from '@models/team'
+import { User } from '@models/user'
 
 export const [gameStore, setgameStore] = createStore({
   games: [] as Game[],

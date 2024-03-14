@@ -1,11 +1,11 @@
 import { Show } from 'solid-js'
-import LogoAnimate from '../lib/assets/animates/logo-animate'
-import { platformStore } from '../lib/storage/platform'
-import { t } from '../lib/storage/theme'
-import Popover from '../lib/widgets/popover'
-import Link from '../lib/widgets/link'
-import Button from '../lib/widgets/button'
-import Card from '../lib/widgets/card'
+import LogoAnimate from '@assets/animates/logo-animate'
+import { platformStore } from '@storage/platform'
+import { t } from '@storage/theme'
+import Popover from '@widgets/popover'
+import Link from '@widgets/link'
+import Button from '@widgets/button'
+import Card from '@widgets/card'
 import Calendar from './calendar'
 
 export default function () {

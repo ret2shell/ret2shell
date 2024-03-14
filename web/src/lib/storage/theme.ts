@@ -1,7 +1,7 @@
 import { createStore } from 'solid-js/store'
 import { makePersisted } from '@solid-primitives/storage'
 import { createEffect, createResource } from 'solid-js'
-import { Locale, fetchDictionary, hasLocale } from '../i18n'
+import { Locale, fetchDictionary, hasLocale } from '@lib/i18n'
 import { translator } from '@solid-primitives/i18n'
 
 const systemPrefersColorScheme =

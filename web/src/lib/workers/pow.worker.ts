@@ -1,4 +1,4 @@
-import { hashToHex } from '../utils/hash'
+import { hashToHex } from '@lib/utils/hash'
 
 self.addEventListener(
   'message',

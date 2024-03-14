@@ -1,6 +1,6 @@
 import './styles/button.scss'
 import { ComponentProps, JSX, Show, children } from 'solid-js'
-import Spin from '../assets/animates/spin'
+import Spin from '@assets/animates/spin'
 import { useMatch } from '@solidjs/router'
 
 export default function (

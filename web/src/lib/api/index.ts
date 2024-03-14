@@ -1,5 +1,5 @@
-import { luxonReviver } from '../models/utils'
-import { accountStore, setAccountStore, userReset } from '../storage/account'
+import { luxonReviver } from '@models/utils'
+import { accountStore, setAccountStore, userReset } from '@storage/account'
 import ky from 'ky'
 
 export const api_root = import.meta.env.VITE_API_ROOT || '/api'

@@ -1,4 +1,4 @@
-import { setColorScheme, themeStore } from '../storage/theme'
+import { setColorScheme, themeStore } from '@storage/theme'
 import './darkmode-button.scss'
 import darkmodeStars from './darkmode-stars.svg'
 
