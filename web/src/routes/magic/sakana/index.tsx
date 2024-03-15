@@ -58,19 +58,31 @@ export default function () {
       <div class="flex-1 flex flex-row items-center justify-center">
         <div class="relative">
           <div id="xdsec-box" />
-          <Link class="absolute left-1/3 right-1/3 -bottom-4 transform normal-case z-[10]" href="https://l.xdsec.org">
+          <Link
+            class="absolute left-1/3 right-1/3 -bottom-4 transform normal-case z-[10]"
+            href="https://l.xdsec.org"
+            target="_blank"
+          >
             L
           </Link>
         </div>
         <div class="relative hidden sm:block">
           <div id="vidar-box" />
-          <Link class="absolute left-1/3 right-1/3 -bottom-4 transform normal-case z-[10]" href="https://vidar.club">
+          <Link
+            class="absolute left-1/3 right-1/3 -bottom-4 transform normal-case z-[10]"
+            href="https://vidar.club"
+            target="_blank"
+          >
             Vidar
           </Link>
         </div>
         <div class="relative hidden lg:block">
           <div id="cnss-box" />
-          <Link class="absolute left-1/3 right-1/3 -bottom-4 transform normal-case z-[10]" href="https://cnss.io">
+          <Link
+            class="absolute left-1/3 right-1/3 -bottom-4 transform normal-case z-[10]"
+            href="https://cnss.io"
+            target="_blank"
+          >
             CNSS
           </Link>
         </div>
