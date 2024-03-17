@@ -1,7 +1,7 @@
 /* @refresh reload */
 import { render } from 'solid-js/web'
 import { routes } from './routes/routes'
-import '@fontsource/jetbrains-mono'
+import '@fontsource/iosevka'
 import 'overlayscrollbars/overlayscrollbars.css'
 import './lib/widgets/styles/base.scss'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-solid'

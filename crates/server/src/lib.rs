@@ -7,6 +7,8 @@ use tracing::{error, info, warn};
 
 use crate::traits::GlobalState;
 
+mod auth;
+mod data;
 mod logger;
 mod routes;
 mod traits;

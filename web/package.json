@@ -4,7 +4,7 @@
   "type": "module",
   "dependencies": {
     "@ark-ui/solid": "^2.2.0",
-    "@fontsource/jetbrains-mono": "^5.0.19",
+    "@fontsource/iosevka": "^5.0.7",
     "@modular-forms/solid": "^0.20.0",
     "@solid-primitives/audio": "^1.3.17",
     "@solid-primitives/clipboard": "^1.5.10",
@@ -60,7 +60,7 @@
     "tslib": "^2.6.2",
     "vite": "^5.1.6",
     "vite-plugin-compression": "^0.5.1",
-    "vite-plugin-solid": "^2.10.1",
+    "vite-plugin-solid": "^2.10.2",
     "vitest": "^1.4.0"
   },
   "scripts": {

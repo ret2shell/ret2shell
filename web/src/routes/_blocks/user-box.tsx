@@ -12,8 +12,9 @@ export default function UserBox() {
       <Show
         when={accountStore.token}
         fallback={
-          <Link href="/account/login" ghost square title={t('account.login.title')}>
+          <Link href="/account/login" title={t('account.login.title')}>
             <span class="icon-[fluent--person-20-regular] w-5 h-5" />
+            {t('account.login.title')}
           </Link>
         }
       >
