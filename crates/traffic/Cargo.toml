@@ -9,5 +9,9 @@ publish = false
 homepage = "https://r2s.woooo.tech/"
 keywords = ["ctf", "challenge", "platform", "security", "education"]
 resolver = "2"
+
+[dependencies]
+wsrx = { version = "0.2", features = ["server"] }
+
 [lib]
 path = "src/lib.rs"
