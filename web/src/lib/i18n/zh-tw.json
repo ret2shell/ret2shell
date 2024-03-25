@@ -53,7 +53,8 @@
       "sat": "六"
     },
     "games": "當月賽事",
-    "noGames": "這個月沒有賽事，享受一下吧"
+    "noGames": "這個月沒有賽事，享受一下吧",
+    "selectGameToSeeDetail": "在左側選擇賽事查看詳情"
   },
   "about": {
     "donate": "捐款",

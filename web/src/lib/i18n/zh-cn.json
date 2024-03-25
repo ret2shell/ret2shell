@@ -53,7 +53,8 @@
       "sat": "六"
     },
     "games": "当月赛事",
-    "noGames": "这个月没有赛事，享受一下吧"
+    "noGames": "这个月没有赛事，享受一下吧",
+    "selectGameToSeeDetail": "在左侧选择赛事查看详情"
   },
   "about": {
     "donate": "捐助",

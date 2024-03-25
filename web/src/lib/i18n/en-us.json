@@ -53,7 +53,8 @@
       "sat": "Sat"
     },
     "games": "Games of the month",
-    "noGames": "There are no games this month, so enjoy it"
+    "noGames": "There are no games this month, so enjoy it",
+    "selectGameToSeeDetail": "Select an game on the left to view details"
   },
   "about": {
     "donate": "Donate",
