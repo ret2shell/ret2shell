@@ -37,7 +37,23 @@
     "language": "言語 / Language"
   },
   "calendar": {
-    "scrollToView": "下にスクロールしてカレンダーを表示します"
+    "scrollToView": "下にスクロールしてカレンダーを表示します",
+    "jumpToToday": "今日にジャンプ",
+    "jumpToPrevMonth": "先月",
+    "jumpToPrevYear": "去年",
+    "jumpToNextMonth": "来月",
+    "jumpToNextYear": "来年",
+    "day": {
+      "sun": "日",
+      "mon": "月",
+      "tue": "火",
+      "wed": "水",
+      "thu": "木",
+      "fri": "金",
+      "sat": "土"
+    },
+    "games": "今月のイベント",
+    "noGames": "今月はイベントがないので楽しんでください"
   },
   "about": {
     "donate": "寄付する",

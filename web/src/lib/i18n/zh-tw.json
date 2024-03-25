@@ -37,7 +37,23 @@
     "language": "語言 / Language"
   },
   "calendar": {
-    "scrollToView": "向下捲動查看日曆"
+    "scrollToView": "向下捲動查看日曆",
+    "jumpToToday": "跳到今天",
+    "jumpToPrevMonth": "上個月",
+    "jumpToPrevYear": "前一年",
+    "jumpToNextMonth": "下個月",
+    "jumpToNextYear": "下一年",
+    "day": {
+      "sun": "日",
+      "mon": "一",
+      "tue": "二",
+      "wed": "三",
+      "thu": "四",
+      "fri": "五",
+      "sat": "六"
+    },
+    "games": "當月賽事",
+    "noGames": "這個月沒有賽事，享受一下吧"
   },
   "about": {
     "donate": "捐款",

@@ -105,7 +105,7 @@ export default function () {
           </section>
           <section
             id="index-calendar"
-            class="h-full min-h-full snap-center flex flex-col items-center justify-center relative"
+            class="h-full min-h-full snap-center flex flex-col lg:flex-row p-6 lg:p-24 lg:space-x-16 relative"
           >
             <Calendar />
           </section>

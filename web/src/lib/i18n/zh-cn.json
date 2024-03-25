@@ -37,7 +37,23 @@
     "language": "语言 / Language"
   },
   "calendar": {
-    "scrollToView": "向下滚动查看日历"
+    "scrollToView": "向下滚动查看日历",
+    "jumpToToday": "跳转到今天",
+    "jumpToPrevMonth": "上个月",
+    "jumpToPrevYear": "上一年",
+    "jumpToNextMonth": "下个月",
+    "jumpToNextYear": "下一年",
+    "day": {
+      "sun": "日",
+      "mon": "一",
+      "tue": "二",
+      "wed": "三",
+      "thu": "四",
+      "fri": "五",
+      "sat": "六"
+    },
+    "games": "当月赛事",
+    "noGames": "这个月没有赛事，享受一下吧"
   },
   "about": {
     "donate": "捐助",

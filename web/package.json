@@ -16,8 +16,8 @@
     "codejar": "^4.2.0",
     "isomorphic-dompurify": "^2.6.0",
     "js-base64": "^3.7.7",
-    "katex": "^0.16.9",
-    "ky": "^1.2.2",
+    "katex": "^0.16.10",
+    "ky": "^1.2.3",
     "luxon": "^3.4.4",
     "nanoid": "^5.0.6",
     "okwind": "^0.1.2",
@@ -39,7 +39,7 @@
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
-    "@iconify-json/fluent": "^1.1.50",
+    "@iconify-json/fluent": "^1.1.51",
     "@iconify/tailwind": "^0.1.4",
     "@kobalte/tailwindcss": "^0.9.0",
     "@tailwindcss/typography": "^0.5.10",
@@ -47,7 +47,7 @@
     "@types/culori": "^2.1.0",
     "@types/luxon": "^3.4.2",
     "@types/node": "^20.11.30",
-    "@typescript-eslint/eslint-plugin": "^7.3.1",
+    "@typescript-eslint/eslint-plugin": "^7.4.0",
     "autoprefixer": "^10.4.19",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
@@ -58,7 +58,7 @@
     "solid-refresh": "^0.7.5",
     "tailwindcss": "^3.4.1",
     "tslib": "^2.6.2",
-    "vite": "^5.2.4",
+    "vite": "^5.2.6",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-solid": "^2.10.2",
     "vitest": "^1.4.0"

@@ -37,7 +37,23 @@
     "language": "Language"
   },
   "calendar": {
-    "scrollToView": "Scroll down to view calendar"
+    "scrollToView": "Scroll down to view calendar",
+    "jumpToToday": "Jump to today",
+    "jumpToPrevMonth": "previous month",
+    "jumpToPrevYear": "previous year",
+    "jumpToNextMonth": "next month",
+    "jumpToNextYear": "next year",
+    "day": {
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat"
+    },
+    "games": "Games of the month",
+    "noGames": "There are no games this month, so enjoy it"
   },
   "about": {
     "donate": "Donate",
