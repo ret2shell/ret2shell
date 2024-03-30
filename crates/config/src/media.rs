@@ -2,9 +2,18 @@ use sea_orm::FromJsonQueryResult;
 /// Configuration for media settings.
 use serde::{Deserialize, Serialize};
 
+use crate::traits::Merge;
+
 /// `MediaConfig` is a configuration struct for managing media settings.
 #[derive(Clone, Debug, Serialize, Deserialize, FromJsonQueryResult, PartialEq, Eq)]
 pub struct Config {
     /// `path` is the directory where media files are stored.
     pub path: String,
+}
+
+impl Merge for Option<Config> {
+    fn merge(self, other: Self) -> Self {
+        // prefers return other if it is Some
+        other.or_else(|| self)
+    }
 }

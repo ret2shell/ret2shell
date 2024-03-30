@@ -15,9 +15,7 @@ pub use traits::{Captcha, CaptchaError, CaptchaValidator};
 ///
 /// * `validator` - The type of the validator.
 /// * `difficulty` - The difficulty of the captcha.
-pub async fn generate(
-    validator: &ValidatorType, difficulty: &u16,
-) -> Result<Captcha, CaptchaError> {
+pub async fn generate(validator: &ValidatorType, difficulty: u16) -> Result<Captcha, CaptchaError> {
     match validator {
         &ValidatorType::None => Ok(Captcha {
             id: "".to_string(),
@@ -25,13 +23,13 @@ pub async fn generate(
             challenge: "".to_string(),
             criteria: None,
         }),
-        &ValidatorType::Image => Ok(image::ImageValidator::generate_captcha(*difficulty).await?),
-        &ValidatorType::Pow => Ok(pow::PowValidator::generate_captcha(*difficulty).await?),
+        &ValidatorType::Image => Ok(image::ImageValidator::generate_captcha(difficulty).await?),
+        &ValidatorType::Pow => Ok(pow::PowValidator::generate_captcha(difficulty).await?),
         &ValidatorType::RecaptchaV3 => {
-            Ok(recaptcha::ReCaptchaV3Validator::generate_captcha(*difficulty).await?)
+            Ok(recaptcha::ReCaptchaV3Validator::generate_captcha(difficulty).await?)
         }
         &ValidatorType::HCaptcha => {
-            Ok(hcaptcha::HCaptchaValidator::generate_captcha(*difficulty).await?)
+            Ok(hcaptcha::HCaptchaValidator::generate_captcha(difficulty).await?)
         }
     }
 }

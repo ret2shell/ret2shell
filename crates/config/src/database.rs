@@ -2,6 +2,8 @@
 use sea_orm::FromJsonQueryResult;
 use serde::{Deserialize, Serialize};
 
+use crate::traits::Merge;
+
 /// Represents the configuration for a database connection.
 #[derive(Serialize, Deserialize, Clone, Debug, FromJsonQueryResult, PartialEq, Eq)]
 pub struct Config {
@@ -27,5 +29,12 @@ impl Config {
             "postgresql://{}:{}@{}:{}/{}?sslmode={}",
             self.user, self.password, self.host, self.port, self.db, self.ssl_mode
         )
+    }
+}
+
+impl Merge for Option<Config> {
+    fn merge(self, other: Self) -> Self {
+        // prefers return other if it is Some
+        other.or_else(|| self)
     }
 }

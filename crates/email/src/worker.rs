@@ -8,9 +8,10 @@ use lettre::{
     },
     AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor,
 };
+use r2s_config::email;
 use tracing::{debug, error, info};
 
-use super::traits::{EmailConfig, EmailCtx, EmailError, EmailRequest};
+use super::traits::{EmailCtx, EmailError, EmailRequest};
 
 fn construct_email(
     email: &EmailCtx, sender_name: impl AsRef<str>, sender_email: impl AsRef<str>,
@@ -31,7 +32,7 @@ fn construct_email(
         .unwrap()
 }
 
-async fn send_email_impl(config: &EmailConfig, email: &EmailCtx) -> Result<(), EmailError> {
+async fn send_email_impl(config: &email::Config, email: &EmailCtx) -> Result<(), EmailError> {
     let smtp_credentials = Credentials::new(config.username.clone(), config.password.clone());
     debug!("smtp_credentials: {} {}", config.username, config.password);
     debug!("smtp host: {} {}:{}", config.tls, config.host, config.port);
@@ -75,7 +76,7 @@ async fn process_message(message: jetstream::Message) -> Result<(), EmailError> 
     Ok(())
 }
 
-pub async fn email_worker(mut messages: Stream) -> Result<(), EmailError> {
+pub async fn email_worker(mut messages: Stream) {
     while let Some(message) = messages.next().await {
         if let Ok(message) = message {
             process_message(message)
@@ -86,5 +87,4 @@ pub async fn email_worker(mut messages: Stream) -> Result<(), EmailError> {
             error!("Failed to receive message from nats: {:?}", message);
         }
     }
-    Ok(())
 }

@@ -2,6 +2,8 @@
 use sea_orm::FromJsonQueryResult;
 use serde::{Deserialize, Serialize};
 
+use crate::traits::Merge;
+
 /// Represents the configuration for a NATS message queue.
 #[derive(Clone, Debug, Serialize, Deserialize, FromJsonQueryResult, PartialEq, Eq)]
 pub struct Config {
@@ -27,5 +29,25 @@ pub struct Config {
 impl Config {
     pub fn addr(&self) -> String {
         format!("{}:{}", self.host, self.port.unwrap_or(4222))
+    }
+}
+
+impl Merge for Option<Config> {
+    fn merge(self, other: Self) -> Self {
+        // prefers fields in `other`
+        match (self, other) {
+            (Some(a), Some(b)) => Some(Config {
+                host: b.host,
+                port: b.port.or(a.port),
+                token: b.token.or(a.token),
+                user: b.user.or(a.user),
+                password: b.password.or(a.password),
+                ping_interval: b.ping_interval.or(a.ping_interval),
+                tls: b.tls.or(a.tls),
+            }),
+            (Some(a), None) => Some(a),
+            (None, Some(b)) => Some(b),
+            (None, None) => None,
+        }
     }
 }

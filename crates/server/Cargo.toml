@@ -39,6 +39,13 @@ colored = "2.1"
 anyhow = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+chrono = "0.4"
+async-nats = "0.34"
+argon2 = "0.5"
+bcrypt = "0.15"
+ring = "0.17"
+hex = "0.4"
+nanoid = "0.4"
 
 # System stat
 systemstat = { version = "0.2", features = ["serde"] }

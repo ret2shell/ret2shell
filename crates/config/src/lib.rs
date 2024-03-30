@@ -44,6 +44,7 @@ pub mod logging;
 pub mod media;
 pub mod queue;
 pub mod server;
+pub mod traits;
 
 #[derive(Error, Debug)]
 pub enum ConfigError {

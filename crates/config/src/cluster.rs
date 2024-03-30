@@ -2,6 +2,8 @@ use sea_orm::FromJsonQueryResult;
 /// Configuration for service settings.
 use serde::{Deserialize, Serialize};
 
+use crate::traits::Merge;
+
 /// `ClusterConfig` is a configuration struct for managing service settings.
 #[derive(Serialize, Deserialize, Clone, Debug, FromJsonQueryResult, PartialEq, Eq)]
 pub struct Config {
@@ -21,4 +23,24 @@ pub struct Config {
     pub challenge_node_selector: Option<String>,
 
     pub proxy_image: Option<String>,
+}
+
+impl Merge for Option<Config> {
+    fn merge(self, other: Self) -> Self {
+        // prefers fields in `other`
+        match (self, other) {
+            (Some(a), Some(b)) => Some(Config {
+                try_default: b.try_default,
+                auto_infer: b.auto_infer,
+                kube_config_path: b.kube_config_path.or_else(|| a.kube_config_path),
+                challenge_node_selector: b
+                    .challenge_node_selector
+                    .or_else(|| a.challenge_node_selector),
+                proxy_image: b.proxy_image.or_else(|| a.proxy_image),
+            }),
+            (Some(a), None) => Some(a),
+            (None, Some(b)) => Some(b),
+            (None, None) => None,
+        }
+    }
 }

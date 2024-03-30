@@ -2,7 +2,7 @@
 
 use r2s_config::{
     auditor, auth, automate, bucket, cache, captcha, cluster, database, email, logging, media,
-    queue, server,
+    queue, server, traits::Merge, GlobalConfig,
 };
 use sea_orm::{entity::prelude::*, ActiveValue};
 use serde::{Deserialize, Serialize};
@@ -38,6 +38,28 @@ pub struct Model {
     pub queue: Option<queue::Config>,
     #[sea_orm(column_type = "JsonBinary")]
     pub server: Option<server::Config>,
+}
+
+impl Model {
+    pub fn merge(self, other: GlobalConfig) -> Self {
+        // prefers self fields
+        Model {
+            id: self.id,
+            auditor: other.auditor.merge(self.auditor),
+            auth: other.auth.merge(self.auth),
+            automate: other.automate.merge(self.automate),
+            bucket: other.bucket.merge(self.bucket),
+            cache: other.cache.merge(self.cache),
+            captcha: other.captcha.merge(self.captcha),
+            cluster: other.cluster.merge(self.cluster),
+            database: other.database.merge(self.database),
+            email: other.email.merge(self.email),
+            logging: other.logging.merge(self.logging),
+            media: other.media.merge(self.media),
+            queue: other.queue.merge(self.queue),
+            server: other.server.merge(self.server),
+        }
+    }
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

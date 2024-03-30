@@ -1,4 +1,4 @@
-use std::io::Write;
+use std::{io::Write, net::SocketAddr};
 
 use colored::Colorize;
 use r2s_config::GlobalConfig;
@@ -7,11 +7,11 @@ use tracing::{error, info, warn};
 
 use crate::traits::GlobalState;
 
-mod auth;
-mod data;
 mod logger;
+mod middleware;
 mod routes;
 mod traits;
+mod utility;
 
 /// Show greet information.
 pub fn greet() {
@@ -65,8 +65,8 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
     info!("Loading module: < Email Worker >");
     r2s_email::initialize(queue.subscribe("email").await?).await?;
 
-    let _state = GlobalState {
-        config,
+    let state = GlobalState {
+        config: config.clone(),
         db,
         cache,
         auditor,
@@ -74,6 +74,30 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
         license,
         cluster,
     };
+
+    let router = routes::initialize(config.server.clone(), state).await?;
+    info!("Router constructed.");
+
+    warn!(">> Server initialization finished <<");
+
+    info!("Starting server...");
+
+    let server_config = config
+        .server
+        .ok_or(anyhow::anyhow!("Server configuration not found."))?;
+
+    let addr_str = format!("{}:{}", &server_config.host, &server_config.port);
+
+    let addr = tokio::net::TcpListener::bind(addr_str.clone())
+        .await
+        .expect("Failed to bind server address");
+    info!("Server started at [ {} ]", addr_str);
+    axum::serve(
+        addr,
+        router.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .await
+    .expect("Failed to start server.");
 
     drop(console_guard);
     drop(file_guard);

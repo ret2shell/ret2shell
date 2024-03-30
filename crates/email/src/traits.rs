@@ -1,3 +1,4 @@
+use r2s_config::email;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -10,25 +11,9 @@ pub struct EmailCtx {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct EmailConfig {
-    /// The email server host.
-    pub host: String,
-    /// The email server port.
-    pub port: u16,
-    /// The email address used as the sender.
-    pub sender: String,
-    /// The username for authentication with the email server.
-    pub username: String,
-    /// The password for authentication with the email server.
-    pub password: String,
-    /// The TLS configuration for secure email communication.
-    pub tls: String,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct EmailRequest {
     pub email: EmailCtx,
-    pub config: EmailConfig,
+    pub config: email::Config,
 }
 
 #[derive(Error, Debug)]

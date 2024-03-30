@@ -3,7 +3,7 @@ use async_nats::jetstream::consumer::pull::Stream;
 mod traits;
 mod worker;
 
-pub use traits::{EmailConfig, EmailCtx, EmailError, EmailRequest};
+pub use traits::{EmailCtx, EmailError, EmailRequest};
 use worker::email_worker;
 
 pub async fn initialize(messages: Stream) -> Result<(), EmailError> {

@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   database:
     image: postgres:16-alpine
@@ -11,22 +9,22 @@ services:
     volumes:
       - database:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - '5432:5432'
   cache:
     image: redis:7-alpine
     restart: always
     volumes:
       - cache:/data
     ports:
-      - "6379:6379"
+      - '6379:6379'
   message_queue:
     image: nats:2-alpine
     restart: always
     volumes:
       - message_queue:/data
     ports:
-      - "4222:4222"
-    command: ["-js", "-sd", "/data"]
+      - '4222:4222'
+    command: ['-js', '-sd', '/data']
 
 volumes:
   database:

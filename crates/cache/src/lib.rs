@@ -1,5 +1,6 @@
 use std::fmt::Display;
 
+pub use fred::error::{RedisError, RedisErrorKind};
 use fred::prelude::*;
 use r2s_config::cache;
 use serde::{Deserialize, Serialize};
@@ -64,20 +65,30 @@ impl Cache {
         }
     }
 
-    pub async fn get(
+    pub async fn get<T>(
         &self, key: impl Into<RedisKey> + Send + Display,
-    ) -> Result<impl Deserialize, CacheError> {
+    ) -> Result<Option<T>, CacheError>
+    where
+        T: for<'de> Deserialize<'de>, {
         let domain_key = with_domain!(self.domain, key);
-        let result = self.client.get::<Value, _>(domain_key).await?;
-        Ok(result)
+        let result = self.client.get::<Option<Value>, _>(domain_key).await?;
+        match result {
+            Some(result) => Ok(Some(serde_json::from_value(result)?)),
+            None => Ok(None),
+        }
     }
 
-    pub async fn getdel(
+    pub async fn getdel<T>(
         &self, key: impl Into<RedisKey> + Send + Display,
-    ) -> Result<impl Deserialize, CacheError> {
+    ) -> Result<Option<T>, CacheError>
+    where
+        T: for<'de> Deserialize<'de>, {
         let domain_key = with_domain!(self.domain, key);
-        let result = self.client.getdel::<Value, _>(domain_key).await?;
-        Ok(result)
+        let result = self.client.getdel::<Option<Value>, _>(domain_key).await?;
+        match result {
+            Some(result) => Ok(Some(serde_json::from_value(result)?)),
+            None => Ok(None),
+        }
     }
 
     pub async fn set(
@@ -91,6 +102,11 @@ impl Cache {
         Ok(())
     }
 
+    /// Set the key with a ttl.
+    ///
+    /// * `key` - The key to set.
+    /// * `value` - The value to set.
+    /// * `ttl` - The time to live for the key in seconds.
     pub async fn set_ex(
         &self, key: impl Into<RedisKey> + Send + Display, value: impl Serialize + Send, ttl: i64,
     ) -> Result<(), CacheError> {
@@ -139,12 +155,20 @@ impl Cache {
         Ok(())
     }
 
-    pub async fn pop(
+    pub async fn pop<T>(
         &self, key: impl Into<RedisKey> + Send + Display,
-    ) -> Result<Value, CacheError> {
+    ) -> Result<Option<T>, CacheError>
+    where
+        T: for<'de> Deserialize<'de>, {
         let domain_key = with_domain!(self.domain, key);
-        let result = self.client.lpop::<Value, _>(domain_key, None).await?;
-        Ok(result)
+        let result = self
+            .client
+            .lpop::<Option<Value>, _>(domain_key, None)
+            .await?;
+        match result {
+            Some(result) => Ok(Some(serde_json::from_value(result)?)),
+            None => Ok(None),
+        }
     }
 
     pub async fn rem(
