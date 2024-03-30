@@ -8,9 +8,8 @@ use r2s_cache::Cache;
 use r2s_config::GlobalConfig;
 use r2s_migrator::Database;
 
-use crate::traits::ResponseError;
-
 use super::auth::Token;
+use crate::traits::ResponseError;
 
 pub async fn prepare_config(
     State(ref db): State<Database>, State(ref pool): State<Cache>,

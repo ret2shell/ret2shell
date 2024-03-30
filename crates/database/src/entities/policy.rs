@@ -23,8 +23,8 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 #[sea_orm(rs_type = "i32", db_type = "Integer")]
 pub enum PermType {
     #[default]
-    Game = 0,
-    User = 1,
+    Game       = 0,
+    User       = 1,
     Statistics = 2,
 }
 

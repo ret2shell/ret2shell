@@ -6,3 +6,4 @@ condense_wildcard_suffixes = true
 fn_params_layout = "Compressed"
 hex_literal_case = "Upper"
 group_imports = "StdExternalCrate"
+enum_discrim_align_threshold = 20

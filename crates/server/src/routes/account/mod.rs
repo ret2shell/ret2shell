@@ -1,19 +1,12 @@
-use crate::{
-    middleware::{
-        auth::{captcha_protected, permission_required_all, Token, TokenTracker},
-        data,
-    },
-    traits::{GlobalState, ResponseError},
-    utility::password::{hash_password, verify_password},
-};
 use axum::{
     extract::State,
     http::StatusCode,
     middleware,
     response::IntoResponse,
-    routing::{patch, post},
+    routing::{get, post},
     Extension, Json, Router,
 };
+use chrono::Utc;
 use nanoid::{alphabet, nanoid};
 use r2s_cache::Cache;
 use r2s_config::email;
@@ -27,11 +20,23 @@ use r2s_queue::Queue;
 use serde::{Deserialize, Serialize};
 use tracing::{debug, info, warn};
 
+use crate::{
+    middleware::{
+        auth::{captcha_protected, permission_required_all, Token, TokenTracker},
+        data,
+    },
+    traits::{GlobalState, ResponseError},
+    utility::password::{hash_password, verify_password},
+};
+
 mod captcha;
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
     Router::new()
-        .route("/self", patch(change_profile).delete(delete_self))
+        .route(
+            "/self",
+            get(get_profile).patch(change_profile).delete(delete_self),
+        )
         .route("/verify", post(verify_email).patch(resend_verify_email))
         .route_layer(middleware::from_fn_with_state(
             state.clone(),
@@ -50,7 +55,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
 
 macro_rules! get_user_by_account {
     ($db:expr, $account:expr) => {{
-        let user = r2s_database::user::get_by_account_or_email(&$db.conn, $account).await?;
+        let user = user::get_by_account_or_email(&$db.conn, $account).await?;
         let user = match user {
             Some(user) => user,
             None => {
@@ -152,7 +157,7 @@ async fn login(
                 if let Ok(password) = hash_password(&body.password).map_err(|err| {
                     warn!("failed to hash password: {:?}", err);
                 }) {
-                    r2s_database::user::update_password(&db.conn, user.id, password).await?;
+                    user::update_password(&db.conn, user.id, password).await?;
                 }
             }
 
@@ -255,7 +260,7 @@ async fn register(
     // if user::get_user_by_account(db, &body.email).await.is_ok() {
     //     return Err((StatusCode::CONFLICT, "account already exists"));
     // }
-    if r2s_database::user::get_by_account_or_email(&db.conn, &body.email)
+    if user::get_by_account_or_email(&db.conn, &body.email)
         .await?
         .is_some()
     {
@@ -264,7 +269,7 @@ async fn register(
 
     let password = hash_password(&body.password)?;
 
-    let mut permissions = match r2s_database::user::count(&db.conn, true).await? {
+    let mut permissions = match user::count(&db.conn, true).await? {
         0 => Permissions(vec![
             Permission::Basic,
             Permission::Verified,
@@ -283,7 +288,7 @@ async fn register(
         permissions.0.push(Permission::Verified);
     }
     let email = body.email.clone();
-    let new_user = r2s_database::user::Model {
+    let new_user = user::Model {
         account: body.account.clone(),
         nickname: body.nickname.clone(),
         password: Some(password),
@@ -294,7 +299,7 @@ async fn register(
         ..Default::default()
     };
 
-    let user = r2s_database::user::create(&db.conn, new_user).await?;
+    let user = user::create(&db.conn, new_user).await?;
 
     send_email(
         &cache,
@@ -338,7 +343,7 @@ async fn verify_email(
     }
     user.permissions.0.push(Permission::Verified);
 
-    r2s_database::user::update(&db.conn, user.clone()).await?;
+    user::update(&db.conn, user.clone()).await?;
 
     // TODO: connect user and institute by email here.
     info!(
@@ -363,11 +368,9 @@ async fn verify_email(
 }
 
 async fn resend_verify_email(
-    State(cache): State<Cache>, State(db): State<Database>, State(ref queue): State<Queue>,
-    Extension(config): Extension<config::Model>, Extension(token): Extension<Token>,
+    State(cache): State<Cache>, State(ref queue): State<Queue>,
+    Extension(config): Extension<config::Model>, Extension(user): Extension<user::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-    let user = get_user_by_account!(db, &token.account);
-
     if user.permissions.0.contains(&Permission::Verified) {
         return Err(ResponseError::Conflict("user already verified".to_owned()));
     }
@@ -407,7 +410,7 @@ async fn forgot_password(
     Extension(config): Extension<config::Model>, Json(body): Json<ForgotPasswordRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
     captcha_protected!(cache, &body.captcha_id, &body.captcha_answer);
-    let user = r2s_database::user::get_by_account_or_email(&db.conn, &body.email).await?;
+    let user = user::get_by_account_or_email(&db.conn, &body.email).await?;
     let user = match user {
         Some(u) => u,
         None => {
@@ -446,7 +449,7 @@ async fn reset_password(
 
     let checked_email = check_email_validation!(cache, &body.token, &body.email);
 
-    let user = r2s_database::user::get_by_account_or_email(&db.conn, &checked_email).await?;
+    let user = user::get_by_account_or_email(&db.conn, &checked_email).await?;
     let user = match user {
         Some(u) => u,
         None => {
@@ -455,7 +458,7 @@ async fn reset_password(
     };
 
     let password = hash_password(&body.password)?;
-    r2s_database::user::update_password(&db.conn, user.id, password).await?;
+    user::update_password(&db.conn, user.id, password).await?;
     let mut prev_token: Option<String>;
     loop {
         prev_token = cache.at("token").pop(format!("user-{}", user.id)).await?;
@@ -488,25 +491,30 @@ async fn logout(
     Ok(StatusCode::OK)
 }
 
+async fn get_profile(
+    Extension(user): Extension<user::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+    Ok(Json(user.desentisize()))
+}
+
 async fn change_profile(
     State(ref cache): State<Cache>, State(ref queue): State<Queue>, State(ref db): State<Database>,
-    Extension(token): Extension<Token>, Extension(config): Extension<config::Model>,
+    Extension(config): Extension<config::Model>, Extension(user): Extension<user::Model>,
     Json(body): Json<user::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-    let user = r2s_database::user::get(&db.conn, token.id).await?;
-
-    let user = match user {
-        Some(user) => user,
+    let email_changed = body.email != user.email;
+    let email = match body.email.clone() {
+        Some(email) => email,
         None => {
-            return Err(ResponseError::NotFound("user not found".to_owned()));
+            return Err(ResponseError::PreconditionFailed(
+                "email is required".to_owned(),
+            ));
         }
     };
 
-    let email_changed = body.email != user.email;
-
     let user = user::Model {
         nickname: body.nickname.clone(),
-        email: body.email.clone(),
+        email: Some(email.clone()),
         avatar: body.avatar.clone(),
         description: body.description.clone(),
         permissions: Permissions(
@@ -520,14 +528,14 @@ async fn change_profile(
         ..user
     };
 
-    r2s_database::user::update(&db.conn, user).await?;
+    user::update(&db.conn, user).await?;
     if email_changed {
         send_email(
             cache,
             queue,
             &config,
             &body.nickname,
-            &body.email.unwrap_or_default(),
+            &email,
             EmailType::Verify,
         )
         .await?;
@@ -536,17 +544,8 @@ async fn change_profile(
 }
 
 async fn delete_self(
-    State(db): State<Database>, State(cache): State<Cache>, Extension(token): Extension<Token>,
+    State(db): State<Database>, State(cache): State<Cache>, Extension(user): Extension<user::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-    let user = r2s_database::user::get(&db.conn, token.id).await?;
-
-    let mut user = match user {
-        Some(user) => user,
-        None => {
-            return Err(ResponseError::NotFound("user not found".to_owned()));
-        }
-    };
-
     let user_count = user::count(&db.conn, false).await?;
 
     if user_count == 1 {
@@ -558,18 +557,25 @@ async fn delete_self(
             ),
         ));
     }
-    user.nickname = format!("[DELETED]{}", user.id);
-    user.account = format!("[DELETED]{}", user.id);
-    user.email = Some(format!(
-        "{}.deleted",
-        user.email.unwrap_or("deleted@ret2shell".to_owned())
-    ));
-    user.description = None;
-    user.institute_id = None;
-    user.permissions = Permissions::default();
-    user.hidden = true;
-    user.banned = true;
-    user.avatar = None;
+    let user = user::Model {
+        account: format!("[DELETED]{}", user.id),
+        nickname: format!("[DELETED]{}", user.id),
+        email: Some(format!(
+            "{}.deleted",
+            user.email
+                .unwrap_or(format!("deleted-{}@ret2shell", user.id))
+        )),
+        description: Some(format!(
+            "**[DELETED]** This account has been ~~deleted~~ at {}",
+            Utc::now().to_rfc3339()
+        )),
+        institute_id: None,
+        permissions: Permissions::default(),
+        hidden: true,
+        banned: true,
+        avatar: None,
+        ..user
+    };
     let mut prev_token: Option<String>;
     loop {
         prev_token = cache.at("token").pop(format!("user-{}", user.id)).await?;
@@ -579,6 +585,6 @@ async fn delete_self(
         cache.at("token").del(&prev_token.unwrap()).await.ok();
     }
     cache.at("token").del(format!("user-{}", user.id)).await?;
-    r2s_database::user::update(&db.conn, user).await?;
+    user::update(&db.conn, user).await?;
     Ok(StatusCode::OK)
 }
