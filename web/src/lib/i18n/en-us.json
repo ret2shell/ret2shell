@@ -2,7 +2,10 @@
   "platform": {
     "name": "Ret 2 Shell",
     "subject": "Fight for all the beauty in the world",
-    "diyBox": "Language and  themes"
+    "diyBox": "Language and  themes",
+    "notificationBox": "Notifications",
+    "clearNotifications": "Clear messages",
+    "noNotifications": "No unread messages"
   },
   "wiki": {
     "title": "Wiki"

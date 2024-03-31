@@ -5,7 +5,7 @@ import type { Config } from 'tailwindcss'
 import { okwind } from 'okwind'
 
 const fontFamily = [
-  'Iosevka',
+  'JetBrains Mono',
   'Menlo',
   '-apple-system',
   '"Noto Sans"',

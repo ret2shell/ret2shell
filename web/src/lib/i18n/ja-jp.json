@@ -2,7 +2,10 @@
   "platform": {
     "name": "Ret へ Shell",
     "subject": "世界中のすべての良いもののために",
-    "diyBox": "言語と明暗のテーマ"
+    "diyBox": "言語と明暗のテーマ",
+    "notificationBox": "プロンプトメッセージ",
+    "clearNotifications": "メッセージをクリアする",
+    "noNotifications": "未読メッセージはありません"
   },
   "wiki": {
     "title": "知識"

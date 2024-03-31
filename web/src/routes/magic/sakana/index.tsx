@@ -3,6 +3,9 @@ import SakanaWidget, { type SakanaWidgetCharacter } from 'sakana-widget'
 import xdsecMascot from '@assets/imgs/xdsec-mascot.webp'
 import vidarMascot from '@assets/imgs/vidar-mascot.webp'
 import cnssMascot from '@assets/imgs/cnss-mascot.webp'
+import LTeam from '@assets/brands/L-team'
+import vidarTeam from '@assets/brands/vidar.svg'
+import cnssTeam from '@assets/brands/cnss.png'
 import { t } from '@storage/theme'
 import Link from '@widgets/link'
 import { onMount } from 'solid-js'
@@ -59,31 +62,31 @@ export default function () {
         <div class="relative">
           <div id="xdsec-box" />
           <Link
-            class="absolute left-1/3 right-1/3 -bottom-4 transform normal-case z-[10]"
+            class="absolute left-1/2 -bottom-12 transform -translate-x-1/2 normal-case z-[10] w-24 h-24"
             href="https://l.xdsec.org"
             target="_blank"
           >
-            L
+            <LTeam width={64} height={64} />
           </Link>
         </div>
         <div class="relative hidden sm:block">
           <div id="vidar-box" />
           <Link
-            class="absolute left-1/3 right-1/3 -bottom-4 transform normal-case z-[10]"
+            class="absolute left-1/2 -bottom-12 transform -translate-x-1/2 normal-case z-[10] w-24 h-24"
             href="https://vidar.club"
             target="_blank"
           >
-            Vidar
+            <img src={vidarTeam} class="w-16 h-16" width={64} height={64} />
           </Link>
         </div>
         <div class="relative hidden lg:block">
           <div id="cnss-box" />
           <Link
-            class="absolute left-1/3 right-1/3 -bottom-4 transform normal-case z-[10]"
+            class="absolute left-1/2 -bottom-12 transform -translate-x-1/2 normal-case z-[10] w-24 h-24"
             href="https://cnss.io"
             target="_blank"
           >
-            CNSS
+            <img src={cnssTeam} class="w-16 h-16" width={64} height={64} />
           </Link>
         </div>
       </div>

@@ -2,7 +2,10 @@
   "platform": {
     "name": "回归终端",
     "subject": "为世间的所有美好而战",
-    "diyBox": "语言与明暗主题"
+    "diyBox": "语言与明暗主题",
+    "notificationBox": "提示消息",
+    "clearNotifications": "清空消息",
+    "noNotifications": "没有未读消息"
   },
   "wiki": {
     "title": "知识"

@@ -15,6 +15,7 @@ import { accountStore } from '@storage/account'
 import { Permission } from '@models/user'
 import Popover from '@widgets/popover'
 import Card from '@widgets/card'
+import NotificationBox from './_blocks/notification-box'
 
 function GlobalTitleLink() {
   return (
@@ -207,6 +208,7 @@ function TitleBar() {
             <Show when={accountStore.token !== null}>
               <InstanceBox />
             </Show>
+            <NotificationBox />
             <DiyBox />
             <UserBox />
           </div>

@@ -2,7 +2,10 @@
   "platform": {
     "name": "回歸終端",
     "subject": "為世間的所有美好而戰",
-    "diyBox": "語言與明暗主題"
+    "diyBox": "語言與明暗主題",
+    "notificationBox": "提示訊息",
+    "clearNotifications": "清空訊息",
+    "noNotifications": "沒有未讀訊息"
   },
   "wiki": {
     "title": "知識"

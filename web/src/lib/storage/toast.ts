@@ -31,3 +31,7 @@ export function addToast(toast: {
 export function removeToast(id: string) {
   setToastStore('toasts', toasts => toasts.filter(item => item.id !== id))
 }
+
+export function clearToasts() {
+  setToastStore('toasts', [])
+}
