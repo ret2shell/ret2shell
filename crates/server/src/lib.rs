@@ -40,7 +40,7 @@ pub fn greet() {
 
 pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
     let (console_guard, file_guard) = logger::initialize(&config.logging).await?;
-    warn!(">> Server initialization started <<");
+    info!(">> Server initialization started <<");
     let license = match r2s_license::check_license(PUB_KEY) {
         Ok(license) => license,
         Err(err) => {
@@ -80,7 +80,7 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
     let router = routes::initialize(config.server.clone(), state).await?;
     info!("Router constructed.");
 
-    warn!(">> Server initialization finished <<");
+    info!(">> Server initialization finished <<");
 
     info!("Starting server...");
 
@@ -93,6 +93,8 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
     let addr = tokio::net::TcpListener::bind(addr_str.clone())
         .await
         .expect("Failed to bind server address");
+    info!("Note: normal HTTP requests will not be logged with level `info` (still can see it with `debug`), you should use a webserver/proxy to monitor the access log.");
+    info!("Also, Ret2Shell will not cleanup logs automatically, you should delete them manually or using some sidecar tools.");
     info!("Server started at [ {} ]", addr_str);
     axum::serve(
         addr,

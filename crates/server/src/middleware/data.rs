@@ -22,7 +22,7 @@ pub async fn prepare_config(
         }
         None => {
             let dynamic_config = r2s_database::config::get(&db.conn).await?;
-            let dynamic_config = dynamic_config.merge(config);
+            let dynamic_config = dynamic_config.unwrap_or_default().merge(config);
             pool.at("platform").set("config", &dynamic_config).await?;
             req.extensions_mut()
                 .insert::<r2s_database::config::Model>(dynamic_config);

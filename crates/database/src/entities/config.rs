@@ -7,7 +7,7 @@ use r2s_config::{
 use sea_orm::{entity::prelude::*, ActiveValue};
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default)]
 #[sea_orm(table_name = "config")]
 pub struct Model {
     #[sea_orm(primary_key)]
@@ -67,12 +67,8 @@ pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}
 
-pub async fn get(db: &DatabaseConnection) -> Result<Model, DbErr> {
-    let config = Entity::find().one(db).await?;
-    match config {
-        Some(config) => Ok(config),
-        None => Err(DbErr::RecordNotFound("config".to_string())),
-    }
+pub async fn get(db: &DatabaseConnection) -> Result<Option<Model>, DbErr> {
+    Entity::find().one(db).await
 }
 
 pub async fn update(db: &DatabaseConnection, config: Model) -> Result<Model, DbErr> {

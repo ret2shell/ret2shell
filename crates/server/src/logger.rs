@@ -23,16 +23,9 @@ pub async fn initialize(
 ) -> Result<(WorkerGuard, WorkerGuard), LoggerError> {
     let config = config.clone().unwrap_or(logging::Config {
         level: "info".to_string(),
-        log_to_file: true,
-        log_to_console: true,
         directory: "./log".to_string(),
     });
-    let logging::Config {
-        level,
-        log_to_file: file_log,
-        log_to_console: console_log,
-        directory,
-    } = config;
+    let logging::Config { level, directory } = config;
     tokio::fs::create_dir_all(&directory).await?;
     let file_appender = rolling::daily(Path::new(&directory).canonicalize()?, "ret2shell.log");
     // println!("log config: {:?}", config.logging);
@@ -45,7 +38,8 @@ pub async fn initialize(
         .with_target(true)
         .with_level(true)
         .with_thread_ids(false)
-        .with_thread_names(false);
+        .with_thread_names(false)
+        .json();
 
     let console_log_layer = Layer::new()
         .with_writer(non_blocking_console)
@@ -55,16 +49,11 @@ pub async fn initialize(
         .with_thread_ids(false)
         .with_thread_names(false);
 
-    let mut layers = Vec::new();
-    if file_log {
-        layers.push(file_log_layer);
-    }
-    if console_log {
-        layers.push(console_log_layer);
-    }
     tracing_subscriber::registry()
         .with(EnvFilter::new(level))
-        .with(layers)
+        .with(file_log_layer)
+        .with(console_log_layer)
         .init();
+
     Ok((_console_guard, _file_guard))
 }
