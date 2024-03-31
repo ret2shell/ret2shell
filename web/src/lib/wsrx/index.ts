@@ -14,6 +14,7 @@ export class Wsrx {
     ;[this.connected, this.setConnected] = createSignal(false)
     ;[this.instances, this.setInstances] = createSignal([])
     ;[this.traffic, this.setTraffic] = createSignal([])
+    this.checkConnection()
   }
   async checkConnection() {
     ky.get(`${this.api}/connect`)

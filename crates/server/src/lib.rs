@@ -13,6 +13,8 @@ mod routes;
 mod traits;
 mod utility;
 
+const PUB_KEY: &[u8] = include_bytes!("../../../config/pub.bin");
+
 /// Show greet information.
 pub fn greet() {
     println!(
@@ -39,7 +41,7 @@ pub fn greet() {
 pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
     let (console_guard, file_guard) = logger::initialize(&config.logging).await?;
     warn!(">> Server initialization started <<");
-    let license = match r2s_license::check_license() {
+    let license = match r2s_license::check_license(PUB_KEY) {
         Ok(license) => license,
         Err(err) => {
             error!("License check failed: {}", err.to_string().red());

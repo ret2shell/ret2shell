@@ -81,7 +81,8 @@
     "renew": "延長時間",
     "stop": "環境を終了する",
     "needLocalDaemon": "使用するにはローカル WSRX に接続する必要があります",
-    "box": "動的環境接続"
+    "box": "動的環境接続",
+    "connecting": "接続中..."
   },
   "magic": {
     "illustration": "図",

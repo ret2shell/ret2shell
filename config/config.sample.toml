@@ -52,7 +52,7 @@ tls = 'starttls'                   #  'none' | 'tls' | 'starttls'
 
 [logging]
 directory = './data/log'
-level = 'ret2shell=debug,tower_http=info,sqlx=warn'
+level = 'debug,tower_http=info,sqlx=warn'
 log_to_file = true
 log_to_console = true
 

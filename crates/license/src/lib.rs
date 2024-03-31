@@ -10,8 +10,6 @@ const LICENSE_PREDEFINED_PATH: [&str; 3] = ["/etc/ret2shell/", "~/.config/ret2sh
 // Predefined file name for the configuration file.
 const LICENSE_PREDEFINED_FILE_NAME: &str = "license";
 
-const PUB_KEY: &[u8] = include_bytes!("../../../config/pub.bin");
-
 #[derive(Error, Debug)]
 pub enum LicenseError {
     #[error("License is missing.")]
@@ -32,7 +30,7 @@ pub struct License {
 /// A simple license check function.
 /// it's easy to crack or patch so....
 /// implementing this one is just a formality.
-pub fn check_license() -> Result<License, LicenseError> {
+pub fn check_license(pub_key: &[u8]) -> Result<License, LicenseError> {
     let mut config_str = String::new();
     let mut file_path = String::new();
     for path in LICENSE_PREDEFINED_PATH.iter() {
@@ -62,7 +60,7 @@ pub fn check_license() -> Result<License, LicenseError> {
         .decode(sig)
         .map_err(|_| LicenseError::Invalid)?;
     let cert = String::from_utf8(cert).map_err(|_| LicenseError::Invalid)?;
-    let keypair = signature::UnparsedPublicKey::new(&signature::ED25519, PUB_KEY);
+    let keypair = signature::UnparsedPublicKey::new(&signature::ED25519, pub_key);
     if keypair.verify(cert.as_bytes(), &sig).is_err() {
         return Err(LicenseError::Invalid);
     }

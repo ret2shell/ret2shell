@@ -81,7 +81,8 @@
     "renew": "Renew timer",
     "stop": "Terminate environment",
     "needLocalDaemon": "Need to connect to local WSRX to use",
-    "box": "dynamic environment connection"
+    "box": "dynamic environment connection",
+    "connecting": "Connecting..."
   },
   "magic": {
     "illustration": "illustration",

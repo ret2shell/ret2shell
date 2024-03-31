@@ -42,10 +42,12 @@ export default function (
     ...btnProps.classList,
   }
 
+  const size = others.size === 'sm' ? 16 : 24
+
   return (
     <button {...btnProps} classList={classList}>
       <Show when={props.loading}>
-        <Spin />
+        <Spin width={size} height={size} />
       </Show>
       {children(() => props.children)()}
     </button>

@@ -81,7 +81,8 @@
     "renew": "延長時間",
     "stop": "終止環境",
     "needLocalDaemon": "需要連接本地WSRX才能使用",
-    "box": "動態環境連接"
+    "box": "動態環境連接",
+    "connecting": "連接中..."
   },
   "magic": {
     "illustration": "插畫",

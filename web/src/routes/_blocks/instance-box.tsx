@@ -3,7 +3,7 @@ import Card from '@widgets/card'
 import { t } from '@storage/theme'
 import Link from '@widgets/link'
 import Button from '@widgets/button'
-import { For, createSignal, onCleanup } from 'solid-js'
+import { For, Show, createSignal, onCleanup } from 'solid-js'
 import Timer from '@widgets/timer'
 import Progress from '@widgets/progress'
 import { Instance } from '@models/instance'
@@ -21,6 +21,17 @@ export default function InstanceBox() {
     )
   }
 
+  const [connecting, setConnecting] = createSignal(false)
+
+  function retryConnect() {
+    wsrx.tryConnect()
+    setConnecting(true)
+    setTimeout(() => {
+      setConnecting(false)
+      wsrx.checkConnection()
+    }, 5000)
+  }
+
   const [now, setNow] = createSignal(DateTime.now())
   const wsrx = new Wsrx()
   const timer = setInterval(() => {
@@ -32,7 +43,11 @@ export default function InstanceBox() {
   return (
     <>
       <Popover
-        btnContent={<span class="icon-[fluent--pair-20-regular] w-5 h-5" />}
+        btnContent={
+          <span
+            class={`icon-[fluent--pair-20-regular] w-5 h-5 ${wsrx.connected() ? 'text-success' : 'text-warning'}`}
+          />
+        }
         square
         ghost
         padding="pt-2"
@@ -41,20 +56,30 @@ export default function InstanceBox() {
         <div class="flex flex-col space-y-2 w-96">
           <Card contentClass="p-2 flex flex-row space-x-2">
             <Button
+              disabled={connecting()}
+              loading={connecting()}
               class="flex-1"
               justify="start"
               ghost
               title={t('instance.retryLinkWsrx')}
               size="sm"
-              onClick={() => {
-                wsrx.tryConnect()
-              }}
+              onClick={retryConnect}
             >
+              <Show when={!connecting()}>
+                <span
+                  class={`icon-[fluent--pair-20-regular] w-5 h-5 ${wsrx.connected() ? 'text-success' : 'text-warning'}`}
+                />
+              </Show>
               <span
-                class={`icon-[fluent--pair-20-regular] w-5 h-5 ${wsrx.connected() ? 'text-success' : 'text-warning'}`}
-              />
-              <span class={wsrx.connected() ? 'text-success font-bold' : 'text-warning'}>
-                {wsrx.connected() ? t('instance.connected') : t('instance.disconnected')}
+                class={
+                  connecting() ? 'text-base opacity-60' : wsrx.connected() ? 'text-success font-bold' : 'text-warning'
+                }
+              >
+                {connecting()
+                  ? t('instance.connecting')
+                  : wsrx.connected()
+                    ? t('instance.connected')
+                    : t('instance.disconnected')}
               </span>
             </Button>
             <Link
