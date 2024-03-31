@@ -11,7 +11,7 @@ keywords = ["ctf", "challenge", "platform", "security", "education"]
 resolver = "2"
 
 [dependencies]
-tokio = { version = "1.36", features = ["full"] }
+tokio = { version = "1.37", features = ["full"] }
 
 sea-orm = { version = "0.12", features = [
   "sqlx-postgres",
