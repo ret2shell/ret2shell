@@ -17,3 +17,4 @@ data/*
 
 config/config.toml
 config/license
+config/*.bin

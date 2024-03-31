@@ -1,6 +1,5 @@
 import Popover from '@widgets/popover'
 import Card from '@widgets/card'
-import { wsrxStore } from '@storage/wsrx'
 import { t } from '@storage/theme'
 import Link from '@widgets/link'
 import Button from '@widgets/button'
@@ -9,6 +8,7 @@ import Timer from '@widgets/timer'
 import Progress from '@widgets/progress'
 import { Instance } from '@models/instance'
 import { DateTime } from 'luxon'
+import { Wsrx } from '@/lib/wsrx'
 
 export default function InstanceBox() {
   function calcProgress(instance: Instance, now: DateTime) {
@@ -20,9 +20,15 @@ export default function InstanceBox() {
       ((instance.renew_count + 1) * 3600 * 10)
     )
   }
+
   const [now, setNow] = createSignal(DateTime.now())
-  const timer = setInterval(() => setNow(DateTime.now()), 1000)
-  onCleanup(() => clearInterval(timer))
+  const wsrx = new Wsrx()
+  const timer = setInterval(() => {
+    setNow(DateTime.now())
+  }, 1000)
+  onCleanup(() => {
+    clearInterval(timer)
+  })
   return (
     <>
       <Popover
@@ -34,16 +40,25 @@ export default function InstanceBox() {
       >
         <div class="flex flex-col space-y-2 w-96">
           <Card contentClass="p-2 flex flex-row space-x-2">
-            <Button class="flex-1" justify="start" ghost title={t('instance.retryLinkWsrx')} size="sm">
+            <Button
+              class="flex-1"
+              justify="start"
+              ghost
+              title={t('instance.retryLinkWsrx')}
+              size="sm"
+              onClick={() => {
+                wsrx.tryConnect()
+              }}
+            >
               <span
-                class={`icon-[fluent--pair-20-regular] w-5 h-5 ${wsrxStore.daemon ? 'text-success' : 'text-warning'}`}
+                class={`icon-[fluent--pair-20-regular] w-5 h-5 ${wsrx.connected() ? 'text-success' : 'text-warning'}`}
               />
-              <span class={wsrxStore.daemon ? 'text-success font-bold' : 'text-warning'}>
-                {wsrxStore.daemon ? t('instance.connected') : t('instance.disconnected')}
+              <span class={wsrx.connected() ? 'text-success font-bold' : 'text-warning'}>
+                {wsrx.connected() ? t('instance.connected') : t('instance.disconnected')}
               </span>
             </Button>
             <Link
-              href="https://github.com/ret2shell/wsrx/releases"
+              href="https://github.com/XDSEC/WebSocketReflectorX/releases"
               ghost
               square
               title={t('instance.downloadWsrx')}
@@ -52,7 +67,7 @@ export default function InstanceBox() {
               <span class="icon-[fluent--arrow-download-20-regular] w-5 h-5" />
             </Link>
           </Card>
-          <For each={wsrxStore.instances}>
+          <For each={wsrx.instances()}>
             {instance => (
               <Card contentClass="p-2 flex flex-col space-y-2">
                 <div class="flex flex-col">
@@ -72,8 +87,8 @@ export default function InstanceBox() {
                   <Button
                     ghost
                     size="sm"
-                    title={wsrxStore.daemon ? t('instance.copyLocalAddr') : t('instance.needLocalDaemon')}
-                    disabled={wsrxStore.daemon === null}
+                    title={wsrx.connected() ? t('instance.copyLocalAddr') : t('instance.needLocalDaemon')}
+                    disabled={wsrx.connected() === null}
                   >
                     <span class="icon-[fluent--copy-20-regular] w-5 h-5 text-info" />
                     <span class="truncate text-nowrap opacity-60">LOCAL</span>
@@ -82,8 +97,8 @@ export default function InstanceBox() {
                     size="sm"
                     square
                     ghost
-                    title={wsrxStore.daemon ? t('instance.openLocalAddr') : t('instance.needLocalDaemon')}
-                    disabled={wsrxStore.daemon === null}
+                    title={wsrx.connected() ? t('instance.openLocalAddr') : t('instance.needLocalDaemon')}
+                    disabled={wsrx.connected() === null}
                   >
                     <span class="icon-[fluent--open-20-regular] w-5 h-5 text-info" />
                   </Button>

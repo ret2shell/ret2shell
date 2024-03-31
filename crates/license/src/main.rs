@@ -60,7 +60,6 @@ struct Args {
 /// Clap subcommands.
 #[derive(Subcommand, Debug)]
 enum Commands {
-    /// Run the server.
     Init {
         /// The path to the output file.
         #[arg(short, long)]

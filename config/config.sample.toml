@@ -1,5 +1,14 @@
-[audit]
+[auditor]
 sensitive_word_list = './config/sensitive_word_list.txt'
+
+[auth]
+signing_key = '857f1cda-01f7-473c-b957-6d4744230a47'
+buffer_time = 21600
+expires_time = 86400
+
+[automate]
+enabled = false
+token = 'T0k3nInD3v3l0pm3nt'
 
 [bucket]
 path = './data/bucket'
@@ -12,6 +21,18 @@ path = './data/bucket'
 # redis-sentinel://username:password@foo.com:6379/1?sentinelServiceName=fakename&node=foo.com:30001&node=bar.com:30002
 url = 'redis://localhost:6379'
 
+[captcha]
+enabled = true
+difficulty = 4
+validator = 'Pow'
+
+[cluster]
+try_default = false
+auto_infer = true
+kube_config_path = "~/.kube/config"
+challenge_node_selector = "challenge"
+proxy_image = "ret2shell/container-proxy:main"
+
 [database]
 db = 'ret2shell'
 host = '127.0.0.1'
@@ -19,6 +40,15 @@ port = 5432
 user = 'ret2shell'
 password = 'P@ssw02dInD3v3l0pm3nt'
 ssl_mode = 'disable'               # disable, allow, prefer, require, verify-ca, verify-full
+
+[email]
+enabled = false
+host = 'smtp.example.com'
+port = 587
+sender = 'Ret2Shell'
+username = 'ret2shell@woooo.tech'
+password = 'P@ssw0rdInD3v3l0pm3nt'
+tls = 'starttls'                   #  'none' | 'tls' | 'starttls'
 
 [logging]
 directory = './data/log'
@@ -48,9 +78,3 @@ external_https = true
 api_base_path = '/api'
 cors_origins = '*'
 init_token = 'Samp1eT0k3n'
-
-[cluster]
-try_default = false
-auto_infer = true
-kube_config_path = "~/.kube/config"
-challenge_node_selector = "challenge"
