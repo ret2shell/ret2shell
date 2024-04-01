@@ -45,7 +45,7 @@ export default function InstanceBox() {
       <Popover
         btnContent={
           <span
-            class={`icon-[fluent--pair-20-regular] w-5 h-5 ${wsrx.connected() ? 'text-success' : 'text-warning'}`}
+            class={`${wsrx.instances().length > 0 ? 'icon-[fluent--airplane-20-filled]' : 'icon-[fluent--airplane-20-regular]'} w-5 h-5 ${wsrx.instances().length > 0 ? (wsrx.connected() ? 'text-success' : 'text-warning') : ''}`}
           />
         }
         square
@@ -67,7 +67,7 @@ export default function InstanceBox() {
             >
               <Show when={!connecting()}>
                 <span
-                  class={`icon-[fluent--pair-20-regular] w-5 h-5 ${wsrx.connected() ? 'text-success' : 'text-warning'}`}
+                  class={`icon-[fluent--airplane-20-regular] w-5 h-5 ${wsrx.connected() ? 'text-success' : 'text-warning'}`}
                 />
               </Show>
               <span

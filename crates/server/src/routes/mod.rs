@@ -25,6 +25,16 @@ use crate::{
 };
 
 mod account;
+mod automate;
+mod bulletin;
+mod calendar;
+mod challenge;
+mod game;
+mod instance;
+mod media;
+mod platform;
+mod user;
+mod wiki;
 
 pub async fn initialize(
     config: Option<server::Config>, state: GlobalState,
@@ -75,6 +85,16 @@ pub async fn initialize(
 fn construct_router(state: &GlobalState) -> Router<GlobalState> {
     Router::new()
         .nest("/account", account::router(state))
+        .nest("/automate", automate::router(state))
+        .nest("/bulletin", bulletin::router(state))
+        .nest("/calendar", calendar::router(state))
+        .nest("/challenge", challenge::router(state))
+        .nest("/game", game::router(state))
+        .nest("/instance", instance::router(state))
+        .nest("/media", media::router(state))
+        .nest("/platform", platform::router(state))
+        .nest("/user", user::router(state))
+        .nest("/wiki", wiki::router(state))
         .route("/ping", get(ping))
         .route_layer(from_fn_with_state(state.clone(), ip_record))
         .route_layer(from_fn_with_state(state.clone(), extract_user_info))

@@ -16,6 +16,7 @@ import { Permission } from '@models/user'
 import Popover from '@widgets/popover'
 import Card from '@widgets/card'
 import NotificationBox from './_blocks/notification-box'
+import { addToast } from '@/lib/storage/toast'
 
 function GlobalTitleLink() {
   return (
@@ -205,9 +206,9 @@ function TitleBar() {
           </ul>
           <div class="flex-1"></div>
           <div class="flex flex-row space-x-2">
-            <Show when={accountStore.token !== null}>
-              <InstanceBox />
-            </Show>
+            {/* <Show when={accountStore.token !== null}> */}
+            <InstanceBox />
+            {/* </Show> */}
             <NotificationBox />
             <DiyBox />
             <UserBox />
@@ -223,6 +224,11 @@ export default function (props: { children?: JSX.Element }) {
   const [platformTyped, setPlatformTyped] = createSignal('')
   const [hideAnimation, setHideAnimation] = createSignal(false)
   const showAnimation = useLocation().pathname === '/'
+  addToast({
+    description:
+      '提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息',
+    level: 'info',
+  })
 
   onMount(() => {
     if (showAnimation) {

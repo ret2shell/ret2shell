@@ -5,7 +5,9 @@
     "diyBox": "Language and  themes",
     "notificationBox": "Notifications",
     "clearNotifications": "Clear messages",
-    "noNotifications": "No unread messages"
+    "noNotifications": "No unread messages",
+    "reject": "No",
+    "accept": "Yes"
   },
   "wiki": {
     "title": "Wiki"

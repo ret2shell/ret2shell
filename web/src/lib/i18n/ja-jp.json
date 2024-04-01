@@ -5,7 +5,9 @@
     "diyBox": "言語と明暗のテーマ",
     "notificationBox": "プロンプトメッセージ",
     "clearNotifications": "メッセージをクリアする",
-    "noNotifications": "未読メッセージはありません"
+    "noNotifications": "未読メッセージはありません",
+    "reject": "いいえ",
+    "accept": "わかりました"
   },
   "wiki": {
     "title": "知識"

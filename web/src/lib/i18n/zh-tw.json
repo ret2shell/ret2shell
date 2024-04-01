@@ -5,7 +5,9 @@
     "diyBox": "語言與明暗主題",
     "notificationBox": "提示訊息",
     "clearNotifications": "清空訊息",
-    "noNotifications": "沒有未讀訊息"
+    "noNotifications": "沒有未讀訊息",
+    "reject": "不行",
+    "accept": "好的"
   },
   "wiki": {
     "title": "知識"
