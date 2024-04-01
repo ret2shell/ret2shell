@@ -34,7 +34,7 @@ export default function () {
   const currentMonthDays = createMemo(() => {
     // should starts at prev month's tail, from sunday, end with next month's head, to saturday
     const days = []
-    let cDate = DateTime.fromObject({ year: year(), month: month(), day: 1 })
+    const cDate = DateTime.fromObject({ year: year(), month: month(), day: 1 })
     const prevMonth = cDate.minus({ month: 1 })
     const currentMonth = cDate
     const currentMonthDays = currentMonth.daysInMonth

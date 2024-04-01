@@ -23,7 +23,7 @@ export function addToast(toast: {
   accept?: () => void
   acceptLabel?: string
 }): string {
-  let id = nanoid()
+  const id = nanoid()
   setToastStore('toasts', toasts => [...toasts, { id, ...toast }])
   return id
 }
