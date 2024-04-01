@@ -224,11 +224,6 @@ export default function (props: { children?: JSX.Element }) {
   const [platformTyped, setPlatformTyped] = createSignal('')
   const [hideAnimation, setHideAnimation] = createSignal(false)
   const showAnimation = useLocation().pathname === '/'
-  addToast({
-    description:
-      '提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息提示消息',
-    level: 'info',
-  })
 
   onMount(() => {
     if (showAnimation) {
