@@ -28,7 +28,6 @@ mod account;
 mod automate;
 mod bulletin;
 mod calendar;
-mod challenge;
 mod game;
 mod instance;
 mod media;
@@ -88,7 +87,6 @@ fn construct_router(state: &GlobalState) -> Router<GlobalState> {
         .nest("/automate", automate::router(state))
         .nest("/bulletin", bulletin::router(state))
         .nest("/calendar", calendar::router(state))
-        .nest("/challenge", challenge::router(state))
         .nest("/game", game::router(state))
         .nest("/instance", instance::router(state))
         .nest("/media", media::router(state))
