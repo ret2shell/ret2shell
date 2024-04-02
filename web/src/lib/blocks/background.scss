@@ -1,0 +1,12 @@
+.draw-line {
+  animation: draw-line 2s ease-out forwards;
+}
+
+@keyframes draw-line {
+  0% {
+    stroke-dashoffset: 1000;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}

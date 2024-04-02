@@ -7,7 +7,8 @@
     "clearNotifications": "清空消息",
     "noNotifications": "没有未读消息",
     "reject": "不行",
-    "accept": "好的"
+    "accept": "好的",
+    "offline": "后端似乎离线了，请刷新页面。如果此错误反复出现，请联系维护人员。"
   },
   "wiki": {
     "title": "知识"
@@ -67,13 +68,24 @@
   },
   "account": {
     "login": {
-      "title": "登录"
+      "title": "登录",
+      "accountPlaceholder": "用户名/邮箱",
+      "passwordPlaceholder": "密码",
+      "captchaPlaceholder": "验证码"
     },
     "settings": {
       "title": "用户设置"
     },
     "logout": "退出登录",
-    "box": "用户详情"
+    "box": "用户详情",
+    "register": {
+      "tips": "没有账号？现在注册！"
+    },
+    "oauth": {
+      "xdu": {
+        "title": "西电统一身份认证"
+      }
+    }
   },
   "instance": {
     "disconnected": "WSRX 未连接",

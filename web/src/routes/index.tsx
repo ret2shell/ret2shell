@@ -1,48 +1,56 @@
 import { Show } from 'solid-js'
 import LogoAnimate from '@assets/animates/logo-animate'
-import { platformStore } from '@storage/platform'
+import { platformStore, setPlatformStore } from '@storage/platform'
 import { t } from '@storage/theme'
 import Popover from '@widgets/popover'
 import Link from '@widgets/link'
 import Button from '@widgets/button'
 import Card from '@widgets/card'
 import Calendar from './calendar'
+import { getVersion } from '@/lib/api/platform'
+import { Title } from '@solidjs/meta'
 
 export default function () {
+  getVersion()
+    .then(version => {
+      setPlatformStore('version', version)
+    })
+    .catch(() => {})
   return (
     <>
+      <Title>{platformStore.config.name || t('platform.name')}</Title>
       <div class="flex-1 relative">
         <div class="absolute h-full w-full overflow-scroll snap-mandatory snap-y">
           <section class="h-full min-h-full snap-center flex flex-col items-center justify-center relative">
             <div class="flex-1" />
             <h1 class="text-3xl font-bold opacity-80">
               &nbsp;&nbsp;
-              <span>[&nbsp;{platformStore.name || t('platform.name')}&nbsp;]</span>
+              <span>[&nbsp;{platformStore.config.name || t('platform.name')}&nbsp;]</span>
               &nbsp;
               <span class="text-primary animate-ping">_</span>
             </h1>
-            <a class="text-xl text-error mt-8" href={platformStore.subject_url || '#'} target="_blank">
-              {platformStore.subject_info || t('platform.subject')}
+            <a class="text-xl text-error mt-8" href={platformStore.config.subject_url || '#'} target="_blank">
+              {platformStore.config.subject_info || t('platform.subject')}
             </a>
             <div class="flex-1" />
             <div class="h-24" />
             <div class="absolute bottom-4 flex flex-row flex-wrap items-center justify-center h-auto p-2 space-x-2 opacity-60">
               <Button ghost>
                 (C) 2022 - {new Date().getFullYear()}&nbsp;
-                <a class="hover:underline" href={platformStore.footer_url} target="_blank">
-                  {platformStore.footer_info}
+                <a class="hover:underline" href={platformStore.config.footer_url || '#'} target="_blank">
+                  {platformStore.config.footer_info}
                 </a>
-                <Show when={!platformStore.hide_maker}>
+                <Show when={!platformStore.config.hide_maker}>
                   <span class="opacity-40">|</span>
                   <span>By</span>
                   <a class="hover:underline" href="https://github.com/ret2shell" target="_blank">
                     {t('platform.name')}
                   </a>
                 </Show>
-                <Show when={platformStore.record}>
+                <Show when={platformStore.config.record}>
                   <span>&nbsp;|&nbsp;</span>
                   <a class="hover:underline" href="https://beian.miit.gov.cn" target="_blank">
-                    {platformStore.record}
+                    {platformStore.config.record}
                   </a>
                 </Show>
               </Button>
@@ -75,14 +83,14 @@ export default function () {
                         <span class="text-error">S</span>
                         <span class="opacity-80">hell</span>
                       </h2>
-                      <p class="text-base font-bold opacity-60">
+                      <p class="text-base font-bold opacity-60 space-x-2">
                         <Show
-                          when={platformStore.version?.includes('*')}
+                          when={(platformStore.version || 'UNKNOWN').includes('*')}
                           fallback={<span class="text-primary">REL</span>}
                         >
                           <span class="text-warning">DEV</span>
                         </Show>
-                        <span>{platformStore.version?.replace('*', '')}</span>
+                        <span>{(platformStore.version || 'UNKNOWN').replace('*', '')}</span>
                       </p>
                     </div>
                   </Card>

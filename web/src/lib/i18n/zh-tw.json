@@ -7,7 +7,8 @@
     "clearNotifications": "清空訊息",
     "noNotifications": "沒有未讀訊息",
     "reject": "不行",
-    "accept": "好的"
+    "accept": "好的",
+    "offline": "後端似乎離線了，請刷新頁面。\n如果此錯誤反覆出現，請聯絡維護人員。"
   },
   "wiki": {
     "title": "知識"
@@ -67,13 +68,24 @@
   },
   "account": {
     "login": {
-      "title": "登入"
+      "title": "登入",
+      "accountPlaceholder": "使用者名稱/郵箱",
+      "passwordPlaceholder": "密碼",
+      "captchaPlaceholder": "驗證碼"
     },
     "settings": {
       "title": "使用者設定"
     },
     "logout": "登出登入",
-    "box": "使用者詳情"
+    "box": "使用者詳情",
+    "register": {
+      "tips": "沒有帳號？\n現在註冊！"
+    },
+    "oauth": {
+      "xdu": {
+        "title": "西電統一身分認證"
+      }
+    }
   },
   "instance": {
     "disconnected": "WSRX 未連接",

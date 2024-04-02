@@ -7,7 +7,8 @@
     "clearNotifications": "メッセージをクリアする",
     "noNotifications": "未読メッセージはありません",
     "reject": "いいえ",
-    "accept": "わかりました"
+    "accept": "わかりました",
+    "offline": "バックエンドがオフラインのようです。ページを更新してください。\nこのエラーが繰り返し発生する場合は保守員に連絡してください。"
   },
   "wiki": {
     "title": "知識"
@@ -67,13 +68,24 @@
   },
   "account": {
     "login": {
-      "title": "ログイン"
+      "title": "ログイン",
+      "accountPlaceholder": "ユーザー名/メールボックス",
+      "passwordPlaceholder": "パスワード",
+      "captchaPlaceholder": "検証コード"
     },
     "settings": {
       "title": "ユーザー設定"
     },
     "logout": "サインアウト",
-    "box": "ユーザーの詳細"
+    "box": "ユーザーの詳細",
+    "register": {
+      "tips": "アカウントがありませんか?\n今すぐ登録！"
+    },
+    "oauth": {
+      "xdu": {
+        "title": "XDU の統一 ID 認証"
+      }
+    }
   },
   "instance": {
     "disconnected": "WSRXが接続されていません",

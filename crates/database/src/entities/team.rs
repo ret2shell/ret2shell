@@ -29,11 +29,11 @@ use super::user;
 #[repr(i32)]
 #[sea_orm(rs_type = "i32", db_type = "Integer")]
 pub enum State {
-    Banned  = 0,
+    Banned = 0,
     #[default]
     Pending = 1,
-    Hidden  = 2,
-    Passed  = 3,
+    Hidden = 2,
+    Passed = 3,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
@@ -75,7 +75,7 @@ pub struct Model {
 }
 
 impl Model {
-    pub fn desentisize(self) -> Self {
+    pub fn desensitize(self) -> Self {
         Self {
             token: None,
             ..self
@@ -99,7 +99,7 @@ pub struct ExModel {
 }
 
 impl ExModel {
-    pub fn desentisize(self) -> Self {
+    pub fn desensitize(self) -> Self {
         Self {
             token: None,
             ..self

@@ -7,6 +7,7 @@ use axum::{
 use r2s_cache::Cache;
 use r2s_config::GlobalConfig;
 use r2s_migrator::Database;
+use tracing::debug;
 
 use super::auth::Token;
 use crate::traits::ResponseError;
@@ -22,6 +23,8 @@ pub async fn prepare_config(
         }
         None => {
             let dynamic_config = r2s_database::config::get(&db.conn).await?;
+            debug!("dynamic_config: {:?}", dynamic_config);
+            debug!("static_config: {:?}", config);
             let dynamic_config = dynamic_config.unwrap_or_default().merge(config);
             cache.at("platform").set("config", &dynamic_config).await?;
             req.extensions_mut()

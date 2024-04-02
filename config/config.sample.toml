@@ -75,4 +75,3 @@ external_domain = 'ctf.woooo.tech'
 external_https = true
 api_base_path = '/api'
 cors_origins = '*'
-init_token = 'Samp1eT0k3n'

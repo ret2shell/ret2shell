@@ -6,8 +6,7 @@ import 'overlayscrollbars/overlayscrollbars.css'
 import './lib/widgets/styles/base.scss'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-solid'
 import { initTheme, t, themeStore } from './lib/storage/theme'
-import { Title, MetaProvider } from '@solidjs/meta'
-import { platformStore } from './lib/storage/platform'
+import { MetaProvider } from '@solidjs/meta'
 import { Router } from '@solidjs/router'
 import { onMount } from 'solid-js'
 import Background from './lib/blocks/background'
@@ -58,7 +57,6 @@ render(() => {
   return (
     <>
       <MetaProvider>
-        <Title>{platformStore.name || t('platform.name')}</Title>
         <Background />
         <OverlayScrollbarsComponent
           options={{

@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::traits::Merge;
 
-#[derive(Serialize, Deserialize, Clone, Debug, FromJsonQueryResult, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, FromJsonQueryResult, PartialEq, Eq, Default)]
 pub struct Config {
     /// The host address of the server.
     pub host: String,
@@ -18,8 +18,6 @@ pub struct Config {
     pub api_base_path: String,
     /// CORS rules enabled
     pub cors_origins: String,
-    /// Initialize token
-    pub init_token: String,
 
     pub name: Option<String>,
     pub footer_info: Option<String>,
@@ -55,7 +53,7 @@ impl Config {
         }
     }
 
-    pub fn desentialize(&self) -> Self {
+    pub fn desensitize(&self) -> Self {
         Self {
             host: "".to_string(),
             port: 0,
@@ -63,7 +61,6 @@ impl Config {
             external_https: self.external_https,
             api_base_path: self.api_base_path.clone(),
             cors_origins: "".to_string(),
-            init_token: "".to_string(),
             name: self.name.clone(),
             footer_info: self.footer_info.clone(),
             footer_url: self.footer_url.clone(),
@@ -86,7 +83,6 @@ impl Merge for Option<Config> {
                 external_https: b.external_https,
                 api_base_path: b.api_base_path,
                 cors_origins: b.cors_origins,
-                init_token: b.init_token,
                 name: b.name.or(a.name),
                 footer_info: b.footer_info.or(a.footer_info),
                 footer_url: b.footer_url.or(a.footer_url),

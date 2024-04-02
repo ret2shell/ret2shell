@@ -13,10 +13,21 @@ export default function (props: {
     card: true,
     'card-solid': props.solid,
     ...props.classList,
-  }
+  } as { [k: string]: boolean }
+  const mergedClasses =
+    Object.keys(mergedClassesList)
+      .filter(k => mergedClassesList[k])
+      .join(' ') + (props.class ? ` ${props.class}` : '')
+  const contentClassesList = {
+    ...props.contentClassList,
+  } as { [k: string]: boolean }
   return (
-    <div classList={mergedClassesList} class={props.class}>
-      <div class={`card-content ${props.contentClass}`} classList={props.contentClassList}>
+    <div class={mergedClasses}>
+      <div
+        class={`card-content ${props.contentClass} ${Object.keys(contentClassesList)
+          .filter(k => contentClassesList[k])
+          .join(' ')}`}
+      >
         {props.children}
       </div>
     </div>

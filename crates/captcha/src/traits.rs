@@ -16,7 +16,7 @@ pub struct Captcha {
 }
 
 impl Captcha {
-    pub fn desentisize(self) -> Self {
+    pub fn desensitize(self) -> Self {
         Self {
             criteria: None,
             ..self

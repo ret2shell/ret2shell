@@ -1,0 +1,28 @@
+.input {
+  @apply backdrop-blur text-layer-content outline-layer-content/60 bg-layer-content/10;
+  /* @apply outline outline-2 outline-offset-2; */
+  @apply px-4 rounded-lg min-h-12;
+
+  &:active:hover,
+  &:active:focus {
+    @apply bg-layer-content/5;
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      @apply bg-layer-content/5;
+    }
+  }
+
+  &:focus {
+    @apply outline outline-2 outline-offset-2 bg-layer-content/5;
+  }
+
+  &-md {
+    @apply px-4 rounded-lg min-h-12;
+  }
+
+  &-sm {
+    @apply px-2 rounded-md min-h-8;
+  }
+}

@@ -1,5 +1,5 @@
 import { JSX, Match, Show, Switch, createSignal, onMount } from 'solid-js'
-import { platformStore } from '@storage/platform'
+import { platformStore, setPlatformStore } from '@storage/platform'
 import { t } from '@storage/theme'
 import { Motion, Presence } from 'solid-motionone'
 import Link from '@widgets/link'
@@ -16,6 +16,9 @@ import { Permission } from '@models/user'
 import Popover from '@widgets/popover'
 import Card from '@widgets/card'
 import NotificationBox from './_blocks/notification-box'
+import { getPlatformInfo } from '@/lib/api/platform'
+import { addToast } from '@/lib/storage/toast'
+import Divider from '@/lib/widgets/divider'
 
 function GlobalTitleLink() {
   return (
@@ -23,7 +26,7 @@ function GlobalTitleLink() {
       <Link ghost href="/">
         <LogoAnimate class="hidden xl:inline-block" width={24} height={24} />
         <span></span>
-        <span>{platformStore.name || t('platform.name')}</span>
+        <span>{platformStore.config.name || t('platform.name')}</span>
       </Link>
     </>
   )
@@ -186,6 +189,14 @@ function TitleBar() {
                       </Match>
                     </Switch>
                   </ul>
+                  <Divider direction="horizontal" />
+                  <div class="flex flex-row space-x-2">
+                    <Show when={accountStore.token !== null}>
+                      <InstanceBox />
+                    </Show>
+                    <NotificationBox />
+                    <DiyBox />
+                  </div>
                 </Card>
               </div>
             </Popover>
@@ -205,11 +216,13 @@ function TitleBar() {
           </ul>
           <div class="flex-1"></div>
           <div class="flex flex-row space-x-2">
-            <Show when={accountStore.token !== null}>
-              <InstanceBox />
-            </Show>
-            <NotificationBox />
-            <DiyBox />
+            <div class="hidden md:flex flex-row space-x-2">
+              <Show when={accountStore.token !== null}>
+                <InstanceBox />
+              </Show>
+              <NotificationBox />
+              <DiyBox />
+            </div>
             <UserBox />
           </div>
         </div>
@@ -219,27 +232,37 @@ function TitleBar() {
 }
 
 export default function (props: { children?: JSX.Element }) {
-  const platformName = `\xa0\xa0[\xa0${platformStore.name || t('platform.name')}\xa0]\xa0`
+  let platformName = `\xa0\xa0[\xa0${platformStore.config.name || t('platform.name')}\xa0]\xa0`
   const [platformTyped, setPlatformTyped] = createSignal('')
   const [hideAnimation, setHideAnimation] = createSignal(false)
   const showAnimation = useLocation().pathname === '/'
-
-  onMount(() => {
-    if (showAnimation) {
-      setTimeout(() => {
-        const typeTimer = setInterval(() => {
-          if (platformTyped().length < platformName!.length) {
-            setPlatformTyped(platformName!.slice(0, platformTyped().length + 1))
-          } else {
-            clearInterval(typeTimer)
-            setTimeout(() => {
-              setHideAnimation(true)
-            }, 500)
-          }
-        }, 100)
-      }, 1000)
-    }
-  })
+  getPlatformInfo()
+    .then(res => {
+      setPlatformStore({ ...platformStore, config: res })
+    })
+    .catch(() => {
+      addToast({
+        level: 'error',
+        description: `${t('platform.offline')}`,
+      })
+    })
+    .finally(() => {
+      platformName = `\xa0\xa0[\xa0${platformStore.config.name || t('platform.name')}\xa0]\xa0`
+      if (showAnimation) {
+        setTimeout(() => {
+          const typeTimer = setInterval(() => {
+            if (platformTyped().length < platformName!.length) {
+              setPlatformTyped(platformName!.slice(0, platformTyped().length + 1))
+            } else {
+              clearInterval(typeTimer)
+              setTimeout(() => {
+                setHideAnimation(true)
+              }, 500)
+            }
+          }, 100)
+        }, 1000)
+      }
+    })
   return (
     <>
       <TitleBar />

@@ -34,7 +34,7 @@ mod captcha;
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
     Router::new()
         .route(
-            "/self",
+            "/profile",
             get(get_profile).patch(change_profile).delete(delete_self),
         )
         .route("/verify", post(verify_email).patch(resend_verify_email))
@@ -494,7 +494,7 @@ async fn logout(
 async fn get_profile(
     Extension(user): Extension<user::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-    Ok(Json(user.desentisize()))
+    Ok(Json(user.desensitize()))
 }
 
 async fn change_profile(

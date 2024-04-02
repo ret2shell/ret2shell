@@ -1,15 +1,38 @@
 use sea_orm::FromJsonQueryResult;
 use serde::{Deserialize, Serialize};
-use serde_json::Value as Json;
 
 use crate::traits::Merge;
+
+#[derive(Serialize, Deserialize, Clone, Debug, FromJsonQueryResult, PartialEq, Eq)]
+pub struct OAuthKey {
+    pub service: String,
+    pub client_key: Option<String>,
+    pub secret: Option<String>,
+}
 
 #[derive(Serialize, Deserialize, Clone, Debug, FromJsonQueryResult, PartialEq, Eq)]
 pub struct Config {
     pub signing_key: String,
     pub buffer_time: i64,
     pub expires_time: i64,
-    pub oauth_keys: Option<Json>,
+    pub oauth_keys: Option<Vec<OAuthKey>>,
+}
+
+impl Config {
+    pub fn desensitize(self) -> Self {
+        Config {
+            signing_key: "".to_owned(),
+            oauth_keys: self.oauth_keys.map(|keys| {
+                keys.into_iter()
+                    .map(|key| OAuthKey {
+                        secret: None,
+                        ..key
+                    })
+                    .collect()
+            }),
+            ..self
+        }
+    }
 }
 
 impl Merge for Option<Config> {

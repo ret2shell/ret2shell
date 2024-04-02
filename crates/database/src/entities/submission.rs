@@ -24,7 +24,7 @@ pub struct Model {
 }
 
 impl Model {
-    pub fn desentisize(self) -> Self {
+    pub fn desensitize(self) -> Self {
         Self {
             content: None,
             ..self
@@ -48,7 +48,7 @@ pub struct ExModel {
 }
 
 impl ExModel {
-    pub fn desentisize(self) -> Self {
+    pub fn desensitize(self) -> Self {
         Self {
             content: None,
             ..self

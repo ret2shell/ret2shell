@@ -7,7 +7,8 @@
     "clearNotifications": "Clear messages",
     "noNotifications": "No unread messages",
     "reject": "No",
-    "accept": "Yes"
+    "accept": "Yes",
+    "offline": "The backend seems to be offline, please refresh the page. \nIf this error occurs repeatedly, please contact maintenance personnel."
   },
   "wiki": {
     "title": "Wiki"
@@ -67,13 +68,24 @@
   },
   "account": {
     "login": {
-      "title": "Login"
+      "title": "Login",
+      "accountPlaceholder": "account / email",
+      "passwordPlaceholder": "Password",
+      "captchaPlaceholder": "Captcha"
     },
     "settings": {
       "title": "user settings"
     },
     "logout": "sign out",
-    "box": "User detail"
+    "box": "User detail",
+    "register": {
+      "tips": "No account? \nRegister now!"
+    },
+    "oauth": {
+      "xdu": {
+        "title": "XDU Identity Authentication"
+      }
+    }
   },
   "instance": {
     "disconnected": "Not connected to WSRX",
