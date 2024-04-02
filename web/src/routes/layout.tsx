@@ -1,4 +1,4 @@
-import { JSX, Match, Show, Switch, createSignal, onMount } from 'solid-js'
+import { JSX, Match, Show, Switch, createSignal } from 'solid-js'
 import { platformStore, setPlatformStore } from '@storage/platform'
 import { t } from '@storage/theme'
 import { Motion, Presence } from 'solid-motionone'

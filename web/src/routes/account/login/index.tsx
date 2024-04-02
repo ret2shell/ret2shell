@@ -24,7 +24,7 @@ type LoginForm = {
 }
 
 export default function () {
-  const [form, { Form, Field, FieldArray }] = createForm<LoginForm>()
+  const [form, { Form, Field }] = createForm<LoginForm>()
   const [authConfig, setAuthConfig] = createSignal({
     signing_key: '',
     buffer_time: 0,
