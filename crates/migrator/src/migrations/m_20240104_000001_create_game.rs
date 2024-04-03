@@ -34,6 +34,7 @@ pub enum Game {
     EnableAudit,
     CanRegisterAfterStarted,
     AwardRate,
+    Admins,
 }
 
 #[async_trait::async_trait]
@@ -98,6 +99,12 @@ impl MigrationTrait for Migration {
                             .integer()
                             .not_null()
                             .default(0),
+                    )
+                    .col(
+                        ColumnDef::new(Game::Admins)
+                            .json_binary()
+                            .not_null()
+                            .default("[]"),
                     )
                     .to_owned(),
             )

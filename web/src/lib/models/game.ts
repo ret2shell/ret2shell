@@ -31,4 +31,5 @@ export type Game = {
   enable_audit: boolean
   can_register_after_started: boolean
   award_rate: number
+  admins: number[]
 }

@@ -28,7 +28,7 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 pub enum HostType {
     #[default]
     CTFTraining = 0,
-    CTFGame     = 1,
+    CTFGame = 1,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
@@ -67,6 +67,8 @@ pub struct Model {
     pub enable_audit: bool,
     pub can_register_after_started: bool,
     pub award_rate: i32,
+    #[sea_orm(column_type = "JsonBinary")]
+    pub admins: Vec<i64>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
