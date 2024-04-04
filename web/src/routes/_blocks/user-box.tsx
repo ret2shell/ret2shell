@@ -23,7 +23,9 @@ export default function UserBox() {
           btnContent={
             <Avatar
               class="w-8 h-8"
-              src={accountStore.info?.avatar || undefined}
+              img={{
+                src: accountStore.info?.avatar || undefined,
+              }}
               fallback={accountStore.name || undefined}
             />
           }
@@ -36,7 +38,9 @@ export default function UserBox() {
               <Link ghost class="h-16 space-x-2 flex-shrink-0 py-1 flex-nowrap" justify="start" href="/account/profile">
                 <Avatar
                   class="w-10 h-10"
-                  src={accountStore.info?.avatar || undefined}
+                  img={{
+                    src: accountStore.info?.avatar || undefined,
+                  }}
                   fallback={accountStore.name || undefined}
                 ></Avatar>
                 <div class="flex flex-col justify-center items-start">

@@ -1,15 +1,24 @@
-import { Avatar, AvatarImageProps } from '@ark-ui/solid'
+import { Avatar, AvatarImageProps, AvatarRootProps } from '@ark-ui/solid'
 import './styles/avatar.scss'
-import { splitProps } from 'solid-js'
+import { JSX, splitProps } from 'solid-js'
 
-export default function (
-  props: AvatarImageProps & { fallback?: string; rootClass?: string; rootClassList?: Record<string, boolean> }
-) {
-  const [rootProps, imgProps] = splitProps(props, ['fallback', 'rootClass', 'rootClassList'])
+export type AvatarProps = {
+  fallback?: string
+  class?: string
+  root?: AvatarRootProps
+  img?: AvatarImageProps
+  children?: JSX.Element
+}
+
+export default function (props: AvatarProps) {
+  const [fallback, _1] = splitProps(props, ['fallback'])
+  const [img, _2] = splitProps(_1, ['img'])
+  const [children, root] = splitProps(_2, ['children'])
   return (
-    <Avatar.Root class={`avatar h-12 w-12 ${rootProps.rootClass}`} classList={rootProps.rootClassList}>
-      <Avatar.Fallback class="avatar-fallback">{props.fallback}</Avatar.Fallback>
-      <Avatar.Image {...imgProps} class="avatar-img" />
+    <Avatar.Root class={`avatar h-12 w-12 ${root.class}`}>
+      <Avatar.Fallback class="avatar-fallback">{fallback.fallback}</Avatar.Fallback>
+      <Avatar.Image {...img} class={`avatar-img ${img.img?.class}`} />
+      {children.children}
     </Avatar.Root>
   )
 }
