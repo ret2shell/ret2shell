@@ -14,18 +14,16 @@ export default function (props: ComponentProps<'div'> & ToastProps) {
   const [toast, others] = splitProps(props, ['toast'])
   let progressRef: HTMLDivElement
   onMount(() => {
-    if (props.selfDestroy) {
+    if (props.selfDestroy && toast.toast.duration && toast.toast.duration > 0) {
       setTimeout(() => {
         progressRef.classList.remove('w-full')
         progressRef.style.transitionDuration = toast.toast.duration + 'ms'
         progressRef.classList.add('w-0')
-      }, 100)
-      setTimeout(
-        () => {
-          props.onTimeout?.()
-        },
-        (toast.toast.duration || 0) + 100
-      )
+      }, 500)
+      if (!toast.toast.duration) return
+      setTimeout(() => {
+        props.onTimeout?.()
+      }, toast.toast.duration + 100)
     }
   })
   return (
@@ -59,7 +57,7 @@ export default function (props: ComponentProps<'div'> & ToastProps) {
         >
           <span class="icon-[fluent--dismiss-20-regular] w-5 h-5"></span>
         </Button>
-        <Show when={props.selfDestroy}>
+        <Show when={props.selfDestroy && toast.toast.duration}>
           {/* bg-info bg-success bg-warning bg-error */}
           <div class="absolute bottom-1 left-4 h-[2px] right-4">
             <div ref={progressRef!} class={`w-full h-full bg-${toast.toast.level} transition-all ease-linear`}></div>

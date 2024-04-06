@@ -240,7 +240,6 @@ export default function (props: { children?: JSX.Element }) {
   addToast({
     level: 'info',
     description: `${t('platform.offline')}`,
-    duration: 5000,
   })
   getPlatformInfo()
     .then(res => {
