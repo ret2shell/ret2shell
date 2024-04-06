@@ -19,6 +19,7 @@ import NotificationBox from './_blocks/notification-box'
 import { getPlatformInfo } from '@/lib/api/platform'
 import { addToast } from '@/lib/storage/toast'
 import Divider from '@/lib/widgets/divider'
+import Toasts from './_blocks/toasts'
 
 function GlobalTitleLink() {
   return (
@@ -48,25 +49,25 @@ function GlobalNav(props: { size: 'sm' | 'md' }) {
   return (
     <>
       <li>
-        <Link class="w-full" href="/wiki" activeMatch="prefix" ghost justify="start" size={props.size}>
+        <Link class="w-full" href="/wiki" activeMatch="partial" ghost justify="start" size={props.size}>
           <span class="icon-[fluent--book-number-20-regular] w-5 h-5" />
           <span>{t('wiki.title')}</span>
         </Link>
       </li>
       <li>
-        <Link class="w-full" href="/training" activeMatch="prefix" ghost justify="start" size={props.size}>
+        <Link class="w-full" href="/training" activeMatch="partial" ghost justify="start" size={props.size}>
           <span class="icon-[fluent--dumbbell-20-regular] w-5 h-5" />
           <span>{t('training.title')}</span>
         </Link>
       </li>
       <li>
-        <Link class="w-full" href="/games" activeMatch="prefix" ghost justify="start" size={props.size}>
+        <Link class="w-full" href="/games" activeMatch="partial" ghost justify="start" size={props.size}>
           <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
           <span>{t('game.title')}</span>
         </Link>
       </li>
       <li>
-        <Link class="w-full" href="/bulletin" activeMatch="prefix" ghost justify="start" size={props.size}>
+        <Link class="w-full" href="/bulletin" activeMatch="partial" ghost justify="start" size={props.size}>
           <span class="icon-[fluent--megaphone-20-regular] w-5 h-5" />
           <span>{t('bulletin.title')}</span>
         </Link>
@@ -82,7 +83,7 @@ function GlobalNav(props: { size: 'sm' | 'md' }) {
         }
       >
         <li>
-          <Link class="w-full" href="/admin" activeMatch="prefix" ghost justify="start" size={props.size}>
+          <Link class="w-full" href="/admin" activeMatch="partial" ghost justify="start" size={props.size}>
             <span class="icon-[fluent--organization-20-regular] w-5 h-5" />
             <span>{t('admin.title')}</span>
           </Link>
@@ -99,7 +100,7 @@ function GameNav(props: { size: 'sm' | 'md' }) {
         <Link
           class="w-full"
           href={`/games/${gameStore.current?.id}/challenges`}
-          activeMatch="prefix"
+          activeMatch="partial"
           ghost
           justify="start"
           size={props.size}
@@ -112,7 +113,7 @@ function GameNav(props: { size: 'sm' | 'md' }) {
         <Link
           class="w-full"
           href={`/games/${gameStore.current?.id}/scoreboard`}
-          activeMatch="prefix"
+          activeMatch="partial"
           ghost
           justify="start"
           size={props.size}
@@ -126,7 +127,7 @@ function GameNav(props: { size: 'sm' | 'md' }) {
           <Link
             class="w-full"
             href={`/games/${gameStore.current?.id}/writeups`}
-            activeMatch="prefix"
+            activeMatch="partial"
             ghost
             justify="start"
             size={props.size}
@@ -140,7 +141,7 @@ function GameNav(props: { size: 'sm' | 'md' }) {
         <Link
           class="w-full"
           href={`/games/${gameStore.current?.id}/admin`}
-          activeMatch="prefix"
+          activeMatch="partial"
           ghost
           justify="start"
           size={props.size}
@@ -153,7 +154,7 @@ function GameNav(props: { size: 'sm' | 'md' }) {
         <Link
           class="w-full"
           href={`/games/`}
-          activeMatch="prefix"
+          activeMatch="partial"
           ghost
           justify="start"
           size={props.size}
@@ -236,6 +237,11 @@ export default function (props: { children?: JSX.Element }) {
   const [platformTyped, setPlatformTyped] = createSignal('')
   const [hideAnimation, setHideAnimation] = createSignal(false)
   const showAnimation = useLocation().pathname === '/'
+  addToast({
+    level: 'info',
+    description: `${t('platform.offline')}`,
+    duration: 5000,
+  })
   getPlatformInfo()
     .then(res => {
       setPlatformStore({ ...platformStore, config: res })
@@ -267,6 +273,7 @@ export default function (props: { children?: JSX.Element }) {
     <>
       <TitleBar />
       {props.children}
+      <Toasts />
       <Presence exitBeforeEnter>
         <Show when={showAnimation && !hideAnimation()}>
           <Motion.div

@@ -1,8 +1,11 @@
-import { ComponentProps } from 'solid-js'
+import { ComponentProps, splitProps } from 'solid-js'
 import './styles/divider.scss'
-export default function (props: ComponentProps<'div'> & { direction?: 'horizontal' | 'vertical' }) {
-  const isVertical = props.direction === 'vertical'
-  const mergedProps = { ...props, classList: { divider: true, 'divider-vertical': isVertical, ...props.classList } }
+
+export type DividerProps = { direction?: 'horizontal' | 'vertical' }
+
+export default function (props: ComponentProps<'div'> & DividerProps) {
+  const [dividerProps, nativeProps] = splitProps(props, ['direction'])
+  const isVertical = dividerProps.direction === 'vertical'
   // divider-vertical
-  return <div {...mergedProps} />
+  return <div {...nativeProps} class={`divider ${isVertical ? 'divider-vertical' : ''} ${nativeProps.class || ''}`} />
 }

@@ -2,11 +2,11 @@ import { Progress, ProgressRootProps } from '@ark-ui/solid'
 import './styles/progress.scss'
 import { createMemo } from 'solid-js'
 
-export default function (
-  props: ProgressRootProps & {
-    static?: boolean
-  }
-) {
+export type ProgressProps = {
+  static?: boolean
+}
+
+export default function (props: ProgressRootProps & ProgressProps) {
   const p = createMemo(() => ((props.value || 0) / ((props.max || 1) - (props.min || 0))) * 100)
   return (
     <Progress.Root {...props}>

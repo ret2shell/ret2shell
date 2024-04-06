@@ -1,5 +1,5 @@
 import './styles/button.scss'
-import { ComponentProps, JSX, Show, splitProps } from 'solid-js'
+import { ComponentProps, JSX, Show, createMemo, splitProps } from 'solid-js'
 import Spin from '@assets/animates/spin'
 
 export type ButtonProps = {
@@ -25,28 +25,32 @@ export default function (props: ComponentProps<'button'> & ButtonProps & { child
     'square',
   ])
   const [children, nativeProps] = splitProps(_1, ['children'])
-  const classList = {
-    btn: true,
-    // btn-primary btn-info btn-success btn-warning btn-error
-    [`btn-${buttonProps.level}`]: !!buttonProps.level,
-    // btn-sm btn-md
-    [`btn-${buttonProps.size || 'md'}`]: true,
-    'btn-ghost': buttonProps.ghost,
-    'btn-bold': buttonProps.bold,
-    // justify-start justify-center justify-end
-    [`justify-${buttonProps.justify || 'center'}`]: true,
-    uppercase: buttonProps.uppercase,
-    disabled: nativeProps.disabled,
-    'btn-square': buttonProps.square,
-  }
-  const className = Object.keys(classList)
-    .filter(key => classList[key])
-    .join(' ')
+  const classList = createMemo(() => {
+    return {
+      btn: true,
+      // btn-primary btn-info btn-success btn-warning btn-error
+      [`btn-${buttonProps.level}`]: !!buttonProps.level,
+      // btn-sm btn-md
+      [`btn-${buttonProps.size || 'md'}`]: true,
+      'btn-ghost': buttonProps.ghost,
+      'btn-bold': buttonProps.bold,
+      // justify-start justify-center justify-end
+      [`justify-${buttonProps.justify || 'center'}`]: true,
+      uppercase: buttonProps.uppercase,
+      disabled: nativeProps.disabled,
+      'btn-square': buttonProps.square,
+    }
+  })
+  const className = createMemo(() => {
+    return Object.keys(classList())
+      .filter(key => classList()[key])
+      .join(' ')
+  })
 
   const size = buttonProps.size === 'sm' ? 16 : 24
 
   return (
-    <button {...nativeProps} class={`${className} ${nativeProps.class}`}>
+    <button {...nativeProps} class={`${className()} ${nativeProps.class}`}>
       <Show when={props.loading}>
         <Spin width={size} height={size} />
       </Show>

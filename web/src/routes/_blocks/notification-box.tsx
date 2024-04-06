@@ -1,5 +1,6 @@
 import { clearToasts, removeToast, toastStore } from '@/lib/storage/toast'
 import Button from '@/lib/widgets/button'
+import Toast from '@/lib/widgets/toast'
 import { t } from '@storage/theme'
 import Card from '@widgets/card'
 import Popover from '@widgets/popover'
@@ -38,40 +39,7 @@ export default function NotificationBox() {
               </Button>
             </Show>
           </Card>
-          <For each={toastStore.toasts}>
-            {toast => (
-              <Card contentClass="p-2 group relative">
-                <div class="flex flex-col space-y-2">
-                  <div class="inline-block space-x-2 px-2 py-1">
-                    <span class={`text-${toast.level}`}>[{toast.level[0]}]</span>
-                    <span>{toast.description}</span>
-                  </div>
-                  <Show when={toast.reject || toast.accept}>
-                    <div class="flex flex-row items-center justify-end space-x-2">
-                      <Show when={toast.reject}>
-                        <Button size="sm" ghost onClick={toast.reject}>
-                          {toast.rejectLabel || t('platform.reject')}
-                        </Button>
-                      </Show>
-                      <Show when={toast.accept}>
-                        <Button size="sm" level="primary" onClick={toast.accept}>
-                          {toast.acceptLabel || t('platform.accept')}
-                        </Button>
-                      </Show>
-                    </div>
-                  </Show>
-                </div>
-                <Button
-                  class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                  size="sm"
-                  square
-                  onClick={() => removeToast(toast.id)}
-                >
-                  <span class="icon-[fluent--dismiss-20-regular] w-5 h-5"></span>
-                </Button>
-              </Card>
-            )}
-          </For>
+          <For each={toastStore.toasts}>{toast => <Toast toast={toast} />}</For>
         </div>
       </Popover>
     </>

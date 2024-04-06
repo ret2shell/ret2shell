@@ -1,12 +1,13 @@
 import { Maybe } from '@modular-forms/solid'
 import Input, { TextInputProps } from '@widgets/input'
-import { splitProps } from 'solid-js'
+import { ComponentProps, splitProps } from 'solid-js'
 
 export default function (
-  props: TextInputProps & {
-    idField: Maybe<string>
-    answerField: Maybe<string>
-  }
+  props: TextInputProps &
+    ComponentProps<'input'> & {
+      idField: Maybe<string>
+      answerField: Maybe<string>
+    }
 ) {
   let [fieldProps, inputProps] = splitProps(props, ['idField', 'answerField'])
   return (

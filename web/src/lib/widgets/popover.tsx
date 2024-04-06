@@ -1,22 +1,15 @@
 import { Popover } from '@ark-ui/solid'
 import { Portal } from 'solid-js/web'
-import { JSX } from 'solid-js'
-export default function (props: {
-  children?: JSX.Element
-  btnContent?: JSX.Element
-  level?: 'primary' | 'info' | 'success' | 'warning' | 'error' | null
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'
-  ghost?: boolean
-  bold?: boolean
-  justify?: 'start' | 'center' | 'end'
-  uppercase?: boolean
-  loading?: boolean
-  disabled?: boolean
-  square?: boolean
-  type?: 'button' | 'submit' | 'reset'
-  padding?: string
-  title?: string
-}) {
+import { ComponentProps, JSX } from 'solid-js'
+import { ButtonProps } from './button'
+export default function (
+  props: {
+    children?: JSX.Element
+    btnContent?: JSX.Element
+    padding?: string
+  } & ButtonProps &
+    ComponentProps<'button'>
+) {
   const classList = {
     btn: true,
     // btn-primary btn-info btn-success btn-warning btn-error

@@ -1,44 +1,32 @@
-import { JSX, Show, createSignal } from 'solid-js'
+import { ComponentProps, JSX, Show, createMemo, createSignal } from 'solid-js'
 import './styles/input.scss'
 
 export type TextInputProps = {
-  name: string
-  placeholder?: string
-  value?: string | undefined
-  required?: boolean
-  ref?: (element: HTMLInputElement) => void
-  onInput?: JSX.EventHandler<HTMLInputElement, InputEvent>
-  onChange?: JSX.EventHandler<HTMLInputElement, Event>
-  onBlur?: JSX.EventHandler<HTMLInputElement, FocusEvent>
-  autofocus?: boolean
-  disabled?: boolean
-  readonly?: boolean
-  class?: string
-  classList?: { [k: string]: boolean }
-  type?: 'text' | 'password' | 'email' | 'number' | 'tel' | 'url'
   icon?: JSX.Element
   extraBtn?: JSX.Element
   size?: 'sm' | 'md'
-  title?: string
-  autocomplete?: string
 }
 
-export default function (props: TextInputProps) {
+export default function (props: TextInputProps & ComponentProps<'input'>) {
   const size = props.size || 'md'
-  const mergedInputClasses =
+  const mergedInputClasses = createMemo(() => {
     // input-sm input-md
-    `input flex-1 w-0 input-${size} ${props.icon ? '!rounded-l-none' : ''} ${props.type === 'password' || props.extraBtn ? '!rounded-r-none' : ''}`
-  const mergedClasses =
-    (props.class ? ` ${props.class} ` : ' ') +
-    (props.classList &&
-      Object.keys(props.classList)
-        .filter(k => props.classList && props.classList[k])
-        .join(' ')) +
-    'flex flex-col space-y-1'
+    return `input flex-1 w-0 input-${size} ${props.icon ? '!rounded-l-none' : ''} ${props.type === 'password' || props.extraBtn ? '!rounded-r-none' : ''}`
+  })
+  const mergedClasses = createMemo(() => {
+    return (
+      (props.class ? ` ${props.class} ` : ' ') +
+      (props.classList &&
+        Object.keys(props.classList)
+          .filter(k => props.classList && props.classList[k])
+          .join(' ')) +
+      'flex flex-col space-y-1'
+    )
+  })
   const [type, setType] = createSignal(props.type)
   return (
     <>
-      <div class={mergedClasses}>
+      <div class={mergedClasses()}>
         <label class="text-sm font-bold text-layer-content/60">{props.title || props.placeholder}</label>
         <div class="flex flex-row">
           <Show when={props.icon}>
@@ -49,7 +37,7 @@ export default function (props: TextInputProps) {
               {props.icon}
             </div>
           </Show>
-          <input {...props} class={mergedInputClasses} type={type()} />
+          <input {...props} class={mergedInputClasses()} type={type()} />
           <Show when={props.type === 'password'}>
             {/* btn-sm btn-md */}
             <button

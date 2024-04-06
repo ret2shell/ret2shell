@@ -1,26 +1,17 @@
 import './styles/button.scss'
-import { ComponentProps, JSX, Show, children } from 'solid-js'
+import { ComponentProps, JSX, Show, children, createMemo } from 'solid-js'
 import Spin from '@assets/animates/spin'
 import { useMatch } from '@solidjs/router'
+import { ButtonProps } from './button'
 
-export default function (
-  props: ComponentProps<'a'> & {
-    children?: JSX.Element
-    level?: 'primary' | 'info' | 'success' | 'warning' | 'error' | null
-    size?: 'sm' | 'md'
-    ghost?: boolean
-    bold?: boolean
-    justify?: 'start' | 'center' | 'end'
-    uppercase?: boolean
-    loading?: boolean
-    disabled?: boolean
-    square?: boolean
-    type?: 'button' | 'submit' | 'reset'
-    activeMatch?: 'prefix' | 'exact'
-  }
-) {
+export type LinkProps = {
+  activeMatch?: 'exact' | 'partial'
+  disabled?: boolean
+}
+
+export default function (props: ComponentProps<'a'> & ButtonProps & LinkProps & { children?: JSX.Element }) {
   const match = useMatch(() => (props.activeMatch === 'exact' ? props.href! : `${props.href}/*`))
-  const classList = () => {
+  const classList = createMemo(() => {
     return {
       btn: true,
       // btn-primary btn-info btn-success btn-warning btn-error
@@ -36,9 +27,14 @@ export default function (
       'btn-square': props.square,
       'btn-active': props.activeMatch ? Boolean(match()) : false,
     }
-  }
+  })
+  const className = createMemo(() => {
+    return Object.keys(classList())
+      .filter(key => classList()[key])
+      .join(' ')
+  })
   return (
-    <a disabled={props.disabled} type={props.type} {...props} classList={classList()}>
+    <a {...props} type={props.type} class={`${className()} ${props.class}`}>
       <Show when={props.loading}>
         <Spin />
       </Show>

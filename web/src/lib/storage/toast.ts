@@ -1,17 +1,22 @@
 import { createStore } from 'solid-js/store'
 import { nanoid } from 'nanoid'
+import { DateTime } from 'luxon'
+
+export type ToastMessage = {
+  id: string
+  description: string
+  level: 'info' | 'success' | 'warning' | 'error'
+  duration?: number
+  reject?: () => void
+  rejectLabel?: string
+  accept?: () => void
+  acceptLabel?: string
+  createdAt: number
+  shown: boolean
+}
 
 export const [toastStore, setToastStore] = createStore({
-  toasts: [] as {
-    id: string
-    description: string
-    level: 'info' | 'success' | 'warning' | 'error'
-    duration?: number
-    reject?: () => void
-    rejectLabel?: string
-    accept?: () => void
-    acceptLabel?: string
-  }[],
+  toasts: [] as ToastMessage[],
 })
 
 export function addToast(toast: {
@@ -24,7 +29,7 @@ export function addToast(toast: {
   acceptLabel?: string
 }): string {
   const id = nanoid()
-  setToastStore('toasts', toasts => [...toasts, { id, ...toast }])
+  setToastStore('toasts', toasts => [...toasts, { id, ...toast, createdAt: DateTime.now().toMillis(), shown: false }])
   return id
 }
 
