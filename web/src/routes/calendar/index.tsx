@@ -94,6 +94,9 @@ export default function () {
                   {year().toString().padStart(4, '0')}-{month().toString().padStart(2, '0')}
                 </span>
               </Button>
+              <Button ghost square onClick={() => {}}>
+                <span class="icon-[fluent--add-20-regular] w-5 h-5" />
+              </Button>
               <Button
                 ghost
                 square

@@ -3,6 +3,7 @@ import Card from './card'
 import Button from './button'
 import { t } from '../storage/theme'
 import { ToastMessage, removeToast } from '../storage/toast'
+import './styles/toast.scss'
 
 export type ToastProps = {
   toast: ToastMessage
@@ -19,7 +20,7 @@ export default function (props: ComponentProps<'div'> & ToastProps) {
         progressRef.classList.remove('w-full')
         progressRef.style.transitionDuration = toast.toast.duration + 'ms'
         progressRef.classList.add('w-0')
-      }, 500)
+      }, 100)
       if (!toast.toast.duration) return
       setTimeout(() => {
         props.onTimeout?.()
@@ -28,7 +29,7 @@ export default function (props: ComponentProps<'div'> & ToastProps) {
   })
   return (
     <>
-      <Card {...others} contentClass="p-2 group relative">
+      <Card {...others} class={`toast ${others.class}`} contentClass="p-2 group relative">
         <div class="flex flex-col space-y-2">
           <div class="inline-block space-x-2 px-2 py-1">
             <span class={`text-${toast.toast.level}`}>[{toast.toast.level[0]}]</span>

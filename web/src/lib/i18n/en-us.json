@@ -8,7 +8,10 @@
     "noNotifications": "No unread messages",
     "reject": "No",
     "accept": "Yes",
-    "offline": "The backend seems to be offline, please refresh the page. \nIf this error occurs repeatedly, please contact maintenance personnel."
+    "offline": "The backend seems to be offline, please refresh the page. \nIf this error occurs repeatedly, please contact maintenance personnel.",
+    "cookiePolicy": "We do not use any cookies.",
+    "ok": "OK",
+    "yes": "Yes"
   },
   "wiki": {
     "title": "Wiki"

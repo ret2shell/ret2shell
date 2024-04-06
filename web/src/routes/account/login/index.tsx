@@ -42,7 +42,7 @@ export default function () {
       <div class="flex-1 flex flex-col items-center md:justify-center p-2 md:p-6">
         <Card
           class="w-full max-w-3xl"
-          contentClass="p-2 md:p-6 flex flex-col md:flex-row space-y-2 space-x-0 md:space-x-6 md:space-y-0"
+          contentClass="p-6 flex flex-col md:flex-row space-y-2 space-x-0 md:space-x-6 md:space-y-0"
         >
           <Form onSubmit={() => {}} class="md:w-0 flex-1 flex-shrink-0 flex flex-col space-y-2">
             <h2 class="font-bold text-center">{t('account.login.title')}</h2>

@@ -68,7 +68,7 @@ export default function () {
               </Link>
               <Popover
                 ghost
-                padding="pb-2"
+                popContentClass="pb-2"
                 square
                 btnContent={<span class="icon-[fluent--info-20-regular] w-5 h-5"></span>}
               >

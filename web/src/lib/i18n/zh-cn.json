@@ -8,7 +8,10 @@
     "noNotifications": "没有未读消息",
     "reject": "不行",
     "accept": "好的",
-    "offline": "后端似乎离线了，请刷新页面。如果此错误反复出现，请联系维护人员。"
+    "offline": "后端似乎离线了，请刷新页面。如果此错误反复出现，请联系维护人员。",
+    "cookiePolicy": "我们不使用任何 Cookie 来追踪您。",
+    "ok": "好的",
+    "yes": "确定"
   },
   "wiki": {
     "title": "知识"

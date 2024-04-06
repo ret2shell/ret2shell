@@ -31,3 +31,5 @@ export class Wsrx {
     })
   }
 }
+
+export const wsrx = new Wsrx()

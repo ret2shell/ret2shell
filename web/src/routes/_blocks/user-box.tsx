@@ -31,7 +31,7 @@ export default function UserBox() {
           }
           square
           ghost
-          padding="pt-2"
+          popContentClass="pt-2"
         >
           <div class="flex flex-col space-y-2 w-64">
             <Card contentClass="p-2 flex flex-col space-y-2">

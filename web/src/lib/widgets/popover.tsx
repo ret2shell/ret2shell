@@ -6,7 +6,7 @@ export default function (
   props: {
     children?: JSX.Element
     btnContent?: JSX.Element
-    padding?: string
+    popContentClass?: string
   } & ButtonProps &
     ComponentProps<'button'>
 ) {
@@ -31,7 +31,7 @@ export default function (
       </Popover.Trigger>
       <Portal>
         <Popover.Positioner>
-          <Popover.Content class={`${props.padding}`}>{props.children}</Popover.Content>
+          <Popover.Content class={`popover-content ${props.popContentClass}`}>{props.children}</Popover.Content>
         </Popover.Positioner>
       </Portal>
     </Popover.Root>

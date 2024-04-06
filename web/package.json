@@ -34,7 +34,7 @@
     "remark-rehype": "^11.1.0",
     "sakana-widget": "^2.7.0",
     "solid-js": "^1.8.16",
-    "solid-motionone": "^1.0.0",
+    "solid-transition-group": "^0.2.3",
     "unified": "^11.0.4",
     "unist-util-visit": "^5.0.0"
   },

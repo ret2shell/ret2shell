@@ -1,25 +1,27 @@
 import { JSX, Match, Show, Switch, createSignal } from 'solid-js'
 import { platformStore, setPlatformStore } from '@storage/platform'
 import { t } from '@storage/theme'
-import { Motion, Presence } from 'solid-motionone'
 import Link from '@widgets/link'
 import LogoAnimate from '@assets/animates/logo-animate'
 import Background from '@blocks/background'
 import { useLocation } from '@solidjs/router'
-import InstanceBox from './_blocks/instance-box'
+import InstanceBox, { InstanceBoxContent } from './_blocks/instance-box'
 import UserBox from './_blocks/user-box'
-import DiyBox from './_blocks/diy-box'
+import DiyBox, { DiyBoxContent } from './_blocks/diy-box'
 import { gameStore } from '@storage/game'
 import { HostType } from '@models/game'
 import { accountStore } from '@storage/account'
 import { Permission } from '@models/user'
 import Popover from '@widgets/popover'
 import Card from '@widgets/card'
-import NotificationBox from './_blocks/notification-box'
+import NotificationBox, { NotificationBoxContent } from './_blocks/notification-box'
 import { getPlatformInfo } from '@/lib/api/platform'
-import { addToast } from '@/lib/storage/toast'
+import { addToast, removeToast, toastStore } from '@/lib/storage/toast'
 import Divider from '@/lib/widgets/divider'
 import Toasts from './_blocks/toasts'
+import { Transition } from 'solid-transition-group'
+import Button from '@/lib/widgets/button'
+import { wsrx } from '@/lib/wsrx'
 
 function GlobalTitleLink() {
   return (
@@ -169,6 +171,8 @@ function GameNav(props: { size: 'sm' | 'md' }) {
 }
 
 function TitleBar() {
+  const [additionalMobileBox, setAdditionalMobileBox] = createSignal<'wsrx' | 'notification' | 'diy' | null>(null)
+
   return (
     <>
       <div id="page-top" />
@@ -179,7 +183,7 @@ function TitleBar() {
               btnContent={<span class="icon-[fluent--navigation-20-regular] w-5 h-5"></span>}
               square
               ghost
-              padding="pt-2"
+              popContentClass="pt-2"
             >
               <div class="flex flex-col space-y-2 w-48">
                 <Card contentClass="p-2 flex flex-col space-y-2">
@@ -189,16 +193,59 @@ function TitleBar() {
                         <GameNav size="sm" />
                       </Match>
                     </Switch>
-                  </ul>
-                  <Divider direction="horizontal" />
-                  <div class="flex flex-row space-x-2">
+                    <Divider direction="horizontal" />
                     <Show when={accountStore.token !== null}>
-                      <InstanceBox />
+                      <Button
+                        justify="start"
+                        size="sm"
+                        ghost={additionalMobileBox() !== 'wsrx'}
+                        onClick={() => setAdditionalMobileBox('wsrx')}
+                      >
+                        <span
+                          class={`${wsrx.instances().length > 0 ? 'icon-[fluent--airplane-20-filled]' : 'icon-[fluent--airplane-20-regular]'} w-5 h-5 ${wsrx.instances().length > 0 ? (wsrx.connected() ? 'text-success' : 'text-warning') : ''}`}
+                        />
+                        <span>{t('instance.box')}</span>
+                      </Button>
                     </Show>
-                    <NotificationBox />
-                    <DiyBox />
-                  </div>
+                    <li>
+                      <Button
+                        justify="start"
+                        class="w-full"
+                        size="sm"
+                        ghost={additionalMobileBox() !== 'notification'}
+                        onClick={() => setAdditionalMobileBox('notification')}
+                      >
+                        <span
+                          class={`${toastStore.toasts.length > 0 ? 'icon-[fluent--alert-badge-20-filled] text-primary' : 'icon-[fluent--alert-20-regular]'} w-5 h-5`}
+                        />
+                        <span>{t('platform.notificationBox')}</span>
+                      </Button>
+                    </li>
+                    <li>
+                      <Button
+                        justify="start"
+                        class="w-full"
+                        size="sm"
+                        ghost={additionalMobileBox() !== 'diy'}
+                        onClick={() => setAdditionalMobileBox('diy')}
+                      >
+                        <span class="icon-[fluent--wand-20-regular] w-5 h-5" />
+                        <span>{t('platform.diyBox')}</span>
+                      </Button>
+                    </li>
+                  </ul>
                 </Card>
+                <Switch fallback={null}>
+                  <Match when={additionalMobileBox() === 'wsrx'}>
+                    <InstanceBoxContent />
+                  </Match>
+                  <Match when={additionalMobileBox() === 'notification'}>
+                    <NotificationBoxContent />
+                  </Match>
+                  <Match when={additionalMobileBox() === 'diy'}>
+                    <DiyBoxContent />
+                  </Match>
+                </Switch>
               </div>
             </Popover>
           </div>
@@ -232,15 +279,35 @@ function TitleBar() {
   )
 }
 
+function checkCookiePolicy() {
+  if (!platformStore.accept_cookies) {
+    let toastId = addToast({
+      level: 'info',
+      description: t('platform.cookiePolicy') as string,
+      accept: () => {
+        setPlatformStore({ ...platformStore, accept_cookies: true })
+        setTimeout(() => {
+          removeToast(toastId)
+        }, 50)
+      },
+      acceptLabel: t('platform.ok'),
+      reject: () => {
+        setPlatformStore({ ...platformStore, accept_cookies: true })
+        setTimeout(() => {
+          removeToast(toastId)
+        }, 50)
+      },
+      rejectLabel: t('platform.yes'),
+    })
+  }
+}
+
 export default function (props: { children?: JSX.Element }) {
   let platformName = `\xa0\xa0[\xa0${platformStore.config.name || t('platform.name')}\xa0]\xa0`
   const [platformTyped, setPlatformTyped] = createSignal('')
   const [hideAnimation, setHideAnimation] = createSignal(false)
   const showAnimation = useLocation().pathname === '/'
-  addToast({
-    level: 'info',
-    description: `${t('platform.offline')}`,
-  })
+  checkCookiePolicy()
   getPlatformInfo()
     .then(res => {
       setPlatformStore({ ...platformStore, config: res })
@@ -273,15 +340,16 @@ export default function (props: { children?: JSX.Element }) {
       <TitleBar />
       {props.children}
       <Toasts />
-      <Presence exitBeforeEnter>
+      <Transition
+        onExit={(el, done) => {
+          const a = el.animate([{ opacity: 1 }, { opacity: 0 }], {
+            duration: 300,
+          })
+          a.finished.then(done)
+        }}
+      >
         <Show when={showAnimation && !hideAnimation()}>
-          <Motion.div
-            class="fixed top-0 left-0 w-screen h-screen bg-layer z-50"
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-          >
+          <div class="fixed top-0 left-0 w-screen h-screen bg-layer z-50">
             <Background />
             <div class="w-full h-full flex flex-col items-center pt-16 pb-24">
               <div class="flex-1" />
@@ -292,9 +360,9 @@ export default function (props: { children?: JSX.Element }) {
               <div class="text-xl opacity-0 mt-8">&nbsp;</div>
               <div class="flex-1" />
             </div>
-          </Motion.div>
+          </div>
         </Show>
-      </Presence>
+      </Transition>
     </>
   )
 }

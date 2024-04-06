@@ -20,6 +20,7 @@ export const [platformStore, setPlatformStore] = makePersisted(
       hide_maker: false as boolean | null,
     } as ServerConfig,
     version: 'UNKNOWN' as string,
+    accept_cookies: false,
   }),
   { name: 'platform' }
 )

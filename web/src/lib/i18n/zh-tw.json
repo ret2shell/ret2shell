@@ -8,7 +8,10 @@
     "noNotifications": "沒有未讀訊息",
     "reject": "不行",
     "accept": "好的",
-    "offline": "後端似乎離線了，請刷新頁面。\n如果此錯誤反覆出現，請聯絡維護人員。"
+    "offline": "後端似乎離線了，請刷新頁面。\n如果此錯誤反覆出現，請聯絡維護人員。",
+    "cookiePolicy": "我們不使用任何 Cookie 來追蹤您。",
+    "ok": "好的",
+    "yes": "確定"
   },
   "wiki": {
     "title": "知識"

@@ -1,9 +1,8 @@
-.toast {
+.popover-content {
   @apply transition-all duration-300 ease-in-out;
-
   &-enter,
   &-exit-to {
     opacity: 0;
-    transform: translateX(24px);
+    transform: scale(0.95);
   }
 }

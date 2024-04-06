@@ -24,21 +24,21 @@
 
 @-webkit-keyframes animate-svg-fill-1 {
   0% {
-    fill: transparent;
+    @apply fill-transparent;
   }
 
   100% {
-    fill: rgb(0, 120, 214);
+    @apply fill-primary;
   }
 }
 
 @keyframes animate-svg-fill-1 {
   0% {
-    fill: transparent;
+    @apply fill-transparent;
   }
 
   100% {
-    fill: rgb(0, 120, 214);
+    @apply fill-primary;
   }
 }
 
@@ -81,7 +81,7 @@
   }
 
   100% {
-    fill: rgb(214, 0, 0);
+    @apply fill-error;
   }
 }
 
@@ -91,7 +91,7 @@
   }
 
   100% {
-    fill: rgb(214, 0, 0);
+    @apply fill-error;
   }
 }
 
