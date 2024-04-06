@@ -14,7 +14,9 @@ import Input from '@/lib/widgets/input'
 import Link from '@/lib/widgets/link'
 import { createForm } from '@modular-forms/solid'
 import { Title } from '@solidjs/meta'
-import { Show, createSignal } from 'solid-js'
+import { Match, Show, Switch, createSignal } from 'solid-js'
+import xdsecMascotNormal from '@assets/imgs/xdsec-mascot-normal.webp'
+import xdsecMascotUnsee from '@assets/imgs/xdsec-mascot-unsee.webp'
 
 type LoginForm = {
   account: string
@@ -34,6 +36,7 @@ export default function () {
   getAuthConfig()
     .then(config => setAuthConfig(config))
     .catch(() => {})
+  const [mascot, setMascot] = createSignal(null as string | null)
   return (
     <>
       <Title>
@@ -55,6 +58,12 @@ export default function () {
                   autocomplete="username"
                   {...props}
                   value={field.value}
+                  onFocusIn={() => {
+                    setMascot(xdsecMascotNormal)
+                  }}
+                  onFocusOut={() => {
+                    setMascot(null)
+                  }}
                 />
               )}
             </Field>
@@ -68,6 +77,12 @@ export default function () {
                   autocomplete="current-password"
                   {...props}
                   value={field.value}
+                  onFocusIn={() => {
+                    setMascot(xdsecMascotUnsee)
+                  }}
+                  onFocusOut={() => {
+                    setMascot(null)
+                  }}
                 />
               )}
             </Field>
@@ -95,7 +110,24 @@ export default function () {
           <Divider class="hidden md:inline-block" direction="vertical" />
           <div class="md:w-0 flex-1 flex-shrink-0 flex flex-col items-center space-y-2">
             <div class="flex-1 flex items-center justify-center">
-              <LogoAnimate class="w-36 h-36 hidden md:inline-block my-6" />
+              <Switch fallback={<LogoAnimate class="w-36 h-36 hidden md:inline-block my-6" />}>
+                <Match when={mascot() === xdsecMascotNormal}>
+                  <img
+                    src={xdsecMascotNormal}
+                    class="w-36 h-36 my-6"
+                    alt="Illustration by hypnotics"
+                    title="Illustration by hypnotics"
+                  />
+                </Match>
+                <Match when={mascot() === xdsecMascotUnsee}>
+                  <img
+                    src={xdsecMascotUnsee}
+                    class="w-36 h-36 my-6"
+                    alt="Illustration by hypnotics"
+                    title="Illustration by hypnotics"
+                  />
+                </Match>
+              </Switch>
             </div>
             <Link class="w-full" href="/account/register">
               {t('account.register.tips')}

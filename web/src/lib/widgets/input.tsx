@@ -27,7 +27,9 @@ export default function (props: TextInputProps & ComponentProps<'input'>) {
   return (
     <>
       <div class={mergedClasses()}>
-        <label class="text-sm font-bold text-layer-content/60">{props.title || props.placeholder}</label>
+        <label class="text-sm font-bold text-layer-content/60" for={props.name}>
+          {props.title || props.placeholder}
+        </label>
         <div class="flex flex-row">
           <Show when={props.icon}>
             {/* rounded-l-lg rounded-l-md */}
