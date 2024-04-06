@@ -109,23 +109,25 @@ export default function () {
           <Divider class="md:hidden" />
           <Divider class="hidden md:inline-block" direction="vertical" />
           <div class="md:w-0 flex-1 flex-shrink-0 flex flex-col items-center space-y-2">
-            <div class="flex-1 flex items-center justify-center">
+            <div class="flex-1 flex flex-col items-center justify-center">
               <Switch fallback={<LogoAnimate class="w-36 h-36 hidden md:inline-block my-6" />}>
                 <Match when={mascot() === xdsecMascotNormal}>
                   <img
                     src={xdsecMascotNormal}
-                    class="w-36 h-36 my-6"
-                    alt="Illustration by hypnotics"
-                    title="Illustration by hypnotics"
+                    class="w-36 h-36 hidden md:inline-block my-6"
+                    alt="Illustrated by hypnotics"
+                    title="Illustrated by hypnotics"
                   />
+                  <label>{t('account.login.accountMascotTip')}</label>
                 </Match>
                 <Match when={mascot() === xdsecMascotUnsee}>
                   <img
                     src={xdsecMascotUnsee}
-                    class="w-36 h-36 my-6"
-                    alt="Illustration by hypnotics"
-                    title="Illustration by hypnotics"
+                    class="w-36 h-36 hidden md:inline-block my-6"
+                    alt="Illustrated by hypnotics"
+                    title="Illustrated by hypnotics"
                   />
+                  <label>{t('account.login.passwordMascotTip')}</label>
                 </Match>
               </Switch>
             </div>

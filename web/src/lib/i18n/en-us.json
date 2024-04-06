@@ -74,7 +74,9 @@
       "title": "Login",
       "accountPlaceholder": "account / email",
       "passwordPlaceholder": "Password",
-      "captchaPlaceholder": "Captcha"
+      "captchaPlaceholder": "Captcha",
+      "accountMascotTip": "Welcome ^_^",
+      "passwordMascotTip": "Won't watch it >_<"
     },
     "settings": {
       "title": "user settings"

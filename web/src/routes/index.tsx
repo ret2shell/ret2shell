@@ -35,8 +35,8 @@ export default function () {
             <div class="flex-1" />
             <div class="h-24" />
             <div class="absolute bottom-4 flex flex-row flex-wrap items-center justify-center h-auto p-2 space-x-2 opacity-60">
-              <Button ghost>
-                (C) 2022 - {new Date().getFullYear()}&nbsp;
+              <Button ghost class="inline-flex flex-row space-x-1 flex-wrap h-auto max-w-full">
+                <span>(C) 2022 - {new Date().getFullYear()}</span>
                 <a class="hover:underline" href={platformStore.config.footer_url || '#'} target="_blank">
                   {platformStore.config.footer_info}
                 </a>
@@ -48,7 +48,7 @@ export default function () {
                   </a>
                 </Show>
                 <Show when={platformStore.config.record}>
-                  <span>&nbsp;|&nbsp;</span>
+                  <span class="opacity-40">|</span>
                   <a class="hover:underline" href="https://beian.miit.gov.cn" target="_blank">
                     {platformStore.config.record}
                   </a>

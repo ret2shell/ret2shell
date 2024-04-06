@@ -74,7 +74,9 @@
       "title": "ログイン",
       "accountPlaceholder": "ユーザー名/メールボックス",
       "passwordPlaceholder": "パスワード",
-      "captchaPlaceholder": "検証コード"
+      "captchaPlaceholder": "検証コード",
+      "accountMascotTip": "いらっしゃいませ ^_^",
+      "passwordMascotTip": "見えない、見えない >_<"
     },
     "settings": {
       "title": "ユーザー設定"

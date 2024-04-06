@@ -74,7 +74,9 @@
       "title": "登录",
       "accountPlaceholder": "用户名/邮箱",
       "passwordPlaceholder": "密码",
-      "captchaPlaceholder": "验证码"
+      "captchaPlaceholder": "验证码",
+      "accountMascotTip": "欢迎欢迎 ^_^",
+      "passwordMascotTip": "看不见看不见 >_<"
     },
     "settings": {
       "title": "用户设置"

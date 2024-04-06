@@ -74,7 +74,9 @@
       "title": "登入",
       "accountPlaceholder": "使用者名稱/郵箱",
       "passwordPlaceholder": "密碼",
-      "captchaPlaceholder": "驗證碼"
+      "captchaPlaceholder": "驗證碼",
+      "accountMascotTip": "歡迎歡迎 ^_^",
+      "passwordMascotTip": "看不見看不見 >_<"
     },
     "settings": {
       "title": "使用者設定"
