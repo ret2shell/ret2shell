@@ -26,3 +26,25 @@
     @apply px-2 rounded-md min-h-8;
   }
 }
+
+/* For Chrome-based browser */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-transition-delay: 1919810s;
+  -webkit-transition:
+    color 1919810s ease-out,
+    background-color 1919810s ease-out;
+  -webkit-box-shadow: none;
+}
+
+/* For firefox 67-94 */
+input {
+  filter: none;
+}
+
+/* For firefox 94+ */
+input:autofill {
+  background: transparent; /* or any other */
+}

@@ -76,7 +76,9 @@
       "passwordPlaceholder": "密碼",
       "captchaPlaceholder": "驗證碼",
       "accountMascotTip": "歡迎歡迎 ^_^",
-      "passwordMascotTip": "看不見看不見 >_<"
+      "passwordMascotTip": "看不見看不見 >_<",
+      "accountRequired": "請填寫使用者名稱/信箱",
+      "accountMinLength": "使用者名稱/信箱至少4個字符"
     },
     "settings": {
       "title": "使用者設定"

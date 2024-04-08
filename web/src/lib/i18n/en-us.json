@@ -76,7 +76,9 @@
       "passwordPlaceholder": "Password",
       "captchaPlaceholder": "Captcha",
       "accountMascotTip": "Welcome ^_^",
-      "passwordMascotTip": "Won't watch it >_<"
+      "passwordMascotTip": "Won't watch it >_<",
+      "accountRequired": "Please fill in your username/email",
+      "accountMinLength": "Username/email must be at least 4 characters"
     },
     "settings": {
       "title": "user settings"

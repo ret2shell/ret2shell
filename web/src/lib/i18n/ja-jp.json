@@ -76,7 +76,9 @@
       "passwordPlaceholder": "パスワード",
       "captchaPlaceholder": "検証コード",
       "accountMascotTip": "いらっしゃいませ ^_^",
-      "passwordMascotTip": "見えない、見えない >_<"
+      "passwordMascotTip": "見えない、見えない >_<",
+      "accountRequired": "ユーザー名/メールアドレスを入力してください",
+      "accountMinLength": "ユーザー名/メールアドレスは 4 文字以上である必要があります"
     },
     "settings": {
       "title": "ユーザー設定"

@@ -5,6 +5,7 @@ export type TextInputProps = {
   icon?: JSX.Element
   extraBtn?: JSX.Element
   size?: 'sm' | 'md'
+  error?: string
 }
 
 export default function (props: TextInputProps & ComponentProps<'input'>) {
@@ -14,14 +15,12 @@ export default function (props: TextInputProps & ComponentProps<'input'>) {
     return `input flex-1 w-0 input-${size} ${props.icon ? '!rounded-l-none' : ''} ${props.type === 'password' || props.extraBtn ? '!rounded-r-none' : ''}`
   })
   const mergedClasses = createMemo(() => {
-    return (
-      (props.class ? ` ${props.class} ` : ' ') +
-      (props.classList &&
-        Object.keys(props.classList)
-          .filter(k => props.classList && props.classList[k])
-          .join(' ')) +
-      'flex flex-col space-y-1'
-    )
+    return `flex flex-col space-y-1 ${props.class ? `${props.class}` : ''} ${
+      props.classList &&
+      Object.keys(props.classList)
+        .filter(k => props.classList && props.classList[k])
+        .join(' ')
+    }`
   })
   const [type, setType] = createSignal(props.type)
   return (

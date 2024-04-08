@@ -35,6 +35,7 @@ pub enum Game {
     CanRegisterAfterStarted,
     AwardRate,
     Admins,
+    Weight,
 }
 
 #[async_trait::async_trait]
@@ -106,6 +107,7 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .default("[]"),
                     )
+                    .col(ColumnDef::new(Game::Weight).integer().not_null())
                     .to_owned(),
             )
             .await

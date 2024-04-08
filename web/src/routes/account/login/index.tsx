@@ -12,7 +12,7 @@ import Card from '@/lib/widgets/card'
 import Divider from '@/lib/widgets/divider'
 import Input from '@/lib/widgets/input'
 import Link from '@/lib/widgets/link'
-import { createForm } from '@modular-forms/solid'
+import { createForm, minLength, required } from '@modular-forms/solid'
 import { Title } from '@solidjs/meta'
 import { Match, Show, Switch, createSignal } from 'solid-js'
 import xdsecMascotNormal from '@assets/imgs/xdsec-mascot-normal.webp'
@@ -49,7 +49,13 @@ export default function () {
         >
           <Form onSubmit={() => {}} class="md:w-0 flex-1 flex-shrink-0 flex flex-col space-y-2">
             <h2 class="font-bold text-center">{t('account.login.title')}</h2>
-            <Field name="account">
+            <Field
+              name="account"
+              validate={[
+                required(t('account.login.accountRequired')!),
+                minLength(4, t('account.login.accountMinLength')!),
+              ]}
+            >
               {(field, props) => (
                 <Input
                   icon={<span class="icon-[fluent--person-20-regular] w-5 h-5"></span>}
@@ -57,7 +63,8 @@ export default function () {
                   title={t('account.login.accountPlaceholder')}
                   autocomplete="username"
                   {...props}
-                  value={field.value}
+                  {...field}
+                  required
                   onFocusIn={() => {
                     setMascot(xdsecMascotNormal)
                   }}
@@ -76,7 +83,7 @@ export default function () {
                   title={t('account.login.passwordPlaceholder')}
                   autocomplete="current-password"
                   {...props}
-                  value={field.value}
+                  {...field}
                   onFocusIn={() => {
                     setMascot(xdsecMascotUnsee)
                   }}

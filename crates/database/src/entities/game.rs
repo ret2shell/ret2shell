@@ -69,6 +69,7 @@ pub struct Model {
     pub award_rate: i32,
     #[sea_orm(column_type = "JsonBinary")]
     pub admins: Vec<i64>,
+    pub weight: i32,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

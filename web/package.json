@@ -10,7 +10,7 @@
     "@solid-primitives/clipboard": "^1.5.10",
     "@solid-primitives/i18n": "^2.1.1",
     "@solid-primitives/resize-observer": "^2.0.25",
-    "@solid-primitives/storage": "^3.1.0",
+    "@solid-primitives/storage": "^3.2.0",
     "@solidjs/meta": "^0.29.3",
     "@solidjs/router": "^0.13.1",
     "codejar": "^4.2.0",
@@ -19,7 +19,7 @@
     "katex": "^0.16.10",
     "ky": "^1.2.3",
     "luxon": "^3.4.4",
-    "nanoid": "^5.0.6",
+    "nanoid": "^5.0.7",
     "okwind": "^0.1.2",
     "overlayscrollbars": "^2.7.1",
     "overlayscrollbars-solid": "^0.5.5",
@@ -39,7 +39,7 @@
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
-    "@iconify-json/fluent": "^1.1.51",
+    "@iconify-json/fluent": "^1.1.52",
     "@iconify/tailwind": "^0.1.4",
     "@kobalte/tailwindcss": "^0.9.0",
     "@tailwindcss/typography": "^0.5.12",
