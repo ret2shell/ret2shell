@@ -6,7 +6,6 @@ import 'overlayscrollbars/overlayscrollbars.css'
 import './lib/widgets/styles/base.scss'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-solid'
 import { initTheme, themeStore } from './lib/storage/theme'
-import { MetaProvider } from '@solidjs/meta'
 import { Router } from '@solidjs/router'
 import { onMount } from 'solid-js'
 import Background from './lib/blocks/background'
@@ -56,23 +55,21 @@ render(() => {
   })
   return (
     <>
-      <MetaProvider>
-        <Background />
-        <OverlayScrollbarsComponent
-          options={{
-            scrollbars: {
-              theme: themeStore.colorScheme === 'light' ? 'os-theme-dark' : 'os-theme-light',
-              autoHide: 'scroll',
-            },
-          }}
-          class="relative w-screen h-screen print:h-auto print:overflow-auto"
-          defer
-        >
-          <div class="flex flex-col min-h-full">
-            <Router>{routes}</Router>
-          </div>
-        </OverlayScrollbarsComponent>
-      </MetaProvider>
+      <Background />
+      <OverlayScrollbarsComponent
+        options={{
+          scrollbars: {
+            theme: themeStore.colorScheme === 'light' ? 'os-theme-dark' : 'os-theme-light',
+            autoHide: 'scroll',
+          },
+        }}
+        class="relative w-screen h-screen print:h-auto print:overflow-auto"
+        defer
+      >
+        <div class="flex flex-col min-h-full">
+          <Router>{routes}</Router>
+        </div>
+      </OverlayScrollbarsComponent>
     </>
   )
 }, document.getElementById('root')!)

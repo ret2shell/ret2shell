@@ -78,7 +78,13 @@
       "accountMascotTip": "歡迎歡迎 ^_^",
       "passwordMascotTip": "看不見看不見 >_<",
       "accountRequired": "請填寫使用者名稱/信箱",
-      "accountMinLength": "使用者名稱/信箱至少4個字符"
+      "accountMinLength": "使用者名稱/信箱至少4個字符",
+      "passwordRequired": "請填寫密碼",
+      "passwordMinLength": "密碼最少8位",
+      "passwordTooWeak": "密碼在8-40字符之間，至少包含一個大寫字母、一個小寫字母、一個數字和一個特殊字符",
+      "success": "登入成功，歡迎回來",
+      "successMascotTip": "歡迎回來 ^_^",
+      "failMascotTip": "失敗了，壞耶 x_x"
     },
     "settings": {
       "title": "使用者設定"
@@ -111,5 +117,13 @@
   "magic": {
     "illustration": "插畫",
     "source": "來源"
+  },
+  "captcha": {
+    "loading": "載入中...",
+    "loadFailed": "載入失敗",
+    "required": "請填寫驗證碼",
+    "minLength": "驗證碼至少4位",
+    "calculating": "計算中...",
+    "placeholder": "驗證碼"
   }
 }

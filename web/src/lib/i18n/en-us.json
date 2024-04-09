@@ -78,7 +78,13 @@
       "accountMascotTip": "Welcome ^_^",
       "passwordMascotTip": "Won't watch it >_<",
       "accountRequired": "Please fill in your username/email",
-      "accountMinLength": "Username/email must be at least 4 characters"
+      "accountMinLength": "Username/email must be at least 4 characters",
+      "passwordRequired": "Please fill in the password",
+      "passwordMinLength": "Password must be at least 8 characters",
+      "passwordTooWeak": "The password must be between 8-40 characters and contain at least one uppercase letter, one lowercase letter, one number and one special character",
+      "success": "Login successful, welcome back",
+      "successMascotTip": "Welcome back ^_^",
+      "failMascotTip": "Failed, bad x_x"
     },
     "settings": {
       "title": "user settings"
@@ -111,5 +117,13 @@
   "magic": {
     "illustration": "illustration",
     "source": "source"
+  },
+  "captcha": {
+    "loading": "loading...",
+    "loadFailed": "Failed to load",
+    "required": "Please fill in the verification code",
+    "minLength": "Captcha must be at least 4 chars",
+    "calculating": "Calculating...",
+    "placeholder": "Verification code"
   }
 }

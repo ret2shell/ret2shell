@@ -12,11 +12,18 @@ import Card from '@/lib/widgets/card'
 import Divider from '@/lib/widgets/divider'
 import Input from '@/lib/widgets/input'
 import Link from '@/lib/widgets/link'
-import { createForm, minLength, required } from '@modular-forms/solid'
-import { Title } from '@solidjs/meta'
+import { createForm, minLength, pattern, required, setValue } from '@modular-forms/solid'
+import { Title } from '@storage/header'
 import { Match, Show, Switch, createSignal } from 'solid-js'
 import xdsecMascotNormal from '@assets/imgs/xdsec-mascot-normal.webp'
 import xdsecMascotUnsee from '@assets/imgs/xdsec-mascot-unsee.webp'
+import xdsecMascotHappy from '@assets/imgs/xdsec-mascot-happy.webp'
+import xdsecMascotCrying from '@assets/imgs/xdsec-mascot-crying.webp'
+import { login } from '@/lib/api/account'
+import { addToast } from '@/lib/storage/toast'
+import { HTTPError } from 'ky'
+import { redirect, useLocation } from '@solidjs/router'
+import { DateTime } from 'luxon'
 
 type LoginForm = {
   account: string
@@ -37,17 +44,48 @@ export default function () {
     .then(config => setAuthConfig(config))
     .catch(() => {})
   const [mascot, setMascot] = createSignal(null as string | null)
+  const [loading, setLoading] = createSignal(false)
+  const [timestamp, setTimestamp] = createSignal(DateTime.now().toMillis())
   return (
     <>
-      <Title>
-        {t('account.login.title')} - {platformStore.config.name || t('platform.name')}
-      </Title>
+      <Title title={`${t('account.login.title')} - ${platformStore.config.name || t('platform.name')}`} />
       <div class="flex-1 flex flex-col items-center md:justify-center p-2 md:p-6">
         <Card
           class="w-full max-w-3xl"
           contentClass="p-6 flex flex-col md:flex-row space-y-2 space-x-0 md:space-x-6 md:space-y-0"
         >
-          <Form onSubmit={() => {}} class="md:w-0 flex-1 flex-shrink-0 flex flex-col space-y-2">
+          <Form
+            onSubmit={result => {
+              setLoading(true)
+              login(result)
+                .then(() => {
+                  addToast({ level: 'success', description: t('account.login.success')!, duration: 5000 })
+                  setTimeout(() => {
+                    let redirectUrl = useLocation().query['redirect']
+                    if (redirectUrl) {
+                      redirect(redirectUrl as string)
+                    } else {
+                      redirect('/')
+                    }
+                  }, 1500)
+                  setMascot(xdsecMascotHappy)
+                })
+                .catch((err: HTTPError) => {
+                  err.response.text().then(text => {
+                    addToast({ level: 'error', description: text as string, duration: 5000 })
+                  })
+                  setTimestamp(DateTime.now().toMillis())
+                  setValue(form, 'password', '')
+                  setTimeout(() => {
+                    setMascot(xdsecMascotCrying)
+                  }, 500)
+                })
+                .finally(() => {
+                  setLoading(false)
+                })
+            }}
+            class="md:w-0 flex-1 flex-shrink-0 flex flex-col space-y-2"
+          >
             <h2 class="font-bold text-center">{t('account.login.title')}</h2>
             <Field
               name="account"
@@ -63,7 +101,8 @@ export default function () {
                   title={t('account.login.accountPlaceholder')}
                   autocomplete="username"
                   {...props}
-                  {...field}
+                  value={field.value}
+                  error={field.error}
                   required
                   onFocusIn={() => {
                     setMascot(xdsecMascotNormal)
@@ -74,7 +113,14 @@ export default function () {
                 />
               )}
             </Field>
-            <Field name="password">
+            <Field
+              name="password"
+              validate={[
+                required(t('account.login.passwordRequired')!),
+                minLength(8, t('account.login.passwordMinLength')!),
+                pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,64}$/, t('account.login.passwordTooWeak')!),
+              ]}
+            >
               {(field, props) => (
                 <Input
                   icon={<span class="icon-[fluent--lock-20-regular] w-5 h-5"></span>}
@@ -83,7 +129,8 @@ export default function () {
                   title={t('account.login.passwordPlaceholder')}
                   autocomplete="current-password"
                   {...props}
-                  {...field}
+                  value={field.value}
+                  error={field.error}
                   onFocusIn={() => {
                     setMascot(xdsecMascotUnsee)
                   }}
@@ -95,21 +142,25 @@ export default function () {
             </Field>
             <Field name="captcha_id">
               {idField => (
-                <Field name="captcha_answer">
+                <Field
+                  name="captcha_answer"
+                  validate={[required(t('captcha.required')!), minLength(4, t('captcha.minLength')!)]}
+                >
                   {(answerField, props) => (
                     <Captcha
-                      icon={<span class="icon-[fluent--bot-20-regular] w-5 h-5"></span>}
-                      placeholder={t('account.login.captchaPlaceholder')}
-                      title={t('account.login.captchaPlaceholder')}
                       {...props}
-                      idField={idField.value}
-                      answerField={answerField.value}
+                      captchaForm={form}
+                      idFieldValue={idField.value}
+                      idFieldError={idField.error}
+                      answerFieldValue={answerField.value}
+                      answerFieldError={answerField.error}
+                      timestamp={timestamp()}
                     />
                   )}
                 </Field>
               )}
             </Field>
-            <Button type="submit" level="primary" class="!mt-4">
+            <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
               {t('account.login.title')}
             </Button>
           </Form>
@@ -135,6 +186,24 @@ export default function () {
                     title="Illustrated by hypnotics"
                   />
                   <label>{t('account.login.passwordMascotTip')}</label>
+                </Match>
+                <Match when={mascot() === xdsecMascotHappy}>
+                  <img
+                    src={xdsecMascotHappy}
+                    class="w-36 h-36 hidden md:inline-block my-6"
+                    alt="Illustrated by hypnotics"
+                    title="Illustrated by hypnotics"
+                  />
+                  <label>{t('account.login.successMascotTip')}</label>
+                </Match>
+                <Match when={mascot() === xdsecMascotCrying}>
+                  <img
+                    src={xdsecMascotCrying}
+                    class="w-36 h-36 hidden md:inline-block my-6"
+                    alt="Illustrated by hypnotics"
+                    title="Illustrated by hypnotics"
+                  />
+                  <label>{t('account.login.failMascotTip')}</label>
                 </Match>
               </Switch>
             </div>

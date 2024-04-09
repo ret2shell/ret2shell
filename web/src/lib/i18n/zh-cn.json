@@ -78,7 +78,13 @@
       "accountMascotTip": "欢迎欢迎 ^_^",
       "passwordMascotTip": "看不见看不见 >_<",
       "accountRequired": "请填写用户名/邮箱",
-      "accountMinLength": "用户名/邮箱至少为4个字符"
+      "accountMinLength": "用户名/邮箱至少为4个字符",
+      "passwordRequired": "请填写密码",
+      "passwordMinLength": "密码最少8位",
+      "passwordTooWeak": "密码在8-40字符之间，至少包含一个大写字母、一个小写字母、一个数字和一个特殊字符",
+      "success": "登录成功，欢迎回来",
+      "successMascotTip": "欢迎回来 ^_^",
+      "failMascotTip": "失败了，坏耶 x_x"
     },
     "settings": {
       "title": "用户设置"
@@ -111,5 +117,13 @@
   "magic": {
     "illustration": "插画",
     "source": "来源"
+  },
+  "captcha": {
+    "loading": "加载中...",
+    "loadFailed": "加载失败",
+    "required": "请填写验证码",
+    "minLength": "验证码至少4位",
+    "calculating": "计算中...",
+    "placeholder": "验证码"
   }
 }

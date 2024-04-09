@@ -118,7 +118,7 @@ async fn login(
     Extension(token_tracker): Extension<TokenTracker>, Json(body): Json<LoginRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
     debug!("login request: {:?}", body);
-    if token.id >= 0 {
+    if token.id > 0 {
         return Err(ResponseError::Conflict(
             "you have already logged in".to_owned(),
         ));

@@ -8,7 +8,7 @@ import Button from '@widgets/button'
 import Card from '@widgets/card'
 import Calendar from './calendar'
 import { getVersion } from '@/lib/api/platform'
-import { Title } from '@solidjs/meta'
+import { Title } from '@storage/header'
 
 export default function () {
   getVersion()
@@ -18,7 +18,7 @@ export default function () {
     .catch(() => {})
   return (
     <>
-      <Title>{platformStore.config.name || t('platform.name')}</Title>
+      <Title title={platformStore.config.name || t('platform.name')!} />
       <div class="flex-1 relative">
         <div class="absolute h-full w-full overflow-scroll snap-mandatory snap-y">
           <section class="h-full min-h-full snap-center flex flex-col items-center justify-center relative">

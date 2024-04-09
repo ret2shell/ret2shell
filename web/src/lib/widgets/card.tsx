@@ -1,9 +1,10 @@
-import { ComponentProps, JSX, createMemo } from 'solid-js'
+import { ComponentProps, createMemo } from 'solid-js'
 import './styles/card.scss'
 
 export type CardProps = {
   solid?: boolean
   contentClass?: string
+  level?: 'info' | 'success' | 'warning' | 'error'
 }
 
 export default function (props: CardProps & ComponentProps<'div'>) {
@@ -19,7 +20,7 @@ export default function (props: CardProps & ComponentProps<'div'>) {
     )
   })
   return (
-    <div {...props} class={mergedClasses()}>
+    <div {...props} class={`${mergedClasses()} ${props.level ? 'card-' + props.level : ''}`}>
       <div class={`card-content ${props.contentClass}`}>{props.children}</div>
     </div>
   )

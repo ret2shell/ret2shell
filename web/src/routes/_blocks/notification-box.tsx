@@ -1,4 +1,4 @@
-import { clearToasts, removeToast, toastStore } from '@/lib/storage/toast'
+import { clearToasts, toastStore } from '@/lib/storage/toast'
 import Button from '@/lib/widgets/button'
 import Toast from '@/lib/widgets/toast'
 import { t } from '@storage/theme'

@@ -22,6 +22,7 @@ import Toasts from './_blocks/toasts'
 import { Transition } from 'solid-transition-group'
 import Button from '@/lib/widgets/button'
 import { wsrx } from '@/lib/wsrx'
+import { Title, setupTitleResolver } from '@storage/header'
 
 function GlobalTitleLink() {
   return (
@@ -281,7 +282,7 @@ function TitleBar() {
 
 function checkCookiePolicy() {
   if (!platformStore.accept_cookies) {
-    let toastId = addToast({
+    const toastId = addToast({
       level: 'info',
       description: t('platform.cookiePolicy') as string,
       accept: () => {
@@ -308,6 +309,7 @@ export default function (props: { children?: JSX.Element }) {
   const [hideAnimation, setHideAnimation] = createSignal(false)
   const showAnimation = useLocation().pathname === '/'
   checkCookiePolicy()
+  setupTitleResolver()
   getPlatformInfo()
     .then(res => {
       setPlatformStore({ ...platformStore, config: res })
@@ -337,6 +339,7 @@ export default function (props: { children?: JSX.Element }) {
     })
   return (
     <>
+      <Title title={platformStore.config.name || t('platform.name')!} />
       <TitleBar />
       {props.children}
       <Toasts />

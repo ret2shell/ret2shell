@@ -16,4 +16,24 @@
     opacity: 0;
     transform: scale(0.95);
   }
+
+  &-primary {
+    @apply bg-primary/30;
+  }
+
+  &-info {
+    @apply bg-info/30;
+  }
+
+  &-success {
+    @apply bg-success/30;
+  }
+
+  &-warning {
+    @apply bg-warning/30;
+  }
+
+  &-error {
+    @apply bg-error/30;
+  }
 }

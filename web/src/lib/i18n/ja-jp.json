@@ -78,7 +78,13 @@
       "accountMascotTip": "いらっしゃいませ ^_^",
       "passwordMascotTip": "見えない、見えない >_<",
       "accountRequired": "ユーザー名/メールアドレスを入力してください",
-      "accountMinLength": "ユーザー名/メールアドレスは 4 文字以上である必要があります"
+      "accountMinLength": "ユーザー名/メールアドレスは 4 文字以上である必要があります",
+      "passwordRequired": "パスワードを入力してください",
+      "passwordMinLength": "パスワードは8文字以上でなければなりません",
+      "passwordTooWeak": "パスワードは 8 ～ 40 文字で、少なくとも 1 つの大文字、1 つの小文字、1 つの数字、および 1 つの特殊文字を含む必要があります。",
+      "success": "ログインに成功しました。おかえりなさい",
+      "successMascotTip": "おかえり ^_^",
+      "failMascotTip": "失敗しました、不良 x_x"
     },
     "settings": {
       "title": "ユーザー設定"
@@ -111,5 +117,13 @@
   "magic": {
     "illustration": "図",
     "source": "ソース"
+  },
+  "captcha": {
+    "loading": "読み込み中...",
+    "loadFailed": "読み込みに失敗しました",
+    "required": "確認コードを入力してください",
+    "minLength": "確認コードは少なくとも 4 桁である必要があります",
+    "calculating": "計算中...",
+    "placeholder": "検証コード"
   }
 }
