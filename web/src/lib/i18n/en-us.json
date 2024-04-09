@@ -92,7 +92,24 @@
     "logout": "sign out",
     "box": "User detail",
     "register": {
-      "tips": "No account? \nRegister now!"
+      "tips": "No account? \nRegister now!",
+      "title": "Register",
+      "accountRequired": "Please enter your account",
+      "accountMinLength": "Username must be at least 4 characters",
+      "accountMaxLength": "Username can be up to 32 characters",
+      "accountPattern": "Username must be a combination of uppercase and lowercase letters, numbers and underscores",
+      "accountPlaceholder": "Username",
+      "nicknameRequired": "Please fill in nickname",
+      "nicknameMinLength": "Nickname must be at least 2 characters long",
+      "nicknameMaxLength": "Nickname can be up to 32 characters long",
+      "nicknamePlaceholder": "Nick name",
+      "emailRequired": "please enter your email",
+      "emailInvalid": "E-mail format is incorrect",
+      "passwordRequired": "Please fill in the password",
+      "passwordMinLength": "Password must be at least 8 characters",
+      "passwordTooWeak": "The password must be between 8-40 characters and contain at least one uppercase letter, one lowercase letter, one number and one special character",
+      "emailPlaceholder": "E-Mail",
+      "passwordPlaceholder": "password"
     },
     "oauth": {
       "xdu": {

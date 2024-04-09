@@ -92,7 +92,24 @@
     "logout": "登出登入",
     "box": "使用者詳情",
     "register": {
-      "tips": "沒有帳號？\n現在註冊！"
+      "tips": "沒有帳號？\n現在註冊！",
+      "title": "註冊",
+      "accountRequired": "請填寫用戶名",
+      "accountMinLength": "使用者名稱至少4個字符",
+      "accountMaxLength": "使用者名稱最多32個字符",
+      "accountPattern": "使用者名稱必須是大小寫字母、數字與底線的組合",
+      "accountPlaceholder": "使用者名稱",
+      "nicknameRequired": "請填寫暱稱",
+      "nicknameMinLength": "暱稱最短2個字符",
+      "nicknameMaxLength": "暱稱最長32個字符",
+      "nicknamePlaceholder": "暱稱",
+      "emailRequired": "請填寫信箱",
+      "emailInvalid": "郵箱格式不正確",
+      "passwordRequired": "請填寫密碼",
+      "passwordMinLength": "密碼最少8位",
+      "passwordTooWeak": "密碼在8-40字符之間，至少包含一個大寫字母、一個小寫字母、一個數字和一個特殊字符",
+      "emailPlaceholder": "信箱",
+      "passwordPlaceholder": "密碼"
     },
     "oauth": {
       "xdu": {

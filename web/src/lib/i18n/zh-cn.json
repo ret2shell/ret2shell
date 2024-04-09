@@ -92,7 +92,24 @@
     "logout": "退出登录",
     "box": "用户详情",
     "register": {
-      "tips": "没有账号？现在注册！"
+      "tips": "没有账号？现在注册！",
+      "accountRequired": "请填写用户名",
+      "accountMinLength": "用户名至少4个字符",
+      "accountMaxLength": "用户名最多32个字符",
+      "accountPattern": "用户名必须是大小写字母、数字与下划线的组合",
+      "title": "注册",
+      "accountPlaceholder": "用户名",
+      "nicknameRequired": "请填写昵称",
+      "nicknameMinLength": "昵称最短2个字符",
+      "nicknameMaxLength": "昵称最长32个字符",
+      "nicknamePlaceholder": "昵称",
+      "emailRequired": "请填写邮箱",
+      "emailInvalid": "邮箱格式不正确",
+      "passwordRequired": "请填写密码",
+      "passwordMinLength": "密码最少8位",
+      "passwordTooWeak": "密码在8-40字符之间，至少包含一个大写字母、一个小写字母、一个数字和一个特殊字符",
+      "emailPlaceholder": "邮箱",
+      "passwordPlaceholder": "密码"
     },
     "oauth": {
       "xdu": {
