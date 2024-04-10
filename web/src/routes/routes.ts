@@ -21,10 +21,6 @@ export const routes = {
           component: lazy(() => import('./account/login/index')),
         },
         {
-          path: '/logout',
-          component: lazy(() => import('./account/logout/index')),
-        },
-        {
           path: '/register',
           component: lazy(() => import('./account/register/index')),
         },
@@ -99,6 +95,20 @@ export const routes = {
         {
           path: '/',
           component: lazy(() => import('./admin/index')),
+        },
+      ],
+    },
+    {
+      path: '/users',
+      component: lazy(() => import('./users/layout')),
+      children: [
+        {
+          path: '/',
+          component: lazy(() => import('./users/index')),
+        },
+        {
+          path: '/:id',
+          component: lazy(() => import('./users/[id]')),
         },
       ],
     },

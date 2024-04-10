@@ -1,5 +1,5 @@
 import { luxonReviver } from '@models/utils'
-import { accountStore, setAccountStore, userReset } from '@storage/account'
+import { accountStore, userLogin, userReset } from '@storage/account'
 import ky from 'ky'
 
 export const api_root = import.meta.env.VITE_API_ROOT || '/api'
@@ -23,7 +23,7 @@ const api = ky.extend({
         if (response.headers.has('Set-Token')) {
           const token = response.headers.get('Set-Token')
           if (token) {
-            setAccountStore({ token })
+            userLogin(token)
           }
         }
       },

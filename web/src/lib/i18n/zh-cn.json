@@ -109,7 +109,8 @@
       "passwordMinLength": "密码最少8位",
       "passwordTooWeak": "密码在8-40字符之间，至少包含一个大写字母、一个小写字母、一个数字和一个特殊字符",
       "emailPlaceholder": "邮箱",
-      "passwordPlaceholder": "密码"
+      "passwordPlaceholder": "密码",
+      "success": "注册成功，欢迎来到 CTF 的世界！"
     },
     "oauth": {
       "xdu": {

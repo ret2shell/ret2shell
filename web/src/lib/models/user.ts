@@ -27,3 +27,10 @@ export type User = {
   hidden: boolean
   banned: boolean
 }
+
+export type Token = {
+  id: number
+  account: string
+  nickname: string
+  permissions: Permission[]
+}

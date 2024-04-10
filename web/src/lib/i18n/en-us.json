@@ -109,7 +109,8 @@
       "passwordMinLength": "Password must be at least 8 characters",
       "passwordTooWeak": "The password must be between 8-40 characters and contain at least one uppercase letter, one lowercase letter, one number and one special character",
       "emailPlaceholder": "E-Mail",
-      "passwordPlaceholder": "password"
+      "passwordPlaceholder": "password",
+      "success": "Registration successful, welcome to the world of CTF!"
     },
     "oauth": {
       "xdu": {

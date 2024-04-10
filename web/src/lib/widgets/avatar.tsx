@@ -15,8 +15,8 @@ export default function (props: AvatarProps) {
   const [img, _2] = splitProps(_1, ['img'])
   const [children, root] = splitProps(_2, ['children'])
   return (
-    <Avatar.Root class={`avatar h-12 w-12 ${root.class}`}>
-      <Avatar.Fallback class="avatar-fallback">{fallback.fallback}</Avatar.Fallback>
+    <Avatar.Root class={`avatar ${root.class}`}>
+      <Avatar.Fallback class="avatar-fallback">{fallback.fallback?.slice(0, 2).toUpperCase()}</Avatar.Fallback>
       <Avatar.Image {...img} class={`avatar-img ${img.img?.class}`} />
       {children.children}
     </Avatar.Root>

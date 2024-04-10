@@ -284,7 +284,7 @@ async fn register(
         ]),
         _ => Permissions(vec![Permission::Basic]),
     };
-    if !config.email.as_ref().is_some_and(|c| c.enabled) {
+    if !config.email.as_ref().is_some_and(|c| c.enabled) && permissions.0.len() == 1 {
         permissions.0.push(Permission::Verified);
     }
     let email = body.email.clone();
@@ -293,6 +293,7 @@ async fn register(
         nickname: body.nickname.clone(),
         password: Some(password),
         email: Some(body.email),
+        registered_at: Utc::now(),
         permissions,
         hidden: false,
         banned: false,

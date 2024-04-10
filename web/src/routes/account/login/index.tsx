@@ -22,8 +22,9 @@ import xdsecMascotCrying from '@assets/imgs/xdsec-mascot-crying.webp'
 import { login } from '@/lib/api/account'
 import { addToast } from '@/lib/storage/toast'
 import { HTTPError } from 'ky'
-import { redirect, useLocation } from '@solidjs/router'
+import { useLocation, useNavigate } from '@solidjs/router'
 import { DateTime } from 'luxon'
+import { accountStore } from '@/lib/storage/account'
 
 type LoginForm = {
   account: string
@@ -33,6 +34,12 @@ type LoginForm = {
 }
 
 export default function () {
+  const navigate = useNavigate()
+  const location = useLocation()
+  if (accountStore.token) {
+    navigate('/', { replace: true })
+    return null
+  }
   const [form, { Form, Field }] = createForm<LoginForm>()
   const [authConfig, setAuthConfig] = createSignal({
     signing_key: '',
@@ -46,6 +53,32 @@ export default function () {
   const [mascot, setMascot] = createSignal(null as string | null)
   const [loading, setLoading] = createSignal(false)
   const [timestamp, setTimestamp] = createSignal(DateTime.now().toMillis())
+  function handleLogin(result: LoginForm) {
+    setLoading(true)
+    login(result)
+      .then(() => {
+        addToast({ level: 'success', description: t('account.login.success')!, duration: 5000, img: xdsecMascotHappy })
+        const redirectUrl = location.query['redirect']
+        if (redirectUrl) {
+          navigate(redirectUrl as string, { replace: true })
+        } else {
+          navigate('/', { replace: true })
+        }
+      })
+      .catch((err: HTTPError) => {
+        err.response.text().then(text => {
+          addToast({ level: 'error', description: text as string, duration: 5000 })
+        })
+        setTimestamp(DateTime.now().toMillis())
+        setValue(form, 'password', '')
+        setTimeout(() => {
+          setMascot(xdsecMascotCrying)
+        }, 500)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }
   return (
     <>
       <Title title={`${t('account.login.title')} - ${platformStore.config.name || t('platform.name')}`} />
@@ -54,38 +87,7 @@ export default function () {
           class="w-full max-w-3xl"
           contentClass="p-6 flex flex-col md:flex-row space-y-2 space-x-0 md:space-x-6 md:space-y-0"
         >
-          <Form
-            onSubmit={result => {
-              setLoading(true)
-              login(result)
-                .then(() => {
-                  addToast({ level: 'success', description: t('account.login.success')!, duration: 5000 })
-                  setTimeout(() => {
-                    let redirectUrl = useLocation().query['redirect']
-                    if (redirectUrl) {
-                      redirect(redirectUrl as string)
-                    } else {
-                      redirect('/')
-                    }
-                  }, 1500)
-                  setMascot(xdsecMascotHappy)
-                })
-                .catch((err: HTTPError) => {
-                  err.response.text().then(text => {
-                    addToast({ level: 'error', description: text as string, duration: 5000 })
-                  })
-                  setTimestamp(DateTime.now().toMillis())
-                  setValue(form, 'password', '')
-                  setTimeout(() => {
-                    setMascot(xdsecMascotCrying)
-                  }, 500)
-                })
-                .finally(() => {
-                  setLoading(false)
-                })
-            }}
-            class="md:w-0 flex-1 flex-shrink-0 flex flex-col space-y-2"
-          >
+          <Form onSubmit={handleLogin} class="md:w-0 flex-1 flex-shrink-0 flex flex-col space-y-2">
             <h2 class="font-bold text-center">{t('account.login.title')}</h2>
             <Field
               name="account"

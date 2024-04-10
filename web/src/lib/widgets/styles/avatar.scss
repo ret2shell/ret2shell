@@ -2,6 +2,10 @@
   @apply rounded-full overflow-hidden relative outline outline-2 outline-offset-2 outline-primary;
 
   &-img {
-    @apply object-cover;
+    @apply w-full aspect-square object-cover;
+  }
+
+  &-fallback {
+    @apply w-full aspect-square flex items-center justify-center;
   }
 }

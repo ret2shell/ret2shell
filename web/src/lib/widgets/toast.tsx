@@ -12,39 +12,44 @@ export type ToastProps = {
 }
 
 export default function (props: ComponentProps<'div'> & ToastProps) {
-  const [toast, others] = splitProps(props, ['toast'])
+  const [toastMsgProps, otherProps] = splitProps(props, ['toast'])
   let progressRef: HTMLDivElement
   onMount(() => {
-    if (props.selfDestroy && toast.toast.duration && toast.toast.duration > 0) {
+    if (props.selfDestroy && toastMsgProps.toast.duration && toastMsgProps.toast.duration > 0) {
       setTimeout(() => {
         progressRef.classList.remove('w-full')
-        progressRef.style.transitionDuration = toast.toast.duration + 'ms'
+        progressRef.style.transitionDuration = toastMsgProps.toast.duration + 'ms'
         progressRef.classList.add('w-0')
       }, 100)
-      if (!toast.toast.duration) return
+      if (!toastMsgProps.toast.duration) return
       setTimeout(() => {
         props.onTimeout?.()
-      }, toast.toast.duration + 100)
+      }, toastMsgProps.toast.duration + 100)
     }
   })
   return (
     <>
-      <Card {...others} class={`toast ${others.class}`} contentClass="p-2 group relative">
+      <Card {...otherProps} class={`toast ${otherProps.class}`} contentClass="p-2 group relative">
         <div class="flex flex-col space-y-2">
+          <Show when={toastMsgProps.toast.img}>
+            <div class="flex flex-row items-center justify-center p-6">
+              <img src={toastMsgProps.toast.img} class="w-24 h-24" />
+            </div>
+          </Show>
           <div class="inline-block space-x-2 px-2 py-1">
-            <span class={`text-${toast.toast.level}`}>[{toast.toast.level[0]}]</span>
-            <span>{toast.toast.description}</span>
+            <span class={`text-${toastMsgProps.toast.level}`}>[{toastMsgProps.toast.level[0]}]</span>
+            <span>{toastMsgProps.toast.description}</span>
           </div>
-          <Show when={toast.toast.reject || toast.toast.accept}>
+          <Show when={toastMsgProps.toast.reject || toastMsgProps.toast.accept}>
             <div class="flex flex-row items-center justify-end space-x-2">
-              <Show when={toast.toast.reject}>
-                <Button size="sm" ghost onClick={toast.toast.reject}>
-                  {toast.toast.rejectLabel || t('platform.reject')}
+              <Show when={toastMsgProps.toast.reject}>
+                <Button size="sm" ghost onClick={toastMsgProps.toast.reject}>
+                  {toastMsgProps.toast.rejectLabel || t('platform.reject')}
                 </Button>
               </Show>
-              <Show when={toast.toast.accept}>
-                <Button size="sm" level="primary" onClick={toast.toast.accept}>
-                  {toast.toast.acceptLabel || t('platform.accept')}
+              <Show when={toastMsgProps.toast.accept}>
+                <Button size="sm" level="primary" onClick={toastMsgProps.toast.accept}>
+                  {toastMsgProps.toast.acceptLabel || t('platform.accept')}
                 </Button>
               </Show>
             </div>
@@ -54,14 +59,17 @@ export default function (props: ComponentProps<'div'> & ToastProps) {
           class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
           size="sm"
           square
-          onClick={() => removeToast(toast.toast.id)}
+          onClick={() => toastMsgProps.toast.id && removeToast(toastMsgProps.toast.id)}
         >
           <span class="icon-[fluent--dismiss-20-regular] w-5 h-5"></span>
         </Button>
-        <Show when={props.selfDestroy && toast.toast.duration}>
+        <Show when={props.selfDestroy && toastMsgProps.toast.duration}>
           {/* bg-info bg-success bg-warning bg-error */}
           <div class="absolute bottom-1 left-4 h-[2px] right-4">
-            <div ref={progressRef!} class={`w-full h-full bg-${toast.toast.level} transition-all ease-linear`}></div>
+            <div
+              ref={progressRef!}
+              class={`w-full h-full bg-${toastMsgProps.toast.level} transition-all ease-linear`}
+            ></div>
           </div>
         </Show>
       </Card>

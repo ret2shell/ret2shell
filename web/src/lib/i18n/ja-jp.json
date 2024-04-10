@@ -109,7 +109,8 @@
       "passwordMinLength": "パスワードは8文字以上でなければなりません",
       "passwordTooWeak": "パスワードは 8 ～ 40 文字で、少なくとも 1 つの大文字、1 つの小文字、1 つの数字、および 1 つの特殊文字を含む必要があります。",
       "emailPlaceholder": "郵便",
-      "passwordPlaceholder": "パスワード"
+      "passwordPlaceholder": "パスワード",
+      "success": "登録は成功しました。CTF の世界へようこそ!"
     },
     "oauth": {
       "xdu": {
