@@ -32,6 +32,7 @@ mod game;
 mod instance;
 mod media;
 mod platform;
+mod rpc;
 mod user;
 mod wiki;
 
@@ -93,6 +94,7 @@ fn construct_router(state: &GlobalState) -> Router<GlobalState> {
         .nest("/platform", platform::router(state))
         .nest("/user", user::router(state))
         .nest("/wiki", wiki::router(state))
+        .nest("/rpc", rpc::router(state))
         .route("/ping", get(ping))
         .route_layer(from_fn_with_state(state.clone(), ip_record))
         .route_layer(from_fn_with_state(state.clone(), extract_user_info))

@@ -239,7 +239,6 @@ fn get_flag_template_valid_part(flag_template: &str) -> String {
     flag_template_valid_part
 }
 
-#[allow(dead_code)]
 pub fn insert_user_id(flag_template: &str, user_id: i64) -> Result<String, FlagError> {
     // turn user_id into Vec<u8> which has 8 bytes
     let user_id = user_id.to_be_bytes();
@@ -288,7 +287,6 @@ pub fn insert_user_id(flag_template: &str, user_id: i64) -> Result<String, FlagE
     Ok(flag)
 }
 
-#[allow(dead_code)]
 pub fn get_user_id_from_flag(flag_template: &str, flag: &str) -> Result<i64, FlagError> {
     let flag_valid_part: Vec<u8> = get_flag_valid_part(flag).to_string().into_bytes();
     let flag_template_valid_part: Vec<u8> = get_flag_template_valid_part(flag_template)

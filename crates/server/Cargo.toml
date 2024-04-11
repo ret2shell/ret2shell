@@ -46,6 +46,10 @@ bcrypt = "0.15"
 ring = "0.17"
 hex = "0.4"
 nanoid = "0.4"
+deunicode = "1.4"
+sanitizer = "0.1"
+once_cell = "1.19"
+rand = "0.8"
 
 # System stat
 systemstat = { version = "0.2", features = ["serde"] }

@@ -7,10 +7,14 @@ import { addToast } from '@/lib/storage/toast'
 import Button from '@/lib/widgets/button'
 import Card from '@/lib/widgets/card'
 import Input from '@/lib/widgets/input'
-import { createForm, email, maxLength, minLength, pattern, required } from '@modular-forms/solid'
+import { createForm, email, maxLength, minLength, pattern, replace, required, setValue } from '@modular-forms/solid'
 import { HTTPError } from 'ky'
 import { DateTime } from 'luxon'
 import { createSignal } from 'solid-js'
+import xdsecMascotHappy from '@assets/imgs/xdsec-mascot-happy.webp'
+import { useNavigate } from '@solidjs/router'
+import { accountStore } from '@/lib/storage/account'
+import { deunicode, leet } from '@/lib/api/rpc'
 
 type RegisterForm = {
   account: string
@@ -22,9 +26,15 @@ type RegisterForm = {
 }
 
 export default function () {
+  const navigate = useNavigate()
+  if (accountStore.token) {
+    navigate('/', { replace: true })
+    return null
+  }
   const [form, { Form, Field }] = createForm<RegisterForm>()
   const [loading, setLoading] = createSignal(false)
   const [timestamp, setTimestamp] = createSignal(DateTime.now().toMillis())
+  let accountInputRef: HTMLInputElement
   return (
     <>
       <Title title={`${t('account.register.title')} - ${platformStore.config.name || t('platform.name')}`} />
@@ -38,7 +48,13 @@ export default function () {
               setLoading(true)
               register(result)
                 .then(() => {
-                  addToast({ level: 'success', description: t('account.register.success')!, duration: 5000 })
+                  addToast({
+                    level: 'success',
+                    description: t('account.register.success')!,
+                    duration: 5000,
+                    img: xdsecMascotHappy,
+                  })
+                  navigate('/', { replace: true })
                 })
                 .catch((err: HTTPError) => {
                   err.response.text().then(text => {
@@ -54,6 +70,36 @@ export default function () {
           >
             <h2 class="font-bold text-center">{t('account.register.title')}</h2>
             <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
+              <Field
+                name="nickname"
+                validate={[
+                  required(t('account.register.nicknameRequired')!),
+                  minLength(2, t('account.register.nicknameMinLength')!),
+                  maxLength(32, t('account.register.nicknameMaxLength')!),
+                ]}
+              >
+                {(field, props) => (
+                  <Input
+                    icon={<span class="icon-[fluent--wand-20-regular] w-5 h-5"></span>}
+                    placeholder={t('account.register.nicknamePlaceholder')}
+                    title={t('account.register.nicknamePlaceholder')}
+                    autocomplete="nickname"
+                    {...props}
+                    value={field.value}
+                    error={field.error}
+                    class="flex-1"
+                    required
+                    onBlur={e => {
+                      if (e.target.value)
+                        deunicode(e.target.value)
+                          .then(result => {
+                            setValue(form, 'account', result)
+                          })
+                          .catch(() => {})
+                    }}
+                  />
+                )}
+              </Field>
               <Field
                 name="account"
                 validate={[
@@ -75,28 +121,23 @@ export default function () {
                     error={field.error}
                     class="flex-1"
                     required
-                  />
-                )}
-              </Field>
-              <Field
-                name="nickname"
-                validate={[
-                  required(t('account.register.nicknameRequired')!),
-                  minLength(2, t('account.register.nicknameMinLength')!),
-                  maxLength(32, t('account.register.nicknameMaxLength')!),
-                ]}
-              >
-                {(field, props) => (
-                  <Input
-                    icon={<span class="icon-[fluent--wand-20-regular] w-5 h-5"></span>}
-                    placeholder={t('account.register.nicknamePlaceholder')}
-                    title={t('account.register.nicknamePlaceholder')}
-                    autocomplete="nickname"
-                    {...props}
-                    value={field.value}
-                    error={field.error}
-                    class="flex-1"
-                    required
+                    ref={accountInputRef}
+                    extraBtn={
+                      <Button
+                        class="!rounded-l-none"
+                        type="button"
+                        onClick={() => {
+                          if (accountInputRef && accountInputRef.value)
+                            leet(accountInputRef!.value)
+                              .then(result => {
+                                setValue(form, 'account', result)
+                              })
+                              .catch(() => {})
+                        }}
+                      >
+                        <span class="icon-[fluent--diversity-20-regular] w-5 h-5"></span>
+                      </Button>
+                    }
                   />
                 )}
               </Field>
