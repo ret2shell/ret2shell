@@ -1,4 +1,4 @@
-import { Show } from 'solid-js'
+import { Show, onMount } from 'solid-js'
 import LogoAnimate from '@assets/animates/logo-animate'
 import { platformStore, setPlatformStore } from '@storage/platform'
 import { t } from '@storage/theme'
@@ -9,6 +9,7 @@ import Card from '@widgets/card'
 import Calendar from './calendar'
 import { getVersion } from '@/lib/api/platform'
 import { Title } from '@storage/header'
+import { useSearchParams } from '@solidjs/router'
 
 export default function () {
   getVersion()
@@ -16,6 +17,20 @@ export default function () {
       setPlatformStore('version', version)
     })
     .catch(() => {})
+  const [searchParams] = useSearchParams()
+  let calendarSection: HTMLElement
+  onMount(() => {
+    if (searchParams.event) {
+      try {
+        let result = parseInt(searchParams.event)
+        if (result) {
+          setTimeout(() => {
+            calendarSection.scrollIntoView({ behavior: 'smooth' })
+          })
+        }
+      } catch {}
+    }
+  })
   return (
     <>
       <Title title={platformStore.config.name || t('platform.name')!} />
@@ -111,7 +126,7 @@ export default function () {
               </Popover>
             </div>
           </section>
-          <section id="index-calendar" class="h-full min-h-full snap-center relative">
+          <section id="index-calendar" ref={calendarSection!} class="h-full min-h-full snap-center relative">
             <Calendar />
           </section>
         </div>

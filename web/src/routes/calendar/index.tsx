@@ -1,3 +1,4 @@
+import { getCalendar, getCalendarList } from '@/lib/api/calendar'
 import { Calendar } from '@/lib/models/calendar'
 import { Permission } from '@/lib/models/user'
 import { accountStore } from '@/lib/storage/account'
@@ -5,13 +6,38 @@ import { t } from '@/lib/storage/theme'
 import Button from '@/lib/widgets/button'
 import Card from '@/lib/widgets/card'
 import Divider from '@/lib/widgets/divider'
+import Link from '@/lib/widgets/link'
+import { useSearchParams } from '@solidjs/router'
 import { DateTime, MonthNumbers } from 'luxon'
-import { Show, createMemo, createSignal } from 'solid-js'
+import { For, Show, createEffect, createMemo, createSignal } from 'solid-js'
 
 export default function () {
   const currentDate = DateTime.now()
   const [year, setYear] = createSignal(currentDate.year)
   const [month, setMonth] = createSignal(currentDate.month)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const selectedEventId = createMemo(() => {
+    if (searchParams && searchParams.event) {
+      try {
+        return parseInt(searchParams.event!)
+      } catch {
+        return null
+      }
+    }
+    return null
+  })
+  const [selectedEvent, setSelectedEvent] = createSignal<Calendar | null>(null)
+  createEffect(() => {
+    if (selectedEventId()) {
+      getCalendar(selectedEventId()!).then(resp => {
+        setSelectedEvent(resp)
+      })
+    } else {
+      setSelectedEvent(null)
+    }
+  })
+
+  const [selectedDay, setSelectedDay] = createSignal(null as null | number)
 
   function convertWeekKey(weekKey: number) {
     switch (weekKey) {
@@ -59,6 +85,53 @@ export default function () {
     return days
   })
   const [events, setEvents] = createSignal([] as Calendar[])
+  function getEvents(startTime: DateTime, endTime: DateTime) {
+    getCalendarList(startTime, endTime).then(resp => {
+      setEvents(resp)
+    })
+  }
+  createEffect(() => {
+    const startTime = DateTime.fromObject({ year: year(), month: month(), day: 1 })
+    const endTime = startTime.endOf('month')
+    getEvents(startTime, endTime)
+  })
+  const eventDays = createMemo(() => {
+    const days = new Set<number>()
+    events().forEach(event => {
+      const start = event.start_at
+      let startDay = start.day
+      if (start.month !== month()) {
+        startDay = 1
+      }
+      const end = event.end_at
+      let endDay = end.day
+      if (end.month !== month()) {
+        endDay = end.endOf('month').day
+      }
+      for (let i = startDay; i <= endDay; i++) {
+        days.add(i)
+      }
+    })
+    return days
+  })
+  const selectedDayMappedEvents = createMemo(() => {
+    if (selectedDay() === null) {
+      return []
+    }
+    return events().filter(event => {
+      const start = event.start_at
+      let startDay = start.day
+      if (start.month !== month()) {
+        startDay = 1
+      }
+      const end = event.end_at
+      let endDay = end.day
+      if (end.month !== month()) {
+        endDay = end.endOf('month').day
+      }
+      return startDay <= selectedDay()! && endDay >= selectedDay()!
+    })
+  })
   return (
     <>
       <div class="w-full h-full flex flex-col lg:flex-row">
@@ -130,8 +203,34 @@ export default function () {
               ))}
               {/* then, render the days use square button */}
               {currentMonthDays().map(day => (
-                <Button ghost square>
+                <Button
+                  ghost={
+                    !(
+                      day.current &&
+                      selectedEvent()?.start_at &&
+                      selectedEvent()!.start_at.day <= day.day &&
+                      selectedEvent()?.end_at &&
+                      selectedEvent()!.end_at.day >= day.day
+                    ) && !(day.current && selectedDay() === day.day)
+                  }
+                  square
+                  class="relative"
+                  onClick={() => {
+                    setSelectedDay(day.day)
+                    setSearchParams({ event: null })
+                  }}
+                >
                   <span classList={{ 'opacity-30': !day.current }}>{day.day}</span>
+                  <span class="absolute h-1 w-4 bottom-2 left-1/2 -translate-x-1/2 flex flex-row space-x-1">
+                    <Show when={day.current && eventDays().has(day.day)}>
+                      <span class="h-1 flex-1 bg-primary rounded-full"></span>
+                    </Show>
+                    <Show
+                      when={currentDate.year === year() && currentDate.month === month() && currentDate.day === day.day}
+                    >
+                      <span class="h-1 flex-1 bg-warning rounded-full"></span>
+                    </Show>
+                  </span>
                 </Button>
               ))}
             </div>
@@ -142,6 +241,29 @@ export default function () {
               <span>{t('calendar.noGames')}</span>
             </div>
           </Show>
+          <For each={events()}>
+            {item => (
+              <>
+                <Link
+                  ghost
+                  justify="start"
+                  class={`mt-2 ${item.id === selectedEventId() ? 'btn-active' : ''}`}
+                  href={`/?event=${item.id}`}
+                  onClick={() => {
+                    setSelectedDay(null)
+                  }}
+                  level={selectedDayMappedEvents().find(s => s.id === item.id) ? 'primary' : null}
+                >
+                  {/* icon-[fluent--flag-20-regular] icon-[fluent--flag-20-filled] */}
+                  <span
+                    class={`icon-[fluent--flag-20-${selectedDayMappedEvents().find(s => s.id === item.id) ? 'filled' : 'regular'}] w-5 h-5`}
+                  ></span>
+                  <span>{item.name}</span>
+                </Link>
+                <Divider />
+              </>
+            )}
+          </For>
         </div>
         <Divider direction="vertical" class="hidden lg:inline-block" />
         <div class="hidden lg:flex flex-col flex-1 items-center">

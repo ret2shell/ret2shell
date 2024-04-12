@@ -25,7 +25,7 @@ export function InstanceBoxContent() {
   const [connecting, setConnecting] = createSignal(false)
 
   function retryConnect() {
-    wsrx.tryConnect()
+    wsrx.tryConnect().catch(() => {})
     setConnecting(true)
     setTimeout(() => {
       setConnecting(false)
