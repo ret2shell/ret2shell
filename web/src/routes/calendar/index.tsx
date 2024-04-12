@@ -268,10 +268,22 @@ export default function () {
         <Divider direction="vertical" class="hidden lg:inline-block" />
         <div class="hidden lg:flex flex-col flex-1 items-center">
           <div class="flex flex-col w-full max-w-5xl flex-1 p-2">
-            <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
-              <span class="icon-[fluent--flag-20-regular] w-24 h-24"></span>
-              <span>{t('calendar.selectGameToSeeDetail')}</span>
-            </div>
+            <Show
+              when={selectedEvent() !== null}
+              fallback={
+                <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
+                  <span class="icon-[fluent--flag-20-regular] w-24 h-24"></span>
+                  <span>{t('calendar.selectGameToSeeDetail')}</span>
+                </div>
+              }
+            >
+              <h1 class="text-3xl text-center py-4 lg:py-6 font-bold">{selectedEvent()?.name}</h1>
+              <div class="flex flex-row items-center justify-center space-x-6 opacity-80 flex-wrap">
+                <span>{selectedEvent()?.start_at.toFormat('yyyy-MM-dd hh:mm:ss')}</span>
+                <span class="icon-[fluent--arrow-right-20-regular] w-5 h-5"></span>
+                <span>{selectedEvent()?.end_at.toFormat('yyyy-MM-dd hh:mm:ss')}</span>
+              </div>
+            </Show>
           </div>
         </div>
       </div>

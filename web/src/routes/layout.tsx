@@ -4,7 +4,7 @@ import { t } from '@storage/theme'
 import Link from '@widgets/link'
 import LogoAnimate from '@assets/animates/logo-animate'
 import Background from '@blocks/background'
-import { useLocation } from '@solidjs/router'
+import { useLocation, useSearchParams } from '@solidjs/router'
 import InstanceBox, { InstanceBoxContent } from './_blocks/instance-box'
 import UserBox from './_blocks/user-box'
 import DiyBox, { DiyBoxContent } from './_blocks/diy-box'
@@ -307,7 +307,7 @@ export default function (props: { children?: JSX.Element }) {
   let platformName = `\xa0\xa0[\xa0${platformStore.config.name || t('platform.name')}\xa0]\xa0`
   const [platformTyped, setPlatformTyped] = createSignal('')
   const [hideAnimation, setHideAnimation] = createSignal(false)
-  const showAnimation = useLocation().pathname === '/'
+  const showAnimation = useLocation().pathname === '/' && useSearchParams()[0].event === undefined
   checkCookiePolicy()
   setupTitleResolver()
   getPlatformInfo()
