@@ -42,7 +42,7 @@ async fn get_calendar_list(
 async fn get_calendar(
     State(ref db): State<Database>, Path(calendar_id): Path<i64>,
 ) -> Result<impl IntoResponse, ResponseError> {
-    match calendar::get(&db.conn, calendar_id).await? {
+    match calendar::get_ex(&db.conn, calendar_id).await? {
         Some(result) => Ok(Json(result)),
         None => Err(ResponseError::NotFound("event not found".to_owned())),
     }

@@ -268,7 +268,7 @@ export default function () {
         </div>
         <Divider direction="vertical" class="hidden lg:inline-block" />
         <div class="hidden lg:flex flex-col flex-1 items-center">
-          <div class="flex flex-col w-full max-w-5xl flex-1 p-2">
+          <div class="flex flex-col w-full max-w-5xl flex-1 p-2 space-y-2">
             <Show
               when={selectedEvent() !== null}
               fallback={
@@ -279,10 +279,28 @@ export default function () {
               }
             >
               <h1 class="text-3xl text-center py-4 lg:py-6 font-bold">{selectedEvent()?.name}</h1>
-              <div class="flex flex-row items-center justify-center space-x-6 opacity-80 flex-wrap">
-                <span>{selectedEvent()?.start_at.toFormat('yyyy-MM-dd hh:mm:ss')}</span>
-                <span class="icon-[fluent--arrow-right-20-regular] w-5 h-5"></span>
-                <span>{selectedEvent()?.end_at.toFormat('yyyy-MM-dd hh:mm:ss')}</span>
+              <div class="flex flex-row items-center justify-center space-x-6 opacity-60 flex-wrap">
+                <a
+                  class="font-bold hover:underline flex flex-row space-x-2 items-center"
+                  href={`/users/${selectedEvent()?.reporter_id}`}
+                >
+                  <span class="icon-[fluent--person-20-regular] w-5 h-5"></span>
+                  <span>{selectedEvent()?.reporter_name || t('calendar.unknown')}</span>
+                </a>
+                <span class="flex flex-row space-x-2 items-center">
+                  <span class="icon-[fluent--clock-20-regular] w-5 h-5"></span>
+                  <span class="font-bold">{selectedEvent()?.start_at.toFormat('yyyy-MM-dd')}</span>
+                  <span class="">-&gt;</span>
+                  <span class="font-bold">{selectedEvent()?.end_at.toFormat('yyyy-MM-dd')}</span>
+                </span>
+                <a
+                  class="font-bold hover:underline flex flex-row space-x-2 items-center"
+                  href={selectedEvent()?.link}
+                  target="_blank"
+                >
+                  <span class="icon-[fluent--link-20-regular] w-5 h-5"></span>
+                  <span>{t('calendar.gotoEventHomePage')}</span>
+                </a>
               </div>
               <Article content={selectedEvent()?.intro || ''} extra headingAnchors />
             </Show>

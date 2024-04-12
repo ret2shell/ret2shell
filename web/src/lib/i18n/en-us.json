@@ -63,7 +63,9 @@
     },
     "games": "Games of the month",
     "noGames": "There are no games this month, so enjoy it",
-    "selectGameToSeeDetail": "Select an game on the left to view details"
+    "selectGameToSeeDetail": "Select an game on the left to view details",
+    "unknown": "unknown",
+    "gotoEventHomePage": "Go to participate"
   },
   "about": {
     "donate": "Donate",

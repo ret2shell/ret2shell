@@ -63,7 +63,9 @@
     },
     "games": "今月のイベント",
     "noGames": "今月はイベントがないので楽しんでください",
-    "selectGameToSeeDetail": "左側でイベントを選択して詳細を表示します"
+    "selectGameToSeeDetail": "左側でイベントを選択して詳細を表示します",
+    "unknown": "未知",
+    "gotoEventHomePage": "参加しに行く"
   },
   "about": {
     "donate": "寄付する",
