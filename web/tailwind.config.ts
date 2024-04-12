@@ -1,6 +1,5 @@
 import { addDynamicIconSelectors } from '@iconify/tailwind'
 import typography from '@tailwindcss/typography'
-import kobalte from '@kobalte/tailwindcss'
 import type { Config } from 'tailwindcss'
 import { okwind } from 'okwind'
 
@@ -53,5 +52,5 @@ export default {
       bgChroma: 0.01,
     },
   },
-  plugins: [typography, kobalte, okwind, addDynamicIconSelectors()],
+  plugins: [typography, okwind, addDynamicIconSelectors()],
 } satisfies Config
