@@ -1,4 +1,4 @@
-import { Show, createEffect } from 'solid-js'
+import { Show, createEffect, createSignal } from 'solid-js'
 import { accountStore, userRefresh, userReset } from '@storage/account'
 import Link from '@widgets/link'
 import Popover from '@widgets/popover'
@@ -8,6 +8,7 @@ import { t } from '@storage/theme'
 import Button from '@/lib/widgets/button'
 import { useNavigate } from '@solidjs/router'
 import { logout } from '@/lib/api/account'
+import { clearToasts } from '@/lib/storage/toast'
 
 export default function UserBox() {
   createEffect(() => {
@@ -17,11 +18,17 @@ export default function UserBox() {
   })
 
   const navigate = useNavigate()
+  const [loading, setLoading] = createSignal(false)
   function handleLogout() {
-    logout().finally(() => {
-      userReset()
-      navigate('/')
-    })
+    setLoading(true)
+    setTimeout(() => {
+      logout().finally(() => {
+        userReset()
+        navigate('/')
+        clearToasts()
+        setLoading(false)
+      })
+    }, 1000)
   }
   return (
     <>
@@ -77,8 +84,10 @@ export default function UserBox() {
                 <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
                 <span>{t('account.settings.title')}</span>
               </Link>
-              <Button ghost size="sm" square title={t('account.logout')} onClick={handleLogout}>
-                <span class="icon-[fluent--sign-out-20-regular] w-5 h-5 text-error" />
+              <Button ghost size="sm" square title={t('account.logout')} onClick={handleLogout} loading={loading()}>
+                <Show when={!loading()}>
+                  <span class="icon-[fluent--sign-out-20-regular] w-5 h-5 text-error" />
+                </Show>
               </Button>
             </Card>
           </div>

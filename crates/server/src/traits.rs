@@ -24,6 +24,7 @@ pub struct GlobalState {
     pub queue: Queue,
     pub cluster: Cluster,
     pub license: License,
+    pub version: String,
 }
 
 #[derive(Debug, Error)]

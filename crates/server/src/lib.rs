@@ -75,6 +75,16 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
         queue,
         license,
         cluster,
+        version: format!(
+            "{}-{}-{}",
+            env!("CARGO_PKG_VERSION"),
+            git_version::git_version!(
+                args = ["--abbrev=8", "--always", "--dirty=*"],
+                fallback = "unknown"
+            )
+            .to_uppercase(),
+            version().unwrap()
+        ),
     };
 
     let router = routes::initialize(config.server.clone(), state).await?;
