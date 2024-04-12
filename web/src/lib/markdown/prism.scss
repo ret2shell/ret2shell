@@ -1,0 +1,97 @@
+.token.comment,
+.token.prolog,
+.token.cdata {
+  @apply text-gray-500;
+}
+
+.token.delimiter,
+.token.boolean,
+.token.keyword,
+.token.selector,
+.token.important,
+.token.atrule {
+  @apply text-primary;
+}
+
+.token.operator,
+.token.punctuation,
+.token.attr-name {
+  @apply text-layer-content/80;
+}
+
+.token.tag,
+.token.tag .punctuation,
+.token.doctype,
+.token.builtin {
+  @apply text-warning;
+}
+
+.token.entity,
+.token.number,
+.token.symbol {
+  @apply text-info;
+}
+
+.token.property,
+.token.constant,
+.token.variable {
+  @apply text-purple-500;
+}
+
+.token.string,
+.token.char {
+  @apply text-success;
+}
+
+.token.attr-value,
+.token.attr-value .punctuation {
+  @apply text-success/80;
+}
+
+.token.attr-value .punctuation:first-child {
+  @apply text-layer-content/80;
+}
+
+.token.url {
+  @apply text-primary underline;
+}
+
+.token.function {
+  @apply text-purple-500;
+}
+
+.token.regex {
+  @apply bg-layer-content/10;
+}
+
+.token.bold {
+  @apply font-bold;
+}
+
+.token.italic {
+  font-style: italic;
+}
+
+.token.inserted {
+  @apply bg-success/20;
+}
+
+.token.deleted {
+  @apply bg-error/20;
+}
+
+code.language-css .token.property,
+code.language-css .token.property + .token.punctuation {
+  @apply text-layer-content/80;
+}
+
+code.language-css .token.id {
+  @apply text-warning;
+}
+
+code.language-css .token.selector > .token.class,
+code.language-css .token.selector > .token.attribute,
+code.language-css .token.selector > .token.pseudo-class,
+code.language-css .token.selector > .token.pseudo-element {
+  @apply text-warning;
+}

@@ -3,6 +3,7 @@ import { Calendar } from '@/lib/models/calendar'
 import { Permission } from '@/lib/models/user'
 import { accountStore } from '@/lib/storage/account'
 import { t } from '@/lib/storage/theme'
+import Article from '@/lib/widgets/article'
 import Button from '@/lib/widgets/button'
 import Card from '@/lib/widgets/card'
 import Divider from '@/lib/widgets/divider'
@@ -283,6 +284,7 @@ export default function () {
                 <span class="icon-[fluent--arrow-right-20-regular] w-5 h-5"></span>
                 <span>{selectedEvent()?.end_at.toFormat('yyyy-MM-dd hh:mm:ss')}</span>
               </div>
+              <Article content={selectedEvent()?.intro || ''} extra headingAnchors />
             </Show>
           </div>
         </div>

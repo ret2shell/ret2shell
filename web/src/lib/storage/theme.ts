@@ -46,6 +46,7 @@ export function fullTheme() {
 export function initTheme() {
   createEffect(() => {
     document.documentElement.setAttribute('data-theme', fullTheme())
+    document.documentElement.setAttribute('data-style', themeStore.colorScheme)
   })
 }
 
