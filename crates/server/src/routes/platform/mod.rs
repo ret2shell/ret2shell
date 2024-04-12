@@ -1,4 +1,5 @@
-use axum::{response::IntoResponse, routing::get, Extension, Json, Router};
+use axum::{extract::State, response::IntoResponse, routing::get, Extension, Json, Router};
+use r2s_cache::Cache;
 use r2s_database::config;
 use rustc_version::version;
 
@@ -28,15 +29,23 @@ async fn get_auth_config(
     Ok(Json(auth_config.desensitize()))
 }
 
-async fn get_version() -> Result<impl IntoResponse, ResponseError> {
-    Ok(Json(format!(
-        "{}-{}-{}",
-        env!("CARGO_PKG_VERSION"),
-        git_version::git_version!(
-            args = ["--abbrev=8", "--always", "--dirty=*"],
-            fallback = "unknown"
-        )
-        .to_uppercase(),
-        version().unwrap()
-    )))
+async fn get_version(State(ref cache): State<Cache>) -> Result<impl IntoResponse, ResponseError> {
+    let v: Option<String> = cache.at("platform").get("version").await?;
+    let v = if v.is_none() {
+        let v = format!(
+            "{}-{}-{}",
+            env!("CARGO_PKG_VERSION"),
+            git_version::git_version!(
+                args = ["--abbrev=8", "--always", "--dirty=*"],
+                fallback = "unknown"
+            )
+            .to_uppercase(),
+            version().unwrap()
+        );
+        cache.at("platform").set("version", &v).await?;
+        v
+    } else {
+        v.unwrap()
+    };
+    Ok(Json(v))
 }

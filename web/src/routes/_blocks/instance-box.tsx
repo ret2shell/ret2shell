@@ -3,12 +3,13 @@ import Card from '@widgets/card'
 import { t } from '@storage/theme'
 import Link from '@widgets/link'
 import Button from '@widgets/button'
-import { For, Show, createSignal, onCleanup } from 'solid-js'
+import { For, Show, createEffect, createSignal, onCleanup } from 'solid-js'
 import Timer from '@widgets/timer'
 import Progress from '@widgets/progress'
 import { Instance } from '@models/instance'
 import { DateTime } from 'luxon'
 import { wsrx } from '@/lib/wsrx'
+import { accountStore } from '@/lib/storage/account'
 
 export function InstanceBoxContent() {
   function calcProgress(instance: Instance, now: DateTime) {
@@ -32,6 +33,10 @@ export function InstanceBoxContent() {
     }, 5000)
   }
 
+  createEffect(() => {
+    if (accountStore.token) retryConnect()
+  })
+
   const [now, setNow] = createSignal(DateTime.now())
   const timer = setInterval(() => {
     setNow(DateTime.now())
@@ -54,7 +59,7 @@ export function InstanceBoxContent() {
         >
           <Show when={!connecting()}>
             <span
-              class={`icon-[fluent--airplane-20-regular] w-5 h-5 ${wsrx.connected() ? 'text-success' : 'text-warning'}`}
+              class={`icon-[fluent--fluid-20-regular] w-5 h-5 ${wsrx.connected() ? 'text-success' : 'text-warning'}`}
             />
           </Show>
           <span
@@ -133,7 +138,7 @@ export default function InstanceBox() {
       <Popover
         btnContent={
           <span
-            class={`${wsrx.instances().length > 0 ? 'icon-[fluent--airplane-20-filled]' : 'icon-[fluent--airplane-20-regular]'} w-5 h-5 ${wsrx.instances().length > 0 ? (wsrx.connected() ? 'text-success' : 'text-warning') : ''}`}
+            class={`${wsrx.instances().length > 0 ? 'icon-[fluent--fluid-20-filled]' : 'icon-[fluent--fluid-20-regular]'} w-5 h-5 ${wsrx.instances().length > 0 ? (wsrx.connected() ? 'text-success' : 'text-warning') : ''}`}
           />
         }
         square

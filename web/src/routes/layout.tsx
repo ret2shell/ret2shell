@@ -203,7 +203,7 @@ function TitleBar() {
                         onClick={() => setAdditionalMobileBox('wsrx')}
                       >
                         <span
-                          class={`${wsrx.instances().length > 0 ? 'icon-[fluent--airplane-20-filled]' : 'icon-[fluent--airplane-20-regular]'} w-5 h-5 ${wsrx.instances().length > 0 ? (wsrx.connected() ? 'text-success' : 'text-warning') : ''}`}
+                          class={`${wsrx.instances().length > 0 ? 'icon-[fluent--fluid-20-filled]' : 'icon-[fluent--fluid-20-regular]'} w-5 h-5 ${wsrx.instances().length > 0 ? (wsrx.connected() ? 'text-success' : 'text-warning') : ''}`}
                         />
                         <span>{t('instance.box')}</span>
                       </Button>
