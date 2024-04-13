@@ -2,7 +2,7 @@ use axum::{
     extract::{Path, Query, State},
     middleware,
     response::IntoResponse,
-    routing::get,
+    routing::{get, patch, post},
     Json, Router,
 };
 use chrono::{serde::ts_seconds, DateTime, Utc};
@@ -17,6 +17,11 @@ use crate::{
 
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     Router::new()
+        .route(
+            "/:calendar_id",
+            patch(update_calendar).delete(delete_calendar),
+        )
+        .route("/", post(create_calendar))
         .layer(middleware::from_fn(auth::permission_required_all!(
             Permission::Calendar
         )))
@@ -46,4 +51,26 @@ async fn get_calendar(
         Some(result) => Ok(Json(result)),
         None => Err(ResponseError::NotFound("event not found".to_owned())),
     }
+}
+
+async fn create_calendar(
+    State(ref db): State<Database>, Json(calendar): Json<calendar::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+    let result = calendar::create(&db.conn, calendar).await?;
+    Ok(Json(result))
+}
+
+async fn update_calendar(
+    State(ref db): State<Database>, Path(calendar_id): Path<i64>,
+    Json(calendar): Json<calendar::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+    let result = calendar::update(&db.conn, calendar_id, calendar).await?;
+    Ok(Json(result))
+}
+
+async fn delete_calendar(
+    State(ref db): State<Database>, Path(calendar_id): Path<i64>,
+) -> Result<impl IntoResponse, ResponseError> {
+    calendar::delete(&db.conn, calendar_id).await?;
+    Ok(())
 }
