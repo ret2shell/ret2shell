@@ -3,7 +3,7 @@ use axum::{
     middleware,
     response::IntoResponse,
     routing::{get, patch, post},
-    Json, Router,
+    Extension, Json, Router,
 };
 use chrono::{serde::ts_seconds, DateTime, Utc};
 use r2s_database::{calendar, user::Permission};
@@ -11,7 +11,7 @@ use r2s_migrator::Database;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    middleware::auth,
+    middleware::auth::{self, Token},
     traits::{GlobalState, ResponseError},
 };
 
@@ -54,17 +54,33 @@ async fn get_calendar(
 }
 
 async fn create_calendar(
-    State(ref db): State<Database>, Json(calendar): Json<calendar::Model>,
+    State(ref db): State<Database>, Extension(token): Extension<Token>,
+    Json(calendar): Json<calendar::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-    let result = calendar::create(&db.conn, calendar).await?;
+    let result = calendar::create(
+        &db.conn,
+        calendar::Model {
+            reporter_id: Some(token.id),
+            ..calendar
+        },
+    )
+    .await?;
     Ok(Json(result))
 }
 
 async fn update_calendar(
-    State(ref db): State<Database>, Path(calendar_id): Path<i64>,
-    Json(calendar): Json<calendar::Model>,
+    State(ref db): State<Database>, Extension(token): Extension<Token>,
+    Path(calendar_id): Path<i64>, Json(calendar): Json<calendar::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-    let result = calendar::update(&db.conn, calendar_id, calendar).await?;
+    let result = calendar::update(
+        &db.conn,
+        calendar_id,
+        calendar::Model {
+            reporter_id: Some(token.id),
+            ..calendar
+        },
+    )
+    .await?;
     Ok(Json(result))
 }
 

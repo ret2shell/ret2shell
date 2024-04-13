@@ -52,12 +52,13 @@ async fn get_wiki(
 
 async fn create_wiki(
     State(ref db): State<Database>, State(ref cache): State<Cache>,
-    Json(article): Json<article::Model>,
+    Extension(token): Extension<Token>, Json(article): Json<article::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
     let result = article::create(
         &db.conn,
         article::Model {
             access_policy: article::AccessPolicy::Wiki,
+            publisher_id: token.id,
             ..article
         },
     )
@@ -69,13 +70,14 @@ async fn create_wiki(
 
 async fn update_wiki(
     State(ref db): State<Database>, State(ref cache): State<Cache>, Path(article_id): Path<i64>,
-    Json(article): Json<article::Model>,
+    Extension(token): Extension<Token>, Json(article): Json<article::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
     let result = article::update(
         &db.conn,
         article_id,
         article::Model {
             access_policy: article::AccessPolicy::Wiki,
+            publisher_id: token.id,
             ..article
         },
     )

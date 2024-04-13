@@ -3,14 +3,14 @@ use axum::{
     middleware,
     response::IntoResponse,
     routing::{get, patch, post},
-    Json, Router,
+    Extension, Json, Router,
 };
 use r2s_database::{article, user::Permission};
 use r2s_migrator::Database;
 use serde::Deserialize;
 
 use crate::{
-    middleware::auth,
+    middleware::auth::{self, Token},
     traits::{GlobalState, ResponseError},
 };
 
@@ -64,12 +64,14 @@ async fn get_bulletin(
 }
 
 async fn create_bulletin(
-    State(ref db): State<Database>, Json(article): Json<article::Model>,
+    State(ref db): State<Database>, Extension(token): Extension<Token>,
+    Json(article): Json<article::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
     let result = article::create(
         &db.conn,
         article::Model {
             access_policy: article::AccessPolicy::Bulletin,
+            publisher_id: token.id,
             ..article
         },
     )
@@ -78,14 +80,15 @@ async fn create_bulletin(
 }
 
 async fn update_bulletin(
-    State(ref db): State<Database>, Path(article_id): Path<i64>,
-    Json(article): Json<article::Model>,
+    State(ref db): State<Database>, Extension(token): Extension<Token>,
+    Path(article_id): Path<i64>, Json(article): Json<article::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
     let result = article::update(
         &db.conn,
         article_id,
         article::Model {
             access_policy: article::AccessPolicy::Bulletin,
+            publisher_id: token.id,
             ..article
         },
     )
