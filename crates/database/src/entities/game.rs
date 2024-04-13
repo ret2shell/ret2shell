@@ -122,11 +122,14 @@ pub async fn get(db: &DatabaseConnection, game_id: i64) -> Result<Option<Model>,
 
 pub async fn get_page(
     db: &DatabaseConnection, page: u64, page_size: u64, host_type: Option<HostType>,
-    with_hidden: bool,
+    weight: Option<i32>, with_hidden: bool,
 ) -> Result<(Vec<Model>, u64), DbErr> {
     let mut sql = Entity::find();
     if let Some(host_type) = host_type {
         sql = sql.filter(Column::HostType.eq(host_type));
+    }
+    if let Some(weight) = weight {
+        sql = sql.filter(Column::Weight.gte(weight));
     }
     if !with_hidden {
         sql = sql.filter(Column::Hidden.eq(false));
