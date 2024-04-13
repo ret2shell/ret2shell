@@ -2,7 +2,7 @@
 name = "r2s-email"
 version = "1.0.0"
 edition = "2021"
-rust-version = "1.77.0"
+rust-version = "1.77.2"
 description = "Email client for Ret2Shell - A feature-riches CTF challenge platform."
 authors = ["Reverier-Xu <reverier.xu@woooo.tech>"]
 publish = false
