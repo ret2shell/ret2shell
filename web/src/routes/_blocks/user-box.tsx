@@ -56,7 +56,7 @@ export default function UserBox() {
           ghost
           popContentClass="pt-2"
         >
-          <div class="flex flex-col space-y-2 w-64">
+          <div class="flex flex-col space-y-2 max-w-64 w-screen">
             <Card contentClass="p-2 flex flex-col space-y-2">
               <Link
                 ghost
