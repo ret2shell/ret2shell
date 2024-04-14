@@ -7,7 +7,6 @@ import { TransitionGroup } from 'solid-transition-group'
 export default function () {
   const [toasts, setToasts] = createSignal(toastStore.toasts)
   createEffect(() => {
-    console.log('toasts', toastStore.toasts)
     setToasts(toastStore.toasts)
   })
   return (
