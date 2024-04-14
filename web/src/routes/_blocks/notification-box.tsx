@@ -8,7 +8,7 @@ import { For, Show } from 'solid-js'
 
 export function NotificationBoxContent() {
   return (
-    <div class="flex flex-col space-y-2 w-96">
+    <div class="flex flex-col space-y-2 max-w-96 w-screen">
       <Card contentClass="p-2 h-12 flex flex-row items-center space-x-2">
         <h2 class="px-2 flex-1 flex items-center space-x-2 font-bold">
           <span class="icon-[fluent--alert-20-regular] w-5 h-5" />

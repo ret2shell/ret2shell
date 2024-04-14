@@ -2,7 +2,7 @@ import { createStore } from 'solid-js/store'
 import { makePersisted } from '@solid-primitives/storage'
 import { createEffect, createResource } from 'solid-js'
 import { Locale, fetchDictionary, hasLocale } from '@lib/i18n'
-import { translator } from '@solid-primitives/i18n'
+import { resolveTemplate, translator } from '@solid-primitives/i18n'
 
 const systemPrefersColorScheme =
   window && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -51,4 +51,4 @@ export function initTheme() {
 }
 
 const [dict] = createResource(themeStore.locale || 'en_us', fetchDictionary)
-export const t = translator(dict)
+export const t = translator(dict, resolveTemplate)

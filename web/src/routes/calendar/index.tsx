@@ -136,10 +136,16 @@ export default function () {
   return (
     <>
       <div class="w-full h-full flex flex-col lg:flex-row">
-        <div class="flex-1 lg:flex-none flex flex-col p-6 backdrop-blur">
+        <div class="flex-none flex flex-col p-3 lg:p-6 backdrop-blur">
           <Card contentClass="p-2 flex flex-col space-y-2">
             <div class="flex flex-row space-x-2">
-              <Button ghost square onClick={() => setYear(year() - 1)} title={t('calendar.jumpToPrevYear')}>
+              <Button
+                class="hidden md:inline-flex"
+                ghost
+                square
+                onClick={() => setYear(year() - 1)}
+                title={t('calendar.jumpToPrevYear')}
+              >
                 <span class="icon-[fluent--chevron-double-left-20-regular] w-5 h-5" />
               </Button>
               <Button
@@ -190,7 +196,13 @@ export default function () {
               >
                 <span class="icon-[fluent--chevron-right-20-regular] w-5 h-5" />
               </Button>
-              <Button ghost square onClick={() => setYear(year() + 1)} title={t('calendar.jumpToNextYear')}>
+              <Button
+                class="hidden md:inline-flex"
+                ghost
+                square
+                onClick={() => setYear(year() + 1)}
+                title={t('calendar.jumpToNextYear')}
+              >
                 <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
               </Button>
             </div>
@@ -237,7 +249,7 @@ export default function () {
             </div>
           </Card>
           <Show when={events().length === 0}>
-            <div class="flex-1 flex flex-row items-center justify-center space-x-2 opacity-60">
+            <div class="flex-1 flex flex-row items-center justify-center space-x-2 opacity-60 p-3">
               <span class="icon-[fluent--person-walking-20-regular] w-5 h-5"></span>
               <span>{t('calendar.noGames')}</span>
             </div>
@@ -261,13 +273,12 @@ export default function () {
                   ></span>
                   <span>{item.name}</span>
                 </Link>
-                <Divider />
               </>
             )}
           </For>
         </div>
-        <Divider direction="vertical" class="hidden lg:inline-block" />
-        <div class="hidden lg:flex flex-col flex-1 items-center">
+        <Divider class="lg:divider-vertical" />
+        <div class="flex flex-col flex-1 items-center">
           <div class="flex flex-col w-full max-w-5xl flex-1 p-2 space-y-2">
             <Show
               when={selectedEvent() !== null}
@@ -278,21 +289,16 @@ export default function () {
                 </div>
               }
             >
-              <h1 class="text-3xl text-center py-4 lg:py-6 font-bold">{selectedEvent()?.name}</h1>
+              <h1 class="text-3xl text-center py-4 lg:py-6 font-bold mt-8">{selectedEvent()?.name}</h1>
               <div class="flex flex-row items-center justify-center space-x-6 opacity-60 flex-wrap">
                 <a
                   class="font-bold hover:underline flex flex-row space-x-2 items-center"
                   href={`/users/${selectedEvent()?.reporter_id}`}
                 >
                   <span class="icon-[fluent--person-20-regular] w-5 h-5"></span>
-                  <span>{selectedEvent()?.reporter_name || t('calendar.unknown')}</span>
+                  <span>{t('calendar.addBy', { name: selectedEvent()?.reporter_name || t('calendar.unknown')! })}</span>
+                  <span></span>
                 </a>
-                <span class="flex flex-row space-x-2 items-center">
-                  <span class="icon-[fluent--clock-20-regular] w-5 h-5"></span>
-                  <span class="font-bold">{selectedEvent()?.start_at.toFormat('yyyy-MM-dd')}</span>
-                  <span class="">-&gt;</span>
-                  <span class="font-bold">{selectedEvent()?.end_at.toFormat('yyyy-MM-dd')}</span>
-                </span>
                 <a
                   class="font-bold hover:underline flex flex-row space-x-2 items-center"
                   href={selectedEvent()?.link}

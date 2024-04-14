@@ -11,7 +11,7 @@ export default function () {
   })
   return (
     <>
-      <div class="fixed bottom-2 right-2 w-96 flex flex-col space-y-2">
+      <div class="fixed bottom-0 right-0 p-2 max-w-96 w-screen flex flex-col space-y-2">
         <TransitionGroup name="toast">
           <For each={toasts()}>
             {toast => (
@@ -19,7 +19,7 @@ export default function () {
                 when={
                   toast.duration === undefined ||
                   toast.duration <= 0 ||
-                  toast.createdAt + toast.duration > DateTime.now().toMillis()
+                  (toast.createdAt || 0) + toast.duration > DateTime.now().toMillis()
                 }
               >
                 <Toast

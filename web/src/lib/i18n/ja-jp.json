@@ -65,7 +65,8 @@
     "noGames": "今月はイベントがないので楽しんでください",
     "selectGameToSeeDetail": "左側でイベントを選択して詳細を表示します",
     "unknown": "未知",
-    "gotoEventHomePage": "参加しに行く"
+    "gotoEventHomePage": "参加しに行く",
+    "addBy": "{{ name }} によって追加されました"
   },
   "about": {
     "donate": "寄付する",
@@ -145,5 +146,8 @@
     "minLength": "確認コードは少なくとも 4 桁である必要があります",
     "calculating": "計算中...",
     "placeholder": "検証コード"
+  },
+  "article": {
+    "loading": "少女は祈っている..."
   }
 }

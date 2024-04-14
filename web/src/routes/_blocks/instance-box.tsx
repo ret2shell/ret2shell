@@ -45,7 +45,7 @@ export function InstanceBoxContent() {
     clearInterval(timer)
   })
   return (
-    <div class="flex flex-col space-y-2 w-96">
+    <div class="flex flex-col space-y-2 max-w-96 w-screen">
       <Card contentClass="p-2 flex flex-row space-x-2">
         <Button
           disabled={connecting()}

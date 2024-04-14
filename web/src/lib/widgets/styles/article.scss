@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 article.prose,
 article.prose * {
   @apply scroll-m-20;
@@ -45,10 +49,12 @@ article > h6 > a:hover::after {
   @apply text-primary opacity-60 ml-4;
 }
 
-.article {
-  @apply prose prose-zinc;
-}
+@layer components {
+  .article {
+    @apply prose prose-zinc p-3 lg:p-6;
+  }
 
-:root[data-style='dark'] .article {
-  @apply prose-invert;
+  :root[data-style='dark'] .article {
+    @apply prose-invert;
+  }
 }

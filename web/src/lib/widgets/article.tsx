@@ -1,6 +1,9 @@
 import { ComponentProps, Show, createEffect, createSignal, splitProps } from 'solid-js'
 import './styles/article.scss'
 import './styles/skeleton.scss'
+import { LoremIpsum } from 'lorem-ipsum'
+import Spin from '../assets/animates/spin'
+import { t } from '../storage/theme'
 
 export type ArticleProps = {
   content: string
@@ -12,6 +15,7 @@ export default function (props: ComponentProps<'article'> & ArticleProps) {
   const [articleProps, nativeProps] = splitProps(props, ['content', 'extra', 'headingAnchors'])
   const [ready, setReady] = createSignal(false)
   const [contentHtml, setContentHtml] = createSignal('')
+  const lorem = new LoremIpsum()
   const render = async (content: string) => {
     setReady(false)
     let { Markdown } = await import('@lib/markdown')
@@ -42,22 +46,18 @@ export default function (props: ComponentProps<'article'> & ArticleProps) {
         when={ready()}
         fallback={
           <>
-            <div class="flex flex-col space-y-2 py-6">
-              <span class="skeleton w-full h-4"></span>
-              <span class="skeleton w-full h-4"></span>
-              <span class="skeleton w-full h-4"></span>
-              <span class="skeleton w-1/2 h-4"></span>
-              <span class="skeleton w-full h-4 !mt-4"></span>
-              <span class="skeleton w-full h-4"></span>
-              <span class="skeleton w-full h-4"></span>
-              <span class="skeleton w-2/3 h-4"></span>
-            </div>
+            <article {...nativeProps} class={`article !max-w-5xl w-full ${nativeProps.class}`}>
+              <p class="inline-flex items-center space-x-2">
+                <Spin width={16} height={16} />
+                <span>{t('article.loading')}</span>
+              </p>
+            </article>
           </>
         }
       >
         <article
           {...nativeProps}
-          class={`article max-w-5xl w-full ${nativeProps.class}`}
+          class={`article !max-w-5xl w-full ${nativeProps.class}`}
           innerHTML={contentHtml()}
         ></article>
       </Show>

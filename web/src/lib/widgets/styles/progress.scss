@@ -1,25 +1,30 @@
-.progress {
-  &-track {
-    @apply bg-layer-content/30 h-[2px] rounded-full;
-  }
-
-  &-range {
-    @apply h-[2px] rounded-full;
-
-    &.progress-range-success {
-      @apply bg-success;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer components {
+  .progress {
+    &-track {
+      @apply bg-layer-content/30 h-[2px] rounded-full;
     }
 
-    &.progress-range-warning {
-      @apply bg-warning;
-    }
+    &-range {
+      @apply h-[2px] rounded-full;
 
-    &.progress-range-info {
-      @apply bg-info;
-    }
+      &.progress-range-success {
+        @apply bg-success;
+      }
 
-    &.progress-range-error {
-      @apply bg-error;
+      &.progress-range-warning {
+        @apply bg-warning;
+      }
+
+      &.progress-range-info {
+        @apply bg-info;
+      }
+
+      &.progress-range-error {
+        @apply bg-error;
+      }
     }
   }
 }

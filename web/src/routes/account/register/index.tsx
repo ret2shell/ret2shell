@@ -38,7 +38,7 @@ export default function () {
   return (
     <>
       <Title title={`${t('account.register.title')} - ${platformStore.config.name || t('platform.name')}`} />
-      <div class="flex-1 flex flex-col items-center md:justify-center p-2 md:p-6">
+      <div class="flex-1 flex flex-col items-center md:justify-center p-3 md:p-6">
         <Card
           class="w-full max-w-3xl"
           contentClass="p-6 flex flex-col md:flex-row space-y-2 space-x-0 md:space-x-6 md:space-y-0"

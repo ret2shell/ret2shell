@@ -65,7 +65,8 @@
     "noGames": "这个月没有赛事，享受一下吧",
     "selectGameToSeeDetail": "在左侧选择赛事查看详情",
     "unknown": "未知",
-    "gotoEventHomePage": "前往参与"
+    "gotoEventHomePage": "前往参与",
+    "addBy": "由 {{ name }} 添加"
   },
   "about": {
     "donate": "捐助",
@@ -145,5 +146,8 @@
     "minLength": "验证码至少4位",
     "calculating": "计算中...",
     "placeholder": "验证码"
+  },
+  "article": {
+    "loading": "少女祈祷中..."
   }
 }

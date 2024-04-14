@@ -65,7 +65,8 @@
     "noGames": "There are no games this month, so enjoy it",
     "selectGameToSeeDetail": "Select an game on the left to view details",
     "unknown": "unknown",
-    "gotoEventHomePage": "Go to participate"
+    "gotoEventHomePage": "Go to participate",
+    "addBy": "Added by {{ name }}"
   },
   "about": {
     "donate": "Donate",
@@ -145,5 +146,8 @@
     "minLength": "Captcha must be at least 4 chars",
     "calculating": "Calculating...",
     "placeholder": "Verification code"
+  },
+  "article": {
+    "loading": "The girl is praying..."
   }
 }

@@ -1,7 +1,13 @@
-.divider {
-  @apply bg-layer-content opacity-10 h-[1px] w-auto;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  &-vertical {
-    @apply w-[1px] h-auto;
+@layer components {
+  .divider {
+    @apply bg-layer-content opacity-10 h-[1px] w-auto;
+
+    &-vertical {
+      @apply w-[1px] h-auto;
+    }
   }
 }
