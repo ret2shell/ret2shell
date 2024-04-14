@@ -53,7 +53,7 @@ see [nginx.dev.conf](deploy/nginx.dev.conf), you could place it into your nginx 
 ### Launch frontend development server
 
 ```bash
-pnpm dev --host
+cd web && pnpm dev --host
 ```
 
 ### Launch backend server
