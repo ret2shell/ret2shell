@@ -51,7 +51,7 @@ article > h6 > a:hover::after {
 
 @layer components {
   .article {
-    @apply prose prose-zinc p-3 lg:p-6;
+    @apply prose prose-zinc px-3 lg:px-6;
   }
 
   :root[data-style='dark'] .article {

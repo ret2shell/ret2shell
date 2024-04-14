@@ -40,7 +40,7 @@ export default function () {
     }
   })
 
-  const [selectedDay, setSelectedDay] = createSignal(null as null | number)
+  const [selectedDay, setSelectedDay] = createSignal(currentDate.day as null | number)
 
   function convertWeekKey(weekKey: number) {
     switch (weekKey) {
@@ -235,23 +235,25 @@ export default function () {
                     setSearchParams({ event: null })
                   }}
                 >
-                  <span classList={{ 'opacity-30': !day.current }}>{day.day}</span>
-                  <span class="absolute h-1 w-4 bottom-2 left-1/2 -translate-x-1/2 flex flex-row space-x-1">
-                    <Show when={day.current && eventDays().has(day.day)}>
-                      <span class="h-1 flex-1 bg-primary rounded-full"></span>
-                    </Show>
-                    <Show
-                      when={currentDate.year === year() && currentDate.month === month() && currentDate.day === day.day}
-                    >
-                      <span class="h-1 flex-1 bg-warning rounded-full"></span>
-                    </Show>
+                  <span
+                    classList={{
+                      'opacity-30': !day.current,
+                      'text-primary':
+                        currentDate.year === year() && currentDate.month === month() && currentDate.day === day.day,
+                    }}
+                  >
+                    {day.day}
                   </span>
+                  <Show when={day.current && eventDays().has(day.day)}>
+                    <span class="absolute h-1 w-3 bottom-2 left-1/2 -translate-x-1/2 flex flex-row space-x-1 bg-primary rounded-full"></span>
+                  </Show>
                 </Button>
               ))}
             </div>
           </Card>
+          <Divider class="mt-3 mb-1 lg:mt-6 lg:mb-4" />
           <Show when={events().length === 0}>
-            <div class="flex-1 flex flex-row items-center justify-center space-x-2 opacity-60 p-3">
+            <div class="mt-2 flex-1 flex flex-row items-center justify-center space-x-2 opacity-60 p-3">
               <span class="icon-[fluent--person-walking-20-regular] w-5 h-5"></span>
               <span>{t('calendar.noGames')}</span>
             </div>
@@ -267,21 +269,22 @@ export default function () {
                   onClick={() => {
                     setSelectedDay(null)
                   }}
-                  level={selectedDayMappedEvents().find(s => s.id === item.id) ? 'primary' : null}
                   disabled={selectedEventId() === item.id && selectedEvent()?.id !== item.id}
                 >
                   {/* icon-[fluent--flag-20-regular] icon-[fluent--flag-20-filled] */}
                   <Show
                     when={selectedEventId() === item.id && selectedEvent()?.id !== item.id}
                     fallback={
+                      // text-primary text-base-content
                       <span
-                        class={`icon-[fluent--flag-20-${selectedDayMappedEvents().find(s => s.id === item.id) ? 'filled' : 'regular'}] w-5 h-5`}
+                        class={`icon-[fluent--flag-20-${selectedDayMappedEvents().find(s => s.id === item.id) ? 'filled' : 'regular'}] w-5 h-5 text-${selectedDayMappedEvents().find(s => s.id === item.id) ? 'primary' : 'layer-content'}`}
                       ></span>
                     }
                   >
                     <Spin width={20} height={20}></Spin>
                   </Show>
-                  <span>{item.name}</span>
+                  <span class="flex-1 text-start">{item.name}</span>
+                  <span class="opacity-60">{item.start_at.toFormat('MM-dd')}</span>
                 </Link>
               </>
             )}
