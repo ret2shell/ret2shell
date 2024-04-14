@@ -40,7 +40,9 @@ export default function () {
     }
   })
 
-  const [selectedDay, setSelectedDay] = createSignal(currentDate.day as null | number)
+  const [selectedDay, setSelectedDay] = createSignal(
+    selectedEventId() === null ? currentDate.day : (null as null | number)
+  )
 
   function convertWeekKey(weekKey: number) {
     switch (weekKey) {
@@ -231,6 +233,7 @@ export default function () {
                   square
                   class="relative"
                   onClick={() => {
+                    if (!day.current) return
                     setSelectedDay(day.day)
                     setSearchParams({ event: null })
                   }}
@@ -277,7 +280,15 @@ export default function () {
                     fallback={
                       // text-primary text-base-content
                       <span
-                        class={`icon-[fluent--flag-20-${selectedDayMappedEvents().find(s => s.id === item.id) ? 'filled' : 'regular'}] w-5 h-5 text-${selectedDayMappedEvents().find(s => s.id === item.id) ? 'primary' : 'layer-content'}`}
+                        class={`icon-[fluent--flag-20-${
+                          selectedDayMappedEvents().find(s => s.id === item.id) || selectedEventId() === item.id
+                            ? 'filled'
+                            : 'regular'
+                        }] w-5 h-5 text-${
+                          selectedDayMappedEvents().find(s => s.id === item.id) || selectedEventId() === item.id
+                            ? 'primary'
+                            : 'layer-content'
+                        }`}
                       ></span>
                     }
                   >
