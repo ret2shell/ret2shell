@@ -1,4 +1,5 @@
 import { getCalendar, getCalendarList } from '@/lib/api/calendar'
+import Spin from '@/lib/assets/animates/spin'
 import { Calendar } from '@/lib/models/calendar'
 import { Permission } from '@/lib/models/user'
 import { accountStore } from '@/lib/storage/account'
@@ -266,11 +267,19 @@ export default function () {
                     setSelectedDay(null)
                   }}
                   level={selectedDayMappedEvents().find(s => s.id === item.id) ? 'primary' : null}
+                  disabled={selectedEventId() === item.id && selectedEvent()?.id !== item.id}
                 >
                   {/* icon-[fluent--flag-20-regular] icon-[fluent--flag-20-filled] */}
-                  <span
-                    class={`icon-[fluent--flag-20-${selectedDayMappedEvents().find(s => s.id === item.id) ? 'filled' : 'regular'}] w-5 h-5`}
-                  ></span>
+                  <Show
+                    when={selectedEventId() === item.id && selectedEvent()?.id !== item.id}
+                    fallback={
+                      <span
+                        class={`icon-[fluent--flag-20-${selectedDayMappedEvents().find(s => s.id === item.id) ? 'filled' : 'regular'}] w-5 h-5`}
+                      ></span>
+                    }
+                  >
+                    <Spin width={20} height={20}></Spin>
+                  </Show>
                   <span>{item.name}</span>
                 </Link>
               </>
