@@ -18,7 +18,6 @@
   "prettier.bracketSpacing": false,
   "prettier.configPath": "web/.prettierrc",
   "prettier.ignorePath": "web/.prettierignore",
-  "prettier.prettierPath": "web/node_modules/prettier/index.cjs",
   "prettier.requireConfig": true,
   "prettier.singleQuote": true,
   "javascript.format.enable": false,

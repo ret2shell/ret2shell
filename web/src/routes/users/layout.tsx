@@ -1,5 +1,5 @@
 import { JSX } from 'solid-js'
 
-export default function (props: { children: JSX.Element }) {
+export default function (props: { children?: JSX.Element }) {
   return <>{props.children}</>
 }

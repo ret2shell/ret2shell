@@ -22,13 +22,15 @@ export default function () {
   onMount(() => {
     if (searchParams.event) {
       try {
-        let result = parseInt(searchParams.event)
+        const result = parseInt(searchParams.event)
         if (result) {
           setTimeout(() => {
             calendarSection.scrollIntoView({ behavior: 'smooth' })
           })
         }
-      } catch {}
+      } catch {
+        // prevent lint
+      }
     }
   })
   return (

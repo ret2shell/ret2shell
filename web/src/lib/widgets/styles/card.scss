@@ -15,12 +15,6 @@
       @apply bg-layer-content/5 overflow-hidden;
     }
 
-    &-enter,
-    &-exit-to {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-
     &-primary {
       @apply bg-primary/30;
     }

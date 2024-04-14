@@ -1,7 +1,6 @@
 import { ComponentProps, Show, createEffect, createSignal, splitProps } from 'solid-js'
 import './styles/article.scss'
 import './styles/skeleton.scss'
-import { LoremIpsum } from 'lorem-ipsum'
 import Spin from '../assets/animates/spin'
 import { t } from '../storage/theme'
 
@@ -15,11 +14,10 @@ export default function (props: ComponentProps<'article'> & ArticleProps) {
   const [articleProps, nativeProps] = splitProps(props, ['content', 'extra', 'headingAnchors'])
   const [ready, setReady] = createSignal(false)
   const [contentHtml, setContentHtml] = createSignal('')
-  const lorem = new LoremIpsum()
   const render = async (content: string) => {
     setReady(false)
-    let { Markdown } = await import('@lib/markdown')
-    let dompurify = await import('isomorphic-dompurify')
+    const { Markdown } = await import('@lib/markdown')
+    const dompurify = await import('isomorphic-dompurify')
     const markdown = new Markdown()
     await markdown.init({
       type: 'html',
