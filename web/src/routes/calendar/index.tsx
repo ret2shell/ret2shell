@@ -289,7 +289,11 @@ export default function () {
                 </div>
               }
             >
-              <h1 class="text-3xl text-center py-4 lg:py-6 font-bold mt-8">{selectedEvent()?.name}</h1>
+              <h1 class="text-3xl text-center py-4 lg:py-6 font-bold mt-8 hover:underline">
+                <a href={selectedEvent()?.link} target="_blank">
+                  {selectedEvent()?.name}
+                </a>
+              </h1>
               <div class="flex flex-row items-center justify-center space-x-6 opacity-60 flex-wrap">
                 <a
                   class="font-bold hover:underline flex flex-row space-x-2 items-center"

@@ -265,7 +265,7 @@ function TitleBar() {
           </ul>
           <div class="flex-1"></div>
           <div class="flex flex-row space-x-2">
-            <div class="hidden md:flex flex-row space-x-2">
+            <div class="hidden lg:flex flex-row space-x-2">
               <Show when={accountStore.token !== null}>
                 <InstanceBox />
               </Show>
