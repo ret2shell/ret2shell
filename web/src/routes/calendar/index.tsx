@@ -31,6 +31,7 @@ export default function () {
   const [selectedEvent, setSelectedEvent] = createSignal<Calendar | null>(null)
   createEffect(() => {
     if (selectedEventId()) {
+      setSelectedEvent(null)
       getCalendar(selectedEventId()!).then(resp => {
         setSelectedEvent(resp)
       })
@@ -298,7 +299,7 @@ export default function () {
                 </div>
               }
             >
-              <h1 class="text-3xl text-center py-4 lg:py-6 font-bold mt-8 hover:underline">
+              <h1 class="text-3xl text-center font-bold mt-8 hover:underline">
                 <a href={selectedEvent()?.link} target="_blank">
                   {selectedEvent()?.name}
                 </a>
