@@ -11,7 +11,7 @@ keywords = ["ctf", "challenge", "platform", "security", "education"]
 resolver = "2"
 
 [dependencies]
-fred = { version = "8.0", features = [
+fred = { version = "9.0", features = [
   "enable-rustls",
   "partial-tracing",
   "monitor",

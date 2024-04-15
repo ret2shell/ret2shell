@@ -3,6 +3,7 @@ use std::{io::Write, net::SocketAddr};
 use colored::Colorize;
 use r2s_config::GlobalConfig;
 use rustc_version::version;
+use rustls::crypto;
 use tracing::{error, info, warn};
 
 use crate::traits::GlobalState;
@@ -54,6 +55,8 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
         "Licensed to {} ({}), will expire at {}",
         license.issuer, license.website, license.date
     );
+
+    crypto::ring::default_provider().install_default().ok();
 
     info!("Loading module: < Auditor >");
     let auditor = r2s_auditor::initialize(&config.auditor).await?;
