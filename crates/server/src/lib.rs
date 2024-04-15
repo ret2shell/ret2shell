@@ -52,8 +52,8 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
     };
 
     info!(
-        "Licensed to {} ({}), will expire at {}",
-        license.issuer, license.website, license.date
+        "[{:?}] Licensed to {} ({}), will expire at {}",
+        license.level, license.issuer, license.website, license.date
     );
 
     crypto::ring::default_provider().install_default().ok();

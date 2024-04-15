@@ -1,5 +1,6 @@
 use base64::Engine;
 use clap::{Parser, Subcommand};
+use r2s_license::base64_to_taichi;
 use ring::{
     rand,
     signature::{self, KeyPair},
@@ -17,7 +18,7 @@ fn generate_keypair(output_path: &str) {
     .unwrap();
 }
 
-fn generate_new_key(ca: &str, path: &str, issuer: &str, website: &str, date: &str) {
+fn generate_new_key(ca: &str, path: &str, issuer: &str, website: &str, date: &str, level: &str) {
     chrono::NaiveDate::parse_from_str(date, "%Y-%m-%d").expect("Invalid date string");
     let ca_bytes = std::fs::read(ca).unwrap();
     let ca_keypair = signature::Ed25519KeyPair::from_pkcs8(ca_bytes.as_ref()).unwrap();
@@ -25,13 +26,14 @@ fn generate_new_key(ca: &str, path: &str, issuer: &str, website: &str, date: &st
         "issuer": issuer,
         "website": website,
         "date": date,
+        "level": level,
     });
     let cert = serde_json::to_string(&cert).unwrap();
     let sig = ca_keypair.sign(cert.as_bytes());
     let cert = format!(
         "{}.{}",
-        base64::engine::general_purpose::STANDARD.encode(cert),
-        base64::engine::general_purpose::STANDARD.encode(sig.as_ref())
+        base64_to_taichi(&base64::engine::general_purpose::STANDARD.encode(cert)),
+        base64_to_taichi(&base64::engine::general_purpose::STANDARD.encode(sig.as_ref()))
     );
     std::fs::write(format!("{}/license", path), cert.to_string()).unwrap();
 }
@@ -81,6 +83,8 @@ enum Commands {
         /// Expiration date.
         #[arg(short, long)]
         date: String,
+        #[arg(short, long)]
+        level: String,
     },
 }
 
@@ -94,7 +98,8 @@ fn main() {
             issuer,
             website,
             date,
-        }) => generate_new_key(&ca, &path, &issuer, &website, &date),
+            level,
+        }) => generate_new_key(&ca, &path, &issuer, &website, &date, &level),
         None => {}
     }
 }

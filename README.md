@@ -43,7 +43,7 @@ cd web && pnpm install
 
 ```bash
 cargo run --bin r2s-license -- init -p config
-cargo run --bin r2s-license -- new --ca ./config/priv.bin --path ./config/ --issuer Wo0t3c --website localhost --date 2077-01-01
+cargo run --bin r2s-license -- new --ca ./config/priv.bin --path ./config/ --issuer Developer --website localhost --level enterprise --date 2077-01-01
 ```
 
 ### Setup localhost nginx proxy
