@@ -1,6 +1,5 @@
-use base64::Engine;
 use clap::{Parser, Subcommand};
-use r2s_license::base64_to_taichi;
+use r2s_license::codec::encode;
 use ring::{
     rand,
     signature::{self, KeyPair},
@@ -30,11 +29,7 @@ fn generate_new_key(ca: &str, path: &str, issuer: &str, website: &str, date: &st
     });
     let cert = serde_json::to_string(&cert).unwrap();
     let sig = ca_keypair.sign(cert.as_bytes());
-    let cert = format!(
-        "{}.{}",
-        base64_to_taichi(&base64::engine::general_purpose::STANDARD.encode(cert)),
-        base64_to_taichi(&base64::engine::general_purpose::STANDARD.encode(sig.as_ref()))
-    );
+    let cert = format!("{}\n{}", encode(cert.as_bytes()), encode(sig.as_ref()));
     std::fs::write(format!("{}/license", path), cert.to_string()).unwrap();
 }
 
@@ -52,7 +47,7 @@ UNAUTHORIZED COPYING, TRANSFERRING OR REPRODUCTION OF THE CONTENTS OF THIS PROJE
 VIA ANY MEDIUM IS STRICTLY PROHIBITED.
 
 If you have any problems, please contact tech support <ret2shell@woooo.tech>.
-    "#
+"#
 )]
 struct Args {
     #[command(subcommand)]
