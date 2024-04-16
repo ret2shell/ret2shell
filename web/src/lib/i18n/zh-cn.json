@@ -66,7 +66,15 @@
     "selectGameToSeeDetail": "在左侧选择赛事查看详情",
     "unknown": "未知",
     "gotoEventHomePage": "前往参与",
-    "addBy": "由 {{ name }} 添加"
+    "addBy": "由 {{ name }} 添加",
+    "eventNamePlaceholder": "赛事名称",
+    "eventNameRequired": "请填写赛事名称",
+    "createEvent": "创建赛事通知",
+    "startEndTime": "起止时间",
+    "eventLinkRequired": "请填写赛事链接",
+    "eventLinkPlaceholder": "赛事链接",
+    "startTime": "开始时间",
+    "endTime": "结束时间"
   },
   "about": {
     "donate": "捐助",

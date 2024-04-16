@@ -6,8 +6,8 @@ export async function getCalendarList(start_time: DateTime, end_time: DateTime) 
   return (
     await api.get(`${api_root}/calendar`, {
       searchParams: {
-        start_time: start_time.toSeconds(),
-        end_time: end_time.toSeconds(),
+        start_time: Math.floor(start_time.toSeconds()),
+        end_time: Math.floor(end_time.toSeconds()),
       },
     })
   ).json<Calendar[]>()

@@ -41,7 +41,7 @@ export default function (props: TextInputProps & ComponentProps<'input'>) {
                 {props.icon}
               </div>
             </Show>
-            <input id={props.name} {...others} data-part="trigger" class={mergedInputClasses()} type={type()} />
+            <input id={props.name} {...others} class={mergedInputClasses()} type={type()} />
             <Show when={props.type === 'password'}>
               {/* btn-sm btn-md */}
               <button

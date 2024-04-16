@@ -120,7 +120,7 @@ export default function () {
               validate={[
                 required(t('account.login.passwordRequired')!),
                 minLength(8, t('account.login.passwordMinLength')!),
-                pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,64}$/, t('account.login.passwordTooWeak')!),
+                pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,40}$/, t('account.login.passwordTooWeak')!),
               ]}
             >
               {(field, props) => (

@@ -66,7 +66,15 @@
     "selectGameToSeeDetail": "左側でイベントを選択して詳細を表示します",
     "unknown": "未知",
     "gotoEventHomePage": "参加しに行く",
-    "addBy": "{{ name }} によって追加されました"
+    "addBy": "{{ name }} によって追加されました",
+    "eventNamePlaceholder": "イベント名",
+    "eventNameRequired": "イベント名をご記入ください",
+    "createEvent": "イベント通知を作成する",
+    "startEndTime": "開始時間と終了時間",
+    "eventLinkRequired": "イベントのリンクを記入してください",
+    "eventLinkPlaceholder": "イベントリンク",
+    "startTime": "開始時間",
+    "endTime": "終了時間"
   },
   "about": {
     "donate": "寄付する",

@@ -66,7 +66,15 @@
     "selectGameToSeeDetail": "在左側選擇賽事查看詳情",
     "unknown": "未知",
     "gotoEventHomePage": "前往參與",
-    "addBy": "由 {{ name }} 添加"
+    "addBy": "由 {{ name }} 添加",
+    "eventNamePlaceholder": "賽事名稱",
+    "eventNameRequired": "請填寫賽事名稱",
+    "createEvent": "建立賽事通知",
+    "startEndTime": "起止時間",
+    "eventLinkRequired": "請填寫賽事連結",
+    "eventLinkPlaceholder": "賽事連結",
+    "startTime": "開始時間",
+    "endTime": "結束時間"
   },
   "about": {
     "donate": "捐款",
