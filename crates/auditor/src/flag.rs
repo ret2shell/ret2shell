@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, num::ParseIntError};
 
 use once_cell::sync::Lazy;
 use thiserror::Error;
@@ -9,46 +9,77 @@ pub enum FlagError {
     EncryptedLengthMismatch(String),
     #[error("flag data broken: {0}")]
     FlagDataBroken(String),
+    #[error("flag suffix broken: {0}")]
+    FlagSuffixBroken(#[from] ParseIntError),
 }
 
-static ALTER_CHAR_TABLE: Lazy<HashMap<u8, Vec<u8>>> = Lazy::new(|| {
+static LEET_CHAR_TABLE: Lazy<HashMap<u8, Vec<u8>>> = Lazy::new(|| {
     let mut map = HashMap::new();
-    map.insert(b'0', vec![b'O', b'o']);
-    map.insert(b'1', vec![b'I', b'l']);
-    map.insert(b'2', vec![b'Z', b'z']);
-    map.insert(b'3', vec![b'E', b'e']);
-    map.insert(b'4', vec![b'@', b'a']);
-    map.insert(b'6', vec![b'b', b'B']);
-    map.insert(b'a', vec![b'@', b'4']);
-    map.insert(b'b', vec![b'B', b'6']);
-    map.insert(b'e', vec![b'E', b'3']);
-    map.insert(b'g', vec![b'G', b'9']);
-    map.insert(b'i', vec![b'I', b'1']);
-    map.insert(b'l', vec![b'L', b'1']);
-    map.insert(b'o', vec![b'O', b'0']);
-    map.insert(b'q', vec![b'Q', b'9']);
-    map.insert(b'r', vec![b'R', b'2']);
-    map.insert(b's', vec![b'S', b'5']);
-    map.insert(b't', vec![b'T', b'7']);
-    map.insert(b'z', vec![b'Z', b'2']);
-    map.insert(b'A', vec![b'@', b'4']);
-    map.insert(b'B', vec![b'b', b'8']);
-    map.insert(b'E', vec![b'e', b'3']);
-    map.insert(b'G', vec![b'g', b'9']);
-    map.insert(b'I', vec![b'i', b'1']);
-    map.insert(b'L', vec![b'l', b'1']);
-    map.insert(b'O', vec![b'o', b'0']);
-    map.insert(b'Q', vec![b'q', b'9']);
-    map.insert(b'R', vec![b'r', b'2']);
-    map.insert(b'S', vec![b's', b'5']);
-    map.insert(b'T', vec![b't', b'7']);
-    map.insert(b'Z', vec![b'z', b'2']);
-    map.insert(b'_', vec![b'-', b'.']);
-    map.insert(b'-', vec![b'_', b'=']);
-    map.insert(b'.', vec![b'-', b'_']);
-    map.insert(b'=', vec![b'-', b'_']);
-    map.insert(b'!', vec![b'_', b'-']);
-    map.insert(b'@', vec![b'A', b'a']);
+    map.insert(b'0', vec![b'0', b'O']);
+    map.insert(b'1', vec![b'1', b'l', b'I']);
+    map.insert(b'2', vec![b'2', b'Z']);
+    map.insert(b'3', vec![b'3']);
+    map.insert(b'4', vec![b'4', b'A']);
+    map.insert(b'5', vec![b'5', b'S']);
+    map.insert(b'6', vec![b'6', b'b']);
+    map.insert(b'7', vec![b'7']);
+    map.insert(b'8', vec![b'8', b'B']);
+    map.insert(b'9', vec![b'9']);
+    map.insert(b'a', vec![b'a', b'A', b'@', b'4']);
+    map.insert(b'b', vec![b'b', b'B', b'6']);
+    map.insert(b'c', vec![b'c', b'C']);
+    map.insert(b'd', vec![b'd', b'D']);
+    map.insert(b'e', vec![b'e', b'E', b'3']);
+    map.insert(b'f', vec![b'f', b'F']);
+    map.insert(b'g', vec![b'g', b'G']);
+    map.insert(b'h', vec![b'h', b'H']);
+    map.insert(b'i', vec![b'i', b'I', b'1', b'l']);
+    map.insert(b'j', vec![b'j', b'J']);
+    map.insert(b'k', vec![b'k', b'K']);
+    map.insert(b'l', vec![b'l', b'L', b'1', b'I']);
+    map.insert(b'm', vec![b'm', b'M']);
+    map.insert(b'n', vec![b'n', b'N']);
+    map.insert(b'o', vec![b'o', b'O', b'0']);
+    map.insert(b'p', vec![b'p', b'P']);
+    map.insert(b'q', vec![b'q', b'Q']);
+    map.insert(b'r', vec![b'r', b'R']);
+    map.insert(b's', vec![b's', b'S', b'5']);
+    map.insert(b't', vec![b't', b'T']);
+    map.insert(b'u', vec![b'u', b'U']);
+    map.insert(b'v', vec![b'v', b'V']);
+    map.insert(b'w', vec![b'w', b'W']);
+    map.insert(b'x', vec![b'x', b'X']);
+    map.insert(b'y', vec![b'y', b'Y']);
+    map.insert(b'z', vec![b'z', b'Z', b'2']);
+    map.insert(b'A', vec![b'A', b'a', b'@', b'4']);
+    map.insert(b'B', vec![b'B', b'b', b'8']);
+    map.insert(b'C', vec![b'C', b'c']);
+    map.insert(b'D', vec![b'D', b'd']);
+    map.insert(b'E', vec![b'E', b'e', b'3']);
+    map.insert(b'F', vec![b'F', b'f']);
+    map.insert(b'G', vec![b'G', b'g']);
+    map.insert(b'H', vec![b'H', b'h']);
+    map.insert(b'I', vec![b'I', b'i', b'1', b'l']);
+    map.insert(b'J', vec![b'J', b'j']);
+    map.insert(b'K', vec![b'K', b'k']);
+    map.insert(b'L', vec![b'L', b'l', b'1', b'I']);
+    map.insert(b'M', vec![b'M', b'm']);
+    map.insert(b'N', vec![b'N', b'n']);
+    map.insert(b'O', vec![b'O', b'o', b'0']);
+    map.insert(b'P', vec![b'P', b'p']);
+    map.insert(b'Q', vec![b'Q', b'q']);
+    map.insert(b'R', vec![b'R', b'r']);
+    map.insert(b'S', vec![b'S', b's', b'5']);
+    map.insert(b'T', vec![b'T', b't']);
+    map.insert(b'U', vec![b'U', b'u']);
+    map.insert(b'V', vec![b'V', b'v']);
+    map.insert(b'W', vec![b'W', b'w']);
+    map.insert(b'X', vec![b'X', b'x']);
+    map.insert(b'Y', vec![b'Y', b'y']);
+    map.insert(b'Z', vec![b'Z', b'z', b'2']);
+    map.insert(b'_', vec![b'_', b'-']);
+    map.insert(b'-', vec![b'-', b'_']);
+
     map
 });
 
@@ -213,142 +244,86 @@ pub fn decrypt_raw(data: &[u8], key: &str) -> Vec<u8> {
     )
 }
 
-fn get_flag_valid_part(flag: &str) -> String {
-    let mut flag_valid_part = String::new();
-    for c in flag.to_string().bytes() {
-        // if ALTER_TABLE's value contains c
-        // then c is valid
-        if ALTER_CHAR_TABLE.contains_key(&c)
-            || ALTER_CHAR_TABLE.values().any(|x| x.iter().any(|&y| y == c))
-        {
-            flag_valid_part.push(c as char);
-        }
-    }
-    flag_valid_part
+#[derive(Debug, Clone)]
+pub struct FlagStego {
+    pub key: String,
 }
 
-fn get_flag_template_valid_part(flag_template: &str) -> String {
-    let mut flag_template_valid_part = String::new();
-    for c in flag_template.to_string().bytes() {
-        // if ALTER_TABLE's key contains c
-        // then c is valid
-        if ALTER_CHAR_TABLE.contains_key(&c) {
-            flag_template_valid_part.push(c as char);
+impl FlagStego {
+    pub fn new(key: &str) -> Self {
+        Self {
+            key: key.to_string(),
         }
     }
-    flag_template_valid_part
-}
 
-pub fn insert_user_id(flag_template: &str, user_id: i64) -> Result<String, FlagError> {
-    // turn user_id into Vec<u8> which has 8 bytes
-    let user_id = user_id.to_be_bytes();
-    let encrypted_user_id = encrypt_raw(&Vec::from(user_id), "TH3-G3NU1NE-REVERIER");
-    if encrypted_user_id.len() != 8 {
-        return Err(FlagError::EncryptedLengthMismatch(format!(
-            "encrypted_user_id.len() = {}",
-            encrypted_user_id.len()
-        )));
-    }
-    // turn 64 bit encrypted_user_id to u64
-    let mut encrypted_user_id =
-        u64::from_be_bytes((&encrypted_user_id[0..8]).try_into().map_err(|err| {
-            FlagError::FlagDataBroken(format!("user_id = {:?}, err = {:?}", user_id, err))
-        })?);
-    // println!("encrypted_user_id = {}", encrypted_user_id);
-    let mut flag = String::new();
-    // iterate over flag_template
-    for c in flag_template.to_string().bytes() {
-        if ALTER_CHAR_TABLE.contains_key(&c) {
-            // if encrypted_user_id % 3 == 0, use the key as result
-            // otherwise, use the value as result
-            if encrypted_user_id % 3 == 0 {
-                flag.push(c as char);
+    pub fn leet(&self, template: &str, data: i64) -> String {
+        let encrypted = encrypt_raw(&data.to_le_bytes(), &self.key);
+        // turn the encrypted data into a i64
+        let mut encrypted_slice = [0; 8];
+        encrypted_slice.copy_from_slice(&encrypted);
+        let mut e = u64::from_le_bytes(encrypted_slice);
+        // println!("e: {e}");
+        let mut result = String::new();
+        for c in template.chars() {
+            if let Some(replace) = LEET_CHAR_TABLE.get(&(c as u8)) {
+                let modular = e % replace.len() as u64;
+                let ec = replace[modular as usize] as char;
+                result.push(ec);
+                e /= replace.len() as u64;
+                // println!("e: {e}, c: {c}, modular: {modular}, ec: {ec}");
             } else {
-                flag.push(
-                    ALTER_CHAR_TABLE.get(&c).unwrap()[(encrypted_user_id % 3 - 1) as usize] as char,
-                );
+                result.push(c);
             }
-            encrypted_user_id /= 3;
-        } else {
-            flag.push(c as char);
         }
-    }
-    while encrypted_user_id > 0 {
-        if encrypted_user_id % 3 == 0 {
-            flag.push('0');
-        } else {
-            flag.push(
-                ALTER_CHAR_TABLE.get(&b'0').unwrap()[(encrypted_user_id % 3 - 1) as usize] as char,
-            );
-        }
-        encrypted_user_id /= 3;
+        // append the remaining encrypted data as hex string
+        result.push_str(&format!("{:x}", e));
+        result
     }
 
-    Ok(flag)
-}
-
-pub fn get_user_id_from_flag(flag_template: &str, flag: &str) -> Result<i64, FlagError> {
-    let flag_valid_part: Vec<u8> = get_flag_valid_part(flag).to_string().into_bytes();
-    let flag_template_valid_part: Vec<u8> = get_flag_template_valid_part(flag_template)
-        .to_string()
-        .into_bytes();
-    let mut encrypted_user_id: Vec<u8> = Vec::new();
-    // iterate over flag_valid_part
-    let mut i = 0;
-    let length = flag_template_valid_part.len();
-    let flag_length = flag_valid_part.len();
-    while i < flag_length {
-        let original_char = if i < length {
-            flag_template_valid_part[i]
-        } else {
-            b'0'
-        };
-        let encrypted_char = flag_valid_part[i];
-        if original_char == encrypted_char {
-            encrypted_user_id.push(0);
-        } else if ALTER_CHAR_TABLE.get(&original_char).unwrap()[0] == encrypted_char {
-            encrypted_user_id.push(1);
-        } else if ALTER_CHAR_TABLE.get(&original_char).unwrap()[1] == encrypted_char {
-            encrypted_user_id.push(2);
-        } else {
-            return Err(FlagError::FlagDataBroken(format!(
-                "original_char = {:?}, encrypted_char = {:?}",
-                String::from_utf8(original_char.to_be_bytes().to_vec()),
-                String::from_utf8(encrypted_char.to_be_bytes().to_vec())
-            )));
+    pub fn unleet(&self, template: &str, data: &str) -> Result<i64, FlagError> {
+        // split the data into encrypted data and hex string using template's length
+        let template_len = template.len();
+        let (e_data, e_hex) = data.split_at(template_len);
+        let mut e_data = e_data.chars().rev();
+        let mut e = u64::from_str_radix(&e_hex, 16)?;
+        for c in template.chars().rev() {
+            let ec = e_data
+                .next()
+                .ok_or(FlagError::EncryptedLengthMismatch("data".to_string()))?;
+            if let Some(replace) = LEET_CHAR_TABLE.get(&(c as u8)) {
+                // println!("c: {c}, replace: {replace:?}, e: {e}, ec: {ec}");
+                let char_t_index = replace
+                    .iter()
+                    .position(|&x| x == ec as u8)
+                    .ok_or(FlagError::FlagDataBroken("data".to_string()))?;
+                // println!("e: {e}, c: {c}, ec: {ec}, e_index: {char_t_index}");
+                e *= replace.len() as u64;
+                e += char_t_index as u64;
+            }
         }
-        i += 1;
+        // println!("e: {e}");
+        let decrypted = decrypt_raw(&e.to_le_bytes(), &self.key);
+        let mut decrypted_slice = [0; 8];
+        decrypted_slice.copy_from_slice(&decrypted);
+        Ok(i64::from_le_bytes(decrypted_slice))
     }
-    let mut user_id: i64 = 0;
-    for (i, item) in encrypted_user_id.iter().enumerate() {
-        user_id = user_id
-            .overflowing_add(
-                (*item as i64)
-                    .overflowing_mul(3_i64.overflowing_pow(i as u32).0)
-                    .0,
-            )
-            .0;
-    }
-    let user_id = decrypt_raw(&Vec::from(user_id.to_be_bytes()), "TH3-G3NU1NE-REVERIER");
-    let user_id = i64::from_be_bytes((&user_id[0..8]).try_into().map_err(|err| {
-        FlagError::FlagDataBroken(format!("user_id = {:?}, err = {:?}", user_id, err))
-    })?);
-
-    Ok(user_id)
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
+
     #[test]
-    fn test() {
-        let flag = insert_user_id("welcome_to_the_world_of_CTF!", 3307);
-        println!("{:?}", flag);
-        assert!(flag.is_ok());
-        let flag = flag.unwrap();
-        let user_id = get_user_id_from_flag("welcome_to_the_world_of_CTF!", &flag);
-        println!("{:?}", user_id);
-        assert!(user_id.is_ok());
-        assert_eq!(user_id.unwrap(), 3307);
+    fn test_flag_transform() {
+        let flag_stego = FlagStego::new("f80f9a197163");
+        let template = "yes_you_are_right_but_you_should_play_genshin_impact";
+        println!("Template  : {}", template);
+        let data = 1919810;
+        println!("User ID   : {}", data);
+        let encrypted = flag_stego.leet(template, data);
+        println!("Encrypted : {}", encrypted);
+        let decrypted = flag_stego.unleet(template, &encrypted);
+        println!("Decrypted : {:?}", decrypted);
+        assert_eq!(decrypted.unwrap(), data);
     }
 }
