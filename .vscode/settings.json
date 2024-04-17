@@ -10,6 +10,10 @@
       "username": "ret2shell"
     }
   ],
+  "files.associations": {
+    "*.css": "tailwindcss",
+    "*.scss": "tailwindcss"
+  },
   "rust-analyzer.showUnlinkedFileNotification": false,
   "prettier.bracketSpacing": false,
   "prettier.configPath": "web/.prettierrc",
