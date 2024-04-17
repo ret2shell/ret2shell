@@ -1,4 +1,4 @@
-use std::{io::Write, net::SocketAddr};
+use std::{io::Write, net::SocketAddr, process};
 
 use colored::Colorize;
 use r2s_config::GlobalConfig;
@@ -56,8 +56,22 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
         license.level, license.issuer, license.website, license.date
     );
 
-    crypto::ring::default_provider().install_default().ok();
-
+    match crypto::aws_lc_rs::default_provider().install_default() {
+        Ok(_) => info!("using `AWS Libcrypto` as default crypto backend."),
+        Err(err) => {
+            error!("`AWS Libcrypto` is not available: {:?}", err);
+            warn!("try to use `ring` as default crypto backend.");
+            crypto::ring::default_provider()
+                .install_default()
+                .inspect_err(|err| {
+                    error!("`ring` is not available: {:?}", err);
+                    error!("All crypto backend are not available, exiting...");
+                    process::exit(1);
+                })
+                .ok();
+            info!("using `ring` as default crypto backend.");
+        }
+    }
     info!("Loading module: < Auditor >");
     let auditor = r2s_auditor::initialize(&config.auditor).await?;
     info!("Loading module: < Database >");

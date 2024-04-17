@@ -12,7 +12,11 @@ resolver = "2"
 
 [dependencies]
 tokio = { version = "1.37", features = ["full"] }
-
+thiserror = "1.0"
+tracing = "0.1"
+ring = "0.17"
+mime = "0.3"
+image = "0.25"
 
 [lib]
 path = "src/lib.rs"
