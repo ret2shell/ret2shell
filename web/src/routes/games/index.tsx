@@ -30,8 +30,8 @@ export default function () {
   return (
     <>
       <div class="flex-1 relative">
-        <div class="absolute h-full w-full overflow-scroll snap-mandatory snap-y">
-          <section class="h-full min-h-full snap-center flex relative">
+        <div class="lg:absolute lg:h-full lg:w-full overflow-scroll lg:snap-mandatory lg:snap-y">
+          <section class="lg:h-full lg:min-h-full lg:overflow-scroll lg:snap-center flex flex-col lg:flex-row relative">
             <div class="w-1/4 hidden lg:flex flex-col items-end justify-start py-32 space-y-2">
               <Divider class="w-4/5" />
               <Button ghost class="w-4/5">
@@ -78,11 +78,29 @@ export default function () {
                 <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5 opacity-60"></span>
               </Button>
               <Divider class="w-4/5" />
+              <div class="flex-1"></div>
+              <Divider class="w-4/5" />
+              <Button ghost class="w-4/5" justify="start">
+                <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5"></span>
+                <span>{t('game.otherGames')}</span>
+              </Button>
+              <Divider class="w-4/5" />
             </div>
             <div class="w-16 hidden lg:inline-block"></div>
+            <Card class="block lg:hidden mx-3 mt-3" contentClass="p-2 flex flex-row space-x-2">
+              <Button ghost square>
+                <span class="icon-[fluent--chevron-double-left-20-regular] w-5 h-5"></span>
+              </Button>
+              <Button ghost class="flex-1">
+                <span>{selectedGame()?.name || t('game.noGameHosted')}</span>
+              </Button>
+              <Button ghost square>
+                <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5"></span>
+              </Button>
+            </Card>
             <div class="flex-1 p-3 lg:p-12 flex flex-col items-center lg:justify-center lg:items-start">
               <Card
-                class="aspect-video w-full lg:w-4/5 transform transition-all rounded-b-none lg:rounded-b-lg border-b-0 lg:border-b-[1px] overflow-hidden"
+                class="aspect-video w-full lg:w-4/5 transform transition-all rounded-b-none lg:rounded-b-lg border-b-0 lg:border-b-[1px] overflow-hidden relative"
                 contentClass="relative"
               >
                 <Show
@@ -103,6 +121,28 @@ export default function () {
                 >
                   <img src={selectedGame()?.cover || undefined}></img>
                 </Show>
+                <Tag
+                  class="absolute top-2 right-2"
+                  level={
+                    selectedGame()
+                      ? DateTime.now() < selectedGame()!.start_at
+                        ? 'info'
+                        : DateTime.now() > selectedGame()!.end_at
+                          ? 'warning'
+                          : 'success'
+                      : 'error'
+                  }
+                >
+                  <span>
+                    {selectedGame()
+                      ? DateTime.now() < selectedGame()!.start_at
+                        ? t('game.pending')
+                        : DateTime.now() > selectedGame()!.end_at
+                          ? t('game.ended')
+                          : t('game.started')
+                      : t('game.unknown')}
+                  </span>
+                </Tag>
               </Card>
               <Card
                 class="w-full lg:w-3/5 relative transform transition-all lg:-translate-y-[2rem] lg:translate-x-1/2 rounded-t-none lg:rounded-t-lg border-t-0 lg:border-t-[1px] flex"
@@ -130,6 +170,7 @@ export default function () {
               </Card>
             </div>
           </section>
+          <section class="lg:h-full lg:min-h-full lg:overflow-scroll lg:snap-center flex relative"></section>
         </div>
       </div>
     </>

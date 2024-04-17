@@ -34,7 +34,12 @@
       "title": "Admin"
     },
     "exit": "Exit",
-    "noGameHosted": "No game is hosted"
+    "noGameHosted": "No game is hosted",
+    "otherGames": "Non-key games",
+    "pending": "Not started",
+    "ended": "Ended",
+    "started": "Started",
+    "unknown": "Unknown"
   },
   "bulletin": {
     "title": "Bulletin"

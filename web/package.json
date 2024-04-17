@@ -20,7 +20,7 @@
     "luxon": "^3.4.4",
     "nanoid": "^5.0.7",
     "okwind": "^0.1.2",
-    "overlayscrollbars": "^2.7.1",
+    "overlayscrollbars": "^2.7.2",
     "overlayscrollbars-solid": "^0.5.5",
     "passive-events-support": "^1.1.0",
     "rehype-autolink-headings": "^7.1.0",
@@ -39,6 +39,7 @@
   },
   "devDependencies": {
     "@iconify-json/fluent": "^1.1.52",
+    "@iconify-json/meteocons": "^1.1.4",
     "@iconify/tailwind": "^0.1.4",
     "@tailwindcss/typography": "^0.5.12",
     "@types/luxon": "^3.4.2",

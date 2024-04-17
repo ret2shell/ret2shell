@@ -34,7 +34,12 @@
       "title": "管理"
     },
     "exit": "退出",
-    "noGameHosted": "沒有舉辦過賽事"
+    "noGameHosted": "沒有舉辦過賽事",
+    "otherGames": "非重點賽事",
+    "pending": "未開始",
+    "ended": "已結束",
+    "started": "進行中",
+    "unknown": "未知"
   },
   "bulletin": {
     "title": "公告"

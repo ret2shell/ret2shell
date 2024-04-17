@@ -34,7 +34,12 @@
       "title": "管理"
     },
     "exit": "やめる",
-    "noGameHosted": "コンテストは開催されていません"
+    "noGameHosted": "コンテストは開催されていません",
+    "otherGames": "重要でないイベント",
+    "pending": "始まっていません",
+    "ended": "以上",
+    "started": "進行中",
+    "unknown": "未知"
   },
   "bulletin": {
     "title": "アナウンス"
