@@ -33,7 +33,8 @@
     "admin": {
       "title": "管理"
     },
-    "exit": "やめる"
+    "exit": "やめる",
+    "noGameHosted": "コンテストは開催されていません"
   },
   "bulletin": {
     "title": "アナウンス"

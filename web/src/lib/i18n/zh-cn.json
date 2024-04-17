@@ -33,7 +33,8 @@
     "admin": {
       "title": "管理"
     },
-    "exit": "退出"
+    "exit": "退出",
+    "noGameHosted": "没有举办过赛事"
   },
   "bulletin": {
     "title": "公告"

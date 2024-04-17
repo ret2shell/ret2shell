@@ -33,7 +33,8 @@
     "admin": {
       "title": "Admin"
     },
-    "exit": "Exit"
+    "exit": "Exit",
+    "noGameHosted": "No game is hosted"
   },
   "bulletin": {
     "title": "Bulletin"
