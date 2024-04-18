@@ -39,7 +39,8 @@
     "pending": "始まっていません",
     "ended": "以上",
     "started": "進行中",
-    "unknown": "未知"
+    "unknown": "未知",
+    "seeOtherInteresting": "他のものを見てください"
   },
   "bulletin": {
     "title": "アナウンス"

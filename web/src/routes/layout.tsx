@@ -19,10 +19,12 @@ import { getPlatformInfo } from '@/lib/api/platform'
 import { addToast, removeToast, toastStore } from '@/lib/storage/toast'
 import Divider from '@/lib/widgets/divider'
 import Toasts from './_blocks/toasts'
-import { Transition } from 'solid-transition-group'
+import { Transition, TransitionGroup } from 'solid-transition-group'
 import Button from '@/lib/widgets/button'
 import { wsrx } from '@/lib/wsrx'
 import { Title, setupTitleResolver } from '@storage/header'
+import { DateTime } from 'luxon'
+import '@widgets/styles/nav.scss'
 
 function GlobalTitleLink() {
   return (
@@ -51,25 +53,25 @@ function GameTitleLink() {
 function GlobalNav(props: { size: 'sm' | 'md' }) {
   return (
     <>
-      <li>
+      <li class="nav">
         <Link class="w-full" href="/wiki" activeMatch="partial" ghost justify="start" size={props.size}>
           <span class="icon-[fluent--book-number-20-regular] w-5 h-5" />
           <span>{t('wiki.title')}</span>
         </Link>
       </li>
-      <li>
+      <li class="nav">
         <Link class="w-full" href="/training" activeMatch="partial" ghost justify="start" size={props.size}>
           <span class="icon-[fluent--dumbbell-20-regular] w-5 h-5" />
           <span>{t('training.title')}</span>
         </Link>
       </li>
-      <li>
+      <li class="nav">
         <Link class="w-full" href="/games" activeMatch="partial" ghost justify="start" size={props.size}>
           <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
           <span>{t('game.title')}</span>
         </Link>
       </li>
-      <li>
+      <li class="nav">
         <Link class="w-full" href="/bulletin" activeMatch="partial" ghost justify="start" size={props.size}>
           <span class="icon-[fluent--megaphone-20-regular] w-5 h-5" />
           <span>{t('bulletin.title')}</span>
@@ -85,7 +87,7 @@ function GlobalNav(props: { size: 'sm' | 'md' }) {
             accountStore.info?.permissions.includes(Permission.Host))
         }
       >
-        <li>
+        <li class="nav">
           <Link class="w-full" href="/admin" activeMatch="partial" ghost justify="start" size={props.size}>
             <span class="icon-[fluent--organization-20-regular] w-5 h-5" />
             <span>{t('admin.title')}</span>
@@ -99,7 +101,7 @@ function GlobalNav(props: { size: 'sm' | 'md' }) {
 function GameNav(props: { size: 'sm' | 'md' }) {
   return (
     <>
-      <li>
+      <li class="nav">
         <Link
           class="w-full"
           href={`/games/${gameStore.current?.id}/challenges`}
@@ -112,7 +114,7 @@ function GameNav(props: { size: 'sm' | 'md' }) {
           <span>{t('game.challenge.title')}</span>
         </Link>
       </li>
-      <li>
+      <li class="nav">
         <Link
           class="w-full"
           href={`/games/${gameStore.current?.id}/scoreboard`}
@@ -125,8 +127,8 @@ function GameNav(props: { size: 'sm' | 'md' }) {
           <span>{t('game.scoreboard.title')}</span>
         </Link>
       </li>
-      <Show when={(gameStore.current?.archive_at.diffNow().toMillis() || 0) < 0}>
-        <li>
+      <Show when={gameStore.current?.archive_at && gameStore.current.archive_at < DateTime.now()}>
+        <li class="nav">
           <Link
             class="w-full"
             href={`/games/${gameStore.current?.id}/writeups`}
@@ -140,7 +142,7 @@ function GameNav(props: { size: 'sm' | 'md' }) {
           </Link>
         </li>
       </Show>
-      <li>
+      <li class="nav">
         <Link
           class="w-full"
           href={`/games/${gameStore.current?.id}/admin`}
@@ -149,20 +151,12 @@ function GameNav(props: { size: 'sm' | 'md' }) {
           justify="start"
           size={props.size}
         >
-          <span class="icon-[fluent--book-open-20-regular] w-5 h-5" />
+          <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
           <span>{t('game.admin.title')}</span>
         </Link>
       </li>
-      <li>
-        <Link
-          class="w-full"
-          href={`/games/`}
-          activeMatch="partial"
-          ghost
-          justify="start"
-          size={props.size}
-          level="warning"
-        >
+      <li class="nav">
+        <Link class="w-full" href={`/games/`} ghost justify="start" size={props.size} level="warning">
           <span class="icon-[fluent--arrow-exit-20-regular] w-5 h-5" />
           <span>{t('game.exit')}</span>
         </Link>
@@ -257,11 +251,13 @@ function TitleBar() {
           </Switch>
           <div class="w-4"></div>
           <ul class="xl:flex flex-row space-x-2 hidden">
-            <Switch fallback={<GlobalNav size="md" />}>
-              <Match when={gameStore.current && gameStore.current.host_type === HostType.CTFGame}>
-                <GameNav size="md" />
-              </Match>
-            </Switch>
+            <TransitionGroup name="nav">
+              <Switch fallback={<GlobalNav size="md" />}>
+                <Match when={gameStore.current && gameStore.current.host_type === HostType.CTFGame}>
+                  <GameNav size="md" />
+                </Match>
+              </Switch>
+            </TransitionGroup>
           </ul>
           <div class="flex-1"></div>
           <div class="flex flex-row space-x-2">

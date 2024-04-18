@@ -76,6 +76,16 @@ export const routes = {
           path: '/',
           component: lazy(() => import('./games/index')),
         },
+        {
+          path: '/:game_id',
+          component: lazy(() => import('./games/[game]/layout')),
+          children: [
+            {
+              path: '/',
+              component: lazy(() => import('./games/[game]/index')),
+            },
+          ],
+        },
       ],
     },
     {

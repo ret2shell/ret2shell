@@ -32,4 +32,5 @@ export type Game = {
   can_register_after_started: boolean
   award_rate: number
   admins: number[]
+  weight: number
 }

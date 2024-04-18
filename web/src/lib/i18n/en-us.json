@@ -39,7 +39,8 @@
     "pending": "Not started",
     "ended": "Ended",
     "started": "Started",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "seeOtherInteresting": "Look at something else"
   },
   "bulletin": {
     "title": "Bulletin"

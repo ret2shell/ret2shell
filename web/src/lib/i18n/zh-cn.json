@@ -39,7 +39,8 @@
     "pending": "未开始",
     "ended": "已结束",
     "started": "进行中",
-    "unknown": "未知"
+    "unknown": "未知",
+    "seeOtherInteresting": "看看别的吧"
   },
   "bulletin": {
     "title": "公告"
