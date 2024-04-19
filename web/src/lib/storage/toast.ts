@@ -31,5 +31,5 @@ export function removeToast(id: string) {
 }
 
 export function clearToasts() {
-  setToastStore('toasts', [])
+  setToastStore({ toasts: [] })
 }

@@ -3,7 +3,7 @@ import { JSX, onCleanup } from 'solid-js'
 
 export default function (props: { children?: JSX.Element }) {
   onCleanup(() => {
-    setGameStore('current', null)
+    setGameStore({ current: null })
   })
   return <>{props.children}</>
 }

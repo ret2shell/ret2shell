@@ -33,7 +33,7 @@ export default function () {
     return keyGames().find(game => game.id === selectedGameId())
   })
   createEffect(() => {
-    setGameStore('preload', selectedGame() ? JSON.parse(JSON.stringify(selectedGame())) : null)
+    setGameStore({ preload: selectedGame() || null })
   })
   return (
     <section class="lg:h-full lg:min-h-full lg:overflow-scroll lg:snap-center flex flex-col lg:flex-row relative">
@@ -180,8 +180,7 @@ export default function () {
           <button
             class="absolute w-full h-full top-0 left-0 !m-0"
             onClick={() => {
-              if (selectedGame())
-                setGameStore('current', selectedGame() ? JSON.parse(JSON.stringify(selectedGame())) : null)
+              if (selectedGame()) setGameStore({ current: selectedGame() || null })
               return false
             }}
           ></button>

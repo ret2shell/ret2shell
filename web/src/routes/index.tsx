@@ -14,7 +14,7 @@ import { useSearchParams } from '@solidjs/router'
 export default function () {
   getVersion()
     .then(version => {
-      setPlatformStore('version', version)
+      setPlatformStore({ version })
     })
     .catch(() => {})
   const [searchParams] = useSearchParams()

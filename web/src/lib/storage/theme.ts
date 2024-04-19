@@ -27,15 +27,15 @@ export const [themeStore, setThemeStore] = makePersisted(
 )
 
 export function setTheme(theme: string) {
-  setThemeStore('theme', theme)
+  setThemeStore({ theme })
 }
 
 export function setColorScheme(colorScheme: 'dark' | 'light') {
-  setThemeStore('colorScheme', colorScheme)
+  setThemeStore({ colorScheme })
 }
 
 export function setLocale(locale: Locale) {
-  setThemeStore('locale', locale)
+  setThemeStore({ locale })
   setTimeout(() => location.reload())
 }
 

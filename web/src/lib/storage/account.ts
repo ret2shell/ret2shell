@@ -36,7 +36,7 @@ export const userRefresh = () => {
   if (!accountStore.token) return
   getProfile()
     .then(info => {
-      setAccountStore('info', info)
+      setAccountStore({ info })
     })
     .catch(() => {
       userReset()

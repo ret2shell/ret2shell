@@ -282,14 +282,14 @@ function checkCookiePolicy() {
       level: 'info',
       description: t('platform.cookiePolicy') as string,
       accept: () => {
-        setPlatformStore({ ...platformStore, accept_cookies: true })
+        setPlatformStore({ accept_cookies: true })
         setTimeout(() => {
           removeToast(toastId)
         }, 50)
       },
       acceptLabel: t('platform.ok'),
       reject: () => {
-        setPlatformStore({ ...platformStore, accept_cookies: true })
+        setPlatformStore({ accept_cookies: true })
         setTimeout(() => {
           removeToast(toastId)
         }, 50)
@@ -308,7 +308,7 @@ export default function (props: { children?: JSX.Element }) {
   setupTitleResolver()
   getPlatformInfo()
     .then(res => {
-      setPlatformStore({ ...platformStore, config: res })
+      setPlatformStore({ config: res })
     })
     .catch(() => {
       addToast({
