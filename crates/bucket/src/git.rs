@@ -247,8 +247,7 @@ impl Git {
     ) -> Result<impl AsyncRead, GitError>
     where
         T: IntoIterator<Item = S>,
-        S: AsRef<OsStr>,
-    {
+        S: AsRef<OsStr>, {
         let mut cmd = Command::new("/bin/git");
         cmd.stdin(Stdio::piped())
             .stdout(Stdio::piped())

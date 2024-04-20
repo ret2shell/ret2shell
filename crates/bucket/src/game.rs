@@ -1,9 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use chrono::{
-    serde::{ts_seconds, ts_seconds_option},
-    DateTime, Utc,
-};
+use chrono::{serde::ts_seconds, DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use tokio::fs::{create_dir_all, write};
@@ -21,7 +18,7 @@ pub struct GameBucket {
 #[repr(i32)]
 pub enum HostType {
     CTFTraining = 0,
-    CTFGame = 1,
+    CTFGame     = 1,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -38,10 +35,10 @@ pub struct GameConfig {
     pub start_at: DateTime<Utc>,
     #[serde(with = "ts_seconds")]
     pub end_at: DateTime<Utc>,
-    #[serde(with = "ts_seconds_option")]
-    pub register_at: Option<DateTime<Utc>>,
-    #[serde(with = "ts_seconds_option")]
-    pub archive_at: Option<DateTime<Utc>>,
+    #[serde(with = "ts_seconds")]
+    pub register_at: DateTime<Utc>,
+    #[serde(with = "ts_seconds")]
+    pub archive_at: DateTime<Utc>,
     pub host_type: HostType,
     pub team_size: i32,
     pub access_policy: AccessPolicy,
