@@ -42,6 +42,7 @@ static ALTER_CHAR_TABLE: Lazy<HashMap<u8, Vec<u8>>> = Lazy::new(|| {
     map.insert(b'Z', vec![b'Z', b'z', b'2']);
     map
 });
+
 /// Convert any unicode string into a path-safe string.
 ///
 /// Assume that we have a string "你好世界", it will be converted to
