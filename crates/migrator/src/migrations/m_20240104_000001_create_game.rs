@@ -36,6 +36,7 @@ pub enum Game {
     AwardRate,
     Admins,
     Weight,
+    Bucket,
 }
 
 #[async_trait::async_trait]
@@ -108,6 +109,7 @@ impl MigrationTrait for Migration {
                             .default("[]"),
                     )
                     .col(ColumnDef::new(Game::Weight).integer().not_null())
+                    .col(ColumnDef::new(Game::Bucket).string_len(127))
                     .to_owned(),
             )
             .await

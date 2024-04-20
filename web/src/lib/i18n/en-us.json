@@ -40,7 +40,9 @@
     "ended": "Ended",
     "started": "Started",
     "unknown": "Unknown",
-    "seeOtherInteresting": "Look at something else"
+    "seeOtherInteresting": "Look at something else",
+    "fetchFailed": "Failed to fetch game list",
+    "create": "New"
   },
   "bulletin": {
     "title": "Bulletin"

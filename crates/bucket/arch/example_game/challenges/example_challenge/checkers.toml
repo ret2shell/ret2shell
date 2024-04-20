@@ -1,0 +1,19 @@
+[env]
+containers = [
+  { image = "registry/challenge-server:latest", cpu = "1", memory = "128Mi", storage = "512Mi" },
+]
+port = 8080
+flag = { template = "flag{welcome_to_the_challenge}", dynamic = true, case_sensitive = true, regex = false }
+
+[mapped]
+flag = { case_sensitive = true, regex = false }
+
+[simple]
+flag = [
+  { flag = "flag{welcome_to_the_challenge_1}", case_sensitive = true, regex = false },
+  { flag = "flag{welcome_to_the_challenge_2}", case_sensitive = true, regex = false },
+]
+
+[script]
+executor = "python"
+script = "./scripts/check.py"

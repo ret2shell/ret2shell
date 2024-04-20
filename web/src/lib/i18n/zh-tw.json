@@ -40,7 +40,9 @@
     "ended": "已結束",
     "started": "進行中",
     "unknown": "未知",
-    "seeOtherInteresting": "看看別的吧"
+    "seeOtherInteresting": "看看別的吧",
+    "fetchFailed": "取得比賽清單失敗",
+    "create": "新建"
   },
   "bulletin": {
     "title": "公告"

@@ -1,5 +1,5 @@
 import LogoAnimate from '@/lib/assets/animates/logo-animate'
-import { gameStore, setGameStore } from '@/lib/storage/game'
+import { appendGames, gameStore, setGameStore } from '@/lib/storage/game'
 import { t, themeStore } from '@/lib/storage/theme'
 import Button from '@/lib/widgets/button'
 import Card from '@/lib/widgets/card'
@@ -9,13 +9,21 @@ import Picture from '@/lib/widgets/picture'
 import Tag from '@/lib/widgets/tag'
 import { useSearchParams } from '@solidjs/router'
 import { DateTime } from 'luxon'
-import { For, Show, createEffect, createMemo } from 'solid-js'
+import { For, Show, createEffect, createMemo, createSignal } from 'solid-js'
 import bluredBgDark from '@assets/imgs/bg-blur-stars.webp'
 import bluredBgLight from '@assets/imgs/bg-blur-suzume.webp'
 import { HostType } from '@/lib/models/game'
+import { getGames } from '@/lib/api/game'
+import { HTTPError } from 'ky'
+import { addToast } from '@/lib/storage/toast'
+import { accountStore } from '@/lib/storage/account'
+import { Permission } from '@/lib/models/user'
 
 export default function () {
   const [searchParams, setSearchParams] = useSearchParams()
+  const [page, setPage] = createSignal(1)
+  const [total, setTotal] = createSignal(0)
+  const [loading, setLoading] = createSignal(true)
   const selectedGameId = createMemo(() => {
     const result = searchParams.selected ? parseInt(searchParams.selected) : NaN
     if (isNaN(result)) {
@@ -24,7 +32,10 @@ export default function () {
     return result
   })
   const keyGames = createMemo(() => {
-    return gameStore.games.filter(game => game.weight >= 3 && game.host_type === HostType.CTFGame)
+    return gameStore.games
+      .filter(game => game.weight >= 3 && game.host_type === HostType.CTFGame)
+      .sort((a, b) => b.start_at.diff(a.start_at).seconds)
+      .slice(page(), page() + 5)
   })
   if (selectedGameId() === null && keyGames().length > 0) {
     setSearchParams({ selected: keyGames()[0].id })
@@ -35,13 +46,48 @@ export default function () {
   createEffect(() => {
     setGameStore({ preload: selectedGame() || null })
   })
+
+  function fetchGames() {
+    /// fetch games from server
+    getGames(page(), 5, HostType.CTFGame, 3)
+      .then(([games]) => {
+        appendGames(games)
+      })
+      .catch((err: HTTPError) => {
+        message: err.response.text().then(resp => {
+          addToast({
+            level: 'error',
+            description: `${t('game.fetchFailed')}: ${resp}`,
+          })
+        })
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }
+  fetchGames()
+
+  createEffect(() => {
+    if (page()) {
+      fetchGames()
+    }
+  })
+
   return (
     <section class="lg:h-full lg:min-h-full lg:overflow-scroll lg:snap-center flex flex-col lg:flex-row relative">
       <div class="w-1/4 hidden lg:flex flex-col items-end justify-start py-32 space-y-2">
         <Divider class="w-4/5" />
-        <Button ghost class="w-4/5">
-          <span class="icon-[fluent--chevron-double-up-20-regular] w-5 h-5 opacity-60"></span>
-        </Button>
+        <div class="w-4/5 flex flex-row space-x-2">
+          <Button ghost class="flex-1" disabled={page() <= 1}>
+            <span class="icon-[fluent--chevron-double-up-20-regular] w-5 h-5 opacity-60"></span>
+          </Button>
+          <Show when={accountStore.permissions.includes(Permission.Host)}>
+            <Button ghost>
+              <span class="icon-[fluent--add-20-regular] w-5 h-5 opacity-60"></span>
+              <span>{t('game.create')}</span>
+            </Button>
+          </Show>
+        </div>
         <Divider class="w-4/5" />
         <For
           each={keyGames()}
@@ -79,7 +125,7 @@ export default function () {
           )}
         </For>
         <Divider class="w-4/5" />
-        <Button ghost class="w-4/5">
+        <Button ghost class="w-4/5" disabled={page() >= total()}>
           <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5 opacity-60"></span>
         </Button>
         <Divider class="w-4/5" />

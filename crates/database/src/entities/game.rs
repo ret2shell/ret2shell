@@ -35,6 +35,14 @@ pub enum HostType {
 pub struct AccessPolicy {
     pub restrict: bool,
     pub institutes: Vec<i64>,
+    /// for platform sync.
+    ///
+    /// 0. sync without restrictions
+    /// 1. sync with game admin access
+    /// 2. no sync
+    ///
+    /// note that sync will only be allowed when the game is archived.
+    pub sync: i32,
 }
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
@@ -70,6 +78,7 @@ pub struct Model {
     #[sea_orm(column_type = "JsonBinary")]
     pub admins: Vec<i64>,
     pub weight: i32,
+    pub bucket: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -129,7 +138,7 @@ pub async fn get_page(
         sql = sql.filter(Column::HostType.eq(host_type));
     }
     if let Some(weight) = weight {
-        sql = sql.filter(Column::Weight.gte(weight));
+        sql = sql.filter(Column::Weight.eq(weight));
     }
     if !with_hidden {
         sql = sql.filter(Column::Hidden.eq(false));

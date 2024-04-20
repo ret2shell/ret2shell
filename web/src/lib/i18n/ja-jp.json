@@ -40,7 +40,9 @@
     "ended": "以上",
     "started": "進行中",
     "unknown": "未知",
-    "seeOtherInteresting": "他のものを見てください"
+    "seeOtherInteresting": "他のものを見てください",
+    "fetchFailed": "一致リストの取得に失敗しました",
+    "create": "新しい"
   },
   "bulletin": {
     "title": "アナウンス"

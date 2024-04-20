@@ -10,3 +10,8 @@ export const [gameStore, setGameStore] = createStore({
   team: null as Team | null,
   members: [] as User[],
 })
+
+export function appendGames(games: Game[]) {
+  const ids = new Set(gameStore.games.map(g => g.id))
+  setGameStore({ games: [...gameStore.games.filter(g => !ids.has(g.id)), ...games] })
+}

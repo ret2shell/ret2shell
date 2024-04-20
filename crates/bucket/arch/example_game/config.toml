@@ -1,0 +1,17 @@
+[info]
+name = "Example Game"
+brief = "Example Game brief"
+register_at = "2021-01-01T00:00:00Z"
+start_at = "2021-01-02T00:00:00Z"
+end_at = "2021-01-03T00:00:00Z"
+archive_at = "2021-01-04T00:00:00Z"
+team_size = 1
+host_type = 1                        # CTFTraining: 0, CTFGame: 1
+cover = "./cover.webp"
+logo = "./logo.svg"
+can_register_after_started = true
+award_rate = 5
+weight = 3
+
+[access_policy]
+sync = 0
