@@ -3,7 +3,7 @@ import Card from '@widgets/card'
 import { t } from '@storage/theme'
 import Link from '@widgets/link'
 import Button from '@widgets/button'
-import { For, Show, createEffect, createSignal, onCleanup } from 'solid-js'
+import { For, Show, createEffect, createSignal, onCleanup, untrack } from 'solid-js'
 import Timer from '@widgets/timer'
 import Progress from '@widgets/progress'
 import { Instance } from '@models/instance'
@@ -34,7 +34,7 @@ export function InstanceBoxContent() {
   }
 
   createEffect(() => {
-    if (accountStore.token) retryConnect()
+    if (accountStore.token) untrack(retryConnect)
   })
 
   const [now, setNow] = createSignal(DateTime.now())

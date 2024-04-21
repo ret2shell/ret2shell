@@ -1,4 +1,4 @@
-import { Show, createEffect, createSignal } from 'solid-js'
+import { Show, createEffect, createSignal, untrack } from 'solid-js'
 import { accountStore, userRefresh, userReset } from '@storage/account'
 import Link from '@widgets/link'
 import Popover from '@widgets/popover'
@@ -13,7 +13,7 @@ import { clearToasts } from '@/lib/storage/toast'
 export default function UserBox() {
   createEffect(() => {
     if (accountStore.token) {
-      userRefresh()
+      untrack(userRefresh)
     }
   })
 

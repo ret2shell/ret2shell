@@ -1,6 +1,6 @@
 import { FormStore, Maybe, setValue } from '@modular-forms/solid'
 import Input, { TextInputProps } from '@widgets/input'
-import { ComponentProps, createEffect, createSignal, splitProps } from 'solid-js'
+import { ComponentProps, createEffect, createSignal, splitProps, untrack } from 'solid-js'
 import { Captcha } from '@models/captcha'
 import Button from '../widgets/button'
 import { t } from '../storage/theme'
@@ -49,7 +49,7 @@ export default function (
 
   createEffect(() => {
     if (props.timestamp) {
-      reload()
+      untrack(reload)
     }
   })
 

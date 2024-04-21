@@ -9,7 +9,7 @@ import Picture from '@/lib/widgets/picture'
 import Tag from '@/lib/widgets/tag'
 import { useSearchParams } from '@solidjs/router'
 import { DateTime } from 'luxon'
-import { For, Show, createEffect, createMemo, createSignal } from 'solid-js'
+import { For, Show, createEffect, createMemo, createSignal, untrack } from 'solid-js'
 import bluredBgDark from '@assets/imgs/bg-blur-stars.webp'
 import bluredBgLight from '@assets/imgs/bg-blur-suzume.webp'
 import { HostType } from '@/lib/models/game'
@@ -69,7 +69,7 @@ export default function () {
 
   createEffect(() => {
     if (page()) {
-      fetchGames()
+      untrack(fetchGames)
     }
   })
 

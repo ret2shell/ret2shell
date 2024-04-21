@@ -1,4 +1,4 @@
-import { ComponentProps, Show, createEffect, createSignal, splitProps } from 'solid-js'
+import { ComponentProps, Show, createEffect, createSignal, splitProps, untrack } from 'solid-js'
 import './styles/article.scss'
 import './styles/skeleton.scss'
 import Spin from '../assets/animates/spin'
@@ -32,11 +32,13 @@ export default function (props: ComponentProps<'article'> & ArticleProps) {
     }, 100)
   }
   createEffect(() => {
-    render(articleProps.content).then(html => {
-      setContentHtml(html)
-      setReady(true)
-      scrollToView()
-    })
+    render(articleProps.content).then(html =>
+      untrack(() => {
+        setContentHtml(html)
+        setReady(true)
+        scrollToView()
+      })
+    )
   })
   return (
     <>

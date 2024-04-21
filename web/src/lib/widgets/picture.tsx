@@ -1,4 +1,4 @@
-import { ComponentProps, Show, createEffect, createSignal, splitProps } from 'solid-js'
+import { ComponentProps, Show, createEffect, createSignal, splitProps, untrack } from 'solid-js'
 import Spin from '../assets/animates/spin'
 import { Transition } from 'solid-transition-group'
 
@@ -15,7 +15,7 @@ export default function (props: ImageProps & ComponentProps<'div'>) {
   const [loading, setLoading] = createSignal(true)
   createEffect(() => {
     if (props.src) {
-      setLoading(true)
+      untrack(() => setLoading(true))
     }
   })
   return (

@@ -1,4 +1,4 @@
-import { createEffect } from 'solid-js'
+import { createEffect, untrack } from 'solid-js'
 import { t } from './theme'
 import { platformStore } from './platform'
 import { useLocation } from '@solidjs/router'
@@ -60,7 +60,7 @@ export function setupTitleResolver() {
   createEffect(() => {
     const path = useLocation().pathname
     const pathArr = path.split('/')
-    const [parentRoute, exactRoute] = headerStore.findRoute(pathArr)
+    const [parentRoute, exactRoute] = untrack(() => headerStore.findRoute(pathArr))
     document.title = exactRoute?.title || parentRoute.title || platformStore.config.name || t('platform.name')!
   })
 }

@@ -14,7 +14,7 @@ import TimePicker from '@/lib/widgets/timepicker'
 import { createForm, required } from '@modular-forms/solid'
 import { useSearchParams } from '@solidjs/router'
 import { DateTime, MonthNumbers } from 'luxon'
-import { For, Match, Show, Switch, createEffect, createMemo, createSignal } from 'solid-js'
+import { For, Match, Show, Switch, createEffect, createMemo, createSignal, untrack } from 'solid-js'
 
 function EventDetail(props: { event: Calendar }) {
   return (
@@ -144,9 +144,11 @@ export default function () {
   const [selectedEvent, setSelectedEvent] = createSignal<Calendar | null>(null)
   createEffect(() => {
     if (selectedEventId()) {
-      setSelectedEvent(null)
-      getCalendar(selectedEventId()!).then(resp => {
-        setSelectedEvent(resp)
+      untrack(() => {
+        setSelectedEvent(null)
+        getCalendar(selectedEventId()!).then(resp => {
+          setSelectedEvent(resp)
+        })
       })
     } else {
       setSelectedEvent(null)
