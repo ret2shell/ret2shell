@@ -167,6 +167,12 @@ impl GameBucket {
             }
         }
     }
+
+    pub async fn delete(&self, challenge: impl AsRef<str>) -> Result<(), BucketError> {
+        let _ = self.at(&challenge).await?;
+        remove_dir_all(self.path.join("challenges").join(challenge.as_ref())).await?;
+        Ok(())
+    }
 }
 
 impl Drop for GameBucket {

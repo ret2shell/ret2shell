@@ -5,7 +5,7 @@ use r2s_config::bucket;
 use serde_json::Value;
 use tokio::fs::remove_dir_all;
 use tracing::error;
-use traits::BucketError;
+pub use traits::BucketError;
 
 pub mod challenge;
 pub mod game;
@@ -52,12 +52,22 @@ impl Bucket {
     pub async fn at_mut(&self, name: impl AsRef<str>) -> Result<game::GameBucket, BucketError> {
         game::GameBucket::open(&self.path, name, true).await
     }
+
+    pub async fn delete(&self, name: impl AsRef<str>) -> Result<(), BucketError> {
+        let _ = self.at(&name).await?;
+        remove_dir_all(self.path.join(name.as_ref())).await?;
+        Ok(())
+    }
 }
 
-pub async fn initialize(config: &bucket::Config) -> Result<Bucket, BucketError> {
-    let path: PathBuf = config.path.clone().into();
-    if !path.exists() {
-        return Err(BucketError::PathDoesNotExist(format!("{}", path.display())));
+pub async fn initialize(config: &Option<bucket::Config>) -> Result<Bucket, BucketError> {
+    if let Some(config) = config {
+        let path: PathBuf = config.path.clone().into();
+        if !path.exists() {
+            return Err(BucketError::PathDoesNotExist(format!("{}", path.display())));
+        }
+        Ok(Bucket::open(path))
+    } else {
+        Err(BucketError::ConfigNotFound)
     }
-    Ok(Bucket::open(path))
 }

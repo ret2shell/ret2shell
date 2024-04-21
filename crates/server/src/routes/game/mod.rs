@@ -2,15 +2,19 @@ use axum::{
     extract::{Query, State},
     middleware,
     response::IntoResponse,
-    routing::get,
+    routing::{get, post},
     Extension, Json, Router,
 };
+use r2s_bucket::Bucket;
 use r2s_database::{game, user::Permission};
 use r2s_migrator::Database;
 use serde::Deserialize;
 
 use crate::{
-    middleware::{auth::Token, data},
+    middleware::{
+        auth::{self, Token},
+        data,
+    },
     traits::{GlobalState, ResponseError},
 };
 
@@ -18,6 +22,10 @@ mod challenge;
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
     Router::new()
+        .route("/", post(create_game))
+        .layer(middleware::from_fn(auth::permission_required_all!(
+            Permission::Host
+        )))
         .nest(
             "/:game_id",
             Router::new()
@@ -66,4 +74,21 @@ async fn get_game(
         return Err(ResponseError::NotFound("game not found".to_owned()));
     }
     Ok(Json(game))
+}
+
+async fn create_game(
+    State(ref db): State<Database>, State(ref bucket): State<Bucket>,
+    Json(mut model): Json<game::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+    let game_bucket = bucket.create(serde_json::to_value(&model)?).await?;
+    model.bucket = Some(game_bucket.name.clone());
+    let model = game::create(&db.conn, model).await;
+
+    match model {
+        Ok(model) => Ok(Json(model)),
+        Err(e) => {
+            bucket.delete(&game_bucket.name).await.ok();
+            Err(e)?
+        }
+    }
 }

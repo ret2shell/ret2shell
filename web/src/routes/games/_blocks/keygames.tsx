@@ -66,6 +66,7 @@ export default function () {
           addToast({
             level: 'error',
             description: `${t('game.fetchFailed')}: ${resp}`,
+            duration: 5000,
           })
         })
       })

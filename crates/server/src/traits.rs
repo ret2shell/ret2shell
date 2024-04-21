@@ -5,6 +5,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use r2s_auditor::Auditor;
+use r2s_bucket::Bucket;
 use r2s_cache::Cache;
 use r2s_cluster::Cluster;
 use r2s_config::GlobalConfig;
@@ -21,6 +22,7 @@ pub struct GlobalState {
     pub db: Database,
     pub cache: Cache,
     pub auditor: Auditor,
+    pub bucket: Bucket,
     pub queue: Queue,
     pub cluster: Cluster,
     pub license: License,
@@ -55,6 +57,10 @@ pub enum ResponseError {
     CaptchaError(#[from] r2s_captcha::CaptchaError),
     #[error("password hashing error: {0}")]
     PasswordHashError(#[from] crate::utility::password::PasswordHashingError),
+    #[error("serialize error: {0}")]
+    SerializeError(#[from] serde_json::Error),
+    #[error("bucket error: {0}")]
+    BucketError(#[from] r2s_bucket::BucketError),
 }
 
 macro_rules! log_with_resp {
@@ -140,6 +146,37 @@ impl IntoResponse for ResponseError {
                     e.to_string()
                 )
             }
+            ResponseError::SerializeError(e) => {
+                log_with_resp!(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "failed to serialize data".to_owned(),
+                    e.to_string()
+                )
+            }
+            ResponseError::BucketError(e) => match e {
+                r2s_bucket::BucketError::PathDoesNotExist(s) => {
+                    log_with_resp!(
+                        StatusCode::NOT_FOUND,
+                        "bucket path does not exist".to_owned(),
+                        s
+                    )
+                }
+                r2s_bucket::BucketError::PathConflict(s) => {
+                    log_with_resp!(StatusCode::CONFLICT, "bucket path conflict".to_owned(), s)
+                }
+                r2s_bucket::BucketError::LockError => {
+                    log_with_resp!(
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        "could not lock the bucket".to_owned(),
+                        "bucket is locked by another process"
+                    )
+                }
+                _ => log_with_resp!(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "bucket internal error".to_owned(),
+                    e.to_string()
+                ),
+            },
         };
         Response::builder()
             .status(status)

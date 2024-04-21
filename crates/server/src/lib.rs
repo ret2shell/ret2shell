@@ -78,8 +78,11 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
     let db = r2s_migrator::initialize(&config.database).await?;
     info!("Loading module: < Cache >");
     let cache = r2s_cache::initialize(&config.cache).await?;
+    info!("Loading module: < Bucket >");
+    let bucket = r2s_bucket::initialize(&config.bucket).await?;
     info!("Loading module: < Message Queue >");
     let queue = r2s_queue::initialize(&config.queue).await?;
+    info!("Loading module: < Cluster >");
     let cluster = r2s_cluster::initialize(&config.cluster).await?;
     info!("Loading module: < Email Worker >");
     r2s_email::initialize(queue.subscribe("email").await?).await?;
@@ -89,6 +92,7 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
         db,
         cache,
         auditor,
+        bucket,
         queue,
         license,
         cluster,

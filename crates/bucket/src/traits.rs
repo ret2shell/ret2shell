@@ -18,6 +18,8 @@ pub enum BucketError {
     TomlError(#[from] toml::ser::Error),
     #[error("toml deserialize error: {0}")]
     TomlDeError(#[from] toml::de::Error),
+    #[error("config not found")]
+    ConfigNotFound,
 }
 
 macro_rules! init_dir {
