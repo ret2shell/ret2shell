@@ -93,7 +93,8 @@
     "create": "创建",
     "delete": "删除",
     "deleteSuccess": "删除成功",
-    "deleteFailed": "删除失败"
+    "deleteFailed": "删除失败",
+    "introRequired": "请填写赛事简介"
   },
   "about": {
     "donate": "捐助",

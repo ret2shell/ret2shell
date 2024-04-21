@@ -151,7 +151,7 @@ function EventForm(props: { onCreated: (id: number) => void }) {
               </Field>
             )}
           </Field>
-          <Field name="intro">
+          <Field name="intro" validate={[required(t('calendar.introRequired')!)]}>
             {field => (
               <>
                 <Editor
@@ -162,6 +162,7 @@ function EventForm(props: { onCreated: (id: number) => void }) {
                   title={t('calendar.introPlaceholder')}
                   name="intro"
                   value={field.value || undefined}
+                  error={field.error}
                 />
               </>
             )}

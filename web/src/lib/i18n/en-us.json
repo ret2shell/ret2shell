@@ -93,7 +93,8 @@
     "create": "create",
     "delete": "Delete",
     "deleteSuccess": "deleted successfully",
-    "deleteFailed": "delete failed"
+    "deleteFailed": "delete failed",
+    "introRequired": "Please fill in the event introduction"
   },
   "about": {
     "donate": "Donate",

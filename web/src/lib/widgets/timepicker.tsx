@@ -372,6 +372,7 @@ export default function TimePicker(props: TimerPickerProps & ComponentProps<'div
           readOnly
           title={props.title}
           placeholder={props.placeholder}
+          error={props.error}
           value={
             (time()?.toFormat(props.type === 'date' ? 'yyyy-MM-dd' : 'yyyy-MM-dd HH:mm') || t('calendar.startTime')) +
             (props.range
@@ -395,7 +396,7 @@ export default function TimePicker(props: TimerPickerProps & ComponentProps<'div
             </>
           }
         />
-        <Card class="mt-2" contentClass="p-2 flex flex-col space-y-2">
+        <Card class="mt-2 !border-none !bg-transparent" contentClass="p-2 flex flex-col space-y-2 bg-layer-content/10">
           <PickerCalendar
             value={time()}
             setValue={setTime}

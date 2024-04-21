@@ -93,7 +93,8 @@
     "create": "創建",
     "delete": "刪除",
     "deleteSuccess": "刪除成功",
-    "deleteFailed": "刪除失敗"
+    "deleteFailed": "刪除失敗",
+    "introRequired": "請填寫賽事簡介"
   },
   "about": {
     "donate": "捐款",

@@ -1,4 +1,4 @@
-import { ComponentProps, Show, createEffect, onMount, splitProps } from 'solid-js'
+import { ComponentProps, Show, createEffect, createSignal, onMount, splitProps } from 'solid-js'
 import './styles/editor.scss'
 import Card from './card'
 import ace from 'ace-builds'
@@ -18,6 +18,7 @@ export type EditorProps = {
   /* eslint-disable  @typescript-eslint/no-explicit-any */
   form?: FormStore<any, undefined>
   error?: string
+  onFocusIn?: () => void
 }
 
 export function EditorBare(props: EditorProps & ComponentProps<'div'>) {
@@ -32,6 +33,7 @@ export function EditorBare(props: EditorProps & ComponentProps<'div'>) {
     'title',
     'form',
     'error',
+    'onFocusIn',
   ])
   let editorElement: HTMLPreElement
   let editor: ace.Ace.Editor | null = null
@@ -70,6 +72,10 @@ export function EditorBare(props: EditorProps & ComponentProps<'div'>) {
     editor.on('blur', function () {
       editorProps.onBlur?.()
     })
+
+    editor.on('focus', function () {
+      editorProps.onFocusIn?.()
+    })
   }
 
   onMount(() => {
@@ -90,7 +96,7 @@ export function EditorBare(props: EditorProps & ComponentProps<'div'>) {
           <pre class={`w-full min-h-full relative bg-transparent`} ref={editorElement!}></pre>
         </div>
         <Show when={editorProps.error}>
-          <Card level="error" contentClass="z-50 px-4 p-2">
+          <Card class="absolute bottom-2 left-2 right-2" level="error" contentClass="z-50 px-4 p-2">
             <p>{editorProps.error}</p>
           </Card>
         </Show>
@@ -111,14 +117,30 @@ export default function Editor(props: EditorProps & ComponentProps<'div'>) {
     'title',
     'form',
     'error',
+    'onFocusIn',
   ])
+  const [focused, setFocused] = createSignal(false)
   return (
     <div {...nativeProps} class={`flex flex-col space-y-1 ${nativeProps.class}`}>
       <label class="text-sm font-bold text-layer-content/60" for={editorProps.name}>
         {editorProps.title || editorProps.placeholder}
       </label>
-      <Card class="flex-1" contentClass="p-2">
-        <EditorBare {...editorProps} class="w-full h-full" />
+      <Card
+        class={`flex-1 ${editorProps.error ? 'border-error outline-error' : '!border-none'} !bg-transparent ${focused() ? 'outline outline-2 outline-offset-2' : ''}`}
+        contentClass={`p-2 ${focused() ? 'bg-layer-content/5' : 'bg-layer-content/10'}`}
+      >
+        <EditorBare
+          {...editorProps}
+          class="w-full h-full"
+          onBlur={() => {
+            setFocused(false)
+            editorProps.onBlur?.()
+          }}
+          onFocusIn={() => {
+            setFocused(true)
+            editorProps.onFocusIn?.()
+          }}
+        />
       </Card>
     </div>
   )

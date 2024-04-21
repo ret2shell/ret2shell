@@ -93,7 +93,8 @@
     "create": "作成する",
     "delete": "消去",
     "deleteSuccess": "正常に削除されました",
-    "deleteFailed": "削除に失敗しました"
+    "deleteFailed": "削除に失敗しました",
+    "introRequired": "イベント紹介文をご記入ください"
   },
   "about": {
     "donate": "寄付する",

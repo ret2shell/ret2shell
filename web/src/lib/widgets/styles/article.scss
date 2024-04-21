@@ -13,7 +13,7 @@ article > pre * {
 }
 
 code:not(pre code) {
-  @apply whitespace-pre-wrap text-base break-all bg-layer-content/10 rounded-md mx-1 #{!important};
+  @apply whitespace-pre-wrap text-base break-all bg-layer-content/5 rounded-md mx-1 #{!important};
 }
 
 article.prose img {
