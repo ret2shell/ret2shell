@@ -1,4 +1,4 @@
-import { createCalendar, getCalendar, getCalendarList } from '@/lib/api/calendar'
+import { createCalendar, deleteCalendar, getCalendar, getCalendarList } from '@/lib/api/calendar'
 import Spin from '@/lib/assets/animates/spin'
 import { Calendar } from '@/lib/models/calendar'
 import { Permission } from '@/lib/models/user'
@@ -19,7 +19,7 @@ import { HTTPError } from '@reverier/ky'
 import { DateTime, MonthNumbers } from 'luxon'
 import { For, Match, Show, Switch, createEffect, createMemo, createSignal, untrack } from 'solid-js'
 
-function EventDetail(props: { event: Calendar }) {
+function EventDetail(props: { event: Calendar; onDeleted: () => void }) {
   return (
     <>
       <h1 class="text-3xl text-center font-bold mt-8 hover:underline">
@@ -44,6 +44,12 @@ function EventDetail(props: { event: Calendar }) {
           <span class="icon-[fluent--link-20-regular] w-5 h-5"></span>
           <span>{t('calendar.gotoEventHomePage')}</span>
         </a>
+        <Show when={accountStore.permissions.includes(Permission.Calendar)}>
+          <button class="font-bold hover:underline flex flex-row space-x-2 items-center" onClick={props.onDeleted}>
+            <span class="icon-[fluent--delete-20-regular] w-5 h-5"></span>
+            <span>{t('calendar.delete')}</span>
+          </button>
+        </Show>
       </div>
       <Article content={props.event.intro || ''} extra headingAnchors />
     </>
@@ -58,7 +64,7 @@ type CalendarForm = {
   end_at: number
 }
 
-function EventForm(props: { onCreated: () => void }) {
+function EventForm(props: { onCreated: (id: number) => void }) {
   const [form, { Form, Field }] = createForm<CalendarForm>()
   const [loading, setLoading] = createSignal(false)
   function onSubmit(result: CalendarForm) {
@@ -70,7 +76,7 @@ function EventForm(props: { onCreated: () => void }) {
       end_at: DateTime.fromSeconds(result.end_at),
       reporter_id: accountStore.id!,
     })
-      .then(props.onCreated)
+      .then(resp => props.onCreated(resp.id))
       .catch((err: HTTPError) => {
         err.response.text().then(resp => {
           addToast({
@@ -162,7 +168,7 @@ function EventForm(props: { onCreated: () => void }) {
           </Field>
         </div>
         <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
-          {t('account.login.title')}
+          {t('calendar.create')}
         </Button>
       </Form>
     </>
@@ -267,7 +273,6 @@ export default function () {
   createEffect(() => {
     const userSelectedMonth = DateTime.fromObject({ year: year(), month: month(), day: 1 })
     setSelectedDay(null)
-    setSearchParams({ event: null })
     if (currentDate.year === userSelectedMonth.year && currentDate.month === userSelectedMonth.month) {
       setSelectedDay(currentDate)
     }
@@ -293,21 +298,47 @@ export default function () {
       return start <= selectedDay()! && end >= selectedDay()!
     })
   })
-  function onCreated() {
-    setInEdit(false)
+  function onCreated(id: number) {
     addToast({
       level: 'success',
       description: t('calendar.createSuccess')!,
+      duration: 5000,
     })
     getEvents(
       DateTime.fromObject({ year: year(), month: month(), day: 1 }),
       DateTime.fromObject({ year: year(), month: month(), day: 1 }).endOf('month')
     )
+    setSearchParams({ event: id })
+    setInEdit(false)
+  }
+  function onDeleted() {
+    deleteCalendar(selectedEventId()!)
+      .then(() => {
+        addToast({
+          level: 'success',
+          description: t('calendar.deleteSuccess')!,
+          duration: 5000,
+        })
+        setSelectedEvent(null)
+        getEvents(
+          DateTime.fromObject({ year: year(), month: month(), day: 1 }),
+          DateTime.fromObject({ year: year(), month: month(), day: 1 }).endOf('month')
+        )
+      })
+      .catch((err: HTTPError) => {
+        err.response.text().then(resp => {
+          addToast({
+            level: 'error',
+            description: `${t('calendar.deleteFailed')}: ${resp}`,
+            duration: 5000,
+          })
+        })
+      })
   }
   return (
     <>
-      <div class="w-full h-full flex flex-col lg:flex-row">
-        <div class="flex-none flex flex-col p-3 lg:p-6 backdrop-blur">
+      <div class="w-full h-full overflow-scroll flex flex-col lg:flex-row">
+        <div class="flex-none flex flex-col p-3 lg:p-6 backdrop-blur sticky top-0 border-r border-r-layer-content/10">
           <Card contentClass="p-2 flex flex-col space-y-2">
             <div class="flex flex-row space-x-2">
               <Button
@@ -476,7 +507,6 @@ export default function () {
             )}
           </For>
         </div>
-        <Divider class="lg:divider-vertical" />
         <div class="flex flex-col flex-1 items-center">
           <div class="flex flex-col w-full max-w-5xl flex-1 p-2 space-y-2">
             <Switch>
@@ -484,7 +514,7 @@ export default function () {
                 <EventForm onCreated={onCreated} />
               </Match>
               <Match when={selectedEvent() !== null}>
-                <EventDetail event={selectedEvent()!} />
+                <EventDetail event={selectedEvent()!} onDeleted={onDeleted} />
               </Match>
               <Match when={true}>
                 <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">

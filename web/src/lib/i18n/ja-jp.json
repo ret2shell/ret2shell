@@ -89,7 +89,11 @@
     "startAtRequired": "開始時間を選択してください",
     "endAtRequired": "終了時間を選択してください",
     "createFailed": "作成に失敗しました",
-    "createSuccess": "正常に作成されました"
+    "createSuccess": "正常に作成されました",
+    "create": "作成する",
+    "delete": "消去",
+    "deleteSuccess": "正常に削除されました",
+    "deleteFailed": "削除に失敗しました"
   },
   "about": {
     "donate": "寄付する",

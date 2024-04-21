@@ -89,7 +89,11 @@
     "startAtRequired": "請選擇開始時間",
     "endAtRequired": "請選擇結束時間",
     "createFailed": "創建失敗",
-    "createSuccess": "創建成功"
+    "createSuccess": "創建成功",
+    "create": "創建",
+    "delete": "刪除",
+    "deleteSuccess": "刪除成功",
+    "deleteFailed": "刪除失敗"
   },
   "about": {
     "donate": "捐款",

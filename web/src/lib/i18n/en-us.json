@@ -89,7 +89,11 @@
     "startAtRequired": "Please select a start time",
     "endAtRequired": "Please select end time",
     "createFailed": "Creation failed",
-    "createSuccess": "Created successfully"
+    "createSuccess": "Created successfully",
+    "create": "create",
+    "delete": "Delete",
+    "deleteSuccess": "deleted successfully",
+    "deleteFailed": "delete failed"
   },
   "about": {
     "donate": "Donate",

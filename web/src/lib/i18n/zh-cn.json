@@ -89,7 +89,11 @@
     "startAtRequired": "请选择开始时间",
     "endAtRequired": "请选择结束时间",
     "createFailed": "创建失败",
-    "createSuccess": "创建成功"
+    "createSuccess": "创建成功",
+    "create": "创建",
+    "delete": "删除",
+    "deleteSuccess": "删除成功",
+    "deleteFailed": "删除失败"
   },
   "about": {
     "donate": "捐助",
