@@ -8,3 +8,10 @@ export function luxonReviver(key: string, value: unknown): unknown {
   }
   return value
 }
+
+export function luxonReplacer(key: string, value: string): unknown {
+  if (key.endsWith('_at')) {
+    return DateTime.fromISO(value).toSeconds()
+  }
+  return value
+}

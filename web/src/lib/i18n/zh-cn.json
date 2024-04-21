@@ -84,7 +84,12 @@
     "eventLinkRequired": "请填写赛事链接",
     "eventLinkPlaceholder": "赛事链接",
     "startTime": "开始时间",
-    "endTime": "结束时间"
+    "endTime": "结束时间",
+    "introPlaceholder": "赛事介绍",
+    "startAtRequired": "请选择开始时间",
+    "endAtRequired": "请选择结束时间",
+    "createFailed": "创建失败",
+    "createSuccess": "创建成功"
   },
   "about": {
     "donate": "捐助",

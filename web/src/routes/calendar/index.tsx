@@ -1,18 +1,21 @@
-import { getCalendar, getCalendarList } from '@/lib/api/calendar'
+import { createCalendar, getCalendar, getCalendarList } from '@/lib/api/calendar'
 import Spin from '@/lib/assets/animates/spin'
 import { Calendar } from '@/lib/models/calendar'
 import { Permission } from '@/lib/models/user'
 import { accountStore } from '@/lib/storage/account'
 import { t } from '@/lib/storage/theme'
+import { addToast } from '@/lib/storage/toast'
 import Article from '@/lib/widgets/article'
 import Button from '@/lib/widgets/button'
 import Card from '@/lib/widgets/card'
 import Divider from '@/lib/widgets/divider'
+import Editor from '@/lib/widgets/editor'
 import Input from '@/lib/widgets/input'
 import Link from '@/lib/widgets/link'
 import TimePicker from '@/lib/widgets/timepicker'
 import { createForm, required } from '@modular-forms/solid'
 import { useSearchParams } from '@solidjs/router'
+import { HTTPError } from '@reverier/ky'
 import { DateTime, MonthNumbers } from 'luxon'
 import { For, Match, Show, Switch, createEffect, createMemo, createSignal, untrack } from 'solid-js'
 
@@ -55,14 +58,37 @@ type CalendarForm = {
   end_at: number
 }
 
-function EventForm() {
+function EventForm(props: { onCreated: () => void }) {
   const [form, { Form, Field }] = createForm<CalendarForm>()
-  function onSubmit() {}
+  const [loading, setLoading] = createSignal(false)
+  function onSubmit(result: CalendarForm) {
+    setLoading(true)
+    createCalendar({
+      ...result,
+      id: 0,
+      start_at: DateTime.fromSeconds(result.start_at),
+      end_at: DateTime.fromSeconds(result.end_at),
+      reporter_id: accountStore.id!,
+    })
+      .then(props.onCreated)
+      .catch((err: HTTPError) => {
+        err.response.text().then(resp => {
+          addToast({
+            level: 'error',
+            description: `${t('calendar.createFailed')}: ${resp}`,
+            duration: 5000,
+          })
+        })
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }
   return (
     <>
       <h1 class="text-3xl text-center font-bold mt-8">{t('calendar.createEvent')}</h1>
       <Form onSubmit={onSubmit} class="flex flex-col space-y-2">
-        <div class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-2">
+        <div class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4">
           <Field name="name" validate={[required(t('calendar.eventNameRequired')!)]}>
             {(field, props) => (
               <>
@@ -96,10 +122,10 @@ function EventForm() {
             )}
           </Field>
         </div>
-        <div class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-2">
-          <Field name="start_at" type="number">
+        <div class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4">
+          <Field name="start_at" type="number" validate={[required(t('calendar.startAtRequired')!)]}>
             {field => (
-              <Field name="end_at" type="number">
+              <Field name="end_at" type="number" validate={[required(t('calendar.endAtRequired')!)]}>
                 {field2 => (
                   <>
                     <TimePicker
@@ -119,7 +145,25 @@ function EventForm() {
               </Field>
             )}
           </Field>
+          <Field name="intro">
+            {field => (
+              <>
+                <Editor
+                  form={form}
+                  class="flex-1 min-h-80 lg:min-h-auto"
+                  lang="markdown"
+                  placeholder={t('calendar.introPlaceholder')}
+                  title={t('calendar.introPlaceholder')}
+                  name="intro"
+                  value={field.value || undefined}
+                />
+              </>
+            )}
+          </Field>
         </div>
+        <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
+          {t('account.login.title')}
+        </Button>
       </Form>
     </>
   )
@@ -229,23 +273,15 @@ export default function () {
     }
   })
   const eventDays = createMemo(() => {
-    const days = new Set<number>()
+    let days = new Set<DateTime>()
     events().forEach(event => {
       const start = event.start_at
-      let startDay = start.day
-      if (start.month !== month()) {
-        startDay = 1
-      }
       const end = event.end_at
-      let endDay = end.day
-      if (end.month !== month()) {
-        endDay = end.endOf('month').day
-      }
-      for (let i = startDay; i <= endDay; i++) {
+      for (let i = start; i <= end; i = i.set({ day: i.day + 1 })) {
         days.add(i)
       }
     })
-    return days
+    return Array.from(days)
   })
   const selectedDayMappedEvents = createMemo(() => {
     if (selectedDay() === null) {
@@ -257,6 +293,17 @@ export default function () {
       return start <= selectedDay()! && end >= selectedDay()!
     })
   })
+  function onCreated() {
+    setInEdit(false)
+    addToast({
+      level: 'success',
+      description: t('calendar.createSuccess')!,
+    })
+    getEvents(
+      DateTime.fromObject({ year: year(), month: month(), day: 1 }),
+      DateTime.fromObject({ year: year(), month: month(), day: 1 }).endOf('month')
+    )
+  }
   return (
     <>
       <div class="w-full h-full flex flex-col lg:flex-row">
@@ -374,7 +421,7 @@ export default function () {
                   >
                     {day.day.toString().padStart(2, '0')}
                   </span>
-                  <Show when={eventDays().has(day.day)}>
+                  <Show when={eventDays().find(i => i.day === day.day && i.month === day.month && i.year === day.year)}>
                     <span class="absolute h-1 w-3 bottom-2 left-1/2 -translate-x-1/2 flex flex-row space-x-1 bg-primary rounded-full"></span>
                   </Show>
                 </Button>
@@ -434,7 +481,7 @@ export default function () {
           <div class="flex flex-col w-full max-w-5xl flex-1 p-2 space-y-2">
             <Switch>
               <Match when={inEdit()}>
-                <EventForm />
+                <EventForm onCreated={onCreated} />
               </Match>
               <Match when={selectedEvent() !== null}>
                 <EventDetail event={selectedEvent()!} />

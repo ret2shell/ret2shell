@@ -16,7 +16,7 @@
     "isomorphic-dompurify": "^2.7.0",
     "js-base64": "^3.7.7",
     "katex": "^0.16.10",
-    "ky": "^1.2.3",
+    "@reverier/ky": "^1.2.3",
     "luxon": "^3.4.4",
     "nanoid": "^5.0.7",
     "okwind": "^0.1.2",

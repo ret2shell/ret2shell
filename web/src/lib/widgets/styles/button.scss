@@ -26,7 +26,7 @@
 
     &:disabled,
     &[disabled] {
-      @apply cursor-not-allowed text-layer-content/60 bg-layer-content/5;
+      @apply cursor-not-allowed opacity-60;
     }
 
     &-md {

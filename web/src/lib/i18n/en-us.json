@@ -84,7 +84,12 @@
     "eventLinkRequired": "Please fill in the event link",
     "eventLinkPlaceholder": "Event link",
     "startTime": "Start time",
-    "endTime": "End time"
+    "endTime": "End time",
+    "introPlaceholder": "Event introduction",
+    "startAtRequired": "Please select a start time",
+    "endAtRequired": "Please select end time",
+    "createFailed": "Creation failed",
+    "createSuccess": "Created successfully"
   },
   "about": {
     "donate": "Donate",

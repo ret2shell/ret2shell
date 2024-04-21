@@ -1,7 +1,11 @@
 use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
-use tokio::fs::{create_dir, write};
+use serde_json::Value;
+use tokio::{
+    fs::{create_dir, read_to_string, write},
+    io::AsyncRead,
+};
 
 use crate::traits::{init_dir, BucketError};
 
@@ -80,5 +84,80 @@ impl ChallengeBucket {
             path: challenge_path,
             locked: false,
         })
+    }
+
+    pub async fn set_config(&self, config: ChallengeConfig) -> Result<(), BucketError> {
+        write(
+            &self.path.join("config.toml"),
+            toml::to_string_pretty(&config)?,
+        )
+        .await?;
+        Ok(())
+    }
+
+    pub async fn config(&self) -> Result<ChallengeConfig, BucketError> {
+        let config = toml::from_str(&read_to_string(&self.path.join("config.toml")).await?)?;
+        Ok(config)
+    }
+
+    pub async fn set_checker_config(&self, config: Value) -> Result<(), BucketError> {
+        write(
+            &self.path.join("checkers.toml"),
+            toml::to_string_pretty(&config)?,
+        )
+        .await?;
+        Ok(())
+    }
+
+    pub async fn checker_config(&self) -> Result<Value, BucketError> {
+        let config = toml::from_str(&read_to_string(&self.path.join("checkers.toml")).await?)?;
+        Ok(config)
+    }
+
+    async fn upload_file(
+        &self, dest: impl AsRef<str>, name: impl AsRef<str>,
+        mut stdin: impl AsyncRead + Send + Unpin + 'static,
+    ) -> Result<(), BucketError> {
+        if !matches!(
+            dest.as_ref(),
+            "images" | "mapped" | "scripts" | "src" | "static"
+        ) {
+            return Err(BucketError::PathDoesNotExist(dest.as_ref().to_owned()));
+        }
+        let dest_path = self.path.join(dest.as_ref()).join(name.as_ref());
+        let mut file = tokio::fs::File::create(&dest_path).await?;
+        tokio::io::copy(&mut stdin, &mut file).await?;
+
+        Ok(())
+    }
+
+    pub async fn upload_static(
+        &self, name: impl AsRef<str>, stdin: impl AsyncRead + Send + Unpin + 'static,
+    ) -> Result<(), BucketError> {
+        self.upload_file("static", name, stdin).await
+    }
+
+    pub async fn upload_images(
+        &self, name: impl AsRef<str>, stdin: impl AsyncRead + Send + Unpin + 'static,
+    ) -> Result<(), BucketError> {
+        self.upload_file("images", name, stdin).await
+    }
+
+    pub async fn upload_mapped(
+        &self, name: impl AsRef<str>, stdin: impl AsyncRead + Send + Unpin + 'static,
+    ) -> Result<(), BucketError> {
+        self.upload_file("mapped", name, stdin).await
+    }
+
+    pub async fn upload_scripts(
+        &self, name: impl AsRef<str>, stdin: impl AsyncRead + Send + Unpin + 'static,
+    ) -> Result<(), BucketError> {
+        self.upload_file("scripts", name, stdin).await
+    }
+
+    pub async fn upload_src(
+        &self, name: impl AsRef<str>, stdin: impl AsyncRead + Send + Unpin + 'static,
+    ) -> Result<(), BucketError> {
+        self.upload_file("src", name, stdin).await
     }
 }

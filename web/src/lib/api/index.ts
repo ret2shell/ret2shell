@@ -1,11 +1,12 @@
-import { luxonReviver } from '@models/utils'
+import { luxonReplacer, luxonReviver } from '@models/utils'
 import { accountStore, userLogin, userReset } from '@storage/account'
-import ky from 'ky'
+import ky from '@reverier/ky'
 
 export const api_root = import.meta.env.VITE_API_ROOT || '/api'
 
 const api = ky.extend({
-  parseJson: (text: string) => JSON.parse(text, luxonReviver),
+  parseJson: text => JSON.parse(text, luxonReviver),
+  stringifyJson: data => JSON.stringify(data, luxonReplacer),
   hooks: {
     beforeRequest: [
       async request => {

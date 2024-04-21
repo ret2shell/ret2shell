@@ -1,4 +1,4 @@
-import ky from 'ky'
+import ky from '@reverier/ky'
 import { Accessor, createSignal } from 'solid-js'
 import { Instance, Traffic } from '@models/instance'
 

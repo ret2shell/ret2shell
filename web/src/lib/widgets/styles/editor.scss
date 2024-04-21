@@ -1,16 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('./input.scss');
+@import url('./button.scss');
+
 .ace_search {
-  @apply text-base text-base-content bg-base-100 flex flex-col shadow-sm;
-  @apply border-base-content/5 border rounded-box space-y-0 px-4 py-2 #{!important};
+  @apply text-base text-layer-content bg-layer flex flex-col shadow-sm;
+  @apply border-layer-content/5 border rounded-lg space-y-0 px-4 py-2 #{!important};
 
   .ace_search_form {
-    @apply text-base-content bg-transparent p-0 m-0 flex flex-row space-x-2 items-center h-12 #{!important};
+    @apply text-layer-content bg-transparent p-0 m-0 flex flex-row space-x-2 items-center h-12 #{!important};
 
     .ace_search_field {
-      @apply text-base text-base-content input input-sm bg-base-content/5 m-1;
+      @apply text-base text-layer-content input input-sm bg-layer-content/5 m-1;
     }
 
     .ace_searchbtn {
-      @apply btn no-animation btn-sm btn-ghost h-8 inline-flex flex-row items-center justify-center p-0 px-2 flex-1;
+      @apply btn  btn-sm btn-ghost h-8 inline-flex flex-row items-center justify-center p-0 px-2 flex-1;
     }
 
     .ace_searchbtn.prev:after,
@@ -20,7 +27,7 @@
 
     .ace_searchbtn.prev,
     .ace_searchbtn.next {
-      @apply btn no-animation btn-sm btn-ghost w-8 h-8 flex flex-row justify-center items-center;
+      @apply btn  btn-sm btn-ghost w-8 h-8 flex flex-row justify-center items-center;
     }
 
     .ace_searchbtn.prev:before,
@@ -38,14 +45,14 @@
   }
 
   .ace_replace_form {
-    @apply text-base-content bg-transparent p-0 m-0 flex flex-row space-x-2 items-center h-12;
+    @apply text-layer-content bg-transparent p-0 m-0 flex flex-row space-x-2 items-center h-12;
 
     .ace_search_field {
-      @apply text-base text-base-content input input-sm bg-base-content/5 m-1;
+      @apply text-base text-layer-content input input-sm bg-layer-content/5 m-1;
     }
 
     .ace_searchbtn {
-      @apply btn no-animation btn-sm btn-ghost h-8 inline-flex flex-row items-center justify-center p-0 px-2;
+      @apply btn  btn-sm btn-ghost h-8 inline-flex flex-row items-center justify-center p-0 px-2;
     }
   }
 
@@ -58,11 +65,11 @@
   }
 
   .ace_search_counter {
-    @apply text-base text-base-content font-mono flex-1 text-left;
+    @apply text-base text-layer-content font-mono flex-1 text-left;
   }
 
   .ace_button {
-    @apply btn no-animation btn-sm btn-ghost w-8 h-8 inline-flex flex-row items-center justify-center;
+    @apply btn  btn-sm btn-ghost w-8 h-8 inline-flex flex-row items-center justify-center;
   }
 
   .ace_button.checked {
@@ -77,11 +84,11 @@
 }
 
 .ace-github-dark .ace_gutter {
-  @apply bg-transparent text-base-content opacity-60 border-r border-r-base-content/20;
+  @apply bg-transparent text-layer-content opacity-60 border-r border-r-layer-content/20;
 }
 
 .ace-kuroir .ace_gutter {
-  @apply bg-transparent text-base-content opacity-60 border-r border-r-base-content/20;
+  @apply bg-transparent text-layer-content opacity-60 border-r border-r-layer-content/20;
 }
 
 .ace_nomatch {
@@ -105,12 +112,12 @@
 
   /* Handle */
   &::-webkit-scrollbar-thumb {
-    @apply bg-base-content/30 rounded-lg min-h-[4rem] min-w-[4rem];
+    @apply bg-layer-content/30 rounded-lg min-h-[4rem] min-w-[4rem];
   }
 
   /* Handle on hover */
   &::-webkit-scrollbar-thumb:hover {
-    @apply bg-base-content/60 rounded-lg;
+    @apply bg-layer-content/60 rounded-lg;
   }
 }
 

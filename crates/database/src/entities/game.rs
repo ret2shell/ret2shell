@@ -25,7 +25,7 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 pub enum HostType {
     #[default]
     CTFTraining = 0,
-    CTFGame     = 1,
+    CTFGame = 1,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
@@ -51,7 +51,7 @@ pub struct Model {
     pub updated_at: DateTime<Utc>,
     pub name: String,
     pub brief: String,
-    pub introduction_id: i64,
+    pub introduction_id: Option<i64>,
     #[serde(with = "ts_seconds")]
     pub start_at: DateTime<Utc>,
     #[serde(with = "ts_seconds")]

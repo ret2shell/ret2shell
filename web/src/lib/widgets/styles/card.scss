@@ -12,7 +12,7 @@
     }
 
     &-content {
-      @apply bg-layer-content/5 overflow-hidden;
+      @apply bg-layer-content/5 overflow-hidden w-full h-full;
     }
 
     &-primary {

@@ -84,7 +84,12 @@
     "eventLinkRequired": "イベントのリンクを記入してください",
     "eventLinkPlaceholder": "イベントリンク",
     "startTime": "開始時間",
-    "endTime": "終了時間"
+    "endTime": "終了時間",
+    "introPlaceholder": "競技紹介",
+    "startAtRequired": "開始時間を選択してください",
+    "endAtRequired": "終了時間を選択してください",
+    "createFailed": "作成に失敗しました",
+    "createSuccess": "正常に作成されました"
   },
   "about": {
     "donate": "寄付する",

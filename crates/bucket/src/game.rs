@@ -4,7 +4,7 @@ use chrono::{serde::ts_seconds, DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
-use tokio::fs::{create_dir_all, remove_dir_all, write};
+use tokio::fs::{create_dir_all, read_to_string, remove_dir_all, write};
 use tracing::error;
 
 use crate::{
@@ -121,13 +121,19 @@ impl GameBucket {
         Ok(())
     }
 
-    pub async fn update_config(&self, game: GameConfig) -> Result<(), BucketError> {
+    pub async fn set_config(&self, game: GameConfig) -> Result<(), BucketError> {
         write(
             self.path.join("config.toml"),
             toml::to_string_pretty(&game)?,
         )
         .await?;
         Ok(())
+    }
+
+    pub async fn config(&self) -> Result<GameConfig, BucketError> {
+        let config_str = read_to_string(self.path.join("config.toml")).await?;
+        let config: GameConfig = toml::from_str(&config_str)?;
+        Ok(config)
     }
 
     pub async fn create(

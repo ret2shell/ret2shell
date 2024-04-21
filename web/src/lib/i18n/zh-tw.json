@@ -84,7 +84,12 @@
     "eventLinkRequired": "請填寫賽事連結",
     "eventLinkPlaceholder": "賽事連結",
     "startTime": "開始時間",
-    "endTime": "結束時間"
+    "endTime": "結束時間",
+    "introPlaceholder": "賽事介紹",
+    "startAtRequired": "請選擇開始時間",
+    "endAtRequired": "請選擇結束時間",
+    "createFailed": "創建失敗",
+    "createSuccess": "創建成功"
   },
   "about": {
     "donate": "捐款",
