@@ -19,3 +19,13 @@ pub enum BucketError {
     #[error("toml deserialize error: {0}")]
     TomlDeError(#[from] toml::de::Error),
 }
+
+macro_rules! init_dir {
+    ($root:expr, $name:literal) => {{
+        let path = $root.join($name);
+        tokio::fs::create_dir(&path).await?;
+        tokio::fs::write(path.join(".gitkeep"), "").await?;
+    }};
+}
+
+pub(crate) use init_dir;

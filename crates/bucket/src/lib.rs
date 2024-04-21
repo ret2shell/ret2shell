@@ -46,7 +46,11 @@ impl Bucket {
     }
 
     pub async fn at(&self, name: impl AsRef<str>) -> Result<game::GameBucket, BucketError> {
-        game::GameBucket::open(&self.path, name).await
+        game::GameBucket::open(&self.path, name, false).await
+    }
+
+    pub async fn at_mut(&self, name: impl AsRef<str>) -> Result<game::GameBucket, BucketError> {
+        game::GameBucket::open(&self.path, name, true).await
     }
 }
 

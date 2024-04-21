@@ -42,7 +42,8 @@
     "unknown": "未知",
     "seeOtherInteresting": "他のものを見てください",
     "fetchFailed": "一致リストの取得に失敗しました",
-    "create": "新しい"
+    "create": "新しい",
+    "loading": "読み込み中..."
   },
   "bulletin": {
     "title": "アナウンス"

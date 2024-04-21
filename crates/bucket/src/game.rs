@@ -2,23 +2,31 @@ use std::path::{Path, PathBuf};
 
 use chrono::{serde::ts_seconds, DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
-use tokio::fs::{create_dir_all, write};
+use tokio::fs::{create_dir_all, remove_dir_all, write};
+use tracing::error;
 
-use crate::{git::Git, traits::BucketError};
+use crate::{
+    challenge,
+    git::Git,
+    traits::{init_dir, BucketError},
+    util,
+};
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct GameBucket {
     pub name: String,
-    pub path: PathBuf,
-    pub git: Git,
+    path: PathBuf,
+    git: Git,
+    locked: bool,
 }
 
 #[derive(Clone, Debug, Serialize_repr, Deserialize_repr)]
 #[repr(i32)]
 pub enum HostType {
     CTFTraining = 0,
-    CTFGame     = 1,
+    CTFGame = 1,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -51,14 +59,21 @@ pub struct GameConfig {
 
 impl GameBucket {
     pub async fn open(
-        root_path: impl AsRef<Path>, name: impl AsRef<str>,
+        root_path: impl AsRef<Path>, name: impl AsRef<str>, should_lock: bool,
     ) -> Result<Self, BucketError> {
         let game_path = root_path.as_ref().join(name.as_ref());
+        if game_path.join(".lock").exists() {
+            return Err(BucketError::LockError);
+        }
         let git = Git::try_open(&game_path).await?;
+        if should_lock {
+            tokio::fs::write(&game_path.join(".lock"), "").await?;
+        }
         Ok(Self {
             name: name.as_ref().to_owned(),
             path: game_path,
             git,
+            locked: should_lock,
         })
     }
 
@@ -66,11 +81,10 @@ impl GameBucket {
         root_path: impl AsRef<Path>, game_bucket_name: impl AsRef<str>, game: GameConfig,
     ) -> Result<Self, BucketError> {
         let game_path = root_path.as_ref().join(game_bucket_name.as_ref());
+        create_dir_all(&game_path).await?;
         let git = Git::new(&game_path).await?;
-        create_dir_all(game_path.join("challenges")).await?;
-        write(game_path.join("challenges").join(".gitkeep"), "").await?;
-        create_dir_all(game_path.join("writeups")).await?;
-        write(game_path.join("writeups").join(".gitkeep"), "").await?;
+        init_dir!(game_path, "challenges");
+        init_dir!(game_path, "writeups");
         write(
             game_path.join("config.toml"),
             toml::to_string_pretty(&game)?,
@@ -84,22 +98,75 @@ impl GameBucket {
             name: game_bucket_name.as_ref().to_owned(),
             path: game_path,
             git,
+            locked: false,
         })
     }
 
-    pub async fn lock(&self) -> Result<(), BucketError> {
-        if self.path.join(".lock").exists() {
-            return Err(BucketError::LockError);
-        }
-        write(self.path.join(".lock"), "").await?;
+    pub async fn at(
+        &self, challenge: impl AsRef<str>,
+    ) -> Result<challenge::ChallengeBucket, BucketError> {
+        challenge::ChallengeBucket::open(&self.path.join("challenges"), challenge, self.locked)
+            .await
+    }
+
+    pub async fn take_shot(
+        &self, message: impl AsRef<str>, author: impl AsRef<str>, email: impl AsRef<str>,
+    ) -> Result<(), BucketError> {
+        self.git.take_shot(message, author, email).await?;
         Ok(())
     }
 
-    pub async fn unlock(&self) -> Result<(), BucketError> {
-        if !self.path.join(".lock").exists() {
-            return Err(BucketError::LockError);
-        }
-        tokio::fs::remove_file(self.path.join(".lock")).await?;
+    pub async fn cleanup(&self) -> Result<(), BucketError> {
+        self.git.cleanup().await?;
         Ok(())
+    }
+
+    pub async fn update_config(&self, game: GameConfig) -> Result<(), BucketError> {
+        write(
+            self.path.join("config.toml"),
+            toml::to_string_pretty(&game)?,
+        )
+        .await?;
+        Ok(())
+    }
+
+    pub async fn create(
+        &self, challenge: Value,
+    ) -> Result<challenge::ChallengeBucket, BucketError> {
+        let challenge_config: challenge::ChallengeConfig = serde_json::from_value(challenge)?;
+        let challenge_name = format!(
+            "{}_{:x}",
+            util::deunicode_str(&challenge_config.name),
+            Utc::now().timestamp(),
+        );
+        if self.path.join("challenges").join(&challenge_name).exists() {
+            return Err(BucketError::PathConflict(challenge_name));
+        }
+        match challenge::ChallengeBucket::new(
+            &self.path.join("challenges"),
+            &challenge_name,
+            challenge_config,
+        )
+        .await
+        {
+            Ok(bucket) => Ok(bucket),
+            Err(e) => {
+                error!("create challenge bucket error: {:?}", e);
+                // cleanup the failed created challenge bucket
+                // it may not exist so we ignore the error
+                remove_dir_all(self.path.join("challenges").join(&challenge_name))
+                    .await
+                    .ok();
+                Err(e)
+            }
+        }
+    }
+}
+
+impl Drop for GameBucket {
+    fn drop(&mut self) {
+        if self.locked {
+            std::fs::remove_file(self.path.join(".lock")).ok();
+        }
     }
 }

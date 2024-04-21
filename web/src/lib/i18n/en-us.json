@@ -42,7 +42,8 @@
     "unknown": "Unknown",
     "seeOtherInteresting": "Look at something else",
     "fetchFailed": "Failed to fetch game list",
-    "create": "New"
+    "create": "New",
+    "loading": "Loading..."
   },
   "bulletin": {
     "title": "Bulletin"

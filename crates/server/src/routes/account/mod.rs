@@ -141,6 +141,12 @@ async fn login(
 
     match verify_password(&body.password, &password_hash)? {
         true => {
+            info!(
+                "User logged in: {} ({}) <{}>",
+                user.nickname,
+                user.account,
+                user.email.unwrap_or_default()
+            );
             *(token_tracker.token.lock().await) = Token {
                 id: user.id,
                 account: user.account.clone(),
@@ -310,7 +316,14 @@ async fn register(
         &email,
         EmailType::Verify,
     )
-    .await?;
+    .await
+    .ok();
+    info!(
+        "User registered: {} ({}) <{}>",
+        user.nickname,
+        user.account,
+        user.email.unwrap_or_default()
+    );
     *(token_tracker.token.lock().await) = Token {
         id: user.id,
         account: user.account.clone(),

@@ -13,7 +13,7 @@ use r2s_license::License;
 use r2s_migrator::Database;
 use r2s_queue::Queue;
 use thiserror::Error;
-use tracing::error;
+use tracing::{error, warn};
 
 #[derive(Clone, FromRef)]
 pub struct GlobalState {
@@ -59,7 +59,11 @@ pub enum ResponseError {
 
 macro_rules! log_with_resp {
     ($code:expr, $summary:expr, $detail:expr) => {{
-        error!("{}: {}", $summary, $detail);
+        if ($code).is_server_error() {
+            error!("{}: {}", $summary, $detail);
+        } else {
+            warn!("{}: {}", $summary, $detail);
+        }
         ($code, $summary)
     }};
 }

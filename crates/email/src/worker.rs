@@ -9,7 +9,7 @@ use lettre::{
     AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor,
 };
 use r2s_config::email;
-use tracing::{debug, error, info};
+use tracing::{debug, error, info, warn};
 
 use super::traits::{EmailCtx, EmailError, EmailRequest};
 
@@ -63,7 +63,7 @@ async fn process_message(message: jetstream::Message) -> Result<(), EmailError> 
     let mut retry_count = 3;
     while retry_count > 0 {
         if let Err(err) = send_email_impl(&req.config, &req.email).await {
-            error!("Failed to send email: {:?}", err);
+            warn!("Failed to send email: {:?}", err);
             retry_count -= 1;
         } else {
             info!("Successfully sent email: {:?}", req);

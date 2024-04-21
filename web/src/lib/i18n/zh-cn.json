@@ -42,7 +42,8 @@
     "unknown": "未知",
     "seeOtherInteresting": "看看别的吧",
     "fetchFailed": "获取比赛列表失败",
-    "create": "新建"
+    "create": "新建",
+    "loading": "加载中..."
   },
   "bulletin": {
     "title": "公告"
