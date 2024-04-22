@@ -170,7 +170,7 @@ export const routes = {
       ],
     },
     {
-      path: '/:catchAll(.*)',
+      path: '*',
       component: lazy(() => import('./errors/e404')),
     },
   ],

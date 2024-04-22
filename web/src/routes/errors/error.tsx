@@ -1,4 +1,5 @@
 import { t } from '@/lib/storage/theme'
+import xdsecMascotCrying from '@assets/imgs/xdsec-mascot-crying.webp'
 
 export default function (props: { status: number | null }) {
   const messages: Record<number, string> = {
@@ -23,13 +24,14 @@ export default function (props: { status: number | null }) {
   const tip = () => tips[props.status!] || t('errors.unknownTip')!
 
   return (
-    <div class="flex-1 flex flex-col items-center justify-center">
+    <div class="flex-1 flex flex-col items-center justify-center space-y-8">
+      <img src={xdsecMascotCrying} width={256} height={256}></img>
       <h1 class="font-bold text-3xl space-x-4">
         <span class="opacity-60">{props.status}</span>
         <span class="text-primary">|</span>
         <span>{message()}</span>
       </h1>
-      <p class="opacity-60 mt-8">{tip()}</p>
+      <p class="opacity-60">{tip()}</p>
     </div>
   )
 }

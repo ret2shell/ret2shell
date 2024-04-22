@@ -194,8 +194,8 @@
     "403Tip": "There is always a door closed to you",
     "404Tip": "Life is always a little ridiculous",
     "418Tip": "Does brewing coffee in a teapot really prevent odor transfer?",
-    "500Tip": "Randomly pick an operation and maintenance festival",
-    "502Tip": "The door is broken, open the window",
+    "500Tip": "You kicked the server and made it smoke.",
+    "502Tip": "Randomly kill a dev&ops man",
     "unknown": "unknown mistake",
     "unknownTip": "you fell into the void"
   }
