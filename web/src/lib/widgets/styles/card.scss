@@ -3,7 +3,7 @@
 @tailwind utilities;
 @layer components {
   .card {
-    @apply transition-colors duration-700 border border-layer-content/15 rounded-xl overflow-hidden;
+    @apply transition-colors duration-700 border border-layer-content/15 rounded-xl flex overflow-hidden;
 
     @apply bg-layer/60 backdrop-blur;
 
@@ -12,7 +12,7 @@
     }
 
     &-content {
-      @apply bg-layer-content/5 overflow-hidden w-full h-full;
+      @apply bg-layer-content/5 overflow-hidden flex-1;
     }
 
     &-primary {

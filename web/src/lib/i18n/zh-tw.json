@@ -46,7 +46,16 @@
     "loading": "載入中..."
   },
   "bulletin": {
-    "title": "公告"
+    "title": "公告",
+    "create": "創建",
+    "titlePlaceholder": "公告標題",
+    "titleRequired": "請填寫公告標題",
+    "pinned": "置頂",
+    "enableComment": "開啟評論區",
+    "contentRequired": "請填寫公告內容",
+    "contentPlaceholder": "公告內容",
+    "deleteSuccess": "刪除成功",
+    "noMore": "沒有公告，看看別的吧"
   },
   "admin": {
     "title": "管理"
@@ -198,5 +207,13 @@
     "unknown": "未知錯誤",
     "418Tip": "用茶壺泡咖啡真的不會串味嗎",
     "unknownTip": "你墜入了虛空"
+  },
+  "form": {
+    "save": "儲存",
+    "create": "創建",
+    "saveFailed": "保存失敗",
+    "createFailed": "創建失敗",
+    "edit": "編輯",
+    "delete": "刪除"
   }
 }

@@ -13,6 +13,7 @@ export type Article = {
   created_at: DateTime
   updated_at: DateTime
   title: string
+  path: string[]
   content: string | null
   publisher_id: number
   publisher_name?: string

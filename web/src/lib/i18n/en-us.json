@@ -46,7 +46,16 @@
     "loading": "Loading..."
   },
   "bulletin": {
-    "title": "Bulletin"
+    "title": "Bulletin",
+    "create": "Create",
+    "titlePlaceholder": "Bulletin title",
+    "titleRequired": "Please fill in the bulletin title",
+    "pinned": "pin to top",
+    "enableComment": "Open comment area",
+    "contentRequired": "Please fill in the bulletin content",
+    "contentPlaceholder": "Bulletin content",
+    "deleteSuccess": "deleted successfully",
+    "noMore": "no bulletin here, see something else"
   },
   "admin": {
     "title": "Admin"
@@ -198,5 +207,13 @@
     "502Tip": "Randomly kill a dev&ops man",
     "unknown": "unknown mistake",
     "unknownTip": "you fell into the void"
+  },
+  "form": {
+    "save": "Save",
+    "create": "Create",
+    "saveFailed": "Save failed",
+    "createFailed": "Create failed",
+    "edit": "Edit",
+    "delete": "Delete"
   }
 }

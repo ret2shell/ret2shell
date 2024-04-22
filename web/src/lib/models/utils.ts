@@ -11,7 +11,7 @@ export function luxonReviver(key: string, value: unknown): unknown {
 
 export function luxonReplacer(key: string, value: string): unknown {
   if (key.endsWith('_at')) {
-    return DateTime.fromISO(value).toSeconds()
+    return Math.round(DateTime.fromISO(value).toSeconds())
   }
   return value
 }

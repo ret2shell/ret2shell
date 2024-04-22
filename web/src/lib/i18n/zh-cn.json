@@ -62,7 +62,16 @@
     "loading": "加载中..."
   },
   "bulletin": {
-    "title": "公告"
+    "title": "公告",
+    "noMore": "没有公告，看看别的吧",
+    "create": "创建",
+    "titlePlaceholder": "公告标题",
+    "titleRequired": "请填写公告标题",
+    "pinned": "置顶",
+    "enableComment": "开启评论区",
+    "contentRequired": "请填写公告内容",
+    "contentPlaceholder": "公告内容",
+    "deleteSuccess": "删除成功"
   },
   "admin": {
     "title": "管理"
@@ -198,5 +207,13 @@
   },
   "article": {
     "loading": "少女祈祷中..."
+  },
+  "form": {
+    "save": "保存",
+    "create": "创建",
+    "saveFailed": "保存失败",
+    "createFailed": "创建失败",
+    "edit": "编辑",
+    "delete": "删除"
   }
 }

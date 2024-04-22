@@ -1,6 +1,8 @@
-import { getBulletin } from '@/lib/api/bulletin'
+import { deleteBulletin, getBulletin } from '@/lib/api/bulletin'
 import Spin from '@/lib/assets/animates/spin'
 import { Article as ArticleModel } from '@/lib/models/article'
+import { Permission } from '@/lib/models/user'
+import { accountStore } from '@/lib/storage/account'
 import { t } from '@/lib/storage/theme'
 import { addToast } from '@/lib/storage/toast'
 import Article from '@/lib/widgets/article'
@@ -24,6 +26,19 @@ export default function () {
         navigate(`/errors/${err.response.status}`, { replace: true })
       })
     })
+
+  function onDelete() {
+    deleteBulletin(article_id)
+      .then(() => {
+        addToast({ level: 'success', description: t('bulletin.deleteSuccess')!, duration: 5000 })
+        navigate('/bulletin', { replace: true })
+      })
+      .catch((err: HTTPError) => {
+        err.response.text().then(reason => {
+          addToast({ level: 'error', description: reason, duration: 5000 })
+        })
+      })
+  }
   return (
     <>
       <h1 class="text-3xl text-center flex flex-row space-x-4 items-center justify-center font-bold mt-8">
@@ -51,6 +66,19 @@ export default function () {
           <span class="icon-[fluent--clock-20-regular] w-5 h-5"></span>
           <span>{article()?.created_at.toFormat('yyyy-MM-dd HH:mm:ss')}</span>
         </div>
+        <Show when={accountStore.permissions.includes(Permission.Bulletin)}>
+          <a
+            class="font-bold hover:underline flex flex-row space-x-2 items-center"
+            href={`/bulletin/${article()?.id}?edit=true`}
+          >
+            <span class="icon-[fluent--edit-20-regular] w-5 h-5"></span>
+            <span>{t('form.edit')}</span>
+          </a>
+          <button class="font-bold hover:underline flex flex-row space-x-2 items-center" onClick={onDelete}>
+            <span class="icon-[fluent--delete-20-regular] w-5 h-5"></span>
+            <span>{t('form.delete')}</span>
+          </button>
+        </Show>
       </div>
       <Article class="self-center" content={article()?.content || ''} extra={true} headingAnchors={true} />
     </>

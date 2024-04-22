@@ -47,11 +47,11 @@ function EventDetail(props: { event: Calendar; onDeleted: () => void; onEdit: ()
         <Show when={accountStore.permissions.includes(Permission.Calendar)}>
           <button class="font-bold hover:underline flex flex-row space-x-2 items-center" onClick={props.onEdit}>
             <span class="icon-[fluent--edit-20-regular] w-5 h-5"></span>
-            <span>{t('calendar.edit')}</span>
+            <span>{t('form.edit')}</span>
           </button>
           <button class="font-bold hover:underline flex flex-row space-x-2 items-center" onClick={props.onDeleted}>
             <span class="icon-[fluent--delete-20-regular] w-5 h-5"></span>
-            <span>{t('calendar.delete')}</span>
+            <span>{t('form.delete')}</span>
           </button>
         </Show>
       </div>
@@ -198,7 +198,7 @@ function EventForm(props: { onDone: (calendar: Calendar) => void; editSource?: C
           </Field>
         </div>
         <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
-          {props.editSource ? t('calendar.save') : t('calendar.create')}
+          {props.editSource ? t('form.save') : t('form.create')}
         </Button>
       </Form>
     </>

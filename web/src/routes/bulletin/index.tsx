@@ -1,11 +1,15 @@
 import { getBulletinList } from '@/lib/api/bulletin'
 import { Article } from '@/lib/models/article'
+import { Permission } from '@/lib/models/user'
+import { accountStore } from '@/lib/storage/account'
 import { Title } from '@/lib/storage/header'
 import { platformStore } from '@/lib/storage/platform'
 import { t } from '@/lib/storage/theme'
+import Button from '@/lib/widgets/button'
+import Divider from '@/lib/widgets/divider'
 import Link from '@/lib/widgets/link'
 import Pagination from '@/lib/widgets/pagination'
-import { For, createEffect, createSignal, untrack } from 'solid-js'
+import { For, Show, createEffect, createSignal, untrack } from 'solid-js'
 
 export default function () {
   const [articles, setArticles] = createSignal<Article[]>([])
@@ -25,6 +29,19 @@ export default function () {
     <>
       <Title title={`${t('bulletin.title')} - ${platformStore.config.name || t('platform.name')}`} />
       <div class="flex flex-col space-y-2 p-3 lg:p-6 flex-1 w-full max-w-5xl self-center">
+        <div class="h-12 relative flex flex-row items-center px-4">
+          <h1 class="space-x-2 flex flex-row items-center flex-1">
+            <span class="icon-[fluent--megaphone-20-regular] w-5 h-5"></span>
+            <span class="font-bold">{t('bulletin.title')}</span>
+          </h1>
+          <Show when={accountStore.permissions.includes(Permission.Bulletin)}>
+            <Link size="sm" level="primary" href="/bulletin/create">
+              <span class="icon-[fluent--add-20-regular] w-5 h-5"></span>
+              <span>{t('bulletin.create')}</span>
+            </Link>
+          </Show>
+          <Divider class="absolute bottom-0 left-2 right-2"></Divider>
+        </div>
         <For each={articles()}>
           {article => (
             <>
@@ -35,13 +52,19 @@ export default function () {
                     article.weight >= 1 ? 'primary' : 'layer-content'
                   }`}
                 ></span>
-                <span class="flex-1 text-start truncate">{article.title}</span>
+                <span class="flex-1 text-start truncate font-normal">{article.title}</span>
                 <span class="opacity-60">{article.created_at.toFormat('yyyy-MM-dd')}</span>
-                <div class="absolute bottom-0 left-2 right-2 h-[1px] bg-layer-content/30"></div>
+                <Divider class="absolute bottom-0 left-2 right-2"></Divider>
               </Link>
             </>
           )}
         </For>
+        <Show when={articles().length === 0}>
+          <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
+            <span class="icon-[fluent--megaphone-20-regular] w-24 h-24"></span>
+            <span>{t('bulletin.noMore')}</span>
+          </div>
+        </Show>
       </div>
       <Pagination
         class="p-6 lg:p-9"

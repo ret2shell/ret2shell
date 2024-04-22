@@ -97,6 +97,10 @@ export const routes = {
           component: lazy(() => import('./bulletin/index')),
         },
         {
+          path: '/create',
+          component: lazy(() => import('./bulletin/create')),
+        },
+        {
           path: '/:article_id',
           component: lazy(() => import('./bulletin/[article]/index')),
         },

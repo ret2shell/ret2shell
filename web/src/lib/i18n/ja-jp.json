@@ -46,7 +46,16 @@
     "loading": "読み込み中..."
   },
   "bulletin": {
-    "title": "アナウンス"
+    "title": "アナウンス",
+    "create": "作成する",
+    "titlePlaceholder": "お知らせタイトル",
+    "titleRequired": "お知らせのタイトルを入力してください",
+    "pinned": "上にピンで留める",
+    "enableComment": "コメントエリアを開く",
+    "contentRequired": "お知らせ内容をご記入ください",
+    "contentPlaceholder": "発表内容",
+    "deleteSuccess": "正常に削除されました",
+    "noMore": "アナウンスはありませんので、他のところを見てみましょう。"
   },
   "admin": {
     "title": "管理"
@@ -198,5 +207,13 @@
     "502Tip": "運用保守フェスティバルをランダムに選択",
     "unknown": "未知の間違い",
     "unknownTip": "あなたは虚空に落ちた"
+  },
+  "form": {
+    "save": "保存",
+    "create": "作成する",
+    "saveFailed": "保存に失敗しました",
+    "createFailed": "作成に失敗しました",
+    "edit": "編集",
+    "delete": "消去"
   }
 }
