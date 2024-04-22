@@ -43,7 +43,13 @@
     "seeOtherInteresting": "他のものを見てください",
     "fetchFailed": "一致リストの取得に失敗しました",
     "create": "新しい",
-    "loading": "読み込み中..."
+    "loading": "読み込み中...",
+    "nameRequired": "イベント名をご記入ください",
+    "namePlaceholder": "イベント名",
+    "briefRequired": "イベント紹介文にご記入ください",
+    "briefPlaceholder": "競技紹介",
+    "startEndTime": "開始時間と終了時間",
+    "registerArchiveTime": "登録と提出の時間"
   },
   "bulletin": {
     "title": "アナウンス",

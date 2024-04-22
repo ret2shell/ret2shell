@@ -1,5 +1,5 @@
 import { FormStore, setValue } from '@modular-forms/solid'
-import { ComponentProps, For, Show, createEffect, createMemo, createSignal } from 'solid-js'
+import { ComponentProps, For, Show, createEffect, createMemo, createSignal, splitProps } from 'solid-js'
 import Input from './input'
 import Button from './button'
 import { DateTime, MonthNumbers } from 'luxon'
@@ -32,6 +32,9 @@ export type TimerPickerProps = {
   error?: string
   title?: string
   placeholder?: string
+  startEdge?: DateTime
+  endEdge?: DateTime
+  reverseEdge?: boolean
 } & TimePickerPropsRange
 
 function TimePickerButton(props: {
@@ -39,6 +42,7 @@ function TimePickerButton(props: {
   date: DateTime
   current: boolean
   type: 'time' | 'date'
+  disabled?: boolean
   onDone: (date: DateTime) => void
 }) {
   let currentDate = DateTime.now()
@@ -53,6 +57,7 @@ function TimePickerButton(props: {
           ghost={!props.active && !timePickerOpened()}
           square
           class="relative"
+          disabled={props.disabled}
           onClick={() => {
             if (props.type === 'time') {
               setTimePickerOpened(true)
@@ -172,6 +177,9 @@ function PickerCalendar(props: {
   valueNext: DateTime | null
   setValueNext: (value: DateTime | null) => void
   range?: boolean
+  startEdge?: DateTime
+  endEdge?: DateTime
+  reverseEdge?: boolean
 }) {
   let currentDate = DateTime.now()
   // only keep date
@@ -229,6 +237,22 @@ function PickerCalendar(props: {
     }
     return days
   })
+
+  function canChoose(day: DateTime) {
+    // if startEdge is set, then the day should be later than startEdge
+    if (props.startEdge && day < props.startEdge) {
+      return !!props.reverseEdge
+    }
+    // if endEdge is set, then the day should be earlier than endEdge
+    if (props.endEdge && day > props.endEdge) {
+      return !!props.reverseEdge
+    }
+
+    if (props.reverseEdge && props.startEdge && props.endEdge) {
+      return day < props.startEdge || day > props.endEdge
+    }
+    return true
+  }
   return (
     <>
       <div class="flex flex-row space-x-2">
@@ -312,10 +336,14 @@ function PickerCalendar(props: {
         {currentMonthDays().map(day => (
           <TimePickerButton
             active={
-              (props.value && day.equals(props.value)) ||
-              (props.value && props.valueNext && day >= props.value && day <= props.valueNext) ||
+              (props.value && day.startOf('day').equals(props.value.startOf('day'))) ||
+              (props.value &&
+                props.valueNext &&
+                day.startOf('day') >= props.value.startOf('day') &&
+                day <= props.valueNext.startOf('day')) ||
               undefined
             }
+            disabled={!canChoose(day)}
             date={day}
             current={day.month === month()}
             type={props.type}
@@ -365,7 +393,7 @@ export default function TimePicker(props: TimerPickerProps & ComponentProps<'div
   })
   return (
     <>
-      <div class="flex flex-col">
+      <div class={`flex flex-col ${props.class}`}>
         <input class="hidden" type="number" value={props.value} name={props.name} />
         <Show when={props.range}>
           <input
@@ -412,6 +440,9 @@ export default function TimePicker(props: TimerPickerProps & ComponentProps<'div
             setValueNext={setTimeNext}
             range={props.range}
             type={props.type}
+            startEdge={props.startEdge}
+            endEdge={props.endEdge}
+            reverseEdge={props.reverseEdge}
           />
         </Card>
       </div>

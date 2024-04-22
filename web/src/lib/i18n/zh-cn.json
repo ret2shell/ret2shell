@@ -59,7 +59,13 @@
     "seeOtherInteresting": "看看别的吧",
     "fetchFailed": "获取比赛列表失败",
     "create": "新建",
-    "loading": "加载中..."
+    "loading": "加载中...",
+    "nameRequired": "请填写赛事名称",
+    "namePlaceholder": "赛事名称",
+    "briefRequired": "请填写赛事简介",
+    "briefPlaceholder": "赛事简介",
+    "startEndTime": "开始与结束时间",
+    "registerArchiveTime": "注册与归档时间"
   },
   "bulletin": {
     "title": "公告",

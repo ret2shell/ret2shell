@@ -43,7 +43,13 @@
     "seeOtherInteresting": "看看別的吧",
     "fetchFailed": "取得比賽清單失敗",
     "create": "新建",
-    "loading": "載入中..."
+    "loading": "載入中...",
+    "nameRequired": "請填寫賽事名稱",
+    "namePlaceholder": "賽事名稱",
+    "briefRequired": "請填寫賽事簡介",
+    "briefPlaceholder": "賽事簡介",
+    "startEndTime": "開始與結束時間",
+    "registerArchiveTime": "註冊與歸檔時間"
   },
   "bulletin": {
     "title": "公告",

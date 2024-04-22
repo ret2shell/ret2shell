@@ -1,4 +1,4 @@
-import { ComponentProps, createMemo } from 'solid-js'
+import { ComponentProps, createMemo, splitProps } from 'solid-js'
 import './styles/card.scss'
 
 export type CardProps = {
@@ -8,20 +8,21 @@ export type CardProps = {
 }
 
 export default function (props: CardProps & ComponentProps<'div'>) {
+  const [cardProps, nativeProps] = splitProps(props, ['solid', 'contentClass', 'level'])
   const mergedClassesList = {
     card: true,
-    'card-solid': props.solid,
+    'card-solid': cardProps.solid,
   } as { [k: string]: boolean }
   const mergedClasses = createMemo(() => {
     return (
       Object.keys(mergedClassesList)
         .filter(k => mergedClassesList[k])
-        .join(' ') + (props.class ? ` ${props.class}` : '')
+        .join(' ') + (nativeProps.class ? ` ${nativeProps.class}` : '')
     )
   })
   return (
-    <div {...props} class={`${mergedClasses()} ${props.level ? 'card-' + props.level : ''}`}>
-      <div class={`card-content ${props.contentClass}`}>{props.children}</div>
+    <div {...nativeProps} class={`${mergedClasses()} ${cardProps.level ? 'card-' + cardProps.level : ''}`}>
+      <div class={`card-content ${cardProps.contentClass}`}>{nativeProps.children}</div>
     </div>
   )
 }

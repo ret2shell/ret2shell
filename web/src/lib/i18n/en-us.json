@@ -43,7 +43,13 @@
     "seeOtherInteresting": "Look at something else",
     "fetchFailed": "Failed to fetch game list",
     "create": "New",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "nameRequired": "Please fill in the game name",
+    "namePlaceholder": "Game name",
+    "briefRequired": "Please fill in the game brief",
+    "briefPlaceholder": "Game brief",
+    "startEndTime": "start and end time",
+    "registerArchiveTime": "Registration and archive time"
   },
   "bulletin": {
     "title": "Bulletin",
