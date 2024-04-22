@@ -36,12 +36,12 @@ export default function (props: TextInputProps & ComponentProps<'input'>) {
             <Show when={props.icon}>
               {/* rounded-l-lg rounded-l-md */}
               <div
-                class={`rounded-l-${size === 'md' ? 'lg' : 'md'} flex flex-shrink-0 flex-row items-center justify-center h-12 w-12 bg-layer-content/20`}
+                class={`rounded-l-${size === 'md' ? 'lg' : 'md'} flex flex-shrink-0 flex-row items-center justify-center h-12 w-12 bg-layer-content/10`}
               >
                 {props.icon}
               </div>
             </Show>
-            <input id={props.name} {...others} class={mergedInputClasses()} type={type()} />
+            <input id={props.name} {...others} value={others.value || ''} class={mergedInputClasses()} type={type()} />
             <Show when={props.type === 'password'}>
               {/* btn-sm btn-md */}
               <button

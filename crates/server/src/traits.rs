@@ -35,6 +35,8 @@ pub enum ResponseError {
     InternalServerError(String, String),
     #[error("unauthorized: {0}")]
     Unauthorized(String),
+    #[error("bad request: {0}")]
+    BadRequest(String),
     #[error("forbidden: {0} {1}")]
     Forbidden(String, String),
     #[error("not found: {0}")]
@@ -45,8 +47,8 @@ pub enum ResponseError {
     Conflict(String),
     #[error("precondition failed: {0}")]
     PreconditionFailed(String),
-    #[error("too many requests: {0}")]
-    TooManyRequests(String),
+    #[error("too many requests: {0}, {1}")]
+    TooManyRequests(String, String),
     #[error("database error: {0}")]
     DatabaseError(#[from] r2s_database::DbErr),
     #[error("cache error: {0}")]
@@ -80,13 +82,18 @@ impl IntoResponse for ResponseError {
             ResponseError::InternalServerError(summary, detail) => {
                 log_with_resp!(StatusCode::INTERNAL_SERVER_ERROR, summary, detail)
             }
-            ResponseError::Unauthorized(summary) => (StatusCode::UNAUTHORIZED, summary),
+            ResponseError::Unauthorized(summary) => {
+                log_with_resp!(StatusCode::UNAUTHORIZED, summary, summary)
+            }
+            ResponseError::BadRequest(summary) => (StatusCode::BAD_REQUEST, summary),
             ResponseError::Forbidden(summary, detail) => {
                 log_with_resp!(StatusCode::FORBIDDEN, summary, detail)
             }
             ResponseError::NotFound(summary) => (StatusCode::NOT_FOUND, summary),
             ResponseError::Conflict(summary) => (StatusCode::CONFLICT, summary),
-            ResponseError::TooManyRequests(summary) => (StatusCode::TOO_MANY_REQUESTS, summary),
+            ResponseError::TooManyRequests(summary, detail) => {
+                log_with_resp!(StatusCode::TOO_MANY_REQUESTS, summary, detail)
+            }
             ResponseError::PreconditionFailed(summary) => {
                 (StatusCode::PRECONDITION_FAILED, summary)
             }

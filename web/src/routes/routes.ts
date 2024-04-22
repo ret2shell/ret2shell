@@ -96,6 +96,10 @@ export const routes = {
           path: '/',
           component: lazy(() => import('./bulletin/index')),
         },
+        {
+          path: '/:article_id',
+          component: lazy(() => import('./bulletin/[article]/index')),
+        },
       ],
     },
     {
@@ -117,8 +121,8 @@ export const routes = {
           component: lazy(() => import('./users/index')),
         },
         {
-          path: '/:id',
-          component: lazy(() => import('./users/[id]')),
+          path: '/:user_id',
+          component: lazy(() => import('./users/[user]/index')),
         },
       ],
     },
@@ -135,6 +139,39 @@ export const routes = {
           component: lazy(() => import('./magic/sakana/index')),
         },
       ],
+    },
+    {
+      path: '/errors',
+      children: [
+        {
+          path: '/401',
+          component: lazy(() => import('./errors/e401')),
+        },
+        {
+          path: '/403',
+          component: lazy(() => import('./errors/e403')),
+        },
+        {
+          path: '/404',
+          component: lazy(() => import('./errors/e404')),
+        },
+        {
+          path: '/418',
+          component: lazy(() => import('./errors/e418')),
+        },
+        {
+          path: '/500',
+          component: lazy(() => import('./errors/e500')),
+        },
+        {
+          path: '/502',
+          component: lazy(() => import('./errors/e502')),
+        },
+      ],
+    },
+    {
+      path: '/:catchAll(.*)',
+      component: lazy(() => import('./errors/e404')),
     },
   ],
 }

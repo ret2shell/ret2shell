@@ -78,17 +78,18 @@ export function EditorBare(props: EditorProps & ComponentProps<'div'>) {
     })
   }
 
+  createEffect(() => {
+    if (editorProps.value !== editor?.getValue()) {
+      editor?.setValue(editorProps.value || '')
+    }
+  })
+
   onMount(() => {
     setTimeout(() => {
       initEditor()
     })
   })
 
-  createEffect(() => {
-    if (editor && editorProps.value !== editor.getValue()) {
-      editor.setValue(editorProps.value || '')
-    }
-  })
   return (
     <>
       <div {...native} class={`relative ${native.class}`}>
@@ -127,7 +128,7 @@ export default function Editor(props: EditorProps & ComponentProps<'div'>) {
       </label>
       <Card
         class={`flex-1 ${editorProps.error ? 'border-error outline-error' : '!border-none'} !bg-transparent ${focused() ? 'outline outline-2 outline-offset-2' : ''}`}
-        contentClass={`p-2 ${focused() ? 'bg-layer-content/5' : 'bg-layer-content/10'}`}
+        contentClass={`p-2 ${focused() ? 'bg-layer-content/5' : 'bg-layer-content/5'}`}
       >
         <EditorBare
           {...editorProps}

@@ -3,7 +3,7 @@
 @tailwind utilities;
 @layer components {
   .input {
-    @apply backdrop-blur text-layer-content outline-layer-content/60 bg-layer-content/10;
+    @apply backdrop-blur text-layer-content outline-layer-content/60 bg-layer-content/5;
     /* @apply outline outline-2 outline-offset-2; */
     @apply px-4 rounded-lg min-h-12;
 
@@ -23,7 +23,7 @@
     }
 
     &:disabled {
-      @apply bg-layer-content/5 text-layer-content/40;
+      @apply bg-layer-content/5 text-layer-content/40 cursor-not-allowed;
     }
 
     &-md {

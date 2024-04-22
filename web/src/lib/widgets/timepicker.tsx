@@ -348,6 +348,14 @@ export default function TimePicker(props: TimerPickerProps & ComponentProps<'div
   const [time, setTime] = createSignal(null as DateTime | null)
   const [timeNext, setTimeNext] = createSignal(null as DateTime | null)
   createEffect(() => {
+    if (props.value) setTime(DateTime.fromSeconds(props.value))
+    else setTime(null)
+  })
+  createEffect(() => {
+    if (props.range && props.valueNext) setTimeNext(DateTime.fromSeconds(props.valueNext))
+    else setTimeNext(null)
+  })
+  createEffect(() => {
     setValue(props.form, props.name, time() ? time()!.toSeconds() : undefined)
   })
   createEffect(() => {
@@ -396,7 +404,7 @@ export default function TimePicker(props: TimerPickerProps & ComponentProps<'div
             </>
           }
         />
-        <Card class="mt-2 !border-none !bg-transparent" contentClass="p-2 flex flex-col space-y-2 bg-layer-content/10">
+        <Card class="mt-2 !border-none !bg-transparent" contentClass="p-2 flex flex-col space-y-2 bg-layer-content/5">
           <PickerCalendar
             value={time()}
             setValue={setTime}

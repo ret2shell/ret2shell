@@ -77,6 +77,7 @@ macro_rules! check_email_freq {
             if freq > 3 {
                 return Err(ResponseError::TooManyRequests(
                     "too many requests, please try again later".to_owned(),
+                    format!("email {} has been requested too many times", $email),
                 ));
             }
         }
@@ -97,9 +98,7 @@ macro_rules! check_email_validation {
         };
 
         if &checked_email != $email {
-            return Err(ResponseError::PreconditionFailed(
-                "email not match".to_owned(),
-            ));
+            return Err(ResponseError::BadRequest("email not match".to_owned()));
         }
         checked_email
     }};
@@ -520,9 +519,7 @@ async fn change_profile(
     let email = match body.email.clone() {
         Some(email) => email,
         None => {
-            return Err(ResponseError::PreconditionFailed(
-                "email is required".to_owned(),
-            ));
+            return Err(ResponseError::BadRequest("email is required".to_owned()));
         }
     };
 
