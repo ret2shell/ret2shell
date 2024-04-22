@@ -1,4 +1,4 @@
-import { createCalendar, deleteCalendar, getCalendar, getCalendarList } from '@/lib/api/calendar'
+import { createCalendar, deleteCalendar, getCalendar, getCalendarList, updateCalendar } from '@/lib/api/calendar'
 import Spin from '@/lib/assets/animates/spin'
 import { Calendar } from '@/lib/models/calendar'
 import { Permission } from '@/lib/models/user'
@@ -13,13 +13,13 @@ import Editor from '@/lib/widgets/editor'
 import Input from '@/lib/widgets/input'
 import Link from '@/lib/widgets/link'
 import TimePicker from '@/lib/widgets/timepicker'
-import { createForm, required } from '@modular-forms/solid'
+import { createForm, required, setValues } from '@modular-forms/solid'
 import { useSearchParams } from '@solidjs/router'
 import { HTTPError } from '@reverier/ky'
 import { DateTime, MonthNumbers } from 'luxon'
 import { For, Match, Show, Switch, createEffect, createMemo, createSignal, untrack } from 'solid-js'
 
-function EventDetail(props: { event: Calendar; onDeleted: () => void }) {
+function EventDetail(props: { event: Calendar; onDeleted: () => void; onEdit: () => void }) {
   return (
     <>
       <h1 class="text-3xl text-center font-bold mt-8 hover:underline">
@@ -45,6 +45,10 @@ function EventDetail(props: { event: Calendar; onDeleted: () => void }) {
           <span>{t('calendar.gotoEventHomePage')}</span>
         </a>
         <Show when={accountStore.permissions.includes(Permission.Calendar)}>
+          <button class="font-bold hover:underline flex flex-row space-x-2 items-center" onClick={props.onEdit}>
+            <span class="icon-[fluent--edit-20-regular] w-5 h-5"></span>
+            <span>{t('calendar.edit')}</span>
+          </button>
           <button class="font-bold hover:underline flex flex-row space-x-2 items-center" onClick={props.onDeleted}>
             <span class="icon-[fluent--delete-20-regular] w-5 h-5"></span>
             <span>{t('calendar.delete')}</span>
@@ -58,30 +62,53 @@ function EventDetail(props: { event: Calendar; onDeleted: () => void }) {
 
 type CalendarForm = {
   name: string
-  intro: string | null
+  intro: string
   link: string
   start_at: number // will be convert to luxon's DateTime
   end_at: number
 }
 
-function EventForm(props: { onCreated: (id: number) => void }) {
+function EventForm(props: { onDone: (calendar: Calendar) => void; editSource?: Calendar }) {
   const [form, { Form, Field }] = createForm<CalendarForm>()
   const [loading, setLoading] = createSignal(false)
+  createEffect(() => {
+    if (props.editSource) {
+      untrack(() => {
+        setValues(form, {
+          name: props.editSource!.name,
+          intro: props.editSource!.intro || '',
+          link: props.editSource!.link,
+          start_at: props.editSource!.start_at.toSeconds(),
+          end_at: props.editSource!.end_at.toSeconds(),
+        })
+      })
+    } else {
+      untrack(() => {
+        setValues(form, {
+          name: undefined,
+          intro: undefined,
+          link: undefined,
+          start_at: undefined,
+          end_at: undefined,
+        })
+      })
+    }
+  })
   function onSubmit(result: CalendarForm) {
     setLoading(true)
-    createCalendar({
+    ;(props.editSource ? updateCalendar : createCalendar)({
       ...result,
-      id: 0,
+      id: props.editSource?.id || 0,
       start_at: DateTime.fromSeconds(result.start_at),
       end_at: DateTime.fromSeconds(result.end_at),
       reporter_id: accountStore.id!,
     })
-      .then(resp => props.onCreated(resp.id))
+      .then(resp => props.onDone(resp))
       .catch((err: HTTPError) => {
         err.response.text().then(resp => {
           addToast({
             level: 'error',
-            description: `${t('calendar.createFailed')}: ${resp}`,
+            description: `${props.editSource ? t('calendar.saveFailed') : t('calendar.createFailed')}: ${resp}`,
             duration: 5000,
           })
         })
@@ -92,7 +119,9 @@ function EventForm(props: { onCreated: (id: number) => void }) {
   }
   return (
     <>
-      <h1 class="text-3xl text-center font-bold mt-8">{t('calendar.createEvent')}</h1>
+      <h1 class="text-3xl text-center font-bold mt-8">
+        {props.editSource ? t('calendar.editEvent') : t('calendar.createEvent')}
+      </h1>
       <Form onSubmit={onSubmit} class="flex flex-col space-y-2">
         <div class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4">
           <Field name="name" validate={[required(t('calendar.eventNameRequired')!)]}>
@@ -161,7 +190,7 @@ function EventForm(props: { onCreated: (id: number) => void }) {
                   placeholder={t('calendar.introPlaceholder')}
                   title={t('calendar.introPlaceholder')}
                   name="intro"
-                  value={field.value || undefined}
+                  value={field.value}
                   error={field.error}
                 />
               </>
@@ -169,7 +198,7 @@ function EventForm(props: { onCreated: (id: number) => void }) {
           </Field>
         </div>
         <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
-          {t('calendar.create')}
+          {props.editSource ? t('calendar.save') : t('calendar.create')}
         </Button>
       </Form>
     </>
@@ -299,18 +328,22 @@ export default function () {
       return start <= selectedDay()! && end >= selectedDay()!
     })
   })
-  function onCreated(id: number) {
+  function onDone(calendar: Calendar) {
     addToast({
       level: 'success',
-      description: t('calendar.createSuccess')!,
+      description: selectedEvent() ? t('calendar.saveSuccess')! : t('calendar.createSuccess')!,
       duration: 5000,
     })
     getEvents(
       DateTime.fromObject({ year: year(), month: month(), day: 1 }),
       DateTime.fromObject({ year: year(), month: month(), day: 1 }).endOf('month')
     )
-    setSearchParams({ event: id })
+    setSearchParams({ event: calendar.id })
     setInEdit(false)
+    setSelectedEvent(calendar)
+  }
+  function onEdit() {
+    setInEdit(true)
   }
   function onDeleted() {
     deleteCalendar(selectedEventId()!)
@@ -438,7 +471,7 @@ export default function () {
                     ) && !(selectedDay() === day)
                   }
                   square
-                  class="relative"
+                  class={`relative ${day.month === month() ? '' : 'opacity-30'}`}
                   onClick={() => {
                     setSelectedDay(day)
                     setSearchParams({ event: null })
@@ -446,7 +479,6 @@ export default function () {
                 >
                   <span
                     classList={{
-                      'opacity-30': day.month !== month(),
                       'text-primary':
                         currentDate.year === year() && currentDate.month === month() && currentDate.day === day.day,
                     }}
@@ -512,10 +544,10 @@ export default function () {
           <div class="flex flex-col w-full max-w-5xl flex-1 p-2 space-y-2">
             <Switch>
               <Match when={inEdit()}>
-                <EventForm onCreated={onCreated} />
+                <EventForm onDone={onDone} editSource={selectedEvent() || undefined} />
               </Match>
-              <Match when={selectedEvent() !== null}>
-                <EventDetail event={selectedEvent()!} onDeleted={onDeleted} />
+              <Match when={!inEdit() && selectedEvent() !== null}>
+                <EventDetail event={selectedEvent()!} onEdit={onEdit} onDeleted={onDeleted} />
               </Match>
               <Match when={true}>
                 <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">

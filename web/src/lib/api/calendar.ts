@@ -22,7 +22,7 @@ export async function createCalendar(calendar: Calendar) {
 }
 
 export async function updateCalendar(calendar: Calendar) {
-  return await api.put(`${api_root}/calendar/${calendar.id}`, { json: calendar }).json<Calendar>()
+  return await api.patch(`${api_root}/calendar/${calendar.id}`, { json: calendar }).json<Calendar>()
 }
 
 export async function deleteCalendar(id: number) {
