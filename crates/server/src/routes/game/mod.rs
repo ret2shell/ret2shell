@@ -27,7 +27,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
             Permission::Host
         )))
         .nest(
-            "/:game_id",
+            "/:game",
             Router::new()
                 .nest("/challenge", challenge::router(state))
                 .route("/", get(get_game))
@@ -69,7 +69,7 @@ async fn get_game(
 ) -> Result<impl IntoResponse, ResponseError> {
     if game.hidden
         && !token.permissions.0.contains(&Permission::Host)
-        && !(token.permissions.0.contains(&Permission::Game) && game.admins.contains(&token.id))
+        && !(token.permissions.0.contains(&Permission::Game) && game.admins.0.contains(&token.id))
     {
         return Err(ResponseError::NotFound("game not found".to_owned()));
     }
@@ -78,11 +78,19 @@ async fn get_game(
 
 async fn create_game(
     State(ref db): State<Database>, State(ref bucket): State<Bucket>,
-    Json(mut model): Json<game::Model>,
+    Extension(token): Extension<Token>, Json(mut model): Json<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
     let game_bucket = bucket.create(serde_json::to_value(&model)?).await?;
     model.bucket = Some(game_bucket.name.clone());
-    let model = game::create(&db.conn, model).await;
+    let model = game::create(
+        &db.conn,
+        game::Model {
+            admins: game::Admins(vec![token.id]),
+            introduction_id: None,
+            ..model
+        },
+    )
+    .await;
 
     match model {
         Ok(model) => Ok(Json(model)),

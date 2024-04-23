@@ -8,6 +8,7 @@ export enum HostType {
 export type GameAccessPolicy = {
   restrict: boolean
   institutes: number[]
+  sync: number
 }
 
 export type Game = {
@@ -15,7 +16,7 @@ export type Game = {
   updated_at: DateTime
   name: string
   brief: string
-  introduction_id: number
+  introduction_id: number | null
   start_at: DateTime
   end_at: DateTime
   register_at: DateTime

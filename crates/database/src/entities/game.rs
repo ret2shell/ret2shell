@@ -42,6 +42,9 @@ pub struct AccessPolicy {
     pub sync: i32,
 }
 
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
+pub struct Admins(pub Vec<i64>);
+
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "game")]
 pub struct Model {
@@ -73,7 +76,7 @@ pub struct Model {
     pub can_register_after_started: bool,
     pub award_rate: i32,
     #[sea_orm(column_type = "JsonBinary")]
-    pub admins: Vec<i64>,
+    pub admins: Admins,
     pub weight: i32,
     pub bucket: Option<String>,
 }

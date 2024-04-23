@@ -77,7 +77,7 @@ export const routes = {
           component: lazy(() => import('./games/index')),
         },
         {
-          path: '/:game_id',
+          path: '/:game',
           component: lazy(() => import('./games/[game]/layout')),
           children: [
             {
@@ -101,7 +101,7 @@ export const routes = {
           component: lazy(() => import('./bulletin/create')),
         },
         {
-          path: '/:article_id',
+          path: '/:article',
           component: lazy(() => import('./bulletin/[article]/index')),
         },
       ],
@@ -125,7 +125,7 @@ export const routes = {
           component: lazy(() => import('./users/index')),
         },
         {
-          path: '/:user_id',
+          path: '/:user',
           component: lazy(() => import('./users/[user]/index')),
         },
       ],

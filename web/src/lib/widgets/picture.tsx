@@ -26,7 +26,11 @@ export default function (props: ImageProps & ComponentProps<'div'>) {
         height={imageProps.height}
         src={imageProps.src}
         alt={imageProps.alt}
-        onLoad={() => setLoading(false)}
+        onLoad={() => {
+          setTimeout(() => {
+            setLoading(false)
+          }, 500)
+        }}
         onLoadStart={() => setLoading(true)}
       />
       <Transition

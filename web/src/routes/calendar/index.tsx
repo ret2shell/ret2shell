@@ -551,7 +551,7 @@ export default function () {
           class="flex-1 relative"
           defer
         >
-          <div class="flex flex-col items-center w-full">
+          <div class="flex flex-col items-center w-full min-h-full">
             <div class="flex flex-col w-full max-w-5xl flex-1 p-2 space-y-2">
               <Switch>
                 <Match when={inEdit()}>

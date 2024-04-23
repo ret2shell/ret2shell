@@ -1,10 +1,10 @@
-import { JSX, Match, Show, Switch, createSignal } from 'solid-js'
+import { JSX, Match, Show, Switch, createEffect, createSignal, untrack } from 'solid-js'
 import { platformStore, setPlatformStore } from '@storage/platform'
 import { t } from '@storage/theme'
 import Link from '@widgets/link'
 import LogoAnimate from '@assets/animates/logo-animate'
 import Background from '@blocks/background'
-import { useLocation, useNavigate, useSearchParams } from '@solidjs/router'
+import { useIsRouting, useLocation, useNavigate, useSearchParams } from '@solidjs/router'
 import InstanceBox, { InstanceBoxContent } from './_blocks/instance-box'
 import UserBox from './_blocks/user-box'
 import DiyBox, { DiyBoxContent } from './_blocks/diy-box'
@@ -25,12 +25,16 @@ import { wsrx } from '@/lib/wsrx'
 import { Title, setupTitleResolver } from '@storage/header'
 import { DateTime } from 'luxon'
 import '@widgets/styles/nav.scss'
+import Spin from '@/lib/assets/animates/spin'
+import '@widgets/styles/skeleton.scss'
 
-function GlobalTitleLink() {
+function GlobalTitleLink(props: { loading: boolean }) {
   return (
     <>
       <Link ghost href="/">
-        <LogoAnimate class="hidden xl:inline-block" width={24} height={24} />
+        <Show when={!props.loading} fallback={<Spin width={24} height={24} />}>
+          <LogoAnimate class="hidden xl:inline-block" width={24} height={24} />
+        </Show>
         <span></span>
         <span>{platformStore.config.name || t('platform.name')}</span>
       </Link>
@@ -38,11 +42,13 @@ function GlobalTitleLink() {
   )
 }
 
-function GameTitleLink() {
+function GameTitleLink(props: { loading: boolean }) {
   return (
     <>
       <Link ghost href={`/games/${gameStore.current?.id}/`}>
-        <LogoAnimate class="hidden xl:inline-block" width={24} height={24} />
+        <Show when={!props.loading} fallback={<Spin width={24} height={24} />}>
+          <LogoAnimate class="hidden xl:inline-block" width={24} height={24} />
+        </Show>
         <span></span>
         <span>{gameStore.current?.name}</span>
       </Link>
@@ -167,12 +173,28 @@ function GameNav(props: { size: 'sm' | 'md' }) {
 
 function TitleBar() {
   const [additionalMobileBox, setAdditionalMobileBox] = createSignal<'wsrx' | 'notification' | 'diy' | null>(null)
-
+  const isRouting = useIsRouting()
+  const [loading, setLoading] = createSignal(false)
+  // TODO: it does not work at this point, see solidjs/solid-router#102
+  createEffect(() => {
+    if (isRouting()) {
+      // console.log('routing', isRouting())
+      setTimeout(() => {
+        // console.log('set routing', isRouting())
+        if (isRouting()) {
+          // console.log('set routing true')
+          setLoading(true)
+        }
+      }, 500)
+    } else {
+      setLoading(false)
+    }
+  })
   return (
     <>
       <div id="page-top" />
       <div class="h-16 border-b border-b-layer-content/15 w-auto bg-layer/60 backdrop-blur z-50 print:hidden sticky top-0 left-0 transition-colors duration-700">
-        <div class="bg-layer-content/5 w-full h-full px-2 py-0 flex flex-row items-center">
+        <div class="bg-layer-content/5 w-full h-full px-2 py-0 flex flex-row items-center relative">
           <div class="xl:hidden">
             <Popover
               btnContent={<span class="icon-[fluent--navigation-20-regular] w-5 h-5"></span>}
@@ -244,9 +266,9 @@ function TitleBar() {
               </div>
             </Popover>
           </div>
-          <Switch fallback={<GlobalTitleLink />}>
+          <Switch fallback={<GlobalTitleLink loading={loading()} />}>
             <Match when={gameStore.current && gameStore.current.host_type === HostType.CTFGame}>
-              <GameTitleLink />
+              <GameTitleLink loading={loading()} />
             </Match>
           </Switch>
           <div class="w-4"></div>
@@ -270,6 +292,9 @@ function TitleBar() {
             </div>
             <UserBox />
           </div>
+          <Show when={loading()}>
+            <div class="absolute bottom-0 left-0 right-0 h-1 skeleton"></div>
+          </Show>
         </div>
       </div>
     </>

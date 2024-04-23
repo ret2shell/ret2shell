@@ -12,7 +12,7 @@ import { DateTime } from 'luxon'
 import { For, Show, createEffect, createMemo, createSignal, untrack } from 'solid-js'
 import bluredBgDark from '@assets/imgs/bg-blur-stars.webp'
 import bluredBgLight from '@assets/imgs/bg-blur-suzume.webp'
-import { HostType } from '@/lib/models/game'
+import { Game, HostType } from '@/lib/models/game'
 import { getGames } from '@/lib/api/game'
 import { HTTPError } from '@reverier/ky'
 import { addToast } from '@/lib/storage/toast'
@@ -21,6 +21,7 @@ import { Permission } from '@/lib/models/user'
 import Spin from '@/lib/assets/animates/spin'
 import Popover from '@/lib/widgets/popover'
 import CreateGame from './create'
+import bgGameDefault from '@assets/imgs/bg-game-default.webp'
 
 export default function () {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -42,7 +43,7 @@ export default function () {
     return gameStore.games
       .filter(game => game.weight >= 3 && game.host_type === HostType.CTFGame)
       .sort((a, b) => b.start_at.diff(a.start_at).seconds)
-      .slice(page(), page() + 5)
+      .slice((page() - 1) * 5, page() * 5 + 1)
   })
   if (selectedGameId() === null && keyGames().length > 0) {
     setSearchParams({ selected: keyGames()[0].id })
@@ -74,7 +75,6 @@ export default function () {
         setLoading(false)
       })
   }
-  fetchGames()
 
   createEffect(() => {
     if (page()) {
@@ -82,11 +82,22 @@ export default function () {
     }
   })
 
+  function onCreated(game: Game) {
+    setGameStore({ preload: game, current: game })
+  }
+
   return (
     <section class="lg:h-full lg:min-h-full lg:overflow-scroll lg:snap-center flex flex-col lg:flex-row relative">
       <div class="w-1/4 hidden lg:flex flex-col items-end justify-start py-32 space-y-2">
         <Show when={accountStore.permissions.includes(Permission.Host)}>
-          <Button level="primary" class="w-4/5" onClick={() => setShowCreate(true)}>
+          <Button
+            level="primary"
+            class="w-4/5"
+            onClick={() => {
+              setShowCreate(true)
+              setSearchParams({ selected: undefined })
+            }}
+          >
             <span class="icon-[fluent--add-20-regular] w-5 h-5 opacity-60"></span>
             <span>{t('game.create')}</span>
           </Button>
@@ -205,7 +216,7 @@ export default function () {
         </Button>
       </Card>
       <div class="flex-1 p-3 lg:p-12 flex flex-col items-center lg:justify-center lg:items-start">
-        <Show when={!showCreate()} fallback={<CreateGame />}>
+        <Show when={!showCreate()} fallback={<CreateGame onDone={onCreated} />}>
           <>
             <Card
               class="aspect-video w-full lg:w-4/5 transform transition-all rounded-b-none lg:rounded-b-lg border-b-0 lg:border-b-[1px] overflow-hidden relative"
@@ -227,9 +238,7 @@ export default function () {
                   </>
                 }
               >
-                <Picture
-                  src={selectedGame()?.cover || (themeStore.colorScheme === 'dark' ? bluredBgDark : bluredBgLight)}
-                ></Picture>
+                <Picture src={selectedGame()?.cover || bgGameDefault}></Picture>
               </Show>
               <Tag
                 class="absolute top-2 right-2"

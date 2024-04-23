@@ -15,3 +15,11 @@ export async function getGames(page?: number, page_size?: number, host_type?: Ho
     })
   ).json<[Game[], number]>()
 }
+
+export async function getGame(id: number) {
+  return await api.get(`${api_root}/game/${id}`).json<Game>()
+}
+
+export async function createGame(game: Game) {
+  return await api.post(`${api_root}/game`, { json: game }).json<Game>()
+}

@@ -16,12 +16,12 @@ use crate::{
 
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     Router::new()
-        .route("/:article_id", patch(update_wiki).delete(delete_wiki))
+        .route("/:article", patch(update_wiki).delete(delete_wiki))
         .route("/", post(create_wiki))
         .layer(middleware::from_fn(auth::permission_required_all!(
             Permission::Wiki
         )))
-        .route("/:article_id", get(get_wiki))
+        .route("/:article", get(get_wiki))
         .route("/", get(get_wiki_tree))
 }
 

@@ -2,11 +2,14 @@ import logo from '@/lib/assets/logo.svg'
 import { gameStore } from '@/lib/storage/game'
 import { useLocation, useNavigate } from '@solidjs/router'
 import { ComponentProps, Show, createEffect, createSignal } from 'solid-js'
+import bgGameDefault from '@assets/imgs/bg-game-default.webp'
 
 export default function (props: ComponentProps<'div'>) {
   const location = useLocation()
   const navigate = useNavigate()
   const [expanded, setExpanded] = createSignal(false)
+  const _preloadImage = new Image()
+  _preloadImage.src = bgGameDefault
   createEffect(() => {
     if (gameStore.current && (location.pathname === '/games' || location.pathname === '/games/')) {
       setExpanded(true)
@@ -30,8 +33,8 @@ export default function (props: ComponentProps<'div'>) {
       >
         <div class="w-full h-full relative">
           <img
-            class={`w-screen h-screen transition-all ease-out duration-[3000ms] ${expanded() ? 'scale-125 blur-xl' : ''}`}
-            src={gameStore.preload?.cover || gameStore.current?.cover || undefined}
+            class={`w-screen h-screen transition-all ease-out duration-[3000ms] ${expanded() ? 'scale-125 blur-2xl' : ''}`}
+            src={gameStore.preload?.cover || gameStore.current?.cover || bgGameDefault}
           />
           <div
             class={`absolute top-0 left-0 w-screen h-screen bg-layer/80 flex flex-col items-center justify-center space-y-8`}

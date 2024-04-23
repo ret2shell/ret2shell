@@ -30,16 +30,13 @@ impl Bucket {
             util::deunicode_str(&game_config.name),
             game_config.start_at.timestamp()
         );
-        if self.path.join(&game_bucket_name).exists() {
-            return Err(BucketError::PathConflict(game_bucket_name));
-        }
         match game::GameBucket::new(&self.path, &game_bucket_name, game_config).await {
             Ok(bucket) => Ok(bucket),
             Err(e) => {
                 error!("create game bucket error: {:?}", e);
                 // cleanup the failed created game bucket
                 // it may not exist so we ignore the error
-                remove_dir_all(self.path.join(&game_bucket_name)).await.ok();
+                // remove_dir_all(self.path.join(&game_bucket_name)).await.ok();
                 Err(e)
             }
         }

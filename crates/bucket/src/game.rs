@@ -4,7 +4,7 @@ use chrono::{serde::ts_seconds, DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
-use tokio::fs::{create_dir_all, read_to_string, remove_dir_all, write};
+use tokio::fs::{read_to_string, remove_dir_all, write};
 use tracing::error;
 
 use crate::{
@@ -38,7 +38,6 @@ pub struct AccessPolicy {
 pub struct GameConfig {
     pub name: String,
     pub brief: String,
-    pub introduction_id: i64,
     #[serde(with = "ts_seconds")]
     pub start_at: DateTime<Utc>,
     #[serde(with = "ts_seconds")]
@@ -81,7 +80,6 @@ impl GameBucket {
         root_path: impl AsRef<Path>, game_bucket_name: impl AsRef<str>, game: GameConfig,
     ) -> Result<Self, BucketError> {
         let game_path = root_path.as_ref().join(game_bucket_name.as_ref());
-        create_dir_all(&game_path).await?;
         let git = Git::new(&game_path).await?;
         init_dir!(game_path, "challenges");
         init_dir!(game_path, "writeups");
@@ -90,7 +88,7 @@ impl GameBucket {
             toml::to_string_pretty(&game)?,
         )
         .await?;
-        write(".gitignore", ".lock").await?;
+        write(game_path.join(".gitignore"), ".lock").await?;
         git.take_shot(":tada: game created", "platform", "platform@woooo.tech")
             .await?;
 

@@ -65,7 +65,17 @@
     "briefRequired": "请填写赛事简介",
     "briefPlaceholder": "赛事简介",
     "startEndTime": "开始与结束时间",
-    "registerArchiveTime": "注册与归档时间"
+    "registerArchiveTime": "注册与归档时间",
+    "weight": "权重",
+    "teamSizePlaceholder": "队伍人数限制",
+    "miscSettings": "杂项设置",
+    "canRegisterAfterStarted": "允许开赛后注册",
+    "offline": "线下比赛",
+    "enableAudit": "开启队伍审核",
+    "teamSizeRequired": "请填写队伍人数限制",
+    "teamSizeMinExceeded": "队伍成员最少一人",
+    "teamSizeMaxExceeded": "队伍成员最多不能超过 100 人，请考虑共享账号",
+    "createFailed": "创建失败"
   },
   "bulletin": {
     "title": "公告",

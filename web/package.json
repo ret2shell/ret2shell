@@ -13,7 +13,7 @@
     "@solid-primitives/resize-observer": "^2.0.25",
     "@solid-primitives/storage": "^3.4.0",
     "@solidjs/router": "^0.13.2",
-    "ace-builds": "^1.33.0",
+    "ace-builds": "^1.33.1",
     "js-base64": "^3.7.7",
     "katex": "^0.16.10",
     "luxon": "^3.4.4",

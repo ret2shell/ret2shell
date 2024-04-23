@@ -49,7 +49,17 @@
     "briefRequired": "請填寫賽事簡介",
     "briefPlaceholder": "賽事簡介",
     "startEndTime": "開始與結束時間",
-    "registerArchiveTime": "註冊與歸檔時間"
+    "registerArchiveTime": "註冊與歸檔時間",
+    "weight": "權重",
+    "teamSizePlaceholder": "隊伍人數限制",
+    "miscSettings": "雜項設定",
+    "canRegisterAfterStarted": "允許開賽後註冊",
+    "offline": "線下比賽",
+    "enableAudit": "開啟隊伍審核",
+    "teamSizeRequired": "請填寫隊伍人數限制",
+    "teamSizeMinExceeded": "隊伍成員最少一人",
+    "teamSizeMaxExceeded": "隊伍成員最多不能超過 100 人，請考慮共享帳號",
+    "createFailed": "創建失敗"
   },
   "bulletin": {
     "title": "公告",

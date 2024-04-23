@@ -49,7 +49,17 @@
     "briefRequired": "Please fill in the game brief",
     "briefPlaceholder": "Game brief",
     "startEndTime": "start and end time",
-    "registerArchiveTime": "Registration and archive time"
+    "registerArchiveTime": "Registration and archive time",
+    "weight": "Weight",
+    "teamSizePlaceholder": "Team size limit",
+    "miscSettings": "Misc settings",
+    "canRegisterAfterStarted": "Allow registration after started",
+    "offline": "Offline game",
+    "enableAudit": "Enable team audit",
+    "teamSizeRequired": "Please fill in the team size limit",
+    "teamSizeMinExceeded": "At least one team member",
+    "teamSizeMaxExceeded": "The maximum number of team members is 100, please consider sharing accounts",
+    "createFailed": "Create failed"
   },
   "bulletin": {
     "title": "Bulletin",

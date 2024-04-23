@@ -1,6 +1,5 @@
 import { ComponentProps, Show, createEffect, createSignal, splitProps, untrack } from 'solid-js'
 import './styles/article.scss'
-import './styles/skeleton.scss'
 import Spin from '../assets/animates/spin'
 import { t } from '../storage/theme'
 
