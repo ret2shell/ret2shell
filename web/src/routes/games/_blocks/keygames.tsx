@@ -45,14 +45,20 @@ export default function () {
       .sort((a, b) => b.start_at.diff(a.start_at).seconds)
       .slice((page() - 1) * 5, page() * 5 + 1)
   })
-  if (selectedGameId() === null && keyGames().length > 0) {
-    setSearchParams({ selected: keyGames()[0].id })
-  }
+
   const selectedGame = createMemo(() => {
     return keyGames().find(game => game.id === selectedGameId())
   })
   createEffect(() => {
     setGameStore({ preload: selectedGame() || null })
+  })
+
+  createEffect(() => {
+    if (keyGames().length > 0) {
+      if (selectedGameId() === null && keyGames().find(game => game.id === selectedGameId()) === undefined) {
+        setSearchParams({ selected: keyGames()[0].id })
+      }
+    }
   })
 
   function fetchGames() {
@@ -63,7 +69,7 @@ export default function () {
         setTotal(total)
       })
       .catch((err: HTTPError) => {
-        message: err.response.text().then(resp => {
+        err.response.text().then(resp => {
           addToast({
             level: 'error',
             description: `${t('game.fetchFailed')}: ${resp}`,

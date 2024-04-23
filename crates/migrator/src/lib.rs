@@ -46,7 +46,7 @@ pub async fn initialize(config: &Option<database::Config>) -> Result<Database, D
     let config = config
         .clone()
         .ok_or(DbErr::Custom("database config not found".to_string()))?;
-    let mut connect_options = ConnectOptions::new(&config.dsn());
+    let mut connect_options = ConnectOptions::new(config.dsn());
     connect_options
         .acquire_timeout(std::time::Duration::from_secs(15))
         .sqlx_logging(true)
@@ -61,7 +61,7 @@ pub async fn down(config: &Option<database::Config>) -> Result<(), DbErr> {
     let config = config
         .clone()
         .ok_or(DbErr::Custom("database config not found".to_string()))?;
-    let mut connect_options = ConnectOptions::new(&config.dsn());
+    let mut connect_options = ConnectOptions::new(config.dsn());
     connect_options
         .sqlx_logging(true)
         .sqlx_logging_level(LevelFilter::Debug);

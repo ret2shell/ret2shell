@@ -52,7 +52,7 @@ async fn send_email_impl(config: &email::Config, email: &EmailCtx) -> Result<(),
     .port(config.port)
     .credentials(smtp_credentials)
     .build();
-    let email = construct_email(&email, &config.sender, &config.username);
+    let email = construct_email(email, &config.sender, &config.username);
     mailer.send(email).await?;
     Ok(())
 }

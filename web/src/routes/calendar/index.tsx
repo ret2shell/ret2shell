@@ -309,7 +309,7 @@ export default function () {
     }
   })
   const eventDays = createMemo(() => {
-    let days = new Set<DateTime>()
+    const days = new Set<DateTime>()
     events().forEach(event => {
       const start = event.start_at
       const end = event.end_at

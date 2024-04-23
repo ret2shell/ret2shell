@@ -65,8 +65,8 @@ pub fn check_license(pub_key: &[u8]) -> Result<License, LicenseError> {
     }
     let (cert, sig) = config_str.split_once('\n').ok_or(LicenseError::Invalid)?;
 
-    let cert = decode(cert).map_err(|_| LicenseError::Invalid)?;
-    let sig = decode(sig).map_err(|_| LicenseError::Invalid)?;
+    let cert = decode(cert).ok_or(LicenseError::Invalid)?;
+    let sig = decode(sig).ok_or(LicenseError::Invalid)?;
     let cert = String::from_utf8(cert).map_err(|_| LicenseError::Invalid)?;
     let keypair = signature::UnparsedPublicKey::new(&signature::ED25519, pub_key);
     if keypair.verify(cert.as_bytes(), &sig).is_err() {

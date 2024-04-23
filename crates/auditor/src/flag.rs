@@ -285,7 +285,7 @@ impl FlagStego {
         let template_len = template.len();
         let (e_data, e_hex) = data.split_at(template_len);
         let mut e_data = e_data.chars().rev();
-        let mut e = u64::from_str_radix(&e_hex, 16)?;
+        let mut e = u64::from_str_radix(e_hex, 16)?;
         for c in template.chars().rev() {
             let ec = e_data
                 .next()

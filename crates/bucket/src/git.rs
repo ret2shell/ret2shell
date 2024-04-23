@@ -62,7 +62,7 @@ impl Git {
             )));
         }
         create_dir_all(&path).await?;
-        return Self::init(&path).await;
+        Self::init(&path).await
     }
 
     async fn init(path: impl AsRef<Path>) -> Result<Self, GitError> {

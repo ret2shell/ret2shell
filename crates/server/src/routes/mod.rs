@@ -45,7 +45,7 @@ pub async fn initialize(
     let cors_origins = &config.cors_origins;
     let ip_record_stream = state.queue.subscribe("ip-record").await?;
     let db = state.db.clone();
-    tokio::spawn(async move { ip_record_worker(ip_record_stream, db) });
+    tokio::spawn(async move { ip_record_worker(ip_record_stream, db).await });
     let api_router = construct_router(&state);
     let router = Router::new()
         .nest(api_base_path, api_router)

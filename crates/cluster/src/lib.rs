@@ -21,7 +21,7 @@ pub async fn initialize(config: &Option<cluster::Config>) -> Result<Cluster, Clu
     } else {
         let kube_config_path = config.kube_config_path.as_ref().unwrap();
         let kube_config_path = Path::new(kube_config_path);
-        let kube_config = Kubeconfig::read_from(&kube_config_path)?;
+        let kube_config = Kubeconfig::read_from(kube_config_path)?;
         let kube_config =
             Config::from_custom_kubeconfig(kube_config, &KubeConfigOptions::default()).await?;
         Client::try_from(kube_config)?

@@ -30,7 +30,7 @@ fn generate_new_key(ca: &str, path: &str, issuer: &str, website: &str, date: &st
     let cert = serde_json::to_string(&cert).unwrap();
     let sig = ca_keypair.sign(cert.as_bytes());
     let cert = format!("{}\n{}", encode(cert.as_bytes()), encode(sig.as_ref()));
-    std::fs::write(format!("{}/license", path), cert.to_string()).unwrap();
+    std::fs::write(format!("{}/license", path), cert).unwrap();
 }
 
 /// Clap arg definition.

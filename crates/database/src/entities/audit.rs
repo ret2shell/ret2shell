@@ -29,7 +29,7 @@ use super::{challenge, team, user};
 #[sea_orm(rs_type = "i32", db_type = "Integer")]
 pub enum State {
     #[default]
-    Pending   = 0,
+    Pending = 0,
     Misjudged = 1,
     Confirmed = 2,
 }
@@ -115,6 +115,7 @@ impl Related<super::user::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
+#[allow(clippy::too_many_arguments)]
 pub async fn get_page(
     db: &DatabaseConnection, page: u64, page_size: u64, game_id: Option<i64>, team_id: Option<i64>,
     user_id: Option<i64>, challenge_id: Option<i64>, state: Option<State>,
@@ -144,6 +145,7 @@ pub async fn get_page(
     Ok((articles, total))
 }
 
+#[allow(clippy::too_many_arguments)]
 pub async fn get_page_ex(
     db: &DatabaseConnection, page: u64, page_size: u64, game_id: Option<i64>, team_id: Option<i64>,
     user_id: Option<i64>, challenge_id: Option<i64>, state: Option<State>,

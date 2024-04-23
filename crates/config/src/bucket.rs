@@ -14,6 +14,6 @@ pub struct Config {
 impl Merge for Option<Config> {
     fn merge(self, other: Self) -> Self {
         // prefers return other if it is Some
-        other.or_else(|| self)
+        other.or(self)
     }
 }

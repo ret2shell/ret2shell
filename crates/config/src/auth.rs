@@ -43,7 +43,7 @@ impl Merge for Option<Config> {
                 signing_key: b.signing_key,
                 buffer_time: b.buffer_time,
                 expires_time: b.expires_time,
-                oauth_keys: b.oauth_keys.or_else(|| a.oauth_keys),
+                oauth_keys: b.oauth_keys.or(a.oauth_keys),
             }),
             (Some(a), None) => Some(a),
             (None, Some(b)) => Some(b),

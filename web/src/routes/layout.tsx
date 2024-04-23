@@ -1,10 +1,10 @@
-import { JSX, Match, Show, Switch, createEffect, createSignal, untrack } from 'solid-js'
+import { JSX, Match, Show, Switch, createEffect, createSignal } from 'solid-js'
 import { platformStore, setPlatformStore } from '@storage/platform'
 import { t } from '@storage/theme'
 import Link from '@widgets/link'
 import LogoAnimate from '@assets/animates/logo-animate'
 import Background from '@blocks/background'
-import { useIsRouting, useLocation, useNavigate, useSearchParams } from '@solidjs/router'
+import { useIsRouting, useLocation, useNavigate, useParams, useSearchParams } from '@solidjs/router'
 import InstanceBox, { InstanceBoxContent } from './_blocks/instance-box'
 import UserBox from './_blocks/user-box'
 import DiyBox, { DiyBoxContent } from './_blocks/diy-box'
@@ -19,7 +19,7 @@ import { getPlatformInfo } from '@/lib/api/platform'
 import { addToast, removeToast, toastStore } from '@/lib/storage/toast'
 import Divider from '@/lib/widgets/divider'
 import Toasts from './_blocks/toasts'
-import { Transition, TransitionGroup } from 'solid-transition-group'
+import { Transition } from 'solid-transition-group'
 import Button from '@/lib/widgets/button'
 import { wsrx } from '@/lib/wsrx'
 import { Title, setupTitleResolver } from '@storage/header'
@@ -173,9 +173,11 @@ function GameNav(props: { size: 'sm' | 'md' }) {
 
 function TitleBar() {
   const [additionalMobileBox, setAdditionalMobileBox] = createSignal<'wsrx' | 'notification' | 'diy' | null>(null)
+  const params = useParams()
+
+  // TODO: it does not work at this point, see solidjs/solid-router#102
   const isRouting = useIsRouting()
   const [loading, setLoading] = createSignal(false)
-  // TODO: it does not work at this point, see solidjs/solid-router#102
   createEffect(() => {
     if (isRouting()) {
       // console.log('routing', isRouting())
@@ -190,6 +192,7 @@ function TitleBar() {
       setLoading(false)
     }
   })
+
   return (
     <>
       <div id="page-top" />
@@ -267,19 +270,17 @@ function TitleBar() {
             </Popover>
           </div>
           <Switch fallback={<GlobalTitleLink loading={loading()} />}>
-            <Match when={gameStore.current && gameStore.current.host_type === HostType.CTFGame}>
+            <Match when={gameStore.current && gameStore.current.host_type === HostType.CTFGame && params.game}>
               <GameTitleLink loading={loading()} />
             </Match>
           </Switch>
           <div class="w-4"></div>
           <ul class="xl:flex flex-row space-x-2 hidden">
-            <TransitionGroup name="nav">
-              <Switch fallback={<GlobalNav size="md" />}>
-                <Match when={gameStore.current && gameStore.current.host_type === HostType.CTFGame}>
-                  <GameNav size="md" />
-                </Match>
-              </Switch>
-            </TransitionGroup>
+            <Switch fallback={<GlobalNav size="md" />}>
+              <Match when={gameStore.current && gameStore.current.host_type === HostType.CTFGame && params.game}>
+                <GameNav size="md" />
+              </Match>
+            </Switch>
           </ul>
           <div class="flex-1"></div>
           <div class="flex flex-row space-x-2">

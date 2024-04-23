@@ -17,7 +17,7 @@ impl Merge for Option<Config> {
         // prefers fields in `other`
         match (self, other) {
             (Some(a), Some(b)) => Some(Config {
-                sensitive_word_list: b.sensitive_word_list.or_else(|| a.sensitive_word_list),
+                sensitive_word_list: b.sensitive_word_list.or(a.sensitive_word_list),
             }),
             (Some(a), None) => Some(a),
             (None, Some(b)) => Some(b),

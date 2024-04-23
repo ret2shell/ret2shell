@@ -38,7 +38,7 @@ pub async fn initialize(
         sensitive_word_list
     );
     if let Some(sensitive_word_list) = sensitive_word_list {
-        let sensitive_words = read_sensitive_word_file(&sensitive_word_list).await?;
+        let sensitive_words = read_sensitive_word_file(sensitive_word_list).await?;
         let ac = AhoCorasick::new(sensitive_words)?;
         Ok(Some(ac))
     } else {

@@ -32,20 +32,20 @@ pub fn encode(data: &[u8]) -> String {
     result
 }
 
-pub fn decode(data: &str) -> Result<Vec<u8>, ()> {
+pub fn decode(data: &str) -> Option<Vec<u8>> {
     let mut result = Vec::new();
     let mut iter = data.split_ascii_whitespace();
     while let Some(index1) = iter.next() {
         if index1.is_empty() {
             continue;
         }
-        let index1 = CHARS_TABLE.iter().position(|&x| x == index1).ok_or(())?;
-        let index2 = iter.next().ok_or(())?;
+        let index1 = CHARS_TABLE.iter().position(|&x| x == index1)?;
+        let index2 = iter.next()?;
         if index2.is_empty() {
             continue;
         }
-        let index2 = CHARS_TABLE.iter().position(|&x| x == index2).ok_or(())?;
+        let index2 = CHARS_TABLE.iter().position(|&x| x == index2)?;
         result.push((index1 as u8) << 4 | index2 as u8);
     }
-    Ok(result)
+    Some(result)
 }

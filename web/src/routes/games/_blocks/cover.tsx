@@ -1,8 +1,8 @@
-import logo from '@/lib/assets/logo.svg'
 import { gameStore } from '@/lib/storage/game'
 import { useLocation, useNavigate } from '@solidjs/router'
 import { ComponentProps, Show, createEffect, createSignal } from 'solid-js'
 import bgGameDefault from '@assets/imgs/bg-game-default.webp'
+import LogoAnimate from '@/lib/assets/animates/logo-animate'
 
 export default function (props: ComponentProps<'div'>) {
   const location = useLocation()
@@ -78,7 +78,12 @@ export default function (props: ComponentProps<'div'>) {
             <div
               class={`aspect-square h-48 transition-all ease-out duration-500 delay-500 ${expanded() ? '' : 'scale-150 blur-xl opacity-0 rotate-90'}`}
             >
-              <img class="w-full h-full object-contain" src={gameStore.current?.logo || logo}></img>
+              <Show
+                when={gameStore.current?.logo}
+                fallback={<LogoAnimate class="w-full h-full object-contain"></LogoAnimate>}
+              >
+                <img class="w-full h-full object-contain" src={gameStore.current!.logo!}></img>
+              </Show>
             </div>
             <div
               class={`text-4xl font-bold transition-all ease-out duration-500 delay-1000 overflow-hidden ${expanded() ? 'h-32' : 'h-0'}`}

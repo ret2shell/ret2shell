@@ -32,11 +32,11 @@ impl Merge for Option<Config> {
             (Some(a), Some(b)) => Some(Config {
                 try_default: b.try_default,
                 auto_infer: b.auto_infer,
-                kube_config_path: b.kube_config_path.or_else(|| a.kube_config_path),
+                kube_config_path: b.kube_config_path.or(a.kube_config_path),
                 challenge_node_selector: b
                     .challenge_node_selector
-                    .or_else(|| a.challenge_node_selector),
-                proxy_image: b.proxy_image.or_else(|| a.proxy_image),
+                    .or(a.challenge_node_selector),
+                proxy_image: b.proxy_image.or(a.proxy_image),
             }),
             (Some(a), None) => Some(a),
             (None, Some(b)) => Some(b),

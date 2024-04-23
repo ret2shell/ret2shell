@@ -130,7 +130,7 @@ pub async fn create(db: &DatabaseConnection, challenge: Model) -> Result<Model, 
     let challenge = ActiveModel {
         id: ActiveValue::NotSet,
         updated_at: ActiveValue::Set(Utc::now()),
-        score: ActiveValue::Set(challenge.score_rule.initial.clone()),
+        score: ActiveValue::Set(challenge.score_rule.initial),
         ..challenge.into_active_model().reset_all()
     };
     challenge.insert(db).await

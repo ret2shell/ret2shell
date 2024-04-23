@@ -25,7 +25,7 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 pub enum HostType {
     #[default]
     CTFTraining = 0,
-    CTFGame = 1,
+    CTFGame     = 1,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]

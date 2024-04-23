@@ -104,6 +104,7 @@ impl Related<super::user::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
+#[allow(clippy::too_many_arguments)]
 pub async fn get_page(
     db: &DatabaseConnection, page: u64, page_size: u64, only_solved: bool, with_content: bool,
     challenge_id: Option<i64>, team_id: Option<i64>, user_id: Option<i64>,
@@ -132,6 +133,7 @@ pub async fn get_page(
     Ok((submissions, total))
 }
 
+#[allow(clippy::too_many_arguments)]
 pub async fn get_page_ex(
     db: &DatabaseConnection, page: u64, page_size: u64, only_solved: bool, with_content: bool,
     challenge_id: Option<i64>, team_id: Option<i64>, user_id: Option<i64>,

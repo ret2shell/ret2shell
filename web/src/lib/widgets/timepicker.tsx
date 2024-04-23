@@ -1,5 +1,5 @@
 import { FormStore, setValue } from '@modular-forms/solid'
-import { ComponentProps, For, Show, createEffect, createMemo, createSignal, splitProps } from 'solid-js'
+import { ComponentProps, Show, createEffect, createMemo, createSignal } from 'solid-js'
 import Input from './input'
 import Button from './button'
 import { DateTime, MonthNumbers } from 'luxon'
