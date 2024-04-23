@@ -52,16 +52,14 @@
   @apply text-layer-content/80;
 }
 
+/* icon-[fluent--open-20-regular] w-5 h-5 */
+
 .token.url {
   @apply text-primary underline;
 }
 
 .token.function {
   @apply text-purple-500;
-}
-
-.token.regex {
-  @apply bg-layer-content/10;
 }
 
 .token.bold {

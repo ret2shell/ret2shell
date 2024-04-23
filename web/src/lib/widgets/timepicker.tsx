@@ -325,7 +325,7 @@ function PickerCalendar(props: {
       </div>
 
       <Divider class="hidden lg:inline-block" />
-      <div class="grid grid-cols-7 gap-2">
+      <div class="grid grid-cols-7 gap-2 justify-items-center">
         {/* first, render sunday to monday */}
         {Array.from({ length: 7 }).map((_, index) => (
           <div class="h-12 min-w-12 w-full flex justify-center items-center font-bold opacity-60">

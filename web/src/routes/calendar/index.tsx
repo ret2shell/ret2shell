@@ -3,7 +3,7 @@ import Spin from '@/lib/assets/animates/spin'
 import { Calendar } from '@/lib/models/calendar'
 import { Permission } from '@/lib/models/user'
 import { accountStore } from '@/lib/storage/account'
-import { t } from '@/lib/storage/theme'
+import { t, themeStore } from '@/lib/storage/theme'
 import { addToast } from '@/lib/storage/toast'
 import Article from '@/lib/widgets/article'
 import Button from '@/lib/widgets/button'
@@ -18,6 +18,7 @@ import { useSearchParams } from '@solidjs/router'
 import { HTTPError } from '@reverier/ky'
 import { DateTime, MonthNumbers } from 'luxon'
 import { For, Match, Show, Switch, createEffect, createMemo, createSignal, untrack } from 'solid-js'
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-solid'
 
 function EventDetail(props: { event: Calendar; onDeleted: () => void; onEdit: () => void }) {
   return (
@@ -371,7 +372,7 @@ export default function () {
   }
   return (
     <>
-      <div class="w-full h-full overflow-scroll flex flex-col lg:flex-row">
+      <div class="w-full h-full overflow-hidden flex flex-col lg:flex-row">
         <div class="flex-none flex flex-col p-3 lg:p-6 backdrop-blur sticky top-0 border-r border-r-layer-content/10">
           <Card contentClass="p-2 flex flex-col space-y-2">
             <div class="flex flex-row space-x-2">
@@ -540,24 +541,35 @@ export default function () {
             )}
           </For>
         </div>
-        <div class="flex flex-col flex-1 items-center">
-          <div class="flex flex-col w-full max-w-5xl flex-1 p-2 space-y-2">
-            <Switch>
-              <Match when={inEdit()}>
-                <EventForm onDone={onDone} editSource={selectedEvent() || undefined} />
-              </Match>
-              <Match when={!inEdit() && selectedEvent() !== null}>
-                <EventDetail event={selectedEvent()!} onEdit={onEdit} onDeleted={onDeleted} />
-              </Match>
-              <Match when={true}>
-                <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
-                  <span class="icon-[fluent--flag-20-regular] w-24 h-24"></span>
-                  <span>{t('calendar.selectGameToSeeDetail')}</span>
-                </div>
-              </Match>
-            </Switch>
+        <OverlayScrollbarsComponent
+          options={{
+            scrollbars: {
+              theme: themeStore.colorScheme === 'light' ? 'os-theme-dark' : 'os-theme-light',
+              autoHide: 'scroll',
+            },
+          }}
+          class="flex-1 relative"
+          defer
+        >
+          <div class="flex flex-col items-center w-full">
+            <div class="flex flex-col w-full max-w-5xl flex-1 p-2 space-y-2">
+              <Switch>
+                <Match when={inEdit()}>
+                  <EventForm onDone={onDone} editSource={selectedEvent() || undefined} />
+                </Match>
+                <Match when={!inEdit() && selectedEvent() !== null}>
+                  <EventDetail event={selectedEvent()!} onEdit={onEdit} onDeleted={onDeleted} />
+                </Match>
+                <Match when={true}>
+                  <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
+                    <span class="icon-[fluent--flag-20-regular] w-24 h-24"></span>
+                    <span>{t('calendar.selectGameToSeeDetail')}</span>
+                  </div>
+                </Match>
+              </Switch>
+            </div>
           </div>
-        </div>
+        </OverlayScrollbarsComponent>
       </div>
     </>
   )

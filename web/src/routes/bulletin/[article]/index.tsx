@@ -7,14 +7,18 @@ import { t } from '@/lib/storage/theme'
 import { addToast } from '@/lib/storage/toast'
 import Article from '@/lib/widgets/article'
 import { HTTPError } from '@reverier/ky'
-import { useNavigate, useParams } from '@solidjs/router'
+import { useNavigate, useParams, useSearchParams } from '@solidjs/router'
 import { Show, createSignal } from 'solid-js'
+import EditForm from '../_blocks/form'
 
 export default function () {
   const params = useParams()
   const article_id = parseInt(params.article_id)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const inEdit = () => searchParams.edit === 'true'
   const [article, setArticle] = createSignal(null as ArticleModel | null)
   const navigate = useNavigate()
+
   if (isNaN(article_id)) navigate('/errors/404', { replace: true })
   getBulletin(article_id)
     .then(resp => {
@@ -38,6 +42,20 @@ export default function () {
           addToast({ level: 'error', description: reason, duration: 5000 })
         })
       })
+  }
+
+  function onDone(article: ArticleModel) {
+    getBulletin(article.id)
+      .then(resp => {
+        setArticle(resp)
+      })
+      .catch((err: HTTPError) => {
+        err.response.text().then(reason => {
+          addToast({ level: 'error', description: reason, duration: 5000 })
+          navigate(`/errors/${err.response.status}`, { replace: true })
+        })
+      })
+    setSearchParams({ edit: undefined })
   }
   return (
     <>
@@ -63,9 +81,15 @@ export default function () {
           <span>{article()?.publisher_name}</span>
         </a>
         <div class="font-bold flex flex-row space-x-2 items-center">
-          <span class="icon-[fluent--clock-20-regular] w-5 h-5"></span>
+          <span class="icon-[fluent--calendar-20-regular] w-5 h-5"></span>
           <span>{article()?.created_at.toFormat('yyyy-MM-dd HH:mm:ss')}</span>
         </div>
+        <Show when={article()?.created_at && article()?.updated_at && article()!.created_at !== article()!.updated_at}>
+          <div class="font-bold flex flex-row space-x-2 items-center">
+            <span class="icon-[fluent--calendar-edit-20-regular] w-5 h-5"></span>
+            <span>{article()?.updated_at.toFormat('yyyy-MM-dd HH:mm:ss')}</span>
+          </div>
+        </Show>
         <Show when={accountStore.permissions.includes(Permission.Bulletin)}>
           <a
             class="font-bold hover:underline flex flex-row space-x-2 items-center"
@@ -80,7 +104,12 @@ export default function () {
           </button>
         </Show>
       </div>
-      <Article class="self-center" content={article()?.content || ''} extra={true} headingAnchors={true} />
+      <Show
+        when={inEdit()}
+        fallback={<Article class="self-center" content={article()?.content || ''} extra={true} headingAnchors={true} />}
+      >
+        <EditForm editSource={article() || undefined} onDone={onDone} />
+      </Show>
     </>
   )
 }

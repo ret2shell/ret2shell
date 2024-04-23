@@ -17,13 +17,12 @@ export default function (props: ComponentProps<'article'> & ArticleProps) {
   const render = async (content: string) => {
     setReady(false)
     const { Markdown } = await import('@lib/markdown')
-    const dompurify = await import('isomorphic-dompurify')
     const markdown = new Markdown()
     await markdown.init({
       type: 'html',
       options: { prism: articleProps.extra, katex: articleProps.extra, headingAnchors: articleProps.headingAnchors },
     })
-    return dompurify.sanitize((await markdown.render(content)) as string)
+    return (await markdown.render(content)) as string
   }
   function scrollToView() {
     setTimeout(() => {

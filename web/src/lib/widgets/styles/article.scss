@@ -9,7 +9,11 @@ article.prose * {
 
 article > pre,
 article > pre * {
-  @apply whitespace-pre-wrap text-base break-words bg-layer-content/5 #{!important};
+  @apply whitespace-pre-wrap text-base break-words #{!important};
+}
+
+article > pre {
+  @apply bg-layer-content/5 rounded-md mx-1 #{!important};
 }
 
 code:not(pre code) {
