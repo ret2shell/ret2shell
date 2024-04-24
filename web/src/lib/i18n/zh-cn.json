@@ -87,7 +87,9 @@
     "enableComment": "开启评论区",
     "contentRequired": "请填写公告内容",
     "contentPlaceholder": "公告内容",
-    "deleteSuccess": "删除成功"
+    "deleteSuccess": "删除成功",
+    "fetchFailed": "获取公告列表失败",
+    "loading": "加载中..."
   },
   "admin": {
     "title": "管理"

@@ -71,7 +71,9 @@
     "contentRequired": "請填寫公告內容",
     "contentPlaceholder": "公告內容",
     "deleteSuccess": "刪除成功",
-    "noMore": "沒有公告，看看別的吧"
+    "noMore": "沒有公告，看看別的吧",
+    "fetchFailed": "取得公告清單失敗",
+    "loading": "載入中..."
   },
   "admin": {
     "title": "管理"

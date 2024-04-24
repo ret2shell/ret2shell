@@ -71,7 +71,9 @@
     "contentRequired": "Please fill in the bulletin content",
     "contentPlaceholder": "Bulletin content",
     "deleteSuccess": "deleted successfully",
-    "noMore": "no bulletin here, see something else"
+    "noMore": "no bulletin here, see something else",
+    "fetchFailed": "Failed to fetch bulletin list",
+    "loading": "Loading..."
   },
   "admin": {
     "title": "Admin"
