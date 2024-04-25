@@ -193,7 +193,11 @@
     "stop": "環境を終了する",
     "needLocalDaemon": "使用するにはローカル WSRX に接続する必要があります",
     "box": "動的環境接続",
-    "connecting": "接続中..."
+    "connecting": "接続中...",
+    "wsrxSettings": "WSRX接続設定を変更する",
+    "defaultApiAddr": "デフォルトのアドレスにリセット",
+    "pending": "ローカル認証を待っています",
+    "wsrxDisconnected": "WSRX クライアントはオフラインです。"
   },
   "magic": {
     "illustration": "図",

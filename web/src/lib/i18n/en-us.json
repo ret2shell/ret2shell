@@ -193,7 +193,11 @@
     "stop": "Terminate environment",
     "needLocalDaemon": "Need to connect to local WSRX to use",
     "box": "dynamic environment connection",
-    "connecting": "Connecting..."
+    "connecting": "Connecting...",
+    "wsrxSettings": "Modify WSRX connection settings",
+    "defaultApiAddr": "Reset to default address",
+    "pending": "Waiting for local authorization",
+    "wsrxDisconnected": "WSRX client is offline."
   },
   "magic": {
     "illustration": "illustration",

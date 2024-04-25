@@ -8,8 +8,10 @@ import Timer from '@widgets/timer'
 import Progress from '@widgets/progress'
 import { Instance } from '@models/instance'
 import { DateTime } from 'luxon'
-import { wsrx } from '@/lib/wsrx'
+import { WsrxState, wsrx } from '@/lib/wsrx'
 import { accountStore } from '@/lib/storage/account'
+import Input from '@/lib/widgets/input'
+import { addToast } from '@/lib/storage/toast'
 
 export function InstanceBoxContent() {
   function calcProgress(instance: Instance, now: DateTime) {
@@ -23,26 +25,48 @@ export function InstanceBoxContent() {
   }
 
   const [connecting, setConnecting] = createSignal(false)
+  const [showSettings, setShowSettings] = createSignal(false)
 
   function retryConnect() {
     wsrx.tryConnect().catch(() => {})
     setConnecting(true)
     setTimeout(() => {
-      setConnecting(false)
-      wsrx.checkConnection()
-    }, 5000)
+      wsrx.checkConnection().then(() => {
+        setConnecting(false)
+      })
+    }, 1000)
   }
 
   createEffect(() => {
     if (accountStore.token) untrack(retryConnect)
   })
 
+  let cachedState = WsrxState.Disconnected
+
+  createEffect(() => {
+    if (wsrx.connected() === WsrxState.Disconnected && cachedState !== WsrxState.Disconnected) {
+      addToast({
+        level: 'warning',
+        description: t('instance.wsrxDisconnected')!,
+        duration: 10 * 1000,
+      })
+    }
+    cachedState = wsrx.connected()
+  })
+
   const [now, setNow] = createSignal(DateTime.now())
-  const timer = setInterval(() => {
+  const instanceTimer = setInterval(() => {
     setNow(DateTime.now())
   }, 1000)
+  const heartbeatTimer = setInterval(() => {
+    // Pending or Connected
+    if (wsrx.connected()) {
+      wsrx.checkConnection()
+    }
+  }, 5 * 1000)
   onCleanup(() => {
-    clearInterval(timer)
+    clearInterval(instanceTimer)
+    clearInterval(heartbeatTimer)
   })
   return (
     <div class="flex flex-col space-y-2 max-w-96 w-[calc(100vw-1rem)]">
@@ -59,29 +83,82 @@ export function InstanceBoxContent() {
         >
           <Show when={!connecting()}>
             <span
-              class={`icon-[fluent--fluid-20-regular] w-5 h-5 ${wsrx.connected() ? 'text-success' : 'text-warning'}`}
+              class={`icon-[fluent--fluid-20-regular] w-5 h-5 ${
+                wsrx.connected() === WsrxState.Connected ? 'text-success' : 'text-warning'
+              }`}
             />
           </Show>
           <span
-            class={connecting() ? 'text-base opacity-60' : wsrx.connected() ? 'text-success font-bold' : 'text-warning'}
+            class={
+              connecting()
+                ? 'text-base opacity-60'
+                : wsrx.connected() === WsrxState.Connected
+                  ? 'text-success font-bold'
+                  : 'text-warning'
+            }
           >
             {connecting()
               ? t('instance.connecting')
-              : wsrx.connected()
+              : wsrx.connected() === WsrxState.Connected
                 ? t('instance.connected')
-                : t('instance.disconnected')}
+                : wsrx.connected() === WsrxState.Pending
+                  ? t('instance.pending')
+                  : t('instance.disconnected')}
           </span>
+        </Button>
+        <Button
+          ghost={!showSettings()}
+          square
+          title={t('instance.wsrxSettings')}
+          size="sm"
+          onClick={() => setShowSettings(!showSettings())}
+        >
+          {/* icon-[fluent--settings-20-regular] icon-[fluent--settings-20-filled] */}
+          <span
+            class={`icon-[fluent--settings-20-${
+              showSettings() ? 'filled' : 'regular'
+            }] w-5 h-5 ${showSettings() ? 'text-primary' : ''}`}
+          />
         </Button>
         <Link
           href="https://github.com/XDSEC/WebSocketReflectorX/releases"
           ghost
           square
+          target="_blank"
           title={t('instance.downloadWsrx')}
           size="sm"
         >
           <span class="icon-[fluent--arrow-download-20-regular] w-5 h-5" />
         </Link>
       </Card>
+      <Show when={showSettings()}>
+        <Card contentClass="p-2 flex flex-row space-x-2">
+          <Input
+            size="sm"
+            class="flex-1"
+            placeholder="http://127.0.0.1:3307"
+            value={wsrx.apiAddr()}
+            onBlur={e => {
+              wsrx.setApiAddr(e.target.value)
+            }}
+          ></Input>
+          <Button
+            size="sm"
+            square
+            title={t('instance.defaultApiAddr')}
+            ghost
+            onClick={() => {
+              wsrx.setApiAddr('http://127.0.0.1:3307')
+            }}
+          >
+            <span class="icon-[fluent--arrow-reset-20-regular] w-5 h-5"></span>
+          </Button>
+          {/* NOTE: Just a placable button, when you click it, the input box will trigger `onBlur` to save it. */}
+          <Button size="sm" square title={t('form.save')} ghost>
+            <span class="icon-[fluent--checkmark-20-regular] w-5 h-5"></span>
+          </Button>
+        </Card>
+      </Show>
       <For each={wsrx.instances()}>
         {instance => (
           <Card contentClass="p-2 flex flex-col space-y-2">
