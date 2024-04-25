@@ -3,7 +3,6 @@ import Card from './card'
 import Button from './button'
 import { t } from '../storage/theme'
 import { ToastMessage, removeToast } from '../storage/toast'
-import './styles/toast.scss'
 
 export type ToastProps = {
   toast: ToastMessage

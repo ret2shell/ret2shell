@@ -4,12 +4,11 @@ import Input from './input'
 import Button from './button'
 import { DateTime, MonthNumbers } from 'luxon'
 import { Popover } from '@ark-ui/solid'
-import './styles/card.scss'
+
 import { t } from '../storage/theme'
 import Divider from './divider'
 import Card from './card'
 import { Portal } from 'solid-js/web'
-import './styles/timepicker.scss'
 
 type TimePickerPropsRange =
   | {

@@ -1,7 +1,7 @@
 import { ComponentProps, Show, createEffect, createSignal, onMount, splitProps } from 'solid-js'
-import './styles/editor.scss'
+
 import Card from './card'
-import './styles/card.scss'
+
 import ace from 'ace-builds'
 import 'ace-builds/esm-resolver'
 import { themeStore } from '../storage/theme'

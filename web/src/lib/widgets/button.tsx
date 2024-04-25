@@ -1,4 +1,3 @@
-import './styles/button.scss'
 import { ComponentProps, JSX, Show, createMemo, splitProps } from 'solid-js'
 import Spin from '@assets/animates/spin'
 

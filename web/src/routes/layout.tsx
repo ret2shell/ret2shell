@@ -24,9 +24,7 @@ import Button from '@/lib/widgets/button'
 import { wsrx } from '@/lib/wsrx'
 import { Title, setupTitleResolver } from '@storage/header'
 import { DateTime } from 'luxon'
-import '@widgets/styles/nav.scss'
 import Spin from '@/lib/assets/animates/spin'
-import '@widgets/styles/skeleton.scss'
 
 function GlobalTitleLink(props: { loading: boolean }) {
   return (

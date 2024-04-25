@@ -1,6 +1,5 @@
 import { Pagination, PaginationRootProps } from '@ark-ui/solid'
 import { For } from 'solid-js'
-import './styles/button.scss'
 
 export default function (props: PaginationRootProps) {
   return (

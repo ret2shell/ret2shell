@@ -1,6 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 @layer components {
   .avatar {
     @apply rounded-full overflow-hidden relative outline outline-2 outline-offset-2 outline-primary;

@@ -1,5 +1,5 @@
 import { ComponentProps, JSX, Show, createSignal, splitProps } from 'solid-js'
-import './styles/input.scss'
+
 import { Popover } from '@ark-ui/solid'
 import { Portal } from 'solid-js/web'
 

@@ -1,5 +1,5 @@
 import { Progress, ProgressRootProps } from '@ark-ui/solid'
-import './styles/progress.scss'
+
 import { createMemo } from 'solid-js'
 
 export type ProgressProps = {

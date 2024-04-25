@@ -1,5 +1,4 @@
 import { ComponentProps, splitProps } from 'solid-js'
-import './styles/divider.scss'
 
 export type DividerProps = { direction?: 'horizontal' | 'vertical' }
 

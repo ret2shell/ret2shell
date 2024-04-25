@@ -1,4 +1,3 @@
-import './styles/button.scss'
 import { ComponentProps, JSX, Show, children, createMemo } from 'solid-js'
 import Spin from '@assets/animates/spin'
 import { useMatch } from '@solidjs/router'

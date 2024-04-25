@@ -1,6 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 @layer components {
   .input {
     @apply backdrop-blur text-layer-content outline-layer-content/60 bg-layer-content/5;

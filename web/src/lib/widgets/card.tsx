@@ -1,5 +1,4 @@
 import { ComponentProps, createMemo, splitProps } from 'solid-js'
-import './styles/card.scss'
 
 export type CardProps = {
   solid?: boolean
