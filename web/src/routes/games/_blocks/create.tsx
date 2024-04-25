@@ -124,7 +124,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
               )}
             </Field>
             <div class="flex flex-col space-y-1">
-              <label class="text-sm font-bold text-layer-content/60">{t('game.miscSettings')}</label>
+              <label class="label">{t('game.miscSettings')}</label>
               <div class="flex flex-row">
                 <Field name="can_register_after_started" type="boolean">
                   {(field, props) => (
@@ -195,7 +195,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
               {(field, props) => (
                 <>
                   <div class="flex flex-col space-y-1">
-                    <label class="text-sm font-bold text-layer-content/60" for={props.name}>
+                    <label class="label" for={props.name}>
                       {t('game.weight')}
                       <input class="hidden" type="number" {...props} value={field.value}></input>
                     </label>

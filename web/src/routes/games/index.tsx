@@ -1,4 +1,4 @@
-import KeyGames from './_blocks/keygames'
+import KeyGames from './_blocks/key-games'
 
 export default function () {
   return (

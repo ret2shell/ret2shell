@@ -431,7 +431,7 @@ export default function TimePicker(props: TimerPickerProps & ComponentProps<'div
             </>
           }
         />
-        <Card class="mt-2 !border-none !bg-transparent" contentClass="p-2 flex flex-col space-y-2 bg-layer-content/5">
+        <Card class="mt-2 card-field" contentClass="p-2 flex flex-col space-y-2">
           <PickerCalendar
             value={time()}
             setValue={setTime}

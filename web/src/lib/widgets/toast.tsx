@@ -26,6 +26,22 @@ export default function (props: ComponentProps<'div'> & ToastProps) {
       }, toastMsgProps.toast.duration + 100)
     }
   })
+
+  function getLevelIcon(level: typeof toastMsgProps.toast.level) {
+    switch (level) {
+      case 'info':
+        return 'icon-[fluent--info-20-regular]'
+      case 'success':
+        return 'icon-[fluent--checkmark-circle-20-regular]'
+      case 'warning':
+        return 'icon-[fluent--warning-20-regular]'
+      case 'error':
+        return 'icon-[fluent--dismiss-circle-20-regular]'
+      default:
+        return 'icon-[fluent--info-20-regular]'
+    }
+  }
+
   return (
     <>
       <Card {...otherProps} class={`toast ${otherProps.class}`} contentClass="p-2 group relative">
@@ -35,10 +51,13 @@ export default function (props: ComponentProps<'div'> & ToastProps) {
               <img src={toastMsgProps.toast.img} class="w-24 h-24" />
             </div>
           </Show>
-          <div class="inline-block space-x-2 px-2 py-1">
-            <span class={`text-${toastMsgProps.toast.level}`}>[{toastMsgProps.toast.level[0]}]</span>
-            <span>{toastMsgProps.toast.description}</span>
-          </div>
+          {/* text-info text-success text-warning text-error */}
+          <span class="inline-block space-x-2 px-2 py-1">
+            <span
+              class={`align-middle ${getLevelIcon(toastMsgProps.toast.level)} w-5 h-5 text-${toastMsgProps.toast.level}`}
+            ></span>
+            <span class="text-wrap align-middle">{toastMsgProps.toast.description}</span>
+          </span>
           <Show when={toastMsgProps.toast.reject || toastMsgProps.toast.accept}>
             <div class="flex flex-row items-center justify-end space-x-2">
               <Show when={toastMsgProps.toast.reject}>

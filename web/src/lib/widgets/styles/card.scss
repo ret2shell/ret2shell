@@ -31,5 +31,21 @@
     &-error {
       @apply bg-error/30;
     }
+
+    &-focused {
+      @apply outline outline-2 outline-offset-2;
+    }
+
+    &-field {
+      @apply border-transparent bg-transparent;
+
+      &.card-error {
+        @apply bg-transparent border-error outline-error;
+      }
+
+      &.card-warning {
+        @apply bg-transparent border-warning outline-warning;
+      }
+    }
   }
 }

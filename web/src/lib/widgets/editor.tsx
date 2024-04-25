@@ -124,12 +124,12 @@ export default function Editor(props: EditorProps & ComponentProps<'div'>) {
   const [focused, setFocused] = createSignal(false)
   return (
     <div {...nativeProps} class={`flex flex-col space-y-1 ${nativeProps.class}`}>
-      <label class="text-sm font-bold text-layer-content/60" for={editorProps.name}>
+      <label class="label" for={editorProps.name}>
         {editorProps.title || editorProps.placeholder}
       </label>
       <Card
-        class={`flex-1 ${editorProps.error ? 'border-error outline-error' : '!border-none'} !bg-transparent ${focused() ? 'outline outline-2 outline-offset-2' : ''}`}
-        contentClass={`p-2 ${focused() ? 'bg-layer-content/5' : 'bg-layer-content/5'}`}
+        class={`flex-1 card-field ${editorProps.error ? 'card-error' : ''} ${focused() ? 'card-focused' : ''}`}
+        contentClass="p-2"
       >
         <EditorBare
           {...editorProps}

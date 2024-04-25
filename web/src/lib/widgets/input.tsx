@@ -13,6 +13,7 @@ export type TextInputProps = {
 export default function (props: TextInputProps & ComponentProps<'input'>) {
   const size = props.size || 'md'
   const [inputProps, others] = splitProps(props, ['icon', 'extraBtn', 'size', 'error'])
+  // input-sm input-md
   const mergedInputClasses = () =>
     `input w-0 flex-1 input-${size} ${inputProps.icon ? '!rounded-l-none' : ''} ${others.type === 'password' || inputProps.extraBtn ? '!rounded-r-none' : ''} ${inputProps.error ? 'input-error' : ''}`
 
@@ -29,14 +30,16 @@ export default function (props: TextInputProps & ComponentProps<'input'>) {
     <>
       <Popover.Root autoFocus={false} open={!!props.error} closeOnInteractOutside={false}>
         <Popover.Anchor class={mergedClasses()}>
-          <label class="text-sm font-bold text-layer-content/60" for={props.name}>
-            {props.title || props.placeholder}
-          </label>
+          <Show when={props.title || props.name}>
+            <label class="label" for={props.name}>
+              {props.title || props.name}
+            </label>
+          </Show>
           <div class="flex flex-row">
             <Show when={props.icon}>
               {/* rounded-l-lg rounded-l-md */}
               <div
-                class={`rounded-l-${size === 'md' ? 'lg' : 'md'} flex flex-shrink-0 flex-row items-center justify-center h-12 w-12 bg-layer-content/10`}
+                class={`rounded-l-${size === 'md' ? 'lg' : 'md'} flex flex-shrink-0 flex-row items-center justify-center ${size === 'md' ? 'h-12 w-12' : 'h-8 w-8'} bg-layer-content/10`}
               >
                 {props.icon}
               </div>
