@@ -15,6 +15,8 @@ use tracing_subscriber::{fmt::Layer, prelude::*, EnvFilter};
 pub enum LoggerError {
     #[error("io error: {0}")]
     Io(#[from] std::io::Error),
+    #[error("file logger init error")]
+    FileLoggerInitError(#[from] rolling::InitError),
 }
 
 /// Initialize the logger.
@@ -24,11 +26,22 @@ pub async fn initialize(
     let config = config.clone().unwrap_or(logging::Config {
         level: "info".to_string(),
         directory: "./log".to_string(),
+        files_kept: None,
     });
-    let logging::Config { level, directory } = config;
+    let logging::Config {
+        level,
+        directory,
+        files_kept,
+    } = config;
     tokio::fs::create_dir_all(&directory).await?;
-    let file_appender = rolling::daily(Path::new(&directory).canonicalize()?, "ret2shell.log");
-    // println!("log config: {:?}", config.logging);
+    let mut file_appender = rolling::RollingFileAppender::builder()
+        .rotation(rolling::Rotation::DAILY)
+        .filename_prefix("ret2shell")
+        .filename_suffix("log");
+    if let Some(files_kept) = files_kept {
+        file_appender = file_appender.max_log_files(files_kept);
+    }
+    let file_appender = file_appender.build(Path::new(&directory).canonicalize()?)?;
 
     let (non_blocking_file, _file_guard) = non_blocking(file_appender);
     let (non_blocking_console, _console_guard) = non_blocking(std::io::stdout());

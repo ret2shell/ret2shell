@@ -12,6 +12,8 @@ pub struct Config {
     /// `level` is the minimum log level that will be recorded (e.g., "info",
     /// "debug", "error").
     pub level: String,
+    /// `files_kept` is the last n files that will be kept.
+    pub files_kept: Option<usize>,
 }
 
 impl Merge for Option<Config> {

@@ -53,6 +53,7 @@ tls = 'starttls'                   #  'none' | 'tls' | 'starttls'
 [logging]
 directory = './data/log'
 level = 'info,tower_http=info,sqlx=warn'
+files_kept = 3
 
 [media]
 path = './data/media'
