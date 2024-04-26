@@ -82,9 +82,7 @@ impl IntoResponse for ResponseError {
             ResponseError::InternalServerError(summary, detail) => {
                 log_with_resp!(StatusCode::INTERNAL_SERVER_ERROR, summary, detail)
             }
-            ResponseError::Unauthorized(summary) => {
-                log_with_resp!(StatusCode::UNAUTHORIZED, summary, summary)
-            }
+            ResponseError::Unauthorized(summary) => (StatusCode::UNAUTHORIZED, summary),
             ResponseError::BadRequest(summary) => (StatusCode::BAD_REQUEST, summary),
             ResponseError::Forbidden(summary, detail) => {
                 log_with_resp!(StatusCode::FORBIDDEN, summary, detail)

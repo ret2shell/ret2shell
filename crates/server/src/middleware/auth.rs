@@ -220,14 +220,14 @@ macro_rules! permission_required_any {
             next: axum::middleware::Next,
         | async move {
             if token.id <= 0 {
-                return (axum::http::StatusCode::UNAUTHORIZED, "please login first");
+                return Err(crate::traits::ResponseError::Unauthorized("please login first".to_owned()));
             }
             let required_perms = [$($perm),*];
             tracing::debug!("user permissions: {:?}", token.permissions.0);
             tracing::debug!("required perms: {:?}", required_perms);
             match required_perms.iter().any(|perm| token.permissions.0.contains(perm)) {
                 true => Ok(next.run(req).await),
-                false => (axum::http::StatusCode::FORBIDDEN, "permission denied")
+                false => Err(crate::traits::ResponseError::Forbidden("permission denied".to_owned(), "".to_owned()))
             }
         }
     };
