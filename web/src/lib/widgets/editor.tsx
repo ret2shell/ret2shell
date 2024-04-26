@@ -142,6 +142,9 @@ export default function Editor(props: EditorProps & ComponentProps<'div'>) {
             setFocused(true)
             editorProps.onFocusIn?.()
           }}
+          onFocusOut={() => {
+            setFocused(false)
+          }}
         />
       </Card>
     </div>

@@ -11,7 +11,6 @@
 @import './editor.scss';
 @import './input.scss';
 @import './label.scss';
-@import './popover.scss';
 @import './progress.scss';
 @import './select.scss';
 @import './skeleton.scss';
@@ -62,4 +61,8 @@ body {
 
 .root {
   @apply min-h-full min-w-full m-0 p-0;
+}
+
+[hidden] {
+  @apply hidden;
 }

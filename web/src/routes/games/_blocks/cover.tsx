@@ -36,9 +36,7 @@ export default function (props: ComponentProps<'div'>) {
             class={`w-screen h-screen transition-all ease-out duration-[3000ms] ${expanded() ? 'scale-125 blur-2xl' : ''}`}
             src={gameStore.preload?.cover || gameStore.current?.cover || bgGameDefault}
           />
-          <div
-            class={`absolute top-0 left-0 w-screen h-screen bg-layer/80 flex flex-col items-center justify-center space-y-8`}
-          >
+          <div class={`absolute top-0 left-0 w-screen h-screen bg-layer/80 flex flex-col items-center justify-center`}>
             <Show when={expanded()}>
               <>
                 <svg
@@ -86,7 +84,7 @@ export default function (props: ComponentProps<'div'>) {
               </Show>
             </div>
             <div
-              class={`text-4xl font-bold transition-all ease-out duration-500 delay-1000 overflow-hidden ${expanded() ? 'h-32' : 'h-0'}`}
+              class={`text-4xl font-bold transition-all ease-out duration-500 delay-1000 overflow-hidden mt-8 ${expanded() ? 'h-32' : 'h-0'}`}
             >
               <h1>{gameStore.current?.name}</h1>
             </div>

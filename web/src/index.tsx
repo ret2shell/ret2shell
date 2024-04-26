@@ -9,7 +9,6 @@ import { initTheme, themeStore } from './lib/storage/theme'
 import { Router } from '@solidjs/router'
 import { onMount } from 'solid-js'
 import Background from './lib/blocks/background'
-import 'solid-devtools'
 
 function checkEdition() {
   const compact_edition = import.meta.env.VITE_COMPAT_EDITION

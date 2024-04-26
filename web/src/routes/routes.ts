@@ -1,4 +1,4 @@
-import { lazy } from 'solid-js'
+import { children, lazy } from 'solid-js'
 
 export const routes = {
   path: '/',
@@ -83,6 +83,63 @@ export const routes = {
             {
               path: '/',
               component: lazy(() => import('./games/[game]/index')),
+            },
+            {
+              path: '/writeups',
+              component: lazy(() => import('./games/[game]/writeups/layout')),
+              children: [
+                {
+                  path: '/',
+                  component: lazy(() => import('./games/[game]/writeups/index')),
+                },
+                {
+                  path: '/edit',
+                  component: lazy(() => import('./games/[game]/writeups/edit/index')),
+                },
+                {
+                  path: '/:writeup',
+                  component: lazy(() => import('./games/[game]/writeups/[writeup]/index')),
+                },
+              ],
+            },
+            {
+              path: '/admin',
+              component: lazy(() => import('./games/[game]/admin/layout')),
+              children: [
+                {
+                  path: '/',
+                  component: lazy(() => import('./games/[game]/admin/index')),
+                },
+              ],
+            },
+            {
+              path: '/scoreboard',
+              component: lazy(() => import('./games/[game]/scoreboard/index')),
+            },
+            {
+              path: '/challenges',
+              component: lazy(() => import('./games/[game]/challenges/index')),
+            },
+            {
+              path: '/teams',
+              children: [
+                {
+                  path: '/',
+                  component: lazy(() => import('./games/[game]/teams/index')),
+                },
+                {
+                  path: '/:team',
+                  component: lazy(() => import('./games/[game]/teams/[team]/index')),
+                },
+                {
+                  path: '/create',
+                  component: lazy(() => import('./games/[game]/teams/create/index')),
+                },
+                {
+                  path: '/join',
+                  component: lazy(() => import('./games/[game]/teams/join/index')),
+                },
+              ],
             },
           ],
         },

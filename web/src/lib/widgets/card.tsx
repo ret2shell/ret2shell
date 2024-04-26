@@ -19,6 +19,7 @@ export default function (props: CardProps & ComponentProps<'div'>) {
         .join(' ') + (nativeProps.class ? ` ${nativeProps.class}` : '')
     )
   })
+  // card-info card-success card-warning card-error
   return (
     <div {...nativeProps} class={`${mergedClasses()} ${cardProps.level ? 'card-' + cardProps.level : ''}`}>
       <div class={`card-content ${cardProps.contentClass}`}>{nativeProps.children}</div>

@@ -1,6 +1,6 @@
 import { Popover } from '@ark-ui/solid'
 import { Portal } from 'solid-js/web'
-import { ComponentProps, JSX, splitProps } from 'solid-js'
+import { ComponentProps, JSX, createSignal, splitProps } from 'solid-js'
 import { ButtonProps } from './button'
 export default function (
   props: {
@@ -21,34 +21,41 @@ export default function (
     'square',
   ])
   const [popoverProps, nativeProps] = splitProps(_1, ['children', 'btnContent', 'popContentClass'])
+  const [opened, setOpened] = createSignal(false)
 
-  const classList = {
-    btn: true,
-    // btn-primary btn-info btn-success btn-warning btn-error
-    [`btn-${buttonProps.level}`]: !!buttonProps.level,
-    // btn-sm btn-md
-    [`btn-${buttonProps.size || 'md'}`]: true,
-    'btn-ghost': buttonProps.ghost,
-    'btn-bold': buttonProps.bold,
-    // justify-start justify-center justify-end
-    [`justify-${buttonProps.justify || 'center'}`]: true,
-    uppercase: buttonProps.uppercase,
-    disabled: nativeProps.disabled,
-    'btn-square': buttonProps.square,
+  const classList = () => {
+    return {
+      btn: true,
+      // btn-primary btn-info btn-success btn-warning btn-error
+      [`btn-${buttonProps.level}`]: !!buttonProps.level,
+      // btn-sm btn-md
+      [`btn-${buttonProps.size || 'md'}`]: true,
+      'btn-ghost': buttonProps.ghost && !opened(),
+      'btn-bold': buttonProps.bold,
+      // justify-start justify-center justify-end
+      [`justify-${buttonProps.justify || 'center'}`]: true,
+      uppercase: buttonProps.uppercase,
+      disabled: nativeProps.disabled,
+      'btn-square': buttonProps.square,
+    }
   }
-  const mergedClass = Object.keys(classList)
-    .filter(key => classList[key])
-    .join(' ')
+  const mergedClass = () =>
+    Object.keys(classList())
+      .filter(key => classList()[key])
+      .join(' ')
   return (
-    <Popover.Root autoFocus={false}>
-      <Popover.Trigger {...nativeProps} class={`${mergedClass} ${nativeProps.class}`} title={nativeProps.title}>
+    <Popover.Root
+      autoFocus={false}
+      onOpenChange={detail => {
+        setOpened(detail.open)
+      }}
+    >
+      <Popover.Trigger {...nativeProps} class={`${mergedClass()} ${nativeProps.class}`} title={nativeProps.title}>
         {props.btnContent}
       </Popover.Trigger>
       <Portal>
         <Popover.Positioner>
-          <Popover.Content class={`popover-content ${popoverProps.popContentClass}`}>
-            {popoverProps.children}
-          </Popover.Content>
+          <Popover.Content class={popoverProps.popContentClass}>{popoverProps.children}</Popover.Content>
         </Popover.Positioner>
       </Portal>
     </Popover.Root>

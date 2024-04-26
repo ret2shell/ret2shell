@@ -73,7 +73,7 @@ export function InstanceBoxContent() {
       <Card contentClass="p-2 flex flex-row space-x-2">
         <Button
           disabled={connecting()}
-          loading={connecting()}
+          loading={connecting() || wsrx.connected() === WsrxState.Pending}
           class="flex-1"
           justify="start"
           ghost
@@ -81,7 +81,7 @@ export function InstanceBoxContent() {
           size="sm"
           onClick={retryConnect}
         >
-          <Show when={!connecting()}>
+          <Show when={!connecting() && wsrx.connected() !== WsrxState.Pending}>
             <span
               class={`icon-[fluent--fluid-20-regular] w-5 h-5 ${
                 wsrx.connected() === WsrxState.Connected ? 'text-success' : 'text-warning'

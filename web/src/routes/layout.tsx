@@ -131,7 +131,7 @@ function GameNav(props: { size: 'sm' | 'md' }) {
           <span>{t('game.scoreboard.title')}</span>
         </Link>
       </li>
-      <Show when={gameStore.current?.archive_at && gameStore.current.archive_at < DateTime.now()}>
+      <Show when={gameStore.current?.end_at && gameStore.current.end_at < DateTime.now()}>
         <li class="nav">
           <Link
             class="w-full"

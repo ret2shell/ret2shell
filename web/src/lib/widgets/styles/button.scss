@@ -1,6 +1,6 @@
 @layer components {
   .btn {
-    @apply gap-2 font-bold no-underline duration-200 ease-out backdrop-blur;
+    @apply gap-2 font-bold no-underline duration-200 ease-out backdrop-blur border border-transparent;
     @apply inline-flex shrink-0 cursor-pointer select-none items-center text-center;
     @apply text-layer-content outline-layer-content/60 bg-layer-content/10;
     /* default md size */

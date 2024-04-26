@@ -17,12 +17,9 @@
   --spread: 8px;
   --offset: 0px;
 
-  @apply rounded-lg h-12 w-48 relative focus:outline-none;
+  @apply rounded-lg h-12 w-48 relative focus:outline-none border-none overflow-hidden isolate;
   background-color: var(--darkmode-clr-background-day);
   font-size: 1em;
-  border: none;
-  overflow: hidden;
-  isolation: isolate;
   transition: all 0.75s var(--darkmode-ease);
 
   .darkmode-stars {
@@ -30,17 +27,12 @@
   }
 
   .darkmode-button {
-    position: absolute;
+    @apply absolute right-auto top-1/2 -translate-y-1/2 rounded-full cursor-pointer;
     left: 0.25em;
-    right: auto;
-    top: 50%;
-    transform: translate(0, -50%);
     width: var(--darkmode-button-width);
     height: var(--darkmode-button-width);
-    border-radius: 50%;
     background: radial-gradient(var(--darkmode-clr-sun-lgt), transparent);
     background-color: var(--darkmode-clr-sun);
-    cursor: pointer;
     box-shadow:
       0px 0px 0em 1em rgb(255 255 255 / 0.2),
       0px 0px 0em 2em rgb(255 255 255 / 0.2),

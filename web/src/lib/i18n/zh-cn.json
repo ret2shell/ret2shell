@@ -75,7 +75,8 @@
     "teamSizeRequired": "请填写队伍人数限制",
     "teamSizeMinExceeded": "队伍成员最少一人",
     "teamSizeMaxExceeded": "队伍成员最多不能超过 100 人，请考虑共享账号",
-    "createFailed": "创建失败"
+    "createFailed": "创建失败",
+    "writeupsOnlyOpenWhenArchived": "题解仅在赛事归档之后才公开！"
   },
   "bulletin": {
     "title": "公告",

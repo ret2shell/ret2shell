@@ -1,15 +1,15 @@
-import { Pagination, PaginationRootProps, PaginationContext } from '@ark-ui/solid'
+import { Pagination, PaginationRootProps } from '@ark-ui/solid'
 import { For } from 'solid-js'
 
 export default function (props: PaginationRootProps) {
   return (
     <>
       <Pagination.Root {...props} class={`flex flex-row space-x-2 items-center justify-center ${props.class}`}>
-        {api => (
-          <>
-            <Pagination.PrevTrigger class="btn btn-md btn-square btn-ghost justify-center">
-              <span class="icon-[fluent--chevron-double-left-20-regular] w-5 h-5" />
-            </Pagination.PrevTrigger>
+        <Pagination.PrevTrigger class="btn btn-md btn-square btn-ghost justify-center">
+          <span class="icon-[fluent--chevron-double-left-20-regular] w-5 h-5" />
+        </Pagination.PrevTrigger>
+        <Pagination.Context>
+          {api => (
             <For each={api().pages}>
               {(page, index) =>
                 page.type === 'page' ? (
@@ -24,11 +24,11 @@ export default function (props: PaginationRootProps) {
                 )
               }
             </For>
-            <Pagination.NextTrigger class="btn btn-md btn-square btn-ghost justify-center">
-              <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
-            </Pagination.NextTrigger>
-          </>
-        )}
+          )}
+        </Pagination.Context>
+        <Pagination.NextTrigger class="btn btn-md btn-square btn-ghost justify-center">
+          <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
+        </Pagination.NextTrigger>
       </Pagination.Root>
     </>
   )

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "@ark-ui/solid": "^2.2.0",
+    "@ark-ui/solid": "3.0.0-1",
     "@fontsource/jetbrains-mono": "^5.0.20",
     "@modular-forms/solid": "^0.20.0",
     "@reverier/ky": "^1.2.3",
@@ -53,7 +53,6 @@
     "postcss-import": "^16.1.0",
     "prettier": "^3.2.5",
     "sass": "^1.75.0",
-    "solid-devtools": "^0.30.1",
     "solid-refresh": "^0.7.5",
     "tailwindcss": "^3.4.3",
     "tslib": "^2.6.2",

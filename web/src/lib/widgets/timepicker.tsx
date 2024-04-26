@@ -49,122 +49,124 @@ function TimePickerButton(props: {
   const [hour, setHour] = createSignal(props.date.hour)
   const [minute, setMinute] = createSignal(props.date.minute)
   return (
-    <Popover.Root autoFocus={false} open={timePickerOpened()} onInteractOutside={() => setTimePickerOpened(false)}>
-      <Popover.Anchor>
-        <Button
-          ghost={!props.active && !timePickerOpened()}
-          square
-          class="relative"
-          disabled={props.disabled}
-          onClick={() => {
-            if (props.type === 'time') {
-              setTimePickerOpened(true)
-            } else {
-              props.onDone(props.date)
-            }
-          }}
-          type="button"
-        >
-          <span
-            classList={{
-              'opacity-30': !props.current,
-              'text-primary': currentDate.equals(props.date),
+    <>
+      <Popover.Root autoFocus={false} open={timePickerOpened()} onInteractOutside={() => setTimePickerOpened(false)}>
+        <Popover.Anchor>
+          <Button
+            ghost={!props.active && !timePickerOpened()}
+            square
+            class="relative"
+            disabled={props.disabled}
+            onClick={() => {
+              if (props.type === 'time') {
+                setTimePickerOpened(true)
+              } else {
+                props.onDone(props.date)
+              }
             }}
+            type="button"
           >
-            {props.date.day.toString().padStart(2, '0')}
-          </span>
-        </Button>
-      </Popover.Anchor>
-      <Portal>
-        <Popover.Positioner>
-          <Popover.Content class="card">
-            <div class="card-content p-2 flex flex-col space-y-2">
-              <div class="flex flex-row space-x-2">
-                <div class="flex flex-col space-y-2">
-                  <Button
-                    square
-                    ghost
-                    type="button"
-                    size="sm"
-                    onClick={() => {
-                      setHour((hour() - 1 + 24) % 24)
-                    }}
-                  >
-                    <span class="icon-[fluent--chevron-up-20-regular] w-5 h-5"></span>
-                  </Button>
-                  <Button square ghost type="button" size="sm">
-                    {hour().toString().padStart(2, '0')}
-                  </Button>
-                  <Button
-                    square
-                    ghost
-                    type="button"
-                    size="sm"
-                    onClick={() => {
-                      setHour((hour() + 1) % 24)
-                    }}
-                  >
-                    <span class="icon-[fluent--chevron-down-20-regular] w-5 h-5"></span>
-                  </Button>
-                </div>
-                <div class="flex flex-col space-y-2">
-                  <Button
-                    square
-                    ghost
-                    type="button"
-                    size="sm"
-                    onClick={() => {
-                      if (minute() < 10) {
+            <span
+              classList={{
+                'opacity-30': !props.current,
+                'text-primary': currentDate.equals(props.date),
+              }}
+            >
+              {props.date.day.toString().padStart(2, '0')}
+            </span>
+          </Button>
+        </Popover.Anchor>
+        <Portal>
+          <Popover.Positioner>
+            <Popover.Content class="card">
+              <div class="card-content p-2 flex flex-col space-y-2">
+                <div class="flex flex-row space-x-2">
+                  <div class="flex flex-col space-y-2">
+                    <Button
+                      square
+                      ghost
+                      type="button"
+                      size="sm"
+                      onClick={() => {
                         setHour((hour() - 1 + 24) % 24)
-                      }
-                      setMinute((minute() - 10 + 60) % 60)
-                    }}
-                  >
-                    <span class="icon-[fluent--chevron-up-20-regular] w-5 h-5"></span>
-                  </Button>
-                  <Button square ghost type="button" size="sm">
-                    {minute().toString().padStart(2, '0')}
-                  </Button>
-                  <Button
-                    square
-                    ghost
-                    type="button"
-                    size="sm"
-                    onClick={() => {
-                      if (minute() >= 50) {
+                      }}
+                    >
+                      <span class="icon-[fluent--chevron-up-20-regular] w-5 h-5"></span>
+                    </Button>
+                    <Button square ghost type="button" size="sm">
+                      {hour().toString().padStart(2, '0')}
+                    </Button>
+                    <Button
+                      square
+                      ghost
+                      type="button"
+                      size="sm"
+                      onClick={() => {
                         setHour((hour() + 1) % 24)
-                      }
-                      setMinute((minute() + 10) % 60)
-                    }}
-                  >
-                    <span class="icon-[fluent--chevron-down-20-regular] w-5 h-5"></span>
-                  </Button>
+                      }}
+                    >
+                      <span class="icon-[fluent--chevron-down-20-regular] w-5 h-5"></span>
+                    </Button>
+                  </div>
+                  <div class="flex flex-col space-y-2">
+                    <Button
+                      square
+                      ghost
+                      type="button"
+                      size="sm"
+                      onClick={() => {
+                        if (minute() < 10) {
+                          setHour((hour() - 1 + 24) % 24)
+                        }
+                        setMinute((minute() - 10 + 60) % 60)
+                      }}
+                    >
+                      <span class="icon-[fluent--chevron-up-20-regular] w-5 h-5"></span>
+                    </Button>
+                    <Button square ghost type="button" size="sm">
+                      {minute().toString().padStart(2, '0')}
+                    </Button>
+                    <Button
+                      square
+                      ghost
+                      type="button"
+                      size="sm"
+                      onClick={() => {
+                        if (minute() >= 50) {
+                          setHour((hour() + 1) % 24)
+                        }
+                        setMinute((minute() + 10) % 60)
+                      }}
+                    >
+                      <span class="icon-[fluent--chevron-down-20-regular] w-5 h-5"></span>
+                    </Button>
+                  </div>
                 </div>
+                <Button
+                  level="primary"
+                  type="button"
+                  size="sm"
+                  onClick={() => {
+                    setTimePickerOpened(false)
+                    props.onDone(
+                      DateTime.fromObject({
+                        year: props.date.year,
+                        month: props.date.month,
+                        day: props.date.day,
+                        hour: hour(),
+                        minute: minute(),
+                      })
+                    )
+                  }}
+                >
+                  OK
+                </Button>
               </div>
-              <Button
-                level="primary"
-                type="button"
-                size="sm"
-                onClick={() => {
-                  setTimePickerOpened(false)
-                  props.onDone(
-                    DateTime.fromObject({
-                      year: props.date.year,
-                      month: props.date.month,
-                      day: props.date.day,
-                      hour: hour(),
-                      minute: minute(),
-                    })
-                  )
-                }}
-              >
-                OK
-              </Button>
-            </div>
-          </Popover.Content>
-        </Popover.Positioner>
-      </Portal>
-    </Popover.Root>
+            </Popover.Content>
+          </Popover.Positioner>
+        </Portal>
+      </Popover.Root>
+    </>
   )
 }
 
