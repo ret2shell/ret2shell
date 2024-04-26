@@ -55,9 +55,11 @@ export default function () {
 
   createEffect(() => {
     if (keyGames().length > 0) {
-      if (selectedGameId() === null && keyGames().find(game => game.id === selectedGameId()) === undefined) {
-        setSearchParams({ selected: keyGames()[0].id })
-      }
+      untrack(() => {
+        if (selectedGameId() === null && keyGames().find(game => game.id === selectedGameId()) === undefined) {
+          setSearchParams({ selected: keyGames()[0].id })
+        }
+      })
     }
   })
 
@@ -100,8 +102,8 @@ export default function () {
             level="primary"
             class="w-4/5"
             onClick={() => {
-              setShowCreate(true)
               setSearchParams({ selected: undefined })
+              setShowCreate(true)
             }}
           >
             <span class="icon-[fluent--add-20-regular] w-5 h-5 opacity-60"></span>
