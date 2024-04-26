@@ -88,7 +88,8 @@
     "teamSizeMinExceeded": "队伍成员最少一人",
     "teamSizeMaxExceeded": "队伍成员最多不能超过 100 人，请考虑共享账号",
     "createFailed": "创建失败",
-    "writeupsOnlyOpenWhenArchived": "题解仅在赛事归档之后才公开！"
+    "writeupsOnlyOpenWhenArchived": "题解仅在赛事归档之后才公开！",
+    "adminCanNotTakePartIn": "管理员不能参赛"
   },
   "bulletin": {
     "title": "公告",

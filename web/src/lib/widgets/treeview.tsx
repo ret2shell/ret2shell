@@ -46,27 +46,29 @@ export default function TreeView(props: TreeViewProps) {
               size={props.size}
               justify="start"
               ghost
-              class="w-full"
+              title={node.name}
+              class="w-full overflow-hidden"
               href={node.type === 'item' && node.link ? node.link : '#'}
               activeMatch="exact"
             >
               <span class={`${node.icon} w-5 h-5`}></span>
-              <span class="flex-1 text-start">{node.name}</span>
+              <span class="flex-1 text-start truncate">{node.name}</span>
               <Show when={node.type === 'item' && node.extraPart}>{node.type === 'item' && node.extraPart}</Show>
             </Link>
           }
         >
           <Button
             ghost
+            title={node.name}
             size={props.size}
             justify="start"
-            class="w-full"
+            class="w-full overflow-hidden"
             onClick={() => {
               setShowChildren(!showChildren())
             }}
           >
             <span class={`${node.icon} w-5 h-5`}></span>
-            <span class="flex-1 text-start">{node.name}</span>
+            <span class="flex-1 text-start truncate">{node.name}</span>
             <span
               class={`icon-[fluent--chevron-right-20-regular] w-5 h-5 transition-transform ${showChildren() ? 'rotate-90' : 'rotate-0'}`}
             ></span>

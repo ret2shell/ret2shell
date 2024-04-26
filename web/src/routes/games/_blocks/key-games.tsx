@@ -32,7 +32,7 @@ export default function () {
   const selectedGameId = createMemo(() => {
     const result = searchParams.selected ? parseInt(searchParams.selected) : NaN
     if (isNaN(result)) {
-      return null
+      return gameStore.games.at(0)?.id || null
     }
     if (result) {
       setShowCreate(false)
@@ -51,16 +51,6 @@ export default function () {
   })
   createEffect(() => {
     setGameStore({ preload: selectedGame() || null })
-  })
-
-  createEffect(() => {
-    if (keyGames().length > 0) {
-      untrack(() => {
-        if (selectedGameId() === null && keyGames().find(game => game.id === selectedGameId()) === undefined) {
-          setSearchParams({ selected: keyGames()[0].id })
-        }
-      })
-    }
   })
 
   function fetchGames() {
@@ -252,9 +242,9 @@ export default function () {
                 class="absolute top-2 right-2"
                 level={
                   selectedGame()
-                    ? DateTime.now() < selectedGame()!.start_at
+                    ? DateTime.now() < (selectedGame()?.start_at || DateTime.now())
                       ? 'info'
-                      : DateTime.now() > selectedGame()!.end_at
+                      : DateTime.now() > (selectedGame()?.end_at || DateTime.now())
                         ? 'warning'
                         : 'success'
                     : 'error'
@@ -262,9 +252,9 @@ export default function () {
               >
                 <span>
                   {selectedGame()
-                    ? DateTime.now() < selectedGame()!.start_at
+                    ? DateTime.now() < (selectedGame()?.start_at || DateTime.now())
                       ? t('game.pending')
-                      : DateTime.now() > selectedGame()!.end_at
+                      : DateTime.now() > (selectedGame()?.end_at || DateTime.now())
                         ? t('game.ended')
                         : t('game.started')
                     : t('game.unknown')}

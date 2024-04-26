@@ -7,16 +7,10 @@ import Link from '@widgets/link'
 import Button from '@widgets/button'
 import Card from '@widgets/card'
 import Calendar from './calendar'
-import { getVersion } from '@/lib/api/platform'
 import { Title } from '@storage/header'
 import { useSearchParams } from '@solidjs/router'
 
 export default function () {
-  getVersion()
-    .then(version => {
-      setPlatformStore({ version })
-    })
-    .catch(() => {})
   const [searchParams] = useSearchParams()
   let calendarSection: HTMLElement
   onMount(() => {

@@ -1,4 +1,4 @@
-import { Show, createEffect, createSignal, untrack } from 'solid-js'
+import { Match, Show, Switch, createEffect, createSignal, untrack } from 'solid-js'
 import { accountStore, userRefresh, userReset } from '@storage/account'
 import Link from '@widgets/link'
 import Popover from '@widgets/popover'
@@ -9,6 +9,9 @@ import Button from '@/lib/widgets/button'
 import { useNavigate } from '@solidjs/router'
 import { logout } from '@/lib/api/account'
 import { clearToasts } from '@/lib/storage/toast'
+import { gameStore } from '@/lib/storage/game'
+import { HostType } from '@/lib/models/game'
+import { Permission } from '@/lib/models/user'
 
 export default function UserBox() {
   createEffect(() => {
@@ -90,6 +93,24 @@ export default function UserBox() {
                 </Show>
               </Button>
             </Card>
+            <Show when={gameStore.current && gameStore.current.host_type === HostType.CTFGame}>
+              <Card contentClass="p-2 flex flex-row space-x-2">
+                <Switch>
+                  <Match
+                    when={
+                      accountStore.permissions.includes(Permission.Host) ||
+                      (accountStore.permissions.includes(Permission.Game) &&
+                        gameStore.current?.admins.includes(accountStore.id!))
+                    }
+                  >
+                    <Button size="sm" justify="start" class="flex-1" disabled>
+                      <span class="icon-[fluent--flag-20-regular] w-5 h-5 text-primary" />
+                      <span>{t('game.adminCanNotTakePartIn')}</span>
+                    </Button>
+                  </Match>
+                </Switch>
+              </Card>
+            </Show>
           </div>
         </Popover>
       </Show>

@@ -72,7 +72,8 @@
     "teamSizeMinExceeded": "At least one team member",
     "teamSizeMaxExceeded": "The maximum number of team members is 100, please consider sharing accounts",
     "createFailed": "Create failed",
-    "writeupsOnlyOpenWhenArchived": "The writeups will only be made public after the game is archived!"
+    "writeupsOnlyOpenWhenArchived": "The writeups will only be made public after the game is archived!",
+    "adminCanNotTakePartIn": "Administrators cannot participate"
   },
   "bulletin": {
     "title": "Bulletin",

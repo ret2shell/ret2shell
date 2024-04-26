@@ -15,7 +15,7 @@ import { Permission } from '@models/user'
 import Popover from '@widgets/popover'
 import Card from '@widgets/card'
 import NotificationBox, { NotificationBoxContent } from './_blocks/notification-box'
-import { getPlatformInfo } from '@/lib/api/platform'
+import { getPlatformInfo, getVersion } from '@/lib/api/platform'
 import { addToast, removeToast, toastStore } from '@/lib/storage/toast'
 import Divider from '@/lib/widgets/divider'
 import Toasts from './_blocks/toasts'
@@ -93,7 +93,7 @@ function GlobalNav(props: { size: 'sm' | 'md' }) {
       >
         <li class="nav">
           <Link class="w-full" href="/admin" activeMatch="partial" ghost justify="start" size={props.size}>
-            <span class="icon-[fluent--organization-20-regular] w-5 h-5" />
+            <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
             <span>{t('admin.title')}</span>
           </Link>
         </li>
@@ -359,6 +359,32 @@ export default function (props: { children?: JSX.Element }) {
         }, 1000)
       }
     })
+  getVersion()
+    .then(version => {
+      setPlatformStore({ version })
+      console.log(
+        `\n%cR%cet %c2 %cS%chell %cv%c${version}\n\n%cCopyright (c) 2022 - 2024 %cRet 2 Shell%c, All rights reserved.\n`,
+        'color: #0078D6; font-weight: bold; font-size: 1.5rem;',
+        'color: currentColor; font-weight: bold; font-size: 1.5rem;',
+        'color: #808080; font-weight: bold; font-size: 1.5rem;',
+        'color: #f83030; font-weight: bold; font-size: 1.5rem;',
+        'color: currentColor; font-weight: bold; font-size: 1.5rem;',
+        'color: #0078D6',
+        'color: #808080',
+        'color: #808080',
+        'color: #808080;text-decoration: underline;',
+        'color: #808080;'
+      )
+      console.log(
+        `\n%cHaving issue? You can open a ticket on https://github.com/ret2shell, any bug reports or feature requests are welcome.\n`,
+        'color: currentColor;'
+      )
+      console.log(
+        `\n%cIf you want to self-host CTF platforms or look for further cooperating, please contact ret2shell@woooo.tech.\n`,
+        'color: currentColor;'
+      )
+    })
+    .catch(() => {})
   return (
     <>
       <Title title={platformStore.config.name || t('platform.name')!} />

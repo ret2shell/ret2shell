@@ -72,7 +72,8 @@
     "teamSizeMinExceeded": "隊伍成員最少一人",
     "teamSizeMaxExceeded": "隊伍成員最多不能超過 100 人，請考慮共享帳號",
     "createFailed": "創建失敗",
-    "writeupsOnlyOpenWhenArchived": "題解僅在賽事歸檔後才公開！"
+    "writeupsOnlyOpenWhenArchived": "題解僅在賽事歸檔後才公開！",
+    "adminCanNotTakePartIn": "管理員不能參賽"
   },
   "bulletin": {
     "title": "公告",

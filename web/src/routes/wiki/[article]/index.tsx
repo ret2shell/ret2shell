@@ -27,7 +27,7 @@ export default function () {
       getWiki(article_id())
         .then(resp => {
           setWikiStore({ current: resp })
-          console.log(resp)
+          // console.log(resp)
         })
         .catch((err: HTTPError) => {
           err.response.text().then(reason => {

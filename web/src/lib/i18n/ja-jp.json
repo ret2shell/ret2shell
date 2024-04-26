@@ -72,7 +72,8 @@
     "teamSizeMinExceeded": "少なくとも 1 人のチームメンバー",
     "teamSizeMaxExceeded": "チームメンバーの最大数は 100 です。アカウントの共有を検討してください。",
     "createFailed": "作成に失敗しました",
-    "writeupsOnlyOpenWhenArchived": "ソリューションはイベントがアーカイブされた後にのみ公開されます！"
+    "writeupsOnlyOpenWhenArchived": "ソリューションはイベントがアーカイブされた後にのみ公開されます！",
+    "adminCanNotTakePartIn": "管理者は参加できません"
   },
   "bulletin": {
     "title": "アナウンス",
