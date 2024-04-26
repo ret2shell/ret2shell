@@ -1,5 +1,6 @@
 import { getGame } from '@/lib/api/game'
 import { gameStore, setGameStore } from '@/lib/storage/game'
+import { Title } from '@/lib/storage/header'
 import { useParams } from '@solidjs/router'
 import { JSX, onCleanup } from 'solid-js'
 
@@ -14,5 +15,10 @@ export default function (props: { children?: JSX.Element }) {
       setGameStore({ current: resp })
     })
   }
-  return <>{props.children}</>
+  return (
+    <>
+      <Title title={gameStore.current?.name || 'CTF'} />
+      {props.children}
+    </>
+  )
 }

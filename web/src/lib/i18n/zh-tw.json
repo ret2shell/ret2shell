@@ -14,7 +14,18 @@
     "yes": "確定"
   },
   "wiki": {
-    "title": "知識"
+    "title": "知識",
+    "titleRequired": "請填寫文章標題",
+    "titlePlaceholder": "文章標題",
+    "enableComment": "開啟評論區",
+    "contentRequired": "請填寫文章內容",
+    "contentPlaceholder": "文章內容",
+    "pathRequired": "請填寫文章路徑",
+    "pathPlaceholder": "文章路徑",
+    "draft": "草稿",
+    "published": "發布",
+    "fetchTocFailed": "取得文章索引目錄失敗",
+    "deleteSuccess": "刪除成功"
   },
   "training": {
     "title": "訓練"

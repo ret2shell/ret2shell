@@ -56,6 +56,14 @@ export const routes = {
           path: '/',
           component: lazy(() => import('./wiki/index')),
         },
+        {
+          path: '/create',
+          component: lazy(() => import('./wiki/create/index')),
+        },
+        {
+          path: '/:article',
+          component: lazy(() => import('./wiki/[article]/index')),
+        },
       ],
     },
     {

@@ -87,8 +87,9 @@ async fn update_wiki(
 }
 
 async fn delete_wiki(
-    State(ref db): State<Database>, Path(article_id): Path<i64>,
+    State(ref db): State<Database>, State(ref cache): State<Cache>, Path(article_id): Path<i64>,
 ) -> Result<impl IntoResponse, ResponseError> {
     article::delete(&db.conn, article_id).await?;
+    cache.at("wiki").del("toc").await?; // remove cache
     Ok(())
 }

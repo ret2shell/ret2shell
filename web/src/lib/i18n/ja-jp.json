@@ -14,7 +14,18 @@
     "yes": "もちろん"
   },
   "wiki": {
-    "title": "知識"
+    "title": "知識",
+    "titleRequired": "記事タイトルをご記入ください",
+    "titlePlaceholder": "記事タイトル",
+    "enableComment": "コメントエリアを開く",
+    "contentRequired": "記事の内容をご記入ください",
+    "contentPlaceholder": "記事の内容",
+    "pathRequired": "記事のパスを入力してください",
+    "pathPlaceholder": "記事のパス",
+    "draft": "下書き",
+    "published": "リリース",
+    "fetchTocFailed": "記事インデックスディレクトリの取得に失敗しました",
+    "deleteSuccess": "正常に削除されました"
   },
   "training": {
     "title": "練習する"

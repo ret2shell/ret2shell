@@ -14,7 +14,18 @@
     "yes": "确定"
   },
   "wiki": {
-    "title": "知识"
+    "title": "知识",
+    "titleRequired": "请填写文章标题",
+    "titlePlaceholder": "文章标题",
+    "enableComment": "开启评论区",
+    "contentRequired": "请填写文章内容",
+    "contentPlaceholder": "文章内容",
+    "pathRequired": "请填写文章路径",
+    "pathPlaceholder": "文章路径",
+    "draft": "草稿",
+    "published": "发布",
+    "fetchTocFailed": "获取文章索引目录失败",
+    "deleteSuccess": "删除成功"
   },
   "training": {
     "title": "训练"

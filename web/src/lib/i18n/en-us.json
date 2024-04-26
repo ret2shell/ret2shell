@@ -14,7 +14,18 @@
     "yes": "Yes"
   },
   "wiki": {
-    "title": "Wiki"
+    "title": "Wiki",
+    "titleRequired": "Please fill in the article title",
+    "titlePlaceholder": "Article title",
+    "enableComment": "Open comment area",
+    "contentRequired": "Please fill in the article content",
+    "contentPlaceholder": "Article content",
+    "pathRequired": "Please fill in the article path",
+    "pathPlaceholder": "Article path",
+    "draft": "draft",
+    "published": "release",
+    "fetchTocFailed": "Failed to get wiki toc",
+    "deleteSuccess": "successfully deleted"
   },
   "training": {
     "title": "Training"

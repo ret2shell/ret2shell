@@ -1,3 +1,11 @@
+import { gameStore } from '@/lib/storage/game'
+import { Title } from '@/lib/storage/header'
+import { t } from '@/lib/storage/theme'
+
 export default function () {
-  return <></>
+  return (
+    <>
+      <Title title={`${t('game.scoreboard.title')} - ${gameStore.current?.name || 'CTF'}`} />
+    </>
+  )
 }

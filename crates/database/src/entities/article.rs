@@ -27,10 +27,10 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 pub enum AccessPolicy {
     #[default]
     Bulletin = 0,
-    Wiki     = 1,
-    Game     = 2,
-    WriteUp  = 3,
-    Answer   = 4,
+    Wiki = 1,
+    Game = 2,
+    WriteUp = 3,
+    Answer = 4,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
@@ -66,6 +66,7 @@ pub struct ExModel {
     #[serde(with = "ts_seconds")]
     pub updated_at: DateTime<Utc>,
     pub title: String,
+    pub path: ArticlePath,
     pub content: Option<String>,
     pub publisher_id: i64,
     pub publisher_name: String,
