@@ -58,6 +58,7 @@ export default function (props: ComponentProps<'article'> & ArticleProps) {
           class={`article !max-w-5xl w-full ${nativeProps.class}`}
           innerHTML={contentHtml()}
         ></article>
+        <div class="h-64"></div>
       </Show>
     </>
   )

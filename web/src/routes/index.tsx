@@ -26,7 +26,7 @@ export default function () {
         if (result) {
           setTimeout(() => {
             calendarSection.scrollIntoView({ behavior: 'smooth' })
-          })
+          }, 1000)
         }
       } catch {
         // prevent lint

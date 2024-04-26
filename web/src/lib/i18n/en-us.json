@@ -25,7 +25,8 @@
     "draft": "draft",
     "published": "release",
     "fetchTocFailed": "Failed to get wiki toc",
-    "deleteSuccess": "successfully deleted"
+    "deleteSuccess": "successfully deleted",
+    "selectWikiToRead": "What do you want to learn today?"
   },
   "training": {
     "title": "Training"

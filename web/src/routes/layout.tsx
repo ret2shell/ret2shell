@@ -212,7 +212,7 @@ function TitleBar() {
                       </Match>
                     </Switch>
                     <Divider direction="horizontal" />
-                    <Show when={accountStore.token !== null}>
+                    <Show when={accountStore.token !== null && gameStore.current}>
                       <Button
                         justify="start"
                         size="sm"
@@ -283,7 +283,7 @@ function TitleBar() {
           <div class="flex-1"></div>
           <div class="flex flex-row space-x-2">
             <div class="hidden lg:flex flex-row space-x-2">
-              <Show when={accountStore.token !== null}>
+              <Show when={accountStore.token !== null && gameStore.current}>
                 <InstanceBox />
               </Show>
               <NotificationBox />

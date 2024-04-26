@@ -25,7 +25,8 @@
     "draft": "下書き",
     "published": "リリース",
     "fetchTocFailed": "記事インデックスディレクトリの取得に失敗しました",
-    "deleteSuccess": "正常に削除されました"
+    "deleteSuccess": "正常に削除されました",
+    "selectWikiToRead": "今日は何を学びたいですか?"
   },
   "training": {
     "title": "練習する"

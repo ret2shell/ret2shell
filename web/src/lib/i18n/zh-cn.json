@@ -25,7 +25,8 @@
     "draft": "草稿",
     "published": "发布",
     "fetchTocFailed": "获取文章索引目录失败",
-    "deleteSuccess": "删除成功"
+    "deleteSuccess": "删除成功",
+    "selectWikiToRead": "今天想学些什么？"
   },
   "training": {
     "title": "训练"
