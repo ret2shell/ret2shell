@@ -61,7 +61,7 @@ export default function (props: TextInputProps & ComponentProps<'input'>) {
         </Popover.Anchor>
         <Portal>
           <Popover.Positioner>
-            <Popover.Content class={`card ${props.error ? 'card-error' : ''} z-50`}>
+            <Popover.Content class={`card ${props.error ? 'card-error' : ''}`}>
               <p class="card-content px-4 p-2">{props.error}</p>
             </Popover.Content>
           </Popover.Positioner>

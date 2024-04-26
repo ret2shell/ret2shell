@@ -4,7 +4,6 @@ import Input from './input'
 import Button from './button'
 import { DateTime, MonthNumbers } from 'luxon'
 import { Popover } from '@ark-ui/solid'
-
 import { t } from '../storage/theme'
 import Divider from './divider'
 import Card from './card'
@@ -78,7 +77,7 @@ function TimePickerButton(props: {
       </Popover.Anchor>
       <Portal>
         <Popover.Positioner>
-          <Popover.Content class="card z-50">
+          <Popover.Content class="card">
             <div class="card-content p-2 flex flex-col space-y-2">
               <div class="flex flex-row space-x-2">
                 <div class="flex flex-col space-y-2">
