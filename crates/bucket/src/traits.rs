@@ -8,8 +8,6 @@ pub enum BucketError {
     PathConflict(String),
     #[error("could not lock the bucket")]
     LockError,
-    #[error("git error: {0}")]
-    GitError(#[from] crate::git::GitError),
     #[error("io error: {0}")]
     IoError(#[from] std::io::Error),
     #[error("serde error: {0}")]
@@ -20,6 +18,10 @@ pub enum BucketError {
     TomlDeError(#[from] toml::de::Error),
     #[error("config not found")]
     ConfigNotFound,
+    #[error("git command failed: {0}")]
+    GitCommandFailed(String),
+    #[error("data convert error: {0}")]
+    DataConvertError(#[from] std::string::FromUtf8Error),
 }
 
 macro_rules! init_dir {

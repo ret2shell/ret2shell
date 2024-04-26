@@ -2,37 +2,27 @@ use std::{
     ffi::OsStr,
     path::{Path, PathBuf},
     process::Stdio,
-    string::FromUtf8Error,
 };
 
-use thiserror::Error;
 use tokio::{fs::create_dir_all, io::AsyncRead, process::Command};
 use tracing::{debug, trace, warn};
+
+use crate::BucketError;
 
 #[derive(Clone, Debug)]
 pub struct Git {
     path: PathBuf,
 }
 
-#[derive(Error, Debug)]
-pub enum GitError {
-    #[error("Failed to run git command: {0}")]
-    CommandError(#[from] tokio::io::Error),
-    #[error("Failed to parse git output: {0}")]
-    ParseError(#[from] FromUtf8Error),
-    #[error("git command failed: {0}")]
-    GitCommandFailed(String),
-}
-
 impl Git {
-    pub async fn try_open(path: impl AsRef<Path>) -> Result<Self, GitError> {
+    pub async fn try_open(path: impl AsRef<Path>) -> Result<Self, BucketError> {
         if path.as_ref().exists() {
             debug!("opening git repository: {:?}", path.as_ref());
         } else {
             warn!("git repository does not exist: {:?}", path.as_ref());
-            return Err(GitError::GitCommandFailed(String::from(
-                "repository does not exist",
-            )));
+            return Err(BucketError::PathDoesNotExist(
+                path.as_ref().display().to_string(),
+            ));
         }
         let output = Command::new("/bin/git")
             .current_dir(&path)
@@ -48,31 +38,31 @@ impl Git {
             })
         } else {
             warn!("failed to open git repository: {:?}", output);
-            Err(GitError::GitCommandFailed(String::from_utf8(
+            Err(BucketError::GitCommandFailed(String::from_utf8(
                 output.stderr,
             )?))
         }
     }
 
-    pub async fn new(path: impl AsRef<Path>) -> Result<Self, GitError> {
+    pub async fn new(path: impl AsRef<Path>) -> Result<Self, BucketError> {
         if path.as_ref().exists() {
             warn!("folder already exists: {:?}", path.as_ref());
-            return Err(GitError::GitCommandFailed(String::from(
-                "folder already exists",
-            )));
+            return Err(BucketError::PathConflict(
+                path.as_ref().display().to_string(),
+            ));
         }
         create_dir_all(&path).await?;
         Self::init(&path).await
     }
 
-    async fn init(path: impl AsRef<Path>) -> Result<Self, GitError> {
+    async fn init(path: impl AsRef<Path>) -> Result<Self, BucketError> {
         if path.as_ref().exists() {
             debug!("opening git repository: {:?}", path.as_ref());
         } else {
             warn!("git repository does not exist: {:?}", path.as_ref());
-            return Err(GitError::GitCommandFailed(String::from(
-                "repository does not exist",
-            )));
+            return Err(BucketError::PathDoesNotExist(
+                path.as_ref().display().to_string(),
+            ));
         }
         let output = Command::new("/bin/git")
             .current_dir(&path)
@@ -86,13 +76,13 @@ impl Git {
             })
         } else {
             warn!("failed to initialize git repository: {:?}", output);
-            Err(GitError::GitCommandFailed(String::from_utf8(
+            Err(BucketError::GitCommandFailed(String::from_utf8(
                 output.stderr,
             )?))
         }
     }
 
-    pub async fn add_all(&self) -> Result<(), GitError> {
+    pub async fn add_all(&self) -> Result<(), BucketError> {
         let output = Command::new("/bin/git")
             .current_dir(&self.path)
             .arg("add")
@@ -104,7 +94,7 @@ impl Git {
             Ok(())
         } else {
             warn!("failed to add all files to git repository: {:?}", output);
-            Err(GitError::GitCommandFailed(String::from_utf8(
+            Err(BucketError::GitCommandFailed(String::from_utf8(
                 output.stderr,
             )?))
         }
@@ -112,7 +102,7 @@ impl Git {
 
     pub async fn commit(
         &self, message: impl AsRef<str>, author: impl AsRef<str>, email: impl AsRef<str>,
-    ) -> Result<(), GitError> {
+    ) -> Result<(), BucketError> {
         let output = Command::new("/bin/git")
             .current_dir(&self.path)
             .arg("commit")
@@ -128,7 +118,7 @@ impl Git {
             Ok(())
         } else {
             warn!("failed to commit to git repository: {:?}", output);
-            Err(GitError::GitCommandFailed(String::from_utf8(
+            Err(BucketError::GitCommandFailed(String::from_utf8(
                 output.stderr,
             )?))
         }
@@ -136,12 +126,12 @@ impl Git {
 
     pub async fn take_shot(
         &self, message: impl AsRef<str>, author: impl AsRef<str>, email: impl AsRef<str>,
-    ) -> Result<(), GitError> {
+    ) -> Result<(), BucketError> {
         self.add_all().await?;
         self.commit(message, author, email).await
     }
 
-    pub async fn checkout_head(&self) -> Result<(), GitError> {
+    pub async fn checkout_head(&self) -> Result<(), BucketError> {
         let output = Command::new("/bin/git")
             .current_dir(&self.path)
             .arg("checkout")
@@ -153,13 +143,13 @@ impl Git {
             Ok(())
         } else {
             warn!("failed to checkout HEAD in git repository: {:?}", output);
-            Err(GitError::GitCommandFailed(String::from_utf8(
+            Err(BucketError::GitCommandFailed(String::from_utf8(
                 output.stderr,
             )?))
         }
     }
 
-    pub async fn checkout(&self, branch: impl AsRef<str>) -> Result<(), GitError> {
+    pub async fn checkout(&self, branch: impl AsRef<str>) -> Result<(), BucketError> {
         let output = Command::new("/bin/git")
             .current_dir(&self.path)
             .arg("checkout")
@@ -171,18 +161,18 @@ impl Git {
             Ok(())
         } else {
             warn!("failed to checkout branch in git repository: {:?}", output);
-            Err(GitError::GitCommandFailed(String::from_utf8(
+            Err(BucketError::GitCommandFailed(String::from_utf8(
                 output.stderr,
             )?))
         }
     }
 
-    pub async fn cleanup(&self) -> Result<(), GitError> {
+    pub async fn cleanup(&self) -> Result<(), BucketError> {
         self.reset_head_internal().await?;
         self.clean_untracked().await
     }
 
-    async fn reset_head_internal(&self) -> Result<(), GitError> {
+    async fn reset_head_internal(&self) -> Result<(), BucketError> {
         let output = Command::new("/bin/git")
             .current_dir(&self.path)
             .arg("reset")
@@ -195,13 +185,13 @@ impl Git {
             Ok(())
         } else {
             warn!("failed to reset HEAD in git repository: {:?}", output);
-            Err(GitError::GitCommandFailed(String::from_utf8(
+            Err(BucketError::GitCommandFailed(String::from_utf8(
                 output.stderr,
             )?))
         }
     }
 
-    async fn clean_untracked(&self) -> Result<(), GitError> {
+    async fn clean_untracked(&self) -> Result<(), BucketError> {
         let output = Command::new("/bin/git")
             .current_dir(&self.path)
             .arg("clean")
@@ -213,13 +203,13 @@ impl Git {
             Ok(())
         } else {
             warn!("failed to clean up git repository: {:?}", output);
-            Err(GitError::GitCommandFailed(String::from_utf8(
+            Err(BucketError::GitCommandFailed(String::from_utf8(
                 output.stderr,
             )?))
         }
     }
 
-    pub async fn get_commits(&self) -> Result<Vec<String>, GitError> {
+    pub async fn get_commits(&self) -> Result<Vec<String>, BucketError> {
         let output = Command::new("/bin/git")
             .current_dir(&self.path)
             .arg("log")
@@ -235,7 +225,7 @@ impl Git {
                 .collect())
         } else {
             warn!("failed to get commits from git repository: {:?}", output);
-            Err(GitError::GitCommandFailed(String::from_utf8(
+            Err(BucketError::GitCommandFailed(String::from_utf8(
                 output.stderr,
             )?))
         }
@@ -244,10 +234,11 @@ impl Git {
     async fn stream_internal<T, S>(
         &self, protocol: impl AsRef<OsStr>, subcmd: impl AsRef<OsStr>, args: T,
         mut stdin: impl AsyncRead + Unpin + Send + 'static,
-    ) -> Result<impl AsyncRead, GitError>
+    ) -> Result<impl AsyncRead, BucketError>
     where
         T: IntoIterator<Item = S>,
-        S: AsRef<OsStr>, {
+        S: AsRef<OsStr>,
+    {
         let mut cmd = Command::new("/bin/git");
         cmd.stdin(Stdio::piped())
             .stdout(Stdio::piped())
@@ -267,7 +258,7 @@ impl Git {
 
     pub async fn info_refs_receive(
         &self, protocol: impl AsRef<OsStr>, stdin: impl AsyncRead + Unpin + Send + 'static,
-    ) -> Result<impl AsyncRead, GitError> {
+    ) -> Result<impl AsyncRead, BucketError> {
         self.stream_internal(
             protocol,
             "receive-pack",
@@ -279,7 +270,7 @@ impl Git {
 
     pub async fn info_refs_upload(
         &self, protocol: impl AsRef<OsStr>, stdin: impl AsyncRead + Unpin + Send + 'static,
-    ) -> Result<impl AsyncRead, GitError> {
+    ) -> Result<impl AsyncRead, BucketError> {
         debug!("get info refs for repo: {:?}", self.path);
         self.stream_internal(
             protocol,
@@ -292,14 +283,14 @@ impl Git {
 
     pub async fn upload_pack(
         &self, protocol: impl AsRef<OsStr>, stdin: impl AsyncRead + Unpin + Send + 'static,
-    ) -> Result<impl AsyncRead, GitError> {
+    ) -> Result<impl AsyncRead, BucketError> {
         self.stream_internal(protocol, "upload-pack", ["--stateless-rpc"], stdin)
             .await
     }
 
     pub async fn receive_pack(
         &self, protocol: impl AsRef<OsStr>, stdin: impl AsyncRead + Unpin + Send + 'static,
-    ) -> Result<impl AsyncRead, GitError> {
+    ) -> Result<impl AsyncRead, BucketError> {
         self.stream_internal(protocol, "receive-pack", ["--stateless-rpc"], stdin)
             .await
     }

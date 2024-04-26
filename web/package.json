@@ -60,7 +60,7 @@
     "vite": "^5.2.10",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-solid": "^2.10.2",
-    "vitest": "^1.5.1"
+    "vitest": "^1.5.2"
   },
   "scripts": {
     "start": "vite",
