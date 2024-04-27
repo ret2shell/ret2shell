@@ -1,0 +1,21 @@
+@layer components {
+  .splitter-panel {
+    @apply relative;
+  }
+
+  .splitter-gutter {
+    @apply min-w-2 min-h-2 border-layer-content/10 outline-none;
+
+    &-vertical {
+      @apply border-b;
+    }
+
+    &-horizontal {
+      @apply border-r;
+    }
+
+    &:focus {
+      @apply border-primary;
+    }
+  }
+}
