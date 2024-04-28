@@ -6,5 +6,5 @@ export default function (props: ComponentProps<'span'> & { end: DateTime }) {
   const interval = setInterval(() => setDuration(props.end.diffNow()), 1000)
   const cleanup = () => clearInterval(interval)
   onCleanup(cleanup)
-  return <span {...props}>{duration().toFormat('HH:mm:ss')}</span>
+  return <span {...props}>{duration().toFormat('hh:mm:ss')}</span>
 }

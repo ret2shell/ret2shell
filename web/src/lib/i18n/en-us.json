@@ -28,13 +28,32 @@
     "deleteSuccess": "successfully deleted",
     "selectWikiToRead": "What do you want to learn today?"
   },
+  "loading": {
+    "1": "Proving P != NP...",
+    "2": "Factoring RSA 4096...",
+    "3": "Dividing by 0...",
+    "4": "Downloading more RAM...",
+    "5": "Ordering 1s and 0s...",
+    "6": "Navigating neural network...",
+    "7": "Importing machine learning...",
+    "8": "Issuing Alice and Bob one-time pads...",
+    "9": "Trying to escape vim...",
+    "10": "Creating unresolved tension...",
+    "11": "Symlinking emacs and vim to ed...",
+    "12": "Training branch predictor...",
+    "13": "Timing cache hits...",
+    "14": "Speculatively executing recipes...",
+    "15": "Adding LLM hallucinations..."
+  },
   "training": {
     "title": "Training"
   },
   "game": {
     "title": "Games",
     "challenge": {
-      "title": "Challenges"
+      "title": "Challenges",
+      "enter": "Solve challenges",
+      "notStarted": "The game hasn’t started yet"
     },
     "scoreboard": {
       "title": "Scoreboard"
@@ -73,7 +92,27 @@
     "teamSizeMaxExceeded": "The maximum number of team members is 100, please consider sharing accounts",
     "createFailed": "Create failed",
     "writeupsOnlyOpenWhenArchived": "The writeups will only be made public after the game is archived!",
-    "adminCanNotTakePartIn": "Administrators cannot participate"
+    "adminCanNotTakePartIn": "Administrators cannot participate",
+    "register": "open registration",
+    "start": "game starts",
+    "end": "game ends",
+    "archive": "game archives",
+    "timerTips": "Time until {{ period }}",
+    "introduction": {
+      "title": "Game README",
+      "empty": "The organizer was lazy and didn’t write anything"
+    },
+    "team": {
+      "create": {
+        "title": "Create a team"
+      },
+      "manage": {
+        "title": "View my team"
+      },
+      "loginThenBack": "Log in to participate"
+    },
+    "archivedGotoTraining": "Archived, please goto training board",
+    "canNotParticipate": "Not eligible to participate"
   },
   "bulletin": {
     "title": "Bulletin",
@@ -193,6 +232,9 @@
       "xdu": {
         "title": "XDU Identity Authentication"
       }
+    },
+    "institute": {
+      "none": "No affiliated institute"
     }
   },
   "instance": {

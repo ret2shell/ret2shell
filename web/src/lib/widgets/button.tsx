@@ -36,7 +36,7 @@ export default function (props: ComponentProps<'button'> & ButtonProps & { child
       // justify-start justify-center justify-end
       [`justify-${buttonProps.justify || 'center'}`]: true,
       uppercase: buttonProps.uppercase,
-      disabled: nativeProps.disabled,
+      'btn-disabled': nativeProps.disabled,
       'btn-square': buttonProps.square,
     }
   })

@@ -22,6 +22,7 @@ import Spin from '@/lib/assets/animates/spin'
 import Popover from '@/lib/widgets/popover'
 import CreateGame from './create'
 import bgGameDefault from '@assets/imgs/bg-game-default.webp'
+import { randomTips } from '@/lib/utils/loading-tips'
 
 export default function () {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -277,7 +278,7 @@ export default function () {
               </Show>
               <div class="flex flex-col space-y-2 flex-1 w-full lg:w-auto">
                 <h2 class="text-xl font-bold flex flex-row space-x-4">
-                  {loading() ? t('game.loading') : selectedGame()?.name || t('game.noGameHosted')}
+                  {loading() ? randomTips() : selectedGame()?.name || t('game.noGameHosted')}
                 </h2>
                 <p class="opacity-60">{selectedGame()?.brief || t('game.seeOtherInteresting')}</p>
               </div>

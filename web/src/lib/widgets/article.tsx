@@ -2,6 +2,7 @@ import { ComponentProps, Show, createEffect, createSignal, splitProps, untrack }
 
 import Spin from '../assets/animates/spin'
 import { t } from '../storage/theme'
+import { randomTips } from '../utils/loading-tips'
 
 export type ArticleProps = {
   content: string
@@ -47,7 +48,7 @@ export default function (props: ComponentProps<'article'> & ArticleProps) {
             <article {...nativeProps} class={`article !max-w-5xl w-full ${nativeProps.class}`}>
               <p class="inline-flex items-center space-x-2">
                 <Spin width={16} height={16} />
-                <span>{t('article.loading')}</span>
+                <span>{randomTips()}</span>
               </p>
             </article>
           </>

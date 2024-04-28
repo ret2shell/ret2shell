@@ -28,13 +28,32 @@
     "deleteSuccess": "刪除成功",
     "selectWikiToRead": "今天想學些什麼？"
   },
+  "loading": {
+    "1": "正在試圖證明 P != NP...",
+    "2": "正在試圖分解 RSA 4096...",
+    "3": "正在除以 0...",
+    "4": "正在連網下載更多的實體記憶體...",
+    "5": "正在排序 1 和 0...",
+    "6": "正在列舉機器學習網路...",
+    "7": "正在導入人工智障...",
+    "8": "正在破解Alice與Bob的One-Time Pads...",
+    "9": "正在試圖退出 VIM...",
+    "10": "正在製造懸念...",
+    "11": "正在將 emacs 和 vim 軟連結到 ed...",
+    "12": "正在訓練分支預測演算法...",
+    "13": "正在命中定時快取...",
+    "14": "正在執行投機取巧演算法...",
+    "15": "正在加入大語言模型幻覺..."
+  },
   "training": {
     "title": "訓練"
   },
   "game": {
     "title": "賽事",
     "challenge": {
-      "title": "題目"
+      "title": "題目",
+      "enter": "攻克挑戰",
+      "notStarted": "尚未開賽，少安毋躁"
     },
     "scoreboard": {
       "title": "積分板"
@@ -73,7 +92,27 @@
     "teamSizeMaxExceeded": "隊伍成員最多不能超過 100 人，請考慮共享帳號",
     "createFailed": "創建失敗",
     "writeupsOnlyOpenWhenArchived": "題解僅在賽事歸檔後才公開！",
-    "adminCanNotTakePartIn": "管理員不能參賽"
+    "adminCanNotTakePartIn": "管理員不能參賽",
+    "register": "開放註冊",
+    "start": "比賽開始",
+    "end": "比賽結束",
+    "archive": "比賽歸檔",
+    "timerTips": "距離 {{ period }} 還有",
+    "introduction": {
+      "title": "比賽須知",
+      "empty": "主辦單位很懶，什麼也沒寫"
+    },
+    "team": {
+      "create": {
+        "title": "創建隊伍"
+      },
+      "manage": {
+        "title": "查看我的隊伍"
+      },
+      "loginThenBack": "登入後參與"
+    },
+    "archivedGotoTraining": "已歸檔，請前往練習場",
+    "canNotParticipate": "不符合參與條件"
   },
   "bulletin": {
     "title": "公告",
@@ -193,6 +232,9 @@
       "xdu": {
         "title": "西電統一身分認證"
       }
+    },
+    "institute": {
+      "none": "無從屬組織機構"
     }
   },
   "instance": {

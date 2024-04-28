@@ -9,6 +9,7 @@ use r2s_bucket::Bucket;
 use r2s_database::{calendar, game, user::Permission};
 use r2s_migrator::Database;
 use serde::Deserialize;
+use tracing::warn;
 
 use crate::{
     middleware::{
@@ -71,6 +72,10 @@ async fn get_game(
         && !token.permissions.0.contains(&Permission::Host)
         && !(token.permissions.0.contains(&Permission::Game) && game.admins.0.contains(&token.id))
     {
+        warn!(
+            "unauthorized user {} ({}:{}) trying to get a hidden game {}:{}",
+            token.nickname, token.id, token.account, game.id, game.name
+        );
         return Err(ResponseError::NotFound("game not found".to_owned()));
     }
     Ok(Json(game))

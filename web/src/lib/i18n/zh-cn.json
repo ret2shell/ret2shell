@@ -28,6 +28,23 @@
     "deleteSuccess": "删除成功",
     "selectWikiToRead": "今天想学些什么？"
   },
+  "loading": {
+    "1": "正在试图证明 P != NP...",
+    "2": "正在试图分解 RSA 4096...",
+    "3": "正在除以 0...",
+    "4": "正在联网下载更多的物理内存...",
+    "5": "正在排序 1 和 0...",
+    "6": "正在枚举机器学习网络...",
+    "7": "正在导入人工智障...",
+    "8": "正在破解Alice与Bob的One-Time Pads...",
+    "9": "正在试图退出 VIM...",
+    "10": "正在制造悬念...",
+    "11": "正在将 emacs 和 vim 软链接到 ed...",
+    "12": "正在训练分支预测算法...",
+    "13": "正在命中定时缓存...",
+    "14": "正在执行投机取巧算法...",
+    "15": "正在加入大语言模型幻觉..."
+  },
   "training": {
     "title": "训练"
   },
@@ -50,7 +67,9 @@
   "game": {
     "title": "赛事",
     "challenge": {
-      "title": "题目"
+      "title": "题目",
+      "enter": "攻克挑战",
+      "notStarted": "尚未开赛，少安毋躁"
     },
     "scoreboard": {
       "title": "积分板"
@@ -89,7 +108,27 @@
     "teamSizeMaxExceeded": "队伍成员最多不能超过 100 人，请考虑共享账号",
     "createFailed": "创建失败",
     "writeupsOnlyOpenWhenArchived": "题解仅在赛事归档之后才公开！",
-    "adminCanNotTakePartIn": "管理员不能参赛"
+    "adminCanNotTakePartIn": "管理员不能参赛",
+    "register": "开放注册",
+    "start": "比赛开始",
+    "end": "比赛结束",
+    "archive": "比赛归档",
+    "timerTips": "距离 {{ period }} 还有",
+    "introduction": {
+      "title": "比赛须知",
+      "empty": "主办方很懒，什么也没有写"
+    },
+    "team": {
+      "create": {
+        "title": "创建队伍"
+      },
+      "manage": {
+        "title": "查看我的队伍"
+      },
+      "loginThenBack": "登录后参与"
+    },
+    "archivedGotoTraining": "已归档，请前往练习场",
+    "canNotParticipate": "不符合参与条件"
   },
   "bulletin": {
     "title": "公告",
@@ -209,6 +248,9 @@
       "xdu": {
         "title": "西电统一身份认证"
       }
+    },
+    "institute": {
+      "none": "无从属组织机构"
     }
   },
   "instance": {

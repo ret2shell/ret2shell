@@ -1,13 +1,243 @@
+import Spin from '@/lib/assets/animates/spin'
+import { Article as ArticleModel } from '@/lib/models/article'
+import { TeamState, coloredState, stringifyState } from '@/lib/models/team'
+import { Permission } from '@/lib/models/user'
+import { accountStore } from '@/lib/storage/account'
 import { gameStore } from '@/lib/storage/game'
 import { Title } from '@/lib/storage/header'
+import { t } from '@/lib/storage/theme'
+import { randomTips } from '@/lib/utils/loading-tips'
+import Article from '@/lib/widgets/article'
+import Avatar from '@/lib/widgets/avatar'
+import Card from '@/lib/widgets/card'
+import Link from '@/lib/widgets/link'
+import Picture from '@/lib/widgets/picture'
+import Tag from '@/lib/widgets/tag'
+import Timer from '@/lib/widgets/timer'
+
+import bgGameDefault from '@assets/imgs/bg-game-default.webp'
+import { DateTime } from 'luxon'
+import { Match, Show, Switch, createEffect, createSignal, onCleanup, untrack } from 'solid-js'
 
 export default function () {
+  const period = () => {
+    if (gameStore.current?.register_at && gameStore.current.register_at > DateTime.now()) {
+      return t('game.register')!
+    } else if (gameStore.current?.start_at && gameStore.current.start_at > DateTime.now()) {
+      return t('game.start')!
+    } else if (gameStore.current?.end_at && gameStore.current.end_at > DateTime.now()) {
+      return t('game.end')!
+    } else if (gameStore.current?.archive_at && gameStore.current.archive_at > DateTime.now()) {
+      return t('game.archive')!
+    }
+    return ''
+  }
+
+  const timeEnd = () => {
+    if (gameStore.current?.register_at && gameStore.current.register_at > DateTime.now()) {
+      return gameStore.current.register_at
+    } else if (gameStore.current?.start_at && gameStore.current.start_at > DateTime.now()) {
+      return gameStore.current.start_at
+    } else if (gameStore.current?.end_at && gameStore.current.end_at > DateTime.now()) {
+      return gameStore.current.end_at
+    } else if (gameStore.current?.archive_at && gameStore.current.archive_at > DateTime.now()) {
+      return gameStore.current.archive_at
+    }
+    return DateTime.now()
+  }
+
+  const [showTimer, setShowTimer] = createSignal(true)
+
+  const updateTimer = setInterval(() => {
+    setShowTimer(!!(gameStore.current?.archive_at && gameStore.current.archive_at > DateTime.now()))
+  }, 1000)
+
+  onCleanup(() => clearInterval(updateTimer))
+
+  const [introduction, setIntroduction] = createSignal(null as ArticleModel | null)
+  const [loading, setLoading] = createSignal(true)
+
+  createEffect(() => {
+    if (gameStore.current?.introduction_id) {
+      untrack(() => {
+        if (gameStore.current?.introduction_id) {
+          /// get the introduction
+        } else {
+          setIntroduction(null)
+          setLoading(false)
+        }
+      })
+    } else {
+      setIntroduction(null)
+      setLoading(false)
+    }
+  })
+
+  function canParticipate() {
+    if (
+      !gameStore.current?.can_register_after_started &&
+      gameStore.current?.start_at &&
+      gameStore.current.start_at < DateTime.now()
+    ) {
+      return false
+    }
+    if (gameStore.current?.end_at && gameStore.current.end_at < DateTime.now()) {
+      return false
+    }
+    if (
+      accountStore.id &&
+      accountStore.permissions.includes(Permission.Game) &&
+      gameStore.current?.admins.includes(accountStore.id)
+    ) {
+      return false
+    }
+    if (accountStore.permissions.includes(Permission.Host)) {
+      return false
+    }
+    // TODO: check game access policy
+
+    return true
+  }
+
   return (
     <>
       <Title title={gameStore.current?.name || 'CTF'} />
-      <div class="flex-1 flex flex-col lg:flex-row">
-        <div class="lg:w-1/3 min-h-48 max-h-[calc(100vh-4rem)] sticky top-16 left-0 flex flex-col"></div>
-        <div class="flex-1"></div>
+      <div class="flex-1 flex flex-col lg:flex-row-reverse">
+        <div class="lg:w-1/3 max-h-[calc(100vh-4rem)] lg:sticky lg:top-16 lg:left-0 flex flex-col backdrop-blur border-b border-b-layer-content/10 lg:border-b-0 lg:backdrop-blur-none p-3 lg:p-6 space-y-4">
+          <Card contentClass="relative">
+            <Picture src={gameStore.current?.cover || bgGameDefault}></Picture>
+            <div class="absolute top-0 left-0 w-full h-full flex flex-col justify-end z-10 p-3 lg:p-6 space-y-4">
+              <h2 class="font-bold p-4 rounded-lg bg-layer/50 backdrop-blur text-center flex flex-col space-y-2">
+                <span class="text-3xl">{gameStore.current?.name}</span>
+                <span class="opacity-80">{gameStore.current?.brief}</span>
+              </h2>
+            </div>
+          </Card>
+          <div class="flex flex-col space-y-2 items-center py-4 lg:py-8">
+            <Show when={showTimer()} fallback={<span class="text-3xl font-bold text-warning">{t('game.ended')}</span>}>
+              <h3 class="text-xl font-bold opacity-60">{t('game.timerTips', { period: period() })}</h3>
+              <p class="text-3xl font-bold">
+                <Timer end={timeEnd()}></Timer>
+              </p>
+            </Show>
+          </div>
+          <div class="flex-1"></div>
+          <Show when={gameStore.team}>
+            <Card contentClass="p-3 lg:p-6 flex flex-row space-x-2 lg:space-x-4">
+              <div class="lg:p-2 flex items-center justify-center">
+                <span class="icon-[fluent--flag-20-filled] w-5 h-5 lg:w-10 lg:h-10 text-primary opacity-60"></span>
+              </div>
+              <div class="flex flex-col space-y-2 justify-center flex-1">
+                <h3 class="font-bold space-x-2 lg:text-2xl px-2">
+                  <span>{gameStore.team?.name}</span>
+                  <span class="text-primary">#</span>
+                  <span class="opacity-60">{gameStore.team?.id.toString(16).padStart(6, '0')}</span>
+                </h3>
+                <p class="flex-row flex-wrap hidden lg:flex">
+                  <Tag level={coloredState(gameStore.team?.state || TeamState.Pending)} class="m-1">
+                    <span>{stringifyState(gameStore.team?.state || TeamState.Pending)}</span>
+                  </Tag>
+                  <Tag level="info" class="m-1">
+                    <span>{gameStore.team?.institute_name || t('account.institute.none')}</span>
+                  </Tag>
+                </p>
+              </div>
+              <div class="flex items-center justify-center lg:text-2xl font-bold">
+                <span class="opacity-60">No.</span>
+                <span class="text-primary">{gameStore.rank || 'NULL'}</span>
+              </div>
+            </Card>
+          </Show>
+          <div class="flex flex-row space-x-2">
+            <Show
+              when={
+                accountStore.id &&
+                ((gameStore.current?.admins.includes(accountStore.id) &&
+                  accountStore.permissions.includes(Permission.Game)) ||
+                  accountStore.permissions.includes(Permission.Host))
+              }
+            >
+              <Link href={`/games/${gameStore.current?.id}?edit=true`} square level="primary">
+                <span class="icon-[fluent--edit-20-regular] w-5 h-5"></span>
+              </Link>
+            </Show>
+            <Switch>
+              <Match when={gameStore.team}>
+                <Link
+                  href={`/games/${gameStore.current?.id}/challenges`}
+                  class="flex-1"
+                  level="success"
+                  disabled={
+                    (gameStore.current?.archive_at && gameStore.current.archive_at < DateTime.now()) ||
+                    (gameStore.current?.start_at && gameStore.current.start_at > DateTime.now())
+                  }
+                >
+                  <span class="icon-[fluent--people-team-20-regular] w-5 h-5"></span>
+                  <Switch>
+                    <Match when={gameStore.current?.archive_at && gameStore.current.archive_at < DateTime.now()}>
+                      <span class="flex-1 text-start">{t('game.archivedGotoTraining')}</span>
+                    </Match>
+                    <Match when={gameStore.current?.start_at && gameStore.current.start_at > DateTime.now()}>
+                      <span class="flex-1 text-start">{t('game.challenge.notStarted')}</span>
+                    </Match>
+                    <Match when={true}>
+                      <span class="flex-1 text-start">{t('game.challenge.enter')}</span>
+                    </Match>
+                  </Switch>
+                  <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5"></span>
+                </Link>
+              </Match>
+              <Match when={accountStore.id && !gameStore.team}>
+                <Link
+                  href={`/games/${gameStore.current?.id}/teams/create`}
+                  class="flex-1"
+                  level="info"
+                  disabled={!canParticipate()}
+                >
+                  <span class="icon-[fluent--people-team-20-regular] w-5 h-5"></span>
+                  <Show
+                    when={canParticipate()}
+                    fallback={<span class="flex-1 text-start">{t('game.canNotParticipate')}</span>}
+                  >
+                    <span class="flex-1 text-start">{t('game.team.create.title')}</span>
+                  </Show>
+                  <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5"></span>
+                </Link>
+              </Match>
+              <Match when={!accountStore.id}>
+                <Link
+                  href={`/account/login?redirect=${encodeURI(`/games/${gameStore.current?.id}/teams/create`)}`}
+                  class="flex-1"
+                  level="warning"
+                >
+                  <span class="icon-[fluent--person-20-regular] w-5 h-5"></span>
+                  <span class="flex-1 text-start">{t('game.team.loginThenBack')}</span>
+                  <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5"></span>
+                </Link>
+              </Match>
+            </Switch>
+          </div>
+        </div>
+        <div class="flex-1 flex flex-col space-y-2 p-3 lg:p-6">
+          <Switch>
+            <Match when={introduction() && !loading()}>
+              <h1 class="text-center text-3xl font-bold">{t('game.introduction.title')}</h1>
+              <Article content={introduction()!.content!} extra={true} headingAnchors={true}></Article>
+            </Match>
+            <Match when={loading()}>
+              <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
+                <Spin width={32} height={32}></Spin>
+                <span>{randomTips()}</span>
+              </div>
+            </Match>
+            <Match when={true}>
+              <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
+                <span class="icon-[fluent--thumb-dislike-20-regular] w-24 h-24"></span>
+                <span>{t('game.introduction.empty')}</span>
+              </div>
+            </Match>
+          </Switch>
+        </div>
       </div>
     </>
   )

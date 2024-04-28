@@ -8,6 +8,7 @@ export const [gameStore, setGameStore] = createStore({
   current: null as Game | null,
   preload: null as Game | null,
   team: null as Team | null,
+  rank: null as number | null,
   members: [] as User[],
 })
 

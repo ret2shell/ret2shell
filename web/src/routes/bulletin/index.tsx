@@ -7,6 +7,7 @@ import { Title } from '@/lib/storage/header'
 import { platformStore } from '@/lib/storage/platform'
 import { t } from '@/lib/storage/theme'
 import { addToast } from '@/lib/storage/toast'
+import { randomTips } from '@/lib/utils/loading-tips'
 import Divider from '@/lib/widgets/divider'
 import Link from '@/lib/widgets/link'
 import Pagination from '@/lib/widgets/pagination'
@@ -78,8 +79,8 @@ export default function () {
           </Match>
           <Match when={loading()}>
             <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
-              <Spin width={24} height={24}></Spin>
-              <span>{t('bulletin.loading')}</span>
+              <Spin width={32} height={32}></Spin>
+              <span>{randomTips()}</span>
             </div>
           </Match>
         </Switch>

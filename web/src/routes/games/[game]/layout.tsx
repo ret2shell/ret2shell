@@ -12,6 +12,7 @@ export default function (props: { children?: JSX.Element }) {
   const game_id = parseInt(params.game)
   if (!gameStore.current && game_id) {
     getGame(game_id).then(resp => {
+      // console.log(resp)
       setGameStore({ current: resp })
     })
   }

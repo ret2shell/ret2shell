@@ -22,7 +22,7 @@ export default function (props: ComponentProps<'a'> & ButtonProps & LinkProps & 
       // justify-start justify-center justify-end
       [`justify-${props.justify || 'center'}`]: true,
       uppercase: props.uppercase,
-      disabled: props.disabled,
+      'btn-disabled': props.disabled,
       'btn-square': props.square,
       'btn-active': props.activeMatch ? Boolean(match()) : false,
     }

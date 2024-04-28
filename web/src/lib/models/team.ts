@@ -20,9 +20,35 @@ export type Team = {
   game_id: number
   token: string | null
   state: TeamState
-  institute_id: number
+  institute_id: number | null
   institute_name?: string
   score: number
   history: TeamScoreHistory[]
   last_active_at: DateTime
+}
+
+export function stringifyState(state: TeamState) {
+  switch (state) {
+    case TeamState.Banned:
+      return 'Banned'
+    case TeamState.Pending:
+      return 'Pending'
+    case TeamState.Hidden:
+      return 'Hidden'
+    case TeamState.Passed:
+      return 'Passed'
+  }
+}
+
+export function coloredState(state: TeamState) {
+  switch (state) {
+    case TeamState.Banned:
+      return 'error'
+    case TeamState.Pending:
+      return 'warning'
+    case TeamState.Hidden:
+      return 'layer-content'
+    case TeamState.Passed:
+      return 'success'
+  }
 }

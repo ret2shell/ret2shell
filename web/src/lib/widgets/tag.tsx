@@ -1,7 +1,7 @@
 import { ComponentProps, JSX, splitProps } from 'solid-js'
 
 export type TagProps = {
-  level: 'info' | 'success' | 'warning' | 'error'
+  level: 'info' | 'success' | 'warning' | 'error' | 'layer-content'
 }
 
 export default function Tag(props: { children?: JSX.Element } & TagProps & ComponentProps<'div'>) {
