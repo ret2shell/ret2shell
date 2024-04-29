@@ -27,6 +27,7 @@ num-derive = "0.4"
 num-traits = "0.2"
 chrono = { version = "0.4", features = ["serde"] }
 futures-io = "0.3"
+nanoid = "0.4"
 
 r2s-config = { version = "1.0.0", path = "../config" }
 

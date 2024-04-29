@@ -122,13 +122,15 @@ export default function () {
               </Popover>
             </div>
           </section>
-          <section
-            id="index-calendar"
-            ref={calendarSection!}
-            class="h-full min-h-full snap-center relative overflow-scroll"
-          >
-            <Calendar />
-          </section>
+          <Show when={platformStore.isOnline}>
+            <section
+              id="index-calendar"
+              ref={calendarSection!}
+              class="h-full min-h-full snap-center relative overflow-scroll"
+            >
+              <Calendar />
+            </section>
+          </Show>
         </div>
       </div>
     </>

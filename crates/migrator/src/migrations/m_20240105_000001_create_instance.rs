@@ -18,19 +18,16 @@ impl MigrationName for Migration {
 pub enum Instance {
     Table,
     Id,
-    UserId,
-    TeamId,
-    ChallengeId,
+    Name,
+    ProxyAddr,
+    RenewCount,
     StartedAt,
     CreatedAt,
     StopedAt,
-    RenewCount,
-    Name,
-    Data,
-    InnerAddr,
-    ProxyAddr,
+    UserId,
+    TeamId,
+    ChallengeId,
     State,
-    Config,
 }
 
 #[async_trait::async_trait]
@@ -47,11 +44,11 @@ impl MigrationTrait for Migration {
                             .auto_increment()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(Instance::Name).string_len(127).not_null())
                     .col(
-                        ColumnDef::new(Instance::InnerAddr)
+                        ColumnDef::new(Instance::Name)
                             .string_len(127)
-                            .not_null(),
+                            .not_null()
+                            .unique_key(),
                     )
                     .col(
                         ColumnDef::new(Instance::ProxyAddr)
@@ -59,7 +56,6 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .unique_key(),
                     )
-                    .col(ColumnDef::new(Instance::Data).json_binary().not_null())
                     .col(
                         ColumnDef::new(Instance::RenewCount)
                             .integer()
@@ -101,7 +97,6 @@ impl MigrationTrait for Migration {
                             .to(Challenge::Table, Challenge::Id),
                     )
                     .col(ColumnDef::new(Instance::State).integer().not_null())
-                    .col(ColumnDef::new(Instance::Config).json_binary().not_null())
                     .to_owned(),
             )
             .await

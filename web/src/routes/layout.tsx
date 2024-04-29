@@ -25,6 +25,9 @@ import { wsrx } from '@/lib/wsrx'
 import { Title, setupTitleResolver } from '@storage/header'
 import { DateTime } from 'luxon'
 import Spin from '@/lib/assets/animates/spin'
+import { HTTPError } from '@reverier/ky'
+import { randomTips } from '@/lib/utils/loading-tips'
+import LoadingTips from '@/lib/widgets/loading-tips'
 
 function GlobalTitleLink(props: { loading: boolean }) {
   return (
@@ -206,13 +209,22 @@ function TitleBar() {
               <div class="flex flex-col space-y-2 w-48">
                 <Card contentClass="p-2 flex flex-col space-y-2">
                   <ul class="flex flex-col space-y-2">
-                    <Switch fallback={<GlobalNav size="sm" />}>
-                      <Match when={gameStore.current && gameStore.current.host_type === HostType.CTFGame}>
+                    <Switch>
+                      <Match when={platformStore.isOnline}>
+                        <GlobalNav size="sm" />
+                      </Match>
+                      <Match
+                        when={
+                          platformStore.isOnline &&
+                          gameStore.current &&
+                          gameStore.current.host_type === HostType.CTFGame
+                        }
+                      >
                         <GameNav size="sm" />
                       </Match>
                     </Switch>
                     <Divider direction="horizontal" />
-                    <Show when={accountStore.token !== null && gameStore.current}>
+                    <Show when={platformStore.isOnline && accountStore.token !== null && gameStore.current}>
                       <Button
                         justify="start"
                         size="sm"
@@ -273,9 +285,19 @@ function TitleBar() {
             </Match>
           </Switch>
           <div class="w-4"></div>
-          <ul class="xl:flex flex-row space-x-2 hidden">
-            <Switch fallback={<GlobalNav size="md" />}>
-              <Match when={gameStore.current && gameStore.current.host_type === HostType.CTFGame && params.game}>
+          <ul class="xl:flex flex-row space-x-2 items-center hidden">
+            <Switch fallback={<LoadingTips class="opacity-60" />}>
+              <Match when={platformStore.isOnline}>
+                <GlobalNav size="md" />
+              </Match>
+              <Match
+                when={
+                  platformStore.isOnline &&
+                  gameStore.current &&
+                  gameStore.current.host_type === HostType.CTFGame &&
+                  params.game
+                }
+              >
                 <GameNav size="md" />
               </Match>
             </Switch>
@@ -283,13 +305,30 @@ function TitleBar() {
           <div class="flex-1"></div>
           <div class="flex flex-row space-x-2">
             <div class="hidden lg:flex flex-row space-x-2">
-              <Show when={accountStore.token !== null && gameStore.current}>
+              <Show when={platformStore.isOnline && accountStore.token !== null && gameStore.current}>
                 <InstanceBox />
               </Show>
               <NotificationBox />
               <DiyBox />
             </div>
-            <UserBox />
+            <Switch
+              fallback={
+                <Button level="error">
+                  <span class="icon-[fluent--dismiss-circle-20-filled] w-5 h-5"></span>
+                  <span>{t('platform.unavailable')}</span>
+                </Button>
+              }
+            >
+              <Match when={platformStore.isOnline}>
+                <UserBox />
+              </Match>
+              <Match when={platformStore.under_maintenance}>
+                <Button level="warning">
+                  <span class="icon-[fluent--warning-20-filled] w-5 h-5"></span>
+                  <span>{t('platform.underMaintenance')}</span>
+                </Button>
+              </Match>
+            </Switch>
           </div>
           <Show when={loading()}>
             <div class="absolute bottom-0 left-0 right-0 h-1 skeleton"></div>
@@ -333,14 +372,26 @@ export default function (props: { children?: JSX.Element }) {
   setupTitleResolver()
   getPlatformInfo()
     .then(res => {
-      setPlatformStore({ config: res })
+      setPlatformStore({ config: res, under_maintenance: false, backend_online: true })
     })
-    .catch(() => {
-      addToast({
-        level: 'error',
-        description: `${t('platform.offline')}`,
-      })
-      navigate('/errors/502')
+    .catch((err: HTTPError) => {
+      if (err.response?.status === 503) {
+        setPlatformStore({ under_maintenance: true })
+        navigate('/')
+      } else if (err.response?.status === 502) {
+        addToast({
+          level: 'error',
+          description: `${t('platform.offline')}`,
+        })
+        navigate(`/errors/${err.response?.status || 502}`)
+      } else {
+        addToast({
+          level: 'error',
+          description: `${t('platform.error')}: ${err.response?.statusText || err.message}`,
+        })
+        navigate(`/errors/${err.response?.status || 500}`)
+      }
+      setPlatformStore({ backend_online: false })
     })
     .finally(() => {
       platformName = `\xa0\xa0[\xa0${platformStore.config.name || t('platform.name')}\xa0]\xa0`

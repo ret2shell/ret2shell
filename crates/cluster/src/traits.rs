@@ -49,16 +49,14 @@ pub struct InstanceConfig {
 #[repr(i32)]
 pub enum State {
     #[default]
-    Pending   = 0,
-    Running   = 1,
-    Succeeded = 2,
-    Failed    = 3,
+    Pending = 0,
+    Running = 1,
+    Finished = 2,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Instance {
     pub name: String,
-    pub inner_addr: String,
     pub state: State,
     pub config: InstanceConfig,
     #[serde(with = "ts_seconds_option")]

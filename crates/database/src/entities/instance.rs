@@ -32,10 +32,9 @@ use super::{challenge, team, user};
 #[sea_orm(rs_type = "i32", db_type = "Integer")]
 pub enum State {
     #[default]
-    Pending   = 0,
-    Running   = 1,
-    Succeeded = 2,
-    Failed    = 3,
+    Pending = 0,
+    Running = 1,
+    Finished = 2,
 }
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
@@ -43,12 +42,10 @@ pub enum State {
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i64,
+    #[sea_orm(unique)]
     pub name: String,
-    pub inner_addr: Option<String>,
     #[sea_orm(unique)]
     pub proxy_addr: String,
-    #[sea_orm(column_type = "JsonBinary")]
-    pub data: Option<Json>,
     pub renew_count: i32,
     #[serde(with = "ts_seconds_option")]
     pub started_at: Option<DateTime<Utc>>,
@@ -60,20 +57,20 @@ pub struct Model {
     pub team_id: Option<i64>,
     pub challenge_id: i64,
     pub state: State,
-    #[sea_orm(column_type = "JsonBinary")]
-    pub config: Option<Json>,
 }
 
 #[derive(Clone, Serialize, Deserialize, FromQueryResult)]
 pub struct ExModel {
     pub id: i64,
     pub name: String,
-    pub inner_addr: Option<String>,
     pub proxy_addr: String,
-    pub data: Option<Json>,
     pub renew_count: i32,
     #[serde(with = "ts_seconds")]
     pub started_at: DateTime<Utc>,
+    #[serde(with = "ts_seconds")]
+    pub created_at: DateTime<Utc>,
+    #[serde(with = "ts_seconds_option")]
+    pub stoped_at: Option<DateTime<Utc>>,
     pub user_id: i64,
     pub user_name: String,
     pub team_id: Option<i64>,

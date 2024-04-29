@@ -21,8 +21,16 @@ pub struct Config {
     /// it will be used as `ret2shellType=<challenge_node_selector>`,
     /// you should setup the node selector in your kubernetes cluster first.
     pub challenge_node_selector: Option<String>,
-
+    /// `proxy_image` is the image for the proxy container.
     pub proxy_image: Option<String>,
+    /// `traffic` is the traffic backend, default to `wsrx`.
+    pub traffic: Option<String>,
+    /// `enable_capture` is a flag to enable the stream capture feature.
+    pub enable_capture: Option<bool>,
+    /// `capture_directory` is the directory to store the capture files.
+    pub capture_directory: Option<String>,
+    /// `cleanup_interval` is the interval in seconds to cleanup outdated pods.
+    pub cleanup_interval: Option<u64>,
 }
 
 impl Merge for Option<Config> {
@@ -33,10 +41,12 @@ impl Merge for Option<Config> {
                 try_default: b.try_default,
                 auto_infer: b.auto_infer,
                 kube_config_path: b.kube_config_path.or(a.kube_config_path),
-                challenge_node_selector: b
-                    .challenge_node_selector
-                    .or(a.challenge_node_selector),
+                challenge_node_selector: b.challenge_node_selector.or(a.challenge_node_selector),
                 proxy_image: b.proxy_image.or(a.proxy_image),
+                traffic: b.traffic.or(a.traffic),
+                enable_capture: b.enable_capture.or(a.enable_capture),
+                capture_directory: b.capture_directory.or(a.capture_directory),
+                cleanup_interval: b.cleanup_interval.or(a.cleanup_interval),
             }),
             (Some(a), None) => Some(a),
             (None, Some(b)) => Some(b),

@@ -11,7 +11,10 @@
     "offline": "The backend seems to be offline, please refresh the page. \nIf this error occurs repeatedly, please contact maintenance personnel.",
     "cookiePolicy": "We do not use any cookies.",
     "ok": "OK",
-    "yes": "Yes"
+    "yes": "Yes",
+    "error": "Platform error",
+    "underMaintenance": "Under maintenance...",
+    "unavailable": "System offline"
   },
   "wiki": {
     "title": "Wiki",
@@ -29,6 +32,7 @@
     "selectWikiToRead": "What do you want to learn today?"
   },
   "loading": {
+    "0": "Fixing cosmic ray-induced bit flips...",
     "1": "Proving P != NP...",
     "2": "Factoring RSA 4096...",
     "3": "Dividing by 0...",
@@ -38,7 +42,7 @@
     "7": "Importing machine learning...",
     "8": "Issuing Alice and Bob one-time pads...",
     "9": "Trying to escape vim...",
-    "10": "Creating unresolved tension...",
+    "10": "Using magnifying glass and pencil to rescue data...",
     "11": "Symlinking emacs and vim to ed...",
     "12": "Training branch predictor...",
     "13": "Timing cache hits...",
@@ -276,7 +280,7 @@
     "404": "Resource does not exist",
     "418": "I am a teapot",
     "500": "Server internal error",
-    "502": "Backend offline",
+    "502": "System down",
     "401Tip": "Even if you do good deeds, please leave your name",
     "403Tip": "There is always a door closed to you",
     "404Tip": "Life is always a little ridiculous",

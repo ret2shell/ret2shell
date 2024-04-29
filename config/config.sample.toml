@@ -32,6 +32,10 @@ auto_infer = true
 kube_config_path = "~/.kube/config"
 challenge_node_selector = "challenge"
 proxy_image = "ret2shell/container-proxy:main"
+traffic = "wsrx"
+enable_capture = true
+capture_directory = "./data/captures"
+cleanup_interval = 3600                        # in seconds
 
 [database]
 db = 'ret2shell'
