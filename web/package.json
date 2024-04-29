@@ -54,7 +54,7 @@
   "devDependencies": {
     "@iconify-json/fluent": "^1.1.53",
     "@iconify-json/meteocons": "^1.1.4",
-    "@iconify/tailwind": "^0.1.4",
+    "@iconify/tailwind": "^1.0.0",
     "@tailwindcss/typography": "^0.5.13",
     "@types/luxon": "^3.4.2",
     "@types/node": "^20.12.7",
