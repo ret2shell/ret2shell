@@ -10,5 +10,11 @@ homepage = "https://r2s.woooo.tech/"
 keywords = ["ctf", "challenge", "platform", "security", "education"]
 resolver = "2"
 
+[dependencies]
+thiserror = "1.0"
+
+r2s-config = { version = "1.0.0", path = "../config" }
+r2s-database = { version = "1.0.0", path = "../database" }
+
 [lib]
 path = "src/lib.rs"

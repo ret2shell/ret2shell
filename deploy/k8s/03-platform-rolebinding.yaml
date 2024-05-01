@@ -1,12 +1,12 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: platform-service-global
+  name: ret2shell-service-global
 subjects:
-- kind: ServiceAccount
-  name: platform-service
-  namespace: platform
+  - kind: ServiceAccount
+    name: ret2shell-service
+    namespace: ret2shell-platform
 roleRef:
   kind: ClusterRole
-  name: platform-service
+  name: ret2shell-service
   apiGroup: rbac.authorization.k8s.io

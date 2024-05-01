@@ -1,6 +1,4 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: challenge
-  labels:
-    domain: challenge
+  name: ret2shell-challenge
