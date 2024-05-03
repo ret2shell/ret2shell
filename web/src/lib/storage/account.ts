@@ -45,12 +45,11 @@ export const refreshUser = () => {
     })
 }
 
-export const refreshInstitutes = () => {
-  getInstitutes()
-    .then(institutes => {
-      setAccountStore({ institutes })
-    })
-    .catch(() => {
-      /* make esling happy */
-    })
+export const refreshInstitutes = async () => {
+  try {
+    const institutes = await getInstitutes()
+    setAccountStore({ institutes })
+  } catch (e) {
+    // make eslint happy
+  }
 }

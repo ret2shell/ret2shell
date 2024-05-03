@@ -58,7 +58,8 @@
       "title": "トピック",
       "enter": "課題を克服する",
       "notStarted": "ゲームはまだ始まっていないので、焦らないでください",
-      "solved": "解決しました"
+      "solved": "解決しました",
+      "welcome": "参加歓迎"
     },
     "scoreboard": {
       "title": "スコアボード",
@@ -68,7 +69,8 @@
       "title": "答え"
     },
     "admin": {
-      "title": "管理"
+      "title": "管理",
+      "manageChallenges": "イベントトピックの管理"
     },
     "exit": "やめる",
     "noGameHosted": "コンテストは開催されていません",
@@ -124,7 +126,8 @@
     "canNotParticipate": "参加資格がありません",
     "accessPolicy": {
       "open": "オープンイベント"
-    }
+    },
+    "adminMode": "管理者モード"
   },
   "bulletin": {
     "title": "アナウンス",

@@ -13,15 +13,16 @@ export type SelectProps = {
 export interface SelectItemType {
   label: string
   icon?: string
-  value: string | number
+  value: string
   disabled?: boolean
 }
 
 export default function <T extends CollectionItem & SelectItemType>(props: SelectRootProps<T> & SelectProps) {
-  const [selectProps, others] = splitProps(props, ['label', 'placeholder', 'size'])
+  const [selectProps, others] = splitProps(props, ['label', 'placeholder', 'size', 'ghost'])
   return (
     <Select.Root
       {...others}
+      items={others.items}
       positioning={{
         sameWidth: true,
       }}
@@ -31,7 +32,7 @@ export default function <T extends CollectionItem & SelectItemType>(props: Selec
       </Show>
       <Select.Control class="w-full">
         <Select.Trigger
-          class={`btn flex flex-row ${props.size === 'sm' ? 'px-0' : 'px-2'} gap-0 items-center w-full btn-${props.size} ${props.ghost ? 'btn-ghost' : ''}`}
+          class={`btn flex flex-row ${selectProps.size === 'sm' ? 'px-0' : 'px-2'} gap-0 items-center w-full btn-${selectProps.size} ${selectProps.ghost ? 'btn-ghost' : ''}`}
         >
           <Select.ValueText class="px-4 flex-1 text-start truncate" placeholder={selectProps.placeholder} />
           <Select.Indicator class="btn btn-sm btn-square btn-ghost items-center justify-center">
@@ -46,7 +47,7 @@ export default function <T extends CollectionItem & SelectItemType>(props: Selec
         <Select.Positioner>
           <Select.Content class="card w-full">
             <Select.ItemGroup class="card-content p-2 flex flex-col space-y-2">
-              <Index each={props.items}>
+              <Index each={others.items}>
                 {item => (
                   <Select.Item
                     item={item().value}

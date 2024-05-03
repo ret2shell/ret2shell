@@ -1,6 +1,8 @@
+import Spin from '@/lib/assets/animates/spin'
 import { Team } from '@/lib/models/team'
 import { gameStore } from '@/lib/storage/game'
 import { t } from '@/lib/storage/theme'
+import { randomTips } from '@/lib/utils/loading-tips'
 import Pagination from '@/lib/widgets/pagination'
 import { For, Match, Show, Switch } from 'solid-js'
 
@@ -14,6 +16,7 @@ export default function TeamRanks(props: {
   page: number
   pageSize: number
   showTime?: boolean
+  loading?: boolean
   onPageChange?: (page: number) => void
 }) {
   function realIndex(index: number) {
@@ -22,12 +25,20 @@ export default function TeamRanks(props: {
   return (
     <>
       <ul class="flex-1 flex flex-col space-y-2 w-full max-w-5xl self-center">
-        <Show when={props.teams.length === 0}>
-          <div class="flex-1 flex flex-col space-y-6 items-center justify-center opacity-60">
-            <span class="icon-[fluent--data-trending-48-regular] w-12 h-12"></span>
-            <span>{t('game.team.noTeamParticipated')}</span>
-          </div>
-        </Show>
+        <Switch>
+          <Match when={props.loading}>
+            <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
+              <Spin width={32} height={32}></Spin>
+              <span>{randomTips()}</span>
+            </div>
+          </Match>
+          <Match when={props.teams.length === 0}>
+            <div class="flex-1 flex flex-col space-y-6 items-center justify-center opacity-60">
+              <span class="icon-[fluent--data-trending-48-regular] w-12 h-12"></span>
+              <span>{t('game.team.noTeamParticipated')}</span>
+            </div>
+          </Match>
+        </Switch>
         <For each={props.teams}>
           {(team, index) => (
             <li class="h-12 flex flex-row items-center space-x-2 px-4 border-b border-b-layer-content/10">

@@ -91,7 +91,7 @@ export default function (props: ComponentProps<'div'>) {
             </div>
           </div>
           <Show when={expanded()}>
-            <div class="absolute left-4 bottom-4">
+            <div class="absolute left-8 bottom-4">
               <LoadingTips />
             </div>
           </Show>

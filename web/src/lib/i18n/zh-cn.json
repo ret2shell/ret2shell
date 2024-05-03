@@ -74,7 +74,8 @@
       "title": "题目",
       "enter": "攻克挑战",
       "notStarted": "尚未开赛，少安毋躁",
-      "solved": "已解决"
+      "solved": "已解决",
+      "welcome": "欢迎参赛"
     },
     "scoreboard": {
       "title": "积分板",
@@ -84,7 +85,8 @@
       "title": "题解"
     },
     "admin": {
-      "title": "管理"
+      "title": "管理",
+      "manageChallenges": "管理赛事题目"
     },
     "exit": "退出",
     "noGameHosted": "没有举办过赛事",
@@ -140,7 +142,8 @@
     "canNotParticipate": "不符合参与条件",
     "accessPolicy": {
       "open": "开放赛事"
-    }
+    },
+    "adminMode": "管理员模式"
   },
   "bulletin": {
     "title": "公告",

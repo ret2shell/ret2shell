@@ -214,6 +214,24 @@ export default function () {
                   <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5"></span>
                 </Link>
               </Match>
+              <Match
+                when={
+                  accountStore.id &&
+                  accountStore.permissions.includes(Permission.Game) &&
+                  gameStore.current?.admins.includes(accountStore.id)
+                }
+              >
+                <Link
+                  level="success"
+                  class="flex-1"
+                  href={`/games/${gameStore.current?.id}/challenges`}
+                  justify="start"
+                >
+                  <span class="icon-[fluent--code-20-filled] w-5 h-5"></span>
+                  <span class="flex-1 text-start">{t('game.admin.manageChallenges')}</span>
+                  <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5"></span>
+                </Link>
+              </Match>
               <Match when={accountStore.id && !gameStore.team}>
                 <Link
                   href={`/games/${gameStore.current?.id}/teams/create`}

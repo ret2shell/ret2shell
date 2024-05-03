@@ -58,7 +58,8 @@
       "title": "Challenges",
       "enter": "Solve challenges",
       "notStarted": "The game hasn’t started yet",
-      "solved": "solved"
+      "solved": "solved",
+      "welcome": "Welcome"
     },
     "scoreboard": {
       "title": "Scoreboard",
@@ -68,7 +69,8 @@
       "title": "Write-up"
     },
     "admin": {
-      "title": "Admin"
+      "title": "Admin",
+      "manageChallenges": "Manage challenges"
     },
     "exit": "Exit",
     "noGameHosted": "No game is hosted",
@@ -124,7 +126,8 @@
     "canNotParticipate": "Not eligible to participate",
     "accessPolicy": {
       "open": "open for participating"
-    }
+    },
+    "adminMode": "Administrator mode"
   },
   "bulletin": {
     "title": "Bulletin",

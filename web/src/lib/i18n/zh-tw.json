@@ -58,7 +58,8 @@
       "title": "題目",
       "enter": "攻克挑戰",
       "notStarted": "尚未開賽，少安毋躁",
-      "solved": "已解決"
+      "solved": "已解決",
+      "welcome": "歡迎參賽"
     },
     "scoreboard": {
       "title": "積分板",
@@ -68,7 +69,8 @@
       "title": "題解"
     },
     "admin": {
-      "title": "管理"
+      "title": "管理",
+      "manageChallenges": "管理賽事題目"
     },
     "exit": "退出",
     "noGameHosted": "沒有舉辦過賽事",
@@ -124,7 +126,8 @@
     "canNotParticipate": "不符合參與條件",
     "accessPolicy": {
       "open": "開放賽事"
-    }
+    },
+    "adminMode": "管理員模式"
   },
   "bulletin": {
     "title": "公告",
