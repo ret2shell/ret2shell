@@ -1,6 +1,7 @@
 import api, { api_root } from '.'
 import { Captcha } from '@models/captcha'
 import { User } from '@models/user'
+import { Institute } from '../models/institute'
 
 export async function getCaptcha() {
   return await api.get(`${api_root}/account/captcha`).json<Captcha>()
@@ -57,4 +58,8 @@ export async function changeProfile(req: User) {
 
 export async function deleteSelf() {
   return await api.delete(`${api_root}/account/profile`).json()
+}
+
+export async function getInstitutes() {
+  return await api.get(`${api_root}/account/institute`).json<Institute[]>()
 }

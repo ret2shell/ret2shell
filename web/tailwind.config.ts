@@ -34,7 +34,11 @@ export default {
       display: fontFamily,
       body: fontFamily,
     },
-    extend: {},
+    extend: {
+      transitionProperty: {
+        size: 'width, height',
+      },
+    },
   },
   okwind: {
     cyber: {

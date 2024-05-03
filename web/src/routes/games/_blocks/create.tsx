@@ -100,9 +100,9 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
               name="team_size"
               type="number"
               validate={[
-                required(t('game.teamSizeRequired')!),
-                minRange(1, t('game.teamSizeMinExceeded')!),
-                maxRange(99, t('game.teamSizeMaxExceeded')!),
+                required(t('game.team.sizeRequired')!),
+                minRange(1, t('game.team.sizeMinExceeded')!),
+                maxRange(99, t('game.team.sizeMaxExceeded')!),
               ]}
             >
               {(field, props) => (

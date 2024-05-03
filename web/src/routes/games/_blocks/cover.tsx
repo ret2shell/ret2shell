@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from '@solidjs/router'
 import { ComponentProps, Show, createEffect, createSignal } from 'solid-js'
 import bgGameDefault from '@assets/imgs/bg-game-default.webp'
 import LogoAnimate from '@/lib/assets/animates/logo-animate'
+import LoadingTips from '@/lib/widgets/loading-tips'
 
 export default function (props: ComponentProps<'div'>) {
   const location = useLocation()
@@ -22,7 +23,7 @@ export default function (props: ComponentProps<'div'>) {
       }, 1000)
       setTimeout(() => {
         setExpanded(false)
-      }, 2500)
+      }, 3000)
     }
   })
   return (
@@ -31,7 +32,7 @@ export default function (props: ComponentProps<'div'>) {
         {...props}
         class={`fixed w-full top-0 left-0 overflow-hidden lg:overflow-clip transition-all ease-in-out z-50 duration-500 ${expanded() ? 'h-full' : 'h-0'} ${props.class}`}
       >
-        <div class="w-full h-full relative">
+        <div class="w-screen h-screen relative">
           <img
             class={`w-screen h-screen transition-all ease-out duration-[3000ms] ${expanded() ? 'scale-125 blur-2xl' : ''}`}
             src={gameStore.preload?.cover || gameStore.current?.cover || bgGameDefault}
@@ -89,6 +90,11 @@ export default function (props: ComponentProps<'div'>) {
               <h1>{gameStore.current?.name}</h1>
             </div>
           </div>
+          <Show when={expanded()}>
+            <div class="absolute left-4 bottom-4">
+              <LoadingTips />
+            </div>
+          </Show>
         </div>
       </div>
     </>

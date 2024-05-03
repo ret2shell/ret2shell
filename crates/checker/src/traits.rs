@@ -1,11 +1,13 @@
 use std::collections::HashMap;
 
+use async_trait::async_trait;
 use r2s_database::{challenge, submission, user};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum CheckerError {}
 
+#[async_trait]
 pub trait CheckerImpl {
     async fn check(
         &self, user: &user::Model, challenge: &challenge::Model, submission: &submission::Model,

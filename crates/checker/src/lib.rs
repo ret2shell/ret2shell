@@ -1,4 +1,4 @@
 mod env;
 mod script;
 mod simple;
-mod traits;
+pub mod traits;

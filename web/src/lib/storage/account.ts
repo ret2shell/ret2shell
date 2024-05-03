@@ -1,8 +1,9 @@
 import { createStore } from 'solid-js/store'
 import { makePersisted } from '@solid-primitives/storage'
 import { Permission, Token, User } from '@models/user'
-import { getProfile } from '../api/account'
+import { getInstitutes, getProfile } from '../api/account'
 import { fromBase64 } from 'js-base64'
+import { Institute } from '../models/institute'
 
 export const [accountStore, setAccountStore] = makePersisted(
   createStore({
@@ -12,11 +13,12 @@ export const [accountStore, setAccountStore] = makePersisted(
     token: null as string | null,
     permissions: [] as Permission[],
     info: null as User | null,
+    institutes: [] as Institute[],
   }),
   { name: 'account' }
 )
 
-export const userLogin = (token: string) => {
+export const storeToken = (token: string) => {
   setAccountStore({ token })
   const tokenRaw = fromBase64(token.split('.')[1])
   const tokenJson = JSON.parse(tokenRaw) as Token
@@ -28,17 +30,27 @@ export const userLogin = (token: string) => {
   })
 }
 
-export const userReset = () => {
+export const resetUser = () => {
   setAccountStore({ id: null, account: null, nickname: null, token: null, info: null, permissions: [] })
 }
 
-export const userRefresh = () => {
+export const refreshUser = () => {
   if (!accountStore.token) return
   getProfile()
     .then(info => {
       setAccountStore({ info })
     })
     .catch(() => {
-      userReset()
+      resetUser()
+    })
+}
+
+export const refreshInstitutes = () => {
+  getInstitutes()
+    .then(institutes => {
+      setAccountStore({ institutes })
+    })
+    .catch(() => {
+      /* make esling happy */
     })
 }

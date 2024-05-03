@@ -73,10 +73,12 @@
     "challenge": {
       "title": "题目",
       "enter": "攻克挑战",
-      "notStarted": "尚未开赛，少安毋躁"
+      "notStarted": "尚未开赛，少安毋躁",
+      "solved": "已解决"
     },
     "scoreboard": {
-      "title": "积分板"
+      "title": "积分板",
+      "selectInstitute": "选择组织..."
     },
     "writeup": {
       "title": "题解"
@@ -107,9 +109,6 @@
     "canRegisterAfterStarted": "允许开赛后注册",
     "offline": "线下比赛",
     "enableAudit": "开启队伍审核",
-    "teamSizeRequired": "请填写队伍人数限制",
-    "teamSizeMinExceeded": "队伍成员最少一人",
-    "teamSizeMaxExceeded": "队伍成员最多不能超过 100 人，请考虑共享账号",
     "createFailed": "创建失败",
     "writeupsOnlyOpenWhenArchived": "题解仅在赛事归档之后才公开！",
     "adminCanNotTakePartIn": "管理员不能参赛",
@@ -129,10 +128,19 @@
       "manage": {
         "title": "查看我的队伍"
       },
-      "loginThenBack": "登录后参与"
+      "loginThenBack": "登录后参与",
+      "sizeRequired": "请填写队伍人数限制",
+      "sizeMinExceeded": "队伍成员最少一人",
+      "sizeMaxExceeded": "队伍成员最多不能超过 100 人，请考虑共享账号",
+      "collab": "{{ size }} 人组队赛",
+      "solo": "单人赛",
+      "noTeamParticipated": "还没有队伍参赛"
     },
     "archivedGotoTraining": "已归档，请前往练习场",
-    "canNotParticipate": "不符合参与条件"
+    "canNotParticipate": "不符合参与条件",
+    "accessPolicy": {
+      "open": "开放赛事"
+    }
   },
   "bulletin": {
     "title": "公告",

@@ -12,6 +12,7 @@ resolver = "2"
 
 [dependencies]
 thiserror = "1.0"
+async-trait = "0.1"
 
 r2s-config = { version = "1.0.0", path = "../config" }
 r2s-database = { version = "1.0.0", path = "../database" }

@@ -57,10 +57,12 @@
     "challenge": {
       "title": "題目",
       "enter": "攻克挑戰",
-      "notStarted": "尚未開賽，少安毋躁"
+      "notStarted": "尚未開賽，少安毋躁",
+      "solved": "已解決"
     },
     "scoreboard": {
-      "title": "積分板"
+      "title": "積分板",
+      "selectInstitute": "選擇組織..."
     },
     "writeup": {
       "title": "題解"
@@ -91,9 +93,6 @@
     "canRegisterAfterStarted": "允許開賽後註冊",
     "offline": "線下比賽",
     "enableAudit": "開啟隊伍審核",
-    "teamSizeRequired": "請填寫隊伍人數限制",
-    "teamSizeMinExceeded": "隊伍成員最少一人",
-    "teamSizeMaxExceeded": "隊伍成員最多不能超過 100 人，請考慮共享帳號",
     "createFailed": "創建失敗",
     "writeupsOnlyOpenWhenArchived": "題解僅在賽事歸檔後才公開！",
     "adminCanNotTakePartIn": "管理員不能參賽",
@@ -113,10 +112,19 @@
       "manage": {
         "title": "查看我的隊伍"
       },
-      "loginThenBack": "登入後參與"
+      "loginThenBack": "登入後參與",
+      "sizeRequired": "請填寫隊伍人數限制",
+      "sizeMinExceeded": "隊伍成員最少一人",
+      "sizeMaxExceeded": "隊伍成員最多不能超過 100 人，請考慮共享帳號",
+      "collab": "{{ size }} 人組隊賽",
+      "solo": "單人賽",
+      "noTeamParticipated": "還沒有隊伍參賽"
     },
     "archivedGotoTraining": "已歸檔，請前往練習場",
-    "canNotParticipate": "不符合參與條件"
+    "canNotParticipate": "不符合參與條件",
+    "accessPolicy": {
+      "open": "開放賽事"
+    }
   },
   "bulletin": {
     "title": "公告",

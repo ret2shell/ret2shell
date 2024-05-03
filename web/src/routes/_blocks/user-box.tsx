@@ -1,5 +1,5 @@
 import { Match, Show, Switch, createEffect, createSignal, untrack } from 'solid-js'
-import { accountStore, userRefresh, userReset } from '@storage/account'
+import { accountStore, refreshInstitutes, refreshUser, resetUser } from '@storage/account'
 import Link from '@widgets/link'
 import Popover from '@widgets/popover'
 import Avatar from '@widgets/avatar'
@@ -16,7 +16,7 @@ import { Permission } from '@/lib/models/user'
 export default function UserBox() {
   createEffect(() => {
     if (accountStore.token) {
-      untrack(userRefresh)
+      untrack(refreshUser)
     }
   })
 
@@ -26,7 +26,7 @@ export default function UserBox() {
     setLoading(true)
     setTimeout(() => {
       logout().finally(() => {
-        userReset()
+        resetUser()
         navigate('/')
         clearToasts()
         setLoading(false)

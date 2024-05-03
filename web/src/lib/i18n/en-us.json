@@ -57,10 +57,12 @@
     "challenge": {
       "title": "Challenges",
       "enter": "Solve challenges",
-      "notStarted": "The game hasn’t started yet"
+      "notStarted": "The game hasn’t started yet",
+      "solved": "solved"
     },
     "scoreboard": {
-      "title": "Scoreboard"
+      "title": "Scoreboard",
+      "selectInstitute": "Select institute..."
     },
     "writeup": {
       "title": "Write-up"
@@ -91,9 +93,6 @@
     "canRegisterAfterStarted": "Allow registration after started",
     "offline": "Offline game",
     "enableAudit": "Enable team audit",
-    "teamSizeRequired": "Please fill in the team size limit",
-    "teamSizeMinExceeded": "At least one team member",
-    "teamSizeMaxExceeded": "The maximum number of team members is 100, please consider sharing accounts",
     "createFailed": "Create failed",
     "writeupsOnlyOpenWhenArchived": "The writeups will only be made public after the game is archived!",
     "adminCanNotTakePartIn": "Administrators cannot participate",
@@ -113,10 +112,19 @@
       "manage": {
         "title": "View my team"
       },
-      "loginThenBack": "Log in to participate"
+      "loginThenBack": "Log in to participate",
+      "sizeRequired": "Please fill in the team size limit",
+      "sizeMinExceeded": "At least one team member",
+      "sizeMaxExceeded": "The maximum number of team members is 100, please consider sharing accounts",
+      "collab": "Team game with {{ size }} players",
+      "solo": "Solo game",
+      "noTeamParticipated": "No team has participated yet"
     },
     "archivedGotoTraining": "Archived, please goto training board",
-    "canNotParticipate": "Not eligible to participate"
+    "canNotParticipate": "Not eligible to participate",
+    "accessPolicy": {
+      "open": "open for participating"
+    }
   },
   "bulletin": {
     "title": "Bulletin",

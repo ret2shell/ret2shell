@@ -19,6 +19,8 @@
 @import './tag.scss';
 @import './toast.scss';
 
+@import './scrollbar.scss';
+
 @import 'tailwindcss/utilities';
 @import 'tailwindcss/variants';
 
@@ -66,4 +68,9 @@ body {
 
 [hidden] {
   @apply hidden;
+}
+
+.os-scrollbar {
+  pointer-events: auto;
+  visibility: visible !important;
 }

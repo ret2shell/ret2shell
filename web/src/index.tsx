@@ -5,11 +5,10 @@ import '@fontsource/jetbrains-mono'
 import 'overlayscrollbars/overlayscrollbars.css'
 import '@widgets/styles/base.scss'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-solid'
-import { initTheme, themeStore } from './lib/storage/theme'
+import { fullTheme, initTheme, themeStore } from './lib/storage/theme'
 import { Router } from '@solidjs/router'
 import { onMount } from 'solid-js'
 import Background from './lib/blocks/background'
-import { platformStore } from './lib/storage/platform'
 
 function checkEdition() {
   const compact_edition = import.meta.env.VITE_COMPAT_EDITION
@@ -60,14 +59,14 @@ render(() => {
       <OverlayScrollbarsComponent
         options={{
           scrollbars: {
-            theme: themeStore.colorScheme === 'light' ? 'os-theme-dark' : 'os-theme-light',
+            theme: `os-theme-${fullTheme()}`,
             autoHide: 'scroll',
           },
         }}
         class="relative w-screen h-screen print:h-auto print:overflow-auto"
         defer
       >
-        <div class="flex flex-col min-h-full">
+        <div class="flex flex-col min-h-full min-w-fit">
           <Router>{routes}</Router>
         </div>
       </OverlayScrollbarsComponent>

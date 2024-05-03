@@ -168,6 +168,7 @@ impl FromStr for ForwardedStanza {
     }
 }
 
+#[allow(dead_code)]
 struct ForwardedHeaderValueIterator<'a> {
     head: Option<&'a ForwardedStanza>,
     tail: &'a [ForwardedStanza],

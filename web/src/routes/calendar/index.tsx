@@ -3,7 +3,7 @@ import Spin from '@/lib/assets/animates/spin'
 import { Calendar } from '@/lib/models/calendar'
 import { Permission } from '@/lib/models/user'
 import { accountStore } from '@/lib/storage/account'
-import { t, themeStore } from '@/lib/storage/theme'
+import { fullTheme, t, themeStore } from '@/lib/storage/theme'
 import { addToast } from '@/lib/storage/toast'
 import Article from '@/lib/widgets/article'
 import Button from '@/lib/widgets/button'
@@ -544,7 +544,7 @@ export default function () {
         <OverlayScrollbarsComponent
           options={{
             scrollbars: {
-              theme: themeStore.colorScheme === 'light' ? 'os-theme-dark' : 'os-theme-light',
+              theme: `os-theme-${fullTheme()}`,
               autoHide: 'scroll',
             },
           }}

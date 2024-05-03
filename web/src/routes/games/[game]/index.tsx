@@ -2,13 +2,12 @@ import Spin from '@/lib/assets/animates/spin'
 import { Article as ArticleModel } from '@/lib/models/article'
 import { TeamState, coloredState, stringifyState } from '@/lib/models/team'
 import { Permission } from '@/lib/models/user'
-import { accountStore } from '@/lib/storage/account'
+import { accountStore, refreshInstitutes } from '@/lib/storage/account'
 import { gameStore } from '@/lib/storage/game'
 import { Title } from '@/lib/storage/header'
 import { t } from '@/lib/storage/theme'
 import { randomTips } from '@/lib/utils/loading-tips'
 import Article from '@/lib/widgets/article'
-import Avatar from '@/lib/widgets/avatar'
 import Card from '@/lib/widgets/card'
 import Link from '@/lib/widgets/link'
 import Picture from '@/lib/widgets/picture'
@@ -17,9 +16,10 @@ import Timer from '@/lib/widgets/timer'
 
 import bgGameDefault from '@assets/imgs/bg-game-default.webp'
 import { DateTime } from 'luxon'
-import { Match, Show, Switch, createEffect, createSignal, onCleanup, untrack } from 'solid-js'
+import { For, Match, Show, Switch, createEffect, createSignal, onCleanup, untrack } from 'solid-js'
 
 export default function () {
+  refreshInstitutes()
   const period = () => {
     if (gameStore.current?.register_at && gameStore.current.register_at > DateTime.now()) {
       return t('game.register')!
@@ -121,7 +121,34 @@ export default function () {
               </p>
             </Show>
           </div>
-          <div class="flex-1"></div>
+          <div class="flex-1 hidden lg:flex flex-col">
+            <div class="flex flex-row flex-wrap items-start justify-center">
+              <Tag level="info" class="m-2">
+                <Show
+                  when={gameStore.current?.team_size && gameStore.current.team_size > 1}
+                  fallback={<span>{t('game.team.solo')}</span>}
+                >
+                  <span>{t('game.team.collab', { size: gameStore.current?.team_size! })}</span>
+                </Show>
+              </Tag>
+              <Show
+                when={gameStore.current?.access_policy.restrict}
+                fallback={
+                  <Tag level="success" class="m-2">
+                    <span>{t('game.accessPolicy.open')}</span>
+                  </Tag>
+                }
+              >
+                <For each={gameStore.current?.access_policy.institutes}>
+                  {institute => (
+                    <Tag level="success" class="m-2">
+                      <span>{accountStore.institutes.find(v => v.id === institute)?.name}</span>
+                    </Tag>
+                  )}
+                </For>
+              </Show>
+            </div>
+          </div>
           <Show when={gameStore.team}>
             <Card contentClass="p-3 lg:p-6 flex flex-row space-x-2 lg:space-x-4">
               <div class="lg:p-2 flex items-center justify-center">
@@ -134,10 +161,10 @@ export default function () {
                   <span class="opacity-60">{gameStore.team?.id.toString(16).padStart(6, '0')}</span>
                 </h3>
                 <p class="flex-row flex-wrap hidden lg:flex">
-                  <Tag level={coloredState(gameStore.team?.state || TeamState.Pending)} class="m-1">
+                  <Tag level={coloredState(gameStore.team?.state || TeamState.Pending)} class="mx-1">
                     <span>{stringifyState(gameStore.team?.state || TeamState.Pending)}</span>
                   </Tag>
-                  <Tag level="info" class="m-1">
+                  <Tag level="info" class="mx-1">
                     <span>{gameStore.team?.institute_name || t('account.institute.none')}</span>
                   </Tag>
                 </p>

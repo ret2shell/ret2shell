@@ -57,10 +57,12 @@
     "challenge": {
       "title": "トピック",
       "enter": "課題を克服する",
-      "notStarted": "ゲームはまだ始まっていないので、焦らないでください"
+      "notStarted": "ゲームはまだ始まっていないので、焦らないでください",
+      "solved": "解決しました"
     },
     "scoreboard": {
-      "title": "スコアボード"
+      "title": "スコアボード",
+      "selectInstitute": "組織を選択..."
     },
     "writeup": {
       "title": "答え"
@@ -91,9 +93,6 @@
     "canRegisterAfterStarted": "キックオフ後の登録を許可する",
     "offline": "オフライン対戦",
     "enableAudit": "チームレビューを開始する",
-    "teamSizeRequired": "チームの人数制限を入力してください",
-    "teamSizeMinExceeded": "少なくとも 1 人のチームメンバー",
-    "teamSizeMaxExceeded": "チームメンバーの最大数は 100 です。アカウントの共有を検討してください。",
     "createFailed": "作成に失敗しました",
     "writeupsOnlyOpenWhenArchived": "ソリューションはイベントがアーカイブされた後にのみ公開されます！",
     "adminCanNotTakePartIn": "管理者は参加できません",
@@ -113,10 +112,19 @@
       "manage": {
         "title": "私のチームを見る"
       },
-      "loginThenBack": "参加するにはログインしてください"
+      "loginThenBack": "参加するにはログインしてください",
+      "sizeRequired": "チームの人数制限を入力してください",
+      "sizeMinExceeded": "少なくとも 1 人のチームメンバー",
+      "sizeMaxExceeded": "チームメンバーの最大数は 100 です。アカウントの共有を検討してください。",
+      "collab": "{{ サイズ }} チーム対抗戦",
+      "solo": "シングルマッチ",
+      "noTeamParticipated": "まだ参加チームはありません"
     },
     "archivedGotoTraining": "アーカイブ済み、ゴルフ練習場へ行ってください",
-    "canNotParticipate": "参加資格がありません"
+    "canNotParticipate": "参加資格がありません",
+    "accessPolicy": {
+      "open": "オープンイベント"
+    }
   },
   "bulletin": {
     "title": "アナウンス",

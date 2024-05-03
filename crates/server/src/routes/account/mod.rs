@@ -30,6 +30,7 @@ use crate::{
 };
 
 mod captcha;
+mod institute;
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
     Router::new()
@@ -51,6 +52,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .route("/login", post(login))
         .route("/register", post(register))
         .nest("/captcha", captcha::router(state))
+        .nest("/institute", institute::router(state))
 }
 
 macro_rules! get_user_by_account {

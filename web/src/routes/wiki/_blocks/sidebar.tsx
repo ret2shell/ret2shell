@@ -1,7 +1,7 @@
 import { Article } from '@/lib/models/article'
 import { Permission } from '@/lib/models/user'
 import { accountStore } from '@/lib/storage/account'
-import { t, themeStore } from '@/lib/storage/theme'
+import { fullTheme, t, themeStore } from '@/lib/storage/theme'
 import { wikiStore } from '@/lib/storage/wiki'
 import Divider from '@/lib/widgets/divider'
 import Link from '@/lib/widgets/link'
@@ -59,7 +59,7 @@ export default function () {
       <OverlayScrollbarsComponent
         options={{
           scrollbars: {
-            theme: themeStore.colorScheme === 'light' ? 'os-theme-dark' : 'os-theme-light',
+            theme: `os-theme-${fullTheme()}`,
             autoHide: 'scroll',
           },
         }}

@@ -1,0 +1,97 @@
+.os-theme-cyber-dark {
+  /* The size of the scrollbar */
+  --os-size: 16px;
+  /* The axis-perpedicular padding of the scrollbar (horizontal: padding-y, vertical: padding-x) */
+  --os-padding-perpendicular: 4px;
+  /* The axis padding of the scrollbar (horizontal: padding-x, vertical: padding-y) */
+  --os-padding-axis: 4px;
+  /* The border radius of the scrollbar track */
+  /* --os-track-border-radius: 0; */
+  /* The background of the scrollbar track */
+  /* --os-track-bg: none; */
+  /* The :hover background of the scrollbar track */
+  /* --os-track-bg-hover: none; */
+  /* The :active background of the scrollbar track */
+  /* --os-track-bg-active: none; */
+  /* The border of the scrollbar track */
+  /* --os-track-border: none; */
+  /* The :hover background of the scrollbar track */
+  /* --os-track-border-hover: none; */
+  /* The :active background of the scrollbar track */
+  /* --os-track-border-active: none; */
+  /* The border radius of the scrollbar handle */
+  --os-handle-border-radius: 9999px;
+  /* The background of the scrollbar handle */
+  --os-handle-bg: #ffffff40;
+  /* The :hover background of the scrollbar handle */
+  --os-handle-bg-hover: #ffffffa0;
+  /* The :active background of the scrollbar handle */
+  --os-handle-bg-active: #ffffff80;
+  /* The border of the scrollbar handle */
+  /* --os-handle-border: none; */
+  /* The :hover border of the scrollbar handle */
+  /* --os-handle-border-hover: none; */
+  /* The :active border of the scrollbar handle */
+  /* --os-handle-border-active: none; */
+  /* The min size of the scrollbar handle */
+  --os-handle-min-size: 33px;
+  /* The max size of the scrollbar handle */
+  /* --os-handle-max-size: none; */
+  /* The axis-perpedicular size of the scrollbar handle (horizontal: height, vertical: width) */
+  --os-handle-perpendicular-size: 6px;
+  /* The :hover axis-perpedicular size of the scrollbar handle (horizontal: height, vertical: width) */
+  --os-handle-perpendicular-size-hover: 8px;
+  /* The :active axis-perpedicular size of the scrollbar handle (horizontal: height, vertical: width) */
+  --os-handle-perpendicular-size-active: 8px;
+  /* Increases the interactive area of the scrollbar handle. */
+  /* --os-handle-interactive-area-offset: 0; */
+}
+
+.os-theme-cyber-light {
+  /* The size of the scrollbar */
+  --os-size: 16px;
+  /* The axis-perpedicular padding of the scrollbar (horizontal: padding-y, vertical: padding-x) */
+  --os-padding-perpendicular: 4px;
+  /* The axis padding of the scrollbar (horizontal: padding-x, vertical: padding-y) */
+  --os-padding-axis: 4px;
+  /* The border radius of the scrollbar track */
+  /* --os-track-border-radius: 0; */
+  /* The background of the scrollbar track */
+  /* --os-track-bg: none; */
+  /* The :hover background of the scrollbar track */
+  /* --os-track-bg-hover: none; */
+  /* The :active background of the scrollbar track */
+  /* --os-track-bg-active: none; */
+  /* The border of the scrollbar track */
+  /* --os-track-border: none; */
+  /* The :hover background of the scrollbar track */
+  /* --os-track-border-hover: none; */
+  /* The :active background of the scrollbar track */
+  /* --os-track-border-active: none; */
+  /* The border radius of the scrollbar handle */
+  --os-handle-border-radius: 9999px;
+  /* The background of the scrollbar handle */
+  --os-handle-bg: #33333390;
+  /* The :hover background of the scrollbar handle */
+  --os-handle-bg-hover: #333333e0;
+  /* The :active background of the scrollbar handle */
+  --os-handle-bg-active: #333333a0;
+  /* The border of the scrollbar handle */
+  /* --os-handle-border: none; */
+  /* The :hover border of the scrollbar handle */
+  /* --os-handle-border-hover: none; */
+  /* The :active border of the scrollbar handle */
+  /* --os-handle-border-active: none; */
+  /* The min size of the scrollbar handle */
+  --os-handle-min-size: 33px;
+  /* The max size of the scrollbar handle */
+  /* --os-handle-max-size: none; */
+  /* The axis-perpedicular size of the scrollbar handle (horizontal: height, vertical: width) */
+  --os-handle-perpendicular-size: 6px;
+  /* The :hover axis-perpedicular size of the scrollbar handle (horizontal: height, vertical: width) */
+  --os-handle-perpendicular-size-hover: 8px;
+  /* The :active axis-perpedicular size of the scrollbar handle (horizontal: height, vertical: width) */
+  --os-handle-perpendicular-size-active: 8px;
+  /* Increases the interactive area of the scrollbar handle. */
+  /* --os-handle-interactive-area-offset: 0; */
+}
