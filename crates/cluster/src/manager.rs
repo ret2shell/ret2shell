@@ -13,7 +13,7 @@ use super::traits::ClusterError;
 
 #[derive(Clone)]
 pub struct Cluster {
-    client: Client,
+    client: Option<Client>,
     namespace: Option<String>,
 }
 
@@ -24,8 +24,18 @@ macro_rules! with_namespace {
     };
 }
 
+macro_rules! check_enabled {
+    ($client: expr) => {
+        if let Some(c) = $client.clone() {
+            Ok(c)
+        } else {
+            Err(super::traits::ClusterError::ClusterDisabled)
+        }
+    };
+}
+
 impl Cluster {
-    pub fn new(client: Client) -> Self {
+    pub fn new(client: Option<Client>) -> Self {
         Self {
             client,
             namespace: Some(String::from("default")),
@@ -47,24 +57,28 @@ impl Cluster {
     }
 
     pub async fn version(&self) -> Result<Info, ClusterError> {
-        let version = self.client.apiserver_version().await?;
+        let client = check_enabled!(self.client)?;
+        let version = client.apiserver_version().await?;
         Ok(version)
     }
 
     pub async fn nodes(&self) -> Result<ObjectList<Node>, ClusterError> {
-        let api: Api<Node> = Api::all(self.client.clone());
+        let client = check_enabled!(self.client)?;
+        let api: Api<Node> = Api::all(client);
         let nodes = api.list(&ListParams::default()).await?;
         Ok(nodes)
     }
 
     pub async fn namespaces(&self) -> Result<ObjectList<Namespace>, ClusterError> {
-        let api: Api<Namespace> = Api::all(self.client.clone());
+        let client = check_enabled!(self.client)?;
+        let api: Api<Namespace> = Api::all(client);
         let namespaces = api.list(&ListParams::default()).await?;
         Ok(namespaces)
     }
 
     pub async fn configs(&self) -> Result<ObjectList<ConfigMap>, ClusterError> {
-        let api: Api<ConfigMap> = Api::all(self.client.clone());
+        let client = check_enabled!(self.client)?;
+        let api: Api<ConfigMap> = Api::all(client);
         let configs = api.list(&ListParams::default()).await?;
         Ok(configs)
     }
@@ -73,10 +87,8 @@ impl Cluster {
         &self, pod: String, container: Option<String>, follow: bool, tail_lines: Option<i64>,
         since_time: Option<DateTime<Utc>>,
     ) -> Result<impl AsyncBufRead, ClusterError> {
-        let pods: Api<Pod> = Api::namespaced(
-            self.client.clone(),
-            &with_namespace!(&self.namespace, "logs")?,
-        );
+        let client = check_enabled!(self.client)?;
+        let pods: Api<Pod> = Api::namespaced(client, &with_namespace!(&self.namespace, "logs")?);
         let logs = pods
             .log_stream(
                 &pod,
@@ -94,7 +106,8 @@ impl Cluster {
     }
 
     pub async fn create_namespace(&self, name: &str) -> Result<Namespace, ClusterError> {
-        let api: Api<Namespace> = Api::all(self.client.clone());
+        let client = check_enabled!(self.client)?;
+        let api: Api<Namespace> = Api::all(client);
         let namespace = Namespace {
             metadata: ObjectMeta {
                 name: Some(name.to_owned()),
@@ -107,28 +120,25 @@ impl Cluster {
     }
 
     pub async fn create_pod(&self, pod: Pod) -> Result<Pod, ClusterError> {
-        let api: Api<Pod> = Api::namespaced(
-            self.client.clone(),
-            &with_namespace!(&self.namespace, "create pod")?,
-        );
+        let client = check_enabled!(self.client)?;
+        let api: Api<Pod> =
+            Api::namespaced(client, &with_namespace!(&self.namespace, "create pod")?);
         let pod = api.create(&Default::default(), &pod).await?;
         Ok(pod)
     }
 
     pub async fn delete_pod(&self, name: &str) -> Result<(), ClusterError> {
-        let api: Api<Pod> = Api::namespaced(
-            self.client.clone(),
-            &with_namespace!(&self.namespace, "delete pod")?,
-        );
+        let client = check_enabled!(self.client)?;
+        let api: Api<Pod> =
+            Api::namespaced(client, &with_namespace!(&self.namespace, "delete pod")?);
         api.delete(name, &Default::default()).await?;
         Ok(())
     }
 
     pub async fn infer_pod(&self, name: &str) -> Result<Pod, ClusterError> {
-        let api: Api<Pod> = Api::namespaced(
-            self.client.clone(),
-            &with_namespace!(&self.namespace, "infer pod")?,
-        );
+        let client = check_enabled!(self.client)?;
+        let api: Api<Pod> =
+            Api::namespaced(client, &with_namespace!(&self.namespace, "infer pod")?);
         let pod = api.get(name).await?;
         Ok(pod)
     }

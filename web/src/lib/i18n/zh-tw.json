@@ -59,7 +59,8 @@
       "enter": "攻克挑戰",
       "notStarted": "尚未開賽，少安毋躁",
       "solved": "已解決",
-      "welcome": "歡迎參賽"
+      "welcome": "歡迎參賽",
+      "list": "題目列表"
     },
     "scoreboard": {
       "title": "積分板",

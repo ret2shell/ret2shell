@@ -75,7 +75,8 @@
       "enter": "攻克挑战",
       "notStarted": "尚未开赛，少安毋躁",
       "solved": "已解决",
-      "welcome": "欢迎参赛"
+      "welcome": "欢迎参赛",
+      "list": "题目列表"
     },
     "scoreboard": {
       "title": "积分板",

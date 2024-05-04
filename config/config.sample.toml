@@ -27,6 +27,7 @@ difficulty = 4
 validator = 'Pow'
 
 [cluster]
+enabled = true
 try_default = false
 auto_infer = true
 kube_config_path = "~/.kube/config"

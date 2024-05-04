@@ -7,13 +7,14 @@ use crate::traits::Merge;
 /// `ClusterConfig` is a configuration struct for managing service settings.
 #[derive(Serialize, Deserialize, Clone, Debug, FromJsonQueryResult, PartialEq, Eq)]
 pub struct Config {
+    pub enabled: bool,
     /// `try_default` is a flag to try to use the default service account.
     /// maybe useful when running ret2shell inside a kubernetes cluster,
     /// and want to use the same cluster to launch challenge pods.
-    pub try_default: bool,
+    pub try_default: Option<bool>,
     /// `auto_infer` is a flag to try to infer the kube config path.
     /// only available when `try_default` is false.
-    pub auto_infer: bool,
+    pub auto_infer: Option<bool>,
     /// `kube_config_path` is the path to the kube config file.
     /// necessary when `try_default` and `auto_infer` both are false.
     pub kube_config_path: Option<String>,
@@ -38,8 +39,9 @@ impl Merge for Option<Config> {
         // prefers fields in `other`
         match (self, other) {
             (Some(a), Some(b)) => Some(Config {
-                try_default: b.try_default,
-                auto_infer: b.auto_infer,
+                enabled: b.enabled,
+                try_default: b.try_default.or(a.try_default),
+                auto_infer: b.auto_infer.or(a.auto_infer),
                 kube_config_path: b.kube_config_path.or(a.kube_config_path),
                 challenge_node_selector: b.challenge_node_selector.or(a.challenge_node_selector),
                 proxy_image: b.proxy_image.or(a.proxy_image),

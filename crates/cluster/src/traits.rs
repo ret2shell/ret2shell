@@ -12,4 +12,6 @@ pub enum ClusterError {
     NeedNamespace(String),
     #[error("cluster config is needed")]
     ConfigNeeded,
+    #[error("cluster is disabled")]
+    ClusterDisabled,
 }

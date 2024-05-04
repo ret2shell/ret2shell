@@ -18,9 +18,12 @@ pub use kube::api::ObjectList;
 
 pub async fn initialize(config: &Option<cluster::Config>) -> Result<Cluster, ClusterError> {
     let config = config.clone().ok_or(ClusterError::ConfigNeeded)?;
-    let client = if config.try_default {
+    if !config.enabled {
+        return Ok(Cluster::new(None));
+    }
+    let client = if config.try_default.is_some_and(|t| t) {
         Client::try_default().await?
-    } else if config.auto_infer {
+    } else if config.auto_infer.is_some_and(|t| t) {
         Client::try_from(Config::infer().await?)?
     } else {
         let kube_config_path = config.kube_config_path.as_ref().unwrap();
@@ -30,7 +33,7 @@ pub async fn initialize(config: &Option<cluster::Config>) -> Result<Cluster, Clu
             Config::from_custom_kubeconfig(kube_config, &KubeConfigOptions::default()).await?;
         Client::try_from(kube_config)?
     };
-    let client = Cluster::new(client);
+    let client = Cluster::new(Some(client));
     let namespaces = client.namespaces().await?;
     let mut found = false;
     for namespace in namespaces.items {

@@ -12,7 +12,7 @@ export default function () {
         <Switch>
           <Match when={gameStore.current?.admins.includes(accountStore.id!)}>
             <Button disabled class="w-full" justify="start">
-              <span class="icon-[fluent--flag-20-filled] w-5 h-5 text-error"></span>
+              <span class="icon-[fluent--person-settings-20-filled] w-5 h-5 text-error"></span>
               <span>{t('game.adminMode')}</span>
             </Button>
           </Match>

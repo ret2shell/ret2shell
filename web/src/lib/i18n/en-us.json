@@ -59,7 +59,8 @@
       "enter": "Solve challenges",
       "notStarted": "The game hasn’t started yet",
       "solved": "solved",
-      "welcome": "Welcome"
+      "welcome": "Welcome",
+      "list": "Challenge list"
     },
     "scoreboard": {
       "title": "Scoreboard",

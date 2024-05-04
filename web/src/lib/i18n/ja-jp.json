@@ -59,7 +59,8 @@
       "enter": "課題を克服する",
       "notStarted": "ゲームはまだ始まっていないので、焦らないでください",
       "solved": "解決しました",
-      "welcome": "参加歓迎"
+      "welcome": "参加歓迎",
+      "list": "質問一覧"
     },
     "scoreboard": {
       "title": "スコアボード",
