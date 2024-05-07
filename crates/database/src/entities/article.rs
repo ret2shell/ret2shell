@@ -27,10 +27,10 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 pub enum AccessPolicy {
     #[default]
     Bulletin = 0,
-    Wiki = 1,
-    Game = 2,
-    WriteUp = 3,
-    Answer = 4,
+    Wiki     = 1,
+    Game     = 2,
+    WriteUp  = 3,
+    Answer   = 4,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]

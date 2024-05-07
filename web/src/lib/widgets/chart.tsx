@@ -52,6 +52,7 @@ export type InitOptions = {
   pointerSize?: number
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type EChartsEventHandler = (event: any) => void | boolean
 export type EChartsEventHandlerDefinition = {
   query: string | object
@@ -74,6 +75,7 @@ export interface EChartsBaseProps {
   lazyUpdate?: boolean
 
   isLoading?: boolean
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   loadingOptions?: any
 
   resizeOptions?: Omit<ResizeOpts, 'width' | 'height'>

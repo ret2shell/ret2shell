@@ -8,13 +8,12 @@ use kube::{
 mod manager;
 mod traits;
 
+pub use k8s_openapi::api::core::v1::{ConfigMap, Namespace, Node, Pod};
+pub use kube::api::ObjectList;
 pub use manager::Cluster;
 use r2s_config::cluster;
 use tracing::info;
 pub use traits::ClusterError;
-
-pub use k8s_openapi::api::core::v1::{ConfigMap, Namespace, Node, Pod};
-pub use kube::api::ObjectList;
 
 pub async fn initialize(config: &Option<cluster::Config>) -> Result<Cluster, ClusterError> {
     let config = config.clone().ok_or(ClusterError::ConfigNeeded)?;

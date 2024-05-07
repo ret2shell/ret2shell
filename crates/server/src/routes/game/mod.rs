@@ -105,9 +105,10 @@ async fn create_game(
                     id: 0,
                     name: model.name.clone(),
                     link: format!("/games/{}", model.id),
-                    start_at: model.start_at.clone(),
-                    end_at: model.end_at.clone(),
-                    intro: Some(model.brief.clone()), // should be replaced with introduction article later.
+                    start_at: model.start_at,
+                    end_at: model.end_at,
+                    intro: Some(model.brief.clone()), /* should be replaced with introduction
+                                                       * article later. */
                     reporter_id: Some(token.id),
                 },
             )

@@ -29,7 +29,7 @@ use super::{challenge, team, user};
 #[sea_orm(rs_type = "i32", db_type = "Integer")]
 pub enum State {
     #[default]
-    Pending = 0,
+    Pending   = 0,
     Misjudged = 1,
     Confirmed = 2,
 }

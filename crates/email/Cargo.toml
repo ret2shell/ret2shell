@@ -30,7 +30,7 @@ lettre = { version = "0.11", features = [
 ], default-features = false }
 thiserror = "1.0"
 futures = "0.3"
-async-nats = "0.34"
+async-nats = "0.35"
 
 [lib]
 path = "src/lib.rs"

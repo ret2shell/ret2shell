@@ -1,4 +1,4 @@
-import { children, lazy } from 'solid-js'
+import { lazy } from 'solid-js'
 
 export const routes = {
   path: '/',

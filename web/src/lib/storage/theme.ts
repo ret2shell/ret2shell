@@ -6,7 +6,7 @@ import { resolveTemplate, translator } from '@solid-primitives/i18n'
 import { createPrefersDark } from '@solid-primitives/media'
 
 const prefersDark = createPrefersDark()
-let initPrefersDark = prefersDark()
+const initPrefersDark = prefersDark()
 
 let systemPrefersLocale = (window.navigator.language || window.navigator.languages[0])
   .replace('-', '_')

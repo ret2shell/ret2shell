@@ -1,8 +1,5 @@
 import { ComponentProps, Show, createEffect, createSignal, splitProps, untrack } from 'solid-js'
 
-import Spin from '../assets/animates/spin'
-import { t } from '../storage/theme'
-import { randomTips } from '../utils/loading-tips'
 import LoadingTips from './loading-tips'
 
 export type ArticleProps = {

@@ -128,7 +128,7 @@ export default function () {
                   when={gameStore.current?.team_size && gameStore.current.team_size > 1}
                   fallback={<span>{t('game.team.solo')}</span>}
                 >
-                  <span>{t('game.team.collab', { size: gameStore.current?.team_size! })}</span>
+                  <span>{t('game.team.collab', { size: gameStore.current?.team_size || 0 })}</span>
                 </Show>
               </Tag>
               <Show

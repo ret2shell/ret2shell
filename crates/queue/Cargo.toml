@@ -11,7 +11,7 @@ keywords = ["ctf", "challenge", "platform", "security", "education"]
 resolver = "2"
 
 [dependencies]
-async-nats = "0.34"
+async-nats = "0.35"
 thiserror = "1.0"
 tracing = "0.1"
 serde = { version = "1.0", features = ["derive"] }

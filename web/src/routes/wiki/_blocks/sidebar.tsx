@@ -1,14 +1,13 @@
 import { Article } from '@/lib/models/article'
 import { Permission } from '@/lib/models/user'
 import { accountStore } from '@/lib/storage/account'
-import { fullTheme, t, themeStore } from '@/lib/storage/theme'
+import { fullTheme, t } from '@/lib/storage/theme'
 import { wikiStore } from '@/lib/storage/wiki'
 import Divider from '@/lib/widgets/divider'
 import Link from '@/lib/widgets/link'
 import TreeView, { TreeNode } from '@/lib/widgets/treeview'
-import { useParams } from '@solidjs/router'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-solid'
-import { Show, createEffect } from 'solid-js'
+import { Show } from 'solid-js'
 
 function buildLinked(tree: TreeNode[], paths: string[], article: Article) {
   let node = tree.find(node => node.type === 'category' && node.name === paths[0])

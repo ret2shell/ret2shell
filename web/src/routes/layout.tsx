@@ -26,7 +26,6 @@ import { Title, setupTitleResolver } from '@storage/header'
 import { DateTime } from 'luxon'
 import Spin from '@/lib/assets/animates/spin'
 import { HTTPError } from '@reverier/ky'
-import { randomTips } from '@/lib/utils/loading-tips'
 import LoadingTips from '@/lib/widgets/loading-tips'
 
 function GlobalTitleLink(props: { loading: boolean }) {

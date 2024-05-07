@@ -1,6 +1,6 @@
 import { Show, onMount } from 'solid-js'
 import LogoAnimate from '@assets/animates/logo-animate'
-import { platformStore, setPlatformStore } from '@storage/platform'
+import { platformStore } from '@storage/platform'
 import { t } from '@storage/theme'
 import Popover from '@widgets/popover'
 import Link from '@widgets/link'
