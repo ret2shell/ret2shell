@@ -17,7 +17,7 @@ import { OverlayScrollbarsComponent } from 'overlayscrollbars-solid'
 export default function () {
   const navigate = useNavigate()
   if (accountStore.token === null) {
-    navigate(`/account/login?redirect=/games/${gameStore.current?.id}`)
+    navigate(`/account/login?redirect=/games/${gameStore.current ? gameStore.current.id : ''}`)
     return null
   }
   const [searchParams, setSearchParams] = useSearchParams()
