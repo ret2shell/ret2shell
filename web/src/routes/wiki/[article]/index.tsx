@@ -89,12 +89,18 @@ export default function () {
         <div class="flex flex-row items-center justify-center space-x-6 opacity-60 flex-wrap py-3">
           <a
             class="hover:underline font-bold flex flex-row space-x-2 items-center"
+            title={t('article.by', { name: wikiStore.current?.publisher_name || t('article.unknownPublisher')! })}
             href={`/users/${wikiStore.current?.publisher_id}`}
           >
             <span class="icon-[fluent--person-20-regular] w-5 h-5"></span>
             <span>{wikiStore.current?.publisher_name}</span>
           </a>
-          <div class="font-bold flex flex-row space-x-2 items-center">
+          <div
+            class="font-bold flex flex-row space-x-2 items-center"
+            title={t('article.createdAt', {
+              time: wikiStore.current?.created_at.toFormat('yyyy-MM-dd HH:mm:ss') || 'UNKNOWN',
+            })}
+          >
             <span class="icon-[fluent--calendar-20-regular] w-5 h-5"></span>
             <span>{wikiStore.current?.created_at.toFormat('yyyy-MM-dd HH:mm:ss')}</span>
           </div>
@@ -105,7 +111,12 @@ export default function () {
               wikiStore.current!.created_at !== wikiStore.current!.updated_at
             }
           >
-            <div class="font-bold flex flex-row space-x-2 items-center">
+            <div
+              class="font-bold flex flex-row space-x-2 items-center"
+              title={t('article.updatedAt', {
+                time: wikiStore.current?.updated_at.toFormat('yyyy-MM-dd HH:mm:ss') || 'UNKNOWN',
+              })}
+            >
               <span class="icon-[fluent--calendar-edit-20-regular] w-5 h-5"></span>
               <span>{wikiStore.current?.updated_at.toFormat('yyyy-MM-dd HH:mm:ss')}</span>
             </div>

@@ -144,7 +144,9 @@
     "accessPolicy": {
       "open": "开放赛事"
     },
-    "adminMode": "管理员模式"
+    "adminMode": "管理员模式",
+    "hidden": "赛事已隐藏",
+    "frozen": "赛事已冻结"
   },
   "bulletin": {
     "title": "公告",
@@ -300,7 +302,11 @@
     "placeholder": "验证码"
   },
   "article": {
-    "loading": "少女祈祷中..."
+    "loading": "少女祈祷中...",
+    "by": "由 {{ name }} 发布",
+    "unknownPublisher": "佚名",
+    "createdAt": "发布于 {{ time }}",
+    "updatedAt": "更新于 {{ time }}"
   },
   "form": {
     "save": "保存",

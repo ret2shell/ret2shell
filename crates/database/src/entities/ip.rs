@@ -81,6 +81,15 @@ pub async fn delete(db: &DatabaseConnection, id: i64) -> Result<(), DbErr> {
 }
 
 pub async fn link_user(db: &DatabaseConnection, user_id: i64, ip_id: i64) -> Result<(), DbErr> {
+    if user2_ip::Entity::find()
+        .filter(user2_ip::Column::UserId.eq(user_id))
+        .filter(user2_ip::Column::IpAddressId.eq(ip_id))
+        .one(db)
+        .await?
+        .is_some()
+    {
+        return Ok(());
+    }
     let user2ip = user2_ip::ActiveModel {
         id: ActiveValue::NotSet,
         user_id: ActiveValue::Set(user_id),

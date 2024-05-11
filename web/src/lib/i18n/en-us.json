@@ -57,7 +57,7 @@
     "challenge": {
       "title": "Challenges",
       "enter": "Solve challenges",
-      "notStarted": "The game hasn’t started yet",
+      "notStarted": "The game hasn't started yet",
       "solved": "solved",
       "welcome": "Welcome",
       "list": "Challenge list"
@@ -128,7 +128,9 @@
     "accessPolicy": {
       "open": "open for participating"
     },
-    "adminMode": "Administrator mode"
+    "adminMode": "Administrator mode",
+    "hidden": "Game is hidden",
+    "frozen": "Game is frozen"
   },
   "bulletin": {
     "title": "Bulletin",
@@ -284,7 +286,11 @@
     "placeholder": "Verification code"
   },
   "article": {
-    "loading": "The girl is praying..."
+    "loading": "The girl is praying...",
+    "by": "By {{ name }}",
+    "unknownPublisher": "Anonymous",
+    "createdAt": "Published at {{ time }}",
+    "updatedAt": "Updated at {{ time }}"
   },
   "errors": {
     "401": "please log in first",

@@ -128,7 +128,9 @@
     "accessPolicy": {
       "open": "開放賽事"
     },
-    "adminMode": "管理員模式"
+    "adminMode": "管理員模式",
+    "hidden": "賽事已隱藏",
+    "frozen": "賽事已凍結"
   },
   "bulletin": {
     "title": "公告",
@@ -284,7 +286,11 @@
     "placeholder": "驗證碼"
   },
   "article": {
-    "loading": "少女祈禱中..."
+    "loading": "少女祈禱中...",
+    "by": "由 {{ name }} 發布",
+    "unknownPublisher": "佚名",
+    "createdAt": "發佈於 {{ time }}",
+    "updatedAt": "更新於 {{ time }}"
   },
   "errors": {
     "401": "請先登入",

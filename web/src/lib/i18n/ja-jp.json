@@ -128,7 +128,9 @@
     "accessPolicy": {
       "open": "オープンイベント"
     },
-    "adminMode": "管理者モード"
+    "adminMode": "管理者モード",
+    "hidden": "隠れた",
+    "frozen": "凍った"
   },
   "bulletin": {
     "title": "アナウンス",
@@ -284,7 +286,11 @@
     "placeholder": "検証コード"
   },
   "article": {
-    "loading": "少女は祈っている..."
+    "loading": "少女は祈っている...",
+    "by": "投稿者: {{ name }}",
+    "unknownPublisher": "匿名",
+    "createdAt": "投稿時刻: {{ time }}",
+    "updatedAt": "{{ time }} に更新されました"
   },
   "errors": {
     "401": "まずログインしてください",

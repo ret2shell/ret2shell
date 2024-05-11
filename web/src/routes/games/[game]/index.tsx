@@ -147,6 +147,16 @@ export default function () {
                   )}
                 </For>
               </Show>
+              <Show when={gameStore.current?.hidden}>
+                <Tag level="warning" class="m-2">
+                  <span>{t('game.hidden')}</span>
+                </Tag>
+              </Show>
+              <Show when={gameStore.current?.frozen}>
+                <Tag level="warning" class="m-2">
+                  <span>{t('game.frozen')}</span>
+                </Tag>
+              </Show>
             </div>
           </div>
           <Show when={gameStore.team}>
