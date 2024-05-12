@@ -55,7 +55,6 @@ render(() => {
   })
   return (
     <>
-      <Background />
       <OverlayScrollbarsComponent
         options={{
           scrollbars: {

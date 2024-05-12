@@ -3,7 +3,7 @@ import { Article as ArticleModel } from '@/lib/models/article'
 import { TeamState, coloredState, stringifyState } from '@/lib/models/team'
 import { Permission } from '@/lib/models/user'
 import { accountStore, refreshInstitutes } from '@/lib/storage/account'
-import { gameStore } from '@/lib/storage/game'
+import { canParticipate, gameStore } from '@/lib/storage/game'
 import { Title } from '@/lib/storage/header'
 import { t } from '@/lib/storage/theme'
 import { randomTips } from '@/lib/utils/loading-tips'
@@ -73,37 +73,11 @@ export default function () {
     }
   })
 
-  function canParticipate() {
-    if (
-      !gameStore.current?.can_register_after_started &&
-      gameStore.current?.start_at &&
-      gameStore.current.start_at < DateTime.now()
-    ) {
-      return false
-    }
-    if (gameStore.current?.end_at && gameStore.current.end_at < DateTime.now()) {
-      return false
-    }
-    if (
-      accountStore.id &&
-      accountStore.permissions.includes(Permission.Game) &&
-      gameStore.current?.admins.includes(accountStore.id)
-    ) {
-      return false
-    }
-    if (accountStore.permissions.includes(Permission.Host)) {
-      return false
-    }
-    // TODO: check game access policy
-
-    return true
-  }
-
   return (
     <>
       <Title title={gameStore.current?.name || 'CTF'} />
       <div class="flex-1 flex flex-col lg:flex-row-reverse">
-        <div class="lg:w-1/3 max-h-[calc(100vh-4rem)] lg:sticky lg:top-16 lg:left-0 flex flex-col backdrop-blur border-b border-b-layer-content/10 lg:border-b-0 lg:backdrop-blur-none p-3 lg:p-6 space-y-4">
+        <div class="lg:w-1/3 max-h-[calc(100vh-4rem)] lg:sticky lg:top-16 lg:left-0 flex flex-col backdrop-blur border-b border-b-layer-content/10 lg:border-b-0 lg:backdrop-blur-none p-3 lg:p-6 space-y-2">
           <Card contentClass="relative">
             <Picture src={gameStore.current?.cover || bgGameDefault}></Picture>
             <div class="absolute top-0 left-0 w-full h-full flex flex-col justify-end z-10 p-3 lg:p-6 space-y-4">
@@ -164,25 +138,25 @@ export default function () {
               <div class="lg:p-2 flex items-center justify-center">
                 <span class="icon-[fluent--flag-20-filled] w-5 h-5 lg:w-10 lg:h-10 text-primary opacity-60"></span>
               </div>
-              <div class="flex flex-col space-y-2 justify-center flex-1">
-                <h3 class="font-bold space-x-2 lg:text-2xl px-2">
+              <div class="flex flex-col justify-center flex-1">
+                <h3 class="font-bold lg:text-xl px-2">
                   <span>{gameStore.team?.name}</span>
+                  <span>&nbsp;</span>
                   <span class="text-primary">#</span>
                   <span class="opacity-60">{gameStore.team?.id.toString(16).padStart(6, '0')}</span>
                 </h3>
-                <p class="flex-row flex-wrap hidden lg:flex">
-                  <Tag level={coloredState(gameStore.team?.state || TeamState.Pending)} class="mx-1">
-                    <span>{stringifyState(gameStore.team?.state || TeamState.Pending)}</span>
-                  </Tag>
-                  <Tag level="info" class="mx-1">
-                    <span>{gameStore.team?.institute_name || t('account.institute.none')}</span>
-                  </Tag>
+                <p class="flex-row flex-wrap hidden lg:flex space-x-2 px-2 opacity-60">
+                  <span>{stringifyState(gameStore.team?.state || TeamState.Pending)}</span>
+                  <span class="opacity-60 text-primary">-</span>
+                  <span>{gameStore.team?.institute_name || t('account.institute.none')}</span>
+                  <span class="opacity-60 text-primary">-</span>
+                  <span>{gameStore.team?.score || 0} pts</span>
                 </p>
               </div>
-              <div class="flex items-center justify-center lg:text-2xl font-bold">
+              <p class="flex items-center justify-center font-bold lg:text-xl">
                 <span class="opacity-60">No.</span>
                 <span class="text-primary">{gameStore.rank || 'NULL'}</span>
-              </div>
+              </p>
             </Card>
           </Show>
           <div class="flex flex-row space-x-2">
@@ -196,6 +170,18 @@ export default function () {
             >
               <Link href={`/games/${gameStore.current?.id}?edit=true`} square level="primary">
                 <span class="icon-[fluent--edit-20-regular] w-5 h-5"></span>
+              </Link>
+            </Show>
+            <Show
+              when={
+                accountStore.id &&
+                ((gameStore.current?.admins.includes(accountStore.id) &&
+                  accountStore.permissions.includes(Permission.Game)) ||
+                  accountStore.permissions.includes(Permission.Host))
+              }
+            >
+              <Link href={`/games/${gameStore.current?.id}/admin`} square level="primary">
+                <span class="icon-[fluent--settings-20-regular] w-5 h-5"></span>
               </Link>
             </Show>
             <Switch>

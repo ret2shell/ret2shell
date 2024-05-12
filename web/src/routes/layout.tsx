@@ -8,7 +8,7 @@ import { useIsRouting, useLocation, useNavigate, useParams, useSearchParams } fr
 import InstanceBox, { InstanceBoxContent } from './_blocks/instance-box'
 import UserBox from './_blocks/user-box'
 import DiyBox, { DiyBoxContent } from './_blocks/diy-box'
-import { gameStore } from '@storage/game'
+import { canAccessChallenges, gameStore, isGameAdmin } from '@storage/game'
 import { HostType } from '@models/game'
 import { accountStore } from '@storage/account'
 import { Permission } from '@models/user'
@@ -115,6 +115,7 @@ function GameNav(props: { size: 'sm' | 'md' }) {
           ghost
           justify="start"
           size={props.size}
+          disabled={!canAccessChallenges()}
         >
           <span class="icon-[fluent--code-20-regular] w-5 h-5" />
           <span>{t('game.challenge.title')}</span>
@@ -148,19 +149,21 @@ function GameNav(props: { size: 'sm' | 'md' }) {
           </Link>
         </li>
       </Show>
-      <li class="nav">
-        <Link
-          class="w-full"
-          href={`/games/${gameStore.current?.id}/admin`}
-          activeMatch="partial"
-          ghost
-          justify="start"
-          size={props.size}
-        >
-          <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
-          <span>{t('game.admin.title')}</span>
-        </Link>
-      </li>
+      <Show when={isGameAdmin()}>
+        <li class="nav">
+          <Link
+            class="w-full"
+            href={`/games/${gameStore.current?.id}/admin`}
+            activeMatch="partial"
+            ghost
+            justify="start"
+            size={props.size}
+          >
+            <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+            <span>{t('game.admin.title')}</span>
+          </Link>
+        </li>
+      </Show>
       <li class="nav">
         <Link class="w-full" href={`/games/`} ghost justify="start" size={props.size} level="warning">
           <span class="icon-[fluent--arrow-exit-20-regular] w-5 h-5" />
@@ -438,6 +441,7 @@ export default function (props: { children?: JSX.Element }) {
   return (
     <>
       <Title title={platformStore.config.name || t('platform.name')!} />
+      <Background />
       <TitleBar />
       {props.children}
       <Toasts />
