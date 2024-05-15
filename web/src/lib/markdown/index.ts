@@ -48,7 +48,7 @@ export class Markdown {
           {
             type: 'element',
             tagName: 'span',
-            properties: { className: ['icon-[fluent--open-20-regular]', 'text-primary', 'w-4', 'h-4'] },
+            properties: { className: ['icon-[fluent--open-20-regular]', 'text-primary', 'w-4', 'h-4', 'print:hidden'] },
             children: [],
           },
         ],

@@ -13,9 +13,13 @@ export type ImageProps = {
 export default function (props: ImageProps & ComponentProps<'div'>) {
   const [imageProps, rest] = splitProps(props, ['src', 'alt', 'fallback', 'width', 'height'])
   const [loading, setLoading] = createSignal(true)
+  let cachedSrc = '' as string | undefined
   createEffect(() => {
-    if (props.src) {
-      untrack(() => setLoading(true))
+    if (imageProps.src && cachedSrc !== imageProps.src) {
+      untrack(() => {
+        setLoading(true)
+        cachedSrc = imageProps.src
+      })
     }
   })
   return (

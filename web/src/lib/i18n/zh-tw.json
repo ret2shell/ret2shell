@@ -50,7 +50,11 @@
     "15": "正在加入大語言模型幻覺..."
   },
   "training": {
-    "title": "訓練"
+    "title": "訓練",
+    "list": "練習場列表",
+    "noPlaygrounds": "沒有練習場",
+    "noArchivedGames": "沒有歸檔的往期賽事",
+    "selectPlayground": "開始今日份的訓練！"
   },
   "game": {
     "title": "賽事",
@@ -121,7 +125,10 @@
       "sizeMaxExceeded": "隊伍成員最多不能超過 100 人，請考慮共享帳號",
       "collab": "{{ size }} 人組隊賽",
       "solo": "單人賽",
-      "noTeamParticipated": "還沒有隊伍參賽"
+      "noTeamParticipated": "還沒有隊伍參賽",
+      "join": {
+        "title": "加入隊伍"
+      }
     },
     "archivedGotoTraining": "已歸檔，請前往練習場",
     "canNotParticipate": "不符合參與條件",
@@ -314,6 +321,9 @@
     "saveFailed": "保存失敗",
     "createFailed": "創建失敗",
     "edit": "編輯",
-    "delete": "刪除"
+    "delete": "刪除",
+    "changeAvatar": "封面",
+    "cover": "封面",
+    "logo": "標識"
   }
 }

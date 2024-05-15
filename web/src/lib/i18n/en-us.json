@@ -50,7 +50,11 @@
     "15": "Adding LLM hallucinations..."
   },
   "training": {
-    "title": "Training"
+    "title": "Training",
+    "list": "Training Playgrounds",
+    "noPlaygrounds": "No playgrounds",
+    "noArchivedGames": "No archived games",
+    "selectPlayground": "Start training today!"
   },
   "game": {
     "title": "Games",
@@ -121,7 +125,10 @@
       "sizeMaxExceeded": "The maximum number of team members is 100, please consider sharing accounts",
       "collab": "Team game with {{ size }} players",
       "solo": "Solo game",
-      "noTeamParticipated": "No team has participated yet"
+      "noTeamParticipated": "No team has participated yet",
+      "join": {
+        "title": "Join team"
+      }
     },
     "archivedGotoTraining": "Archived, please goto training board",
     "canNotParticipate": "Not eligible to participate",
@@ -314,6 +321,9 @@
     "saveFailed": "Save failed",
     "createFailed": "Create failed",
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "changeAvatar": "Cover",
+    "cover": "cover",
+    "logo": "Logo"
   }
 }

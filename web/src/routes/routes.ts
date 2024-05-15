@@ -74,6 +74,10 @@ export const routes = {
           path: '/',
           component: lazy(() => import('./training/index')),
         },
+        {
+          path: '/:game',
+          component: lazy(() => import('./training/[game]/index')),
+        },
       ],
     },
     {

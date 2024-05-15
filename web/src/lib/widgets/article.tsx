@@ -29,13 +29,15 @@ export default function (props: ComponentProps<'article'> & ArticleProps) {
     }, 100)
   }
   createEffect(() => {
-    render(articleProps.content).then(html =>
-      untrack(() => {
-        setContentHtml(html)
-        setReady(true)
-        scrollToView()
-      })
-    )
+    if (articleProps.content) {
+      render(articleProps.content).then(html =>
+        untrack(() => {
+          setContentHtml(html)
+          setReady(true)
+          scrollToView()
+        })
+      )
+    }
   })
   return (
     <>

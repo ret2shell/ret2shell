@@ -6,7 +6,7 @@ import './background.scss'
 export default function () {
   return (
     <>
-      <div class="fixed -left-1 -right-1 -top-1 -bottom-1">
+      <div class="fixed -left-1 -right-1 -top-1 -bottom-1 -z-10">
         <div class="w-full h-full relative">
           <img
             src={BgBlurNight}

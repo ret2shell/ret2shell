@@ -199,7 +199,12 @@ function TitleBar() {
   return (
     <>
       <div id="page-top" />
-      <div class="h-16 border-b border-b-layer-content/15 w-screen bg-layer/60 backdrop-blur z-50 print:hidden sticky top-0 left-0 transition-colors duration-700">
+      <div class="hidden print:flex flex-row border-b border-b-layer-content/60 w-full">
+        <span>{platformStore.config.name}</span>
+        <span class="flex-1"></span>
+        <span>{DateTime.now().toFormat('yyyy-MM-dd HH:mm:ss')}</span>
+      </div>
+      <div class="h-16 border-b border-b-layer-content/15 w-screen bg-layer/60 backdrop-blur z-50 print:hidden print:static sticky top-0 left-0 transition-colors duration-700">
         <div class="bg-layer-content/5 w-full h-full px-2 py-0 flex flex-row items-center relative">
           <div class="xl:hidden">
             <Popover

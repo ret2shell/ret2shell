@@ -1,13 +1,15 @@
+import LogoAnimate from '@/lib/assets/animates/logo-animate'
 import Spin from '@/lib/assets/animates/spin'
 import { Article as ArticleModel } from '@/lib/models/article'
 import { TeamState, coloredState, stringifyState } from '@/lib/models/team'
 import { Permission } from '@/lib/models/user'
 import { accountStore, refreshInstitutes } from '@/lib/storage/account'
-import { canParticipate, gameStore } from '@/lib/storage/game'
+import { canParticipate, gameStore, isGameAdmin } from '@/lib/storage/game'
 import { Title } from '@/lib/storage/header'
 import { t } from '@/lib/storage/theme'
 import { randomTips } from '@/lib/utils/loading-tips'
 import Article from '@/lib/widgets/article'
+import Button from '@/lib/widgets/button'
 import Card from '@/lib/widgets/card'
 import Link from '@/lib/widgets/link'
 import Picture from '@/lib/widgets/picture'
@@ -80,10 +82,36 @@ export default function () {
         <div class="lg:w-1/3 max-h-[calc(100vh-4rem)] lg:sticky lg:top-16 lg:left-0 flex flex-col backdrop-blur border-b border-b-layer-content/10 lg:border-b-0 lg:backdrop-blur-none p-3 lg:p-6 space-y-2">
           <Card contentClass="relative">
             <Picture src={gameStore.current?.cover || bgGameDefault}></Picture>
-            <div class="absolute top-0 left-0 w-full h-full flex flex-col justify-end z-10 p-3 lg:p-6 space-y-4">
-              <h2 class="font-bold p-4 rounded-lg bg-layer/50 backdrop-blur text-center flex flex-col space-y-2">
-                <span class="text-3xl">{gameStore.current?.name}</span>
-                <span class="opacity-80">{gameStore.current?.brief}</span>
+            <div class="absolute top-0 left-0 w-full h-full flex flex-col justify-end items-end z-10 p-3 lg:p-6 space-y-4">
+              <Show when={isGameAdmin()}>
+                <div class="flex flex-row space-x-2">
+                  <Button>
+                    <span class="icon-[fluent--draw-image-20-regular] w-5 h-5"></span>
+                    <span>{t('form.cover')}</span>
+                  </Button>
+                  <Button>
+                    <span class="icon-[fluent--flag-20-regular] w-5 h-5"></span>
+                    <span>{t('form.logo')}</span>
+                  </Button>
+                </div>
+              </Show>
+              <h2 class="font-bold p-4 rounded-lg bg-layer/50 backdrop-blur flex flex-row space-x-2 w-full">
+                <div class="mx-4">
+                  <Show
+                    when={gameStore.current?.logo}
+                    fallback={
+                      <Show when={loading()} fallback={<LogoAnimate width={64} height={64} />}>
+                        <Spin width={64} height={64}></Spin>
+                      </Show>
+                    }
+                  >
+                    <img src={gameStore.current?.logo || undefined} width={64} height={64}></img>
+                  </Show>
+                </div>
+                <div class="flex flex-col space-y-2">
+                  <span class="text-3xl">{gameStore.current?.name}</span>
+                  <span class="opacity-80">{gameStore.current?.brief}</span>
+                </div>
               </h2>
             </div>
           </Card>

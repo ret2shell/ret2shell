@@ -50,7 +50,11 @@
     "15": "LLM の幻覚を追加..."
   },
   "training": {
-    "title": "練習する"
+    "title": "練習する",
+    "list": "ゴルフ練習場一覧",
+    "noPlaygrounds": "ドライビングレンジなし",
+    "noArchivedGames": "アーカイブされた過去のイベントはありません",
+    "selectPlayground": "今日からトレーニングを始めましょう！"
   },
   "game": {
     "title": "コンペ",
@@ -121,7 +125,10 @@
       "sizeMaxExceeded": "チームメンバーの最大数は 100 です。アカウントの共有を検討してください。",
       "collab": "{{ サイズ }} チーム対抗戦",
       "solo": "シングルマッチ",
-      "noTeamParticipated": "まだ参加チームはありません"
+      "noTeamParticipated": "まだ参加チームはありません",
+      "join": {
+        "title": "チームに参加する"
+      }
     },
     "archivedGotoTraining": "アーカイブ済み、ゴルフ練習場へ行ってください",
     "canNotParticipate": "参加資格がありません",
@@ -314,6 +321,9 @@
     "saveFailed": "保存に失敗しました",
     "createFailed": "作成に失敗しました",
     "edit": "編集",
-    "delete": "消去"
+    "delete": "消去",
+    "changeAvatar": "カバー",
+    "cover": "カバー",
+    "logo": "ロゴ"
   }
 }

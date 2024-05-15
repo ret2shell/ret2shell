@@ -1,0 +1,14 @@
+fn check(bucket, submission) {
+
+  true
+}
+
+fn flags(bucket, user, team) {
+
+  ["flag{hello_world}"]
+}
+
+fn env_vars(bucket, user, team) {
+  let flag = "flag{hello_world}";
+  [`FLAG=${flag}`, "OTHER_VAR=nooop"]
+}

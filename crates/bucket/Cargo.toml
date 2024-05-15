@@ -19,7 +19,7 @@ serde_repr = "0.1"
 chrono = { version = "0.4", features = ["serde"] }
 serde_json = "1.0"
 toml = "0.8"
-deunicode = "1.4"
+deunicode = "1.6"
 sanitizer = "0.1"
 
 r2s-config = { version = "1.0.0", path = "../config" }

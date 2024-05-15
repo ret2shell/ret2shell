@@ -1,0 +1,3 @@
+executor = "rusx" # rusx | python
+entry = "main.rx"
+queued = false

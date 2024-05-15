@@ -50,7 +50,11 @@
     "15": "正在加入大语言模型幻觉..."
   },
   "training": {
-    "title": "训练"
+    "title": "训练",
+    "list": "练习场列表",
+    "noPlaygrounds": "没有练习场",
+    "noArchivedGames": "没有归档的往期赛事",
+    "selectPlayground": "开始今日份的训练！"
   },
   "errors": {
     "401": "请先登录",
@@ -137,7 +141,10 @@
       "sizeMaxExceeded": "队伍成员最多不能超过 100 人，请考虑共享账号",
       "collab": "{{ size }} 人组队赛",
       "solo": "单人赛",
-      "noTeamParticipated": "还没有队伍参赛"
+      "noTeamParticipated": "还没有队伍参赛",
+      "join": {
+        "title": "加入队伍"
+      }
     },
     "archivedGotoTraining": "已归档，请前往练习场",
     "canNotParticipate": "不符合参与条件",
@@ -314,6 +321,9 @@
     "saveFailed": "保存失败",
     "createFailed": "创建失败",
     "edit": "编辑",
-    "delete": "删除"
+    "delete": "删除",
+    "changeAvatar": "封面",
+    "cover": "封面",
+    "logo": "标识"
   }
 }
