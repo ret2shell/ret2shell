@@ -139,6 +139,13 @@ export default function () {
               <span>{t('form.delete')}</span>
             </button>
           </Show>
+          <button
+            class="font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
+            onClick={() => print()}
+          >
+            <span class="icon-[fluent--print-20-regular] w-5 h-5"></span>
+            <span>{t('form.print')}</span>
+          </button>
         </div>
         <Show
           when={inEdit()}

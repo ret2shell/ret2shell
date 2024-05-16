@@ -92,6 +92,40 @@ export default function () {
           <span class="hidden print:inline-block">at</span>
           <span>{article()?.created_at.toFormat('yyyy-MM-dd HH:mm:ss')}</span>
         </div>
+        <Show when={article()?.created_at && article()?.updated_at && article()!.created_at !== article()!.updated_at}>
+          <div
+            class="font-bold flex flex-row space-x-2 items-center print:hidden"
+            title={t('article.updatedAt', {
+              time: article()?.updated_at.toFormat('yyyy-MM-dd HH:mm:ss') || 'UNKNOWN',
+            })}
+          >
+            <span class="icon-[fluent--calendar-edit-20-regular] w-5 h-5"></span>
+            <span>{article()?.updated_at.toFormat('yyyy-MM-dd HH:mm:ss')}</span>
+          </div>
+        </Show>
+        <Show when={accountStore.permissions.includes(Permission.Wiki)}>
+          <a
+            class="font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
+            href={`/bulletin/${article()?.id}?edit=true`}
+          >
+            <span class="icon-[fluent--edit-20-regular] w-5 h-5"></span>
+            <span>{t('form.edit')}</span>
+          </a>
+          <button
+            class="font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
+            onClick={onDelete}
+          >
+            <span class="icon-[fluent--delete-20-regular] w-5 h-5"></span>
+            <span>{t('form.delete')}</span>
+          </button>
+        </Show>
+        <button
+          class="font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
+          onClick={() => print()}
+        >
+          <span class="icon-[fluent--print-20-regular] w-5 h-5"></span>
+          <span>{t('form.print')}</span>
+        </button>
       </div>
       <Show
         when={inEdit()}

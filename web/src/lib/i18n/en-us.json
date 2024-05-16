@@ -324,6 +324,7 @@
     "delete": "Delete",
     "changeAvatar": "Cover",
     "cover": "cover",
-    "logo": "Logo"
+    "logo": "Logo",
+    "print": "Print"
   }
 }

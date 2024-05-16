@@ -324,6 +324,7 @@
     "delete": "删除",
     "changeAvatar": "封面",
     "cover": "封面",
-    "logo": "标识"
+    "logo": "标识",
+    "print": "打印"
   }
 }
