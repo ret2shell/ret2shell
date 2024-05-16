@@ -42,28 +42,28 @@ pub struct License {
 /// it's easy to crack or patch so...
 /// implementing this one is just a formality.
 pub fn check_license(pub_key: &[u8]) -> Result<License, LicenseError> {
-    let mut config_str = String::new();
-    let mut file_path = String::new();
+    let mut license_str = String::new();
+    let mut ok = false;
     for path in LICENSE_PREDEFINED_PATH.iter() {
         let path = match Path::new(path).canonicalize() {
             Ok(p) => p,
             Err(_) => continue,
         };
         // println!("config file path is: {path:?}");
-        let path = path.display();
-        file_path = format!("{path}/{LICENSE_PREDEFINED_FILE_NAME}");
+        let file_path = path.join(LICENSE_PREDEFINED_FILE_NAME);
         match std::fs::read_to_string(&file_path) {
             Ok(s) => {
-                config_str = s;
+                license_str = s;
+                ok = true;
                 break;
             }
             Err(_) => continue,
         }
     }
-    if file_path.is_empty() || config_str.is_empty() {
+    if !ok || license_str.is_empty() {
         return Err(LicenseError::Missing);
     }
-    let (cert, sig) = config_str.split_once('\n').ok_or(LicenseError::Invalid)?;
+    let (cert, sig) = license_str.split_once('\n').ok_or(LicenseError::Invalid)?;
 
     let cert = decode(cert).ok_or(LicenseError::Invalid)?;
     let sig = decode(sig).ok_or(LicenseError::Invalid)?;

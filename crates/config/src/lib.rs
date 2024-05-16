@@ -30,7 +30,6 @@ use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
-
 pub mod auditor;
 pub mod auth;
 pub mod automate;
@@ -72,11 +71,6 @@ pub struct GlobalConfig {
     pub media: Option<media::Config>,
     pub queue: Option<queue::Config>,
     pub server: Option<server::Config>,
-
-    /// The file path of the configuration file, not serialized or deserialized.
-    #[serde(skip_serializing)]
-    #[serde(skip_deserializing)]
-    pub file: Option<String>,
 }
 
 // Predefined paths for the configuration file.
@@ -92,29 +86,34 @@ impl GlobalConfig {
     pub fn load() -> Result<Self, ConfigError> {
         // load config str from predefined paths
         let mut config_str = String::new();
-        let mut file_path = String::new();
+        let mut ok = false;
         for path in CONFIG_PREDEFINED_PATH.iter() {
             let path = match Path::new(path).canonicalize() {
                 Ok(p) => p,
-                Err(_) => continue,
+                Err(err) => {
+                    println!("[stage 1] config path error: {err:?}, original path: {path}");
+                    continue;
+                }
             };
             // println!("config file path is: {path:?}");
-            let path = path.display();
-            file_path = format!("{path}/{CONFIG_PREDEFINED_FILE_NAME}");
+            let file_path = path.join(CONFIG_PREDEFINED_FILE_NAME);
             match std::fs::read_to_string(&file_path) {
                 Ok(s) => {
                     config_str = s;
+                    ok = true;
                     break;
                 }
-                Err(_) => continue,
+                Err(err) => {
+                    println!("[stage 2] config path error: {err:?}, original path: {path:?}");
+                    continue;
+                }
             }
         }
-        if file_path.is_empty() || config_str.is_empty() {
+        if !ok || config_str.is_empty() {
             return Err(ConfigError::NotFound);
         }
         // load config from config str
-        let mut config: GlobalConfig = toml::from_str(&config_str)?;
-        config.file = Some(file_path);
+        let config: GlobalConfig = toml::from_str(&config_str)?;
         Ok(config)
     }
 }

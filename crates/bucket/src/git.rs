@@ -24,7 +24,7 @@ impl Git {
                 path.as_ref().display().to_string(),
             ));
         }
-        let output = Command::new("/bin/git")
+        let output = Command::new("git")
             .current_dir(&path)
             .arg("describe")
             .arg("--all")
@@ -64,7 +64,7 @@ impl Git {
                 path.as_ref().display().to_string(),
             ));
         }
-        let output = Command::new("/bin/git")
+        let output = Command::new("git")
             .current_dir(&path)
             .arg("init")
             .output()
@@ -83,7 +83,7 @@ impl Git {
     }
 
     pub async fn add_all(&self) -> Result<(), BucketError> {
-        let output = Command::new("/bin/git")
+        let output = Command::new("git")
             .current_dir(&self.path)
             .arg("add")
             .arg("--all")
@@ -103,7 +103,7 @@ impl Git {
     pub async fn commit(
         &self, message: impl AsRef<str>, author: impl AsRef<str>, email: impl AsRef<str>,
     ) -> Result<(), BucketError> {
-        let output = Command::new("/bin/git")
+        let output = Command::new("git")
             .current_dir(&self.path)
             .arg("commit")
             .arg("--no-gpg-sign")
@@ -132,7 +132,7 @@ impl Git {
     }
 
     pub async fn checkout_head(&self) -> Result<(), BucketError> {
-        let output = Command::new("/bin/git")
+        let output = Command::new("git")
             .current_dir(&self.path)
             .arg("checkout")
             .arg("HEAD")
@@ -150,7 +150,7 @@ impl Git {
     }
 
     pub async fn checkout(&self, branch: impl AsRef<str>) -> Result<(), BucketError> {
-        let output = Command::new("/bin/git")
+        let output = Command::new("git")
             .current_dir(&self.path)
             .arg("checkout")
             .arg(branch.as_ref())
@@ -173,7 +173,7 @@ impl Git {
     }
 
     async fn reset_head_internal(&self) -> Result<(), BucketError> {
-        let output = Command::new("/bin/git")
+        let output = Command::new("git")
             .current_dir(&self.path)
             .arg("reset")
             .arg("--hard")
@@ -192,7 +192,7 @@ impl Git {
     }
 
     async fn clean_untracked(&self) -> Result<(), BucketError> {
-        let output = Command::new("/bin/git")
+        let output = Command::new("git")
             .current_dir(&self.path)
             .arg("clean")
             .arg("-fd")
@@ -210,7 +210,7 @@ impl Git {
     }
 
     pub async fn get_commits(&self) -> Result<Vec<String>, BucketError> {
-        let output = Command::new("/bin/git")
+        let output = Command::new("git")
             .current_dir(&self.path)
             .arg("log")
             .arg("--reflog")
@@ -237,8 +237,9 @@ impl Git {
     ) -> Result<impl AsyncRead, BucketError>
     where
         T: IntoIterator<Item = S>,
-        S: AsRef<OsStr>, {
-        let mut cmd = Command::new("/bin/git");
+        S: AsRef<OsStr>,
+    {
+        let mut cmd = Command::new("git");
         cmd.stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .env("GIT_PROTOCOL", protocol)
