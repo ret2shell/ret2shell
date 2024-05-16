@@ -19,7 +19,6 @@ fred = { version = "9.0", features = [
   "serde-json",
   "mocks",
   "dns",
-  "unix-sockets",
 ] }
 thiserror = "1.0"
 serde = { version = "1.0", features = ["derive"] }

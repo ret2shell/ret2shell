@@ -4,6 +4,7 @@ import { Team } from '@models/team'
 import { Permission, User } from '@models/user'
 import { DateTime } from 'luxon'
 import { accountStore } from './account'
+import { Challenge } from '../models/challenge'
 
 export const [gameStore, setGameStore] = createStore({
   games: [] as Game[],
@@ -13,6 +14,7 @@ export const [gameStore, setGameStore] = createStore({
   rank: null as number | null,
   score: null as number | null,
   members: [] as User[],
+  challenges: [] as Challenge[],
 })
 
 export function appendGames(games: Game[]) {

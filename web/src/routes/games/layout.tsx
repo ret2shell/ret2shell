@@ -7,8 +7,7 @@ import { setGameStore } from '@/lib/storage/game'
 
 export default function (props: { children?: JSX.Element }) {
   onCleanup(() => {
-    setGameStore({ preload: null })
-    setGameStore({ current: null })
+    setGameStore({ current: null, games: [], preload: null })
   })
   return (
     <>
