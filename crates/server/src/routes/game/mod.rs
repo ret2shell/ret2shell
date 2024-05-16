@@ -6,7 +6,7 @@ use axum::{
     Extension, Json, Router,
 };
 use r2s_bucket::Bucket;
-use r2s_database::{calendar, game, user::Permission};
+use r2s_database::{game, user::Permission};
 use r2s_migrator::Database;
 use serde::Deserialize;
 use tracing::warn;
@@ -98,24 +98,7 @@ async fn create_game(
     .await;
 
     match model {
-        Ok(model) => {
-            calendar::create(
-                &db.conn,
-                calendar::Model {
-                    id: 0,
-                    name: model.name.clone(),
-                    link: format!("/games/{}", model.id),
-                    start_at: model.start_at,
-                    end_at: model.end_at,
-                    intro: Some(model.brief.clone()), /* should be replaced with introduction
-                                                       * article later. */
-                    reporter_id: Some(token.id),
-                },
-            )
-            .await
-            .ok();
-            Ok(Json(model))
-        }
+        Ok(model) => Ok(Json(model)),
         Err(e) => {
             bucket.delete(&game_bucket.name).await.ok();
             Err(e)?

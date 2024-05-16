@@ -59,7 +59,7 @@ export default function () {
   }
   return (
     <>
-      <h1 class="text-3xl text-center flex flex-row space-x-4 items-center justify-center font-bold mt-8">
+      <h1 class="text-3xl text-center flex flex-row space-x-4 items-center justify-center font-bold mt-8 print:mt-16">
         <Show
           when={article()}
           fallback={
@@ -72,37 +72,26 @@ export default function () {
           <span>{article()!.title}</span>
         </Show>
       </h1>
-      <div class="flex flex-row items-center justify-center space-x-6 opacity-60 flex-wrap py-3">
+      <div class="flex flex-row items-center justify-center space-x-6 print:space-x-2 opacity-60 flex-wrap py-3">
         <a
           class="hover:underline font-bold flex flex-row space-x-2 items-center"
+          title={t('article.by', { name: article()?.publisher_name || t('article.unknownPublisher')! })}
           href={`/users/${article()?.publisher_id}`}
         >
-          <span class="icon-[fluent--person-20-regular] w-5 h-5"></span>
+          <span class="icon-[fluent--person-20-regular] w-5 h-5 print:hidden"></span>
+          <span class="hidden print:inline-block">By</span>
           <span>{article()?.publisher_name}</span>
         </a>
-        <div class="font-bold flex flex-row space-x-2 items-center">
-          <span class="icon-[fluent--calendar-20-regular] w-5 h-5"></span>
+        <div
+          class="font-bold flex flex-row space-x-2 items-center"
+          title={t('article.createdAt', {
+            time: article()?.created_at.toFormat('yyyy-MM-dd HH:mm:ss') || 'UNKNOWN',
+          })}
+        >
+          <span class="icon-[fluent--calendar-20-regular] w-5 h-5 print:hidden"></span>
+          <span class="hidden print:inline-block">at</span>
           <span>{article()?.created_at.toFormat('yyyy-MM-dd HH:mm:ss')}</span>
         </div>
-        <Show when={article()?.created_at && article()?.updated_at && article()!.created_at !== article()!.updated_at}>
-          <div class="font-bold flex flex-row space-x-2 items-center">
-            <span class="icon-[fluent--calendar-edit-20-regular] w-5 h-5"></span>
-            <span>{article()?.updated_at.toFormat('yyyy-MM-dd HH:mm:ss')}</span>
-          </div>
-        </Show>
-        <Show when={accountStore.permissions.includes(Permission.Bulletin)}>
-          <a
-            class="font-bold hover:underline flex flex-row space-x-2 items-center"
-            href={`/bulletin/${article()?.id}?edit=true`}
-          >
-            <span class="icon-[fluent--edit-20-regular] w-5 h-5"></span>
-            <span>{t('form.edit')}</span>
-          </a>
-          <button class="font-bold hover:underline flex flex-row space-x-2 items-center" onClick={onDelete}>
-            <span class="icon-[fluent--delete-20-regular] w-5 h-5"></span>
-            <span>{t('form.delete')}</span>
-          </button>
-        </Show>
       </div>
       <Show
         when={inEdit()}

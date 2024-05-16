@@ -552,7 +552,7 @@ export default function () {
           defer
         >
           <div class="flex flex-col items-center w-full min-h-full">
-            <div class="flex flex-col w-full max-w-5xl flex-1 p-2 space-y-2">
+            <div class="flex flex-col w-full max-w-5xl flex-1 p-3 lg:p-6 space-y-2">
               <Switch>
                 <Match when={inEdit()}>
                   <EventForm onDone={onDone} editSource={selectedEvent() || undefined} />

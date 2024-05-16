@@ -18,6 +18,8 @@ pub struct Config {
     pub api_base_path: String,
     /// CORS rules enabled
     pub cors_origins: String,
+    /// request rate per 5 seconds
+    pub api_rate_limit: Option<i32>,
 
     pub name: Option<String>,
     pub footer_info: Option<String>,
@@ -68,6 +70,7 @@ impl Config {
             subject_url: self.subject_url.clone(),
             record: self.record.clone(),
             hide_maker: self.hide_maker,
+            api_rate_limit: self.api_rate_limit,
         }
     }
 }
@@ -90,6 +93,7 @@ impl Merge for Option<Config> {
                 subject_url: b.subject_url.or(a.subject_url),
                 record: b.record.or(a.record),
                 hide_maker: b.hide_maker.or(a.hide_maker),
+                api_rate_limit: b.api_rate_limit.or(a.api_rate_limit),
             }),
             (Some(a), None) => Some(a),
             (None, Some(b)) => Some(b),

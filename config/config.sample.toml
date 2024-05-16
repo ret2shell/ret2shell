@@ -24,7 +24,7 @@ url = 'redis://localhost:6379'
 [captcha]
 enabled = true
 difficulty = 4
-validator = 'Pow'
+validator = 'pow'
 
 [cluster]
 enabled = true
@@ -81,3 +81,14 @@ external_domain = 'ctf.woooo.tech'
 external_https = true
 api_base_path = '/api'
 cors_origins = '*'
+api_rate_limit = 10                # in 5 seconds
+
+### the Following settings could be changed at web admin panel.
+### configuration in database will overwrite the following settings.
+# name = 'Ret2Shell'
+# footer_info = 'Ret 2 Shell'
+# footer_url = 'https://github.com/ret2shell/ret2shell'
+# subject_info = 'Fight for all the beauty in the world.'
+# subject_url = 'https://www.woooo.tech'
+# record = '豫ICP备xxxxxxxx号-1'   # China ICP record
+# hide_maker = false

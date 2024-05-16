@@ -73,7 +73,7 @@ export default function () {
     <>
       <Title title={`${wikiStore.current?.title} - ${platformStore.config.name || t('platform.name')}`}></Title>
       <div class="flex-1 flex flex-col">
-        <h1 class="text-3xl text-center flex flex-row space-x-4 items-center justify-center font-bold mt-8">
+        <h1 class="text-3xl text-center flex flex-row space-x-4 items-center justify-center font-bold mt-8 print:mt-16">
           <Show
             when={wikiStore.current}
             fallback={
@@ -86,13 +86,14 @@ export default function () {
             <span>{wikiStore.current!.title}</span>
           </Show>
         </h1>
-        <div class="flex flex-row items-center justify-center space-x-6 opacity-60 flex-wrap py-3">
+        <div class="flex flex-row items-center justify-center space-x-6 print:space-x-2 opacity-60 flex-wrap py-3">
           <a
             class="hover:underline font-bold flex flex-row space-x-2 items-center"
             title={t('article.by', { name: wikiStore.current?.publisher_name || t('article.unknownPublisher')! })}
             href={`/users/${wikiStore.current?.publisher_id}`}
           >
-            <span class="icon-[fluent--person-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--person-20-regular] w-5 h-5 print:hidden"></span>
+            <span class="hidden print:inline-block">By</span>
             <span>{wikiStore.current?.publisher_name}</span>
           </a>
           <div
@@ -101,7 +102,8 @@ export default function () {
               time: wikiStore.current?.created_at.toFormat('yyyy-MM-dd HH:mm:ss') || 'UNKNOWN',
             })}
           >
-            <span class="icon-[fluent--calendar-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--calendar-20-regular] w-5 h-5 print:hidden"></span>
+            <span class="hidden print:inline-block">at</span>
             <span>{wikiStore.current?.created_at.toFormat('yyyy-MM-dd HH:mm:ss')}</span>
           </div>
           <Show
@@ -112,7 +114,7 @@ export default function () {
             }
           >
             <div
-              class="font-bold flex flex-row space-x-2 items-center"
+              class="font-bold flex flex-row space-x-2 items-center print:hidden"
               title={t('article.updatedAt', {
                 time: wikiStore.current?.updated_at.toFormat('yyyy-MM-dd HH:mm:ss') || 'UNKNOWN',
               })}
