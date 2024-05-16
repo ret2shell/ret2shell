@@ -25,12 +25,13 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 pub enum HostType {
     #[default]
     CTFTraining = 0,
-    CTFGame     = 1,
+    CTFGame = 1,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct AccessPolicy {
     pub restrict: bool,
+    /// institutes that are allowed to register and be ranked.
     pub institutes: Vec<i64>,
     /// for platform sync.
     ///
