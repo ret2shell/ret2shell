@@ -29,14 +29,11 @@ export default function () {
   const [page, setPage] = createSignal(1)
   const [total, setTotal] = createSignal(0)
   const [loading, setLoading] = createSignal(true)
-  const [showCreate, setShowCreate] = createSignal(false)
+  const showCreate = () => searchParams.create === 'true'
   const selectedGameId = createMemo(() => {
     const result = searchParams.selected ? parseInt(searchParams.selected) : NaN
     if (isNaN(result)) {
       return gameStore.games.at(0)?.id || null
-    }
-    if (result) {
-      setShowCreate(false)
     }
     return result
   })
@@ -89,17 +86,17 @@ export default function () {
     <section class="lg:h-full lg:min-h-full lg:overflow-scroll lg:snap-center flex flex-col lg:flex-row relative">
       <div class="w-1/4 hidden lg:flex flex-col items-end justify-start py-32 space-y-2">
         <Show when={accountStore.permissions.includes(Permission.Host)}>
-          <Button
+          <Link
             level="primary"
             class="w-4/5"
             onClick={() => {
-              setSearchParams({ selected: undefined })
-              setShowCreate(true)
+              setSearchParams({ selected: undefined, create: true })
             }}
+            href="/games?create=true"
           >
             <span class="icon-[fluent--add-20-regular] w-5 h-5 opacity-60"></span>
             <span>{t('game.create')}</span>
-          </Button>
+          </Link>
         </Show>
         <Divider class="w-4/5" />
         <Button ghost class="w-4/5" disabled={page() <= 1} onClick={() => setPage(page() - 1)}>

@@ -1,6 +1,5 @@
 import { gameStore } from '@/lib/storage/game'
 import { t } from '@/lib/storage/theme'
-import Button from '@/lib/widgets/button'
 import Link from '@/lib/widgets/link'
 import { Show } from 'solid-js'
 import Challenges from './challenges'
@@ -28,9 +27,9 @@ export default function SideBar() {
             </Link>
           </Show>
           <Show when={accountStore.permissions.includes(Permission.Host)}>
-            <Button square level="primary" title={t('form.create')}>
+            <Link square level="primary" title={t('form.create')} href={`/training?create=true`}>
               <span class="icon-[fluent--add-20-regular] w-5 h-5"></span>
-            </Button>
+            </Link>
           </Show>
         </div>
       </div>
