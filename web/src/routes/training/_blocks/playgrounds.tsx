@@ -3,9 +3,8 @@ import { fullTheme, t } from '@/lib/storage/theme'
 import Button from '@/lib/widgets/button'
 import Divider from '@/lib/widgets/divider'
 import Link from '@/lib/widgets/link'
-import Pagination from '@/lib/widgets/pagination'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-solid'
-import { For, Show, createSignal } from 'solid-js'
+import { For, createSignal } from 'solid-js'
 
 export default function Playgrounds() {
   const [playgrounds, setPlaygrounds] = createSignal([] as Game[])

@@ -1,7 +1,7 @@
 import LogoAnimate from '@/lib/assets/animates/logo-animate'
 import Spin from '@/lib/assets/animates/spin'
 import { Article as ArticleModel } from '@/lib/models/article'
-import { TeamState, coloredState, stringifyState } from '@/lib/models/team'
+import { TeamState, stringifyState } from '@/lib/models/team'
 import { Permission } from '@/lib/models/user'
 import { accountStore, refreshInstitutes } from '@/lib/storage/account'
 import { canParticipate, gameStore, isGameAdmin } from '@/lib/storage/game'
