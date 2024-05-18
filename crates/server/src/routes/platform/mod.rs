@@ -1,13 +1,28 @@
-use axum::{extract::State, response::IntoResponse, routing::get, Extension, Json, Router};
-use r2s_database::config;
+use axum::{
+    extract::State, middleware, response::IntoResponse, routing::get, Extension, Json, Router,
+};
+use r2s_database::{config, user::Permission};
 
-use crate::traits::{GlobalState, ResponseError};
+use crate::{
+    middleware::auth,
+    traits::{GlobalState, ResponseError},
+};
 
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     Router::new()
+        .route("/config", get(get_config))
+        .route_layer(middleware::from_fn(auth::permission_required_all!(
+            Permission::DevOps
+        )))
         .route("/info", get(get_platform_info))
         .route("/auth", get(get_auth_config))
         .route("/version", get(get_version))
+}
+
+async fn get_config(
+    Extension(config): Extension<config::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+    Ok(Json(config))
 }
 
 async fn get_platform_info(

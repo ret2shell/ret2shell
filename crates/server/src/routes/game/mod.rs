@@ -20,6 +20,7 @@ use crate::{
 };
 
 mod challenge;
+mod team;
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
     Router::new()
@@ -33,6 +34,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
                 .route("/", patch(update_game).delete(delete_game))
                 .layer(middleware::from_fn(auth::game_admin_required))
                 .nest("/challenge", challenge::router(state))
+                .nest("/team", team::router(state))
                 .route("/", get(get_game))
                 .layer(middleware::from_fn_with_state(
                     state.clone(),
