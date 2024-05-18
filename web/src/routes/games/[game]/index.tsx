@@ -82,16 +82,15 @@ export default function () {
         <div class="lg:w-1/3 max-h-[calc(100vh-4rem)] lg:sticky lg:top-16 lg:left-0 flex flex-col backdrop-blur border-b border-b-layer-content/10 lg:border-b-0 lg:backdrop-blur-none p-3 lg:p-6 space-y-2">
           <Card contentClass="relative">
             <Picture src={gameStore.current?.cover || bgGameDefault}></Picture>
-            <div class="absolute top-0 left-0 w-full h-full flex flex-col justify-end items-end z-10 p-3 lg:p-6 space-y-4">
+
+            <div class="absolute top-0 left-0 w-full h-full flex flex-col justify-end items-end z-10 p-3 lg:p-6 space-y-2">
               <Show when={isGameAdmin()}>
                 <div class="flex flex-row space-x-2">
-                  <Button>
+                  <Button square size="sm" class="bg-layer/50">
                     <span class="icon-[fluent--draw-image-20-regular] w-5 h-5"></span>
-                    <span>{t('form.cover')}</span>
                   </Button>
-                  <Button>
+                  <Button square size="sm" class="bg-layer/50">
                     <span class="icon-[fluent--flag-20-regular] w-5 h-5"></span>
-                    <span>{t('form.logo')}</span>
                   </Button>
                 </div>
               </Show>

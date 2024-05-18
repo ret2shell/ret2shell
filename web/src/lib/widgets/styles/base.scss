@@ -40,8 +40,8 @@ html {
 /** Hide input[type=number] arrows */
 /* Firefox */
 input[type='number'] {
-  appearance: textfield;
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 /* Chrome, Safari, Edge, Opera */

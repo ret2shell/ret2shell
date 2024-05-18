@@ -2,7 +2,7 @@ use axum::{
     extract::{Query, State},
     middleware,
     response::IntoResponse,
-    routing::{get, post},
+    routing::{get, patch, post},
     Extension, Json, Router,
 };
 use r2s_bucket::Bucket;
@@ -30,6 +30,8 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .nest(
             "/:game",
             Router::new()
+                .route("/", patch(update_game).delete(delete_game))
+                .layer(middleware::from_fn(auth::game_admin_required))
                 .nest("/challenge", challenge::router(state))
                 .route("/", get(get_game))
                 .layer(middleware::from_fn_with_state(
@@ -104,4 +106,38 @@ async fn create_game(
             Err(e)?
         }
     }
+}
+
+async fn update_game(
+    State(ref db): State<Database>, Extension(game): Extension<game::Model>,
+    Json(model): Json<game::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+    let model = game::update(
+        &db.conn,
+        game::Model {
+            id: game.id,
+            bucket: game.bucket.clone(),
+            introduction_id: game.introduction_id,
+            ..model
+        },
+    )
+    .await?;
+    Ok(Json(model))
+}
+
+#[derive(Deserialize)]
+pub struct DeleteGameQuery {
+    force: Option<bool>,
+}
+
+async fn delete_game(
+    State(ref db): State<Database>, State(ref bucket): State<Bucket>,
+    Extension(game): Extension<game::Model>, Query(query): Query<DeleteGameQuery>,
+) -> Result<impl IntoResponse, ResponseError> {
+    let delete_result = bucket.delete(&game.bucket.clone().unwrap()).await;
+    if !query.force.unwrap_or(false) {
+        delete_result?;
+    }
+    game::delete(&db.conn, game.id).await?;
+    Ok(())
 }

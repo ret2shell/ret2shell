@@ -11,7 +11,10 @@ use chrono::Utc;
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use r2s_cache::Cache;
 use r2s_config::auth;
-use r2s_database::{config, user::Permissions};
+use r2s_database::{
+    config, game,
+    user::{Permission, Permissions},
+};
 use serde::{Deserialize, Serialize};
 use tokio::sync::Mutex;
 use tracing::{debug, error};
@@ -237,3 +240,20 @@ macro_rules! permission_required_any {
 pub(crate) use permission_required_all;
 #[allow(unused_imports)]
 pub(crate) use permission_required_any;
+
+pub async fn game_admin_required(
+    Extension(token): Extension<Token>, Extension(game): Extension<game::Model>, req: Request,
+    next: Next,
+) -> Result<impl IntoResponse, ResponseError> {
+    if token.permissions.0.contains(&Permission::Game) && game.admins.0.contains(&token.id) {
+        Ok(next.run(req).await)
+    } else {
+        Err(ResponseError::Forbidden(
+            "permission denied".to_owned(),
+            format!(
+                "user {}:{} ({}) want to access game {}:{} admin api with out permission",
+                token.id, token.account, token.nickname, game.id, game.name
+            ),
+        ))
+    }
+}
