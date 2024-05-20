@@ -116,21 +116,27 @@ export default function () {
             <>
               <Link
                 ghost
-                class={`w-4/5 ${selectedGameId() === game.id ? 'btn-active' : ''}`}
+                class={`w-4/5 ${selectedGameId() === game.id && !showCreate() ? 'btn-active' : ''}`}
                 justify="start"
                 href={`/games?selected=${game.id}`}
               >
                 {/* icon-[fluent--flag-20-regular] icon-[fluent--flag-20-filled] */}
                 <span
-                  class={`icon-[fluent--flag-20-${selectedGameId() === game.id ? 'filled' : 'regular'}] w-5 h-5 ${
-                    selectedGameId() === game.id ? 'text-primary' : 'opacity-60'
+                  class={`icon-[fluent--flag-20-${selectedGameId() === game.id && !showCreate() ? 'filled' : 'regular'}] w-5 h-5 ${
+                    selectedGameId() === game.id && !showCreate() ? 'text-primary' : 'opacity-60'
                   }`}
                 ></span>
                 <span
-                  class={`flex-1 text-start ${selectedGameId() === game.id ? 'font-bold' : 'font-normal opacity-60'}`}
+                  class={`flex-1 text-start ${selectedGameId() === game.id && !showCreate() ? 'font-bold' : 'font-normal opacity-60'}`}
                 >
                   {game.name}
                 </span>
+                <Show when={game.frozen}>
+                  <span class="icon-[fluent--weather-snowflake-20-regular] w-5 h-5 text-primary mx-2"></span>
+                </Show>
+                <Show when={game.hidden}>
+                  <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning mx-2"></span>
+                </Show>
                 <div
                   class={`w-2 h-2 rounded-full ${DateTime.now() < game.start_at ? 'bg-info' : DateTime.now() > game.end_at ? 'bg-warning' : 'bg-success'}`}
                 ></div>

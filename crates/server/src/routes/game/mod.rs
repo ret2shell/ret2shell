@@ -66,7 +66,15 @@ async fn get_game_list(
             || token.permissions.0.contains(&Permission::Game),
     )
     .await?;
-    Ok(Json(results))
+    Ok(Json((
+        results
+            .0
+            .iter()
+            .filter(|g| g.admins.0.contains(&token.id))
+            .cloned()
+            .collect::<Vec<_>>(),
+        results.1,
+    )))
 }
 
 async fn get_game(

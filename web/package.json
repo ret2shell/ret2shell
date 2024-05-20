@@ -63,7 +63,7 @@
     "@types/luxon": "^3.4.2",
     "@types/node": "^20.12.12",
     "@types/shell-quote": "^1.7.5",
-    "@typescript-eslint/eslint-plugin": "^7.9.0",
+    "@typescript-eslint/eslint-plugin": "^7.10.0",
     "autoprefixer": "^10.4.19",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
