@@ -37,7 +37,7 @@ pub enum ResponseError {
     Unauthorized(String),
     #[error("bad request: {0}")]
     BadRequest(String),
-    #[error("forbidden: {0} {1}")]
+    #[error("forbidden: {0}, {1}")]
     Forbidden(String, String),
     #[error("not found: {0}")]
     NotFound(String),

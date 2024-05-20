@@ -4,11 +4,13 @@ use chrono::{serde::ts_seconds, DateTime, Utc};
 use num_derive::{FromPrimitive, ToPrimitive};
 use sea_orm::{
     entity::prelude::*, ActiveValue, Condition, FromJsonQueryResult, FromQueryResult,
-    IntoActiveModel,
+    IntoActiveModel, JoinType, QuerySelect,
 };
 use sea_query::Func;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
+
+use crate::institute;
 
 use super::user;
 
@@ -29,11 +31,11 @@ use super::user;
 #[repr(i32)]
 #[sea_orm(rs_type = "i32", db_type = "Integer")]
 pub enum State {
-    Banned  = 0,
+    Banned = 0,
     #[default]
     Pending = 1,
-    Hidden  = 2,
-    Passed  = 3,
+    Hidden = 2,
+    Passed = 3,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
@@ -103,6 +105,23 @@ impl ExModel {
         Self {
             token: None,
             ..self
+        }
+    }
+}
+
+impl From<Model> for ExModel {
+    fn from(model: Model) -> Self {
+        ExModel {
+            id: model.id,
+            name: model.name,
+            game_id: model.game_id,
+            token: model.token,
+            state: model.state,
+            institute_id: model.institute_id,
+            institute_name: None,
+            score: model.score,
+            history: model.history,
+            last_active_at: model.last_active_at,
         }
     }
 }
@@ -192,6 +211,15 @@ impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get(db: &DatabaseConnection, id: i64) -> Result<Option<Model>, DbErr> {
     Entity::find_by_id(id).one(db).await
+}
+
+pub async fn get_ex(db: &DatabaseConnection, id: i64) -> Result<Option<ExModel>, DbErr> {
+    Entity::find_by_id(id)
+        .join(JoinType::InnerJoin, Relation::Institute.def())
+        .column_as(institute::Column::Name, "institute_name")
+        .into_model()
+        .one(db)
+        .await
 }
 
 pub async fn get_by_user_id(

@@ -196,7 +196,10 @@ macro_rules! permission_required_all {
             tracing::debug!("required perms: {:?}", required_perms);
             match required_perms.iter().all(|perm| token.permissions.0.contains(perm)) {
                 true => Ok(next.run(req).await),
-                false => Err(crate::traits::ResponseError::Forbidden("permission denied".to_owned(), "".to_owned()))
+                false => Err(crate::traits::ResponseError::Forbidden("permission denied".to_owned(), format!(
+                    "user {}:'{}' ({}) want to access api '{}' without permission",
+                    token.id, token.account, token.nickname, req.uri().path()
+                )))
             }
         }
     };
@@ -230,7 +233,10 @@ macro_rules! permission_required_any {
             tracing::debug!("required perms: {:?}", required_perms);
             match required_perms.iter().any(|perm| token.permissions.0.contains(perm)) {
                 true => Ok(next.run(req).await),
-                false => Err(crate::traits::ResponseError::Forbidden("permission denied".to_owned(), "".to_owned()))
+                false => Err(crate::traits::ResponseError::Forbidden("permission denied".to_owned(), format!(
+                    "user {}:'{}' ({}) want to access api '{}' without permission",
+                    token.id, token.account, token.nickname, req.uri().path()
+                )))
             }
         }
     };
@@ -251,7 +257,7 @@ pub async fn game_admin_required(
         Err(ResponseError::Forbidden(
             "permission denied".to_owned(),
             format!(
-                "user {}:{} ({}) want to access game {}:{} admin api with out permission",
+                "user {}:'{}' ({}) want to access game {}:'{}' admin api with out permission",
                 token.id, token.account, token.nickname, game.id, game.name
             ),
         ))

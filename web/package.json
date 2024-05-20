@@ -54,7 +54,7 @@
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
-    "@iconify-json/fluent": "^1.1.54",
+    "@iconify-json/fluent": "^1.1.55",
     "@iconify-json/fluent-emoji-flat": "^1.1.16",
     "@iconify-json/meteocons": "^1.1.4",
     "@iconify/tailwind": "^0.1.4",
