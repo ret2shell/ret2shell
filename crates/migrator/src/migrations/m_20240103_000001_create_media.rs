@@ -14,7 +14,6 @@ impl MigrationName for Migration {
 pub enum Media {
     Table,
     Id,
-    Path,
     Hash,
     UploaderId,
 }
@@ -33,7 +32,6 @@ impl MigrationTrait for Migration {
                             .auto_increment()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(Media::Path).string_len(255).not_null())
                     .col(
                         ColumnDef::new(Media::Hash)
                             .string_len(255)
