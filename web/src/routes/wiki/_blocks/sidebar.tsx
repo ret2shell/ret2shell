@@ -51,7 +51,7 @@ function buildTocTree(articles: Article[]) {
   return tree
 }
 
-export default function () {
+export default function SideBar() {
   const toc = () => buildTocTree(wikiStore.toc)
   return (
     <>

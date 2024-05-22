@@ -285,7 +285,19 @@
       "failMascotTip": "Failed, bad x_x"
     },
     "settings": {
-      "title": "user settings"
+      "title": "user settings",
+      "info": {
+        "title": "User Info"
+      },
+      "oauth": {
+        "title": "Third-party auth"
+      },
+      "institute": {
+        "title": "Institute"
+      },
+      "delete": {
+        "title": "Delete account"
+      }
     },
     "logout": "sign out",
     "box": "User detail",

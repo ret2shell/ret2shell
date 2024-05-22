@@ -6,7 +6,7 @@ import Button from '@/lib/widgets/button'
 import { createBreakpoints } from '@solid-primitives/media'
 import { JSX, Show, createSignal } from 'solid-js'
 import { Transition } from 'solid-transition-group'
-import Sidebar from './_blocks/sidebar'
+import SideBar from './_blocks/sidebar'
 import { refreshWikiToc } from '@/lib/storage/wiki'
 
 export default function (props: { children?: JSX.Element }) {
@@ -19,7 +19,7 @@ export default function (props: { children?: JSX.Element }) {
   return (
     <>
       <Title title={`${t('wiki.title')} - ${platformStore.config.name || t('platform.name')}`} />
-      <SidebarLayout leftBar={<Sidebar />} showLeftBar={showSidebar()}>
+      <SidebarLayout leftBar={<SideBar />} showLeftBar={showSidebar()}>
         {props.children}
       </SidebarLayout>
       <Transition name="slide-fade-right">

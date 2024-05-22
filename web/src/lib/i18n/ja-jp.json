@@ -285,7 +285,19 @@
       "failMascotTip": "失敗しました、不良 x_x"
     },
     "settings": {
-      "title": "ユーザー設定"
+      "title": "ユーザー設定",
+      "info": {
+        "title": "ユーザー情報"
+      },
+      "oauth": {
+        "title": "第三者認証"
+      },
+      "institute": {
+        "title": "組織"
+      },
+      "delete": {
+        "title": "アカウント削除して逃げる"
+      }
     },
     "logout": "サインアウト",
     "box": "ユーザーの詳細",

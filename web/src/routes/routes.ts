@@ -48,6 +48,22 @@ export const routes = {
               path: '/',
               component: lazy(() => import('./account/settings/index')),
             },
+            {
+              path: '/info',
+              component: lazy(() => import('./account/settings/info/index')),
+            },
+            {
+              path: '/oauth',
+              component: lazy(() => import('./account/settings/oauth/index')),
+            },
+            {
+              path: '/institute',
+              component: lazy(() => import('./account/settings/institute/index')),
+            },
+            {
+              path: '/mov-rsp-rbp-pop-rbp',
+              component: lazy(() => import('./account/settings/mov-rsp-rbp-pop-rbp/index')),
+            },
           ],
         },
       ],

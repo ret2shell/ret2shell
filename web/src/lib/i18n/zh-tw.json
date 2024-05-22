@@ -285,7 +285,19 @@
       "failMascotTip": "失敗了，壞耶 x_x"
     },
     "settings": {
-      "title": "使用者設定"
+      "title": "使用者設定",
+      "info": {
+        "title": "使用者資訊"
+      },
+      "oauth": {
+        "title": "第三方認證"
+      },
+      "institute": {
+        "title": "組織機構"
+      },
+      "delete": {
+        "title": "刪號跑路"
+      }
     },
     "logout": "登出登入",
     "box": "使用者詳情",

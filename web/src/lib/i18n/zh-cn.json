@@ -301,7 +301,19 @@
       "failMascotTip": "失败了，坏耶 x_x"
     },
     "settings": {
-      "title": "用户设置"
+      "title": "用户设置",
+      "info": {
+        "title": "用户信息"
+      },
+      "oauth": {
+        "title": "第三方认证"
+      },
+      "institute": {
+        "title": "组织机构"
+      },
+      "delete": {
+        "title": "删号跑路"
+      }
     },
     "logout": "退出登录",
     "box": "用户详情",
