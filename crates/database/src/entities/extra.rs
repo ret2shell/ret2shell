@@ -84,11 +84,17 @@ impl Related<super::team::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
-pub async fn get_list(db: &DatabaseConnection, team_id: i64) -> Result<Vec<Model>, DbErr> {
+pub async fn get_list<'a, C>(db: &'a C, team_id: i64) -> Result<Vec<Model>, DbErr>
+where
+    C: ConnectionTrait,
+{
     let sql = Entity::find().filter(Column::TeamId.eq(team_id));
     sql.all(db).await
 }
-pub async fn get_list_ex(db: &DatabaseConnection, team_id: i64) -> Result<Vec<ExModel>, DbErr> {
+pub async fn get_list_ex<'a, C>(db: &'a C, team_id: i64) -> Result<Vec<ExModel>, DbErr>
+where
+    C: ConnectionTrait,
+{
     let sql = Entity::find()
         .join(JoinType::InnerJoin, Relation::Team.def())
         .join(JoinType::InnerJoin, Relation::Challenge.def())
@@ -98,7 +104,10 @@ pub async fn get_list_ex(db: &DatabaseConnection, team_id: i64) -> Result<Vec<Ex
     sql.into_model().all(db).await
 }
 
-pub async fn create(db: &DatabaseConnection, extra: Model) -> Result<Model, DbErr> {
+pub async fn create<'a, C>(db: &'a C, extra: Model) -> Result<Model, DbErr>
+where
+    C: ConnectionTrait,
+{
     let extra = ActiveModel {
         id: ActiveValue::NotSet,
         ..extra.into_active_model().reset_all()
@@ -106,6 +115,9 @@ pub async fn create(db: &DatabaseConnection, extra: Model) -> Result<Model, DbEr
     extra.insert(db).await
 }
 
-pub async fn delete(db: &DatabaseConnection, id: i64) -> Result<(), DbErr> {
+pub async fn delete<'a, C>(db: &'a C, id: i64) -> Result<(), DbErr>
+where
+    C: ConnectionTrait,
+{
     Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

@@ -9,6 +9,7 @@ use r2s_bucket::Bucket;
 use r2s_cache::Cache;
 use r2s_database::{article, game, user::Permission};
 use r2s_migrator::Database;
+use sea_orm::TransactionTrait;
 use serde::Deserialize;
 use tracing::warn;
 
@@ -45,6 +46,25 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
                 )),
         )
         .route("/", get(get_game_list))
+}
+
+macro_rules! get_game_bucket_mut {
+    ($bucket:expr, $game: expr) => {{
+        $bucket
+            .at_mut(
+                &$game
+                    .bucket
+                    .clone()
+                    .ok_or(ResponseError::InternalServerError(
+                        "bucket is not exist for this game".into(),
+                        format!(
+                            "game {}:'{}' does not have a valid bucket",
+                            $game.id, $game.name
+                        ),
+                    ))?,
+            )
+            .await?
+    }};
 }
 
 #[derive(Deserialize)]
@@ -100,10 +120,11 @@ async fn create_game(
     State(ref db): State<Database>, State(ref bucket): State<Bucket>,
     Extension(token): Extension<Token>, Json(mut model): Json<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+    let txn = db.conn.begin().await?;
     let game_bucket = bucket.create(serde_json::to_value(&model)?).await?;
     model.bucket = Some(game_bucket.name.clone());
     let model = game::create(
-        &db.conn,
+        &txn,
         game::Model {
             admins: game::Admins(vec![token.id]),
             introduction_id: None,
@@ -113,7 +134,10 @@ async fn create_game(
     .await;
 
     match model {
-        Ok(model) => Ok(Json(model)),
+        Ok(model) => {
+            txn.commit().await?;
+            Ok(Json(model))
+        }
         Err(e) => {
             bucket.delete(&game_bucket.name).await.ok();
             Err(e)?
@@ -123,10 +147,12 @@ async fn create_game(
 
 async fn update_game(
     State(ref db): State<Database>, State(ref cache): State<Cache>,
-    Extension(game): Extension<game::Model>, Json(model): Json<game::Model>,
+    State(ref bucket): State<Bucket>, Extension(game): Extension<game::Model>,
+    Json(model): Json<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+    let txn = db.conn.begin().await?;
     let model = game::update(
-        &db.conn,
+        &txn,
         game::Model {
             id: game.id,
             bucket: game.bucket.clone(),
@@ -136,7 +162,18 @@ async fn update_game(
     )
     .await?;
     cache.at("game").del(game.id).await?;
-
+    let game_bucket = get_game_bucket_mut!(bucket, game);
+    game_bucket
+        .set_config(serde_json::to_value(&model)?)
+        .await?;
+    game_bucket
+        .take_shot(
+            ":construction: update game config",
+            "platform",
+            "platform@woooo.tech",
+        )
+        .await?;
+    txn.commit().await?;
     Ok(Json(model))
 }
 
@@ -172,12 +209,13 @@ async fn get_game_intro(
 
 async fn update_game_intro(
     State(ref db): State<Database>, State(ref cache): State<Cache>,
-    Extension(game): Extension<game::Model>, Extension(token): Extension<Token>,
-    Json(model): Json<article::Model>,
+    State(ref bucket): State<Bucket>, Extension(game): Extension<game::Model>,
+    Extension(token): Extension<Token>, Json(model): Json<article::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-    if let Some(intro_id) = game.introduction_id {
+    let txn = db.conn.begin().await?;
+    let result = if let Some(intro_id) = game.introduction_id {
         let model = article::update(
-            &db.conn,
+            &txn,
             intro_id,
             article::Model {
                 id: intro_id,
@@ -186,10 +224,10 @@ async fn update_game_intro(
             },
         )
         .await?;
-        Ok(Json(model))
+        model
     } else {
         let model = article::create(
-            &db.conn,
+            &txn,
             article::Model {
                 id: 0,
                 publisher_id: token.id,
@@ -198,7 +236,7 @@ async fn update_game_intro(
         )
         .await?;
         game::update(
-            &db.conn,
+            &txn,
             game::Model {
                 id: game.id,
                 introduction_id: Some(model.id),
@@ -207,6 +245,17 @@ async fn update_game_intro(
         )
         .await?;
         cache.at("game").del(game.id).await?;
-        Ok(Json(model))
-    }
+        model
+    };
+
+    let game_bucket = get_game_bucket_mut!(bucket, game);
+    game_bucket
+        .set_introduction(&result.clone().content.unwrap_or("NO CONTENT".into()))
+        .await?;
+    game_bucket
+        .take_shot(":memo: update README.md", "platform", "platform@woooo.tech")
+        .await?;
+    txn.commit().await?;
+
+    Ok(Json(result))
 }

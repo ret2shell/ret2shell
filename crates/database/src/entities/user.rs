@@ -211,13 +211,17 @@ impl Related<super::notification::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
-pub async fn get(db: &DatabaseConnection, user_id: i64) -> Result<Option<Model>, DbErr> {
+pub async fn get<'a, C>(db: &'a C, user_id: i64) -> Result<Option<Model>, DbErr>
+where
+    C: ConnectionTrait,
+{
     Entity::find_by_id(user_id).one(db).await
 }
 
-pub async fn get_by_account_or_email(
-    db: &DatabaseConnection, n: &str,
-) -> Result<Option<Model>, DbErr> {
+pub async fn get_by_account_or_email<'a, C>(db: &'a C, n: &str) -> Result<Option<Model>, DbErr>
+where
+    C: ConnectionTrait,
+{
     Entity::find()
         .filter(
             Condition::any()
@@ -228,10 +232,13 @@ pub async fn get_by_account_or_email(
         .await
 }
 
-pub async fn get_page(
-    db: &DatabaseConnection, page: u64, page_size: u64, order: Option<String>,
-    filter: Option<String>, with_hidden: bool, with_institute_id: Option<i64>,
-) -> Result<(Vec<Model>, u64), DbErr> {
+pub async fn get_page<'a, C>(
+    db: &'a C, page: u64, page_size: u64, order: Option<String>, filter: Option<String>,
+    with_hidden: bool, with_institute_id: Option<i64>,
+) -> Result<(Vec<Model>, u64), DbErr>
+where
+    C: ConnectionTrait,
+{
     let mut sql = Entity::find().select_only().columns(
         Column::iter().filter(|col| !matches!(col, Column::Password | Column::Description)),
     );
@@ -286,7 +293,10 @@ fn filter_and_order(
     Ok(sql)
 }
 
-pub async fn count(db: &DatabaseConnection, with_banned: bool) -> Result<u64, DbErr> {
+pub async fn count<'a, C>(db: &'a C, with_banned: bool) -> Result<u64, DbErr>
+where
+    C: ConnectionTrait,
+{
     let mut sql = Entity::find();
     if !with_banned {
         sql = sql.filter(Column::Banned.eq(false));
@@ -294,7 +304,10 @@ pub async fn count(db: &DatabaseConnection, with_banned: bool) -> Result<u64, Db
     sql.count(db).await
 }
 
-pub async fn create(db: &DatabaseConnection, user: Model) -> Result<Model, DbErr> {
+pub async fn create<'a, C>(db: &'a C, user: Model) -> Result<Model, DbErr>
+where
+    C: ConnectionTrait,
+{
     let active_model: ActiveModel = ActiveModel {
         id: ActiveValue::NotSet,
         ..user.into_active_model().reset_all()
@@ -302,7 +315,10 @@ pub async fn create(db: &DatabaseConnection, user: Model) -> Result<Model, DbErr
     active_model.insert(db).await
 }
 
-pub async fn update(db: &DatabaseConnection, user: Model) -> Result<Model, DbErr> {
+pub async fn update<'a, C>(db: &'a C, user: Model) -> Result<Model, DbErr>
+where
+    C: ConnectionTrait,
+{
     let active_model: ActiveModel = ActiveModel {
         id: ActiveValue::Unchanged(user.id),
         password: ActiveValue::NotSet,
@@ -311,9 +327,12 @@ pub async fn update(db: &DatabaseConnection, user: Model) -> Result<Model, DbErr
     active_model.update(db).await
 }
 
-pub async fn update_password(
-    db: &DatabaseConnection, user_id: i64, password: String,
-) -> Result<Model, DbErr> {
+pub async fn update_password<'a, C>(
+    db: &'a C, user_id: i64, password: String,
+) -> Result<Model, DbErr>
+where
+    C: ConnectionTrait,
+{
     let active_model: ActiveModel = ActiveModel {
         id: ActiveValue::Set(user_id),
         password: ActiveValue::Set(Some(password)),
@@ -322,6 +341,9 @@ pub async fn update_password(
     active_model.update(db).await
 }
 
-pub async fn delete(db: &DatabaseConnection, id: i64) -> Result<(), DbErr> {
+pub async fn delete<'a, C>(db: &'a C, id: i64) -> Result<(), DbErr>
+where
+    C: ConnectionTrait,
+{
     Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

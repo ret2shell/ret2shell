@@ -75,14 +75,20 @@ impl Related<super::user::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
-pub async fn get_list(db: &DatabaseConnection, user_id: i64) -> Result<Vec<Model>, DbErr> {
+pub async fn get_list<'a, C>(db: &'a C, user_id: i64) -> Result<Vec<Model>, DbErr>
+where
+    C: ConnectionTrait,
+{
     Entity::find()
         .filter(Column::UserId.eq(user_id))
         .all(db)
         .await
 }
 
-pub async fn get_list_ex(db: &DatabaseConnection, user_id: i64) -> Result<Vec<ExModel>, DbErr> {
+pub async fn get_list_ex<'a, C>(db: &'a C, user_id: i64) -> Result<Vec<ExModel>, DbErr>
+where
+    C: ConnectionTrait,
+{
     Entity::find()
         .join(JoinType::InnerJoin, Relation::User.def())
         .join(JoinType::InnerJoin, Relation::Institute.def())
@@ -94,7 +100,10 @@ pub async fn get_list_ex(db: &DatabaseConnection, user_id: i64) -> Result<Vec<Ex
         .await
 }
 
-pub async fn create(db: &DatabaseConnection, oauth: Model) -> Result<Model, DbErr> {
+pub async fn create<'a, C>(db: &'a C, oauth: Model) -> Result<Model, DbErr>
+where
+    C: ConnectionTrait,
+{
     let oauth = ActiveModel {
         id: ActiveValue::NotSet,
         created_at: ActiveValue::Set(Utc::now()),
@@ -104,7 +113,10 @@ pub async fn create(db: &DatabaseConnection, oauth: Model) -> Result<Model, DbEr
     oauth.insert(db).await
 }
 
-pub async fn update(db: &DatabaseConnection, id: i64, oauth: Model) -> Result<Model, DbErr> {
+pub async fn update<'a, C>(db: &'a C, id: i64, oauth: Model) -> Result<Model, DbErr>
+where
+    C: ConnectionTrait,
+{
     let oauth = ActiveModel {
         id: ActiveValue::Unchanged(id),
         updated_at: ActiveValue::Set(Utc::now()),
@@ -113,6 +125,9 @@ pub async fn update(db: &DatabaseConnection, id: i64, oauth: Model) -> Result<Mo
     oauth.update(db).await
 }
 
-pub async fn delete(db: &DatabaseConnection, id: i64) -> Result<(), DbErr> {
+pub async fn delete<'a, C>(db: &'a C, id: i64) -> Result<(), DbErr>
+where
+    C: ConnectionTrait,
+{
     Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

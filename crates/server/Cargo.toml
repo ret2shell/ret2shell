@@ -34,6 +34,7 @@ tower = "0.4"
 tower-http = { version = "0.5", features = ["cors", "fs", "trace"] }
 jsonwebtoken = { version = "9.3", default-features = false }
 thiserror = "1.0"
+sea-orm = "0.12"
 clap = { version = "4.5", features = ["derive"] }
 colored = "2.1"
 anyhow = "1.0"

@@ -103,13 +103,19 @@ impl Related<super::submission::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
-pub async fn get(db: &DatabaseConnection, id: i64) -> Result<Option<Model>, DbErr> {
+pub async fn get<'a, C>(db: &'a C, id: i64) -> Result<Option<Model>, DbErr>
+where
+    C: ConnectionTrait,
+{
     Entity::find_by_id(id).one(db).await
 }
 
-pub async fn get_page(
-    db: &DatabaseConnection, page: u64, page_size: u64, game_id: i64, with_hidden: bool,
-) -> Result<(Vec<Model>, u64), DbErr> {
+pub async fn get_page<'a, C>(
+    db: &'a C, page: u64, page_size: u64, game_id: i64, with_hidden: bool,
+) -> Result<(Vec<Model>, u64), DbErr>
+where
+    C: ConnectionTrait,
+{
     let mut sql = Entity::find()
         .filter(Column::GameId.eq(game_id))
         .select_only()
@@ -126,7 +132,10 @@ pub async fn get_page(
     Ok((challenges, total))
 }
 
-pub async fn create(db: &DatabaseConnection, challenge: Model) -> Result<Model, DbErr> {
+pub async fn create<'a, C>(db: &'a C, challenge: Model) -> Result<Model, DbErr>
+where
+    C: ConnectionTrait,
+{
     let challenge = ActiveModel {
         id: ActiveValue::NotSet,
         updated_at: ActiveValue::Set(Utc::now()),
@@ -136,7 +145,10 @@ pub async fn create(db: &DatabaseConnection, challenge: Model) -> Result<Model, 
     challenge.insert(db).await
 }
 
-pub async fn update(db: &DatabaseConnection, challenge: Model) -> Result<Model, DbErr> {
+pub async fn update<'a, C>(db: &'a C, challenge: Model) -> Result<Model, DbErr>
+where
+    C: ConnectionTrait,
+{
     let challenge = ActiveModel {
         id: ActiveValue::Unchanged(challenge.id),
         updated_at: ActiveValue::Set(Utc::now()),
@@ -148,6 +160,9 @@ pub async fn update(db: &DatabaseConnection, challenge: Model) -> Result<Model, 
     challenge.update(db).await
 }
 
-pub async fn delete(db: &DatabaseConnection, id: i64) -> Result<(), DbErr> {
+pub async fn delete<'a, C>(db: &'a C, id: i64) -> Result<(), DbErr>
+where
+    C: ConnectionTrait,
+{
     Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

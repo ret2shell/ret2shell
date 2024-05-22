@@ -128,14 +128,20 @@ impl Related<super::team::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
-pub async fn get(db: &DatabaseConnection, game_id: i64) -> Result<Option<Model>, DbErr> {
+pub async fn get<'a, C>(db: &'a C, game_id: i64) -> Result<Option<Model>, DbErr>
+where
+    C: ConnectionTrait,
+{
     Entity::find_by_id(game_id).one(db).await
 }
 
-pub async fn get_page(
-    db: &DatabaseConnection, page: u64, page_size: u64, host_type: Option<HostType>,
-    weight: Option<i32>, with_hidden: bool,
-) -> Result<(Vec<Model>, u64), DbErr> {
+pub async fn get_page<'a, C>(
+    db: &'a C, page: u64, page_size: u64, host_type: Option<HostType>, weight: Option<i32>,
+    with_hidden: bool,
+) -> Result<(Vec<Model>, u64), DbErr>
+where
+    C: ConnectionTrait,
+{
     let mut sql = Entity::find();
     if let Some(host_type) = host_type {
         sql = sql.filter(Column::HostType.eq(host_type));
@@ -153,7 +159,10 @@ pub async fn get_page(
     Ok((games, total))
 }
 
-pub async fn create(db: &DatabaseConnection, game: Model) -> Result<Model, DbErr> {
+pub async fn create<'a, C>(db: &'a C, game: Model) -> Result<Model, DbErr>
+where
+    C: ConnectionTrait,
+{
     let game = ActiveModel {
         id: ActiveValue::NotSet,
         updated_at: ActiveValue::Set(Utc::now()),
@@ -162,7 +171,10 @@ pub async fn create(db: &DatabaseConnection, game: Model) -> Result<Model, DbErr
     game.insert(db).await
 }
 
-pub async fn update(db: &DatabaseConnection, game: Model) -> Result<Model, DbErr> {
+pub async fn update<'a, C>(db: &'a C, game: Model) -> Result<Model, DbErr>
+where
+    C: ConnectionTrait,
+{
     let game = ActiveModel {
         id: ActiveValue::Unchanged(game.id),
         updated_at: ActiveValue::Set(Utc::now()),
@@ -171,6 +183,9 @@ pub async fn update(db: &DatabaseConnection, game: Model) -> Result<Model, DbErr
     game.update(db).await
 }
 
-pub async fn delete(db: &DatabaseConnection, game_id: i64) -> Result<(), DbErr> {
+pub async fn delete<'a, C>(db: &'a C, game_id: i64) -> Result<(), DbErr>
+where
+    C: ConnectionTrait,
+{
     Entity::delete_by_id(game_id).exec(db).await.map(|_| ())
 }

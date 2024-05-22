@@ -67,7 +67,10 @@ impl Related<super::user::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
-pub async fn get_list(db: &DatabaseConnection, game_id: i64) -> Result<Vec<Model>, DbErr> {
+pub async fn get_list<'a, C>(db: &'a C, game_id: i64) -> Result<Vec<Model>, DbErr>
+where
+    C: ConnectionTrait,
+{
     let notifications = Entity::find()
         .filter(Column::GameId.eq(game_id))
         .all(db)
@@ -75,7 +78,10 @@ pub async fn get_list(db: &DatabaseConnection, game_id: i64) -> Result<Vec<Model
     Ok(notifications)
 }
 
-pub async fn get_list_ex(db: &DatabaseConnection, game_id: i64) -> Result<Vec<ExModel>, DbErr> {
+pub async fn get_list_ex<'a, C>(db: &'a C, game_id: i64) -> Result<Vec<ExModel>, DbErr>
+where
+    C: ConnectionTrait,
+{
     let notifications = Entity::find()
         .join(JoinType::InnerJoin, Relation::Uploader.def())
         .column_as(user::Column::Nickname, "uploader_name")
@@ -86,7 +92,10 @@ pub async fn get_list_ex(db: &DatabaseConnection, game_id: i64) -> Result<Vec<Ex
     Ok(notifications)
 }
 
-pub async fn create(db: &DatabaseConnection, notification: Model) -> Result<Model, DbErr> {
+pub async fn create<'a, C>(db: &'a C, notification: Model) -> Result<Model, DbErr>
+where
+    C: ConnectionTrait,
+{
     let notification = ActiveModel {
         id: ActiveValue::NotSet,
         ..notification.into_active_model().reset_all()
@@ -94,6 +103,9 @@ pub async fn create(db: &DatabaseConnection, notification: Model) -> Result<Mode
     notification.insert(db).await
 }
 
-pub async fn delete(db: &DatabaseConnection, id: i64) -> Result<(), DbErr> {
+pub async fn delete<'a, C>(db: &'a C, id: i64) -> Result<(), DbErr>
+where
+    C: ConnectionTrait,
+{
     Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

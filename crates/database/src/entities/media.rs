@@ -33,22 +33,34 @@ impl Related<super::user::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
-pub async fn get(db: &DatabaseConnection, id: i64) -> Result<Option<Model>, DbErr> {
+pub async fn get<'a, C>(db: &'a C, id: i64) -> Result<Option<Model>, DbErr>
+where
+    C: ConnectionTrait,
+{
     Entity::find_by_id(id).one(db).await
 }
 
-pub async fn get_by_hash(db: &DatabaseConnection, hash: &str) -> Result<Option<Model>, DbErr> {
+pub async fn get_by_hash<'a, C>(db: &'a C, hash: &str) -> Result<Option<Model>, DbErr>
+where
+    C: ConnectionTrait,
+{
     Entity::find().filter(Column::Hash.eq(hash)).one(db).await
 }
 
-pub async fn get_list(db: &DatabaseConnection, uploader_id: i64) -> Result<Vec<Model>, DbErr> {
+pub async fn get_list<'a, C>(db: &'a C, uploader_id: i64) -> Result<Vec<Model>, DbErr>
+where
+    C: ConnectionTrait,
+{
     Entity::find()
         .filter(Column::UploaderId.eq(uploader_id))
         .all(db)
         .await
 }
 
-pub async fn exists(db: &DatabaseConnection, hash: &str) -> Result<bool, DbErr> {
+pub async fn exists<'a, C>(db: &'a C, hash: &str) -> Result<bool, DbErr>
+where
+    C: ConnectionTrait,
+{
     Ok(Entity::find()
         .filter(Column::Hash.eq(hash))
         .one(db)
@@ -56,7 +68,10 @@ pub async fn exists(db: &DatabaseConnection, hash: &str) -> Result<bool, DbErr> 
         .is_some())
 }
 
-pub async fn create(db: &DatabaseConnection, media: Model) -> Result<Model, DbErr> {
+pub async fn create<'a, C>(db: &'a C, media: Model) -> Result<Model, DbErr>
+where
+    C: ConnectionTrait,
+{
     let media = ActiveModel {
         id: ActiveValue::NotSet,
         ..media.into_active_model().reset_all()
@@ -64,11 +79,17 @@ pub async fn create(db: &DatabaseConnection, media: Model) -> Result<Model, DbEr
     media.insert(db).await
 }
 
-pub async fn delete(db: &DatabaseConnection, id: i64) -> Result<(), DbErr> {
+pub async fn delete<'a, C>(db: &'a C, id: i64) -> Result<(), DbErr>
+where
+    C: ConnectionTrait,
+{
     Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }
 
-pub async fn delete_by_user_id(db: &DatabaseConnection, user_id: i64) -> Result<(), DbErr> {
+pub async fn delete_by_user_id<'a, C>(db: &'a C, user_id: i64) -> Result<(), DbErr>
+where
+    C: ConnectionTrait,
+{
     Entity::delete(ActiveModel {
         uploader_id: ActiveValue::Set(user_id),
         ..Default::default()

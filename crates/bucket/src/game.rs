@@ -26,7 +26,7 @@ pub struct GameBucket {
 #[repr(i32)]
 pub enum HostType {
     CTFTraining = 0,
-    CTFGame     = 1,
+    CTFGame = 1,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -119,12 +119,18 @@ impl GameBucket {
         Ok(())
     }
 
-    pub async fn set_config(&self, game: GameConfig) -> Result<(), BucketError> {
+    pub async fn set_config(&self, game: Value) -> Result<(), BucketError> {
+        let game: GameConfig = serde_json::from_value(game)?;
         write(
             self.path.join("config.toml"),
             toml::to_string_pretty(&game)?,
         )
         .await?;
+        Ok(())
+    }
+
+    pub async fn set_introduction(&self, introduction: &str) -> Result<(), BucketError> {
+        write(self.path.join("README.md"), introduction.to_string()).await?;
         Ok(())
     }
 

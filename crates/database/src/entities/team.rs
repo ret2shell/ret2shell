@@ -209,11 +209,17 @@ impl Related<super::user::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
-pub async fn get(db: &DatabaseConnection, id: i64) -> Result<Option<Model>, DbErr> {
+pub async fn get<'a, C>(db: &'a C, id: i64) -> Result<Option<Model>, DbErr>
+where
+    C: ConnectionTrait,
+{
     Entity::find_by_id(id).one(db).await
 }
 
-pub async fn get_ex(db: &DatabaseConnection, id: i64) -> Result<Option<ExModel>, DbErr> {
+pub async fn get_ex<'a, C>(db: &'a C, id: i64) -> Result<Option<ExModel>, DbErr>
+where
+    C: ConnectionTrait,
+{
     Entity::find_by_id(id)
         .join(JoinType::InnerJoin, Relation::Institute.def())
         .column_as(institute::Column::Name, "institute_name")
@@ -222,9 +228,12 @@ pub async fn get_ex(db: &DatabaseConnection, id: i64) -> Result<Option<ExModel>,
         .await
 }
 
-pub async fn get_by_user_id(
-    db: &DatabaseConnection, game_id: i64, user_id: i64,
-) -> Result<Option<Model>, DbErr> {
+pub async fn get_by_user_id<'a, C>(
+    db: &'a C, game_id: i64, user_id: i64,
+) -> Result<Option<Model>, DbErr>
+where
+    C: ConnectionTrait,
+{
     let (_, team): (user::Model, Option<Model>) = match user::Entity::find_by_id(user_id)
         .find_also_related(Entity)
         .filter(Column::GameId.eq(game_id))
@@ -239,10 +248,13 @@ pub async fn get_by_user_id(
     Ok(team)
 }
 
-pub async fn get_page(
-    db: &DatabaseConnection, game_id: i64, page: u64, page_size: u64, min_state: Option<State>,
+pub async fn get_page<'a, C>(
+    db: &'a C, game_id: i64, page: u64, page_size: u64, min_state: Option<State>,
     filter: Option<String>,
-) -> Result<(Vec<Model>, u64), DbErr> {
+) -> Result<(Vec<Model>, u64), DbErr>
+where
+    C: ConnectionTrait,
+{
     let state = min_state.unwrap_or(State::Passed);
     let mut sql = Entity::find()
         .filter(Column::GameId.eq(game_id))
@@ -268,7 +280,10 @@ fn filter_sql(mut sql: Select<Entity>, filter: Option<String>) -> Result<Select<
     Ok(sql)
 }
 
-pub async fn create(db: &DatabaseConnection, team: Model) -> Result<Model, DbErr> {
+pub async fn create<'a, C>(db: &'a C, team: Model) -> Result<Model, DbErr>
+where
+    C: ConnectionTrait,
+{
     let team = ActiveModel {
         id: ActiveValue::NotSet,
         last_active_at: ActiveValue::Set(Utc::now()),
@@ -278,7 +293,10 @@ pub async fn create(db: &DatabaseConnection, team: Model) -> Result<Model, DbErr
     team.insert(db).await
 }
 
-pub async fn update(db: &DatabaseConnection, team: Model) -> Result<Model, DbErr> {
+pub async fn update<'a, C>(db: &'a C, team: Model) -> Result<Model, DbErr>
+where
+    C: ConnectionTrait,
+{
     let team = ActiveModel {
         id: ActiveValue::Unchanged(team.id),
         game_id: ActiveValue::Unchanged(team.game_id),
@@ -287,6 +305,9 @@ pub async fn update(db: &DatabaseConnection, team: Model) -> Result<Model, DbErr
     team.insert(db).await
 }
 
-pub async fn delete(db: &DatabaseConnection, id: i64) -> Result<(), DbErr> {
+pub async fn delete<'a, C>(db: &'a C, id: i64) -> Result<(), DbErr>
+where
+    C: ConnectionTrait,
+{
     Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

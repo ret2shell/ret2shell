@@ -67,11 +67,17 @@ pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}
 
-pub async fn get(db: &DatabaseConnection) -> Result<Option<Model>, DbErr> {
+pub async fn get<'a, C>(db: &'a C) -> Result<Option<Model>, DbErr>
+where
+    C: ConnectionTrait,
+{
     Entity::find().one(db).await
 }
 
-pub async fn update(db: &DatabaseConnection, config: Model) -> Result<Model, DbErr> {
+pub async fn update<'a, C>(db: &'a C, config: Model) -> Result<Model, DbErr>
+where
+    C: ConnectionTrait,
+{
     let original_info = Entity::find().one(db).await?;
     match original_info {
         Some(original_info) => {

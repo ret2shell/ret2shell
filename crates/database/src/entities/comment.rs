@@ -67,9 +67,12 @@ impl Related<super::user::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
-pub async fn get_list(
-    db: &DatabaseConnection, page: u64, page_size: u64, article_id: i64,
-) -> Result<(Vec<Model>, u64), DbErr> {
+pub async fn get_list<'a, C>(
+    db: &'a C, page: u64, page_size: u64, article_id: i64,
+) -> Result<(Vec<Model>, u64), DbErr>
+where
+    C: ConnectionTrait,
+{
     let sql = Entity::find().filter(Column::ArticleId.eq(article_id));
     let paginator = sql.into_model().paginate(db, page_size);
     let total = paginator.num_pages().await?;
@@ -77,9 +80,12 @@ pub async fn get_list(
     Ok((comments, total))
 }
 
-pub async fn get_list_ex(
-    db: &DatabaseConnection, page: u64, page_size: u64, article_id: i64,
-) -> Result<(Vec<ExModel>, u64), DbErr> {
+pub async fn get_list_ex<'a, C>(
+    db: &'a C, page: u64, page_size: u64, article_id: i64,
+) -> Result<(Vec<ExModel>, u64), DbErr>
+where
+    C: ConnectionTrait,
+{
     let sql = Entity::find()
         .join(JoinType::InnerJoin, Relation::Publisher.def())
         .join(JoinType::InnerJoin, Relation::Article.def())
@@ -92,7 +98,10 @@ pub async fn get_list_ex(
     Ok((comments, total))
 }
 
-pub async fn create(db: &DatabaseConnection, comment: Model) -> Result<Model, DbErr> {
+pub async fn create<'a, C>(db: &'a C, comment: Model) -> Result<Model, DbErr>
+where
+    C: ConnectionTrait,
+{
     let comment = ActiveModel {
         id: ActiveValue::NotSet,
         created_at: ActiveValue::Set(Utc::now()),
@@ -101,6 +110,9 @@ pub async fn create(db: &DatabaseConnection, comment: Model) -> Result<Model, Db
     comment.insert(db).await
 }
 
-pub async fn delete(db: &DatabaseConnection, id: i64) -> Result<(), DbErr> {
+pub async fn delete<'a, C>(db: &'a C, id: i64) -> Result<(), DbErr>
+where
+    C: ConnectionTrait,
+{
     Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

@@ -105,10 +105,13 @@ impl Related<super::user::Entity> for Entity {
 impl ActiveModelBehavior for ActiveModel {}
 
 #[allow(clippy::too_many_arguments)]
-pub async fn get_page(
-    db: &DatabaseConnection, page: u64, page_size: u64, only_solved: bool, with_content: bool,
+pub async fn get_page<'a, C>(
+    db: &'a C, page: u64, page_size: u64, only_solved: bool, with_content: bool,
     challenge_id: Option<i64>, team_id: Option<i64>, user_id: Option<i64>,
-) -> Result<(Vec<Model>, u64), DbErr> {
+) -> Result<(Vec<Model>, u64), DbErr>
+where
+    C: ConnectionTrait,
+{
     let mut sql = Entity::find();
     if let Some(challenge_id) = challenge_id {
         sql = sql.filter(Column::ChallengeId.eq(challenge_id));
@@ -134,10 +137,13 @@ pub async fn get_page(
 }
 
 #[allow(clippy::too_many_arguments)]
-pub async fn get_page_ex(
-    db: &DatabaseConnection, page: u64, page_size: u64, only_solved: bool, with_content: bool,
+pub async fn get_page_ex<'a, C>(
+    db: &'a C, page: u64, page_size: u64, only_solved: bool, with_content: bool,
     challenge_id: Option<i64>, team_id: Option<i64>, user_id: Option<i64>,
-) -> Result<(Vec<ExModel>, u64), DbErr> {
+) -> Result<(Vec<ExModel>, u64), DbErr>
+where
+    C: ConnectionTrait,
+{
     let mut sql = Entity::find()
         .join(JoinType::InnerJoin, Relation::Team.def())
         .join(JoinType::InnerJoin, Relation::Challenge.def())
@@ -168,7 +174,10 @@ pub async fn get_page_ex(
     Ok((submissions, total))
 }
 
-pub async fn create(db: &DatabaseConnection, submission: Model) -> Result<Model, DbErr> {
+pub async fn create<'a, C>(db: &'a C, submission: Model) -> Result<Model, DbErr>
+where
+    C: ConnectionTrait,
+{
     let submission = ActiveModel {
         id: ActiveValue::NotSet,
         created_at: ActiveValue::Set(Utc::now()),
@@ -177,6 +186,9 @@ pub async fn create(db: &DatabaseConnection, submission: Model) -> Result<Model,
     submission.insert(db).await
 }
 
-pub async fn delete(db: &DatabaseConnection, id: i64) -> Result<(), DbErr> {
+pub async fn delete<'a, C>(db: &'a C, id: i64) -> Result<(), DbErr>
+where
+    C: ConnectionTrait,
+{
     Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }
