@@ -228,6 +228,14 @@ export const routes = {
           component: lazy(() => import('./admin/edit/index')),
         },
         {
+          path: '/logs',
+          component: lazy(() => import('./admin/logs/index')),
+        },
+        {
+          path: '/cluster',
+          component: lazy(() => import('./admin/cluster/index')),
+        },
+        {
           path: '/sync',
           component: lazy(() => import('./admin/sync/index')),
         },
