@@ -126,7 +126,9 @@
     "timerTips": "距离 {{ period }} 还有",
     "introduction": {
       "title": "比赛须知",
-      "empty": "主办方很懒，什么也没有写"
+      "empty": "主办方很懒，什么也没有写",
+      "fetchFailed": "获取赛事介绍失败",
+      "updateFailed": "更新赛事介绍失败"
     },
     "team": {
       "create": {
@@ -161,7 +163,9 @@
     "logo": {
       "uploaded": "已更新赛事图标",
       "uploadFailed": "图标上传失败"
-    }
+    },
+    "introRequired": "请填写赛事介绍",
+    "introPlaceholder": "赛事介绍"
   },
   "bulletin": {
     "title": "公告",

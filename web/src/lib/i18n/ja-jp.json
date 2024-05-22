@@ -110,7 +110,9 @@
     "timerTips": "{{ period }} からの距離",
     "introduction": {
       "title": "競技説明書",
-      "empty": "主催者が怠け者で何も書かなかった"
+      "empty": "主催者が怠け者で何も書かなかった",
+      "fetchFailed": "イベント紹介の取得に失敗しました",
+      "updateFailed": "イベント紹介の更新に失敗しました"
     },
     "team": {
       "create": {
@@ -145,7 +147,9 @@
     "logo": {
       "uploaded": "イベントアイコンが更新されました",
       "uploadFailed": "アイコンのアップロードに失敗しました"
-    }
+    },
+    "introRequired": "イベント紹介文をご記入ください",
+    "introPlaceholder": "競技紹介"
   },
   "bulletin": {
     "title": "アナウンス",

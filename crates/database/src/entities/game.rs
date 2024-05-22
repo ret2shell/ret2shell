@@ -2,7 +2,9 @@
 
 use chrono::{serde::ts_seconds, DateTime, Utc};
 use num_derive::{FromPrimitive, ToPrimitive};
-use sea_orm::{entity::prelude::*, ActiveValue, FromJsonQueryResult, IntoActiveModel};
+use sea_orm::{
+    entity::prelude::*, ActiveValue, FromJsonQueryResult, IntoActiveModel, Order, QueryOrder,
+};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -144,6 +146,7 @@ pub async fn get_page(
     if !with_hidden {
         sql = sql.filter(Column::Hidden.eq(false));
     }
+    sql = sql.order_by(Column::StartAt, Order::Desc);
     let paginator = sql.into_model().paginate(db, page_size);
     let total = paginator.num_pages().await?;
     let games = paginator.fetch_page(page - 1).await?;

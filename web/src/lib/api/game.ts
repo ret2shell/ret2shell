@@ -1,4 +1,5 @@
 import api, { api_root } from '.'
+import { Article } from '../models/article'
 import { Game, HostType } from '../models/game'
 
 export async function getGames(page?: number, page_size?: number, host_type?: HostType, weight?: number) {
@@ -30,4 +31,12 @@ export async function updateGame(id: number, game: Game) {
 
 export async function deleteGame(id: number) {
   return await api.delete(`${api_root}/game/${id}`).json<null>()
+}
+
+export async function getGameIntroduction(id: number) {
+  return await api.get(`${api_root}/game/${id}/introduction`).json<Article>()
+}
+
+export async function updateGameIntroduction(id: number, article: Article) {
+  return await api.patch(`${api_root}/game/${id}/introduction`, { json: article }).json<Article>()
 }

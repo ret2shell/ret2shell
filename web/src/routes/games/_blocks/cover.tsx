@@ -91,9 +91,10 @@ export default function (props: ComponentProps<'div'>) {
               </Show>
             </div>
             <div
-              class={`text-4xl font-bold transition-all ease-out duration-500 delay-1000 overflow-hidden mt-8 ${expanded() ? 'h-32' : 'h-0'}`}
+              class={`flex flex-col items-center space-y-4 transition-all ease-out duration-500 delay-1000 overflow-hidden mt-8 ${expanded() ? 'h-32' : 'h-0'}`}
             >
-              <h1>{gameStore.current?.name}</h1>
+              <h1 class="text-4xl font-bold">{gameStore.current?.name}</h1>
+              <p class="text-base opacity-60">{gameStore.current?.brief}</p>
             </div>
           </div>
           <Show when={expanded()}>

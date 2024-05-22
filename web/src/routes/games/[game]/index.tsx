@@ -1,5 +1,5 @@
 import { api_root } from '@/lib/api'
-import { updateGame } from '@/lib/api/game'
+import { getGameIntroduction, updateGame, updateGameIntroduction } from '@/lib/api/game'
 import { uploadMedia } from '@/lib/api/media'
 import LogoAnimate from '@/lib/assets/animates/logo-animate'
 import Spin from '@/lib/assets/animates/spin'
@@ -23,11 +23,15 @@ import Timer from '@/lib/widgets/timer'
 
 import bgGameDefault from '@assets/imgs/bg-game-default.webp'
 import { HTTPError } from '@reverier/ky'
+import { useSearchParams } from '@solidjs/router'
 import { DateTime } from 'luxon'
 import { For, Match, Show, Switch, createEffect, createSignal, onCleanup, untrack } from 'solid-js'
+import IntroForm from './_blocks/intro-form'
 
 export default function () {
   refreshInstitutes()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const inEdit = () => searchParams.edit === 'true'
   const period = () => {
     if (gameStore.current?.register_at && gameStore.current.register_at > DateTime.now()) {
       return t('game.register')!
@@ -69,7 +73,22 @@ export default function () {
     if (gameStore.current?.introduction_id) {
       untrack(() => {
         if (gameStore.current?.introduction_id) {
-          /// get the introduction
+          getGameIntroduction(gameStore.current.id)
+            .then(resp => {
+              setIntroduction(resp)
+              setLoading(false)
+            })
+            .catch((err: HTTPError) => {
+              err.response.text().then(resp => {
+                addToast({
+                  level: 'error',
+                  description: `${t('game.introduction.fetchFailed')}: ${resp}`,
+                  duration: 5000,
+                })
+              })
+              setIntroduction(null)
+              setLoading(false)
+            })
         } else {
           setIntroduction(null)
           setLoading(false)
@@ -114,7 +133,8 @@ export default function () {
               ...gameStore.current,
               cover: resp.hash,
             })
-              .then(() => {
+              .then(resp => {
+                setGameStore({ current: resp })
                 addToast({
                   level: 'success',
                   description: t('game.cover.uploaded')!,
@@ -122,10 +142,12 @@ export default function () {
                 })
               })
               .catch((err: HTTPError) => {
-                addToast({
-                  level: 'error',
-                  description: `${t('game.cover.uploadFailed')}: ${err.message}`,
-                  duration: 5000,
+                err.response.text().then(resp => {
+                  addToast({
+                    level: 'error',
+                    description: `${t('game.cover.uploadFailed')}: ${resp}`,
+                    duration: 5000,
+                  })
                 })
               })
               .finally(() => {
@@ -135,10 +157,12 @@ export default function () {
               })
         })
         .catch((err: HTTPError) => {
-          addToast({
-            level: 'error',
-            description: `${t('game.cover.uploadFailed')}: ${err.message}`,
-            duration: 5000,
+          err.response.text().then(resp => {
+            addToast({
+              level: 'error',
+              description: `${t('game.cover.uploadFailed')}: ${resp}`,
+              duration: 5000,
+            })
           })
         })
   }
@@ -175,7 +199,8 @@ export default function () {
               ...gameStore.current,
               logo: resp.hash,
             })
-              .then(() => {
+              .then(resp => {
+                setGameStore({ current: resp })
                 addToast({
                   level: 'success',
                   description: t('game.logo.uploaded')!,
@@ -183,10 +208,12 @@ export default function () {
                 })
               })
               .catch((err: HTTPError) => {
-                addToast({
-                  level: 'error',
-                  description: `${t('game.logo.uploadFailed')}: ${err.message}`,
-                  duration: 5000,
+                err.response.text().then(resp => {
+                  addToast({
+                    level: 'error',
+                    description: `${t('game.logo.uploadFailed')}: ${resp}`,
+                    duration: 5000,
+                  })
                 })
               })
               .finally(() => {
@@ -196,12 +223,29 @@ export default function () {
               })
         })
         .catch((err: HTTPError) => {
-          addToast({
-            level: 'error',
-            description: `${t('game.logo.uploadFailed')}: ${err.message}`,
-            duration: 5000,
+          err.response.text().then(resp => {
+            addToast({
+              level: 'error',
+              description: `${t('game.logo.uploadFailed')}: ${resp}`,
+              duration: 5000,
+            })
           })
         })
+  }
+
+  async function onUpdateIntroduction(result: ArticleModel) {
+    try {
+      let resp = await updateGameIntroduction(gameStore.current!.id, result)
+      setIntroduction(resp)
+      setSearchParams({ edit: null })
+    } catch (err) {
+      let errorString = await (err as HTTPError).response.text()
+      addToast({
+        level: 'error',
+        description: `${t('game.introduction.updateFailed')}: ${errorString}`,
+        duration: 5000,
+      })
+    }
   }
 
   return (
@@ -224,6 +268,7 @@ export default function () {
                     class="bg-layer/50"
                     onClick={() => (coverSet() ? handleUploadCover() : handleSelectCover())}
                     loading={coverUploading()}
+                    disabled={logoSet()}
                   >
                     <input type="file" class="hidden" ref={coverInput!} onChange={handleSelectedCover} />
                     <Show
@@ -239,6 +284,7 @@ export default function () {
                     class="bg-layer/50"
                     onClick={() => (logoSet() ? handleUploadLogo() : handleSelectLogo())}
                     loading={logoUploading()}
+                    disabled={coverSet()}
                   >
                     <input type="file" class="hidden" ref={logoInput!} onChange={handleSelectedLogo} />
                     <Show when={logoSet()} fallback={<span class="icon-[fluent--flag-20-regular] w-5 h-5"></span>}>
@@ -439,11 +485,19 @@ export default function () {
             </Switch>
           </div>
         </div>
-        <div class="flex-1 flex flex-col space-y-2 p-3 lg:p-6">
+        <div class="flex-1 flex flex-col space-y-2">
+          <h1 class="text-center text-3xl font-bold mt-4 lg:mt-8">{t('game.introduction.title')}</h1>
           <Switch>
+            <Match when={inEdit()}>
+              <IntroForm onDone={onUpdateIntroduction} editSource={introduction() || undefined} />
+            </Match>
             <Match when={introduction() && !loading()}>
-              <h1 class="text-center text-3xl font-bold">{t('game.introduction.title')}</h1>
-              <Article content={introduction()!.content!} extra={true} headingAnchors={true}></Article>
+              <Article
+                class="self-center"
+                content={introduction()!.content!}
+                extra={true}
+                headingAnchors={true}
+              ></Article>
             </Match>
             <Match when={loading()}>
               <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">

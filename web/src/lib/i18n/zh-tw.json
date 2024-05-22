@@ -110,7 +110,9 @@
     "timerTips": "距離 {{ period }} 還有",
     "introduction": {
       "title": "比賽須知",
-      "empty": "主辦單位很懶，什麼也沒寫"
+      "empty": "主辦單位很懶，什麼也沒寫",
+      "fetchFailed": "取得賽事介紹失敗",
+      "updateFailed": "更新賽事介紹失敗"
     },
     "team": {
       "create": {
@@ -145,7 +147,9 @@
     "logo": {
       "uploaded": "已更新賽事圖標",
       "uploadFailed": "圖標上傳失敗"
-    }
+    },
+    "introRequired": "請填寫賽事介紹",
+    "introPlaceholder": "賽事介紹"
   },
   "bulletin": {
     "title": "公告",

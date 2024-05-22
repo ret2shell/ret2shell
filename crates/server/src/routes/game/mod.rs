@@ -7,7 +7,7 @@ use axum::{
 };
 use r2s_bucket::Bucket;
 use r2s_cache::Cache;
-use r2s_database::{game, user::Permission};
+use r2s_database::{article, game, user::Permission};
 use r2s_migrator::Database;
 use serde::Deserialize;
 use tracing::warn;
@@ -32,10 +32,12 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .nest(
             "/:game",
             Router::new()
+                .route("/introduction", patch(update_game_intro))
                 .route("/", patch(update_game).delete(delete_game))
                 .layer(middleware::from_fn(auth::game_admin_required))
                 .nest("/challenge", challenge::router(state))
                 .nest("/team", team::router(state))
+                .route("/introduction", get(get_game_intro))
                 .route("/", get(get_game))
                 .layer(middleware::from_fn_with_state(
                     state.clone(),
@@ -155,4 +157,56 @@ async fn delete_game(
     cache.at("game").del(game.id).await?;
     game::delete(&db.conn, game.id).await?;
     Ok(())
+}
+
+async fn get_game_intro(
+    State(ref db): State<Database>, Extension(game): Extension<game::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+    if let Some(intro_id) = game.introduction_id {
+        let intro = article::get_ex(&db.conn, intro_id).await?;
+        Ok(Json(intro))
+    } else {
+        Err(ResponseError::NotFound("introduction not found".to_owned()))
+    }
+}
+
+async fn update_game_intro(
+    State(ref db): State<Database>, State(ref cache): State<Cache>,
+    Extension(game): Extension<game::Model>, Extension(token): Extension<Token>,
+    Json(model): Json<article::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+    if let Some(intro_id) = game.introduction_id {
+        let model = article::update(
+            &db.conn,
+            intro_id,
+            article::Model {
+                id: intro_id,
+                publisher_id: token.id,
+                ..model
+            },
+        )
+        .await?;
+        Ok(Json(model))
+    } else {
+        let model = article::create(
+            &db.conn,
+            article::Model {
+                id: 0,
+                publisher_id: token.id,
+                ..model
+            },
+        )
+        .await?;
+        game::update(
+            &db.conn,
+            game::Model {
+                id: game.id,
+                introduction_id: Some(model.id),
+                ..game.clone()
+            },
+        )
+        .await?;
+        cache.at("game").del(game.id).await?;
+        Ok(Json(model))
+    }
 }

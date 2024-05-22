@@ -110,7 +110,9 @@
     "timerTips": "Time until {{ period }}",
     "introduction": {
       "title": "Game README",
-      "empty": "The organizer was lazy and didn’t write anything"
+      "empty": "The organizer was lazy and didn’t write anything",
+      "fetchFailed": "Failed to fetch game introduction",
+      "updateFailed": "Failed to update game introduction"
     },
     "team": {
       "create": {
@@ -145,7 +147,9 @@
     "logo": {
       "uploaded": "Game logo updated",
       "uploadFailed": "Logo upload failed"
-    }
+    },
+    "introRequired": "Please fill in the game introduction",
+    "introPlaceholder": "Game introduction"
   },
   "bulletin": {
     "title": "Bulletin",
