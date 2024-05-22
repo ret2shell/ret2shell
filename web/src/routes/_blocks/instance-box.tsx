@@ -12,18 +12,9 @@ import { WsrxState, wsrx } from '@/lib/wsrx'
 import { accountStore } from '@/lib/storage/account'
 import Input from '@/lib/widgets/input'
 import { addToast } from '@/lib/storage/toast'
+import TimeProgress from '@/lib/widgets/time-progress'
 
 export function InstanceBoxContent() {
-  function calcProgress(instance: Instance, now: DateTime) {
-    return (
-      instance.started_at
-        .plus({ hours: instance.renew_count + 1 })
-        .diff(now)
-        .toMillis() /
-      ((instance.renew_count + 1) * 3600 * 10)
-    )
-  }
-
   const [connecting, setConnecting] = createSignal(false)
   const [showSettings, setShowSettings] = createSignal(false)
 
@@ -55,9 +46,6 @@ export function InstanceBoxContent() {
   })
 
   const [now, setNow] = createSignal(DateTime.now())
-  const instanceTimer = setInterval(() => {
-    setNow(DateTime.now())
-  }, 1000)
   const heartbeatTimer = setInterval(() => {
     // Pending or Connected
     if (wsrx.connected()) {
@@ -65,7 +53,6 @@ export function InstanceBoxContent() {
     }
   }, 5 * 1000)
   onCleanup(() => {
-    clearInterval(instanceTimer)
     clearInterval(heartbeatTimer)
   })
   return (
@@ -162,15 +149,17 @@ export function InstanceBoxContent() {
       <For each={wsrx.instances()}>
         {instance => (
           <Card contentClass="p-2 flex flex-col space-y-2">
-            <div class="flex flex-col">
-              <div class="inline-flex flex-row justify-start items-center p-2 space-x-2">
-                <span class="icon-[fluent--play-circle-hint-20-regular] w-5 h-5 text-success"></span>
-                <span>{instance.challenge_name}</span>
-                <span class="flex-1"></span>
-                <Timer class="opacity-60" end={instance.started_at.plus({ hours: instance.renew_count + 1 })} />
-              </div>
-              <Progress class="px-2" min={0} max={100} value={calcProgress(instance, now())} />
-            </div>
+            <Button size="sm" ghost>
+              <span class="icon-[fluent--play-circle-hint-20-regular] w-5 h-5 text-success"></span>
+              <span>{instance.challenge_name}</span>
+              <span class="flex-1"></span>
+              <Timer class="opacity-60" end={instance.started_at.plus({ hours: instance.renew_count + 1 })} />
+            </Button>
+            <TimeProgress
+              class="px-2"
+              start_at={instance.started_at}
+              end_at={instance.started_at.plus({ hours: instance.renew_count + 1 })}
+            />
             <div class="flex flex-row space-x-2">
               <Button ghost size="sm" title={t('instance.copyWsrxAddr')}>
                 <span class="icon-[fluent--copy-20-regular] w-5 h-5 text-success" />

@@ -28,6 +28,9 @@ import Spin from '@/lib/assets/animates/spin'
 import { HTTPError } from '@reverier/ky'
 import LoadingTips from '@/lib/widgets/loading-tips'
 import { mediaPath } from '@/lib/utils/media'
+import Timer from '@/lib/widgets/timer'
+import Progress from '@/lib/widgets/progress'
+import TimeProgress from '@/lib/widgets/time-progress'
 
 function GlobalTitleLink(props: { loading: boolean }) {
   return (
@@ -316,6 +319,22 @@ function TitleBar() {
           <div class="flex flex-row space-x-2">
             <div class="hidden lg:flex flex-row space-x-2">
               <Show when={platformStore.isOnline && accountStore.token !== null && gameStore.current}>
+                <Show
+                  when={
+                    gameStore.current &&
+                    gameStore.current.start_at < DateTime.now() &&
+                    gameStore.current.end_at > DateTime.now()
+                  }
+                >
+                  <div class="flex flex-col items-center justify-center px-4 relative">
+                    <Timer end={gameStore.current!.end_at} />
+                    <TimeProgress
+                      class="w-full"
+                      start_at={gameStore.current!.start_at}
+                      end_at={gameStore.current!.end_at}
+                    />
+                  </div>
+                </Show>
                 <InstanceBox />
               </Show>
               <NotificationBox />

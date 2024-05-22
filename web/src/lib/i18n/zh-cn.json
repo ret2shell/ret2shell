@@ -197,7 +197,31 @@
     "loading": "加载中..."
   },
   "admin": {
-    "title": "管理"
+    "title": "管理",
+    "statistics": {
+      "title": "平台统计信息"
+    },
+    "edit": {
+      "title": "编辑平台设置"
+    },
+    "email": {
+      "title": "邮箱设置"
+    },
+    "captcha": {
+      "title": "验证码保护"
+    },
+    "media": {
+      "title": "媒体存储设置"
+    },
+    "sync": {
+      "title": "分布式资源共享"
+    },
+    "users": {
+      "title": "用户列表"
+    },
+    "oauth": {
+      "title": "第三方认证"
+    }
   },
   "theme": {
     "colorScheme": "明暗主题",

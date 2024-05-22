@@ -140,7 +140,7 @@
       "sizeRequired": "チームの人数制限を入力してください",
       "sizeMinExceeded": "少なくとも 1 人のチームメンバー",
       "sizeMaxExceeded": "チームメンバーの最大数は 100 です。アカウントの共有を検討してください。",
-      "collab": "{{ サイズ }} チーム対抗戦",
+      "collab": "{{ size }} チーム対抗戦",
       "solo": "シングルマッチ",
       "noTeamParticipated": "まだ参加チームはありません",
       "join": {
@@ -181,7 +181,31 @@
     "loading": "読み込み中..."
   },
   "admin": {
-    "title": "管理"
+    "title": "管理",
+    "statistics": {
+      "title": "プラットフォーム統計"
+    },
+    "edit": {
+      "title": "プラットフォーム設定を編集する"
+    },
+    "email": {
+      "title": "郵便設定"
+    },
+    "captcha": {
+      "title": "キャプチャ保護"
+    },
+    "media": {
+      "title": "メディアストレージ設定"
+    },
+    "sync": {
+      "title": "分散リソース共有"
+    },
+    "users": {
+      "title": "ユーザーリスト"
+    },
+    "oauth": {
+      "title": "第三者認証"
+    }
   },
   "theme": {
     "colorScheme": "光と闇のテーマ",

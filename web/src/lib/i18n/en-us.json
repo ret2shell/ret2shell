@@ -181,7 +181,31 @@
     "loading": "Loading..."
   },
   "admin": {
-    "title": "Admin"
+    "title": "Admin",
+    "statistics": {
+      "title": "Platform statistics"
+    },
+    "edit": {
+      "title": "Edit platform settings"
+    },
+    "email": {
+      "title": "Email settings"
+    },
+    "captcha": {
+      "title": "CAPTCHA protection"
+    },
+    "media": {
+      "title": "Media storage settings"
+    },
+    "sync": {
+      "title": "Distributed resource sharing"
+    },
+    "users": {
+      "title": "User list"
+    },
+    "oauth": {
+      "title": "Third-party auth"
+    }
   },
   "theme": {
     "colorScheme": "color scheme",

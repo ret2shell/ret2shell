@@ -181,7 +181,31 @@
     "loading": "載入中..."
   },
   "admin": {
-    "title": "管理"
+    "title": "管理",
+    "statistics": {
+      "title": "平台統計訊息"
+    },
+    "edit": {
+      "title": "編輯平台設定"
+    },
+    "email": {
+      "title": "信箱設定"
+    },
+    "captcha": {
+      "title": "驗證碼保護"
+    },
+    "media": {
+      "title": "媒體儲存設定"
+    },
+    "sync": {
+      "title": "分散式資源共享"
+    },
+    "users": {
+      "title": "使用者列表"
+    },
+    "oauth": {
+      "title": "第三方認證"
+    }
   },
   "theme": {
     "colorScheme": "明暗主題",
