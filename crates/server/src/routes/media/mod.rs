@@ -67,7 +67,7 @@ async fn get_media(
     headers.insert(
         "Content-Type",
         media
-            .get_mimetype(&query.hash)
+            .get_mime_type(&query.hash)
             .await?
             .parse::<HeaderValue>()
             .map_err(|e| {
