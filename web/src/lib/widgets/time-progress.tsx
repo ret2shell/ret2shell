@@ -8,7 +8,10 @@ export default function TimeProgress(
 ) {
   const [progressProps, nativeProps] = splitProps(props, ['start_at', 'end_at', 'static'])
   const [now, setNow] = createSignal(DateTime.now())
-  const interval = setInterval(() => setNow(DateTime.now()), 1000)
+  const interval = setInterval(() => {
+    setNow(DateTime.now())
+    if (now().diff(progressProps.end_at).seconds >= 0) clearInterval(interval)
+  }, 1000)
   const progress = () =>
     (progressProps.start_at.diff(now()).milliseconds / progressProps.start_at.diff(progressProps.end_at).milliseconds) *
     100
