@@ -33,6 +33,10 @@ export const routes = {
           component: lazy(() => import('./account/reset/index')),
         },
         {
+          path: '/oauth',
+          component: lazy(() => import('./account/oauth/index')),
+        },
+        {
           path: '/verify',
           component: lazy(() => import('./account/verify/index')),
         },
@@ -122,6 +126,26 @@ export const routes = {
                   path: '/',
                   component: lazy(() => import('./games/[game]/admin/index')),
                 },
+                {
+                  path: '/statistics',
+                  component: lazy(() => import('./games/[game]/admin/statistics/index')),
+                },
+                {
+                  path: '/events',
+                  component: lazy(() => import('./games/[game]/admin/events/index')),
+                },
+                {
+                  path: '/teams',
+                  component: lazy(() => import('./games/[game]/admin/teams/index')),
+                },
+                {
+                  path: '/automate',
+                  component: lazy(() => import('./games/[game]/admin/automate/index')),
+                },
+                {
+                  path: '/edit',
+                  component: lazy(() => import('./games/[game]/admin/edit/index')),
+                },
               ],
             },
             {
@@ -182,6 +206,38 @@ export const routes = {
         {
           path: '/',
           component: lazy(() => import('./admin/index')),
+        },
+        {
+          path: '/users',
+          component: lazy(() => import('./admin/users/index')),
+        },
+        {
+          path: '/statistics',
+          component: lazy(() => import('./admin/statistics/index')),
+        },
+        {
+          path: '/captcha',
+          component: lazy(() => import('./admin/captcha/index')),
+        },
+        {
+          path: '/email',
+          component: lazy(() => import('./admin/email/index')),
+        },
+        {
+          path: '/edit',
+          component: lazy(() => import('./admin/edit/index')),
+        },
+        {
+          path: '/sync',
+          component: lazy(() => import('./admin/sync/index')),
+        },
+        {
+          path: '/media',
+          component: lazy(() => import('./admin/media/index')),
+        },
+        {
+          path: '/oauth',
+          component: lazy(() => import('./admin/oauth/index')),
         },
       ],
     },

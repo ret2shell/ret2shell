@@ -22,7 +22,7 @@ export const [toastStore, setToastStore] = createStore({
 
 export function addToast(toast: ToastMessage): string {
   const id = nanoid()
-  setToastStore(produce(s => s.toasts.push({ ...toast, id, createdAt: DateTime.now().toMillis(), shown: false })))
+  setToastStore(produce(s => s.toasts.push({ ...toast, id, createdAt: DateTime.now().toMillis(), shown: true })))
   return id
 }
 
