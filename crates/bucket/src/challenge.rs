@@ -116,7 +116,7 @@ impl ChallengeBucket {
 
     async fn upload_file(
         &self, dest: impl AsRef<str>, name: impl AsRef<str>,
-        mut stdin: impl AsyncRead + Send + Unpin + 'static,
+        mut stdin: impl AsyncRead + Send + Unpin,
     ) -> Result<(), BucketError> {
         if !matches!(
             dest.as_ref(),
@@ -132,31 +132,31 @@ impl ChallengeBucket {
     }
 
     pub async fn upload_static(
-        &self, name: impl AsRef<str>, stdin: impl AsyncRead + Send + Unpin + 'static,
+        &self, name: impl AsRef<str>, stdin: impl AsyncRead + Send + Unpin,
     ) -> Result<(), BucketError> {
         self.upload_file("static", name, stdin).await
     }
 
     pub async fn upload_images(
-        &self, name: impl AsRef<str>, stdin: impl AsyncRead + Send + Unpin + 'static,
+        &self, name: impl AsRef<str>, stdin: impl AsyncRead + Send + Unpin,
     ) -> Result<(), BucketError> {
         self.upload_file("images", name, stdin).await
     }
 
     pub async fn upload_mapped(
-        &self, name: impl AsRef<str>, stdin: impl AsyncRead + Send + Unpin + 'static,
+        &self, name: impl AsRef<str>, stdin: impl AsyncRead + Send + Unpin,
     ) -> Result<(), BucketError> {
         self.upload_file("mapped", name, stdin).await
     }
 
     pub async fn upload_scripts(
-        &self, name: impl AsRef<str>, stdin: impl AsyncRead + Send + Unpin + 'static,
+        &self, name: impl AsRef<str>, stdin: impl AsyncRead + Send + Unpin,
     ) -> Result<(), BucketError> {
         self.upload_file("scripts", name, stdin).await
     }
 
     pub async fn upload_src(
-        &self, name: impl AsRef<str>, stdin: impl AsyncRead + Send + Unpin + 'static,
+        &self, name: impl AsRef<str>, stdin: impl AsyncRead + Send + Unpin,
     ) -> Result<(), BucketError> {
         self.upload_file("src", name, stdin).await
     }

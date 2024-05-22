@@ -10,4 +10,6 @@ pub enum MediaError {
     ImageError(#[from] image::ImageError),
     #[error("unsupported file type: {0}")]
     UnsupportedFileType(String),
+    #[error("media storage path is not configured")]
+    MediaStoragePathNotConfigured,
 }

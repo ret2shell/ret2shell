@@ -86,6 +86,8 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
     let cluster = r2s_cluster::initialize(&config.cluster).await?;
     info!("Loading module: < Email Worker >");
     r2s_email::initialize(queue.subscribe("email").await?).await?;
+    info!("Loading module: < Media Storage >");
+    let media = r2s_media::initialize(&config.media).await?;
 
     let state = GlobalState {
         config: config.clone(),
@@ -96,6 +98,7 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
         queue,
         license,
         cluster,
+        media,
         version: format!(
             "{}-{}-{}",
             env!("CARGO_PKG_VERSION"),

@@ -85,8 +85,8 @@ async fn get_game(
         && !(token.permissions.0.contains(&Permission::Game) && game.admins.0.contains(&token.id))
     {
         warn!(
-            "unauthorized user {} ({}:{}) trying to get a hidden game {}:{}",
-            token.nickname, token.id, token.account, game.id, game.name
+            "unauthorized user {}:'{}' ({}) trying to get a hidden game {}:'{}'",
+            token.id, token.account, token.nickname, game.id, game.name
         );
         return Err(ResponseError::NotFound("game not found".to_owned()));
     }

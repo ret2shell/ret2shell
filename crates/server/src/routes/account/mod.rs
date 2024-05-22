@@ -132,7 +132,7 @@ async fn login(
         return Err(ResponseError::Forbidden(
             "account is banned".to_owned(),
             format!(
-                "user {}:{} ({}) is banned",
+                "user {}:'{}' ({}) is banned",
                 user.id, user.account, user.nickname
             ),
         ));
@@ -565,7 +565,7 @@ async fn delete_self(
         return Err(ResponseError::Forbidden(
             "you are the only user, can't delete yourself".to_owned(),
             format!(
-                "user {}:{} ({}) want to delete itself but no user left.",
+                "user {}:'{}' ({}) want to delete itself but no user left.",
                 user.id, user.account, user.nickname
             ),
         ));

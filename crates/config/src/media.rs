@@ -9,6 +9,10 @@ use crate::traits::Merge;
 pub struct Config {
     /// `path` is the directory where media files are stored.
     pub path: String,
+    /// `anti_theft` is a boolean value that determines whether to enable anti-theft protection.
+    pub anti_theft: bool,
+    /// `limit` is the maximum number of media files that one user could be uploaded in a week, administrator is not limited.
+    pub limit: i32,
 }
 
 impl Merge for Option<Config> {

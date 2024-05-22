@@ -11,6 +11,7 @@ use r2s_cluster::Cluster;
 use r2s_config::GlobalConfig;
 use r2s_database::DbErr;
 use r2s_license::License;
+use r2s_media::Media;
 use r2s_migrator::Database;
 use r2s_queue::Queue;
 use thiserror::Error;
@@ -26,6 +27,7 @@ pub struct GlobalState {
     pub queue: Queue,
     pub cluster: Cluster,
     pub license: License,
+    pub media: Media,
     pub version: String,
 }
 
@@ -63,6 +65,8 @@ pub enum ResponseError {
     SerializeError(#[from] serde_json::Error),
     #[error("bucket error: {0}")]
     BucketError(#[from] r2s_bucket::BucketError),
+    #[error("media storage error: {0}")]
+    MediaError(#[from] r2s_media::MediaError),
 }
 
 macro_rules! log_with_resp {
@@ -179,6 +183,34 @@ impl IntoResponse for ResponseError {
                 _ => log_with_resp!(
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "bucket internal error".to_owned(),
+                    e.to_string()
+                ),
+            },
+            ResponseError::MediaError(e) => match e {
+                r2s_media::MediaError::ParseContentTypeError(e) => {
+                    log_with_resp!(
+                        StatusCode::BAD_REQUEST,
+                        "failed to parse content type".to_owned(),
+                        e.to_string()
+                    )
+                }
+                r2s_media::MediaError::UnsupportedFileType(s) => {
+                    log_with_resp!(
+                        StatusCode::BAD_REQUEST,
+                        "unsupported file type".to_owned(),
+                        s
+                    )
+                }
+                r2s_media::MediaError::MediaStoragePathNotConfigured => {
+                    log_with_resp!(
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        "media storage path not configured".to_owned(),
+                        "media storage path is not set yet"
+                    )
+                }
+                _ => log_with_resp!(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "media internal error".to_owned(),
                     e.to_string()
                 ),
             },

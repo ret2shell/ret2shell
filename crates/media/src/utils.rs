@@ -43,9 +43,16 @@ where
     {
         Err(err) => {
             warn!("resize image to thumbnail error: {err}");
-            info!("image will be directly save to {}", dest.as_ref().display());
-            let _ = tokio::fs::hard_link(original, dest).await;
-            Ok(())
+            info!("image will be linked to {}", dest.as_ref().display());
+            match tokio::fs::hard_link(&original, &dest).await {
+                Ok(_) => Ok(()),
+                Err(err) => {
+                    warn!("hard link image to thumbnail error: {err}");
+                    info!("image will be directly save to {}", dest.as_ref().display());
+                    tokio::fs::copy(&original, &dest).await?;
+                    Ok(())
+                }
+            }
         }
         Ok(_) => Ok(()),
     }

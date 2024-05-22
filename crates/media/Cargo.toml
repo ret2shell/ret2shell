@@ -16,7 +16,13 @@ thiserror = "1.0"
 tracing = "0.1"
 ring = "0.17"
 mime = "0.3"
+mime_guess = "2.0"
 image = "0.25"
+nanoid = "0.4"
+hex = "0.4"
+
+r2s-database = { version = "1.0.0", path = "../database" }
+r2s-config = { version = "1.0.0", path = "../config" }
 
 [lib]
 path = "src/lib.rs"

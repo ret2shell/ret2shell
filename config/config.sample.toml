@@ -62,6 +62,8 @@ files_kept = 3
 
 [media]
 path = './data/media'
+anti_theft = true
+limit = 50            # one user could upload per week
 
 [queue]
 host = '127.0.0.1'
