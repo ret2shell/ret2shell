@@ -75,7 +75,22 @@
     },
     "admin": {
       "title": "Admin",
-      "manageChallenges": "Manage challenges"
+      "manageChallenges": "Manage challenges",
+      "statistics": {
+        "title": "Statistics"
+      },
+      "teams": {
+        "title": "Participating teams"
+      },
+      "events": {
+        "title": "Event board"
+      },
+      "automate": {
+        "title": "Automation facilities"
+      },
+      "edit": {
+        "title": "Edit game"
+      }
     },
     "exit": "Exit",
     "noGameHosted": "No game is hosted",

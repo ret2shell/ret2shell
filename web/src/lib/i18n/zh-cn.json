@@ -91,7 +91,22 @@
     },
     "admin": {
       "title": "管理",
-      "manageChallenges": "管理赛事题目"
+      "manageChallenges": "管理赛事题目",
+      "statistics": {
+        "title": "统计数据"
+      },
+      "teams": {
+        "title": "参赛队伍"
+      },
+      "events": {
+        "title": "事件看板"
+      },
+      "automate": {
+        "title": "自动化设施"
+      },
+      "edit": {
+        "title": "编辑信息"
+      }
     },
     "exit": "退出",
     "noGameHosted": "没有举办过赛事",

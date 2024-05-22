@@ -75,7 +75,22 @@
     },
     "admin": {
       "title": "管理",
-      "manageChallenges": "管理賽事題目"
+      "manageChallenges": "管理賽事題目",
+      "statistics": {
+        "title": "統計數據"
+      },
+      "teams": {
+        "title": "參賽隊伍"
+      },
+      "events": {
+        "title": "事件看板"
+      },
+      "automate": {
+        "title": "自動化設施"
+      },
+      "edit": {
+        "title": "編輯訊息"
+      }
     },
     "exit": "退出",
     "noGameHosted": "沒有舉辦過賽事",

@@ -75,7 +75,22 @@
     },
     "admin": {
       "title": "管理",
-      "manageChallenges": "イベントトピックの管理"
+      "manageChallenges": "イベントトピックの管理",
+      "statistics": {
+        "title": "統計データ"
+      },
+      "teams": {
+        "title": "参加チーム"
+      },
+      "events": {
+        "title": "イベントボード"
+      },
+      "automate": {
+        "title": "自動化設備"
+      },
+      "edit": {
+        "title": "情報を編集する"
+      }
     },
     "exit": "やめる",
     "noGameHosted": "コンテストは開催されていません",
