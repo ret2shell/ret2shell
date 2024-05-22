@@ -205,6 +205,12 @@
     },
     "oauth": {
       "title": "第三方認證"
+    },
+    "cluster": {
+      "title": "叢集管理"
+    },
+    "logs": {
+      "title": "平台日誌"
     }
   },
   "theme": {

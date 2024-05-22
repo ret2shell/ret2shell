@@ -13,7 +13,7 @@ export default function SideBar() {
           </Link>
         </li>
         <li class="w-full">
-          <Link class="w-full" ghost href={`/games/${gameStore.current?.id}/admin/teams`} justify="start">
+          <Link class="w-full" ghost href={`/games/${gameStore.current?.id}/admin/events`} justify="start">
             <span class="icon-[fluent--flash-flow-20-regular] w-5 h-5"></span>
             <span>{t('game.admin.events.title')}</span>
           </Link>

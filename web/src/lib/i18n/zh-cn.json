@@ -221,6 +221,12 @@
     },
     "oauth": {
       "title": "第三方认证"
+    },
+    "cluster": {
+      "title": "集群管理"
+    },
+    "logs": {
+      "title": "平台日志"
     }
   },
   "theme": {

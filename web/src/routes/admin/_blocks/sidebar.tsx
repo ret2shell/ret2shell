@@ -31,8 +31,14 @@ export default function SideBar() {
         </li>
         <li class="w-full">
           <Link class="w-full" ghost href="/admin/sync" justify="start">
-            <span class="icon-[fluent--image-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--flowchart-20-regular] w-5 h-5"></span>
             <span>{t('admin.sync.title')}</span>
+          </Link>
+        </li>
+        <li class="w-full">
+          <Link class="w-full" ghost href="/admin/shell" justify="start">
+            <span class="icon-[fluent--code-20-regular] w-5 h-5"></span>
+            <span>{t('admin.logs.title')}</span>
           </Link>
         </li>
         <li class="w-full">
@@ -51,6 +57,12 @@ export default function SideBar() {
           <Link class="w-full" ghost href="/admin/oauth" justify="start">
             <span class="icon-[fluent--lock-closed-key-20-regular] w-5 h-5"></span>
             <span>{t('admin.oauth.title')}</span>
+          </Link>
+        </li>
+        <li class="w-full">
+          <Link class="w-full" ghost href="/admin/cluster" justify="start">
+            <span class="icon-[fluent--hexagon-three-20-regular] w-5 h-5"></span>
+            <span>{t('admin.cluster.title')}</span>
           </Link>
         </li>
       </ul>

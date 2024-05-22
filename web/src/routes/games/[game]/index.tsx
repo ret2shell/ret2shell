@@ -265,7 +265,7 @@ export default function () {
                   <Button
                     square
                     size="sm"
-                    class="bg-layer/50"
+                    class="bg-layer/50 print:hidden"
                     onClick={() => (coverSet() ? handleUploadCover() : handleSelectCover())}
                     loading={coverUploading()}
                     disabled={logoSet()}
@@ -281,7 +281,7 @@ export default function () {
                   <Button
                     square
                     size="sm"
-                    class="bg-layer/50"
+                    class="bg-layer/50 print:hidden"
                     onClick={() => (logoSet() ? handleUploadLogo() : handleSelectLogo())}
                     loading={logoUploading()}
                     disabled={coverSet()}
@@ -313,7 +313,7 @@ export default function () {
               </h2>
             </div>
           </Card>
-          <div class="flex flex-col space-y-2 items-center py-4 lg:py-8">
+          <div class="flex flex-col space-y-2 items-center py-4 lg:py-8 print:hidden">
             <Show when={showTimer()} fallback={<span class="text-3xl font-bold text-warning">{t('game.ended')}</span>}>
               <h3 class="text-xl font-bold opacity-60">{t('game.timerTips', { period: period() })}</h3>
               <p class="text-3xl font-bold">
@@ -321,7 +321,7 @@ export default function () {
               </p>
             </Show>
           </div>
-          <div class="flex-1 hidden lg:flex flex-col">
+          <div class="flex-1 hidden lg:flex flex-col print:hidden">
             <div class="flex flex-row flex-wrap items-start justify-center">
               <Tag level="info" class="m-2">
                 <Show
@@ -360,7 +360,7 @@ export default function () {
             </div>
           </div>
           <Show when={gameStore.team}>
-            <Card contentClass="p-3 lg:p-6 flex flex-row space-x-2 lg:space-x-4">
+            <Card contentClass="p-3 lg:p-6 flex flex-row space-x-2 lg:space-x-4 print:hidden">
               <div class="lg:p-2 flex items-center justify-center">
                 <span class="icon-[fluent--flag-20-filled] w-5 h-5 lg:w-10 lg:h-10 text-primary opacity-60"></span>
               </div>
@@ -385,7 +385,7 @@ export default function () {
               </p>
             </Card>
           </Show>
-          <div class="flex flex-row space-x-2">
+          <div class="flex flex-row space-x-2 print:hidden">
             <Show
               when={
                 accountStore.id &&

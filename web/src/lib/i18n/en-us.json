@@ -205,6 +205,12 @@
     },
     "oauth": {
       "title": "Third-party auth"
+    },
+    "cluster": {
+      "title": "Cluster management"
+    },
+    "logs": {
+      "title": "Platform log"
     }
   },
   "theme": {
