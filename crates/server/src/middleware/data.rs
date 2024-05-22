@@ -67,7 +67,7 @@ macro_rules! get_path_param_i64 {
 pub(crate) use get_path_param_i64;
 
 macro_rules! prepare_data {
-    ($model:tt) => {
+    ($model:tt, $cached: expr) => {
         |axum::extract::State(db): axum::extract::State<r2s_migrator::Database>,
          axum::extract::State(cache): axum::extract::State<r2s_cache::Cache>,
          axum::extract::Path(params): axum::extract::Path<
@@ -76,21 +76,25 @@ macro_rules! prepare_data {
          mut req: axum::extract::Request,
          next: axum::middleware::Next| async move {
             let id = crate::middleware::data::get_path_param_i64!(stringify!($model), &params);
-            let data = match cache.at(stringify!($model)).get(id).await? {
-                Some(info) => Some(info),
-                None => {
-                    let data = r2s_database::$model::get(&db.conn, id).await?;
-                    match data {
-                        Some(data) => {
-                            cache
-                                .at(stringify!($model))
-                                .set(id.to_string(), &data)
-                                .await?;
-                            Some(data)
+            let data = if $cached {
+                match cache.at(stringify!($model)).get(id).await? {
+                    Some(info) => Some(info),
+                    None => {
+                        let data = r2s_database::$model::get(&db.conn, id).await?;
+                        match data {
+                            Some(data) => {
+                                cache
+                                    .at(stringify!($model))
+                                    .set(id.to_string(), &data)
+                                    .await?;
+                                Some(data)
+                            }
+                            None => None,
                         }
-                        None => None,
                     }
                 }
+            } else {
+                r2s_database::$model::get(&db.conn, id).await?
             };
             match data {
                 Some(data) => {

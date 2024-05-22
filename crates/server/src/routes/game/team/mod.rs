@@ -21,7 +21,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
             .route("/", get(get_team_info))
             .layer(middleware::from_fn_with_state(
                 state.clone(),
-                data::prepare_data!(team),
+                data::prepare_data!(team, false),
             )),
     )
 }

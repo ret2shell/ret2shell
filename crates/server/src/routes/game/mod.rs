@@ -6,6 +6,7 @@ use axum::{
     Extension, Json, Router,
 };
 use r2s_bucket::Bucket;
+use r2s_cache::Cache;
 use r2s_database::{game, user::Permission};
 use r2s_migrator::Database;
 use serde::Deserialize;
@@ -38,7 +39,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
                 .route("/", get(get_game))
                 .layer(middleware::from_fn_with_state(
                     state.clone(),
-                    data::prepare_data!(game),
+                    data::prepare_data!(game, true),
                 )),
         )
         .route("/", get(get_game_list))
@@ -119,8 +120,8 @@ async fn create_game(
 }
 
 async fn update_game(
-    State(ref db): State<Database>, Extension(game): Extension<game::Model>,
-    Json(model): Json<game::Model>,
+    State(ref db): State<Database>, State(ref cache): State<Cache>,
+    Extension(game): Extension<game::Model>, Json(model): Json<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
     let model = game::update(
         &db.conn,
@@ -132,6 +133,8 @@ async fn update_game(
         },
     )
     .await?;
+    cache.at("game").del(game.id).await?;
+
     Ok(Json(model))
 }
 
@@ -141,13 +144,15 @@ pub struct DeleteGameQuery {
 }
 
 async fn delete_game(
-    State(ref db): State<Database>, State(ref bucket): State<Bucket>,
-    Extension(game): Extension<game::Model>, Query(query): Query<DeleteGameQuery>,
+    State(ref db): State<Database>, State(ref cache): State<Cache>,
+    State(ref bucket): State<Bucket>, Extension(game): Extension<game::Model>,
+    Query(query): Query<DeleteGameQuery>,
 ) -> Result<impl IntoResponse, ResponseError> {
     let delete_result = bucket.delete(&game.bucket.clone().unwrap()).await;
     if !query.force.unwrap_or(false) {
         delete_result?;
     }
+    cache.at("game").del(game.id).await?;
     game::delete(&db.conn, game.id).await?;
     Ok(())
 }

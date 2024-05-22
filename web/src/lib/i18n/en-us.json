@@ -137,7 +137,15 @@
     },
     "adminMode": "Administrator mode",
     "hidden": "Game is hidden",
-    "frozen": "Game is frozen"
+    "frozen": "Game is frozen",
+    "cover": {
+      "uploaded": "Game cover updated",
+      "uploadFailed": "Cover upload failed"
+    },
+    "logo": {
+      "uploaded": "Game logo updated",
+      "uploadFailed": "Logo upload failed"
+    }
   },
   "bulletin": {
     "title": "Bulletin",

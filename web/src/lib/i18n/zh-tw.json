@@ -137,7 +137,15 @@
     },
     "adminMode": "管理員模式",
     "hidden": "賽事已隱藏",
-    "frozen": "賽事已凍結"
+    "frozen": "賽事已凍結",
+    "cover": {
+      "uploaded": "已更新賽事封面",
+      "uploadFailed": "封面上傳失敗"
+    },
+    "logo": {
+      "uploaded": "已更新賽事圖標",
+      "uploadFailed": "圖標上傳失敗"
+    }
   },
   "bulletin": {
     "title": "公告",

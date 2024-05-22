@@ -23,3 +23,11 @@ export async function getGame(id: number) {
 export async function createGame(game: Game) {
   return await api.post(`${api_root}/game`, { json: game }).json<Game>()
 }
+
+export async function updateGame(id: number, game: Game) {
+  return await api.patch(`${api_root}/game/${id}`, { json: game }).json<Game>()
+}
+
+export async function deleteGame(id: number) {
+  return await api.delete(`${api_root}/game/${id}`).json<null>()
+}

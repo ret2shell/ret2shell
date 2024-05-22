@@ -108,10 +108,16 @@ impl Media {
     pub async fn get_mimetype(&self, hash: impl AsRef<str>) -> Result<String, MediaError> {
         let hash = hash.as_ref();
         let path = self.path.join(&hash[..2]).join(&hash[2..4]).join(&hash);
-        let mime_type = mime_guess::from_path(&path)
-            .first_or_octet_stream()
-            .to_string();
-        Ok(mime_type)
+        match infer::get_from_path(path)? {
+            Some(mime) => {
+                if mime.mime_type() == "text/xml" {
+                    Ok("image/svg+xml".to_string())
+                } else {
+                    Ok(mime.mime_type().into())
+                }
+            }
+            None => Err(MediaError::UnsupportedFileType("unknown".to_string())),
+        }
     }
 
     pub async fn accepted(content_type: impl AsRef<str>) -> Result<bool, MediaError> {

@@ -153,7 +153,15 @@
     },
     "adminMode": "管理员模式",
     "hidden": "赛事已隐藏",
-    "frozen": "赛事已冻结"
+    "frozen": "赛事已冻结",
+    "cover": {
+      "uploaded": "已更新赛事封面",
+      "uploadFailed": "封面上传失败"
+    },
+    "logo": {
+      "uploaded": "已更新赛事图标",
+      "uploadFailed": "图标上传失败"
+    }
   },
   "bulletin": {
     "title": "公告",

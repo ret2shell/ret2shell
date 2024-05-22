@@ -1,13 +1,18 @@
+import { api_root } from '@/lib/api'
+import { updateGame } from '@/lib/api/game'
+import { uploadMedia } from '@/lib/api/media'
 import LogoAnimate from '@/lib/assets/animates/logo-animate'
 import Spin from '@/lib/assets/animates/spin'
 import { Article as ArticleModel } from '@/lib/models/article'
 import { TeamState, stringifyState } from '@/lib/models/team'
 import { Permission } from '@/lib/models/user'
 import { accountStore, refreshInstitutes } from '@/lib/storage/account'
-import { canParticipate, gameStore, isGameAdmin } from '@/lib/storage/game'
+import { canParticipate, gameStore, isGameAdmin, setGameStore } from '@/lib/storage/game'
 import { Title } from '@/lib/storage/header'
 import { t } from '@/lib/storage/theme'
+import { addToast } from '@/lib/storage/toast'
 import { randomTips } from '@/lib/utils/loading-tips'
+import { mediaPath } from '@/lib/utils/media'
 import Article from '@/lib/widgets/article'
 import Button from '@/lib/widgets/button'
 import Card from '@/lib/widgets/card'
@@ -17,6 +22,7 @@ import Tag from '@/lib/widgets/tag'
 import Timer from '@/lib/widgets/timer'
 
 import bgGameDefault from '@assets/imgs/bg-game-default.webp'
+import { HTTPError } from '@reverier/ky'
 import { DateTime } from 'luxon'
 import { For, Match, Show, Switch, createEffect, createSignal, onCleanup, untrack } from 'solid-js'
 
@@ -75,22 +81,169 @@ export default function () {
     }
   })
 
+  let coverInput: HTMLInputElement
+  const [coverSet, setCoverSet] = createSignal(false)
+  const [coverFile, setCoverFile] = createSignal(null as File | null)
+  const [coverUploading, setCoverUploading] = createSignal(false)
+  function handleSelectCover() {
+    coverInput.click()
+  }
+  function handleSelectedCover(event: Event) {
+    if (
+      event.target &&
+      (event.target as HTMLInputElement).files &&
+      (event.target as HTMLInputElement).files!.length > 0
+    ) {
+      if (gameStore.current)
+        setGameStore({
+          current: {
+            ...gameStore.current,
+            cover: URL.createObjectURL((event.target as HTMLInputElement).files![0]),
+          },
+        })
+      setCoverFile((event.target as HTMLInputElement).files![0])
+      setCoverSet(true)
+    }
+  }
+  function handleUploadCover() {
+    if (coverFile())
+      uploadMedia(coverFile()!, false)
+        .then(resp => {
+          if (gameStore.current)
+            updateGame(gameStore.current.id, {
+              ...gameStore.current,
+              cover: resp.hash,
+            })
+              .then(() => {
+                addToast({
+                  level: 'success',
+                  description: t('game.cover.uploaded')!,
+                  duration: 5000,
+                })
+              })
+              .catch((err: HTTPError) => {
+                addToast({
+                  level: 'error',
+                  description: `${t('game.cover.uploadFailed')}: ${err.message}`,
+                  duration: 5000,
+                })
+              })
+              .finally(() => {
+                setCoverUploading(false)
+                setCoverFile(null)
+                setCoverSet(false)
+              })
+        })
+        .catch((err: HTTPError) => {
+          addToast({
+            level: 'error',
+            description: `${t('game.cover.uploadFailed')}: ${err.message}`,
+            duration: 5000,
+          })
+        })
+  }
+  const [logoSet, setLogoSet] = createSignal(false)
+  const [logoFile, setLogoFile] = createSignal(null as File | null)
+  const [logoUploading, setLogoUploading] = createSignal(false)
+  let logoInput: HTMLInputElement
+  function handleSelectLogo() {
+    logoInput.click()
+  }
+  function handleSelectedLogo(event: Event) {
+    if (
+      event.target &&
+      (event.target as HTMLInputElement).files &&
+      (event.target as HTMLInputElement).files!.length > 0
+    ) {
+      if (gameStore.current)
+        setGameStore({
+          current: {
+            ...gameStore.current,
+            logo: URL.createObjectURL((event.target as HTMLInputElement).files![0]),
+          },
+        })
+      setLogoFile((event.target as HTMLInputElement).files![0])
+      setLogoSet(true)
+    }
+  }
+  function handleUploadLogo() {
+    if (logoFile())
+      uploadMedia(logoFile()!, false)
+        .then(resp => {
+          if (gameStore.current)
+            updateGame(gameStore.current.id, {
+              ...gameStore.current,
+              logo: resp.hash,
+            })
+              .then(() => {
+                addToast({
+                  level: 'success',
+                  description: t('game.logo.uploaded')!,
+                  duration: 5000,
+                })
+              })
+              .catch((err: HTTPError) => {
+                addToast({
+                  level: 'error',
+                  description: `${t('game.logo.uploadFailed')}: ${err.message}`,
+                  duration: 5000,
+                })
+              })
+              .finally(() => {
+                setLogoUploading(false)
+                setLogoFile(null)
+                setLogoSet(false)
+              })
+        })
+        .catch((err: HTTPError) => {
+          addToast({
+            level: 'error',
+            description: `${t('game.logo.uploadFailed')}: ${err.message}`,
+            duration: 5000,
+          })
+        })
+  }
+
   return (
     <>
       <Title title={gameStore.current?.name || 'CTF'} />
       <div class="flex-1 flex flex-col lg:flex-row-reverse">
         <div class="lg:w-1/3 max-h-[calc(100vh-4rem)] lg:sticky lg:top-16 lg:left-0 flex flex-col backdrop-blur border-b border-b-layer-content/10 lg:border-b-0 lg:backdrop-blur-none p-3 lg:p-6 space-y-2">
           <Card contentClass="relative">
-            <Picture src={gameStore.current?.cover || bgGameDefault}></Picture>
+            <Picture
+              class="aspect-video"
+              src={(gameStore.current?.cover && mediaPath(gameStore.current.cover)) || bgGameDefault}
+            ></Picture>
 
             <div class="absolute top-0 left-0 w-full h-full flex flex-col justify-end items-end z-10 p-3 lg:p-6 space-y-2">
               <Show when={isGameAdmin()}>
                 <div class="flex flex-row space-x-2">
-                  <Button square size="sm" class="bg-layer/50">
-                    <span class="icon-[fluent--draw-image-20-regular] w-5 h-5"></span>
+                  <Button
+                    square
+                    size="sm"
+                    class="bg-layer/50"
+                    onClick={() => (coverSet() ? handleUploadCover() : handleSelectCover())}
+                    loading={coverUploading()}
+                  >
+                    <input type="file" class="hidden" ref={coverInput!} onChange={handleSelectedCover} />
+                    <Show
+                      when={coverSet()}
+                      fallback={<span class="icon-[fluent--draw-image-20-regular] w-5 h-5"></span>}
+                    >
+                      <span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5 text-primary"></span>
+                    </Show>
                   </Button>
-                  <Button square size="sm" class="bg-layer/50">
-                    <span class="icon-[fluent--flag-20-regular] w-5 h-5"></span>
+                  <Button
+                    square
+                    size="sm"
+                    class="bg-layer/50"
+                    onClick={() => (logoSet() ? handleUploadLogo() : handleSelectLogo())}
+                    loading={logoUploading()}
+                  >
+                    <input type="file" class="hidden" ref={logoInput!} onChange={handleSelectedLogo} />
+                    <Show when={logoSet()} fallback={<span class="icon-[fluent--flag-20-regular] w-5 h-5"></span>}>
+                      <span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5 text-primary"></span>
+                    </Show>
                   </Button>
                 </div>
               </Show>
@@ -104,7 +257,7 @@ export default function () {
                       </Show>
                     }
                   >
-                    <img src={gameStore.current?.logo || undefined} width={64} height={64}></img>
+                    <img src={mediaPath(gameStore.current!.logo!)} width={64} height={64}></img>
                   </Show>
                 </div>
                 <div class="flex flex-col space-y-2">

@@ -7,7 +7,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         "/:challenge",
         Router::new().layer(middleware::from_fn_with_state(
             state.clone(),
-            data::prepare_data!(challenge),
+            data::prepare_data!(challenge, false),
         )),
     )
 }

@@ -48,6 +48,14 @@ pub async fn get_list(db: &DatabaseConnection, uploader_id: i64) -> Result<Vec<M
         .await
 }
 
+pub async fn exists(db: &DatabaseConnection, hash: &str) -> Result<bool, DbErr> {
+    Ok(Entity::find()
+        .filter(Column::Hash.eq(hash))
+        .one(db)
+        .await?
+        .is_some())
+}
+
 pub async fn create(db: &DatabaseConnection, media: Model) -> Result<Model, DbErr> {
     let media = ActiveModel {
         id: ActiveValue::NotSet,

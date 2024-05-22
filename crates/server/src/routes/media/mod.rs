@@ -127,16 +127,20 @@ async fn upload_media(
         if query.thumbnail.unwrap_or(false) {
             media.make_thumbnail(&model.hash, 128).await?;
         }
-        let model = media::create(
-            &db.conn,
-            media::Model {
-                id: 0,
-                uploader_id: token.id,
-                ..model
-            },
-        )
-        .await?;
-        Ok(Json(model))
+        if let Some(result) = media::get_by_hash(&db.conn, &model.hash).await? {
+            Ok(Json(result))
+        } else {
+            let model = media::create(
+                &db.conn,
+                media::Model {
+                    id: 0,
+                    uploader_id: token.id,
+                    ..model
+                },
+            )
+            .await?;
+            Ok(Json(model))
+        }
     } else {
         Err(ResponseError::BadRequest("no file uploaded".to_owned()))
     }

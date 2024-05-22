@@ -23,6 +23,8 @@ import Popover from '@/lib/widgets/popover'
 import CreateGame from './create'
 import bgGameDefault from '@assets/imgs/bg-game-default.webp'
 import { randomTips } from '@/lib/utils/loading-tips'
+import { api_root } from '@/lib/api'
+import { mediaPath } from '@/lib/utils/media'
 
 export default function () {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -240,7 +242,10 @@ export default function () {
                   </>
                 }
               >
-                <Picture src={selectedGame()?.cover || bgGameDefault}></Picture>
+                <Picture
+                  class="aspect-video"
+                  src={(selectedGame()?.cover && mediaPath(selectedGame()!.cover!)) || bgGameDefault}
+                ></Picture>
               </Show>
               <Tag
                 class="absolute top-2 right-2"
@@ -277,7 +282,7 @@ export default function () {
                   </Show>
                 }
               >
-                <img class="hidden lg:block" src={selectedGame()?.logo || undefined} width={64} height={64}></img>
+                <img class="hidden lg:block" src={mediaPath(selectedGame()!.logo!)} width={64} height={64}></img>
               </Show>
               <div class="flex flex-col space-y-2 flex-1 w-full lg:w-auto">
                 <h2 class="text-xl font-bold flex flex-row space-x-4">

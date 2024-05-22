@@ -4,6 +4,8 @@ import { ComponentProps, Show, createEffect, createSignal } from 'solid-js'
 import bgGameDefault from '@assets/imgs/bg-game-default.webp'
 import LogoAnimate from '@/lib/assets/animates/logo-animate'
 import LoadingTips from '@/lib/widgets/loading-tips'
+import { api_root } from '@/lib/api'
+import { mediaPath } from '@/lib/utils/media'
 
 export default function (props: ComponentProps<'div'>) {
   const location = useLocation()
@@ -35,7 +37,11 @@ export default function (props: ComponentProps<'div'>) {
         <div class="w-screen h-screen relative">
           <img
             class={`w-screen h-screen transition-all ease-out duration-[3000ms] ${expanded() ? 'scale-125 blur-2xl' : ''}`}
-            src={gameStore.preload?.cover || gameStore.current?.cover || bgGameDefault}
+            src={
+              (gameStore.preload?.cover && mediaPath(gameStore.preload.cover)) ||
+              (gameStore.current?.cover && mediaPath(gameStore.current.cover)) ||
+              bgGameDefault
+            }
           />
           <div class={`absolute top-0 left-0 w-screen h-screen bg-layer/80 flex flex-col items-center justify-center`}>
             <Show when={expanded()}>
@@ -81,7 +87,7 @@ export default function (props: ComponentProps<'div'>) {
                 when={gameStore.current?.logo}
                 fallback={<LogoAnimate class="w-full h-full object-contain"></LogoAnimate>}
               >
-                <img class="w-full h-full object-contain" src={gameStore.current!.logo!}></img>
+                <img class="w-full h-full object-contain" src={mediaPath(gameStore.current!.logo!)}></img>
               </Show>
             </div>
             <div

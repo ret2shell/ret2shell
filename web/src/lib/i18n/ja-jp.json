@@ -137,7 +137,15 @@
     },
     "adminMode": "管理者モード",
     "hidden": "隠れた",
-    "frozen": "凍った"
+    "frozen": "凍った",
+    "cover": {
+      "uploaded": "イベント表紙を更新しました",
+      "uploadFailed": "カバーのアップロードに失敗しました"
+    },
+    "logo": {
+      "uploaded": "イベントアイコンが更新されました",
+      "uploadFailed": "アイコンのアップロードに失敗しました"
+    }
   },
   "bulletin": {
     "title": "アナウンス",

@@ -27,6 +27,7 @@ import { DateTime } from 'luxon'
 import Spin from '@/lib/assets/animates/spin'
 import { HTTPError } from '@reverier/ky'
 import LoadingTips from '@/lib/widgets/loading-tips'
+import { mediaPath } from '@/lib/utils/media'
 
 function GlobalTitleLink(props: { loading: boolean }) {
   return (
@@ -47,7 +48,9 @@ function GameTitleLink(props: { loading: boolean }) {
     <>
       <Link ghost href={`/games/${gameStore.current?.id}/`}>
         <Show when={!props.loading} fallback={<Spin width={24} height={24} />}>
-          <LogoAnimate class="hidden xl:inline-block" width={24} height={24} />
+          <Show when={gameStore.current?.logo} fallback={<LogoAnimate width={24} height={24} />}>
+            <img src={mediaPath(gameStore.current!.logo!)} width={24} height={24}></img>
+          </Show>
         </Show>
         <span></span>
         <span>{gameStore.current?.name}</span>
