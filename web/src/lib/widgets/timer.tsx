@@ -1,11 +1,10 @@
-import { DateTime } from 'luxon'
+import { DateTime, Duration } from 'luxon'
 import { ComponentProps, createSignal, onCleanup } from 'solid-js'
 
 export default function (props: ComponentProps<'span'> & { end: DateTime }) {
   const [duration, setDuration] = createSignal(props.end.diffNow())
   const interval = setInterval(() => {
-    setDuration(props.end.diffNow())
-    if (duration().seconds <= 0) clearInterval(interval)
+    setDuration(props.end > DateTime.now() ? props.end.diffNow() : Duration.fromObject({ seconds: 0 }))
   }, 1000)
   const cleanup = () => clearInterval(interval)
   onCleanup(cleanup)

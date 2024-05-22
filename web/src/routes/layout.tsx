@@ -95,8 +95,7 @@ function GlobalNav(props: { size: 'sm' | 'md' }) {
           accountStore.info &&
           (accountStore.info?.permissions.includes(Permission.Statistics) ||
             accountStore.info?.permissions.includes(Permission.DevOps) ||
-            accountStore.info?.permissions.includes(Permission.User) ||
-            accountStore.info?.permissions.includes(Permission.Host))
+            accountStore.info?.permissions.includes(Permission.User))
         }
       >
         <li class="nav">
