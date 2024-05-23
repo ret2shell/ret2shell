@@ -61,8 +61,8 @@ export const routes = {
               component: lazy(() => import('./account/settings/institute/index')),
             },
             {
-              path: '/mov-rsp-rbp-pop-rbp',
-              component: lazy(() => import('./account/settings/mov-rsp-rbp-pop-rbp/index')),
+              path: '/mov-esp-ebp-pop-ebp',
+              component: lazy(() => import('./account/settings/mov-esp-ebp-pop-ebp/index')),
             },
           ],
         },

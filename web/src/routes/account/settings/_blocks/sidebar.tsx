@@ -26,7 +26,7 @@ export default function SideBar() {
         </li>
         <Divider />
         <li class="w-full">
-          <Link class="w-full" ghost href={`/account/settings/mov-rsp-rbp-pop-rbp`} level="error" justify="start">
+          <Link class="w-full" ghost href={`/account/settings/mov-esp-ebp-pop-ebp`} level="error" justify="start">
             <span class="icon-[fluent--person-walking-20-regular] w-5 h-5"></span>
             <span>{t('account.settings.delete.title')}</span>
           </Link>
