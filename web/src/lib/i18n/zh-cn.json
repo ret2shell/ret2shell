@@ -228,7 +228,8 @@
     },
     "logs": {
       "title": "平台日志"
-    }
+    },
+    "description": "平台管理面板"
   },
   "theme": {
     "colorScheme": "明暗主题",

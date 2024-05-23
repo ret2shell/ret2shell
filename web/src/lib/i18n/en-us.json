@@ -212,7 +212,8 @@
     },
     "logs": {
       "title": "Platform log"
-    }
+    },
+    "description": "Platform management panel"
   },
   "theme": {
     "colorScheme": "color scheme",

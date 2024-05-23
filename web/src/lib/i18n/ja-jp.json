@@ -212,7 +212,8 @@
     },
     "logs": {
       "title": "プラットフォームログ"
-    }
+    },
+    "description": "プラットフォーム管理パネル"
   },
   "theme": {
     "colorScheme": "光と闇のテーマ",
