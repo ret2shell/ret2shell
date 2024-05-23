@@ -1,14 +1,25 @@
-fn check(bucket, submission) {
 
-  true
+/// Check flag submitted by user.
+/// 
+/// * bucket: the challenge bucket path
+/// * user: { id: number, account: string, institute_id: number }
+/// * team: Option<{ id: number, name: string, institute_id: number }>
+/// * submission: { id: number, user_id: number, team_id: number, challenge_id: number, content: string }
+///
+/// Returns: (bool, string)
+pub fn check(bucket, user, team, submission) {
+  let ok = submission.content == "flag{hello_world}";
+  let msg = if ok { "Correct!" } else { "Incorrect!" };
+  (ok, msg)
 }
 
-fn flags(bucket, user, team) {
-
-  ["flag{hello_world}"]
-}
-
-fn env_vars(bucket, user, team) {
-  let flag = "flag{hello_world}";
-  [`FLAG=${flag}`, "OTHER_VAR=nooop"]
+/// Provides the environment variables when user starts the challenge container.
+/// 
+/// * bucket: the challenge bucket path
+/// * user: { id: number, account: string, institute_id: number }
+/// * team: Option<{ id: number, name: string, institute_id: number }>
+/// 
+/// Returns: { key: string, value: string }[]
+pub fn environ(bucket, user, team) {
+  []
 }

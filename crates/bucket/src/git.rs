@@ -231,6 +231,24 @@ impl Git {
         }
     }
 
+    pub async fn get_head(&self) -> Result<String, BucketError> {
+        let output = Command::new("git")
+            .current_dir(&self.path)
+            .arg("rev-parse")
+            .arg("HEAD")
+            .output()
+            .await?;
+        if output.status.success() {
+            trace!("got HEAD from git repository: {:?}", output);
+            Ok(String::from_utf8(output.stdout)?.trim().to_string())
+        } else {
+            warn!("failed to get HEAD from git repository: {:?}", output);
+            Err(BucketError::GitCommandFailed(String::from_utf8(
+                output.stderr,
+            )?))
+        }
+    }
+
     async fn stream_internal<T, S>(
         &self, protocol: impl AsRef<OsStr>, subcmd: impl AsRef<OsStr>, args: T,
         mut stdin: impl AsyncRead + Unpin + Send + 'static,

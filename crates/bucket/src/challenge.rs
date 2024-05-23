@@ -86,6 +86,10 @@ impl ChallengeBucket {
         })
     }
 
+    pub fn path(&self) -> &Path {
+        &self.path
+    }
+
     pub async fn set_config(&self, config: ChallengeConfig) -> Result<(), BucketError> {
         write(
             &self.path.join("config.toml"),
@@ -159,5 +163,16 @@ impl ChallengeBucket {
         &self, name: impl AsRef<str>, stdin: impl AsyncRead + Send + Unpin,
     ) -> Result<(), BucketError> {
         self.upload_file("src", name, stdin).await
+    }
+
+    pub fn hash(&self) -> String {
+        let mut hasher = ring::digest::Context::new(&ring::digest::SHA256);
+        hasher.update(self.path.to_string_lossy().as_bytes());
+        hasher
+            .finish()
+            .as_ref()
+            .iter()
+            .map(|b| format!("{:02x}", b))
+            .collect::<String>()
     }
 }
