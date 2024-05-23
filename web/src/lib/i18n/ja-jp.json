@@ -90,7 +90,8 @@
       },
       "edit": {
         "title": "情報を編集する"
-      }
+      },
+      "description": "競技運営委員会"
     },
     "exit": "やめる",
     "noGameHosted": "コンテストは開催されていません",

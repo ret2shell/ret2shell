@@ -90,7 +90,8 @@
       },
       "edit": {
         "title": "編輯訊息"
-      }
+      },
+      "description": "比賽管理面板"
     },
     "exit": "退出",
     "noGameHosted": "沒有舉辦過賽事",

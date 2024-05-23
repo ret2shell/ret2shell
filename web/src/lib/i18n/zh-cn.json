@@ -106,7 +106,8 @@
       },
       "edit": {
         "title": "编辑信息"
-      }
+      },
+      "description": "比赛管理面板"
     },
     "exit": "退出",
     "noGameHosted": "没有举办过赛事",

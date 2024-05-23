@@ -90,7 +90,8 @@
       },
       "edit": {
         "title": "Edit game"
-      }
+      },
+      "description": "Game management panel"
     },
     "exit": "Exit",
     "noGameHosted": "No game is hosted",
