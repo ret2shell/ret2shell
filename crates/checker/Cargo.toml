@@ -19,6 +19,7 @@ serde = { version = "1.0", features = ["derive"] }
 tokio = { version = "1.37", features = ["full"] }
 async-nats = "0.35"
 chrono = "0.4"
+tracing = "0.1"
 
 r2s-config = { version = "1.0.0", path = "../config" }
 r2s-database = { version = "1.0.0", path = "../database" }

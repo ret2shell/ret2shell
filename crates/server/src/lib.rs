@@ -88,6 +88,8 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
     r2s_email::initialize(queue.subscribe("email").await?).await?;
     info!("Loading module: < Media Storage >");
     let media = r2s_media::initialize(&config.media).await?;
+    info!("Loading module: < Checker >");
+    let checker = r2s_checker::initialize().await;
 
     let state = GlobalState {
         config: config.clone(),
@@ -98,6 +100,7 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
         queue,
         license,
         cluster,
+        checker,
         media,
         version: format!(
             "{}-{}-{}",
@@ -110,6 +113,7 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
             version().unwrap()
         ),
     };
+    info!("Modules loaded, constructing router...");
 
     let router = routes::initialize(config.server.clone(), state).await?;
     info!("Router constructed.");

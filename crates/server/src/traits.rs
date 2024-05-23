@@ -7,6 +7,7 @@ use axum::{
 use r2s_auditor::Auditor;
 use r2s_bucket::Bucket;
 use r2s_cache::Cache;
+use r2s_checker::Checker;
 use r2s_cluster::Cluster;
 use r2s_config::GlobalConfig;
 use r2s_database::DbErr;
@@ -28,6 +29,7 @@ pub struct GlobalState {
     pub cluster: Cluster,
     pub license: License,
     pub media: Media,
+    pub checker: Checker,
     pub version: String,
 }
 

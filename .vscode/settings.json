@@ -12,7 +12,8 @@
   ],
   "files.associations": {
     "*.css": "tailwindcss",
-    "*.scss": "tailwindcss"
+    "*.scss": "tailwindcss",
+    "*.rx": "rune"
   },
   "rust-analyzer.showUnlinkedFileNotification": false,
   "prettier.bracketSpacing": false,

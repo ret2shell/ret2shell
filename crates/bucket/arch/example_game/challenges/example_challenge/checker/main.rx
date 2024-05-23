@@ -7,7 +7,7 @@
 /// * submission: { id: number, user_id: number, team_id: number, challenge_id: number, content: string }
 ///
 /// Returns: (bool, string)
-pub fn check(bucket, user, team, submission) {
+pub async fn check(bucket, user, team, submission) {
   let ok = submission.content == "flag{hello_world}";
   let msg = if ok { "Correct!" } else { "Incorrect!" };
   (ok, msg)
@@ -20,6 +20,6 @@ pub fn check(bucket, user, team, submission) {
 /// * team: Option<{ id: number, name: string, institute_id: number }>
 /// 
 /// Returns: { key: string, value: string }[]
-pub fn environ(bucket, user, team) {
+pub async fn environ(bucket, user, team) {
   []
 }
