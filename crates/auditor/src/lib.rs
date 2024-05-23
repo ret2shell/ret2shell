@@ -3,7 +3,6 @@ use r2s_config::auditor;
 use thiserror::Error;
 
 pub mod filter;
-pub mod flag;
 pub mod monitor;
 pub mod traits;
 

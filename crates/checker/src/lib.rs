@@ -12,8 +12,7 @@ use tokio::sync::RwLock;
 use tracing::{error, info};
 use traits::CheckerError;
 
-mod modules;
-
+pub mod modules;
 pub mod traits;
 
 #[derive(Clone, Debug)]
