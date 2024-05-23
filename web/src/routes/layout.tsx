@@ -29,7 +29,6 @@ import { HTTPError } from '@reverier/ky'
 import LoadingTips from '@/lib/widgets/loading-tips'
 import { mediaPath } from '@/lib/utils/media'
 import Timer from '@/lib/widgets/timer'
-import Progress from '@/lib/widgets/progress'
 import TimeProgress from '@/lib/widgets/time-progress'
 
 function GlobalTitleLink(props: { loading: boolean }) {
@@ -184,22 +183,22 @@ function TitleBar() {
   const params = useParams()
 
   // TODO: it does not work at this point, see solidjs/solid-router#102
-  const isRouting = useIsRouting()
-  const [loading, setLoading] = createSignal(false)
-  createEffect(() => {
-    if (isRouting()) {
-      // console.log('routing', isRouting())
-      setTimeout(() => {
-        // console.log('set routing', isRouting())
-        if (isRouting()) {
-          // console.log('set routing true')
-          setLoading(true)
-        }
-      }, 500)
-    } else {
-      setLoading(false)
-    }
-  })
+  // const isRouting = useIsRouting()
+  const [loading] = createSignal(false)
+  // createEffect(() => {
+  //   if (isRouting()) {
+  //     // console.log('routing', isRouting())
+  //     setTimeout(() => {
+  //       // console.log('set routing', isRouting())
+  //       if (isRouting()) {
+  //         // console.log('set routing true')
+  //         setLoading(true)
+  //       }
+  //     }, 500)
+  //   } else {
+  //     setLoading(false)
+  //   }
+  // })
 
   return (
     <>
