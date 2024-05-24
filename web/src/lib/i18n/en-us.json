@@ -223,7 +223,9 @@
       "title": "Third-party auth"
     },
     "cluster": {
-      "title": "Cluster management"
+      "title": "Cluster management",
+      "unavailable": "The cluster is offline and the status is unavailable",
+      "available": "Running normally, cluster API is available"
     },
     "logs": {
       "title": "Platform log",

@@ -239,7 +239,9 @@
       "title": "第三方认证"
     },
     "cluster": {
-      "title": "集群管理"
+      "title": "集群管理",
+      "unavailable": "集群已离线，状态不可用",
+      "available": "正常运行，集群 API 可用"
     },
     "logs": {
       "title": "平台日志",
