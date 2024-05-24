@@ -28,11 +28,12 @@ mod account;
 mod automate;
 mod bulletin;
 mod calendar;
+mod cluster;
 mod game;
-mod instance;
 mod media;
 mod platform;
 mod rpc;
+mod traffic;
 mod user;
 mod wiki;
 mod worker;
@@ -90,12 +91,13 @@ fn construct_router(state: &GlobalState) -> Router<GlobalState> {
         .nest("/bulletin", bulletin::router(state))
         .nest("/calendar", calendar::router(state))
         .nest("/game", game::router(state))
-        .nest("/instance", instance::router(state))
+        .nest("/cluster", cluster::router(state))
         .nest("/media", media::router(state))
         .nest("/platform", platform::router(state))
         .nest("/user", user::router(state))
         .nest("/wiki", wiki::router(state))
         .nest("/rpc", rpc::router(state))
+        .nest("/traffic", traffic::router(state))
         .route("/ping", get(ping))
         .route_layer(from_fn_with_state(state.clone(), ip_record))
         .route_layer(from_fn_with_state(state.clone(), extract_user_info))

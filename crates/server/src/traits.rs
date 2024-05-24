@@ -71,6 +71,8 @@ pub enum ResponseError {
     MediaError(#[from] r2s_media::MediaError),
     #[error("file io error: {0}")]
     FileIoError(#[from] std::io::Error),
+    #[error("cluster error: {0}")]
+    ClusterError(#[from] r2s_cluster::ClusterError),
 }
 
 macro_rules! log_with_resp {
@@ -222,6 +224,13 @@ impl IntoResponse for ResponseError {
                 log_with_resp!(
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "file io error".to_owned(),
+                    e.to_string()
+                )
+            }
+            ResponseError::ClusterError(e) => {
+                log_with_resp!(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "cluster internal error".to_owned(),
                     e.to_string()
                 )
             }
