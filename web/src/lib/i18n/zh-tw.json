@@ -225,7 +225,8 @@
     "cluster": {
       "title": "叢集管理",
       "unavailable": "叢集已離線，狀態不可用",
-      "available": "正常運行，叢集 API 可用"
+      "available": "正常運行，叢集 API 可用",
+      "failedToFetchNodes": "取得叢集節點資訊失敗"
     },
     "logs": {
       "title": "平台日誌",

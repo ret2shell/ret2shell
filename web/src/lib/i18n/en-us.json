@@ -225,7 +225,8 @@
     "cluster": {
       "title": "Cluster management",
       "unavailable": "The cluster is offline and the status is unavailable",
-      "available": "Running normally, cluster API is available"
+      "available": "Running normally, cluster API is available",
+      "failedToFetchNodes": "Failed to fetch cluster nodes information"
     },
     "logs": {
       "title": "Platform log",

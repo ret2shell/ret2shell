@@ -1,10 +1,13 @@
-import { getClusterConfig } from '@/lib/api/cluster'
+import { ClusterNode, getClusterConfig, getClusterNodes } from '@/lib/api/cluster'
 import Spin from '@/lib/assets/animates/spin'
 import { t } from '@/lib/storage/theme'
+import { addToast } from '@/lib/storage/toast'
+import Card from '@/lib/widgets/card'
 import Divider from '@/lib/widgets/divider'
 import LoadingTips from '@/lib/widgets/loading-tips'
+import { HTTPError } from '@reverier/ky'
 import { DateTime } from 'luxon'
-import { Match, Show, Switch, createSignal } from 'solid-js'
+import { For, Match, Show, Switch, createSignal } from 'solid-js'
 
 export default function () {
   const [available, setAvailable] = createSignal(false)
@@ -13,6 +16,7 @@ export default function () {
   const [since, setSince] = createSignal('')
   const [clusterDNS, setClusterDNS] = createSignal('')
   const [clusterDomain, setClusterDomain] = createSignal('')
+  const [clusterNodes, setClusterNodes] = createSignal([] as ClusterNode[])
   getClusterConfig()
     .then(resp => {
       setAvailable(true)
@@ -33,6 +37,18 @@ export default function () {
     })
     .finally(() => {
       setLoading(false)
+    })
+  getClusterNodes()
+    .then(resp => {
+      setClusterNodes(resp.items)
+    })
+    .catch((err: HTTPError) => {
+      err.response.text().then(text => {
+        addToast({
+          level: 'error',
+          description: `${t('admin.cluster.failedToFetchNodes')}: ${text}`,
+        })
+      })
     })
   return (
     <>
@@ -67,22 +83,43 @@ export default function () {
           </h1>
         </div>
         <Divider />
-        <Show when={available()}>
-          <div class="h-12 flex flex-row space-x-4 items-center px-4">
-            <span class="flex-1 opacity-60">
-              Since {since()}, {DateTime.fromFormat(since(), 'yyyy-MM-dd').diffNow().negate().toFormat('hh')} hours
-              online
-            </span>
-            <span>{clusterDomain()}</span>
-            <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5 opacity-60"></span>
-            <span class="text-warning">{clusterDNS()}</span>
-          </div>
-          <Divider />
-        </Show>
         <Show when={loading()}>
           <div class="h-8 flex flex-row space-x-4 items-center px-4">
             <LoadingTips />
           </div>
+          <Divider />
+        </Show>
+        <Show when={available()}>
+          <div class="h-20 lg:h-12 flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4 justify-center items-center px-4">
+            <span class="lg:flex-1 opacity-60">
+              Since {since()}, {DateTime.fromFormat(since(), 'yyyy-MM-dd').diffNow().negate().toFormat('hh')} hours
+              online
+            </span>
+            <span class="flex flex-row items-center space-x-4">
+              <span>{clusterDomain()}</span>
+              <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5 opacity-60"></span>
+              <span class="text-warning">{clusterDNS()}</span>
+            </span>
+          </div>
+          <Divider />
+          <div class="flex flex-col lg:flex-row items-center lg:items-start flex-wrap p-3 lg:p-6">
+            <For each={clusterNodes()}>
+              {node => (
+                <>
+                  <Card class="my-2 lg:mx-4 min-w-fit" contentClass="p-3 lg:p-6 flex flex-row space-x-4 min-w-fit">
+                    <div class="h-16 w-16 flex-shrink-0 flex justify-center items-center">
+                      <span class="icon-[fluent--organization-16-regular] w-8 h-8 lg:w-12 lg:h-12 text-success"></span>
+                    </div>
+                    <div class="flex flex-col justify-center space-y-2 min-w-fit">
+                      <span class="font-bold">{node.metadata.name}</span>
+                      <span class="opacity-60">{node.metadata.creationTimestamp}</span>
+                    </div>
+                  </Card>
+                </>
+              )}
+            </For>
+          </div>
+          <Divider />
         </Show>
       </div>
     </>
