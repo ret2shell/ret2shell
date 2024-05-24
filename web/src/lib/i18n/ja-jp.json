@@ -231,7 +231,10 @@
       "title": "プラットフォームログ",
       "socketClosed": "ログ パイプが切断されたため、接続は自動的に再試行されます..."
     },
-    "description": "プラットフォーム管理パネル"
+    "description": "プラットフォーム管理パネル",
+    "about": {
+      "title": "About Ret 2 Shell"
+    }
   },
   "theme": {
     "colorScheme": "光と闇のテーマ",

@@ -231,7 +231,10 @@
       "title": "Platform log",
       "socketClosed": "The log pipe has been disconnected and will automatically retry the connection..."
     },
-    "description": "Platform management panel"
+    "description": "Platform management panel",
+    "about": {
+      "title": "About Ret 2 Shell"
+    }
   },
   "theme": {
     "colorScheme": "color scheme",

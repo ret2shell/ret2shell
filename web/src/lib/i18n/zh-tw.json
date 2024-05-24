@@ -231,7 +231,10 @@
       "title": "平台日誌",
       "socketClosed": "日誌管道已斷開，將自動重試連線..."
     },
-    "description": "平台管理面板"
+    "description": "平台管理面板",
+    "about": {
+      "title": "關於回歸終端"
+    }
   },
   "theme": {
     "colorScheme": "明暗主題",

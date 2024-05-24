@@ -247,7 +247,10 @@
       "title": "平台日志",
       "socketClosed": "日志管道已断开，将自动重试连接..."
     },
-    "description": "平台管理面板"
+    "description": "平台管理面板",
+    "about": {
+      "title": "关于回归终端"
+    }
   },
   "theme": {
     "colorScheme": "明暗主题",

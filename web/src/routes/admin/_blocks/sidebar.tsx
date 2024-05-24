@@ -148,6 +148,13 @@ export default function SideBar() {
             <span>{t('admin.sync.title')}</span>
           </Link>
         </li>
+        <Divider />
+        <li class="w-full">
+          <Link activeMatch="exact" class="w-full" ghost href="/admin/about" justify="start">
+            <span class="icon-[fluent--info-20-regular] w-5 h-5"></span>
+            <span>{t('admin.about.title')}</span>
+          </Link>
+        </li>
       </ul>
     </>
   )
