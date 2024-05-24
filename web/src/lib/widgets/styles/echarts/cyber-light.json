@@ -1,17 +1,17 @@
 {
   "color": [
+    "rgb(26.81, 143.7, 237.73)",
+    "rgb(2.54, 167.8, 83.22)",
     "rgb(218.28, 87.29, 135.87)",
+    "rgb(119.23, 124.77, 240.42)",
     "rgb(220.58, 98.38, 31.29)",
+    "rgb(158.37, 110.9, 225.77)",
     "rgb(199.68, 113.14, 87.6)",
     "rgb(104.38, 159.09, 8.76)",
-    "rgb(2.54, 167.8, 83.22)",
-    "rgb(26.81, 143.7, 237.73)",
     "rgb(92.82, 141.42, 209.71)",
-    "rgb(119.23, 124.77, 240.42)",
-    "rgb(158.37, 110.9, 225.77)",
     "rgb(182.94, 101.11, 204.63)",
-    "rgb(200.14, 93.97, 180.54)",
-    "rgb(139.97, 139.97, 139.97)"
+    "rgb(139.97, 139.97, 139.97)",
+    "rgb(200.14, 93.97, 180.54)"
   ],
   "backgroundColor": "rgba(0,0,0,0)",
   "darkMode": false,
@@ -62,6 +62,13 @@
       "borderColor": "#cccccc"
     }
   },
+  "sunburst": {
+    "itemStyle": {
+      "borderWidth": "2",
+      "borderRadius": "4",
+      "borderColor": "oklch(96% 0.01 248)"
+    }
+  },
   "scatter": {
     "itemStyle": {
       "borderWidth": 0,
@@ -94,13 +101,18 @@
     "splitLine": {
       "show": false,
       "lineStyle": {
-        "color": ["#eee"]
+        "color": [
+          "#eee"
+        ]
       }
     },
     "splitArea": {
       "show": false,
       "areaStyle": {
-        "color": ["rgba(250,250,250,0.3)", "rgba(200,200,200,0.3)"]
+        "color": [
+          "rgba(250,250,250,0.3)",
+          "rgba(200,200,200,0.3)"
+        ]
       }
     }
   },
@@ -124,13 +136,18 @@
     "splitLine": {
       "show": true,
       "lineStyle": {
-        "color": ["#aaa"]
+        "color": [
+          "#aaa"
+        ]
       }
     },
     "splitArea": {
       "show": false,
       "areaStyle": {
-        "color": ["rgba(250,250,250,0.3)", "rgba(200,200,200,0.3)"]
+        "color": [
+          "rgba(250,250,250,0.3)",
+          "rgba(200,200,200,0.3)"
+        ]
       }
     }
   },
@@ -154,13 +171,18 @@
     "splitLine": {
       "show": true,
       "lineStyle": {
-        "color": ["#eee"]
+        "color": [
+          "#eee"
+        ]
       }
     },
     "splitArea": {
       "show": false,
       "areaStyle": {
-        "color": ["rgba(250,250,250,0.3)", "rgba(200,200,200,0.3)"]
+        "color": [
+          "rgba(250,250,250,0.3)",
+          "rgba(200,200,200,0.3)"
+        ]
       }
     }
   },
@@ -184,13 +206,19 @@
     "splitLine": {
       "show": false,
       "lineStyle": {
-        "color": ["#eee", "#333333"]
+        "color": [
+          "#eee",
+          "#333333"
+        ]
       }
     },
     "splitArea": {
       "show": false,
       "areaStyle": {
-        "color": ["rgba(250,250,250,0.3)", "rgba(200,200,200,0.3)"]
+        "color": [
+          "rgba(250,250,250,0.3)",
+          "rgba(200,200,200,0.3)"
+        ]
       }
     }
   },
@@ -259,7 +287,10 @@
     }
   },
   "visualMap": {
-    "color": ["#5ab1ef", "#e0ffff"]
+    "color": [
+      "#5ab1ef",
+      "#e0ffff"
+    ]
   },
   "dataZoom": {
     "backgroundColor": "rgba(47,69,84,0)",

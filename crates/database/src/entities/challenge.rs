@@ -2,10 +2,12 @@
 
 use chrono::{serde::ts_seconds, DateTime, Utc};
 use sea_orm::{
-    entity::prelude::*, ActiveValue, FromJsonQueryResult, IntoActiveModel, Iterable, QueryOrder,
-    QuerySelect,
+    entity::prelude::*, ActiveValue, FromJsonQueryResult, IntoActiveModel, Iterable, JoinType,
+    QueryOrder, QuerySelect,
 };
 use serde::{Deserialize, Serialize};
+
+use crate::game;
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct ScoreRule {
@@ -130,6 +132,27 @@ where
     let total = paginator.num_pages().await?;
     let challenges = paginator.fetch_page(page - 1).await?;
     Ok((challenges, total))
+}
+
+pub async fn count<'a, C>(
+    db: &'a C, game_id: Option<i64>, game_type: Option<game::HostType>, with_hidden: bool,
+) -> Result<u64, DbErr>
+where
+    C: ConnectionTrait,
+{
+    let mut sql = Entity::find();
+    if let Some(game_id) = game_id {
+        sql = sql.filter(Column::GameId.eq(game_id));
+    }
+    if let Some(game_type) = game_type {
+        sql = sql
+            .join(JoinType::InnerJoin, Relation::Game.def())
+            .filter(game::Column::HostType.eq(game_type));
+    }
+    if !with_hidden {
+        sql = sql.filter(Column::Hidden.eq(false));
+    }
+    sql.count(db).await
 }
 
 pub async fn create<'a, C>(db: &'a C, challenge: Model) -> Result<Model, DbErr>

@@ -174,6 +174,29 @@ where
     Ok((submissions, total))
 }
 
+pub async fn count<'a, C>(
+    db: &'a C, only_solved: bool, challenge_id: Option<i64>, team_id: Option<i64>,
+    user_id: Option<i64>,
+) -> Result<u64, DbErr>
+where
+    C: ConnectionTrait,
+{
+    let mut sql = Entity::find();
+    if let Some(challenge_id) = challenge_id {
+        sql = sql.filter(Column::ChallengeId.eq(challenge_id));
+    }
+    if let Some(team_id) = team_id {
+        sql = sql.filter(Column::TeamId.eq(team_id));
+    }
+    if let Some(user_id) = user_id {
+        sql = sql.filter(Column::UserId.eq(user_id));
+    }
+    if only_solved {
+        sql = sql.filter(Column::Solved.eq(true));
+    }
+    sql.count(db).await
+}
+
 pub async fn create<'a, C>(db: &'a C, submission: Model) -> Result<Model, DbErr>
 where
     C: ConnectionTrait,

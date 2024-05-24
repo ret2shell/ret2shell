@@ -337,10 +337,11 @@ async fn ip_record_worker_exec(message: jetstream::Message, db: &Database) -> an
 pub async fn ip_record_worker(mut messages: Stream, db: Database) {
     while let Some(message) = messages.next().await {
         if let Ok(message) = message {
-            ip_record_worker_exec(message, &db)
+            ip_record_worker_exec(message.clone(), &db)
                 .await
                 .map_err(|e| error!("Failed to process message: {:?}", e))
                 .ok();
+            message.ack().await.ok();
         } else {
             error!("Failed to receive message from nats: {:?}", message);
         }

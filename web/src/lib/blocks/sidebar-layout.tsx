@@ -21,13 +21,13 @@ export default function SidebarLayout(props: SidebarLayoutProps) {
     <>
       <div class="flex-1 flex flex-row">
         <Show when={props.leftBar && matches.lg}>
-          <div class="sticky w-1/5 top-16 left-0 h-[calc(100vh_-_4rem)] min-w-[24rem] max-w-[32rem] backdrop-blur border-r border-r-layer-content/10 print:hidden">
+          <div class="sticky flex-shrink-0 w-1/5 top-16 left-0 h-[calc(100vh_-_4rem)] min-w-[24rem] max-w-[32rem] backdrop-blur border-r border-r-layer-content/10 print:hidden">
             {props.leftBar}
           </div>
         </Show>
         {props.children}
         <Show when={props.rightBar && ((!props.leftBar && matches.lg) || matches.xl)}>
-          <div class="sticky w-1/5 top-16 right-0 h-[calc(100vh_-_4rem)] min-w-[24rem] max-w-[32rem] backdrop-blur border-l border-l-layer-content/10 print:hidden">
+          <div class="sticky w-1/5 flex-shrink-0 top-16 right-0 h-[calc(100vh_-_4rem)] min-w-[24rem] max-w-[32rem] backdrop-blur border-l border-l-layer-content/10 print:hidden">
             {props.rightBar}
           </div>
         </Show>

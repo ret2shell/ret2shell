@@ -74,6 +74,13 @@ where
     }
 }
 
+pub async fn count<'a, C>(db: &'a C) -> Result<u64, DbErr>
+where
+    C: ConnectionTrait,
+{
+    Entity::find().count(db).await
+}
+
 pub async fn create<'a, C>(db: &'a C, ip: Model) -> Result<Model, DbErr>
 where
     C: ConnectionTrait,

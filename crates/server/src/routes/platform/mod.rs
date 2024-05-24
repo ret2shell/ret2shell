@@ -3,7 +3,9 @@ use axum::{
 };
 use futures::future::join_all;
 use r2s_database::{
-    config, institute,
+    challenge, config,
+    game::{self, HostType},
+    institute, ip, submission,
     user::{self, Permission},
 };
 use r2s_migrator::Database;
@@ -72,16 +74,28 @@ struct UserStatistics {
     pub total: u64,
     pub valid: u64,
     pub institutes: Vec<(i64, u64)>,
+    pub ips: u64,
 }
 
 #[derive(Serialize)]
-struct GameStatistics {}
+struct SubmissionStatistics {
+    pub total: u64,
+    pub solved: u64,
+}
+
+#[derive(Serialize)]
+struct ChallengeStatistics {
+    pub total: u64,
+    pub in_game: u64,
+}
 
 #[derive(Serialize)]
 struct Statistics {
     pub users: UserStatistics,
     pub institutes: Vec<institute::Model>,
-    pub games: GameStatistics,
+    pub games: Vec<game::StatisticsModel>,
+    pub submissions: SubmissionStatistics,
+    pub challenges: ChallengeStatistics,
 }
 
 async fn get_platform_statistics(
@@ -100,12 +114,23 @@ async fn get_platform_statistics(
         .into_iter()
         .map(|r: Result<(i64, u64), DbErr>| r.unwrap_or((0, 0)))
         .collect(),
+        ips: ip::count(&db.conn).await?,
     };
-    let games = GameStatistics {};
+    let games = game::get_statistics(&db.conn).await?;
+    let submissions = SubmissionStatistics {
+        total: submission::count(&db.conn, false, None, None, None).await?,
+        solved: submission::count(&db.conn, true, None, None, None).await?,
+    };
+    let challenges = ChallengeStatistics {
+        total: challenge::count(&db.conn, None, None, false).await?,
+        in_game: challenge::count(&db.conn, None, Some(HostType::CTFGame), false).await?,
+    };
     let statistics = Statistics {
         users,
         institutes,
         games,
+        submissions,
+        challenges,
     };
     Ok(Json(statistics))
 }

@@ -184,7 +184,22 @@
   "admin": {
     "title": "管理",
     "statistics": {
-      "title": "プラットフォーム統計"
+      "title": "プラットフォーム統計",
+      "fetchFailed": "プラットフォームデータの取得に失敗しました",
+      "validUsers": "アクティブユーザー",
+      "totalUsers": "登録ユーザー",
+      "pendingGames": "試合はまだ始まっていません",
+      "inProgressGames": "進行中の試合",
+      "endedGames": "終了したゲーム",
+      "comingGames": "アクティブなイベント",
+      "totalGames": "イベントを主催する",
+      "games": "イベント",
+      "trainings": "ドライビングレンジ",
+      "solvedSubmissions": "正しい提出数量",
+      "totalSubmissions": "総提出数",
+      "inGameChallenges": "コンテストの問題数",
+      "totalChallenges": "総質問数",
+      "instituteUsers": "ユーザー組織の分布"
     },
     "edit": {
       "title": "プラットフォーム設定を編集する"

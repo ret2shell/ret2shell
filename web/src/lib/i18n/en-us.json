@@ -184,7 +184,22 @@
   "admin": {
     "title": "Admin",
     "statistics": {
-      "title": "Platform statistics"
+      "title": "Platform statistics",
+      "fetchFailed": "Failed to fetch platform data",
+      "validUsers": "active user(s)",
+      "totalUsers": "registered user(s)",
+      "pendingGames": "games not yet started",
+      "inProgressGames": "ongoing games",
+      "endedGames": "ended games",
+      "comingGames": "Active games",
+      "totalGames": "Host an event",
+      "games": "games",
+      "trainings": "Playgrounds",
+      "solvedSubmissions": "Correct submissions",
+      "totalSubmissions": "Total submissions",
+      "inGameChallenges": "Challenges in games",
+      "totalChallenges": "Total challenges",
+      "instituteUsers": "Distribution of user institutes"
     },
     "edit": {
       "title": "Edit platform settings"

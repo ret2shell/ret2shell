@@ -184,7 +184,22 @@
   "admin": {
     "title": "管理",
     "statistics": {
-      "title": "平台統計訊息"
+      "title": "平台統計訊息",
+      "fetchFailed": "取得平台資料失敗",
+      "validUsers": "活躍用戶",
+      "totalUsers": "註冊用戶",
+      "pendingGames": "未開始的比賽",
+      "inProgressGames": "進行中的比賽",
+      "endedGames": "已結束的比賽",
+      "comingGames": "活躍賽事",
+      "totalGames": "舉辦賽事",
+      "games": "賽事",
+      "trainings": "練習場",
+      "solvedSubmissions": "正確提交數量",
+      "totalSubmissions": "總提交數量",
+      "inGameChallenges": "賽中題目數量",
+      "totalChallenges": "總題目數量",
+      "instituteUsers": "使用者組織分佈狀況"
     },
     "edit": {
       "title": "編輯平台設定"

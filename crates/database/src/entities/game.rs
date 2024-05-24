@@ -3,10 +3,14 @@
 use chrono::{serde::ts_seconds, DateTime, Utc};
 use num_derive::{FromPrimitive, ToPrimitive};
 use sea_orm::{
-    entity::prelude::*, ActiveValue, FromJsonQueryResult, IntoActiveModel, Order, QueryOrder,
+    entity::prelude::*, ActiveValue, FromJsonQueryResult, FromQueryResult, IntoActiveModel,
+    IntoSimpleExpr, Order, QueryOrder, QuerySelect,
 };
+use sea_query::{BinOper, Query, SimpleExpr};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
+
+use crate::team;
 
 #[derive(
     Clone,
@@ -84,6 +88,23 @@ pub struct Model {
     pub bucket: Option<String>,
 }
 
+#[derive(Clone, Serialize, Deserialize, FromQueryResult)]
+pub struct StatisticsModel {
+    pub id: i64,
+    pub name: String,
+    #[serde(with = "ts_seconds")]
+    pub start_at: DateTime<Utc>,
+    #[serde(with = "ts_seconds")]
+    pub end_at: DateTime<Utc>,
+    #[serde(with = "ts_seconds")]
+    pub register_at: DateTime<Utc>,
+    #[serde(with = "ts_seconds")]
+    pub archive_at: DateTime<Utc>,
+    // NOTE: should be u64, but sqlx does not support u64
+    pub teams: i64,
+    pub host_type: HostType,
+}
+
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
     #[sea_orm(
@@ -157,6 +178,41 @@ where
     let total = paginator.num_pages().await?;
     let games = paginator.fetch_page(page - 1).await?;
     Ok((games, total))
+}
+
+pub async fn get_statistics<'a, C>(db: &'a C) -> Result<Vec<StatisticsModel>, DbErr>
+where
+    C: ConnectionTrait,
+{
+    let mut sql = Entity::find().select_only().columns(vec![
+        Column::Id,
+        Column::Name,
+        Column::StartAt,
+        Column::EndAt,
+        Column::RegisterAt,
+        Column::ArchiveAt,
+        Column::HostType,
+    ]);
+    sql = sql.column_as(
+        SimpleExpr::SubQuery(
+            None,
+            Box::new(
+                Query::select()
+                    .expr(team::Column::GameId.count())
+                    .and_where(SimpleExpr::Binary(
+                        Box::new(Column::Id.into_simple_expr()),
+                        BinOper::Equal,
+                        Box::new(team::Column::GameId.into_simple_expr()),
+                    ))
+                    .from(team::Entity)
+                    .take()
+                    .into_sub_query_statement(),
+            ),
+        ),
+        "teams",
+    );
+
+    sql.into_model::<StatisticsModel>().all(db).await
 }
 
 pub async fn create<'a, C>(db: &'a C, game: Model) -> Result<Model, DbErr>

@@ -200,7 +200,22 @@
   "admin": {
     "title": "管理",
     "statistics": {
-      "title": "平台统计信息"
+      "title": "平台统计信息",
+      "fetchFailed": "获取平台数据失败",
+      "validUsers": "活跃用户",
+      "totalUsers": "注册用户",
+      "pendingGames": "未开始的比赛",
+      "inProgressGames": "进行中的比赛",
+      "endedGames": "已结束的比赛",
+      "comingGames": "活跃赛事",
+      "totalGames": "举办赛事",
+      "games": "赛事",
+      "trainings": "练习场",
+      "solvedSubmissions": "正确提交数量",
+      "totalSubmissions": "总提交数量",
+      "inGameChallenges": "赛中题目数量",
+      "totalChallenges": "总题目数量",
+      "instituteUsers": "用户组织分布情况"
     },
     "edit": {
       "title": "编辑平台设置"
