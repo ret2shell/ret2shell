@@ -28,7 +28,10 @@ export default function SideBar() {
             ghost
             href="/admin/logs"
             justify="start"
-            disabled={!accountStore.permissions.includes(Permission.Statistics)}
+            disabled={
+              !accountStore.permissions.includes(Permission.Statistics) &&
+              !accountStore.permissions.includes(Permission.DevOps)
+            }
           >
             <span class="icon-[fluent--code-20-regular] w-5 h-5"></span>
             <span>{t('admin.logs.title')}</span>

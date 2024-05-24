@@ -2,8 +2,9 @@ import { api_root } from '@/lib/api'
 import { accountStore } from '@/lib/storage/account'
 import { t } from '@/lib/storage/theme'
 import { addToast } from '@/lib/storage/toast'
+import LoadingTips from '@/lib/widgets/loading-tips'
 import { DateTime } from 'luxon'
-import { For, createSignal, onCleanup } from 'solid-js'
+import { For, Show, createSignal, onCleanup } from 'solid-js'
 
 type Log = {
   timestamp: string
@@ -108,6 +109,11 @@ export default function () {
           </div>
         )}
       </For>
+      <Show when={loading()}>
+        <div class="h-8 flex flex-row items-center space-x-2 border-b border-b-layer-content/10 overflow-hidden min-w-0">
+          <LoadingTips />
+        </div>
+      </Show>
       <div ref={bottomDiv!}></div>
     </div>
   )
