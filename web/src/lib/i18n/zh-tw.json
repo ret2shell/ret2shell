@@ -226,7 +226,8 @@
       "title": "叢集管理"
     },
     "logs": {
-      "title": "平台日誌"
+      "title": "平台日誌",
+      "socketClosed": "日誌管道已斷開，將自動重試連線..."
     },
     "description": "平台管理面板"
   },

@@ -143,9 +143,10 @@ async fn login(
     match verify_password(&body.password, &password_hash)? {
         true => {
             info!(
-                "User logged in: {} ({}) <{}>",
-                user.nickname,
+                "User logged in: {}:'{}' ({}) <{}>",
+                user.id,
                 user.account,
+                user.nickname,
                 user.email.unwrap_or_default()
             );
             *(token_tracker.token.lock().await) = Token {

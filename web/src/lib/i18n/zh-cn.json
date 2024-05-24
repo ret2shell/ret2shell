@@ -242,7 +242,8 @@
       "title": "集群管理"
     },
     "logs": {
-      "title": "平台日志"
+      "title": "平台日志",
+      "socketClosed": "日志管道已断开，将自动重试连接..."
     },
     "description": "平台管理面板"
   },

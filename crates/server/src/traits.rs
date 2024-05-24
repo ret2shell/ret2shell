@@ -69,6 +69,8 @@ pub enum ResponseError {
     BucketError(#[from] r2s_bucket::BucketError),
     #[error("media storage error: {0}")]
     MediaError(#[from] r2s_media::MediaError),
+    #[error("file io error: {0}")]
+    FileIoError(#[from] std::io::Error),
 }
 
 macro_rules! log_with_resp {
@@ -216,6 +218,13 @@ impl IntoResponse for ResponseError {
                     e.to_string()
                 ),
             },
+            ResponseError::FileIoError(e) => {
+                log_with_resp!(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "file io error".to_owned(),
+                    e.to_string()
+                )
+            }
         };
         Response::builder()
             .status(status)

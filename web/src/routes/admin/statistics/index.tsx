@@ -2,6 +2,7 @@ import { PlatformStatistics, getPlatformStatistics } from '@/lib/api/platform'
 import LogoAnimate from '@/lib/assets/animates/logo-animate'
 import Spin from '@/lib/assets/animates/spin'
 import { HostType } from '@/lib/models/game'
+import { platformStore } from '@/lib/storage/platform'
 import { t } from '@/lib/storage/theme'
 import { addToast } from '@/lib/storage/toast'
 import Card from '@/lib/widgets/card'
@@ -34,7 +35,7 @@ export default function () {
       <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 p-3 lg:p-6 gap-3 lg:gap-6 self-start">
         <div class="hidden xl:flex xl:col-span-2 items-center justify-start space-x-12 px-12">
           <LogoAnimate class="w-36 h-36" />
-          <h1 class="text-5xl font-bold">{t('platform.name')}</h1>
+          <h1 class="text-5xl font-bold">{platformStore.config.name || t('platform.name')!}</h1>
         </div>
         <div class="col-span-1 h-48 p-6 flex flex-row items-center space-x-8">
           <div class="flex-1 flex flex-col space-y-4">
@@ -83,7 +84,12 @@ export default function () {
                         },
                       },
                       {
-                        value: statistics()!.games.filter(g => g.host_type === HostType.CTFTraining).length,
+                        value:
+                          (statistics()!.games.filter(g => g.host_type === HostType.CTFTraining).length *
+                            statistics()!
+                              .games.filter(g => g.host_type === HostType.CTFGame)
+                              .reduce((a, b) => a + b.teams, 0)) /
+                          statistics()!.games.length,
                         name: t('admin.statistics.trainings'),
                         itemStyle: {
                           color: '#0991ed',

@@ -226,7 +226,8 @@
       "title": "Cluster management"
     },
     "logs": {
-      "title": "Platform log"
+      "title": "Platform log",
+      "socketClosed": "The log pipe has been disconnected and will automatically retry the connection..."
     },
     "description": "Platform management panel"
   },

@@ -1,7 +1,18 @@
+use std::{path::PathBuf, str::FromStr};
+
 use axum::{
-    extract::State, middleware, response::IntoResponse, routing::get, Extension, Json, Router,
+    extract::{
+        ws::{Message, WebSocket},
+        Query, State, WebSocketUpgrade,
+    },
+    middleware,
+    response::IntoResponse,
+    routing::get,
+    Extension, Json, Router,
 };
 use futures::future::join_all;
+use r2s_cache::Cache;
+use r2s_config::GlobalConfig;
 use r2s_database::{
     challenge, config,
     game::{self, HostType},
@@ -10,7 +21,9 @@ use r2s_database::{
 };
 use r2s_migrator::Database;
 use sea_orm::DbErr;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+use tokio::{fs, io::AsyncBufReadExt};
+use tracing::error;
 
 use crate::{
     middleware::auth,
@@ -20,24 +33,26 @@ use crate::{
 pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     Router::new()
         .nest(
-            "/config",
+            "/",
             Router::new()
-                .route("/", get(get_config))
+                .route("/config", get(get_config))
                 .route_layer(middleware::from_fn(auth::permission_required_all!(
                     Permission::DevOps
                 ))),
         )
         .nest(
-            "/statistics",
+            "/",
             Router::new()
-                .route("/", get(get_platform_statistics))
-                .route_layer(middleware::from_fn(auth::permission_required_all!(
-                    Permission::Statistics
+                .route("/statistics", get(get_platform_statistics))
+                .route_layer(middleware::from_fn(auth::permission_required_any!(
+                    Permission::Statistics,
+                    Permission::DevOps
                 ))),
         )
         .route("/info", get(get_platform_info))
         .route("/auth", get(get_auth_config))
         .route("/version", get(get_version))
+        .route("/logs", get(platform_stream_logs))
 }
 
 async fn get_config(
@@ -133,4 +148,83 @@ async fn get_platform_statistics(
         challenges,
     };
     Ok(Json(statistics))
+}
+
+#[derive(Deserialize)]
+struct LogRequest {
+    pub token: String,
+}
+
+async fn platform_stream_logs(
+    State(config): State<GlobalConfig>, State(ref cache): State<Cache>,
+    Query(req): Query<LogRequest>, ws: WebSocketUpgrade,
+) -> Result<impl IntoResponse, ResponseError> {
+    // info!(
+    //     "user {}:'{}' ({}) requested to stream platform logs.",
+    //     token.id, token.account, token.nickname
+    // );
+    let valid = cache.at("token").exists(&req.token).await?;
+
+    let token = if valid {
+        auth::decode_token(&req.token, &config.auth.clone().unwrap().signing_key).await
+    } else {
+        auth::Token::default()
+    };
+    if !token.permissions.0.contains(&Permission::DevOps)
+        && !token.permissions.0.contains(&Permission::Statistics)
+    {
+        return Err(ResponseError::Forbidden(
+            "permission denied".to_owned(),
+            format!(
+                "somebody try to access platform logs without bad token {:?}.",
+                token
+            ),
+        ));
+    }
+    let resp = ws.on_upgrade(|ws| stream_logs_worker(ws, config));
+    Ok(resp)
+}
+
+async fn stream_logs_worker(ws: WebSocket, config: GlobalConfig) {
+    let result = _stream_logs_worker(ws, config).await;
+    if let Err(e) = result {
+        error!("stream_logs_worker error: {:?}", e);
+    }
+}
+
+async fn _stream_logs_worker(mut ws: WebSocket, config: GlobalConfig) -> Result<(), ResponseError> {
+    let log_dir = PathBuf::from_str(
+        &config
+            .logging
+            .ok_or(ResponseError::InternalServerError(
+                "missing log config".to_owned(),
+                "missing log config".to_owned(),
+            ))?
+            .directory,
+    )
+    .ok();
+    if let Some(log_dir) = log_dir {
+        let current_log = log_dir.join(format!(
+            "ret2shell.{}.log",
+            chrono::Utc::now().format("%Y-%m-%d")
+        ));
+        let mut timer = tokio::time::interval(tokio::time::Duration::from_secs(1));
+        let mut lines = fs::File::open(&current_log)
+            .await
+            .map(tokio::io::BufReader::new)
+            .map(tokio::io::BufReader::lines)?;
+        loop {
+            while let Some(log) = lines.next_line().await? {
+                let result = ws.send(Message::Text(log)).await;
+                if result.is_err() {
+                    return Ok(());
+                }
+            }
+            timer.tick().await;
+        }
+    } else {
+        ws.close().await.ok();
+    }
+
+    Ok(())
 }

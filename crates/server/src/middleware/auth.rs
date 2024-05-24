@@ -221,7 +221,7 @@ macro_rules! permission_required_all {
 macro_rules! permission_required_any {
     ($($perm:expr),*) => {
         |
-            axum::extract::Extension(token): axum::extract::Extension<crate::controller::layer::auth::Token>,
+            axum::extract::Extension(token): axum::extract::Extension<crate::middleware::auth::Token>,
             req: axum::extract::Request,
             next: axum::middleware::Next,
         | async move {
