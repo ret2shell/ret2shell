@@ -293,13 +293,18 @@ fn filter_and_order(
     Ok(sql)
 }
 
-pub async fn count<'a, C>(db: &'a C, with_banned: bool) -> Result<u64, DbErr>
+pub async fn count<'a, C>(
+    db: &'a C, with_banned: bool, institute_id: Option<i64>,
+) -> Result<u64, DbErr>
 where
     C: ConnectionTrait,
 {
     let mut sql = Entity::find();
     if !with_banned {
         sql = sql.filter(Column::Banned.eq(false));
+    }
+    if let Some(institute_id) = institute_id {
+        sql = sql.filter(Column::InstituteId.eq(institute_id));
     }
     sql.count(db).await
 }

@@ -276,7 +276,7 @@ async fn register(
 
     let password = hash_password(&body.password)?;
 
-    let mut permissions = match user::count(&db.conn, true).await? {
+    let mut permissions = match user::count(&db.conn, true, None).await? {
         0 => Permissions(vec![
             Permission::Basic,
             Permission::Verified,
@@ -559,7 +559,7 @@ async fn change_profile(
 async fn delete_self(
     State(db): State<Database>, State(cache): State<Cache>, Extension(user): Extension<user::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-    let user_count = user::count(&db.conn, false).await?;
+    let user_count = user::count(&db.conn, false, None).await?;
 
     if user_count == 1 {
         return Err(ResponseError::Forbidden(

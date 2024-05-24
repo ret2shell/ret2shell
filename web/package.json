@@ -2,6 +2,8 @@
   "name": "ret2shell",
   "version": "1.0.0",
   "type": "module",
+  "private": true,
+  "description": "Ret 2 Shell is a feature-riches CTF challenge platform.",
   "dependencies": {
     "@ark-ui/solid": "3.0.0-4",
     "@fontsource/jetbrains-mono": "^5.0.20",
@@ -62,6 +64,7 @@
     "@types/howler": "^2.2.11",
     "@types/luxon": "^3.4.2",
     "@types/node": "^20.12.12",
+    "@types/postcss-import": "^14.0.3",
     "@types/shell-quote": "^1.7.5",
     "@typescript-eslint/eslint-plugin": "8.0.0-alpha.14",
     "@typescript-eslint/parser": "8.0.0-alpha.14",
