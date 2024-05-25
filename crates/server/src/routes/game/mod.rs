@@ -93,7 +93,7 @@ async fn get_game_list(
         results
             .0
             .iter()
-            .filter(|g| g.admins.0.contains(&token.id))
+            .filter(|g| !g.hidden || g.admins.0.contains(&token.id))
             .cloned()
             .collect::<Vec<_>>(),
         results.1,
