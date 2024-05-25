@@ -2,6 +2,7 @@ import { PlatformStatistics, getPlatformStatistics } from '@/lib/api/platform'
 import LogoAnimate from '@/lib/assets/animates/logo-animate'
 import Spin from '@/lib/assets/animates/spin'
 import { HostType } from '@/lib/models/game'
+import { Title } from '@/lib/storage/header'
 import { platformStore } from '@/lib/storage/platform'
 import { t } from '@/lib/storage/theme'
 import { addToast } from '@/lib/storage/toast'
@@ -32,6 +33,7 @@ export default function () {
     .finally(() => setLoading(false))
   return (
     <>
+      <Title title={`${t('admin.statistics.title')} - ${platformStore.config.name || t('platform.name')}`}></Title>
       <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 p-3 lg:p-6 gap-3 lg:gap-6">
         <div class="hidden xl:flex xl:col-span-2 items-center justify-start space-x-12 px-12">
           <LogoAnimate class="w-36 h-36" />
