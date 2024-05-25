@@ -1,12 +1,13 @@
 use std::{path::PathBuf, str::FromStr};
 
 use axum::{
+    body::Body,
     extract::{
         ws::{Message, WebSocket},
         Query, State, WebSocketUpgrade,
     },
     middleware,
-    response::IntoResponse,
+    response::{IntoResponse, Response},
     routing::get,
     Extension, Json, Router,
 };
@@ -23,7 +24,8 @@ use r2s_migrator::Database;
 use sea_orm::DbErr;
 use serde::{Deserialize, Serialize};
 use tokio::{fs, io::AsyncBufReadExt};
-use tracing::error;
+use tokio_util::io::ReaderStream;
+use tracing::{debug, error};
 
 use crate::{
     middleware::auth,
@@ -44,6 +46,7 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
             "/",
             Router::new()
                 .route("/statistics", get(get_platform_statistics))
+                .route("/logs", get(get_logs_list))
                 .route_layer(middleware::from_fn(auth::permission_required_any!(
                     Permission::Statistics,
                     Permission::DevOps
@@ -52,7 +55,7 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
         .route("/info", get(get_platform_info))
         .route("/auth", get(get_auth_config))
         .route("/version", get(get_version))
-        .route("/logs", get(platform_stream_logs))
+        .route("/logs/stream", get(platform_stream_logs))
 }
 
 async fn get_config(
@@ -227,4 +230,53 @@ async fn _stream_logs_worker(mut ws: WebSocket, config: GlobalConfig) -> Result<
     }
 
     Ok(())
+}
+
+#[derive(Deserialize)]
+struct LogListRequest {
+    pub file: Option<String>,
+}
+
+async fn get_logs_list(
+    State(config): State<GlobalConfig>, Query(req): Query<LogListRequest>,
+) -> Result<Response, ResponseError> {
+    let log_dir = PathBuf::from_str(
+        &config
+            .logging
+            .ok_or(ResponseError::InternalServerError(
+                "missing log config".to_owned(),
+                "missing log config".to_owned(),
+            ))?
+            .directory,
+    )
+    .ok();
+    if let Some(log_dir) = log_dir {
+        if let Some(file_name) = req.file {
+            let file_path = log_dir.join(file_name).canonicalize()?;
+            debug!("get_logs_list: {:?}", file_path);
+            debug!("log_dir: {:?}", log_dir);
+            // avoid path traversal
+            if file_path.starts_with(log_dir.canonicalize()?) && file_path.exists() {
+                let file = fs::File::open(file_path).await?;
+                let stream = ReaderStream::new(file);
+                Ok(Response::new(Body::from_stream(stream)))
+            } else {
+                Err(ResponseError::NotFound("file not found".to_owned()))
+            }
+        } else {
+            let mut files = fs::read_dir(log_dir).await?;
+            let mut file_list = Vec::new();
+            while let Some(file) = files.next_entry().await? {
+                if let Some(file_name) = file.file_name().to_str() {
+                    file_list.push(file_name.to_owned());
+                }
+            }
+            Ok(Json(file_list).into_response())
+        }
+    } else {
+        Err(ResponseError::InternalServerError(
+            "missing log config".to_owned(),
+            "missing log config".to_owned(),
+        ))
+    }
 }
