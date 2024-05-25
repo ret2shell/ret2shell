@@ -226,11 +226,38 @@
       "title": "Cluster management",
       "unavailable": "Cluster is offline",
       "available": "Online, cluster API is available",
-      "failedToFetchNodes": "Failed to fetch cluster nodes information"
+      "failedToFetchNodes": "Failed to fetch cluster nodes information",
+      "refreshNode": "Refresh node status",
+      "disconnectNode": "disconnect node",
+      "updateNode": "Upgrade node",
+      "nodeInfo": "Node information",
+      "data": {
+        "nodeInfo": {
+          "architecture": "Architecture",
+          "bootID": "Boot ID",
+          "containerRuntimeVersion": "Container Runtime",
+          "kernelVersion": "Kernel",
+          "machineID": "Machine ID",
+          "operatingSystem": "System",
+          "osImage": "Distribution",
+          "systemUUID": "System UUID",
+          "kubeletVersion": "Kubelet",
+          "kubeProxyVersion": "Kube Proxy"
+        }
+      },
+      "nodeNetwork": "Network",
+      "nodeResources": "Node resources",
+      "selectNode": "Select a node to view detailed information"
     },
     "logs": {
       "title": "Platform log",
-      "socketClosed": "The log pipe has been disconnected and will automatically retry the connection..."
+      "socketClosed": "The log pipe has been disconnected and will automatically retry the connection...",
+      "start": "Enable streaming logs",
+      "stop": "Disable streaming logs",
+      "streamingEnabled": "Live streaming logs...",
+      "empty": "After turning on streaming, the logs will be displayed here. Please be careful when opening a large amount of logs.",
+      "emptyTips": "Only the logs of the current day in server time are displayed. For other logs, please download the log files for auditing.",
+      "failedToFetchLogsList": "Failed to get log list"
     },
     "description": "Platform management panel",
     "about": {

@@ -242,11 +242,38 @@
       "title": "集群管理",
       "unavailable": "集群已离线，状态不可用",
       "available": "正常运行，集群 API 可用",
-      "failedToFetchNodes": "获取集群节点信息失败"
+      "failedToFetchNodes": "获取集群节点信息失败",
+      "refreshNode": "刷新节点状态",
+      "disconnectNode": "断开节点",
+      "updateNode": "升级节点",
+      "nodeInfo": "节点信息",
+      "data": {
+        "nodeInfo": {
+          "architecture": "架构",
+          "bootID": "启动 ID",
+          "containerRuntimeVersion": "容器运行时",
+          "kernelVersion": "内核版本",
+          "machineID": "机器 ID",
+          "operatingSystem": "操作系统",
+          "osImage": "发行版",
+          "systemUUID": "系统 UUID",
+          "kubeletVersion": "Kubelet",
+          "kubeProxyVersion": "Kube Proxy"
+        }
+      },
+      "nodeNetwork": "网络情况",
+      "nodeResources": "节点资源",
+      "selectNode": "选择节点，查看详细信息"
     },
     "logs": {
       "title": "平台日志",
-      "socketClosed": "日志管道已断开，将自动重试连接..."
+      "socketClosed": "日志管道已断开，将自动重试连接...",
+      "start": "开启日志串流",
+      "stop": "关闭日志串流",
+      "streamingEnabled": "正在实时串流日志...",
+      "empty": "开启串流后日志会显示在这里，日志量大时请谨慎开启",
+      "emptyTips": "仅显示服务器时间的当天日志，其他日志请下载日志文件进行审计",
+      "failedToFetchLogsList": "获取日志列表失败"
     },
     "description": "平台管理面板",
     "about": {

@@ -226,11 +226,38 @@
       "title": "クラスター管理",
       "unavailable": "クラスターはオフラインであり、ステータスは利用不可です",
       "available": "正常に実行されており、クラスター API が利用可能です",
-      "failedToFetchNodes": "クラスタノード情報の取得に失敗しました"
+      "failedToFetchNodes": "クラスタノード情報の取得に失敗しました",
+      "refreshNode": "ノードのステータスを更新する",
+      "disconnectNode": "ノードを切断する",
+      "updateNode": "ノードのアップグレード",
+      "nodeInfo": "ノード情報",
+      "data": {
+        "nodeInfo": {
+          "architecture": "アーキテクチャ",
+          "bootID": "ブート ID",
+          "containerRuntimeVersion": "コンテナランタイムバージョン",
+          "kernelVersion": "カーネルバージョン",
+          "machineID": "マシン ID",
+          "operatingSystem": "オペレーティングシステム",
+          "osImage": "OS イメージ",
+          "systemUUID": "システム UUID",
+          "kubeletVersion": "Kubelet",
+          "kubeProxyVersion": "Kube Proxy"
+        }
+      },
+      "nodeNetwork": "ネットワーク状況",
+      "nodeResources": "ノードリソース",
+      "selectNode": "ノードを選択して詳細情報を表示します"
     },
     "logs": {
       "title": "プラットフォームログ",
-      "socketClosed": "ログ パイプが切断されたため、接続は自動的に再試行されます..."
+      "socketClosed": "ログ パイプが切断されたため、接続は自動的に再試行されます...",
+      "start": "ログストリーミングを有効にする",
+      "stop": "ログストリーミングをオフにする",
+      "streamingEnabled": "ライブストリーミングログ...",
+      "empty": "ストリーミングをオンにすると、ここにログが表示されます。大量のログを開く場合は注意してください。",
+      "emptyTips": "サーバー時間における当日のログのみが表示されます。その他のログについては、監査用のログ ファイルをダウンロードしてください。",
+      "failedToFetchLogsList": "ログリストの取得に失敗しました"
     },
     "description": "プラットフォーム管理パネル",
     "about": {

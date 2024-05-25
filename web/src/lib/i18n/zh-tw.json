@@ -226,11 +226,38 @@
       "title": "叢集管理",
       "unavailable": "叢集已離線，狀態不可用",
       "available": "正常運行，叢集 API 可用",
-      "failedToFetchNodes": "取得叢集節點資訊失敗"
+      "failedToFetchNodes": "取得叢集節點資訊失敗",
+      "refreshNode": "刷新節點狀態",
+      "disconnectNode": "斷開節點",
+      "updateNode": "升級節點",
+      "nodeInfo": "節點資訊",
+      "data": {
+        "nodeInfo": {
+          "architecture": "架構",
+          "bootID": "啟動 ID",
+          "containerRuntimeVersion": "容器運行時",
+          "kernelVersion": "內核版本",
+          "machineID": "機器 ID",
+          "operatingSystem": "作業系統",
+          "osImage": "作業系統映像",
+          "systemUUID": "系統 UUID",
+          "kubeletVersion": "Kubelet 版本",
+          "kubeProxyVersion": "Kube Proxy 版本"
+        }
+      },
+      "nodeNetwork": "網路狀況",
+      "nodeResources": "節點資源",
+      "selectNode": "選擇節點，查看詳細信息"
     },
     "logs": {
       "title": "平台日誌",
-      "socketClosed": "日誌管道已斷開，將自動重試連線..."
+      "socketClosed": "日誌管道已斷開，將自動重試連線...",
+      "start": "開啟日誌串流",
+      "stop": "關閉日誌串流",
+      "streamingEnabled": "正在即時串流日誌...",
+      "empty": "開啟串流後日誌會顯示在這裡，日誌量大時請謹慎開啟",
+      "emptyTips": "僅顯示伺服器時間的當天日誌，其他日誌請下載日誌檔案進行審計",
+      "failedToFetchLogsList": "取得日誌清單失敗"
     },
     "description": "平台管理面板",
     "about": {
