@@ -1,7 +1,10 @@
 import { ClusterNode, getClusterConfig, getClusterNodes } from '@/lib/api/cluster'
 import Spin from '@/lib/assets/animates/spin'
+import { Title } from '@/lib/storage/header'
+import { platformStore } from '@/lib/storage/platform'
 import { t } from '@/lib/storage/theme'
 import { addToast } from '@/lib/storage/toast'
+import Button from '@/lib/widgets/button'
 import Card from '@/lib/widgets/card'
 import Divider from '@/lib/widgets/divider'
 import LoadingTips from '@/lib/widgets/loading-tips'
@@ -50,8 +53,11 @@ export default function () {
         })
       })
     })
+
+  const [shownNode, setShownNode] = createSignal(null as ClusterNode | null)
   return (
     <>
+      <Title title={`${t('admin.cluster.title')} - ${platformStore.config.name || t('platform.name')}`}></Title>
       <div class="flex-1 flex flex-col p-3 lg:p-6">
         <div class="h-32 lg:h-48 flex flex-row items-center">
           <div class="h-full aspect-square flex items-center justify-center">
@@ -90,7 +96,7 @@ export default function () {
           <Divider />
         </Show>
         <Show when={available()}>
-          <div class="h-20 lg:h-12 flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4 justify-center items-center px-4">
+          <div class="h-20 lg:h-12 flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4 justify-center items-center px-3">
             <span class="lg:flex-1 opacity-60">
               Since {since()}, {DateTime.fromFormat(since(), 'yyyy-MM-dd').diffNow().negate().toFormat('hh')} hours
               online
@@ -102,24 +108,125 @@ export default function () {
             </span>
           </div>
           <Divider />
-          <div class="flex flex-col lg:flex-row items-center lg:items-start flex-wrap p-3 lg:p-6">
+          <div class="flex flex-row flex-wrap py-2">
             <For each={clusterNodes()}>
               {node => (
                 <>
-                  <Card class="my-2 lg:mx-4 min-w-fit" contentClass="p-3 lg:p-6 flex flex-row space-x-4 min-w-fit">
-                    <div class="h-16 w-16 flex-shrink-0 flex justify-center items-center">
-                      <span class="icon-[fluent--organization-16-regular] w-8 h-8 lg:w-12 lg:h-12 text-success"></span>
-                    </div>
-                    <div class="flex flex-col justify-center space-y-2 min-w-fit">
+                  <Button
+                    class="m-1 min-w-fit !h-auto py-2"
+                    level={shownNode()?.metadata.name === node.metadata.name ? 'primary' : undefined}
+                    onClick={() => setShownNode(node)}
+                  >
+                    <span
+                      class={`${
+                        node.metadata.labels['node-role.kubernetes.io/master'] === 'true'
+                          ? 'icon-[fluent--flash-flow-20-regular]'
+                          : 'icon-[fluent--engine-20-regular]'
+                      } w-8 h-8 ${shownNode()?.metadata.name === node.metadata.name ? 'text-primary-content' : 'text-success'}`}
+                    ></span>
+                    <div class="flex flex-col justify-center items-start min-w-fit">
                       <span class="font-bold">{node.metadata.name}</span>
                       <span class="opacity-60">{node.metadata.creationTimestamp}</span>
                     </div>
-                  </Card>
+                  </Button>
                 </>
               )}
             </For>
           </div>
           <Divider />
+          <Show
+            when={shownNode()}
+            fallback={
+              <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
+                <span class="icon-[fluent--organization-20-regular] w-24 h-24"></span>
+                <span>{t('admin.cluster.selectNode')}</span>
+              </div>
+            }
+          >
+            <>
+              <div class="h-12 flex flex-row items-center space-x-2 px-3">
+                <span class="icon-[fluent--organization-20-regular] w-5 h-5"></span>
+                <span class="font-bold flex-1 text-start">{shownNode()?.metadata.name}</span>
+                <span class="opacity-60 hidden lg:inline">
+                  <span>Online at: </span>
+                  <span>
+                    {DateTime.fromISO(shownNode()!.metadata.creationTimestamp).toFormat('yyyy-MM-dd HH:mm:ss')}
+                  </span>
+                </span>
+                <Button size="sm" square title={t('admin.cluster.refreshNode')!}>
+                  <span class="icon-[fluent--arrow-clockwise-20-regular] w-5 h-5"></span>
+                </Button>
+                <Button size="sm" square title={t('admin.cluster.updateNode')!}>
+                  <span class="icon-[fluent--arrow-circle-up-20-regular] w-5 h-5"></span>
+                </Button>
+                <Button size="sm" square level="error" title={t('admin.cluster.disconnectNode')!}>
+                  <span class="icon-[fluent--stop-20-regular] w-5 h-5"></span>
+                </Button>
+              </div>
+              <Divider />
+              <div class="p-3 lg:p-6 flex flex-col">
+                <h3 class="text-center font-bold">{t('admin.cluster.nodeInfo')}</h3>
+                <table>
+                  <tbody>
+                    <For each={Object.entries(shownNode()!.status.nodeInfo)}>
+                      {([key, value]) => (
+                        <tr class="border-b border-b-layer-content/10">
+                          {/* @ts-expect-error key is dynamic */}
+                          <td class="font-bold opacity-60 p-2">{`${t(`admin.cluster.data.nodeInfo.${key}`)}`}</td>
+                          <td class="p-2">{value}</td>
+                        </tr>
+                      )}
+                    </For>
+                    <tr class="border-b border-b-layer-content/10">
+                      <td class="font-bold opacity-60 p-2">Provider ID</td>
+                      <td class="p-2">{shownNode()?.spec.providerID}</td>
+                    </tr>
+                    <tr class="border-b border-b-layer-content/10">
+                      <td class="font-bold opacity-60 p-2">Addresses</td>
+                      <td class="p-2">
+                        {shownNode()
+                          ?.status.addresses.map(a => a.address)
+                          .join(', ')}
+                      </td>
+                    </tr>
+                    <tr class="border-b border-b-layer-content/10">
+                      <td class="font-bold opacity-60 p-2">Pod CIDRs</td>
+                      <td class="p-2">{shownNode()?.spec.podCIDRs.join(', ')}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="flex flex-col">
+                <h3 class="text-center font-bold">{t('admin.cluster.nodeResources')}</h3>
+                <div class="flex flex-col xl:flex-row p-3 lg:p-6">
+                  <table class="flex-1">
+                    <tbody>
+                      <For each={Object.entries(shownNode()!.status.capacity)}>
+                        {([key, value]) => (
+                          <tr class="border-b border-b-layer-content/10">
+                            <td class="font-bold opacity-60 p-2">Capacity {key}</td>
+                            <td class="p-2">{value}</td>
+                          </tr>
+                        )}
+                      </For>
+                    </tbody>
+                  </table>
+                  <table class="flex-1">
+                    <tbody>
+                      <For each={Object.entries(shownNode()!.status.allocatable)}>
+                        {([key, value]) => (
+                          <tr class="border-b border-b-layer-content/10">
+                            <td class="font-bold opacity-60 p-2">Allocatable {key}</td>
+                            <td class="p-2">{value}</td>
+                          </tr>
+                        )}
+                      </For>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          </Show>
         </Show>
       </div>
     </>

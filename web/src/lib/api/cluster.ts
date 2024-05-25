@@ -51,9 +51,11 @@ export type ClusterNode = {
       address: string
     }[]
     capacity: {
+      cpu: string
       [key: string]: string
     }
     allocatable: {
+      cpu: string
       [key: string]: string
     }
     conditions: {
@@ -64,6 +66,23 @@ export type ClusterNode = {
       reason: string
       message: string
     }[]
+    nodeInfo: {
+      machineID: string
+      systemUUID: string
+      bootID: string
+      kernelVersion: string
+      osImage: string
+      containerRuntimeVersion: string
+      kubeletVersion: string
+      kubeProxyVersion: string
+      operatingSystem: string
+      architecture: string
+    }
+    daemonEndpoints: {
+      kubeletEndpoint: {
+        Port: number
+      }
+    }
   }
 }
 
