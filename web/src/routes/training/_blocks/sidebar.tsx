@@ -11,27 +11,20 @@ export default function SideBar() {
   return (
     <div class="flex flex-col overflow-hidden w-full h-full">
       <div class="border-b border-b-layer-content/10 p-3 lg:p-6">
-        <div class="flex flex-row space-x-2">
-          <Show
-            when={gameStore.current}
-            fallback={
-              <Link class="flex-1" ghost justify="start" href="/training">
-                <span class="icon-[fluent--dumbbell-20-filled] w-5 h-5 text-primary"></span>
-                <span>{t('training.list')}</span>
-              </Link>
-            }
-          >
-            <Link class="flex-1" ghost justify="start" href={`/training/${gameStore.current?.id}`}>
+        <Show
+          when={gameStore.current}
+          fallback={
+            <Link class="w-full" ghost justify="start" href="/training">
               <span class="icon-[fluent--dumbbell-20-filled] w-5 h-5 text-primary"></span>
-              <span>{gameStore.current?.name}</span>
+              <span>{t('training.list')}</span>
             </Link>
-          </Show>
-          <Show when={accountStore.permissions.includes(Permission.Host)}>
-            <Link square level="primary" title={t('form.create')} href={`/training?create=true`}>
-              <span class="icon-[fluent--add-20-regular] w-5 h-5"></span>
-            </Link>
-          </Show>
-        </div>
+          }
+        >
+          <Link class="w-full" ghost justify="start" href={`/training/${gameStore.current?.id}`}>
+            <span class="icon-[fluent--dumbbell-20-filled] w-5 h-5 text-primary"></span>
+            <span>{gameStore.current?.name}</span>
+          </Link>
+        </Show>
       </div>
       <Show when={gameStore.current} fallback={<Playgrounds />}>
         <Challenges />

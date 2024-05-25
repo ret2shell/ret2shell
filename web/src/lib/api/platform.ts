@@ -47,3 +47,16 @@ export type PlatformStatistics = {
 export async function getPlatformStatistics() {
   return await api.get(`${api_root}/platform/statistics`).json<PlatformStatistics>()
 }
+
+export async function getPlatformLogs(file?: string) {
+  if (!file) return await api.get(`${api_root}/platform/logs`).json<string[]>()
+  return await api
+    .get(`${api_root}/platform/logs`, {
+      searchParams: JSON.parse(
+        JSON.stringify({
+          file,
+        })
+      ),
+    })
+    .blob()
+}
