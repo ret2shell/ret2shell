@@ -33,7 +33,7 @@ export default function (props: ComponentProps<'a'> & ButtonProps & LinkProps & 
       .join(' ')
   })
   return (
-    <a {...props} type={props.type} class={`${className()} ${props.class}`}>
+    <a {...props} href={props.disabled ? '#' : props.href} type={props.type} class={`${className()} ${props.class}`}>
       <Show when={props.loading}>
         <Spin />
       </Show>

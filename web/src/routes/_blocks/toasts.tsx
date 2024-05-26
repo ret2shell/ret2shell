@@ -1,8 +1,6 @@
 import { setToastStore, toastStore } from '@/lib/storage/toast'
 import Toast from '@/lib/widgets/toast'
-import { DateTime } from 'luxon'
-import { For, Show, createEffect, createSignal } from 'solid-js'
-import { reconcile } from 'solid-js/store'
+import { For } from 'solid-js'
 import { TransitionGroup } from 'solid-transition-group'
 
 export default function () {
@@ -18,7 +16,7 @@ export default function () {
                 selfDestroy
                 onTimeout={() => {
                   setToastStore({
-                    toasts: toasts().map(t => {
+                    toasts: toastStore.toasts.map(t => {
                       if (t.id === toast.id) {
                         return { ...t, shown: false }
                       }

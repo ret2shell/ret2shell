@@ -45,6 +45,7 @@ export default function () {
         addToast({
           level: 'error',
           description: `${t('admin.logs.failedToFetchLogsList')}: ${text}`,
+          duration: 5000,
         })
       })
     })
@@ -64,19 +65,6 @@ export default function () {
     })
   }
 
-  function enableReconnect() {
-    ws.onclose = () => {
-      addToast({
-        level: 'error',
-        description: t('admin.logs.socketClosed')!,
-        duration: 5000,
-      })
-      setTimeout(() => {
-        connect()
-      }, 5000)
-    }
-  }
-
   function disable() {
     if (ws) {
       ws.onclose = null
@@ -88,7 +76,6 @@ export default function () {
 
   function enable() {
     connect()
-    enableReconnect()
     setEnableStreamLogs(true)
   }
 
@@ -105,6 +92,16 @@ export default function () {
       setTimeout(() => {
         bottomDiv.scrollIntoView({ behavior: 'smooth' })
       }, 100)
+    }
+    ws.onclose = () => {
+      addToast({
+        level: 'error',
+        description: t('admin.logs.socketClosed')!,
+        duration: 5000,
+      })
+      setTimeout(() => {
+        connect()
+      }, 5000)
     }
     ws.onerror = () => {
       ws.close()

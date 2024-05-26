@@ -52,7 +52,7 @@ export default function (props: ImageProps & ComponentProps<'div'>) {
         }}
       >
         <Show when={loading()}>
-          <div class="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-layer/60">
+          <div class="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-layer/80 backdrop-blur-xl">
             <Spin width={24} height={24}></Spin>
           </div>
         </Show>

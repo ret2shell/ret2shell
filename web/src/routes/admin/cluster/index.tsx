@@ -5,7 +5,6 @@ import { platformStore } from '@/lib/storage/platform'
 import { t } from '@/lib/storage/theme'
 import { addToast } from '@/lib/storage/toast'
 import Button from '@/lib/widgets/button'
-import Card from '@/lib/widgets/card'
 import Divider from '@/lib/widgets/divider'
 import LoadingTips from '@/lib/widgets/loading-tips'
 import { HTTPError } from '@reverier/ky'
@@ -50,6 +49,7 @@ export default function () {
         addToast({
           level: 'error',
           description: `${t('admin.cluster.failedToFetchNodes')}: ${text}`,
+          duration: 5000,
         })
       })
     })
@@ -74,7 +74,7 @@ export default function () {
             </Switch>
           </div>
           <h1 class="flex flex-col justify-center space-y-2">
-            <span class="text-3xl lg:text-5xl font-bold">Kubernetes</span>
+            <span class="text-3xl lg:text-5xl font-bold">{t('admin.cluster.title')}</span>
             <Switch>
               <Match when={loading()}>
                 <LoadingTips />
@@ -120,8 +120,8 @@ export default function () {
                     <span
                       class={`${
                         node.metadata.labels['node-role.kubernetes.io/master'] === 'true'
-                          ? 'icon-[fluent--flash-flow-20-regular]'
-                          : 'icon-[fluent--engine-20-regular]'
+                          ? 'icon-[fluent--brain-circuit-20-regular]'
+                          : 'icon-[fluent--production-20-regular]'
                       } w-8 h-8 ${shownNode()?.metadata.name === node.metadata.name ? 'text-primary-content' : 'text-success'}`}
                     ></span>
                     <div class="flex flex-col justify-center items-start min-w-fit">

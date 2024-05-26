@@ -24,7 +24,7 @@
     &:disabled,
     &-disabled,
     &[disabled] {
-      @apply cursor-not-allowed opacity-60 pointer-events-none;
+      @apply cursor-not-allowed opacity-60;
     }
 
     &-md {
