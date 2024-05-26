@@ -227,13 +227,30 @@ impl IntoResponse for ResponseError {
                     e.to_string()
                 )
             }
-            ResponseError::ClusterError(e) => {
-                log_with_resp!(
+            ResponseError::ClusterError(e) => match e {
+                r2s_cluster::ClusterError::NeedNamespace(s) => {
+                    log_with_resp!(StatusCode::BAD_REQUEST, "need namespace".to_owned(), s)
+                }
+                r2s_cluster::ClusterError::ConfigNeeded => {
+                    log_with_resp!(
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        "missing cluster config".to_owned(),
+                        "cluster config is not set yet"
+                    )
+                }
+                r2s_cluster::ClusterError::ClusterDisabled => {
+                    log_with_resp!(
+                        StatusCode::NOT_FOUND,
+                        "cluster is disabled".to_owned(),
+                        "please setup cluster first and enable it in the config file"
+                    )
+                }
+                _ => log_with_resp!(
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "cluster internal error".to_owned(),
                     e.to_string()
-                )
-            }
+                ),
+            },
         };
         Response::builder()
             .status(status)
