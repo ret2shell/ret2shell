@@ -54,7 +54,10 @@
     "list": "练习场列表",
     "noPlaygrounds": "没有练习场",
     "noArchivedGames": "没有归档的往期赛事",
-    "selectPlayground": "开始今日份的训练！"
+    "selectPlayground": "开始今日份的训练！",
+    "failedToFetchPlaygrounds": "获取练习场列表失败",
+    "failedToFetchGames": "获取赛事列表失败",
+    "gameNotArchived": "比赛尚未归档"
   },
   "errors": {
     "401": "请先登录",

@@ -54,7 +54,10 @@
     "list": "Training Playgrounds",
     "noPlaygrounds": "No playgrounds",
     "noArchivedGames": "No archived games",
-    "selectPlayground": "Start training today!"
+    "selectPlayground": "Start training today!",
+    "failedToFetchPlaygrounds": "Failed to get playground list",
+    "failedToFetchGames": "Failed to get game list",
+    "gameNotArchived": "The game has not been archived yet"
   },
   "game": {
     "title": "Games",

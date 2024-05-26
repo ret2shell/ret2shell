@@ -54,7 +54,10 @@
     "list": "練習場列表",
     "noPlaygrounds": "沒有練習場",
     "noArchivedGames": "沒有歸檔的往期賽事",
-    "selectPlayground": "開始今日份的訓練！"
+    "selectPlayground": "開始今日份的訓練！",
+    "failedToFetchPlaygrounds": "取得練習場清單失敗",
+    "failedToFetchGames": "取得賽事清單失敗",
+    "gameNotArchived": "比賽尚未歸檔"
   },
   "game": {
     "title": "賽事",

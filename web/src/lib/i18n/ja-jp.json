@@ -54,7 +54,10 @@
     "list": "ゴルフ練習場一覧",
     "noPlaygrounds": "ドライビングレンジなし",
     "noArchivedGames": "アーカイブされた過去のイベントはありません",
-    "selectPlayground": "今日からトレーニングを始めましょう！"
+    "selectPlayground": "今日からトレーニングを始めましょう！",
+    "failedToFetchPlaygrounds": "ゴルフ練習場のリストを取得できませんでした",
+    "failedToFetchGames": "イベントリストの取得に失敗しました",
+    "gameNotArchived": "試合はまだアーカイブされていません"
   },
   "game": {
     "title": "コンペ",
