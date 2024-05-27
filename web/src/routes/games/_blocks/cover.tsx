@@ -35,7 +35,7 @@ export default function (props: ComponentProps<'div'>) {
       >
         <div class="w-screen h-screen relative">
           <img
-            class={`w-screen h-screen transition-all ease-out duration-[2000ms] ${expanded() ? 'scale-125 blur-2xl' : ''}`}
+            class={`w-screen h-screen transition-all ease-out duration-[2000ms] ${expanded() ? 'scale-125 blur-md' : ''}`}
             src={
               (gameStore.preload?.cover && mediaPath(gameStore.preload.cover)) ||
               (gameStore.current?.cover && mediaPath(gameStore.current.cover)) ||

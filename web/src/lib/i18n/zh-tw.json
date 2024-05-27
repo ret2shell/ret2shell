@@ -264,7 +264,8 @@
     },
     "description": "平台管理面板",
     "about": {
-      "title": "關於回歸終端"
+      "title": "關於回歸終端",
+      "failedToFetchLicense": "取得平台授權失敗"
     }
   },
   "theme": {

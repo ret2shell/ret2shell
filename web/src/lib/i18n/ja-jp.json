@@ -264,7 +264,8 @@
     },
     "description": "プラットフォーム管理パネル",
     "about": {
-      "title": "About Ret 2 Shell"
+      "title": "About Ret 2 Shell",
+      "failedToFetchLicense": "プラットフォームライセンスの取得に失敗しました"
     }
   },
   "theme": {

@@ -20,6 +20,7 @@ use r2s_database::{
     institute, ip, submission,
     user::{self, Permission},
 };
+use r2s_license::License;
 use r2s_migrator::Database;
 use sea_orm::DbErr;
 use serde::{Deserialize, Serialize};
@@ -56,6 +57,7 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
         .route("/auth", get(get_auth_config))
         .route("/version", get(get_version))
         .route("/logs/stream", get(platform_stream_logs))
+        .route("/license", get(get_license))
 }
 
 async fn get_config(
@@ -279,4 +281,10 @@ async fn get_logs_list(
             "missing log config".to_owned(),
         ))
     }
+}
+
+async fn get_license(
+    State(ref license): State<License>,
+) -> Result<impl IntoResponse, ResponseError> {
+    Ok(Json(license.clone()))
 }

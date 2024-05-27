@@ -60,3 +60,14 @@ export async function getPlatformLogs(file?: string) {
     })
     .blob()
 }
+
+export type PlatformLicense = {
+  issuer: string
+  website: string
+  date: string
+  level: string
+}
+
+export async function getPlatformLicense() {
+  return await api.get(`${api_root}/platform/license`).json<PlatformLicense>()
+}

@@ -264,7 +264,8 @@
     },
     "description": "Platform management panel",
     "about": {
-      "title": "About Ret 2 Shell"
+      "title": "About Ret 2 Shell",
+      "failedToFetchLicense": "Failed to fetch platform license"
     }
   },
   "theme": {
