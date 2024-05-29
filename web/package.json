@@ -5,7 +5,7 @@
   "private": true,
   "description": "Ret 2 Shell is a feature-riches CTF challenge platform.",
   "dependencies": {
-    "@ark-ui/solid": "^3.0.1",
+    "@ark-ui/solid": "^3.0.2",
     "@fontsource/jetbrains-mono": "^5.0.20",
     "@modular-forms/solid": "^0.20.0",
     "@reverier/ky": "^1.2.3",
@@ -78,7 +78,7 @@
     "solid-refresh": "^0.7.5",
     "tailwindcss": "^3.4.3",
     "tslib": "^2.6.2",
-    "vite": "^5.2.11",
+    "vite": "^5.2.12",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-solid": "^2.10.2",
     "vitest": "^1.6.0"
