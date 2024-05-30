@@ -22,6 +22,8 @@ pub enum BucketError {
     GitCommandFailed(String),
     #[error("data convert error: {0}")]
     DataConvertError(#[from] std::string::FromUtf8Error),
+    #[error("need locking before write operation")]
+    NeedLocking,
 }
 
 macro_rules! init_dir {

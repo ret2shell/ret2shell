@@ -1,7 +1,7 @@
 use std::{
     ffi::OsStr,
     path::{Path, PathBuf},
-    process::Stdio,
+    process::{Command as SyncCommand, Stdio},
 };
 
 use tokio::{fs::create_dir_all, io::AsyncRead, process::Command};
@@ -172,6 +172,11 @@ impl Git {
         self.clean_untracked().await
     }
 
+    pub fn cleanup_sync(&self) -> Result<(), BucketError> {
+        self.reset_head_internal_sync()?;
+        self.clean_untracked_sync()
+    }
+
     async fn reset_head_internal(&self) -> Result<(), BucketError> {
         let output = Command::new("git")
             .current_dir(&self.path)
@@ -191,6 +196,24 @@ impl Git {
         }
     }
 
+    fn reset_head_internal_sync(&self) -> Result<(), BucketError> {
+        let output = SyncCommand::new("git")
+            .current_dir(&self.path)
+            .arg("reset")
+            .arg("--hard")
+            .arg("HEAD")
+            .output()?;
+        if output.status.success() {
+            trace!("reset HEAD in git repository: {:?}", output);
+            Ok(())
+        } else {
+            warn!("failed to reset HEAD in git repository: {:?}", output);
+            Err(BucketError::GitCommandFailed(String::from_utf8(
+                output.stderr,
+            )?))
+        }
+    }
+
     async fn clean_untracked(&self) -> Result<(), BucketError> {
         let output = Command::new("git")
             .current_dir(&self.path)
@@ -198,6 +221,23 @@ impl Git {
             .arg("-fd")
             .output()
             .await?;
+        if output.status.success() {
+            trace!("cleaned up git repository: {:?}", output);
+            Ok(())
+        } else {
+            warn!("failed to clean up git repository: {:?}", output);
+            Err(BucketError::GitCommandFailed(String::from_utf8(
+                output.stderr,
+            )?))
+        }
+    }
+
+    fn clean_untracked_sync(&self) -> Result<(), BucketError> {
+        let output = SyncCommand::new("git")
+            .current_dir(&self.path)
+            .arg("clean")
+            .arg("-fd")
+            .output()?;
         if output.status.success() {
             trace!("cleaned up git repository: {:?}", output);
             Ok(())

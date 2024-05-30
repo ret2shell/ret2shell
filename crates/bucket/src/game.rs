@@ -110,16 +110,25 @@ impl GameBucket {
     pub async fn take_shot(
         &self, message: impl AsRef<str>, author: impl AsRef<str>, email: impl AsRef<str>,
     ) -> Result<(), BucketError> {
+        if !self.locked {
+            return Err(BucketError::NeedLocking);
+        }
         self.git.take_shot(message, author, email).await?;
         Ok(())
     }
 
     pub async fn cleanup(&self) -> Result<(), BucketError> {
+        if !self.locked {
+            return Err(BucketError::NeedLocking);
+        }
         self.git.cleanup().await?;
         Ok(())
     }
 
     pub async fn set_config(&self, game: Value) -> Result<(), BucketError> {
+        if !self.locked {
+            return Err(BucketError::NeedLocking);
+        }
         let game: GameConfig = serde_json::from_value(game)?;
         write(
             self.path.join("config.toml"),
@@ -130,6 +139,9 @@ impl GameBucket {
     }
 
     pub async fn set_introduction(&self, introduction: &str) -> Result<(), BucketError> {
+        if !self.locked {
+            return Err(BucketError::NeedLocking);
+        }
         write(self.path.join("README.md"), introduction.to_string()).await?;
         Ok(())
     }
@@ -143,6 +155,9 @@ impl GameBucket {
     pub async fn create(
         &self, challenge: Value,
     ) -> Result<challenge::ChallengeBucket, BucketError> {
+        if !self.locked {
+            return Err(BucketError::NeedLocking);
+        }
         let challenge_config: challenge::ChallengeConfig = serde_json::from_value(challenge)?;
         let challenge_name = format!(
             "{}_{:x}",
@@ -177,6 +192,9 @@ impl GameBucket {
     }
 
     pub async fn delete(&self, challenge: impl AsRef<str>) -> Result<(), BucketError> {
+        if !self.locked {
+            return Err(BucketError::NeedLocking);
+        }
         let _ = self.at(&challenge).await?;
         remove_dir_all(self.path.join("challenges").join(challenge.as_ref())).await?;
         Ok(())
@@ -187,6 +205,7 @@ impl Drop for GameBucket {
     fn drop(&mut self) {
         if self.locked {
             std::fs::remove_file(self.path.join(".lock")).ok();
+            self.git.cleanup_sync().ok();
         }
     }
 }

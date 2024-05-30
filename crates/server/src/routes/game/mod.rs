@@ -104,7 +104,6 @@ async fn get_game(
     Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
     if game.hidden
-        && !token.permissions.0.contains(&Permission::Host)
         && !(token.permissions.0.contains(&Permission::Game) && game.admins.0.contains(&token.id))
     {
         warn!(
