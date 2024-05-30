@@ -121,7 +121,7 @@ export default function Chart(props: EChartsBaseProps) {
   registerTheme('cyber-light', cyberLight)
 
   onMount(() => {
-    size = createElementSize(chartElement!)
+    size = createElementSize(chartElement)
   })
 
   onCleanup(() => {
@@ -172,7 +172,7 @@ export default function Chart(props: EChartsBaseProps) {
       () => props.isLoading,
       isLoading => {
         if (isLoading) {
-          chartInstance.showLoading(props.loadingOptions)
+          chartInstance.showLoading(props.loadingOptions as unknown as object | undefined)
         } else {
           chartInstance.hideLoading()
         }

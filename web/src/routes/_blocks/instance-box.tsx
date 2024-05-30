@@ -5,8 +5,6 @@ import Link from '@widgets/link'
 import Button from '@widgets/button'
 import { For, Show, createEffect, createSignal, onCleanup, untrack } from 'solid-js'
 import Timer from '@widgets/timer'
-import Progress from '@widgets/progress'
-import { Instance } from '@models/instance'
 import { DateTime } from 'luxon'
 import { WsrxState, wsrx } from '@/lib/wsrx'
 import { accountStore } from '@/lib/storage/account'
@@ -22,7 +20,7 @@ export function InstanceBoxContent() {
     wsrx.tryConnect().catch(() => {})
     setConnecting(true)
     setTimeout(() => {
-      wsrx.checkConnection().then(() => {
+      void wsrx.checkConnection().then(() => {
         setConnecting(false)
       })
     }, 1000)
@@ -49,7 +47,7 @@ export function InstanceBoxContent() {
   const heartbeatTimer = setInterval(() => {
     // Pending or Connected
     if (wsrx.connected()) {
-      wsrx.checkConnection()
+      void wsrx.checkConnection()
     }
   }, 5 * 1000)
   onCleanup(() => {

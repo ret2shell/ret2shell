@@ -371,7 +371,7 @@ function checkCookiePolicy() {
   if (!platformStore.accept_cookies) {
     const toastId = addToast({
       level: 'info',
-      description: t('platform.cookiePolicy') as string,
+      description: t('platform.cookiePolicy')!,
       accept: () => {
         setPlatformStore({ accept_cookies: true })
         setTimeout(() => {
@@ -426,8 +426,8 @@ export default function (props: { children?: JSX.Element }) {
       if (showAnimation) {
         setTimeout(() => {
           const typeTimer = setInterval(() => {
-            if (platformTyped().length < platformName!.length) {
-              setPlatformTyped(platformName!.slice(0, platformTyped().length + 1))
+            if (platformTyped().length < platformName.length) {
+              setPlatformTyped(platformName.slice(0, platformTyped().length + 1))
             } else {
               clearInterval(typeTimer)
               setTimeout(() => {
@@ -476,7 +476,7 @@ export default function (props: { children?: JSX.Element }) {
           const a = el.animate([{ opacity: 1 }, { opacity: 0 }], {
             duration: 300,
           })
-          a.finished.then(done)
+          void a.finished.then(done)
         }}
       >
         <Show when={showAnimation && !hideAnimation()}>

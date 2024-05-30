@@ -23,7 +23,6 @@ import Popover from '@/lib/widgets/popover'
 import CreateGame from './create'
 import bgGameDefault from '@assets/imgs/bg-game-default.webp'
 import { randomTips } from '@/lib/utils/loading-tips'
-import { api_root } from '@/lib/api'
 import { mediaPath } from '@/lib/utils/media'
 
 export default function () {
@@ -61,7 +60,7 @@ export default function () {
         setTotal(total)
       })
       .catch((err: HTTPError) => {
-        err.response.text().then(resp => {
+        void err.response.text().then(resp => {
           addToast({
             level: 'error',
             description: `${t('game.fetchFailed')}: ${resp}`,

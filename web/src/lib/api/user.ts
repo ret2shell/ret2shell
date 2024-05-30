@@ -1,3 +1,4 @@
+import { SearchParamsOption } from '@reverier/ky'
 import api, { api_root } from '.'
 import { User } from '../models/user'
 
@@ -18,7 +19,7 @@ export async function getUserList(
           filter,
           with_institute_id,
         })
-      ),
+      ) as SearchParamsOption,
     })
     .json<[User[], number]>()
 }

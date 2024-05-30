@@ -9,7 +9,7 @@ import { platformStore } from '@/lib/storage/platform'
 export default function () {
   const navigate = useNavigate()
   function onDone(article: Article) {
-    refreshWikiToc().then(() => {
+    void refreshWikiToc().then(() => {
       navigate(`/wiki/${article.id}`)
     })
   }

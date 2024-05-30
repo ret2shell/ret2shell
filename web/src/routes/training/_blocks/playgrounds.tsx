@@ -31,7 +31,7 @@ export default function Playgrounds() {
         setPlaygroundTotal(resp[1])
       })
       .catch((err: HTTPError) => {
-        err.response.text().then(text => {
+        void err.response.text().then(text => {
           addToast({
             level: 'error',
             description: `${t('training.failedToFetchPlaygrounds')}: ${text}`,
@@ -52,7 +52,7 @@ export default function Playgrounds() {
         setGameTotal(resp[1])
       })
       .catch((err: HTTPError) => {
-        err.response.text().then(text => {
+        void err.response.text().then(text => {
           addToast({
             level: 'error',
             description: `${t('training.failedToFetchGames')}: ${text}`,

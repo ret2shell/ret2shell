@@ -57,7 +57,7 @@ export default function (props: { onDone: (calendar: Article) => void; editSourc
     })
       .then(resp => props.onDone(resp))
       .catch((err: HTTPError) => {
-        err.response.text().then(resp => {
+        void err.response.text().then(resp => {
           addToast({
             level: 'error',
             description: `${props.editSource ? t('form.saveFailed') : t('form.createFailed')}: ${resp}`,

@@ -1,4 +1,4 @@
-import { Avatar, AvatarImageProps, AvatarRootProps } from '@ark-ui/solid'
+import { Avatar } from '@ark-ui/solid'
 import { JSX, splitProps } from 'solid-js'
 
 export type AvatarProps = {

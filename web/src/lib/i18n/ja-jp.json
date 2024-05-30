@@ -333,7 +333,8 @@
     "save": "保存",
     "edit": "編集",
     "saveFailed": "保存に失敗しました",
-    "saveSuccess": "正常に保存"
+    "saveSuccess": "正常に保存",
+    "fetchFailed": "イベントカレンダーの取得に失敗しました"
   },
   "about": {
     "donate": "寄付する",

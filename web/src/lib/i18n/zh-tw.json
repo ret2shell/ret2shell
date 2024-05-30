@@ -333,7 +333,8 @@
     "save": "儲存",
     "edit": "編輯",
     "saveFailed": "保存失敗",
-    "saveSuccess": "保存成功"
+    "saveSuccess": "保存成功",
+    "fetchFailed": "取得賽事日曆失敗"
   },
   "about": {
     "donate": "捐款",

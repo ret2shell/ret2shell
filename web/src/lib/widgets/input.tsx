@@ -21,7 +21,7 @@ export default function (props: TextInputProps & ComponentProps<'input'>) {
     `flex flex-col relative space-y-1 ${props.class ? `${props.class}` : ''} ${
       props.classList &&
       Object.keys(props.classList)
-        .filter(k => props.classList && props.classList[k])
+        .filter(k => props.classList?.[k])
         .join(' ')
     }`
 

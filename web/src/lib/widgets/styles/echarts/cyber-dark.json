@@ -101,18 +101,13 @@
     "splitLine": {
       "show": false,
       "lineStyle": {
-        "color": [
-          "#eee"
-        ]
+        "color": ["#eee"]
       }
     },
     "splitArea": {
       "show": false,
       "areaStyle": {
-        "color": [
-          "rgba(250,250,250,0.3)",
-          "rgba(200,200,200,0.3)"
-        ]
+        "color": ["rgba(250,250,250,0.3)", "rgba(200,200,200,0.3)"]
       }
     }
   },
@@ -136,18 +131,13 @@
     "splitLine": {
       "show": true,
       "lineStyle": {
-        "color": [
-          "#333333"
-        ]
+        "color": ["#333333"]
       }
     },
     "splitArea": {
       "show": false,
       "areaStyle": {
-        "color": [
-          "rgba(250,250,250,0.3)",
-          "rgba(200,200,200,0.3)"
-        ]
+        "color": ["rgba(250,250,250,0.3)", "rgba(200,200,200,0.3)"]
       }
     }
   },
@@ -171,18 +161,13 @@
     "splitLine": {
       "show": true,
       "lineStyle": {
-        "color": [
-          "#444444"
-        ]
+        "color": ["#444444"]
       }
     },
     "splitArea": {
       "show": false,
       "areaStyle": {
-        "color": [
-          "rgba(250,250,250,0.3)",
-          "rgba(200,200,200,0.3)"
-        ]
+        "color": ["rgba(250,250,250,0.3)", "rgba(200,200,200,0.3)"]
       }
     }
   },
@@ -206,19 +191,13 @@
     "splitLine": {
       "show": false,
       "lineStyle": {
-        "color": [
-          "#eee",
-          "#333333"
-        ]
+        "color": ["#eee", "#333333"]
       }
     },
     "splitArea": {
       "show": false,
       "areaStyle": {
-        "color": [
-          "rgba(250,250,250,0.3)",
-          "rgba(200,200,200,0.3)"
-        ]
+        "color": ["rgba(250,250,250,0.3)", "rgba(200,200,200,0.3)"]
       }
     }
   },
@@ -287,10 +266,7 @@
     }
   },
   "visualMap": {
-    "color": [
-      "#5ab1ef",
-      "#e0ffff"
-    ]
+    "color": ["#5ab1ef", "#e0ffff"]
   },
   "dataZoom": {
     "backgroundColor": "rgba(47,69,84,0)",

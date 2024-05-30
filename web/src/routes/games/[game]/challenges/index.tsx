@@ -15,7 +15,6 @@ import { Challenge as ChallengeModel } from '@/lib/models/challenge'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-solid'
 import { DateTime } from 'luxon'
 import { Permission } from '@/lib/models/user'
-import { c } from 'vite/dist/node/types.d-aGj9QkWt'
 import Create from './_blocks/create'
 
 export default function () {
@@ -85,7 +84,7 @@ export default function () {
               <For each={challengeHistory()}>
                 {challenge => (
                   <Link
-                    href={`/games/${gameStore.current?.id}/challenges?challenge=${challenge}`}
+                    href={`/games/${gameStore.current?.id}/challenges?challenge=${challenge.id}`}
                     onClick={() => setSearchParams({ challenge: challenge.id })}
                     active={challenge.id === selectedChallengeId() && inCreate() === false}
                     ghost

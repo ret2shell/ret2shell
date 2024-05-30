@@ -333,7 +333,8 @@
     "save": "Save",
     "edit": "Edit",
     "saveFailed": "Save failed",
-    "saveSuccess": "Saved successfully"
+    "saveSuccess": "Saved successfully",
+    "fetchFailed": "Failed to fetch game events"
   },
   "about": {
     "donate": "Donate",

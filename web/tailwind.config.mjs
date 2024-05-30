@@ -1,6 +1,5 @@
 import { addDynamicIconSelectors } from '@iconify/tailwind'
 import typography from '@tailwindcss/typography'
-import type { Config } from 'tailwindcss'
 import { okwind } from 'okwind'
 
 const fontFamily = [
@@ -57,4 +56,4 @@ export default {
     },
   },
   plugins: [typography, okwind, addDynamicIconSelectors()],
-} satisfies Config
+}

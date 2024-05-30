@@ -46,7 +46,7 @@ function buildLinked(tree: TreeNode[], paths: string[], article: Article) {
 function buildTocTree(articles: Article[]) {
   const tree: TreeNode[] = []
   for (const article of articles) {
-    buildLinked(tree, JSON.parse(JSON.stringify(article.path)), article)
+    buildLinked(tree, JSON.parse(JSON.stringify(article.path)) as string[], article)
   }
   return tree
 }

@@ -58,16 +58,16 @@ export default function () {
     login(result)
       .then(() => {
         addToast({ level: 'success', description: t('account.login.success')!, duration: 5000, img: xdsecMascotHappy })
-        const redirectUrl = location.query['redirect']
+        const redirectUrl = location.query.redirect
         if (redirectUrl) {
-          navigate(redirectUrl as string, { replace: true })
+          navigate(redirectUrl, { replace: true })
         } else {
           navigate('/', { replace: true })
         }
       })
       .catch((err: HTTPError) => {
-        err.response.text().then(text => {
-          addToast({ level: 'error', description: text as string, duration: 5000 })
+        void err.response.text().then(text => {
+          addToast({ level: 'error', description: text, duration: 5000 })
         })
         setTimestamp(DateTime.now().toMillis())
         setValue(form, 'password', '')

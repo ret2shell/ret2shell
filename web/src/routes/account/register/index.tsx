@@ -57,8 +57,8 @@ export default function () {
                   navigate('/', { replace: true })
                 })
                 .catch((err: HTTPError) => {
-                  err.response.text().then(text => {
-                    addToast({ level: 'error', description: text as string, duration: 5000 })
+                  void err.response.text().then(text => {
+                    addToast({ level: 'error', description: text, duration: 5000 })
                   })
                   setTimestamp(DateTime.now().toMillis())
                 })
@@ -127,7 +127,7 @@ export default function () {
                         class="!rounded-l-none"
                         type="button"
                         onClick={() => {
-                          if (accountInputRef && accountInputRef.value)
+                          if (accountInputRef?.value)
                             leet(accountInputRef!.value)
                               .then(result => {
                                 setValue(form, 'account', result)

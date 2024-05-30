@@ -14,7 +14,6 @@ import { For, Match, Show, Switch, createSignal } from 'solid-js'
 export default function () {
   const [available, setAvailable] = createSignal(false)
   const [loading, setLoading] = createSignal(true)
-  const configShownKeys = ['since', 'clusterDNS', 'clusterDomain']
   const [since, setSince] = createSignal('')
   const [clusterDNS, setClusterDNS] = createSignal('')
   const [clusterDomain, setClusterDomain] = createSignal('')
@@ -23,13 +22,13 @@ export default function () {
     .then(resp => {
       setAvailable(true)
       for (const c of resp.items) {
-        if (c.data && c.data.since) {
+        if (c.data?.since) {
           setSince(c.data.since)
         }
-        if (c.data && c.data.clusterDNS) {
+        if (c.data?.clusterDNS) {
           setClusterDNS(c.data.clusterDNS)
         }
-        if (c.data && c.data.clusterDomain) {
+        if (c.data?.clusterDomain) {
           setClusterDomain(c.data.clusterDomain)
         }
       }
@@ -45,7 +44,7 @@ export default function () {
       setClusterNodes(resp.items)
     })
     .catch((err: HTTPError) => {
-      err.response.text().then(text => {
+      void err.response.text().then(text => {
         addToast({
           level: 'error',
           description: `${t('admin.cluster.failedToFetchNodes')}: ${text}`,
@@ -153,13 +152,13 @@ export default function () {
                     {DateTime.fromISO(shownNode()!.metadata.creationTimestamp).toFormat('yyyy-MM-dd HH:mm:ss')}
                   </span>
                 </span>
-                <Button size="sm" square title={t('admin.cluster.refreshNode')!}>
+                <Button size="sm" square title={t('admin.cluster.refreshNode')}>
                   <span class="icon-[fluent--arrow-clockwise-20-regular] w-5 h-5"></span>
                 </Button>
-                <Button size="sm" square title={t('admin.cluster.updateNode')!}>
+                <Button size="sm" square title={t('admin.cluster.updateNode')}>
                   <span class="icon-[fluent--arrow-circle-up-20-regular] w-5 h-5"></span>
                 </Button>
-                <Button size="sm" square level="error" title={t('admin.cluster.disconnectNode')!}>
+                <Button size="sm" square level="error" title={t('admin.cluster.disconnectNode')}>
                   <span class="icon-[fluent--stop-20-regular] w-5 h-5"></span>
                 </Button>
               </div>
@@ -172,7 +171,7 @@ export default function () {
                       {([key, value]) => (
                         <tr class="border-b border-b-layer-content/10">
                           {/* @ts-expect-error key is dynamic */}
-                          <td class="font-bold opacity-60 p-2">{`${t(`admin.cluster.data.nodeInfo.${key}`)}`}</td>
+                          <td class="font-bold opacity-60 p-2">{`${t(`admin.cluster.data.nodeInfo.${key}`) as string}`}</td>
                           <td class="p-2">{value}</td>
                         </tr>
                       )}

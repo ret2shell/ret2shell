@@ -15,7 +15,7 @@ export default function () {
   getPlatformLicense()
     .then(setLicense)
     .catch((err: HTTPError) => {
-      err.response.text().then(text => {
+      void err.response.text().then(text => {
         addToast({
           level: 'error',
           description: `${t('admin.about.failedToFetchLicense')}: ${text}`,

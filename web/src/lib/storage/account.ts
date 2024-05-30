@@ -49,7 +49,7 @@ export const refreshInstitutes = async () => {
   try {
     const institutes = await getInstitutes()
     setAccountStore({ institutes })
-  } catch (e) {
+  } catch {
     // make eslint happy
   }
 }

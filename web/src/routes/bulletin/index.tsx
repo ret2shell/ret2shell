@@ -27,7 +27,7 @@ export default function () {
         setTotal(t)
       })
       .catch((err: HTTPError) => {
-        err.response.text().then(reason => {
+        void err.response.text().then(reason => {
           addToast({ level: 'error', description: `${t('bulletin.fetchFailed')}: ${reason}`, duration: 5000 })
         })
       })

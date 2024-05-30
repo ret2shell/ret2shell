@@ -106,7 +106,7 @@ function EventForm(props: { onDone: (calendar: Calendar) => void; editSource?: C
     })
       .then(resp => props.onDone(resp))
       .catch((err: HTTPError) => {
-        err.response.text().then(resp => {
+        void err.response.text().then(resp => {
           addToast({
             level: 'error',
             description: `${props.editSource ? t('calendar.saveFailed') : t('calendar.createFailed')}: ${resp}`,
@@ -213,9 +213,9 @@ export default function () {
   const [searchParams, setSearchParams] = useSearchParams()
   const [inEdit, setInEdit] = createSignal(false)
   const selectedEventId = createMemo(() => {
-    if (searchParams && searchParams.event) {
+    if (searchParams?.event) {
       try {
-        return parseInt(searchParams.event!)
+        return parseInt(searchParams.event)
       } catch {
         return null
       }
@@ -227,7 +227,7 @@ export default function () {
     if (selectedEventId()) {
       untrack(() => {
         setSelectedEvent(null)
-        getCalendar(selectedEventId()!).then(resp => {
+        void getCalendar(selectedEventId()!).then(resp => {
           setSelectedEvent(resp)
         })
       })
@@ -292,9 +292,19 @@ export default function () {
   })
   const [events, setEvents] = createSignal([] as Calendar[])
   function getEvents(startTime: DateTime, endTime: DateTime) {
-    getCalendarList(startTime, endTime).then(resp => {
-      setEvents(resp)
-    })
+    getCalendarList(startTime, endTime)
+      .then(resp => {
+        setEvents(resp)
+      })
+      .catch((err: HTTPError) => {
+        void err.response.text().then(resp => {
+          addToast({
+            level: 'error',
+            description: `${t('calendar.fetchFailed')}: ${resp}`,
+            duration: 5000,
+          })
+        })
+      })
   }
   createEffect(() => {
     const startTime = DateTime.fromObject({ year: year(), month: month(), day: 1 })
@@ -347,28 +357,29 @@ export default function () {
     setInEdit(true)
   }
   function onDeleted() {
-    deleteCalendar(selectedEventId()!)
-      .then(() => {
-        addToast({
-          level: 'success',
-          description: t('calendar.deleteSuccess')!,
-          duration: 5000,
-        })
-        setSelectedEvent(null)
-        getEvents(
-          DateTime.fromObject({ year: year(), month: month(), day: 1 }),
-          DateTime.fromObject({ year: year(), month: month(), day: 1 }).endOf('month')
-        )
-      })
-      .catch((err: HTTPError) => {
-        err.response.text().then(resp => {
+    if (selectedEventId())
+      deleteCalendar(selectedEventId()!)
+        .then(() => {
           addToast({
-            level: 'error',
-            description: `${t('calendar.deleteFailed')}: ${resp}`,
+            level: 'success',
+            description: t('calendar.deleteSuccess')!,
             duration: 5000,
           })
+          setSelectedEvent(null)
+          getEvents(
+            DateTime.fromObject({ year: year(), month: month(), day: 1 }),
+            DateTime.fromObject({ year: year(), month: month(), day: 1 }).endOf('month')
+          )
         })
-      })
+        .catch((err: HTTPError) => {
+          void err.response.text().then(resp => {
+            addToast({
+              level: 'error',
+              description: `${t('calendar.deleteFailed')}: ${resp}`,
+              duration: 5000,
+            })
+          })
+        })
   }
   return (
     <>

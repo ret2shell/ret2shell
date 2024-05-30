@@ -26,5 +26,5 @@
       "@routes/*": ["src/routes/*"]
     }
   },
-  "include": ["src", "tailwind.config.ts", "vite.config.ts"]
+  "include": ["src", "vite.config.ts"]
 }

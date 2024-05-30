@@ -2,14 +2,14 @@ import { luxonReplacer, luxonReviver } from '@models/utils'
 import { accountStore, storeToken, resetUser } from '@storage/account'
 import ky from '@reverier/ky'
 
-export const api_root = import.meta.env.VITE_API_ROOT || '/api'
+export const api_root = (import.meta.env.VITE_API_ROOT as string) || '/api'
 
 const api = ky.extend({
-  parseJson: text => JSON.parse(text, luxonReviver),
+  parseJson: text => JSON.parse(text, luxonReviver) as unknown,
   stringifyJson: data => JSON.stringify(data, luxonReplacer),
   hooks: {
     beforeRequest: [
-      async request => {
+      request => {
         const token = accountStore.token
         if (token) {
           request.headers.set('Authorization', `Bearer ${token}`)
@@ -17,7 +17,7 @@ const api = ky.extend({
       },
     ],
     afterResponse: [
-      async (_request, _options, response) => {
+      (_request, _options, response) => {
         if (response.status === 401) {
           resetUser()
         }

@@ -1,3 +1,4 @@
+import { SearchParamsOption } from '@reverier/ky'
 import api, { api_root } from '.'
 import { Article } from '../models/article'
 
@@ -9,7 +10,7 @@ export async function getBulletinList(page: number, page_size: number) {
           page,
           page_size,
         })
-      ),
+      ) as SearchParamsOption,
     })
     .json<[Article[], number]>()
 }

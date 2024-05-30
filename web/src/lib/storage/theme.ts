@@ -12,9 +12,7 @@ let systemPrefersLocale = (window.navigator.language || window.navigator.languag
   .replace('-', '_')
   .toLowerCase() as Locale
 
-if (hasLocale(systemPrefersLocale)) {
-  systemPrefersLocale = systemPrefersLocale as Locale
-} else {
+if (!hasLocale(systemPrefersLocale)) {
   systemPrefersLocale = 'en_us' as Locale
 }
 
@@ -22,7 +20,7 @@ export const [themeStore, setThemeStore] = makePersisted(
   createStore({
     theme: 'cyber',
     locale: systemPrefersLocale,
-    colorScheme: (initPrefersDark ? 'dark' : 'light') as 'dark' | 'light',
+    colorScheme: initPrefersDark ? 'dark' : 'light',
   }),
   { name: 'theme' }
 )

@@ -1,3 +1,4 @@
+import { SearchParamsOption } from '@reverier/ky'
 import api, { api_root } from '.'
 import { Article } from '../models/article'
 import { Game, HostType } from '../models/game'
@@ -13,7 +14,7 @@ export async function getGames(page?: number, page_size?: number, host_type?: Ho
           host_type,
           weight,
         })
-      ),
+      ) as SearchParamsOption,
     })
   ).json<[Game[], number]>()
 }
@@ -60,7 +61,7 @@ export async function getGameScoreboard(
           asc: false,
           order_by: 'score',
         })
-      ),
+      ) as SearchParamsOption,
     })
   ).json<[Team[], number]>()
 }

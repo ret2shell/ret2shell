@@ -1,4 +1,3 @@
-import { api_root } from '@/lib/api'
 import { getGameIntroduction, updateGame, updateGameIntroduction } from '@/lib/api/game'
 import { uploadMedia } from '@/lib/api/media'
 import LogoAnimate from '@/lib/assets/animates/logo-animate'
@@ -29,7 +28,7 @@ import { For, Match, Show, Switch, createEffect, createSignal, onCleanup, untrac
 import IntroForm from './_blocks/intro-form'
 
 export default function () {
-  refreshInstitutes()
+  void refreshInstitutes()
   const [searchParams, setSearchParams] = useSearchParams()
   const inEdit = () => searchParams.edit === 'true'
   const period = () => {
@@ -79,7 +78,7 @@ export default function () {
               setLoading(false)
             })
             .catch((err: HTTPError) => {
-              err.response.text().then(resp => {
+              void err.response.text().then(resp => {
                 addToast({
                   level: 'error',
                   description: `${t('game.introduction.fetchFailed')}: ${resp}`,
@@ -142,7 +141,7 @@ export default function () {
                 })
               })
               .catch((err: HTTPError) => {
-                err.response.text().then(resp => {
+                void err.response.text().then(resp => {
                   addToast({
                     level: 'error',
                     description: `${t('game.cover.uploadFailed')}: ${resp}`,
@@ -157,7 +156,7 @@ export default function () {
               })
         })
         .catch((err: HTTPError) => {
-          err.response.text().then(resp => {
+          void err.response.text().then(resp => {
             addToast({
               level: 'error',
               description: `${t('game.cover.uploadFailed')}: ${resp}`,
@@ -208,7 +207,7 @@ export default function () {
                 })
               })
               .catch((err: HTTPError) => {
-                err.response.text().then(resp => {
+                void err.response.text().then(resp => {
                   addToast({
                     level: 'error',
                     description: `${t('game.logo.uploadFailed')}: ${resp}`,
@@ -223,7 +222,7 @@ export default function () {
               })
         })
         .catch((err: HTTPError) => {
-          err.response.text().then(resp => {
+          void err.response.text().then(resp => {
             addToast({
               level: 'error',
               description: `${t('game.logo.uploadFailed')}: ${resp}`,
@@ -235,11 +234,11 @@ export default function () {
 
   async function onUpdateIntroduction(result: ArticleModel) {
     try {
-      let resp = await updateGameIntroduction(gameStore.current!.id, result)
+      const resp = await updateGameIntroduction(gameStore.current!.id, result)
       setIntroduction(resp)
       setSearchParams({ edit: null })
     } catch (err) {
-      let errorString = await (err as HTTPError).response.text()
+      const errorString = await (err as HTTPError).response.text()
       addToast({
         level: 'error',
         description: `${t('game.introduction.updateFailed')}: ${errorString}`,

@@ -88,7 +88,7 @@ export default function () {
   const [loadingInstitute, setLoadingInstitute] = createSignal(true)
   const [loading, setLoading] = createSignal(false)
   const [showPlane, setShowPlane] = createSignal(false)
-  refreshInstitutes().then(() => setLoadingInstitute(false))
+  void refreshInstitutes().then(() => setLoadingInstitute(false))
 
   function getTopTeams() {
     setLoading(true)
@@ -97,7 +97,7 @@ export default function () {
         setTopTeams(data[0])
       })
       .catch((err: HTTPError) => {
-        err.response.text().then((text: string) => {
+        void err.response.text().then((text: string) => {
           addToast({
             level: 'error',
             description: `${t('game.scoreboard.fetchError')}: ${text}`,
@@ -122,7 +122,7 @@ export default function () {
         setTeams(data[0])
       })
       .catch((err: HTTPError) => {
-        err.response.text().then((text: string) => {
+        void err.response.text().then((text: string) => {
           addToast({
             level: 'error',
             description: `${t('game.scoreboard.fetchError')}: ${text}`,

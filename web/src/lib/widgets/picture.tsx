@@ -42,13 +42,13 @@ export default function (props: ImageProps & ComponentProps<'div'>) {
           const a = el.animate([{ opacity: 0 }, { opacity: 1 }], {
             duration: 300,
           })
-          a.finished.then(done)
+          void a.finished.then(done)
         }}
         onExit={(el, done) => {
           const a = el.animate([{ opacity: 1 }, { opacity: 0 }], {
             duration: 300,
           })
-          a.finished.then(done)
+          void a.finished.then(done)
         }}
       >
         <Show when={loading()}>

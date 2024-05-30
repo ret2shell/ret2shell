@@ -2,8 +2,8 @@ import { hashToHex } from '@lib/utils/hash'
 
 self.addEventListener(
   'message',
-  async function (e) {
-    const criteria: string = e.data.challenge
+  function (e: { data: { challenge: string } }) {
+    const criteria = e.data.challenge
     const difficulty = Number.parseInt(criteria.split('#')[0])
     const challenge = criteria.split('#')[1]
     let nonce = 0

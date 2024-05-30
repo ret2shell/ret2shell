@@ -1,6 +1,6 @@
 import { ComponentProps, createMemo, splitProps } from 'solid-js'
 
-export type CardProps = {
+export interface CardProps {
   solid?: boolean
   contentClass?: string
   level?: 'info' | 'success' | 'warning' | 'error'
@@ -11,7 +11,7 @@ export default function (props: CardProps & ComponentProps<'div'>) {
   const mergedClassesList = {
     card: true,
     'card-solid': cardProps.solid,
-  } as { [k: string]: boolean }
+  } as Record<string, boolean>
   const mergedClasses = createMemo(() => {
     return (
       Object.keys(mergedClassesList)

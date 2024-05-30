@@ -8,7 +8,10 @@ import rehypeSanitize from 'rehype-sanitize'
 import remarkRehype from 'remark-rehype'
 import rehypeStringify from 'rehype-stringify'
 
-type IParams = { type: 'html'; options?: MarkToHtmlOptions }
+type IParams = {
+  type: 'html'
+  options?: MarkToHtmlOptions
+}
 
 export class Markdown {
   private processor: Processor | undefined
@@ -20,7 +23,7 @@ export class Markdown {
     this.processor = unified().use(remarkParse)
     switch (params.type) {
       case 'html':
-        await this.initHtml(params.options as MarkToHtmlOptions)
+        await this.initHtml(params.options)
         break
     }
   }

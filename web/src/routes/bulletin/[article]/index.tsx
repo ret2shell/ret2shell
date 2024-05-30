@@ -25,7 +25,7 @@ export default function () {
       setArticle(resp)
     })
     .catch((err: HTTPError) => {
-      err.response.text().then(reason => {
+      void err.response.text().then(reason => {
         addToast({ level: 'error', description: reason, duration: 5000 })
         navigate(`/errors/${err.response.status}`, { replace: true })
       })
@@ -38,7 +38,7 @@ export default function () {
         navigate('/bulletin', { replace: true })
       })
       .catch((err: HTTPError) => {
-        err.response.text().then(reason => {
+        void err.response.text().then(reason => {
           addToast({ level: 'error', description: reason, duration: 5000 })
         })
       })
@@ -50,7 +50,7 @@ export default function () {
         setArticle(resp)
       })
       .catch((err: HTTPError) => {
-        err.response.text().then(reason => {
+        void err.response.text().then(reason => {
           addToast({ level: 'error', description: reason, duration: 5000 })
           navigate(`/errors/${err.response.status}`, { replace: true })
         })

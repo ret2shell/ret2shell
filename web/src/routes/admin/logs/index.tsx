@@ -6,8 +6,6 @@ import { platformStore } from '@/lib/storage/platform'
 import { t } from '@/lib/storage/theme'
 import { addToast } from '@/lib/storage/toast'
 import Button from '@/lib/widgets/button'
-import Divider from '@/lib/widgets/divider'
-import Link from '@/lib/widgets/link'
 import LoadingTips from '@/lib/widgets/loading-tips'
 import Tag from '@/lib/widgets/tag'
 import { HTTPError } from '@reverier/ky'
@@ -41,7 +39,7 @@ export default function () {
       setLogFiles(resp as string[])
     })
     .catch((err: HTTPError) => {
-      err.response.text().then(text => {
+      void err.response.text().then(text => {
         addToast({
           level: 'error',
           description: `${t('admin.logs.failedToFetchLogsList')}: ${text}`,
@@ -54,7 +52,7 @@ export default function () {
 
   function downloadLog(file: string) {
     setDownloadingFile(file)
-    getPlatformLogs(file).then(blob => {
+    void getPlatformLogs(file).then(blob => {
       const url = window.URL.createObjectURL(blob as Blob)
       const a = document.createElement('a')
       a.href = url
@@ -87,7 +85,7 @@ export default function () {
       setLogs([])
     }
     ws.onmessage = event => {
-      let log: Log = JSON.parse(event.data)
+      const log = JSON.parse(event.data as string) as Log
       setLogs(logs().concat(log))
       setTimeout(() => {
         bottomDiv.scrollIntoView({ behavior: 'smooth' })

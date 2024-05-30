@@ -60,7 +60,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
         props.onDone(resp)
       })
       .catch((err: HTTPError) => {
-        err.response.text().then(reason => {
+        void err.response.text().then(reason => {
           addToast({
             level: 'error',
             description: `${t('game.createFailed')}: ${reason}`,

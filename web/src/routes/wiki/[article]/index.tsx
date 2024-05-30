@@ -30,7 +30,7 @@ export default function () {
           // console.log(resp)
         })
         .catch((err: HTTPError) => {
-          err.response.text().then(reason => {
+          void err.response.text().then(reason => {
             addToast({ level: 'error', description: reason, duration: 5000 })
             navigate(`/errors/${err.response.status}`, { replace: true })
           })
@@ -46,10 +46,10 @@ export default function () {
     deleteWiki(article_id())
       .then(() => {
         addToast({ level: 'success', description: t('wiki.deleteSuccess')!, duration: 5000 })
-        refreshWikiToc().then(() => navigate('/wiki', { replace: true }))
+        void refreshWikiToc().then(() => navigate('/wiki', { replace: true }))
       })
       .catch((err: HTTPError) => {
-        err.response.text().then(reason => {
+        void err.response.text().then(reason => {
           addToast({ level: 'error', description: reason, duration: 5000 })
         })
       })
@@ -59,10 +59,10 @@ export default function () {
     getWiki(article.id)
       .then(resp => {
         setWikiStore({ current: resp })
-        refreshWikiToc()
+        void refreshWikiToc()
       })
       .catch((err: HTTPError) => {
-        err.response.text().then(reason => {
+        void err.response.text().then(reason => {
           addToast({ level: 'error', description: reason, duration: 5000 })
           navigate(`/errors/${err.response.status}`, { replace: true })
         })
@@ -110,7 +110,7 @@ export default function () {
             when={
               wikiStore.current?.created_at &&
               wikiStore.current?.updated_at &&
-              wikiStore.current!.created_at !== wikiStore.current!.updated_at
+              wikiStore.current.created_at !== wikiStore.current.updated_at
             }
           >
             <div

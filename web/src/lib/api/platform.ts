@@ -3,6 +3,7 @@ import { AuthConfig, ServerConfig } from '@models/config'
 import { Institute } from '../models/institute'
 import { DateTime } from 'luxon'
 import { HostType } from '../models/game'
+import { SearchParamsOption } from '@reverier/ky'
 
 export async function getPlatformInfo() {
   return await api.get(`${api_root}/platform/info`).json<ServerConfig>()
@@ -56,7 +57,7 @@ export async function getPlatformLogs(file?: string) {
         JSON.stringify({
           file,
         })
-      ),
+      ) as SearchParamsOption,
     })
     .blob()
 }

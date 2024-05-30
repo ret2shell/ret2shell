@@ -1,6 +1,7 @@
 import { ComponentProps, Show, createEffect, createSignal, splitProps, untrack } from 'solid-js'
 
 import LoadingTips from './loading-tips'
+import { addToast } from '../storage/toast'
 
 export type ArticleProps = {
   content: string
@@ -20,7 +21,7 @@ export default function (props: ComponentProps<'article'> & ArticleProps) {
       type: 'html',
       options: { prism: articleProps.extra, katex: articleProps.extra, headingAnchors: articleProps.headingAnchors },
     })
-    return (await markdown.render(content)) as string
+    return (await markdown.render(content))!
   }
   function scrollToView() {
     setTimeout(() => {
@@ -30,13 +31,21 @@ export default function (props: ComponentProps<'article'> & ArticleProps) {
   }
   createEffect(() => {
     if (articleProps.content) {
-      render(articleProps.content).then(html =>
-        untrack(() => {
-          setContentHtml(html)
-          setReady(true)
-          scrollToView()
+      render(articleProps.content)
+        .then(html =>
+          untrack(() => {
+            setContentHtml(html)
+            setReady(true)
+            scrollToView()
+          })
+        )
+        .catch((err: Error) => {
+          addToast({
+            level: 'error',
+            description: err.message,
+            duration: 5000,
+          })
         })
-      )
     }
   })
   return (

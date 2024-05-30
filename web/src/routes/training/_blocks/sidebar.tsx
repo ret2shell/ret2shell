@@ -4,8 +4,6 @@ import Link from '@/lib/widgets/link'
 import { Show } from 'solid-js'
 import Challenges from './challenges'
 import Playgrounds from './playgrounds'
-import { accountStore } from '@/lib/storage/account'
-import { Permission } from '@/lib/models/user'
 
 export default function SideBar() {
   return (

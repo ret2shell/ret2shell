@@ -1,7 +1,7 @@
 import { api_root } from '../api'
 
 export function mediaPath(hashUrl: string) {
-  let pattern = /[A-Fa-f0-9]{64}/
+  const pattern = /[A-Fa-f0-9]{64}/
   if (!pattern.test(hashUrl)) {
     return hashUrl
   }

@@ -16,7 +16,7 @@ export async function refreshWikiToc() {
     resp = resp.sort((a, b) => (a.created_at < b.created_at ? -1 : 1))
     setWikiStore({ toc: resp })
   } catch (err) {
-    ;(err as HTTPError).response.text().then(reason => {
+    void (err as HTTPError).response.text().then(reason => {
       addToast({ level: 'error', description: `${t('wiki.fetchTocFailed')}: ${reason}`, duration: 5000 })
     })
   }

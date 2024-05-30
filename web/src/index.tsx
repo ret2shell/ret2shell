@@ -10,7 +10,7 @@ import { Router } from '@solidjs/router'
 import { onMount } from 'solid-js'
 
 function checkEdition() {
-  const compact_edition = import.meta.env.VITE_COMPAT_EDITION
+  const compact_edition: string = import.meta.env.VITE_COMPAT_EDITION as string
   const edition = localStorage.getItem('edition')
   const needReload = localStorage.length !== 0 && edition !== compact_edition
   if (compact_edition && needReload) {

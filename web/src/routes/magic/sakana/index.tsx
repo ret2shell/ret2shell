@@ -17,9 +17,9 @@ export default function () {
   if (xdsec) xdsec.image = xdsecMascot
   if (vidar) vidar.image = vidarMascot
   if (cnss) cnss.image = cnssMascot
-  SakanaWidget.registerCharacter('xdsec', xdsec as SakanaWidgetCharacter)
-  SakanaWidget.registerCharacter('vidar', vidar as SakanaWidgetCharacter)
-  SakanaWidget.registerCharacter('cnss', cnss as SakanaWidgetCharacter)
+  SakanaWidget.registerCharacter('xdsec', xdsec!)
+  SakanaWidget.registerCharacter('vidar', vidar!)
+  SakanaWidget.registerCharacter('cnss', cnss!)
 
   onMount(() => {
     new SakanaWidget({

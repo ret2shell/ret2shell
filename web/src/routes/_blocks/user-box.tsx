@@ -25,7 +25,7 @@ export default function UserBox() {
   function handleLogout() {
     setLoading(true)
     setTimeout(() => {
-      logout().finally(() => {
+      void logout().finally(() => {
         resetUser()
         navigate('/')
         clearToasts()

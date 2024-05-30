@@ -349,7 +349,8 @@
     "save": "保存",
     "edit": "编辑",
     "saveFailed": "保存失败",
-    "saveSuccess": "保存成功"
+    "saveSuccess": "保存成功",
+    "fetchFailed": "获取赛事日历失败"
   },
   "about": {
     "donate": "捐助",

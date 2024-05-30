@@ -15,7 +15,7 @@ export default function (props: { children?: JSX.Element }) {
   }
   const matches = createBreakpoints(breakpoints)
   const [showSidebar, setShowSidebar] = createSignal(false)
-  refreshWikiToc()
+  void refreshWikiToc()
   return (
     <>
       <Title title={`${t('wiki.title')} - ${platformStore.config.name || t('platform.name')}`} />

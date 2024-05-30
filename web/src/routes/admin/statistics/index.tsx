@@ -11,7 +11,7 @@ import Chart from '@/lib/widgets/chart'
 import Divider from '@/lib/widgets/divider'
 import { HTTPError } from '@reverier/ky'
 import { DateTime } from 'luxon'
-import { Show, children, createSignal } from 'solid-js'
+import { Show, createSignal } from 'solid-js'
 
 export default function () {
   const [loading, setLoading] = createSignal(false)
@@ -22,7 +22,7 @@ export default function () {
       setStatistics(resp)
     })
     .catch((err: HTTPError) => {
-      err.response.text().then(text => {
+      void err.response.text().then(text => {
         addToast({
           level: 'error',
           description: `${t('admin.statistics.fetchFailed')}: ${text}`,

@@ -1,3 +1,4 @@
+import { SearchParamsOption } from '@reverier/ky'
 import api, { api_root } from '.'
 import { Media } from '../models/media'
 
@@ -11,7 +12,7 @@ export async function uploadMedia(file: File, thumbnail?: boolean) {
         JSON.stringify({
           thumbnail,
         })
-      ),
+      ) as SearchParamsOption,
     })
     .json<Media>()
 }

@@ -67,7 +67,7 @@ export function EditorBare(props: EditorProps & ComponentProps<'div'>) {
     editor.on('change', function () {
       const content = editor?.getValue()
       editorProps.onValueChanged?.(content || '')
-      editorProps.form && editorProps.name && setValue(editorProps.form, editorProps.name, content)
+      if (editorProps.form && editorProps.name) setValue(editorProps.form, editorProps.name, content)
     })
 
     editor.on('blur', function () {
