@@ -27,7 +27,7 @@ services:
     networks:
       internal:
   cache:
-    image: redis:7-alpine
+    image: valkey/valkey:7-alpine
     restart: always
     volumes:
       - cache:/data
