@@ -25,7 +25,7 @@ function TeamDetail(props: { team: Team; challenges: Challenge[]; index: number 
           </Switch>
         </div>
         <div class="flex-1 flex flex-col justify-center">
-          <h2 class="text-2xl font-bold flex flex-row">
+          <h2 class="text-xl font-bold flex flex-row">
             <a class="hover:underline flex-1" href={`/games/${gameStore.current?.id}/teams/${props.team.id}`}>
               {props.team.name}
             </a>
@@ -34,7 +34,7 @@ function TeamDetail(props: { team: Team; challenges: Challenge[]; index: number 
             </span>
           </h2>
           <div class="pt-2 flex flex-row items-center space-x-4">
-            <Progress class="flex-1" max={1} min={0} value={solvedChallenges() / (totalChallenges() || 1)} />
+            <Progress class="flex-1" max={1} min={0} value={solvedChallenges() / (totalChallenges() || 1)} static />
             <span>
               {solvedChallenges()} / {totalChallenges()} {t('game.challenge.solved')}
             </span>

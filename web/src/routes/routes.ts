@@ -151,16 +151,20 @@ export const routes = {
                   component: lazy(() => import('./games/[game]/admin/events/index')),
                 },
                 {
+                  path: '/edit',
+                  component: lazy(() => import('./games/[game]/admin/edit/index')),
+                },
+                {
+                  path: '/hammers',
+                  component: lazy(() => import('./games/[game]/admin/hammers/index')),
+                },
+                {
                   path: '/teams',
                   component: lazy(() => import('./games/[game]/admin/teams/index')),
                 },
                 {
                   path: '/automate',
                   component: lazy(() => import('./games/[game]/admin/automate/index')),
-                },
-                {
-                  path: '/edit',
-                  component: lazy(() => import('./games/[game]/admin/edit/index')),
                 },
               ],
             },

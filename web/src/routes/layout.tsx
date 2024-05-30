@@ -119,7 +119,8 @@ function GameNav(props: { size: 'sm' | 'md' }) {
           ghost
           justify="start"
           size={props.size}
-          disabled={!canAccessChallenges()}
+          disabled={!canAccessChallenges()[0]}
+          title={canAccessChallenges()[1]}
         >
           <span class="icon-[fluent--code-20-regular] w-5 h-5" />
           <span>{t('game.challenge.title')}</span>

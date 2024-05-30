@@ -5,6 +5,7 @@ import { ButtonProps } from './button'
 
 export type LinkProps = {
   activeMatch?: 'exact' | 'partial'
+  active?: boolean
   disabled?: boolean
 }
 
@@ -24,7 +25,7 @@ export default function (props: ComponentProps<'a'> & ButtonProps & LinkProps & 
       uppercase: props.uppercase,
       'btn-disabled': props.disabled,
       'btn-square': props.square,
-      'btn-active': props.activeMatch ? Boolean(match()) : false,
+      'btn-active': props.activeMatch ? Boolean(match()) : props.active,
     }
   })
   const className = createMemo(() => {

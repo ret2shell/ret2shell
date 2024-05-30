@@ -5,6 +5,8 @@ import { Permission, User } from '@models/user'
 import { DateTime } from 'luxon'
 import { accountStore } from './account'
 import { Challenge } from '../models/challenge'
+import { t } from './theme'
+import { Submission } from '../models/submission'
 
 export const [gameStore, setGameStore] = createStore({
   games: [] as Game[],
@@ -15,7 +17,10 @@ export const [gameStore, setGameStore] = createStore({
   score: null as number | null,
   members: [] as User[],
   challenges: [] as Challenge[],
+  solves: [] as Submission[],
 })
+
+export type GameStoreType = typeof gameStore
 
 export function appendGames(games: Game[]) {
   const ids = new Set(gameStore.games.map(g => g.id))
@@ -55,20 +60,20 @@ export const canParticipate = () => {
   return true
 }
 
-export const canAccessChallenges = () => {
-  if (!accountStore.id) return false
+export function canAccessChallenges(): [boolean, string] {
+  if (!accountStore.id) return [false, t('game.team.loginThenBack')!]
   if (
     gameStore.current?.admins &&
     (accountStore.permissions.includes(Permission.Host) ||
       (gameStore.current.admins.includes(accountStore.id) && accountStore.permissions.includes(Permission.Game)))
   ) {
-    return true
+    return [true, '']
   }
   if (gameStore.current?.start_at && gameStore.current.start_at > DateTime.now()) {
-    return false
+    return [false, t('game.challenge.notStarted')!]
   }
   if (gameStore.current?.archive_at && gameStore.current.archive_at < DateTime.now()) {
-    return false
+    return [false, t('game.ended')!]
   }
   if (
     gameStore.current?.start_at &&
@@ -77,12 +82,12 @@ export const canAccessChallenges = () => {
     gameStore.current.archive_at > DateTime.now()
   ) {
     if (gameStore.team) {
-      return true
+      return [true, '']
     }
   }
-  return false
+  return [false, t('game.team.joinFirst')!]
 }
-export const isGameAdmin = () => {
+export function isGameAdmin() {
   if (!accountStore.id) return false
   if (
     gameStore.current?.admins &&

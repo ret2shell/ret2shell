@@ -1,6 +1,7 @@
 import api, { api_root } from '.'
 import { Article } from '../models/article'
 import { Game, HostType } from '../models/game'
+import { Team, TeamState } from '../models/team'
 
 export async function getGames(page?: number, page_size?: number, host_type?: HostType, weight?: number) {
   return (
@@ -39,4 +40,27 @@ export async function getGameIntroduction(id: number) {
 
 export async function updateGameIntroduction(id: number, article: Article) {
   return await api.patch(`${api_root}/game/${id}/introduction`, { json: article }).json<Article>()
+}
+
+export async function getGameScoreboard(
+  id: number,
+  page?: number,
+  page_size?: number,
+  with_hidden?: boolean,
+  institute_id?: number
+) {
+  return (
+    await api.get(`${api_root}/game/${id}/team`, {
+      searchParams: JSON.parse(
+        JSON.stringify({
+          min_state: with_hidden ? TeamState.Hidden : TeamState.Passed,
+          page,
+          page_size,
+          institute_id,
+          asc: false,
+          order_by: 'score',
+        })
+      ),
+    })
+  ).json<[Team[], number]>()
 }

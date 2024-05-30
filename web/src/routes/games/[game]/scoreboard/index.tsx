@@ -6,13 +6,16 @@ import Button from '@/lib/widgets/button'
 import Card from '@/lib/widgets/card'
 import Chart from '@/lib/widgets/chart'
 import Select from '@/lib/widgets/select'
-import { Match, Show, Switch, createEffect, createMemo, createSignal, onMount } from 'solid-js'
+import { Match, Show, Switch, createEffect, createMemo, createSignal, onMount, untrack } from 'solid-js'
 import TeamDetails from './_blocks/team-details'
 import { Team } from '@/lib/models/team'
 import TeamSolves from './_blocks/team-solves'
 import TeamRanks from './_blocks/team-ranks'
 import { Size, createElementSize } from '@solid-primitives/resize-observer'
 import { useSearchParams } from '@solidjs/router'
+import { getGameScoreboard } from '@/lib/api/game'
+import { HTTPError } from '@reverier/ky'
+import { addToast } from '@/lib/storage/toast'
 
 function ChartOperations(props: {
   onRefresh?: () => void
@@ -84,8 +87,67 @@ export default function () {
   const selectedInstituteId = createMemo(() => parseInt(searchParams.institute || 'NaN') || null)
   const [loadingInstitute, setLoadingInstitute] = createSignal(true)
   const [loading, setLoading] = createSignal(false)
+  const [showPlane, setShowPlane] = createSignal(false)
   refreshInstitutes().then(() => setLoadingInstitute(false))
 
+  function getTopTeams() {
+    setLoading(true)
+    getGameScoreboard(gameStore.current?.id || 0, 1, 10, showHiddenTeams(), selectedInstituteId() || undefined)
+      .then(data => {
+        setTopTeams(data[0])
+      })
+      .catch((err: HTTPError) => {
+        err.response.text().then((text: string) => {
+          addToast({
+            level: 'error',
+            description: `${t('game.scoreboard.fetchError')}: ${text}`,
+            duration: 5000,
+          })
+        })
+      })
+      .finally(() => setLoading(false))
+  }
+
+  function getTeams() {
+    setLoading(true)
+    setTeams([])
+    getGameScoreboard(
+      gameStore.current?.id || 0,
+      page(),
+      pageSize(),
+      showHiddenTeams(),
+      selectedInstituteId() || undefined
+    )
+      .then(data => {
+        setTeams(data[0])
+      })
+      .catch((err: HTTPError) => {
+        err.response.text().then((text: string) => {
+          addToast({
+            level: 'error',
+            description: `${t('game.scoreboard.fetchError')}: ${text}`,
+            duration: 5000,
+          })
+        })
+      })
+      .finally(() => setLoading(false))
+  }
+
+  createEffect(() => {
+    if (gameStore.current?.id) {
+      if (showHiddenTeams() || selectedInstituteId()) {
+        /// ... just monitor the changes
+      }
+      untrack(getTopTeams)
+      untrack(getTeams)
+    }
+  })
+
+  createEffect(() => {
+    if (page() && pageSize() && gameStore.current?.id) {
+      untrack(getTeams)
+    }
+  })
   // TODO: fetch scoreboard, change scoreboard page.
 
   let autoPageSizeWatcher: HTMLDivElement
@@ -187,6 +249,18 @@ export default function () {
                       <span class="icon-[fluent--arrow-minimize-20-regular] w-5 h-5" />
                     </Show>
                   </Button>
+                  <Button
+                    ghost
+                    square
+                    level="info"
+                    onClick={() => setShowPlane(!showPlane())}
+                    class="hidden xl:flex"
+                    size={showChallengeDetail() ? 'sm' : 'md'}
+                  >
+                    <Show when={showPlane()} fallback={<span class="icon-[fluent--airplane-20-regular] w-5 h-5" />}>
+                      <span class="icon-[fluent--airplane-20-filled] w-5 h-5" />
+                    </Show>
+                  </Button>
                 </Show>
                 <Button
                   ghost
@@ -245,6 +319,7 @@ export default function () {
                   pageSize={pageSize()}
                   showTime={!showLargePanel()}
                   loading={loading()}
+                  onPageChange={p => setPage(p)}
                 />
               </>
             }

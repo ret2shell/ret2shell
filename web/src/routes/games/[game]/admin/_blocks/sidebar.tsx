@@ -35,6 +35,30 @@ export default function SideBar() {
             activeMatch="exact"
             class="w-full"
             ghost
+            href={`/games/${gameStore.current?.id}/admin/edit`}
+            justify="start"
+          >
+            <span class="icon-[fluent--edit-20-regular] w-5 h-5"></span>
+            <span>{t('game.admin.edit.title')}</span>
+          </Link>
+        </li>
+        <li class="w-full">
+          <Link
+            activeMatch="exact"
+            class="w-full"
+            ghost
+            href={`/games/${gameStore.current?.id}/admin/hammers`}
+            justify="start"
+          >
+            <span class="icon-[fluent--chat-20-regular] w-5 h-5"></span>
+            <span>{t('game.admin.hammer.title')}</span>
+          </Link>
+        </li>
+        <li class="w-full">
+          <Link
+            activeMatch="exact"
+            class="w-full"
+            ghost
             href={`/games/${gameStore.current?.id}/admin/teams`}
             justify="start"
           >
@@ -52,18 +76,6 @@ export default function SideBar() {
           >
             <span class="icon-[fluent--cloud-flow-20-regular] w-5 h-5"></span>
             <span>{t('game.admin.automate.title')}</span>
-          </Link>
-        </li>
-        <li class="w-full">
-          <Link
-            activeMatch="exact"
-            class="w-full"
-            ghost
-            href={`/games/${gameStore.current?.id}/admin/edit`}
-            justify="start"
-          >
-            <span class="icon-[fluent--edit-20-regular] w-5 h-5"></span>
-            <span>{t('game.admin.edit.title')}</span>
           </Link>
         </li>
       </ul>

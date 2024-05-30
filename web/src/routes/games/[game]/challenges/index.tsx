@@ -8,11 +8,15 @@ import Team from './_blocks/team'
 import Notifications from './_blocks/notifications'
 import { useNavigate, useSearchParams } from '@solidjs/router'
 import { accountStore } from '@/lib/storage/account'
-import { For, Match, Switch, createMemo, createSignal } from 'solid-js'
+import { For, Match, Show, Switch, createMemo, createSignal } from 'solid-js'
 import Welcome from './_blocks/welcome'
 import Link from '@/lib/widgets/link'
 import { Challenge as ChallengeModel } from '@/lib/models/challenge'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-solid'
+import { DateTime } from 'luxon'
+import { Permission } from '@/lib/models/user'
+import { c } from 'vite/dist/node/types.d-aGj9QkWt'
+import Create from './_blocks/create'
 
 export default function () {
   const navigate = useNavigate()
@@ -22,6 +26,7 @@ export default function () {
   }
   const [searchParams, setSearchParams] = useSearchParams()
   const selectedChallengeId = createMemo(() => parseInt(searchParams.challenge || 'NaN') || null)
+  const inCreate = createMemo(() => searchParams.create === 'true')
   const [challengeHistory, setChallengeHistory] = createSignal<{ id: number; name: string }[]>([])
   function appendChallengeHistory(challenge: ChallengeModel) {
     if (challengeHistory().find(c => c.id === challenge.id)) {
@@ -59,17 +64,31 @@ export default function () {
               <Link
                 href={`/games/${gameStore.current?.id}/challenges`}
                 onClick={() => setSearchParams({ challenge: null })}
-                activeMatch="exact"
+                ghost
+                active={selectedChallengeId() === null && inCreate() === false}
               >
                 <span class="icon-[fluent--home-20-regular] w-5 h-5"></span>
                 <span>{t('game.challenge.welcome')}</span>
               </Link>
+
+              <Show when={accountStore.permissions.includes(Permission.Game)}>
+                <Link
+                  active={inCreate()}
+                  title={t('form.create')}
+                  ghost
+                  href={`/games/${gameStore.current?.id}/challenges?create=true`}
+                >
+                  <span class="icon-[fluent--add-20-regular] w-5 h-5"></span>
+                  <span>{t('form.create')}</span>
+                </Link>
+              </Show>
               <For each={challengeHistory()}>
                 {challenge => (
                   <Link
                     href={`/games/${gameStore.current?.id}/challenges?challenge=${challenge}`}
                     onClick={() => setSearchParams({ challenge: challenge.id })}
-                    activeMatch="exact"
+                    active={challenge.id === selectedChallengeId() && inCreate() === false}
+                    ghost
                   >
                     <span class="icon-[fluent--code-20-regular] w-5 h-5"></span>
                     <span>{challenge.name}</span>
@@ -79,8 +98,26 @@ export default function () {
             </div>
           </OverlayScrollbarsComponent>
           <Switch fallback={<Welcome />}>
+            <Match when={inCreate()}>
+              <Create />
+            </Match>
             <Match when={selectedChallengeId() !== null}>
-              <Challenge />
+              <Challenge
+                inGame
+                store={gameStore}
+                challenge={{
+                  id: selectedChallengeId()!,
+                  name: 'Challenge',
+                  score: 100,
+                  game_id: 1,
+                  content: 'Content',
+                  updated_at: DateTime.now(),
+                  hidden: false,
+                  tag: [{ name: 'Reverse', primary: true }],
+                  score_rule: { initial: 1000, minimum: 500, decay: 10 },
+                  bucket: '',
+                }}
+              />
             </Match>
           </Switch>
         </div>

@@ -49,9 +49,7 @@ export default function UserBox() {
           btnContent={
             <Avatar
               class="w-8 h-8"
-              img={{
-                src: accountStore.info?.avatar || undefined,
-              }}
+              src={accountStore.info?.avatar || undefined}
               fallback={accountStore.info?.account || undefined}
             />
           }
@@ -69,9 +67,7 @@ export default function UserBox() {
               >
                 <Avatar
                   class="w-10 h-10"
-                  img={{
-                    src: accountStore.info?.avatar || undefined,
-                  }}
+                  src={accountStore.info?.avatar || undefined}
                   fallback={accountStore.info?.account || undefined}
                 ></Avatar>
                 <div class="flex flex-col justify-center items-start">
