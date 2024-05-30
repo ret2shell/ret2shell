@@ -6,10 +6,10 @@ import { Match, Switch, createMemo } from 'solid-js'
 
 export default function () {
   const [searchParams, setSearchParams] = useSearchParams()
-  const selectedChallengeId = createMemo(() => parseInt(searchParams.challenge || 'NaN') || null)
+  const selectedChallengeId = createMemo(() => Number.parseInt(searchParams.challenge || 'NaN') || null)
   return (
     <>
-      <Switch fallback={<></>}>
+      <Switch fallback={null}>
         <Match when={selectedChallengeId() !== null}>
           <Challenge
             inGame={false}

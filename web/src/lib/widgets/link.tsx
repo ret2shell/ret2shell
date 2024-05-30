@@ -1,7 +1,7 @@
-import { ComponentProps, JSX, Show, children, createMemo } from 'solid-js'
 import Spin from '@assets/animates/spin'
 import { useMatch } from '@solidjs/router'
-import { ButtonProps } from './button'
+import { type ComponentProps, type JSX, Show, children, createMemo } from 'solid-js'
+import type { ButtonProps } from './button'
 
 export type LinkProps = {
   activeMatch?: 'exact' | 'partial'

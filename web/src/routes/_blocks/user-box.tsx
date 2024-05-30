@@ -1,17 +1,17 @@
-import { Match, Show, Switch, createEffect, createSignal, untrack } from 'solid-js'
-import { accountStore, refreshUser, resetUser } from '@storage/account'
-import Link from '@widgets/link'
-import Popover from '@widgets/popover'
-import Avatar from '@widgets/avatar'
-import Card from '@widgets/card'
-import { t } from '@storage/theme'
-import Button from '@/lib/widgets/button'
-import { useNavigate } from '@solidjs/router'
 import { logout } from '@/lib/api/account'
-import { clearToasts } from '@/lib/storage/toast'
-import { gameStore } from '@/lib/storage/game'
 import { HostType } from '@/lib/models/game'
 import { Permission } from '@/lib/models/user'
+import { gameStore } from '@/lib/storage/game'
+import { clearToasts } from '@/lib/storage/toast'
+import Button from '@/lib/widgets/button'
+import { useNavigate } from '@solidjs/router'
+import { accountStore, refreshUser, resetUser } from '@storage/account'
+import { t } from '@storage/theme'
+import Avatar from '@widgets/avatar'
+import Card from '@widgets/card'
+import Link from '@widgets/link'
+import Popover from '@widgets/popover'
+import { Match, Show, Switch, createEffect, createSignal, untrack } from 'solid-js'
 
 export default function UserBox() {
   createEffect(() => {
@@ -69,7 +69,7 @@ export default function UserBox() {
                   class="w-10 h-10"
                   src={accountStore.info?.avatar || undefined}
                   fallback={accountStore.info?.account || undefined}
-                ></Avatar>
+                />
                 <div class="flex flex-col justify-center items-start">
                   <h2 class="text-lg font-bold">{accountStore.info?.nickname}</h2>
                   <span class="text-start text-base font-normal opacity-60">

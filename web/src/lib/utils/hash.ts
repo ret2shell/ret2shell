@@ -13,7 +13,7 @@ const K = new Uint32Array([
   0xc67178f2,
 ])
 
-function hashBlocks(w: Int32Array, v: Int32Array, p: Uint8Array, pos: number, len: number): number {
+function hashBlocks(w: Int32Array, v: Int32Array, p: Uint8Array, position: number, length: number): number {
   let a: number
   let b: number
   let c: number
@@ -27,6 +27,8 @@ function hashBlocks(w: Int32Array, v: Int32Array, p: Uint8Array, pos: number, le
   let j: number
   let t1: number
   let t2: number
+  let len = length
+  let pos = position
   while (len >= 64) {
     a = v[0]
     b = v[1]
@@ -144,28 +146,29 @@ class Hash {
   // Throws error when trying to update already finalized hash:
   // instance must be reset to use it again.
   update(data: Uint8Array, dataLength: number = data.length): this {
+    let length = dataLength
     if (this.finished) {
       throw new Error("SHA256: can't update because hash was finished.")
     }
     let dataPos = 0
-    this.bytesHashed += dataLength
+    this.bytesHashed += length
     if (this.bufferLength > 0) {
-      while (this.bufferLength < 64 && dataLength > 0) {
+      while (this.bufferLength < 64 && length > 0) {
         this.buffer[this.bufferLength++] = data[dataPos++]
-        dataLength--
+        length--
       }
       if (this.bufferLength === 64) {
         hashBlocks(this.temp, this.state, this.buffer, 0, 64)
         this.bufferLength = 0
       }
     }
-    if (dataLength >= 64) {
-      dataPos = hashBlocks(this.temp, this.state, data, dataPos, dataLength)
-      dataLength %= 64
+    if (length >= 64) {
+      dataPos = hashBlocks(this.temp, this.state, data, dataPos, length)
+      length %= 64
     }
-    while (dataLength > 0) {
+    while (length > 0) {
       this.buffer[this.bufferLength++] = data[dataPos++]
-      dataLength--
+      length--
     }
     return this
   }

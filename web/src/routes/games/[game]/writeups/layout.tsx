@@ -1,6 +1,6 @@
 import SidebarLayout from '@/lib/blocks/sidebar-layout'
-import { JSX } from 'solid-js'
+import type { JSX } from 'solid-js'
 
 export default function (props: { children?: JSX.Element }) {
-  return <SidebarLayout leftBar={<></>}>{props.children}</SidebarLayout>
+  return <SidebarLayout leftBar={null}>{props.children}</SidebarLayout>
 }

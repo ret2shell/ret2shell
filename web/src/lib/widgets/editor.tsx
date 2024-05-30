@@ -1,11 +1,11 @@
-import { ComponentProps, Show, createEffect, createSignal, onMount, splitProps } from 'solid-js'
+import { type ComponentProps, Show, createEffect, createSignal, onMount, splitProps } from 'solid-js'
 
 import Card from './card'
 
 import ace from 'ace-builds'
 import 'ace-builds/esm-resolver'
+import { type FormStore, setValue } from '@modular-forms/solid'
 import { themeStore } from '../storage/theme'
-import { FormStore, setValue } from '@modular-forms/solid'
 
 export type EditorProps = {
   value?: string
@@ -16,7 +16,8 @@ export type EditorProps = {
   placeholder?: string
   name?: string
   title?: string
-  /* eslint-disable  @typescript-eslint/no-explicit-any */
+
+  // biome-ignore lint/suspicious/noExplicitAny: the options are not ensured
   form?: FormStore<any, undefined>
   error?: string
   onFocusIn?: () => void
@@ -64,17 +65,17 @@ export function EditorBare(props: EditorProps & ComponentProps<'div'>) {
     })
     editor.container.style.lineHeight = '1.6'
 
-    editor.on('change', function () {
+    editor.on('change', () => {
       const content = editor?.getValue()
       editorProps.onValueChanged?.(content || '')
       if (editorProps.form && editorProps.name) setValue(editorProps.form, editorProps.name, content)
     })
 
-    editor.on('blur', function () {
+    editor.on('blur', () => {
       editorProps.onBlur?.()
     })
 
-    editor.on('focus', function () {
+    editor.on('focus', () => {
       editorProps.onFocusIn?.()
     })
   }
@@ -95,7 +96,7 @@ export function EditorBare(props: EditorProps & ComponentProps<'div'>) {
     <>
       <div {...native} class={`relative ${native.class}`}>
         <div class="absolute left-0 top-0 bottom-0 right-0 p-2">
-          <pre class={`w-full min-h-full relative bg-transparent`} ref={editorElement!}></pre>
+          <pre class={'w-full min-h-full relative bg-transparent'} ref={editorElement!} />
         </div>
         <Show when={editorProps.error}>
           <Card class="absolute bottom-2 left-2 right-2" level="error" contentClass="z-50 px-4 p-2">

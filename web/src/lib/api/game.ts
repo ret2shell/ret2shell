@@ -1,8 +1,8 @@
-import { SearchParamsOption } from '@reverier/ky'
+import type { SearchParamsOption } from '@reverier/ky'
 import api, { api_root } from '.'
-import { Article } from '../models/article'
-import { Game, HostType } from '../models/game'
-import { Team, TeamState } from '../models/team'
+import type { Article } from '../models/article'
+import type { Game, HostType } from '../models/game'
+import { type Team, TeamState } from '../models/team'
 
 export async function getGames(page?: number, page_size?: number, host_type?: HostType, weight?: number) {
   return (

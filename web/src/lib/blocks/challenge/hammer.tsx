@@ -2,8 +2,8 @@ import { t } from '@/lib/storage/theme'
 import Button from '@/lib/widgets/button'
 import Card from '@/lib/widgets/card'
 import Input from '@/lib/widgets/input'
-import xdsecMascotUnsee from '@assets/imgs/xdsec-mascot-unsee.webp'
 import xdsecMascotHappy from '@assets/imgs/xdsec-mascot-happy.webp'
+import xdsecMascotUnsee from '@assets/imgs/xdsec-mascot-unsee.webp'
 
 export default function () {
   return (
@@ -11,15 +11,15 @@ export default function () {
       <div class="flex flex-col min-h-full">
         <div class="flex flex-col flex-1 p-3 lg:p-6 space-y-4">
           <div class="self-start flex-row max-w-[calc(100%-4rem)] flex items-center">
-            <img src={xdsecMascotHappy} width={40} height={40} />
-            <div class="w-4"></div>
+            <img src={xdsecMascotHappy} width={40} height={40} alt="V(=^･ω･^=)v" />
+            <div class="w-4" />
             <Card contentClass="p-2">
               <p class="text-wrap">{t('game.challenge.hammerTips')}</p>
             </Card>
           </div>
           <div class="self-start flex-row max-w-[calc(100%-4rem)] flex items-center">
-            <img src={xdsecMascotUnsee} width={40} height={40} />
-            <div class="w-4"></div>
+            <img src={xdsecMascotUnsee} width={40} height={40} alt="V(=^>ω<^=)v" />
+            <div class="w-4" />
             <Card contentClass="p-2">
               <p class="text-wrap">{t('game.challenge.hammerTips2')}</p>
             </Card>
@@ -43,7 +43,7 @@ export default function () {
             placeholder={t('game.challenge.hammerInput')}
             extraBtn={
               <Button class="!rounded-l-none">
-                <span class="icon-[fluent--send-20-regular] w-5 h-5"></span>
+                <span class="icon-[fluent--send-20-regular] w-5 h-5" />
               </Button>
             }
           />

@@ -1,5 +1,5 @@
-import { Select, SelectRootProps } from '@ark-ui/solid'
-import { CollectionItem } from '@ark-ui/solid/dist/types/types'
+import { Select, type SelectRootProps } from '@ark-ui/solid'
+import type { CollectionItem } from '@ark-ui/solid/dist/types/types'
 import { Index, Show, splitProps } from 'solid-js'
 import { Portal } from 'solid-js/web'
 
@@ -32,14 +32,16 @@ export default function <T extends CollectionItem & SelectItemType>(props: Selec
       </Show>
       <Select.Control class="w-full">
         <Select.Trigger
-          class={`btn flex flex-row ${selectProps.size === 'sm' ? 'px-0' : 'px-2'} gap-0 items-center w-full btn-${selectProps.size} ${selectProps.ghost ? 'btn-ghost' : ''}`}
+          class={`btn flex flex-row ${selectProps.size === 'sm' ? 'px-0' : 'px-2'} gap-0 items-center w-full btn-${
+            selectProps.size
+          } ${selectProps.ghost ? 'btn-ghost' : ''}`}
         >
           <Select.ValueText class="px-4 flex-1 text-start truncate" placeholder={selectProps.placeholder} />
           <Select.Indicator class="btn btn-sm btn-square btn-ghost items-center justify-center">
-            <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5" />
           </Select.Indicator>
           <Select.ClearTrigger class="btn btn-sm btn-square btn-ghost items-center justify-center">
-            <span class="icon-[fluent--dismiss-circle-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--dismiss-circle-20-regular] w-5 h-5" />
           </Select.ClearTrigger>
         </Select.Trigger>
       </Select.Control>
@@ -51,17 +53,17 @@ export default function <T extends CollectionItem & SelectItemType>(props: Selec
                 {item => (
                   <Select.Item
                     item={item().value}
-                    class={`btn btn-ghost btn-sm items-center overflow-hidden`}
+                    class={'btn btn-ghost btn-sm items-center overflow-hidden'}
                     title={item().label}
                   >
                     <Select.ItemText class="flex-1 text-start flex flex-row space-x-2 items-center overflow-hidden">
                       <Show when={item().icon}>
-                        <span class={`${item().icon} flex-shrink-0`}></span>
+                        <span class={`${item().icon} flex-shrink-0`} />
                       </Show>
                       <span class="truncate">{item().label}</span>
                     </Select.ItemText>
                     <Select.ItemIndicator class="flex items-center">
-                      <span class="icon-[fluent--checkmark-20-regular] w-5 h-5 text-success flex-shrink-0"></span>
+                      <span class="icon-[fluent--checkmark-20-regular] w-5 h-5 text-success flex-shrink-0" />
                     </Select.ItemIndicator>
                   </Select.Item>
                 )}

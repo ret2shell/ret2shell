@@ -1,7 +1,7 @@
+import type { Game } from '@models/game'
 import { createStore } from 'solid-js/store'
-import { Game } from '@models/game'
-import { Challenge } from '../models/challenge'
-import { Submission } from '../models/submission'
+import type { Challenge } from '../models/challenge'
+import type { Submission } from '../models/submission'
 
 export const [trainingStore, setTrainingStore] = createStore({
   current: null as Game | null,

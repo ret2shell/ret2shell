@@ -1,6 +1,6 @@
-import { createStore } from 'solid-js/store'
 import { makePersisted } from '@solid-primitives/storage'
-import { ServerConfig } from '../models/config'
+import { createStore } from 'solid-js/store'
+import type { ServerConfig } from '../models/config'
 
 export const [platformStore, setPlatformStore] = makePersisted(
   createStore({

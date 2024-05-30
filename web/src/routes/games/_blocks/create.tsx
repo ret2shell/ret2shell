@@ -1,5 +1,5 @@
 import { createGame } from '@/lib/api/game'
-import { Game, HostType } from '@/lib/models/game'
+import { type Game, HostType } from '@/lib/models/game'
 import { accountStore } from '@/lib/storage/account'
 import { t } from '@/lib/storage/theme'
 import { addToast } from '@/lib/storage/toast'
@@ -7,7 +7,7 @@ import Button from '@/lib/widgets/button'
 import Input from '@/lib/widgets/input'
 import TimePicker from '@/lib/widgets/timepicker'
 import { createForm, maxRange, minRange, required, setValue, setValues } from '@modular-forms/solid'
-import { HTTPError } from '@reverier/ky'
+import type { HTTPError } from '@reverier/ky'
 import { DateTime } from 'luxon'
 import { createSignal } from 'solid-js'
 
@@ -84,7 +84,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
               {(field, props) => (
                 <>
                   <Input
-                    icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5"></span>}
+                    icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
                     placeholder={t('game.namePlaceholder')}
                     title={t('game.namePlaceholder')}
                     {...props}
@@ -108,7 +108,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
               {(field, props) => (
                 <>
                   <Input
-                    icon={<span class="icon-[fluent--person-20-regular] w-5 h-5"></span>}
+                    icon={<span class="icon-[fluent--person-20-regular] w-5 h-5" />}
                     placeholder={t('game.teamSizePlaceholder')}
                     title={t('game.teamSizePlaceholder')}
                     {...props}
@@ -129,7 +129,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
                 <Field name="can_register_after_started" type="boolean">
                   {(field, props) => (
                     <>
-                      <input type="checkbox" class="hidden" {...props} checked={field.value}></input>
+                      <input type="checkbox" class="hidden" {...props} checked={field.value} />
                       <Button
                         title={t('game.canRegisterAfterStarted')}
                         type="button"
@@ -141,8 +141,10 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
                       >
                         {/* icon-[fluent--accessibility-checkmark-20-regular] icon-[fluent--accessibility-checkmark-20-filled] */}
                         <span
-                          class={`icon-[fluent--accessibility-checkmark-20-${field.value ? 'filled' : 'regular'}] w-5 h-5 ${field.value ? 'text-primary' : ''}`}
-                        ></span>
+                          class={`icon-[fluent--accessibility-checkmark-20-${
+                            field.value ? 'filled' : 'regular'
+                          }] w-5 h-5 ${field.value ? 'text-primary' : ''}`}
+                        />
                       </Button>
                     </>
                   )}
@@ -150,7 +152,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
                 <Field name="offline" type="boolean">
                   {(field, props) => (
                     <>
-                      <input type="checkbox" class="hidden" {...props} checked={field.value}></input>
+                      <input type="checkbox" class="hidden" {...props} checked={field.value} />
                       <Button
                         title={t('game.offline')}
                         type="button"
@@ -162,8 +164,10 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
                       >
                         {/* icon-[fluent--wifi-off-20-regular] icon-[fluent--wifi-off-20-filled] */}
                         <span
-                          class={`icon-[fluent--wifi-off-20-${field.value ? 'filled' : 'regular'}] w-5 h-5 ${field.value ? 'text-primary' : ''}`}
-                        ></span>
+                          class={`icon-[fluent--wifi-off-20-${field.value ? 'filled' : 'regular'}] w-5 h-5 ${
+                            field.value ? 'text-primary' : ''
+                          }`}
+                        />
                       </Button>
                     </>
                   )}
@@ -171,7 +175,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
                 <Field name="enable_audit" type="boolean">
                   {(field, props) => (
                     <>
-                      <input type="checkbox" class="hidden" {...props} checked={field.value}></input>
+                      <input type="checkbox" class="hidden" {...props} checked={field.value} />
                       <Button
                         title={t('game.enableAudit')}
                         type="button"
@@ -183,8 +187,10 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
                       >
                         {/* icon-[fluent--people-audience-20-regular] icon-[fluent--people-audience-20-filled] */}
                         <span
-                          class={`icon-[fluent--people-audience-20-${field.value ? 'filled' : 'regular'}] w-5 h-5 ${field.value ? 'text-primary' : ''}`}
-                        ></span>
+                          class={`icon-[fluent--people-audience-20-${field.value ? 'filled' : 'regular'}] w-5 h-5 ${
+                            field.value ? 'text-primary' : ''
+                          }`}
+                        />
                       </Button>
                     </>
                   )}
@@ -197,7 +203,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
                   <div class="flex flex-col space-y-1">
                     <label class="label" for={props.name}>
                       {t('game.weight')}
-                      <input class="hidden" type="number" {...props} value={field.value}></input>
+                      <input class="hidden" type="number" {...props} value={field.value} />
                     </label>
                     <div class="flex flex-row">
                       <Button
@@ -240,7 +246,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
             {(field, props) => (
               <>
                 <Input
-                  icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5"></span>}
+                  icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
                   placeholder={t('game.briefPlaceholder')}
                   title={t('game.briefPlaceholder')}
                   {...props}

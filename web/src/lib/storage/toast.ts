@@ -1,6 +1,6 @@
-import { createStore, produce } from 'solid-js/store'
-import { nanoid } from 'nanoid'
 import { DateTime } from 'luxon'
+import { nanoid } from 'nanoid'
+import { createStore, produce } from 'solid-js/store'
 
 export type ToastMessage = {
   id?: string
@@ -22,12 +22,25 @@ export const [toastStore, setToastStore] = createStore({
 
 export function addToast(toast: ToastMessage): string {
   const id = nanoid()
-  setToastStore(produce(s => s.toasts.push({ ...toast, id, createdAt: DateTime.now().toMillis(), shown: true })))
+  setToastStore(
+    produce(s =>
+      s.toasts.push({
+        ...toast,
+        id,
+        createdAt: DateTime.now().toMillis(),
+        shown: true,
+      })
+    )
+  )
   return id
 }
 
 export function removeToast(id: string) {
-  setToastStore(produce(s => (s.toasts = s.toasts.filter(toast => toast.id !== id))))
+  setToastStore(
+    produce(s => {
+      s.toasts = s.toasts.filter(toast => toast.id !== id)
+    })
+  )
 }
 
 export function clearToasts() {

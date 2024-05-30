@@ -8,7 +8,7 @@ export default function () {
     <>
       <div class="border-b border-b-layer-content/10 p-3 lg:p-6">
         <Link class="w-full" ghost justify="start" href={`/games/${gameStore.current?.id}/challenges`}>
-          <span class="icon-[fluent--flag-20-filled] w-5 h-5 text-primary"></span>
+          <span class="icon-[fluent--flag-20-filled] w-5 h-5 text-primary" />
           <span>{t('game.challenge.list')}</span>
         </Link>
       </div>
@@ -23,7 +23,7 @@ export default function () {
           class="relative w-full h-full print:h-auto print:overflow-auto"
           defer
         >
-          <div class="flex flex-col space-y-2 p-3 lg:p-6"></div>
+          <div class="flex flex-col space-y-2 p-3 lg:p-6" />
         </OverlayScrollbarsComponent>
       </div>
     </>

@@ -432,7 +432,8 @@
     "required": "Please fill in the verification code",
     "minLength": "Captcha must be at least 4 chars",
     "calculating": "Calculating...",
-    "placeholder": "Verification code"
+    "placeholder": "Verification code",
+    "reload": "Can't see clearly? "
   },
   "article": {
     "loading": "The girl is praying...",

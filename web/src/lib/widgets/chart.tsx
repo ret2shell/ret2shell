@@ -1,26 +1,26 @@
-import { passiveSupport } from 'passive-events-support/src/utils'
-import { JSX, Ref, createEffect, on, onCleanup, onMount } from 'solid-js'
-import { init, registerTheme, use } from 'echarts/core'
-import { LabelLayout, UniversalTransition } from 'echarts/features'
-import {
-  TitleComponent,
-  TooltipComponent,
-  GridComponent,
-  DatasetComponent,
-  TransformComponent,
-  DataZoomComponent,
-  ToolboxComponent,
-} from 'echarts/components'
-import { LineChart, BarChart, SunburstChart, RadarChart, GaugeChart } from 'echarts/charts'
-import type { EChartsCoreOption, EChartsType, ResizeOpts } from 'echarts/core'
-import { SVGRenderer, CanvasRenderer } from 'echarts/renderers'
+import { isMobile } from '@solid-primitives/platform'
 import { mergeRefs } from '@solid-primitives/refs'
+import { type Size, createElementSize } from '@solid-primitives/resize-observer'
+import { BarChart, GaugeChart, LineChart, RadarChart, SunburstChart } from 'echarts/charts'
+import {
+  DataZoomComponent,
+  DatasetComponent,
+  GridComponent,
+  TitleComponent,
+  ToolboxComponent,
+  TooltipComponent,
+  TransformComponent,
+} from 'echarts/components'
+import { init, registerTheme, use } from 'echarts/core'
+import type { EChartsCoreOption, EChartsType, ResizeOpts } from 'echarts/core'
+import { LabelLayout, UniversalTransition } from 'echarts/features'
+import { CanvasRenderer, SVGRenderer } from 'echarts/renderers'
+import { nanoid } from 'nanoid'
+import { passiveSupport } from 'passive-events-support/src/utils'
+import { type JSX, type Ref, createEffect, on, onCleanup, onMount } from 'solid-js'
+import { fullTheme } from '../storage/theme'
 import cyberDark from './styles/echarts/cyber-dark.json'
 import cyberLight from './styles/echarts/cyber-light.json'
-import { fullTheme } from '../storage/theme'
-import { nanoid } from 'nanoid'
-import { Size, createElementSize } from '@solid-primitives/resize-observer'
-import { isMobile } from '@solid-primitives/platform'
 
 use([
   LabelLayout,
@@ -52,7 +52,8 @@ export type InitOptions = {
   pointerSize?: number
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noConfusingVoidType: the event handler returns void to pass the event by default
+// biome-ignore lint/suspicious/noExplicitAny: the options are not ensured
 export type EChartsEventHandler = (event: any) => void | boolean
 export type EChartsEventHandlerDefinition = {
   query: string | object
@@ -75,7 +76,7 @@ export interface EChartsBaseProps {
   lazyUpdate?: boolean
 
   isLoading?: boolean
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: the options are not ensured
   loadingOptions?: any
 
   resizeOptions?: Omit<ResizeOpts, 'width' | 'height'>
@@ -85,19 +86,19 @@ export interface EChartsBaseProps {
 }
 
 export const bindEvents = (chartInstance: EChartsType, eventHandlers: EventHandlers) => {
-  Object.entries(eventHandlers).forEach(([eventName, handler]) => {
+  for (const [eventName, handler] of Object.entries(eventHandlers)) {
     if ('query' in handler) {
       chartInstance.on(eventName, handler.query, handler.handler)
     } else {
       chartInstance.on(eventName, handler)
     }
-  })
+  }
 }
 
 export const unbindEvents = (chartInstance: EChartsType, eventHandlers: EventHandlers) => {
-  Object.entries(eventHandlers).forEach(([eventName, handler]) => {
+  for (const [eventName, handler] of Object.entries(eventHandlers)) {
     chartInstance.off(eventName, 'handler' in handler ? handler.handler : handler)
-  })
+  }
 }
 
 export default function Chart(props: EChartsBaseProps) {
@@ -202,7 +203,9 @@ export default function Chart(props: EChartsBaseProps) {
       id={id}
       style={props.style}
       class={`w-full h-full ${props.class}`}
-      ref={mergeRefs(props.ref, el => (chartElement = el))}
+      ref={mergeRefs(props.ref, el => {
+        chartElement = el
+      })}
     />
   )
 }

@@ -1,4 +1,4 @@
-import { DateTime } from 'luxon'
+import type { DateTime } from 'luxon'
 
 export type ContainerConfig = {
   image: string
@@ -13,10 +13,10 @@ export type InstanceConfig = {
 }
 
 export enum InstanceState {
-  Pending,
-  Running,
-  Succeeded,
-  Failed,
+  Pending = 0,
+  Running = 1,
+  Succeeded = 2,
+  Failed = 3,
 }
 
 export type Instance = {

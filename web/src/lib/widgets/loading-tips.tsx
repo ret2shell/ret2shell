@@ -1,4 +1,4 @@
-import { ComponentProps, createSignal, onCleanup } from 'solid-js'
+import { type ComponentProps, createSignal, onCleanup } from 'solid-js'
 import Spin from '../assets/animates/spin'
 import { randomTips } from '../utils/loading-tips'
 

@@ -1,28 +1,28 @@
+import { deleteWiki, getWiki } from '@/lib/api/wiki'
 import Spin from '@/lib/assets/animates/spin'
-import { Article as ArticleModel } from '@/lib/models/article'
+import type { Article as ArticleModel } from '@/lib/models/article'
 import { Permission } from '@/lib/models/user'
 import { accountStore } from '@/lib/storage/account'
+import { Title } from '@/lib/storage/header'
+import { platformStore } from '@/lib/storage/platform'
 import { t } from '@/lib/storage/theme'
 import { addToast } from '@/lib/storage/toast'
+import { refreshWikiToc, setWikiStore, wikiStore } from '@/lib/storage/wiki'
 import Article from '@/lib/widgets/article'
-import { HTTPError } from '@reverier/ky'
+import type { HTTPError } from '@reverier/ky'
 import { useNavigate, useParams, useSearchParams } from '@solidjs/router'
 import { Show, createEffect, onCleanup, untrack } from 'solid-js'
 import EditForm from '../_blocks/form'
-import { deleteWiki, getWiki } from '@/lib/api/wiki'
-import { refreshWikiToc, setWikiStore, wikiStore } from '@/lib/storage/wiki'
-import { Title } from '@/lib/storage/header'
-import { platformStore } from '@/lib/storage/platform'
 
 export default function () {
   const params = useParams()
-  const article_id = () => parseInt(params.article)
+  const article_id = () => Number.parseInt(params.article)
   const [searchParams, setSearchParams] = useSearchParams()
   const inEdit = () => searchParams.edit === 'true'
   const navigate = useNavigate()
 
   createEffect(() => {
-    if (isNaN(article_id())) navigate('/errors/404', { replace: true })
+    if (Number.isNaN(article_id())) navigate('/errors/404', { replace: true })
     untrack(() => {
       getWiki(article_id())
         .then(resp => {
@@ -45,7 +45,11 @@ export default function () {
   function onDelete() {
     deleteWiki(article_id())
       .then(() => {
-        addToast({ level: 'success', description: t('wiki.deleteSuccess')!, duration: 5000 })
+        addToast({
+          level: 'success',
+          description: t('wiki.deleteSuccess')!,
+          duration: 5000,
+        })
         void refreshWikiToc().then(() => navigate('/wiki', { replace: true }))
       })
       .catch((err: HTTPError) => {
@@ -71,7 +75,7 @@ export default function () {
   }
   return (
     <>
-      <Title title={`${wikiStore.current?.title} - ${platformStore.config.name || t('platform.name')}`}></Title>
+      <Title title={`${wikiStore.current?.title} - ${platformStore.config.name || t('platform.name')}`} />
       <div class="flex-1 flex flex-col">
         <h1 class="text-3xl text-center flex flex-row space-x-4 items-center justify-center font-bold mt-8 print:mt-16">
           <Show
@@ -89,10 +93,12 @@ export default function () {
         <div class="flex flex-row items-center justify-center space-x-6 print:space-x-2 opacity-60 flex-wrap py-3">
           <a
             class="hover:underline font-bold flex flex-row space-x-2 items-center"
-            title={t('article.by', { name: wikiStore.current?.publisher_name || t('article.unknownPublisher')! })}
+            title={t('article.by', {
+              name: wikiStore.current?.publisher_name || t('article.unknownPublisher')!,
+            })}
             href={`/users/${wikiStore.current?.publisher_id}`}
           >
-            <span class="icon-[fluent--person-20-regular] w-5 h-5 print:hidden"></span>
+            <span class="icon-[fluent--person-20-regular] w-5 h-5 print:hidden" />
             <span class="hidden print:inline-block">By</span>
             <span>{wikiStore.current?.publisher_name}</span>
           </a>
@@ -102,7 +108,7 @@ export default function () {
               time: wikiStore.current?.created_at.toFormat('yyyy-MM-dd HH:mm:ss') || 'UNKNOWN',
             })}
           >
-            <span class="icon-[fluent--calendar-20-regular] w-5 h-5 print:hidden"></span>
+            <span class="icon-[fluent--calendar-20-regular] w-5 h-5 print:hidden" />
             <span class="hidden print:inline-block">at</span>
             <span>{wikiStore.current?.created_at.toFormat('yyyy-MM-dd HH:mm:ss')}</span>
           </div>
@@ -119,7 +125,7 @@ export default function () {
                 time: wikiStore.current?.updated_at.toFormat('yyyy-MM-dd HH:mm:ss') || 'UNKNOWN',
               })}
             >
-              <span class="icon-[fluent--calendar-edit-20-regular] w-5 h-5"></span>
+              <span class="icon-[fluent--calendar-edit-20-regular] w-5 h-5" />
               <span>{wikiStore.current?.updated_at.toFormat('yyyy-MM-dd HH:mm:ss')}</span>
             </div>
           </Show>
@@ -128,22 +134,24 @@ export default function () {
               class="font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
               href={`/wiki/${wikiStore.current?.id}?edit=true`}
             >
-              <span class="icon-[fluent--edit-20-regular] w-5 h-5"></span>
+              <span class="icon-[fluent--edit-20-regular] w-5 h-5" />
               <span>{t('form.edit')}</span>
             </a>
             <button
               class="font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
               onClick={onDelete}
+              type="button"
             >
-              <span class="icon-[fluent--delete-20-regular] w-5 h-5"></span>
+              <span class="icon-[fluent--delete-20-regular] w-5 h-5" />
               <span>{t('form.delete')}</span>
             </button>
           </Show>
           <button
             class="font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
             onClick={() => print()}
+            type="button"
           >
-            <span class="icon-[fluent--print-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--print-20-regular] w-5 h-5" />
             <span>{t('form.print')}</span>
           </button>
         </div>

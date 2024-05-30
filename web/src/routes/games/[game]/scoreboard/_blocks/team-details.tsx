@@ -1,11 +1,15 @@
-import { Challenge } from '@/lib/models/challenge'
-import { Team } from '@/lib/models/team'
+import type { Challenge } from '@/lib/models/challenge'
+import type { Team } from '@/lib/models/team'
 import { gameStore } from '@/lib/storage/game'
 import { t } from '@/lib/storage/theme'
 import Progress from '@/lib/widgets/progress'
 import { For, Match, Switch } from 'solid-js'
 
-function TeamDetail(props: { team: Team; challenges: Challenge[]; index: number }) {
+function TeamDetail(props: {
+  team: Team
+  challenges: Challenge[]
+  index: number
+}) {
   const solvedChallenges = () => props.team.history.filter(h => !!h.challenge_id).length
   const totalChallenges = () => props.challenges.length
   return (
@@ -14,13 +18,13 @@ function TeamDetail(props: { team: Team; challenges: Challenge[]; index: number 
         <div class="w-24 h-24 flex items-center justify-center">
           <Switch>
             <Match when={props.index === 1}>
-              <span class="icon-[fluent-emoji-flat--1st-place-medal] w-12 h-12"></span>
+              <span class="icon-[fluent-emoji-flat--1st-place-medal] w-12 h-12" />
             </Match>
             <Match when={props.index === 2}>
-              <span class="icon-[fluent-emoji-flat--2nd-place-medal] w-12 h-12"></span>
+              <span class="icon-[fluent-emoji-flat--2nd-place-medal] w-12 h-12" />
             </Match>
             <Match when={props.index === 3}>
-              <span class="icon-[fluent-emoji-flat--3rd-place-medal] w-12 h-12"></span>
+              <span class="icon-[fluent-emoji-flat--3rd-place-medal] w-12 h-12" />
             </Match>
           </Switch>
         </div>
@@ -30,7 +34,8 @@ function TeamDetail(props: { team: Team; challenges: Challenge[]; index: number 
               {props.team.name}
             </a>
             <span>
-              <span class="text-primary">{props.team.score}</span>&nbsp;<span class="opacity-60">pts</span>
+              <span class="text-primary">{props.team.score}</span>&nbsp;
+              <span class="opacity-60">pts</span>
             </span>
           </h2>
           <div class="pt-2 flex flex-row items-center space-x-4">
@@ -45,7 +50,10 @@ function TeamDetail(props: { team: Team; challenges: Challenge[]; index: number 
   )
 }
 
-export default function TeamDetails(props: { topTeams: Team[]; challenges: Challenge[] }) {
+export default function TeamDetails(props: {
+  topTeams: Team[]
+  challenges: Challenge[]
+}) {
   return (
     <>
       <ul class="xl:flex flex-col space-y-2 w-full max-w-5xl self-center py-6 hidden">

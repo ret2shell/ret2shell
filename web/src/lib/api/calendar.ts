@@ -1,6 +1,6 @@
-import { DateTime } from 'luxon'
-import { Calendar } from '../models/calendar'
+import type { DateTime } from 'luxon'
 import api, { api_root } from '.'
+import type { Calendar } from '../models/calendar'
 
 export async function getCalendarList(start_time: DateTime, end_time: DateTime) {
   return (

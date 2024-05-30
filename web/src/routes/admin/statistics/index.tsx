@@ -1,4 +1,4 @@
-import { PlatformStatistics, getPlatformStatistics } from '@/lib/api/platform'
+import { type PlatformStatistics, getPlatformStatistics } from '@/lib/api/platform'
 import LogoAnimate from '@/lib/assets/animates/logo-animate'
 import Spin from '@/lib/assets/animates/spin'
 import { HostType } from '@/lib/models/game'
@@ -9,7 +9,7 @@ import { addToast } from '@/lib/storage/toast'
 import Card from '@/lib/widgets/card'
 import Chart from '@/lib/widgets/chart'
 import Divider from '@/lib/widgets/divider'
-import { HTTPError } from '@reverier/ky'
+import type { HTTPError } from '@reverier/ky'
 import { DateTime } from 'luxon'
 import { Show, createSignal } from 'solid-js'
 
@@ -33,7 +33,7 @@ export default function () {
     .finally(() => setLoading(false))
   return (
     <>
-      <Title title={`${t('admin.statistics.title')} - ${platformStore.config.name || t('platform.name')}`}></Title>
+      <Title title={`${t('admin.statistics.title')} - ${platformStore.config.name || t('platform.name')}`} />
       <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 p-3 lg:p-6 gap-3 lg:gap-6">
         <div class="hidden xl:flex xl:col-span-2 items-center justify-start space-x-12 px-12">
           <LogoAnimate class="w-36 h-36" />
@@ -42,14 +42,14 @@ export default function () {
         <div class="col-span-1 h-48 p-6 flex flex-row items-center space-x-8">
           <div class="flex-1 flex flex-col space-y-4">
             <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--dumbbell-20-regular] w-8 h-8 opacity-80"></span>
+              <span class="icon-[fluent--dumbbell-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl text-info">
                 {statistics()?.games.filter(g => g.host_type === HostType.CTFTraining).length}
               </span>
               <span class="opacity-60">{t('admin.statistics.trainings')}</span>
             </div>
             <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--flag-20-regular] w-8 h-8 opacity-80"></span>
+              <span class="icon-[fluent--flag-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl text-error">
                 {statistics()?.games.filter(g => g.host_type === HostType.CTFGame).length}
               </span>
@@ -230,12 +230,12 @@ export default function () {
           </div>
           <div class="flex-1 flex flex-col space-y-2 lg:space-y-4">
             <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--emoji-sparkle-20-regular] w-8 h-8 opacity-80"></span>
+              <span class="icon-[fluent--emoji-sparkle-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl text-info">{statistics()?.users.valid}</span>
               <span class="opacity-60">{t('admin.statistics.validUsers')}</span>
             </div>
             <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--person-20-regular] w-8 h-8 opacity-80"></span>
+              <span class="icon-[fluent--person-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl">{statistics()?.users.total}</span>
               <span class="opacity-60">{t('admin.statistics.totalUsers')}</span>
             </div>
@@ -292,12 +292,12 @@ export default function () {
           </div>
           <div class="flex-1 flex flex-col space-y-2 lg:space-y-4">
             <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--code-20-regular] w-8 h-8 opacity-80"></span>
+              <span class="icon-[fluent--code-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl text-warning">{statistics()?.challenges.in_game}</span>
               <span class="opacity-60">{t('admin.statistics.inGameChallenges')}</span>
             </div>
             <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--target-edit-20-regular] w-8 h-8 opacity-80"></span>
+              <span class="icon-[fluent--target-edit-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl">{statistics()?.challenges.total}</span>
               <span class="opacity-60">{t('admin.statistics.totalChallenges')}</span>
             </div>
@@ -354,12 +354,12 @@ export default function () {
           </div>
           <div class="flex-1 flex flex-col space-y-2 lg:space-y-4">
             <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--checkmark-starburst-20-regular] w-8 h-8 opacity-80"></span>
+              <span class="icon-[fluent--checkmark-starburst-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl text-success">{statistics()?.submissions.solved}</span>
               <span class="opacity-60">{t('admin.statistics.solvedSubmissions')}</span>
             </div>
             <div class="flex flex-row space-x-4 items-center flex-1">
-              <span class="icon-[fluent--text-bullet-list-20-regular] w-8 h-8 opacity-80"></span>
+              <span class="icon-[fluent--text-bullet-list-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl">{statistics()?.submissions.total}</span>
               <span class="opacity-60">{t('admin.statistics.totalSubmissions')}</span>
             </div>

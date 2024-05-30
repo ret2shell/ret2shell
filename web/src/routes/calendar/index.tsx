@@ -1,6 +1,6 @@
 import { createCalendar, deleteCalendar, getCalendar, getCalendarList, updateCalendar } from '@/lib/api/calendar'
 import Spin from '@/lib/assets/animates/spin'
-import { Calendar } from '@/lib/models/calendar'
+import type { Calendar } from '@/lib/models/calendar'
 import { Permission } from '@/lib/models/user'
 import { accountStore } from '@/lib/storage/account'
 import { fullTheme, t } from '@/lib/storage/theme'
@@ -14,17 +14,21 @@ import Input from '@/lib/widgets/input'
 import Link from '@/lib/widgets/link'
 import TimePicker from '@/lib/widgets/timepicker'
 import { createForm, required, setValues } from '@modular-forms/solid'
+import type { HTTPError } from '@reverier/ky'
 import { useSearchParams } from '@solidjs/router'
-import { HTTPError } from '@reverier/ky'
-import { DateTime, MonthNumbers } from 'luxon'
-import { For, Match, Show, Switch, createEffect, createMemo, createSignal, untrack } from 'solid-js'
+import { DateTime, type MonthNumbers } from 'luxon'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-solid'
+import { For, Match, Show, Switch, createEffect, createMemo, createSignal, untrack } from 'solid-js'
 
-function EventDetail(props: { event: Calendar; onDeleted: () => void; onEdit: () => void }) {
+function EventDetail(props: {
+  event: Calendar
+  onDeleted: () => void
+  onEdit: () => void
+}) {
   return (
     <>
       <h1 class="text-3xl text-center font-bold mt-8 hover:underline">
-        <a href={props.event.link} target="_blank">
+        <a href={props.event.link} target="_blank" rel="noreferrer">
           {props.event.name}
         </a>
       </h1>
@@ -33,25 +37,38 @@ function EventDetail(props: { event: Calendar; onDeleted: () => void; onEdit: ()
           class="font-bold hover:underline flex flex-row space-x-2 items-center"
           href={`/users/${props.event.reporter_id}`}
         >
-          <span class="icon-[fluent--person-20-regular] w-5 h-5"></span>
-          <span>{t('calendar.addBy', { name: props.event.reporter_name || t('calendar.unknown')! })}</span>
-          <span></span>
+          <span class="icon-[fluent--person-20-regular] w-5 h-5" />
+          <span>
+            {t('calendar.addBy', {
+              name: props.event.reporter_name || t('calendar.unknown')!,
+            })}
+          </span>
+          <span />
         </a>
         <a
           class="font-bold hover:underline flex flex-row space-x-2 items-center"
           href={props.event.link}
           target="_blank"
+          rel="noreferrer"
         >
-          <span class="icon-[fluent--link-20-regular] w-5 h-5"></span>
+          <span class="icon-[fluent--link-20-regular] w-5 h-5" />
           <span>{t('calendar.gotoEventHomePage')}</span>
         </a>
         <Show when={accountStore.permissions.includes(Permission.Calendar)}>
-          <button class="font-bold hover:underline flex flex-row space-x-2 items-center" onClick={props.onEdit}>
-            <span class="icon-[fluent--edit-20-regular] w-5 h-5"></span>
+          <button
+            class="font-bold hover:underline flex flex-row space-x-2 items-center"
+            onClick={props.onEdit}
+            type="button"
+          >
+            <span class="icon-[fluent--edit-20-regular] w-5 h-5" />
             <span>{t('form.edit')}</span>
           </button>
-          <button class="font-bold hover:underline flex flex-row space-x-2 items-center" onClick={props.onDeleted}>
-            <span class="icon-[fluent--delete-20-regular] w-5 h-5"></span>
+          <button
+            class="font-bold hover:underline flex flex-row space-x-2 items-center"
+            onClick={props.onDeleted}
+            type="button"
+          >
+            <span class="icon-[fluent--delete-20-regular] w-5 h-5" />
             <span>{t('form.delete')}</span>
           </button>
         </Show>
@@ -69,7 +86,10 @@ type CalendarForm = {
   end_at: number
 }
 
-function EventForm(props: { onDone: (calendar: Calendar) => void; editSource?: Calendar }) {
+function EventForm(props: {
+  onDone: (calendar: Calendar) => void
+  editSource?: Calendar
+}) {
   const [form, { Form, Field }] = createForm<CalendarForm>()
   const [loading, setLoading] = createSignal(false)
   createEffect(() => {
@@ -129,7 +149,7 @@ function EventForm(props: { onDone: (calendar: Calendar) => void; editSource?: C
             {(field, props) => (
               <>
                 <Input
-                  icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5"></span>}
+                  icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
                   placeholder={t('calendar.eventNamePlaceholder')}
                   title={t('calendar.eventNamePlaceholder')}
                   {...props}
@@ -145,7 +165,7 @@ function EventForm(props: { onDone: (calendar: Calendar) => void; editSource?: C
             {(field, props) => (
               <>
                 <Input
-                  icon={<span class="icon-[fluent--link-20-regular] w-5 h-5"></span>}
+                  icon={<span class="icon-[fluent--link-20-regular] w-5 h-5" />}
                   placeholder={t('calendar.eventLinkPlaceholder')}
                   title={t('calendar.eventLinkPlaceholder')}
                   {...props}
@@ -215,7 +235,7 @@ export default function () {
   const selectedEventId = createMemo(() => {
     if (searchParams?.event) {
       try {
-        return parseInt(searchParams.event)
+        return Number.parseInt(searchParams.event)
       } catch {
         return null
       }
@@ -276,16 +296,30 @@ export default function () {
     const nextMonthHead = (7 - ((currentMonthFirstDay + currentMonthDays!) % 7)) % 7
     for (let i = prevMonthTail; i < prevMonthDays!; i++) {
       // push as datetime
-      days.push(DateTime.fromObject({ year: prevMonth.year, month: prevMonth.month, day: i + 1 }) as DateTime<true>)
+      days.push(
+        DateTime.fromObject({
+          year: prevMonth.year,
+          month: prevMonth.month,
+          day: i + 1,
+        }) as DateTime<true>
+      )
     }
     for (let i = 0; i < currentMonthDays!; i++) {
       days.push(
-        DateTime.fromObject({ year: currentMonth.year, month: currentMonth.month, day: i + 1 }) as DateTime<true>
+        DateTime.fromObject({
+          year: currentMonth.year,
+          month: currentMonth.month,
+          day: i + 1,
+        }) as DateTime<true>
       )
     }
     for (let i = 0; i < nextMonthHead; i++) {
       days.push(
-        DateTime.fromObject({ year: currentMonth.year, month: currentMonth.month + 1, day: i + 1 }) as DateTime<true>
+        DateTime.fromObject({
+          year: currentMonth.year,
+          month: currentMonth.month + 1,
+          day: i + 1,
+        }) as DateTime<true>
       )
     }
     return days
@@ -307,12 +341,20 @@ export default function () {
       })
   }
   createEffect(() => {
-    const startTime = DateTime.fromObject({ year: year(), month: month(), day: 1 })
+    const startTime = DateTime.fromObject({
+      year: year(),
+      month: month(),
+      day: 1,
+    })
     const endTime = startTime.endOf('month')
     getEvents(startTime, endTime)
   })
   createEffect(() => {
-    const userSelectedMonth = DateTime.fromObject({ year: year(), month: month(), day: 1 })
+    const userSelectedMonth = DateTime.fromObject({
+      year: year(),
+      month: month(),
+      day: 1,
+    })
     setSelectedDay(null)
     if (currentDate.year === userSelectedMonth.year && currentDate.month === userSelectedMonth.month) {
       setSelectedDay(currentDate)
@@ -320,13 +362,13 @@ export default function () {
   })
   const eventDays = createMemo(() => {
     const days = new Set<DateTime>()
-    events().forEach(event => {
+    for (const event of events()) {
       const start = event.start_at
       const end = event.end_at
       for (let i = start; i <= end; i = i.set({ day: i.day + 1 })) {
         days.add(i)
       }
-    })
+    }
     return Array.from(days)
   })
   const selectedDayMappedEvents = createMemo(() => {
@@ -498,7 +540,7 @@ export default function () {
                     {day.day.toString().padStart(2, '0')}
                   </span>
                   <Show when={eventDays().find(i => i.day === day.day && i.month === day.month && i.year === day.year)}>
-                    <span class="absolute h-1 w-3 bottom-2 left-1/2 -translate-x-1/2 flex flex-row space-x-1 bg-primary rounded-full"></span>
+                    <span class="absolute h-1 w-3 bottom-2 left-1/2 -translate-x-1/2 flex flex-row space-x-1 bg-primary rounded-full" />
                   </Show>
                 </Button>
               ))}
@@ -507,7 +549,7 @@ export default function () {
           <Divider class="mt-3 mb-1 lg:mt-6 lg:mb-4" />
           <Show when={events().length === 0}>
             <div class="mt-2 flex-1 flex flex-row items-center justify-center space-x-2 opacity-60 p-3">
-              <span class="icon-[fluent--person-walking-20-regular] w-5 h-5"></span>
+              <span class="icon-[fluent--person-walking-20-regular] w-5 h-5" />
               <span>{t('calendar.noGames')}</span>
             </div>
           </Show>
@@ -540,10 +582,10 @@ export default function () {
                             ? 'primary'
                             : 'layer-content'
                         }`}
-                      ></span>
+                      />
                     }
                   >
-                    <Spin width={20} height={20}></Spin>
+                    <Spin width={20} height={20} />
                   </Show>
                   <span class="flex-1 text-start">{item.name}</span>
                   <span class="opacity-60">{item.start_at.toFormat('MM-dd')}</span>
@@ -573,7 +615,7 @@ export default function () {
                 </Match>
                 <Match when={true}>
                   <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
-                    <span class="icon-[fluent--flag-20-regular] w-24 h-24"></span>
+                    <span class="icon-[fluent--flag-20-regular] w-24 h-24" />
                     <span>{t('calendar.selectGameToSeeDetail')}</span>
                   </div>
                 </Match>

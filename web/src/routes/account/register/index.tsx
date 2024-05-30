@@ -1,5 +1,7 @@
 import { register } from '@/lib/api/account'
+import { deunicode, leet } from '@/lib/api/rpc'
 import Captcha from '@/lib/blocks/captcha'
+import { accountStore } from '@/lib/storage/account'
 import { Title } from '@/lib/storage/header'
 import { platformStore } from '@/lib/storage/platform'
 import { t } from '@/lib/storage/theme'
@@ -7,14 +9,12 @@ import { addToast } from '@/lib/storage/toast'
 import Button from '@/lib/widgets/button'
 import Card from '@/lib/widgets/card'
 import Input from '@/lib/widgets/input'
+import xdsecMascotHappy from '@assets/imgs/xdsec-mascot-happy.webp'
 import { createForm, email, maxLength, minLength, pattern, required, setValue } from '@modular-forms/solid'
-import { HTTPError } from '@reverier/ky'
+import type { HTTPError } from '@reverier/ky'
+import { useNavigate } from '@solidjs/router'
 import { DateTime } from 'luxon'
 import { createSignal } from 'solid-js'
-import xdsecMascotHappy from '@assets/imgs/xdsec-mascot-happy.webp'
-import { useNavigate } from '@solidjs/router'
-import { accountStore } from '@/lib/storage/account'
-import { deunicode, leet } from '@/lib/api/rpc'
 
 type RegisterForm = {
   account: string
@@ -58,7 +58,11 @@ export default function () {
                 })
                 .catch((err: HTTPError) => {
                   void err.response.text().then(text => {
-                    addToast({ level: 'error', description: text, duration: 5000 })
+                    addToast({
+                      level: 'error',
+                      description: text,
+                      duration: 5000,
+                    })
                   })
                   setTimestamp(DateTime.now().toMillis())
                 })
@@ -80,7 +84,7 @@ export default function () {
               >
                 {(field, props) => (
                   <Input
-                    icon={<span class="icon-[fluent--wand-20-regular] w-5 h-5"></span>}
+                    icon={<span class="icon-[fluent--wand-20-regular] w-5 h-5" />}
                     placeholder={t('account.register.nicknamePlaceholder')}
                     title={t('account.register.nicknamePlaceholder')}
                     autocomplete="nickname"
@@ -112,7 +116,7 @@ export default function () {
               >
                 {(field, props) => (
                   <Input
-                    icon={<span class="icon-[fluent--person-20-regular] w-5 h-5"></span>}
+                    icon={<span class="icon-[fluent--person-20-regular] w-5 h-5" />}
                     placeholder={t('account.register.accountPlaceholder')}
                     title={t('account.register.accountPlaceholder')}
                     autocomplete="username"
@@ -135,7 +139,7 @@ export default function () {
                               .catch(() => {})
                         }}
                       >
-                        <span class="icon-[fluent--diversity-20-regular] w-5 h-5"></span>
+                        <span class="icon-[fluent--diversity-20-regular] w-5 h-5" />
                       </Button>
                     }
                   />
@@ -148,7 +152,7 @@ export default function () {
             >
               {(field, props) => (
                 <Input
-                  icon={<span class="icon-[fluent--mail-20-regular] w-5 h-5"></span>}
+                  icon={<span class="icon-[fluent--mail-20-regular] w-5 h-5" />}
                   placeholder={t('account.register.emailPlaceholder')}
                   title={t('account.register.emailPlaceholder')}
                   autocomplete="email"
@@ -166,12 +170,13 @@ export default function () {
                 validate={[
                   required(t('account.register.passwordRequired')!),
                   minLength(8, t('account.register.passwordMinLength')!),
+                  // biome-ignore lint/correctness/noEmptyCharacterClassInRegex: password allows any characters
                   pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,40}$/, t('account.register.passwordTooWeak')!),
                 ]}
               >
                 {(field, props) => (
                   <Input
-                    icon={<span class="icon-[fluent--lock-20-regular] w-5 h-5"></span>}
+                    icon={<span class="icon-[fluent--lock-20-regular] w-5 h-5" />}
                     placeholder={t('account.register.passwordPlaceholder')}
                     title={t('account.register.passwordPlaceholder')}
                     autocomplete="password"

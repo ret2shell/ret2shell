@@ -1,13 +1,13 @@
 import 'sakana-widget/lib/index.css'
-import SakanaWidget, { type SakanaWidgetCharacter } from 'sakana-widget'
-import xdsecMascot from '@assets/imgs/xdsec-mascot.webp'
-import vidarMascot from '@assets/imgs/vidar-mascot.webp'
-import cnssMascot from '@assets/imgs/cnss-mascot.webp'
 import LTeam from '@assets/brands/L-team'
-import vidarTeam from '@assets/brands/vidar.svg'
 import cnssTeam from '@assets/brands/cnss.svg'
+import vidarTeam from '@assets/brands/vidar.svg'
+import cnssMascot from '@assets/imgs/cnss-mascot.webp'
+import vidarMascot from '@assets/imgs/vidar-mascot.webp'
+import xdsecMascot from '@assets/imgs/xdsec-mascot.webp'
 import { t } from '@storage/theme'
 import Link from '@widgets/link'
+import SakanaWidget, { type SakanaWidgetCharacter } from 'sakana-widget'
 import { onMount } from 'solid-js'
 
 export default function () {
@@ -76,7 +76,7 @@ export default function () {
             href="https://vidar.club"
             target="_blank"
           >
-            <img src={vidarTeam} class="w-16 h-16" width={64} height={64} />
+            <img src={vidarTeam} class="w-16 h-16" width={64} height={64} alt="Vidar" />
           </Link>
         </div>
         <div class="relative hidden lg:block">
@@ -86,7 +86,7 @@ export default function () {
             href="https://cnss.io"
             target="_blank"
           >
-            <img src={cnssTeam} class="w-16 h-16" width={64} height={64} />
+            <img src={cnssTeam} class="w-16 h-16" width={64} height={64} alt="CNSS" />
           </Link>
         </div>
       </div>

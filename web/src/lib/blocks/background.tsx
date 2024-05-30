@@ -11,7 +11,9 @@ export default function () {
           <img
             src={BgBlurNight}
             alt=""
-            class={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-700 ${themeStore.colorScheme === 'dark' ? 'opacity-100' : 'opacity-0'}`}
+            class={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-700 ${
+              themeStore.colorScheme === 'dark' ? 'opacity-100' : 'opacity-0'
+            }`}
             onContextMenu={() => {
               return false
             }}
@@ -19,13 +21,15 @@ export default function () {
           <img
             src={BgBlurDay}
             alt=""
-            class={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-700 ${themeStore.colorScheme === 'light' ? 'opacity-100' : 'opacity-0'}`}
+            class={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-700 ${
+              themeStore.colorScheme === 'light' ? 'opacity-100' : 'opacity-0'
+            }`}
             onContextMenu={() => {
               return false
             }}
           />
         </div>
-        <div class="fixed left-0 right-0 top-0 bottom-0 bg-layer/90 transition-colors duration-700"></div>
+        <div class="fixed left-0 right-0 top-0 bottom-0 bg-layer/90 transition-colors duration-700" />
         <svg
           viewBox="0 0 960 1080"
           xmlns="http://www.w3.org/2000/svg"

@@ -1,4 +1,4 @@
-import { ComponentProps, JSX, Show, createSignal, splitProps } from 'solid-js'
+import { type ComponentProps, type JSX, Show, createSignal, splitProps } from 'solid-js'
 
 import { Popover } from '@ark-ui/solid'
 import { Portal } from 'solid-js/web'
@@ -15,7 +15,9 @@ export default function (props: TextInputProps & ComponentProps<'input'>) {
   const [inputProps, others] = splitProps(props, ['icon', 'extraBtn', 'size', 'error'])
   // input-sm input-md
   const mergedInputClasses = () =>
-    `input w-0 flex-1 input-${size} ${inputProps.icon ? '!rounded-l-none' : ''} ${others.type === 'password' || inputProps.extraBtn ? '!rounded-r-none' : ''} ${inputProps.error ? 'input-error' : ''}`
+    `input w-0 flex-1 input-${size} ${inputProps.icon ? '!rounded-l-none' : ''} ${
+      others.type === 'password' || inputProps.extraBtn ? '!rounded-r-none' : ''
+    } ${inputProps.error ? 'input-error' : ''}`
 
   const mergedClasses = () =>
     `flex flex-col relative space-y-1 ${props.class ? `${props.class}` : ''} ${
@@ -39,7 +41,11 @@ export default function (props: TextInputProps & ComponentProps<'input'>) {
             <Show when={props.icon}>
               {/* rounded-l-lg rounded-l-md */}
               <div
-                class={`rounded-l-${size === 'md' ? 'lg' : 'md'} flex flex-shrink-0 flex-row items-center justify-center ${size === 'md' ? 'h-12 w-12' : 'h-8 w-8'} bg-layer-content/10`}
+                class={`rounded-l-${
+                  size === 'md' ? 'lg' : 'md'
+                } flex flex-shrink-0 flex-row items-center justify-center ${
+                  size === 'md' ? 'h-12 w-12' : 'h-8 w-8'
+                } bg-layer-content/10`}
               >
                 {props.icon}
               </div>
@@ -53,7 +59,7 @@ export default function (props: TextInputProps & ComponentProps<'input'>) {
                 type="button"
               >
                 {/* icon-[fluent--eye-20-regular] icon-[fluent--eye-off-20-regular] */}
-                <span class={`icon-[fluent--${type() === 'password' ? 'eye' : 'eye-off'}-20-regular] w-5 h-5`}></span>
+                <span class={`icon-[fluent--${type() === 'password' ? 'eye' : 'eye-off'}-20-regular] w-5 h-5`} />
               </button>
             </Show>
             <Show when={props.extraBtn}>{props.extraBtn}</Show>

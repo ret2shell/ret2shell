@@ -1,7 +1,7 @@
+import type { Captcha } from '@models/captcha'
+import type { User } from '@models/user'
 import api, { api_root } from '.'
-import { Captcha } from '@models/captcha'
-import { User } from '@models/user'
-import { Institute } from '../models/institute'
+import type { Institute } from '../models/institute'
 
 export async function getCaptcha() {
   return await api.get(`${api_root}/account/captcha`).json<Captcha>()
@@ -18,7 +18,12 @@ export async function register(req: {
   return await api.post(`${api_root}/account/register`, { json: req }).json()
 }
 
-export async function login(req: { account: string; password: string; captcha_id: string; captcha_answer: string }) {
+export async function login(req: {
+  account: string
+  password: string
+  captcha_id: string
+  captcha_answer: string
+}) {
   return await api.post(`${api_root}/account/login`, { json: req }).json()
 }
 
@@ -26,7 +31,11 @@ export async function logout() {
   return await api.post(`${api_root}/account/logout`).json()
 }
 
-export async function forgotPassword(req: { email: string; captcha_id: string; captcha_answer: string }) {
+export async function forgotPassword(req: {
+  email: string
+  captcha_id: string
+  captcha_answer: string
+}) {
   return await api.post(`${api_root}/account/forgot`, { json: req }).json()
 }
 

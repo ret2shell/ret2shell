@@ -1,9 +1,9 @@
-import { createStore } from 'solid-js/store'
+import type { Permission, Token, User } from '@models/user'
 import { makePersisted } from '@solid-primitives/storage'
-import { Permission, Token, User } from '@models/user'
-import { getInstitutes, getProfile } from '../api/account'
 import { fromBase64 } from 'js-base64'
-import { Institute } from '../models/institute'
+import { createStore } from 'solid-js/store'
+import { getInstitutes, getProfile } from '../api/account'
+import type { Institute } from '../models/institute'
 
 export const [accountStore, setAccountStore] = makePersisted(
   createStore({
@@ -31,7 +31,14 @@ export const storeToken = (token: string) => {
 }
 
 export const resetUser = () => {
-  setAccountStore({ id: null, account: null, nickname: null, token: null, info: null, permissions: [] })
+  setAccountStore({
+    id: null,
+    account: null,
+    nickname: null,
+    token: null,
+    info: null,
+    permissions: [],
+  })
 }
 
 export const refreshUser = () => {

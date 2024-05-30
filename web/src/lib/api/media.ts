@@ -1,6 +1,6 @@
-import { SearchParamsOption } from '@reverier/ky'
+import type { SearchParamsOption } from '@reverier/ky'
 import api, { api_root } from '.'
-import { Media } from '../models/media'
+import type { Media } from '../models/media'
 
 export async function uploadMedia(file: File, thumbnail?: boolean) {
   const formData = new FormData()

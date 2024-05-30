@@ -1,17 +1,17 @@
-import { FormStore, Maybe, setValue } from '@modular-forms/solid'
-import Input, { TextInputProps } from '@widgets/input'
-import { ComponentProps, createEffect, createSignal, splitProps, untrack } from 'solid-js'
-import { Captcha } from '@models/captcha'
-import Button from '../widgets/button'
-import { t } from '../storage/theme'
-import { getCaptcha } from '../api/account'
+import type { Captcha } from '@models/captcha'
+import { type FormStore, type Maybe, setValue } from '@modular-forms/solid'
+import Input, { type TextInputProps } from '@widgets/input'
 import { encode } from 'js-base64'
+import { type ComponentProps, createEffect, createSignal, splitProps, untrack } from 'solid-js'
+import { getCaptcha } from '../api/account'
 import Spin from '../assets/animates/spin'
+import { t } from '../storage/theme'
+import Button from '../widgets/button'
 
 export default function (
   props: TextInputProps &
     ComponentProps<'input'> & {
-      /* eslint-disable  @typescript-eslint/no-explicit-any */
+      // biome-ignore lint/suspicious/noExplicitAny: the options are not ensured
       captchaForm: FormStore<any, undefined>
       idFieldValue: Maybe<string>
       idFieldError: string | undefined
@@ -62,18 +62,24 @@ export default function (
           return <span>NONE</span>
         case 'image':
           setManuallyFill(true)
-          return <img class="w-20 object-fill" src={`data:image/svg+xml;base64,${encode(captchaObj.challenge)}`}></img>
+          return (
+            <img
+              class="w-20 object-fill"
+              src={`data:image/svg+xml;base64,${encode(captchaObj.challenge)}`}
+              alt={t('captcha.reload')}
+            />
+          )
         case 'pow':
           setManuallyFill(false)
           return (
             <span class="inline-flex space-x-2 items-center">
               {calculating() ? (
                 <>
-                  <Spin width={20} height={20}></Spin>
+                  <Spin width={20} height={20} />
                   <span>{t('captcha.calculating')}</span>
                 </>
               ) : (
-                <span class="icon-[fluent--checkmark-20-regular] w-5 h-5 text-success"></span>
+                <span class="icon-[fluent--checkmark-20-regular] w-5 h-5 text-success" />
               )}
             </span>
           )
@@ -101,9 +107,9 @@ export default function (
 
   return (
     <>
-      <input class="hidden" name="captcha_id" value={fieldProps.idFieldValue}></input>
+      <input class="hidden" name="captcha_id" value={fieldProps.idFieldValue} />
       <Input
-        icon={<span class="icon-[fluent--bot-20-regular] w-5 h-5"></span>}
+        icon={<span class="icon-[fluent--bot-20-regular] w-5 h-5" />}
         placeholder={t('captcha.placeholder')}
         title={t('captcha.placeholder')}
         value={fieldProps.answerFieldValue}
@@ -121,7 +127,7 @@ export default function (
             {loading() ? t('captcha.loading') : captcha() ? getCaptchaContent() : t('captcha.loadFailed')}
           </Button>
         }
-      ></Input>
+      />
     </>
   )
 }

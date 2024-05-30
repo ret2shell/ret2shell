@@ -1,7 +1,7 @@
-import { createEffect, untrack } from 'solid-js'
-import { t } from './theme'
-import { platformStore } from './platform'
 import { useLocation } from '@solidjs/router'
+import { createEffect, untrack } from 'solid-js'
+import { platformStore } from './platform'
+import { t } from './theme'
 
 class RouteHeader {
   title: string

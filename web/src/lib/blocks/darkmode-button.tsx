@@ -13,6 +13,7 @@ export default function () {
       onClick={() => {
         setColorScheme(themeStore.colorScheme === 'dark' ? 'light' : 'dark')
       }}
+      type="button"
     >
       <img
         onContextMenu={() => {
@@ -20,8 +21,9 @@ export default function () {
         }}
         class="darkmode-stars"
         src={darkmodeStars}
-      ></img>
-      <span class="darkmode-button"></span>
+        alt="Darkmode stars"
+      />
+      <span class="darkmode-button" />
     </button>
   )
 }

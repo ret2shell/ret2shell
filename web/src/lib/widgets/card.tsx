@@ -1,4 +1,4 @@
-import { ComponentProps, createMemo, splitProps } from 'solid-js'
+import { type ComponentProps, createMemo, splitProps } from 'solid-js'
 
 export interface CardProps {
   solid?: boolean
@@ -21,7 +21,7 @@ export default function (props: CardProps & ComponentProps<'div'>) {
   })
   // card-info card-success card-warning card-error
   return (
-    <div {...nativeProps} class={`${mergedClasses()} ${cardProps.level ? 'card-' + cardProps.level : ''}`}>
+    <div {...nativeProps} class={`${mergedClasses()} ${cardProps.level ? `card-${cardProps.level}` : ''}`}>
       <div class={`card-content ${cardProps.contentClass}`}>{nativeProps.children}</div>
     </div>
   )

@@ -1,13 +1,13 @@
 import { Title } from '@/lib/storage/header'
-import Error from './error'
-import { t } from '@/lib/storage/theme'
 import { platformStore } from '@/lib/storage/platform'
+import { t } from '@/lib/storage/theme'
+import ErrorSection from './error'
 
 export default function () {
   return (
     <>
       <Title title={`${t('errors.500')} - ${platformStore.config.name || t('platform.name')}`} />
-      <Error status={500} />
+      <ErrorSection status={500} />
     </>
   )
 }

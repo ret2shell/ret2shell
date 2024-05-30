@@ -1,4 +1,4 @@
-import { Article, ArticleAccessPolicy } from '@/lib/models/article'
+import { type Article, ArticleAccessPolicy } from '@/lib/models/article'
 import { gameStore } from '@/lib/storage/game'
 import { t } from '@/lib/storage/theme'
 import Button from '@/lib/widgets/button'
@@ -11,7 +11,10 @@ type ArticleForm = {
   content: string
 }
 
-export default function IntroForm(props: { onDone: (article: Article) => Promise<void>; editSource?: Article }) {
+export default function IntroForm(props: {
+  onDone: (article: Article) => Promise<void>
+  editSource?: Article
+}) {
   const [form, { Form, Field }] = createForm<ArticleForm>()
   const [loading, setLoading] = createSignal(false)
   createEffect(() => {

@@ -1,5 +1,5 @@
 import { createBulletin, updateBulletin } from '@/lib/api/bulletin'
-import { Article, ArticleAccessPolicy } from '@/lib/models/article'
+import { type Article, ArticleAccessPolicy } from '@/lib/models/article'
 import { accountStore } from '@/lib/storage/account'
 import { t } from '@/lib/storage/theme'
 import { addToast } from '@/lib/storage/toast'
@@ -7,7 +7,7 @@ import Button from '@/lib/widgets/button'
 import Editor from '@/lib/widgets/editor'
 import Input from '@/lib/widgets/input'
 import { createForm, required, setValue, setValues } from '@modular-forms/solid'
-import { HTTPError } from '@reverier/ky'
+import type { HTTPError } from '@reverier/ky'
 import { DateTime } from 'luxon'
 import { createEffect, createSignal, untrack } from 'solid-js'
 
@@ -18,17 +18,20 @@ type BulletinForm = {
   weight: number
 }
 
-export default function (props: { onDone: (calendar: Article) => void; editSource?: Article }) {
+export default function (props: {
+  onDone: (calendar: Article) => void
+  editSource?: Article
+}) {
   const [form, { Form, Field }] = createForm<BulletinForm>()
   const [loading, setLoading] = createSignal(false)
   createEffect(() => {
     if (props.editSource) {
       untrack(() => {
         setValues(form, {
-          title: props.editSource!.title,
-          content: props.editSource!.content || '',
-          enable_comment: props.editSource!.enable_comment,
-          weight: props.editSource!.weight,
+          title: props.editSource?.title || '',
+          content: props.editSource?.content || '',
+          enable_comment: props.editSource?.enable_comment || false,
+          weight: props.editSource?.weight || 3,
         })
       })
     } else {
@@ -49,7 +52,7 @@ export default function (props: { onDone: (calendar: Article) => void; editSourc
       id: props.editSource?.id || 0,
       created_at: props.editSource?.created_at || DateTime.now(),
       updated_at: props.editSource?.updated_at || DateTime.now(),
-      publisher_id: accountStore.id!,
+      publisher_id: accountStore.id || 0,
       access_policy: ArticleAccessPolicy.Bulletin,
       draft: false,
       published: true,
@@ -76,7 +79,7 @@ export default function (props: { onDone: (calendar: Article) => void; editSourc
           {(field, props) => (
             <>
               <Input
-                icon={<span class="icon-[fluent--megaphone-20-regular] w-5 h-5"></span>}
+                icon={<span class="icon-[fluent--megaphone-20-regular] w-5 h-5" />}
                 placeholder={t('bulletin.titlePlaceholder')}
                 title={t('bulletin.titlePlaceholder')}
                 {...props}
@@ -88,7 +91,7 @@ export default function (props: { onDone: (calendar: Article) => void; editSourc
                     <Field name="weight" type="number">
                       {(field, props) => (
                         <>
-                          <input type="number" {...props} name="weight" value={field.value} class="hidden"></input>
+                          <input type="number" {...props} name="weight" value={field.value} class="hidden" />
                           <Button
                             class="!rounded-none"
                             title={t('bulletin.pinned')}
@@ -99,8 +102,10 @@ export default function (props: { onDone: (calendar: Article) => void; editSourc
                           >
                             {/* icon-[fluent--pin-20-regular] icon-[fluent--pin-20-filled] */}
                             <span
-                              class={`w-5 h-5 icon-[fluent--pin-20-${(field.value || 0) > 0 ? 'filled' : 'regular'}] ${(field.value || 0) > 0 ? 'text-primary' : ''}`}
-                            ></span>
+                              class={`w-5 h-5 icon-[fluent--pin-20-${(field.value || 0) > 0 ? 'filled' : 'regular'}] ${
+                                (field.value || 0) > 0 ? 'text-primary' : ''
+                              }`}
+                            />
                           </Button>
                         </>
                       )}
@@ -114,7 +119,7 @@ export default function (props: { onDone: (calendar: Article) => void; editSourc
                             name="enable_comment"
                             checked={field.value}
                             class="hidden"
-                          ></input>
+                          />
                           <Button
                             class="!rounded-l-none"
                             title={t('bulletin.enableComment')}
@@ -125,8 +130,10 @@ export default function (props: { onDone: (calendar: Article) => void; editSourc
                           >
                             {/* icon-[fluent--chat-20-regular] icon-[fluent--chat-20-filled] */}
                             <span
-                              class={`w-5 h-5 icon-[fluent--chat-20-${field.value ? 'filled' : 'regular'}] ${field.value ? 'text-primary' : ''}`}
-                            ></span>
+                              class={`w-5 h-5 icon-[fluent--chat-20-${field.value ? 'filled' : 'regular'}] ${
+                                field.value ? 'text-primary' : ''
+                              }`}
+                            />
                           </Button>
                         </>
                       )}

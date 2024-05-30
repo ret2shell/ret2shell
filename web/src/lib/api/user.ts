@@ -1,6 +1,6 @@
-import { SearchParamsOption } from '@reverier/ky'
+import type { SearchParamsOption } from '@reverier/ky'
 import api, { api_root } from '.'
-import { User } from '../models/user'
+import type { User } from '../models/user'
 
 export async function getUserList(
   page?: number,

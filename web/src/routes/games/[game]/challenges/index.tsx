@@ -1,21 +1,21 @@
 import Challenge from '@/lib/blocks/challenge'
-import Challenges from './_blocks/challenges'
 import SidebarLayout from '@/lib/blocks/sidebar-layout'
+import type { Challenge as ChallengeModel } from '@/lib/models/challenge'
+import { Permission } from '@/lib/models/user'
+import { accountStore } from '@/lib/storage/account'
 import { gameStore } from '@/lib/storage/game'
 import { Title } from '@/lib/storage/header'
 import { fullTheme, t } from '@/lib/storage/theme'
-import Team from './_blocks/team'
-import Notifications from './_blocks/notifications'
-import { useNavigate, useSearchParams } from '@solidjs/router'
-import { accountStore } from '@/lib/storage/account'
-import { For, Match, Show, Switch, createMemo, createSignal } from 'solid-js'
-import Welcome from './_blocks/welcome'
 import Link from '@/lib/widgets/link'
-import { Challenge as ChallengeModel } from '@/lib/models/challenge'
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-solid'
+import { useNavigate, useSearchParams } from '@solidjs/router'
 import { DateTime } from 'luxon'
-import { Permission } from '@/lib/models/user'
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-solid'
+import { For, Match, Show, Switch, createMemo, createSignal } from 'solid-js'
+import Challenges from './_blocks/challenges'
 import Create from './_blocks/create'
+import Notifications from './_blocks/notifications'
+import Team from './_blocks/team'
+import Welcome from './_blocks/welcome'
 
 export default function () {
   const navigate = useNavigate()
@@ -24,7 +24,7 @@ export default function () {
     return null
   }
   const [searchParams, setSearchParams] = useSearchParams()
-  const selectedChallengeId = createMemo(() => parseInt(searchParams.challenge || 'NaN') || null)
+  const selectedChallengeId = createMemo(() => Number.parseInt(searchParams.challenge || 'NaN') || null)
   const inCreate = createMemo(() => searchParams.create === 'true')
   const [challengeHistory, setChallengeHistory] = createSignal<{ id: number; name: string }[]>([])
   function appendChallengeHistory(challenge: ChallengeModel) {
@@ -66,7 +66,7 @@ export default function () {
                 ghost
                 active={selectedChallengeId() === null && inCreate() === false}
               >
-                <span class="icon-[fluent--home-20-regular] w-5 h-5"></span>
+                <span class="icon-[fluent--home-20-regular] w-5 h-5" />
                 <span>{t('game.challenge.welcome')}</span>
               </Link>
 
@@ -77,7 +77,7 @@ export default function () {
                   ghost
                   href={`/games/${gameStore.current?.id}/challenges?create=true`}
                 >
-                  <span class="icon-[fluent--add-20-regular] w-5 h-5"></span>
+                  <span class="icon-[fluent--add-20-regular] w-5 h-5" />
                   <span>{t('form.create')}</span>
                 </Link>
               </Show>
@@ -89,7 +89,7 @@ export default function () {
                     active={challenge.id === selectedChallengeId() && inCreate() === false}
                     ghost
                   >
-                    <span class="icon-[fluent--code-20-regular] w-5 h-5"></span>
+                    <span class="icon-[fluent--code-20-regular] w-5 h-5" />
                     <span>{challenge.name}</span>
                   </Link>
                 )}

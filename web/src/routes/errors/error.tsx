@@ -26,7 +26,12 @@ export default function (props: { status: number | null }) {
 
   return (
     <div class="flex-1 flex flex-col items-center justify-center space-y-8">
-      <img src={(props.status || 500) >= 500 ? xdsecMascotCrying : xdsecMascotUnsee} width={256} height={256}></img>
+      <img
+        src={(props.status || 500) >= 500 ? xdsecMascotCrying : xdsecMascotUnsee}
+        width={256}
+        height={256}
+        alt="V(= TωT =)v"
+      />
       <h1 class="font-bold text-3xl space-x-4">
         <span class="opacity-60">{props.status}</span>
         <span class="text-primary">|</span>

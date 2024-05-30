@@ -1,4 +1,4 @@
-import { ComponentProps, splitProps } from 'solid-js'
+import { type ComponentProps, splitProps } from 'solid-js'
 
 export type DividerProps = { direction?: 'horizontal' | 'vertical' }
 

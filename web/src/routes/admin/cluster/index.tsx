@@ -1,4 +1,4 @@
-import { ClusterNode, getClusterConfig, getClusterNodes } from '@/lib/api/cluster'
+import { type ClusterNode, getClusterConfig, getClusterNodes } from '@/lib/api/cluster'
 import Spin from '@/lib/assets/animates/spin'
 import { Title } from '@/lib/storage/header'
 import { platformStore } from '@/lib/storage/platform'
@@ -7,7 +7,7 @@ import { addToast } from '@/lib/storage/toast'
 import Button from '@/lib/widgets/button'
 import Divider from '@/lib/widgets/divider'
 import LoadingTips from '@/lib/widgets/loading-tips'
-import { HTTPError } from '@reverier/ky'
+import type { HTTPError } from '@reverier/ky'
 import { DateTime } from 'luxon'
 import { For, Match, Show, Switch, createSignal } from 'solid-js'
 
@@ -56,7 +56,7 @@ export default function () {
   const [shownNode, setShownNode] = createSignal(null as ClusterNode | null)
   return (
     <>
-      <Title title={`${t('admin.cluster.title')} - ${platformStore.config.name || t('platform.name')}`}></Title>
+      <Title title={`${t('admin.cluster.title')} - ${platformStore.config.name || t('platform.name')}`} />
       <div class="flex-1 flex flex-col p-3 lg:p-6">
         <div class="h-32 lg:h-48 flex flex-row items-center">
           <div class="h-full aspect-square flex items-center justify-center">
@@ -65,10 +65,10 @@ export default function () {
                 <Spin width={24} height={24} />
               </Match>
               <Match when={available()}>
-                <span class="icon-[meteocons--compass] w-full h-full"></span>
+                <span class="icon-[meteocons--compass] w-full h-full" />
               </Match>
               <Match when={true}>
-                <span class="icon-[meteocons--code-red-fill] w-full h-full"></span>
+                <span class="icon-[meteocons--code-red-fill] w-full h-full" />
               </Match>
             </Switch>
           </div>
@@ -102,7 +102,7 @@ export default function () {
             </span>
             <span class="flex flex-row items-center space-x-4">
               <span>{clusterDomain()}</span>
-              <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5 opacity-60"></span>
+              <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5 opacity-60" />
               <span class="text-warning">{clusterDNS()}</span>
             </span>
           </div>
@@ -121,8 +121,10 @@ export default function () {
                         node.metadata.labels['node-role.kubernetes.io/master'] === 'true'
                           ? 'icon-[fluent--brain-circuit-20-regular]'
                           : 'icon-[fluent--production-20-regular]'
-                      } w-8 h-8 ${shownNode()?.metadata.name === node.metadata.name ? 'text-primary-content' : 'text-success'}`}
-                    ></span>
+                      } w-8 h-8 ${
+                        shownNode()?.metadata.name === node.metadata.name ? 'text-primary-content' : 'text-success'
+                      }`}
+                    />
                     <div class="flex flex-col justify-center items-start min-w-fit">
                       <span class="font-bold">{node.metadata.name}</span>
                       <span class="opacity-60">{node.metadata.creationTimestamp}</span>
@@ -137,14 +139,14 @@ export default function () {
             when={shownNode()}
             fallback={
               <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
-                <span class="icon-[fluent--organization-20-regular] w-24 h-24"></span>
+                <span class="icon-[fluent--organization-20-regular] w-24 h-24" />
                 <span>{t('admin.cluster.selectNode')}</span>
               </div>
             }
           >
             <>
               <div class="h-12 flex flex-row items-center space-x-2 px-3">
-                <span class="icon-[fluent--organization-20-regular] w-5 h-5"></span>
+                <span class="icon-[fluent--organization-20-regular] w-5 h-5" />
                 <span class="font-bold flex-1 text-start">{shownNode()?.metadata.name}</span>
                 <span class="opacity-60 hidden lg:inline">
                   <span>Online at: </span>
@@ -153,13 +155,13 @@ export default function () {
                   </span>
                 </span>
                 <Button size="sm" square title={t('admin.cluster.refreshNode')}>
-                  <span class="icon-[fluent--arrow-clockwise-20-regular] w-5 h-5"></span>
+                  <span class="icon-[fluent--arrow-clockwise-20-regular] w-5 h-5" />
                 </Button>
                 <Button size="sm" square title={t('admin.cluster.updateNode')}>
-                  <span class="icon-[fluent--arrow-circle-up-20-regular] w-5 h-5"></span>
+                  <span class="icon-[fluent--arrow-circle-up-20-regular] w-5 h-5" />
                 </Button>
                 <Button size="sm" square level="error" title={t('admin.cluster.disconnectNode')}>
-                  <span class="icon-[fluent--stop-20-regular] w-5 h-5"></span>
+                  <span class="icon-[fluent--stop-20-regular] w-5 h-5" />
                 </Button>
               </div>
               <Divider />
@@ -170,8 +172,10 @@ export default function () {
                     <For each={Object.entries(shownNode()!.status.nodeInfo)}>
                       {([key, value]) => (
                         <tr class="border-b border-b-layer-content/10">
-                          {/* @ts-expect-error key is dynamic */}
-                          <td class="font-bold opacity-60 p-2">{`${t(`admin.cluster.data.nodeInfo.${key}`) as string}`}</td>
+                          <td class="font-bold opacity-60 p-2">{`${
+                            /* @ts-expect-error key is dynamic */
+                            t(`admin.cluster.data.nodeInfo.${key}`) as string
+                          }`}</td>
                           <td class="p-2">{value}</td>
                         </tr>
                       )}

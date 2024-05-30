@@ -1,5 +1,5 @@
 import { Avatar } from '@ark-ui/solid'
-import { JSX, splitProps } from 'solid-js'
+import { type JSX, splitProps } from 'solid-js'
 
 export type AvatarProps = {
   fallback?: string

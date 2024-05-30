@@ -432,7 +432,8 @@
     "required": "請填寫驗證碼",
     "minLength": "驗證碼至少4位",
     "calculating": "計算中...",
-    "placeholder": "驗證碼"
+    "placeholder": "驗證碼",
+    "reload": "看不清？換一個"
   },
   "article": {
     "loading": "少女祈禱中...",

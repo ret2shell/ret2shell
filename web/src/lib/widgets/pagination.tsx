@@ -1,4 +1,4 @@
-import { Pagination, PaginationRootProps } from '@ark-ui/solid'
+import { Pagination, type PaginationRootProps } from '@ark-ui/solid'
 import { For } from 'solid-js'
 
 export default function (props: PaginationRootProps) {

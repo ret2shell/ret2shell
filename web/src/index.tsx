@@ -4,10 +4,10 @@ import { routes } from './routes/routes'
 import '@fontsource/jetbrains-mono'
 import 'overlayscrollbars/overlayscrollbars.css'
 import '@widgets/styles/base.scss'
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-solid'
-import { fullTheme, initTheme } from './lib/storage/theme'
 import { Router } from '@solidjs/router'
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-solid'
 import { onMount } from 'solid-js'
+import { fullTheme, initTheme } from './lib/storage/theme'
 
 function checkEdition() {
   const compact_edition: string = import.meta.env.VITE_COMPAT_EDITION as string
@@ -70,4 +70,4 @@ render(() => {
       </OverlayScrollbarsComponent>
     </>
   )
-}, document.getElementById('root')!)
+}, document.getElementById('root') || document.body)

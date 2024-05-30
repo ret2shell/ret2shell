@@ -1,6 +1,6 @@
-import { SearchParamsOption } from '@reverier/ky'
+import type { SearchParamsOption } from '@reverier/ky'
 import api, { api_root } from '.'
-import { Article } from '../models/article'
+import type { Article } from '../models/article'
 
 export async function getBulletinList(page: number, page_size: number) {
   return await api

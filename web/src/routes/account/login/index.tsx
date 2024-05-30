@@ -1,30 +1,30 @@
+import { login } from '@/lib/api/account'
 import { getAuthConfig } from '@/lib/api/platform'
 import LogoAnimate from '@/lib/assets/animates/logo-animate'
 import Github from '@/lib/assets/brands/github'
 import Gitlab from '@/lib/assets/brands/gitlab'
 import Google from '@/lib/assets/brands/google'
 import Captcha from '@/lib/blocks/captcha'
-import { AuthConfig } from '@/lib/models/config'
+import type { AuthConfig } from '@/lib/models/config'
+import { accountStore } from '@/lib/storage/account'
 import { platformStore } from '@/lib/storage/platform'
 import { t } from '@/lib/storage/theme'
+import { addToast } from '@/lib/storage/toast'
 import Button from '@/lib/widgets/button'
 import Card from '@/lib/widgets/card'
 import Divider from '@/lib/widgets/divider'
 import Input from '@/lib/widgets/input'
 import Link from '@/lib/widgets/link'
-import { createForm, minLength, pattern, required, setValue } from '@modular-forms/solid'
-import { Title } from '@storage/header'
-import { Match, Show, Switch, createSignal } from 'solid-js'
+import xdsecMascotCrying from '@assets/imgs/xdsec-mascot-crying.webp'
+import xdsecMascotHappy from '@assets/imgs/xdsec-mascot-happy.webp'
 import xdsecMascotNormal from '@assets/imgs/xdsec-mascot-normal.webp'
 import xdsecMascotUnsee from '@assets/imgs/xdsec-mascot-unsee.webp'
-import xdsecMascotHappy from '@assets/imgs/xdsec-mascot-happy.webp'
-import xdsecMascotCrying from '@assets/imgs/xdsec-mascot-crying.webp'
-import { login } from '@/lib/api/account'
-import { addToast } from '@/lib/storage/toast'
-import { HTTPError } from '@reverier/ky'
+import { createForm, minLength, pattern, required, setValue } from '@modular-forms/solid'
+import type { HTTPError } from '@reverier/ky'
 import { useLocation, useNavigate } from '@solidjs/router'
+import { Title } from '@storage/header'
 import { DateTime } from 'luxon'
-import { accountStore } from '@/lib/storage/account'
+import { Match, Show, Switch, createSignal } from 'solid-js'
 
 type LoginForm = {
   account: string
@@ -57,7 +57,12 @@ export default function () {
     setLoading(true)
     login(result)
       .then(() => {
-        addToast({ level: 'success', description: t('account.login.success')!, duration: 5000, img: xdsecMascotHappy })
+        addToast({
+          level: 'success',
+          description: t('account.login.success')!,
+          duration: 5000,
+          img: xdsecMascotHappy,
+        })
         const redirectUrl = location.query.redirect
         if (redirectUrl) {
           navigate(redirectUrl, { replace: true })
@@ -98,7 +103,7 @@ export default function () {
             >
               {(field, props) => (
                 <Input
-                  icon={<span class="icon-[fluent--person-20-regular] w-5 h-5"></span>}
+                  icon={<span class="icon-[fluent--person-20-regular] w-5 h-5" />}
                   placeholder={t('account.login.accountPlaceholder')}
                   title={t('account.login.accountPlaceholder')}
                   autocomplete="username"
@@ -120,12 +125,13 @@ export default function () {
               validate={[
                 required(t('account.login.passwordRequired')!),
                 minLength(8, t('account.login.passwordMinLength')!),
+                // biome-ignore lint/correctness/noEmptyCharacterClassInRegex: password allows any characters
                 pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,40}$/, t('account.login.passwordTooWeak')!),
               ]}
             >
               {(field, props) => (
                 <Input
-                  icon={<span class="icon-[fluent--lock-20-regular] w-5 h-5"></span>}
+                  icon={<span class="icon-[fluent--lock-20-regular] w-5 h-5" />}
                   type="password"
                   placeholder={t('account.login.passwordPlaceholder')}
                   title={t('account.login.passwordPlaceholder')}

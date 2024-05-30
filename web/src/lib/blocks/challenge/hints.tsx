@@ -1,11 +1,11 @@
-import { Extra } from '@/lib/models/extra'
-import { Hint } from '@/lib/models/hint'
-import { For, Show, createSignal } from 'solid-js'
-import { LoremIpsum } from 'lorem-ipsum'
-import Button from '@/lib/widgets/button'
-import Popover from '@/lib/widgets/popover'
-import Card from '@/lib/widgets/card'
+import type { Extra } from '@/lib/models/extra'
+import type { Hint } from '@/lib/models/hint'
 import { t } from '@/lib/storage/theme'
+import Button from '@/lib/widgets/button'
+import Card from '@/lib/widgets/card'
+import Popover from '@/lib/widgets/popover'
+import { LoremIpsum } from 'lorem-ipsum'
+import { For, Show, createSignal } from 'solid-js'
 
 export default function () {
   const [hints, setHints] = createSignal([] as Hint[])
@@ -23,7 +23,7 @@ export default function () {
           {hint => (
             <>
               <div class="px-2 min-h-12 border-b border-b-layer-content/10 flex items-center space-x-2">
-                <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary flex-shrink-0"></span>
+                <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary flex-shrink-0" />
                 <Show
                   when={hint.cost === 0 || extras().find(e => e.hint_id === hint.id)}
                   fallback={
@@ -36,12 +36,16 @@ export default function () {
                           <>
                             <span class="text-warning">-{hint.cost}</span>
                             <span class="opacity-60 text-warning">pts</span>
-                            <span class="icon-[fluent--lock-20-regular] w-5 h-5 text-warning"></span>
+                            <span class="icon-[fluent--lock-20-regular] w-5 h-5 text-warning" />
                           </>
                         }
                       >
                         <Card contentClass="p-2 flex flex-row items-center">
-                          <span class="px-2">{t('game.challenge.confirmUnlockHint', { cost: hint.cost })}</span>
+                          <span class="px-2">
+                            {t('game.challenge.confirmUnlockHint', {
+                              cost: hint.cost,
+                            })}
+                          </span>
                           <Button size="sm" level="error">
                             {t('platform.yes')}
                           </Button>

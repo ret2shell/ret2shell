@@ -1,12 +1,12 @@
-import { createStore } from 'solid-js/store'
-import { Game } from '@models/game'
-import { Team } from '@models/team'
-import { Permission, User } from '@models/user'
+import type { Game } from '@models/game'
+import type { Team } from '@models/team'
+import { Permission, type User } from '@models/user'
 import { DateTime } from 'luxon'
+import { createStore } from 'solid-js/store'
+import type { Challenge } from '../models/challenge'
+import type { Submission } from '../models/submission'
 import { accountStore } from './account'
-import { Challenge } from '../models/challenge'
 import { t } from './theme'
-import { Submission } from '../models/submission'
 
 export const [gameStore, setGameStore] = createStore({
   games: [] as Game[],
@@ -24,7 +24,9 @@ export type GameStoreType = typeof gameStore
 
 export function appendGames(games: Game[]) {
   const ids = new Set(gameStore.games.map(g => g.id))
-  setGameStore({ games: [...gameStore.games.filter(g => !ids.has(g.id)), ...games] })
+  setGameStore({
+    games: [...gameStore.games.filter(g => !ids.has(g.id)), ...games],
+  })
 }
 
 export const canParticipate = () => {

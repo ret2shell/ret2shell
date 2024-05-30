@@ -8,7 +8,7 @@ import { addToast } from '@/lib/storage/toast'
 import Button from '@/lib/widgets/button'
 import LoadingTips from '@/lib/widgets/loading-tips'
 import Tag from '@/lib/widgets/tag'
-import { HTTPError } from '@reverier/ky'
+import type { HTTPError } from '@reverier/ky'
 import { DateTime } from 'luxon'
 import { For, Show, createSignal, onCleanup } from 'solid-js'
 
@@ -139,11 +139,11 @@ export default function () {
   let bottomDiv: HTMLDivElement
   return (
     <>
-      <Title title={`${t('admin.logs.title')} - ${platformStore.config.name || t('platform.name')}`}></Title>
+      <Title title={`${t('admin.logs.title')} - ${platformStore.config.name || t('platform.name')}`} />
       <div class="flex-1 flex flex-col">
         <div class="sticky top-16 h-16 z-20 backdrop-blur border-b border-b-layer-content/10 flex flex-row space-x-4 items-center px-3 lg:px-6">
           <h1 class="flex-1 font-bold flex flex-row space-x-2 items-center">
-            <span class="icon-[fluent--code-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--code-20-regular] w-5 h-5" />
             <span>{t('admin.logs.title')}</span>
           </h1>
           <Show when={enableStreamLogs()}>
@@ -168,7 +168,7 @@ export default function () {
                 onClick={() => downloadLog(file)}
               >
                 <Show when={downloadingFile() !== file}>
-                  <span class="icon-[fluent--folder-zip-20-regular] w-8 h-8 flex-shrink-0"></span>
+                  <span class="icon-[fluent--folder-zip-20-regular] w-8 h-8 flex-shrink-0" />
                 </Show>
                 <span class="truncate">{file.replace('ret2shell.', '').replace('.log', '')}</span>
               </Button>
@@ -201,12 +201,12 @@ export default function () {
           </Show>
           <Show when={logs().length === 0}>
             <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
-              <span class="icon-[fluent--code-20-regular] w-24 h-24"></span>
+              <span class="icon-[fluent--code-20-regular] w-24 h-24" />
               <span>{t('admin.logs.empty')}</span>
               <span>{t('admin.logs.emptyTips')}</span>
             </div>
           </Show>
-          <div ref={bottomDiv!}></div>
+          <div ref={bottomDiv!} />
         </div>
       </div>
     </>

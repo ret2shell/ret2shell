@@ -38,7 +38,11 @@ export default function NotificationBox() {
       <Popover
         btnContent={
           <span
-            class={`${toastStore.toasts.length > 0 ? 'icon-[fluent--alert-badge-20-filled] text-primary' : 'icon-[fluent--alert-20-regular]'} w-5 h-5`}
+            class={`${
+              toastStore.toasts.length > 0
+                ? 'icon-[fluent--alert-badge-20-filled] text-primary'
+                : 'icon-[fluent--alert-20-regular]'
+            } w-5 h-5`}
           />
         }
         square

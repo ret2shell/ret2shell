@@ -1,6 +1,6 @@
-import { ComponentProps, Show, createEffect, createSignal, splitProps, untrack } from 'solid-js'
-import Spin from '../assets/animates/spin'
+import { type ComponentProps, Show, createEffect, createSignal, splitProps, untrack } from 'solid-js'
 import { Transition } from 'solid-transition-group'
+import Spin from '../assets/animates/spin'
 
 export type ImageProps = {
   src?: string
@@ -53,7 +53,7 @@ export default function (props: ImageProps & ComponentProps<'div'>) {
       >
         <Show when={loading()}>
           <div class="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-layer/80 backdrop-blur-xl">
-            <Spin width={24} height={24}></Spin>
+            <Spin width={24} height={24} />
           </div>
         </Show>
       </Transition>

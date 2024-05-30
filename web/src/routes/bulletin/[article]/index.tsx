@@ -1,25 +1,25 @@
 import { deleteBulletin, getBulletin } from '@/lib/api/bulletin'
 import Spin from '@/lib/assets/animates/spin'
-import { Article as ArticleModel } from '@/lib/models/article'
+import type { Article as ArticleModel } from '@/lib/models/article'
 import { Permission } from '@/lib/models/user'
 import { accountStore } from '@/lib/storage/account'
 import { t } from '@/lib/storage/theme'
 import { addToast } from '@/lib/storage/toast'
 import Article from '@/lib/widgets/article'
-import { HTTPError } from '@reverier/ky'
+import type { HTTPError } from '@reverier/ky'
 import { useNavigate, useParams, useSearchParams } from '@solidjs/router'
 import { Show, createSignal } from 'solid-js'
 import EditForm from '../_blocks/form'
 
 export default function () {
   const params = useParams()
-  const article_id = parseInt(params.article)
+  const article_id = Number.parseInt(params.article)
   const [searchParams, setSearchParams] = useSearchParams()
   const inEdit = () => searchParams.edit === 'true'
   const [article, setArticle] = createSignal(null as ArticleModel | null)
   const navigate = useNavigate()
 
-  if (isNaN(article_id)) navigate('/errors/404', { replace: true })
+  if (Number.isNaN(article_id)) navigate('/errors/404', { replace: true })
   getBulletin(article_id)
     .then(resp => {
       setArticle(resp)
@@ -34,7 +34,11 @@ export default function () {
   function onDelete() {
     deleteBulletin(article_id)
       .then(() => {
-        addToast({ level: 'success', description: t('bulletin.deleteSuccess')!, duration: 5000 })
+        addToast({
+          level: 'success',
+          description: t('bulletin.deleteSuccess')!,
+          duration: 5000,
+        })
         navigate('/bulletin', { replace: true })
       })
       .catch((err: HTTPError) => {
@@ -75,10 +79,12 @@ export default function () {
       <div class="flex flex-row items-center justify-center space-x-6 print:space-x-2 opacity-60 flex-wrap py-3">
         <a
           class="hover:underline font-bold flex flex-row space-x-2 items-center"
-          title={t('article.by', { name: article()?.publisher_name || t('article.unknownPublisher')! })}
+          title={t('article.by', {
+            name: article()?.publisher_name || t('article.unknownPublisher')!,
+          })}
           href={`/users/${article()?.publisher_id}`}
         >
-          <span class="icon-[fluent--person-20-regular] w-5 h-5 print:hidden"></span>
+          <span class="icon-[fluent--person-20-regular] w-5 h-5 print:hidden" />
           <span class="hidden print:inline-block">By</span>
           <span>{article()?.publisher_name}</span>
         </a>
@@ -88,7 +94,7 @@ export default function () {
             time: article()?.created_at.toFormat('yyyy-MM-dd HH:mm:ss') || 'UNKNOWN',
           })}
         >
-          <span class="icon-[fluent--calendar-20-regular] w-5 h-5 print:hidden"></span>
+          <span class="icon-[fluent--calendar-20-regular] w-5 h-5 print:hidden" />
           <span class="hidden print:inline-block">at</span>
           <span>{article()?.created_at.toFormat('yyyy-MM-dd HH:mm:ss')}</span>
         </div>
@@ -99,7 +105,7 @@ export default function () {
               time: article()?.updated_at.toFormat('yyyy-MM-dd HH:mm:ss') || 'UNKNOWN',
             })}
           >
-            <span class="icon-[fluent--calendar-edit-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--calendar-edit-20-regular] w-5 h-5" />
             <span>{article()?.updated_at.toFormat('yyyy-MM-dd HH:mm:ss')}</span>
           </div>
         </Show>
@@ -108,22 +114,24 @@ export default function () {
             class="font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
             href={`/bulletin/${article()?.id}?edit=true`}
           >
-            <span class="icon-[fluent--edit-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--edit-20-regular] w-5 h-5" />
             <span>{t('form.edit')}</span>
           </a>
           <button
             class="font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
             onClick={onDelete}
+            type="button"
           >
-            <span class="icon-[fluent--delete-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--delete-20-regular] w-5 h-5" />
             <span>{t('form.delete')}</span>
           </button>
         </Show>
         <button
           class="font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
           onClick={() => print()}
+          type="button"
         >
-          <span class="icon-[fluent--print-20-regular] w-5 h-5"></span>
+          <span class="icon-[fluent--print-20-regular] w-5 h-5" />
           <span>{t('form.print')}</span>
         </button>
       </div>

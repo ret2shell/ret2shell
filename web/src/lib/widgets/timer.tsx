@@ -1,5 +1,5 @@
 import { DateTime, Duration } from 'luxon'
-import { ComponentProps, createSignal, onCleanup } from 'solid-js'
+import { type ComponentProps, createSignal, onCleanup } from 'solid-js'
 
 export default function (props: ComponentProps<'span'> & { end: DateTime }) {
   const [duration, setDuration] = createSignal(props.end.diffNow())

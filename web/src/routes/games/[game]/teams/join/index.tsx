@@ -9,7 +9,11 @@ export default function () {
   const navigate = useNavigate()
   createEffect(() => {
     if (gameStore.current && !canParticipate()) {
-      addToast({ level: 'warning', description: t('game.canNotParticipate')!, duration: 5000 })
+      addToast({
+        level: 'warning',
+        description: t('game.canNotParticipate')!,
+        duration: 5000,
+      })
       navigate(`/games/${gameStore.current.id}`, { replace: true })
     }
   })

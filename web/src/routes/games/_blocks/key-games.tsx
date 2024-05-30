@@ -1,29 +1,29 @@
+import { getGames } from '@/lib/api/game'
 import LogoAnimate from '@/lib/assets/animates/logo-animate'
+import Spin from '@/lib/assets/animates/spin'
+import { type Game, HostType } from '@/lib/models/game'
+import { Permission } from '@/lib/models/user'
+import { accountStore } from '@/lib/storage/account'
 import { appendGames, gameStore, setGameStore } from '@/lib/storage/game'
 import { t, themeStore } from '@/lib/storage/theme'
+import { addToast } from '@/lib/storage/toast'
+import { randomTips } from '@/lib/utils/loading-tips'
+import { mediaPath } from '@/lib/utils/media'
 import Button from '@/lib/widgets/button'
 import Card from '@/lib/widgets/card'
 import Divider from '@/lib/widgets/divider'
 import Link from '@/lib/widgets/link'
 import Picture from '@/lib/widgets/picture'
+import Popover from '@/lib/widgets/popover'
 import Tag from '@/lib/widgets/tag'
+import bluredBgDark from '@assets/imgs/bg-blur-stars.webp'
+import bluredBgLight from '@assets/imgs/bg-blur-suzume.webp'
+import bgGameDefault from '@assets/imgs/bg-game-default.webp'
+import type { HTTPError } from '@reverier/ky'
 import { useSearchParams } from '@solidjs/router'
 import { DateTime } from 'luxon'
 import { For, Show, createEffect, createMemo, createSignal, untrack } from 'solid-js'
-import bluredBgDark from '@assets/imgs/bg-blur-stars.webp'
-import bluredBgLight from '@assets/imgs/bg-blur-suzume.webp'
-import { Game, HostType } from '@/lib/models/game'
-import { getGames } from '@/lib/api/game'
-import { HTTPError } from '@reverier/ky'
-import { addToast } from '@/lib/storage/toast'
-import { accountStore } from '@/lib/storage/account'
-import { Permission } from '@/lib/models/user'
-import Spin from '@/lib/assets/animates/spin'
-import Popover from '@/lib/widgets/popover'
 import CreateGame from './create'
-import bgGameDefault from '@assets/imgs/bg-game-default.webp'
-import { randomTips } from '@/lib/utils/loading-tips'
-import { mediaPath } from '@/lib/utils/media'
 
 export default function () {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -32,8 +32,8 @@ export default function () {
   const [loading, setLoading] = createSignal(true)
   const showCreate = () => searchParams.create === 'true'
   const selectedGameId = createMemo(() => {
-    const result = searchParams.selected ? parseInt(searchParams.selected) : NaN
-    if (isNaN(result)) {
+    const result = searchParams.selected ? Number.parseInt(searchParams.selected) : Number.NaN
+    if (Number.isNaN(result)) {
       return gameStore.games.at(0)?.id || null
     }
     return result
@@ -95,20 +95,20 @@ export default function () {
             }}
             href="/games?create=true"
           >
-            <span class="icon-[fluent--add-20-regular] w-5 h-5 opacity-60"></span>
+            <span class="icon-[fluent--add-20-regular] w-5 h-5 opacity-60" />
             <span>{t('game.create')}</span>
           </Link>
         </Show>
         <Divider class="w-4/5" />
         <Button ghost class="w-4/5" disabled={page() <= 1} onClick={() => setPage(page() - 1)}>
-          <span class="icon-[fluent--chevron-double-up-20-regular] w-5 h-5 opacity-60"></span>
+          <span class="icon-[fluent--chevron-double-up-20-regular] w-5 h-5 opacity-60" />
         </Button>
         <Divider class="w-4/5" />
         <For
           each={keyGames()}
           fallback={
             <Button ghost disabled class="w-4/5" justify="start">
-              <span class="icon-[fluent--flag-20-regular] w-5 h-5"></span>
+              <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
               <span>{t('game.noGameHosted')}</span>
             </Button>
           }
@@ -123,34 +123,42 @@ export default function () {
               >
                 {/* icon-[fluent--flag-20-regular] icon-[fluent--flag-20-filled] */}
                 <span
-                  class={`icon-[fluent--flag-20-${selectedGameId() === game.id && !showCreate() ? 'filled' : 'regular'}] w-5 h-5 ${
-                    selectedGameId() === game.id && !showCreate() ? 'text-primary' : 'opacity-60'
-                  }`}
-                ></span>
+                  class={`icon-[fluent--flag-20-${
+                    selectedGameId() === game.id && !showCreate() ? 'filled' : 'regular'
+                  }] w-5 h-5 ${selectedGameId() === game.id && !showCreate() ? 'text-primary' : 'opacity-60'}`}
+                />
                 <span
-                  class={`flex-1 text-start ${selectedGameId() === game.id && !showCreate() ? 'font-bold' : 'font-normal opacity-60'}`}
+                  class={`flex-1 text-start ${
+                    selectedGameId() === game.id && !showCreate() ? 'font-bold' : 'font-normal opacity-60'
+                  }`}
                 >
                   {game.name}
                 </span>
                 <Show when={game.frozen}>
-                  <span class="icon-[fluent--weather-snowflake-20-regular] w-5 h-5 text-primary mx-2"></span>
+                  <span class="icon-[fluent--weather-snowflake-20-regular] w-5 h-5 text-primary mx-2" />
                 </Show>
                 <Show when={game.hidden}>
-                  <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning mx-2"></span>
+                  <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning mx-2" />
                 </Show>
                 <div
-                  class={`w-2 h-2 rounded-full ${DateTime.now() < game.start_at ? 'bg-info' : DateTime.now() > game.end_at ? 'bg-warning' : 'bg-success'}`}
-                ></div>
+                  class={`w-2 h-2 rounded-full ${
+                    DateTime.now() < game.start_at
+                      ? 'bg-info'
+                      : DateTime.now() > game.end_at
+                        ? 'bg-warning'
+                        : 'bg-success'
+                  }`}
+                />
               </Link>
             </>
           )}
         </For>
         <Divider class="w-4/5" />
         <Button ghost class="w-4/5" disabled={page() >= total()} onClick={() => setPage(page() + 1)}>
-          <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5 opacity-60"></span>
+          <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5 opacity-60" />
         </Button>
         <Divider class="w-4/5" />
-        <div class="flex-1"></div>
+        <div class="flex-1" />
         <Divider class="w-4/5" />
         <Button
           ghost
@@ -160,15 +168,15 @@ export default function () {
             document.getElementById('other-games')?.scrollIntoView({ behavior: 'smooth' })
           }}
         >
-          <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5"></span>
+          <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5" />
           <span>{t('game.otherGames')}</span>
         </Button>
         <Divider class="w-4/5" />
       </div>
-      <div class="w-16 hidden lg:inline-block"></div>
+      <div class="w-16 hidden lg:inline-block" />
       <Card class="block lg:hidden mx-3 mt-3" contentClass="p-2 flex flex-row space-x-2">
         <Button ghost square>
-          <span class="icon-[fluent--chevron-double-left-20-regular] w-5 h-5"></span>
+          <span class="icon-[fluent--chevron-double-left-20-regular] w-5 h-5" />
         </Button>
         <Popover
           popContentClass="pt-2 flex flex-col"
@@ -181,7 +189,7 @@ export default function () {
               each={keyGames()}
               fallback={
                 <Button ghost disabled justify="start">
-                  <span class="icon-[fluent--flag-20-regular] w-5 h-5"></span>
+                  <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
                   <span>{t('game.noGameHosted')}</span>
                 </Button>
               }
@@ -199,15 +207,23 @@ export default function () {
                       class={`icon-[fluent--flag-20-${selectedGameId() === game.id ? 'filled' : 'regular'}] w-5 h-5 ${
                         selectedGameId() === game.id ? 'text-primary' : 'opacity-60'
                       }`}
-                    ></span>
+                    />
                     <span
-                      class={`flex-1 text-start ${selectedGameId() === game.id ? 'font-bold' : 'font-normal opacity-60'}`}
+                      class={`flex-1 text-start ${
+                        selectedGameId() === game.id ? 'font-bold' : 'font-normal opacity-60'
+                      }`}
                     >
                       {game.name}
                     </span>
                     <div
-                      class={`w-2 h-2 rounded-full ${DateTime.now() < game.start_at ? 'bg-info' : DateTime.now() > game.end_at ? 'bg-warning' : 'bg-success'}`}
-                    ></div>
+                      class={`w-2 h-2 rounded-full ${
+                        DateTime.now() < game.start_at
+                          ? 'bg-info'
+                          : DateTime.now() > game.end_at
+                            ? 'bg-warning'
+                            : 'bg-success'
+                      }`}
+                    />
                   </Link>
                 </>
               )}
@@ -215,7 +231,7 @@ export default function () {
           </Card>
         </Popover>
         <Button ghost square>
-          <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5"></span>
+          <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
         </Button>
       </Card>
       <div class="flex-1 p-3 lg:p-12 flex flex-col items-center lg:justify-center lg:items-start">
@@ -244,7 +260,7 @@ export default function () {
                 <Picture
                   class="aspect-video"
                   src={(selectedGame()?.cover && mediaPath(selectedGame()!.cover!)) || bgGameDefault}
-                ></Picture>
+                />
               </Show>
               <Tag
                 class="absolute top-2 right-2"
@@ -277,11 +293,17 @@ export default function () {
                 when={selectedGame()?.logo}
                 fallback={
                   <Show when={loading()} fallback={<LogoAnimate class="hidden lg:block" width={64} height={64} />}>
-                    <Spin width={64} height={64}></Spin>
+                    <Spin width={64} height={64} />
                   </Show>
                 }
               >
-                <img class="hidden lg:block" src={mediaPath(selectedGame()!.logo!)} width={64} height={64}></img>
+                <img
+                  class="hidden lg:block"
+                  src={mediaPath(selectedGame()!.logo!)}
+                  width={64}
+                  height={64}
+                  alt={selectedGame()?.name}
+                />
               </Show>
               <div class="flex flex-col space-y-2 flex-1 w-full lg:w-auto">
                 <h2 class="text-xl font-bold flex flex-row space-x-4">
@@ -303,7 +325,8 @@ export default function () {
                   if (selectedGame()) setGameStore({ current: selectedGame() || null })
                   return false
                 }}
-              ></button>
+                type="button"
+              />
             </Card>
           </>
         </Show>

@@ -1,4 +1,4 @@
-import { Progress, ProgressRootProps } from '@ark-ui/solid'
+import { Progress, type ProgressRootProps } from '@ark-ui/solid'
 
 import { createMemo } from 'solid-js'
 

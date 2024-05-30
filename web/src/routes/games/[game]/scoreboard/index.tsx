@@ -1,21 +1,21 @@
+import { getGameScoreboard } from '@/lib/api/game'
+import type { Team } from '@/lib/models/team'
 import { accountStore, refreshInstitutes } from '@/lib/storage/account'
 import { gameStore } from '@/lib/storage/game'
 import { Title } from '@/lib/storage/header'
 import { t } from '@/lib/storage/theme'
+import { addToast } from '@/lib/storage/toast'
 import Button from '@/lib/widgets/button'
 import Card from '@/lib/widgets/card'
 import Chart from '@/lib/widgets/chart'
 import Select from '@/lib/widgets/select'
+import type { HTTPError } from '@reverier/ky'
+import { type Size, createElementSize } from '@solid-primitives/resize-observer'
+import { useSearchParams } from '@solidjs/router'
 import { Match, Show, Switch, createEffect, createMemo, createSignal, onMount, untrack } from 'solid-js'
 import TeamDetails from './_blocks/team-details'
-import { Team } from '@/lib/models/team'
-import TeamSolves from './_blocks/team-solves'
 import TeamRanks from './_blocks/team-ranks'
-import { Size, createElementSize } from '@solid-primitives/resize-observer'
-import { useSearchParams } from '@solidjs/router'
-import { getGameScoreboard } from '@/lib/api/game'
-import { HTTPError } from '@reverier/ky'
-import { addToast } from '@/lib/storage/toast'
+import TeamSolves from './_blocks/team-solves'
 
 function ChartOperations(props: {
   onRefresh?: () => void
@@ -42,10 +42,10 @@ function ChartOperations(props: {
       <div class="flex flex-row space-x-2 justify-between overflow-hidden">
         <div class="flex flex-row space-x-2">
           <Button square size={props.size} ghost={props.ghost} onClick={() => props.onRefresh?.()}>
-            <span class="icon-[fluent--arrow-clockwise-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--arrow-clockwise-20-regular] w-5 h-5" />
           </Button>
           <Button square size={props.size} ghost={props.ghost} onClick={() => props.onExport?.()}>
-            <span class="icon-[fluent--open-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--open-20-regular] w-5 h-5" />
           </Button>
           <Button
             square
@@ -53,8 +53,8 @@ function ChartOperations(props: {
             ghost={props.ghost}
             onClick={() => props.onShowHiddenTeams?.(!props.showHiddenTeams)}
           >
-            <Show when={props.showHiddenTeams} fallback={<span class="icon-[fluent--eye-20-regular] w-5 h-5"></span>}>
-              <span class="icon-[fluent--eye-off-20-filled] w-5 h-5 text-warning"></span>
+            <Show when={props.showHiddenTeams} fallback={<span class="icon-[fluent--eye-20-regular] w-5 h-5" />}>
+              <span class="icon-[fluent--eye-off-20-filled] w-5 h-5 text-warning" />
             </Show>
           </Button>
         </div>
@@ -65,7 +65,7 @@ function ChartOperations(props: {
           placeholder={t('game.scoreboard.selectInstitute')}
           items={gameInstitutesSelect()}
           onValueChange={v => {
-            props.onInstituteChanged?.((v.value.at(0) && parseInt(v.value.at(0)!)) || null)
+            props.onInstituteChanged?.((v.value.at(0) && Number.parseInt(v.value.at(0)!)) || null)
           }}
           value={(props.institute && [props.institute.toString()]) || undefined}
         />
@@ -84,7 +84,7 @@ export default function () {
   const [page, setPage] = createSignal(1)
   const [pageSize, setPageSize] = createSignal(10)
   const showHiddenTeams = createMemo(() => searchParams.hidden === 'true')
-  const selectedInstituteId = createMemo(() => parseInt(searchParams.institute || 'NaN') || null)
+  const selectedInstituteId = createMemo(() => Number.parseInt(searchParams.institute || 'NaN') || null)
   const [loadingInstitute, setLoadingInstitute] = createSignal(true)
   const [loading, setLoading] = createSignal(false)
   const [showPlane, setShowPlane] = createSignal(false)
@@ -175,10 +175,16 @@ export default function () {
     <>
       <Title title={`${t('game.scoreboard.title')} - ${gameStore.current?.name || 'CTF'}`} />
       <div class="flex flex-col xl:flex-row flex-1 min-w-min">
-        <div ref={autoPageSizeWatcher!} class="fixed h-[calc(100vh-24rem)]"></div>
+        <div ref={autoPageSizeWatcher!} class="fixed h-[calc(100vh-24rem)]" />
         <Show when={!loadingInstitute() && topTeams().length > 0}>
           <div
-            class={`xl:sticky w-full top-0 left-0 ${showChallengeDetail() ? 'xl:w-[20vw] backdrop-blur border-r border-r-layer-content/10' : showLargePanel() ? 'xl:w-[75vw] justify-center' : 'xl:w-[40vw]'} transition-size duration-500 p-3 lg:p-6 flex flex-col space-y-2 flex-shrink-0`}
+            class={`xl:sticky w-full top-0 left-0 ${
+              showChallengeDetail()
+                ? 'xl:w-[20vw] backdrop-blur border-r border-r-layer-content/10'
+                : showLargePanel()
+                  ? 'xl:w-[75vw] justify-center'
+                  : 'xl:w-[40vw]'
+            } transition-size duration-500 p-3 lg:p-6 flex flex-col space-y-2 flex-shrink-0`}
           >
             <Card class="relative" contentClass={`p-2 ${showChallengeDetail() ? 'h-48' : 'aspect-video'}`}>
               <Chart
@@ -213,12 +219,10 @@ export default function () {
                   },
                   yAxis: {
                     type: 'value',
-                    min: function () {
-                      return 0
-                    },
-                    max: function (value: { min: number; max: number }) {
+                    min: () => 0,
+                    max: (value: { min: number; max: number }) => {
                       if (value.max < 100) return 100
-                      else return Math.ceil(value.max + value.max * 0.1)
+                      return Math.ceil(value.max + value.max * 0.1)
                     },
                     axisLabel: {
                       fontFamily: 'JetBrains Mono',
@@ -229,7 +233,7 @@ export default function () {
               />
               <Show when={teams().length === 0}>
                 <div class="absolute top-0 left-0 w-full h-full flex flex-col space-y-6 items-center justify-center">
-                  <span class="icon-[fluent--data-trending-48-regular] w-12 h-12 opacity-60"></span>
+                  <span class="icon-[fluent--data-trending-48-regular] w-12 h-12 opacity-60" />
                 </div>
               </Show>
               <div class="absolute left-2 top-2 flex flex-row space-x-2">

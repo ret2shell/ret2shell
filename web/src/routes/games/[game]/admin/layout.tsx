@@ -1,8 +1,8 @@
 import SidebarLayout from '@/lib/blocks/sidebar-layout'
+import { gameStore } from '@/lib/storage/game'
 import { Title } from '@/lib/storage/header'
 import { t } from '@/lib/storage/theme'
-import { JSX } from 'solid-js'
-import { gameStore } from '@/lib/storage/game'
+import type { JSX } from 'solid-js'
 import SideBar from './_blocks/sidebar'
 
 export default function (props: { children?: JSX.Element }) {

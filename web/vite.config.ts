@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import solidPlugin from 'vite-plugin-solid'
-import path from 'path'
+import path from 'node:path'
 import viteCompression from 'vite-plugin-compression'
 
 export default defineConfig({

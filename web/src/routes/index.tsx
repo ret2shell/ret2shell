@@ -1,14 +1,14 @@
-import { Show, onMount } from 'solid-js'
 import LogoAnimate from '@assets/animates/logo-animate'
+import { useSearchParams } from '@solidjs/router'
+import { Title } from '@storage/header'
 import { platformStore } from '@storage/platform'
 import { t } from '@storage/theme'
-import Popover from '@widgets/popover'
-import Link from '@widgets/link'
 import Button from '@widgets/button'
 import Card from '@widgets/card'
+import Link from '@widgets/link'
+import Popover from '@widgets/popover'
+import { Show, onMount } from 'solid-js'
 import Calendar from './calendar'
-import { Title } from '@storage/header'
-import { useSearchParams } from '@solidjs/router'
 
 export default function () {
   const [searchParams] = useSearchParams()
@@ -16,7 +16,7 @@ export default function () {
   onMount(() => {
     if (searchParams.event) {
       try {
-        const result = parseInt(searchParams.event)
+        const result = Number.parseInt(searchParams.event)
         if (result) {
           setTimeout(() => {
             calendarSection.scrollIntoView({ behavior: 'smooth' })
@@ -40,7 +40,12 @@ export default function () {
               &nbsp;
               <span class="text-primary animate-ping">_</span>
             </h1>
-            <a class="text-xl text-error mt-8" href={platformStore.config.subject_url || '#'} target="_blank">
+            <a
+              class="text-xl text-error mt-8"
+              href={platformStore.config.subject_url || '#'}
+              target="_blank"
+              rel="noreferrer"
+            >
               {platformStore.config.subject_info || t('platform.subject')}
             </a>
             <div class="flex-1" />
@@ -48,19 +53,24 @@ export default function () {
             <div class="absolute bottom-4 flex flex-row flex-wrap items-center justify-center h-auto p-2 space-x-2 opacity-60">
               <Button ghost class="inline-flex flex-row space-x-1 flex-wrap h-auto max-w-full">
                 <span>(C) 2022 - {new Date().getFullYear()}</span>
-                <a class="hover:underline" href={platformStore.config.footer_url || '#'} target="_blank">
+                <a
+                  class="hover:underline"
+                  href={platformStore.config.footer_url || '#'}
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   {platformStore.config.footer_info}
                 </a>
                 <Show when={!platformStore.config.hide_maker}>
                   <span class="opacity-40">|</span>
                   <span>By</span>
-                  <a class="hover:underline" href="https://github.com/ret2shell" target="_blank">
+                  <a class="hover:underline" href="https://github.com/ret2shell" target="_blank" rel="noreferrer">
                     {t('platform.name')}
                   </a>
                 </Show>
                 <Show when={platformStore.config.record}>
                   <span class="opacity-40">|</span>
-                  <a class="hover:underline" href="https://beian.miit.gov.cn" target="_blank">
+                  <a class="hover:underline" href="https://beian.miit.gov.cn" target="_blank" rel="noreferrer">
                     {platformStore.config.record}
                   </a>
                 </Show>
@@ -81,7 +91,7 @@ export default function () {
                 ghost
                 popContentClass="pb-2"
                 square
-                btnContent={<span class="icon-[fluent--info-20-regular] w-5 h-5"></span>}
+                btnContent={<span class="icon-[fluent--info-20-regular] w-5 h-5" />}
               >
                 <div class="w-max flex flex-col space-y-2">
                   <Card contentClass="flex flex-row items-center space-x-6 p-4 px-8">
@@ -107,15 +117,15 @@ export default function () {
                   </Card>
                   <Card contentClass="flex flex-row p-2 space-x-2">
                     <Link href="mailto:ret2shell@woooo.tech" ghost size="sm">
-                      <span class="icon-[fluent--mail-20-regular] w-5 h-5"></span>
+                      <span class="icon-[fluent--mail-20-regular] w-5 h-5" />
                       <span class="font-normal opacity-60">ret2shell@woooo.tech</span>
                     </Link>
-                    <div class="flex-1"></div>
+                    <div class="flex-1" />
                     <Link href="https://github.com/ret2shell" ghost size="sm" square title={t('about.donate')}>
-                      <span class="icon-[fluent--flash-sparkle-20-regular] w-5 h-5"></span>
+                      <span class="icon-[fluent--flash-sparkle-20-regular] w-5 h-5" />
                     </Link>
                     <Link href="https://github.com/ret2shell" ghost size="sm" square title={t('about.source')}>
-                      <span class="icon-[fluent--open-20-regular] w-5 h-5"></span>
+                      <span class="icon-[fluent--open-20-regular] w-5 h-5" />
                     </Link>
                   </Card>
                 </div>

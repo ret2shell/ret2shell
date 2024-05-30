@@ -1,5 +1,5 @@
 import { createBreakpoints } from '@solid-primitives/media'
-import { JSX, Show } from 'solid-js'
+import { type JSX, Show } from 'solid-js'
 import { Transition } from 'solid-transition-group'
 import './sidebar-layout.scss'
 

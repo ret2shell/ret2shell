@@ -1,5 +1,5 @@
+import { type Flatten, flatten } from '@solid-primitives/i18n'
 import type rawDict from './en-us.json'
-import { Flatten, flatten } from '@solid-primitives/i18n'
 
 const localeList = ['en_us', 'zh_cn', 'zh_tw', 'ja_jp'] as const
 export type Locale = (typeof localeList)[number]

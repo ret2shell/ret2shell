@@ -1,16 +1,16 @@
-import { DateTime } from 'luxon'
+import type { DateTime } from 'luxon'
 
 export enum Permission {
-  Basic,
-  Verified,
-  Calendar,
-  Wiki,
-  Bulletin,
-  Game,
-  Host,
-  User,
-  Statistics,
-  DevOps,
+  Basic = 0,
+  Verified = 1,
+  Calendar = 2,
+  Wiki = 3,
+  Bulletin = 4,
+  Game = 5,
+  Host = 6,
+  User = 7,
+  Statistics = 8,
+  DevOps = 9,
 }
 
 export type User = {

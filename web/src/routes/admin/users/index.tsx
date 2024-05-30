@@ -5,7 +5,7 @@ import { t } from '@/lib/storage/theme'
 export default function () {
   return (
     <>
-      <Title title={`${t('admin.users.title')} - ${platformStore.config.name || t('platform.name')}`}></Title>
+      <Title title={`${t('admin.users.title')} - ${platformStore.config.name || t('platform.name')}`} />
     </>
   )
 }

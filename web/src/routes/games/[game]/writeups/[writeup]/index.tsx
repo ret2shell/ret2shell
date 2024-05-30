@@ -10,7 +10,7 @@ import { createEffect, untrack } from 'solid-js'
 export default function () {
   const navigate = useNavigate()
   createEffect(() => {
-    if (gameStore.current && gameStore.current.archive_at && !accountStore.permissions.includes(Permission.Game)) {
+    if (gameStore.current?.archive_at && !accountStore.permissions.includes(Permission.Game)) {
       untrack(() => {
         if (gameStore.current?.archive_at && gameStore.current.archive_at > DateTime.now()) {
           addToast({

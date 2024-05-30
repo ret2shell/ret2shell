@@ -1,5 +1,5 @@
 import Spin from '@/lib/assets/animates/spin'
-import { Team } from '@/lib/models/team'
+import type { Team } from '@/lib/models/team'
 import { gameStore } from '@/lib/storage/game'
 import { t } from '@/lib/storage/theme'
 import { randomTips } from '@/lib/utils/loading-tips'
@@ -28,13 +28,13 @@ export default function TeamRanks(props: {
         <Switch>
           <Match when={props.loading}>
             <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
-              <Spin width={32} height={32}></Spin>
+              <Spin width={32} height={32} />
               <span>{randomTips()}</span>
             </div>
           </Match>
           <Match when={props.teams.length === 0}>
             <div class="flex-1 flex flex-col space-y-6 items-center justify-center opacity-60">
-              <span class="icon-[fluent--data-trending-48-regular] w-12 h-12"></span>
+              <span class="icon-[fluent--data-trending-48-regular] w-12 h-12" />
               <span>{t('game.team.noTeamParticipated')}</span>
             </div>
           </Match>
@@ -45,13 +45,13 @@ export default function TeamRanks(props: {
               <span class="w-12 text-center">
                 <Switch>
                   <Match when={realIndex(index()) === 1}>
-                    <span class="icon-[fluent-emoji-flat--1st-place-medal] w-6 h-6"></span>
+                    <span class="icon-[fluent-emoji-flat--1st-place-medal] w-6 h-6" />
                   </Match>
                   <Match when={realIndex(index()) === 2}>
-                    <span class="icon-[fluent-emoji-flat--2nd-place-medal] w-6 h-6"></span>
+                    <span class="icon-[fluent-emoji-flat--2nd-place-medal] w-6 h-6" />
                   </Match>
                   <Match when={realIndex(index()) === 3}>
-                    <span class="icon-[fluent-emoji-flat--3rd-place-medal] w-6 h-6"></span>
+                    <span class="icon-[fluent-emoji-flat--3rd-place-medal] w-6 h-6" />
                   </Match>
                   <Match when={realIndex(index()) > 3}>
                     <span class="font-bold opacity-60">{realIndex(index()).toString().padStart(4, '0')}</span>

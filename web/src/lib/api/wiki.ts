@@ -1,5 +1,5 @@
 import api, { api_root } from '.'
-import { Article } from '../models/article'
+import type { Article } from '../models/article'
 
 export async function getWikiTree() {
   return await api.get(`${api_root}/wiki`).json<Article[]>()

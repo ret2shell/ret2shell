@@ -1,4 +1,4 @@
-import { ComponentProps, JSX, splitProps } from 'solid-js'
+import { type ComponentProps, type JSX, splitProps } from 'solid-js'
 
 export type TagProps = {
   level: 'info' | 'success' | 'warning' | 'error' | 'layer-content'
@@ -10,7 +10,7 @@ export default function Tag(props: { children?: JSX.Element } & TagProps & Compo
     <div {...others} class={`tag ${others.class}`}>
       <div class="tag-content">
         {/* bg-info bg-success bg-warning bg-error */}
-        <span class={`tag-dot bg-${tagProps.level}`}></span>
+        <span class={`tag-dot bg-${tagProps.level}`} />
         {tagProps.children}
       </div>
     </div>

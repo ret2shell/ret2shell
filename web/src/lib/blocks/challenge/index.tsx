@@ -1,22 +1,22 @@
 import { Permission } from '@/lib/models/user'
 import { accountStore } from '@/lib/storage/account'
+import type { GameStoreType } from '@/lib/storage/game'
 import { fullTheme, t } from '@/lib/storage/theme'
+import type { TrainingStoreType } from '@/lib/storage/training'
 import Button from '@/lib/widgets/button'
-import { Challenge } from '@models/challenge'
+import type { Challenge } from '@models/challenge'
 import Splitter from '@widgets/splitter'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-solid'
 import { Show, createSignal } from 'solid-js'
-import Terminal from './terminal'
-import Hints from './hints'
+import { Dynamic } from 'solid-js/web'
+import Answer from './answer'
 import Files from './files'
 import Hammer from './hammer'
-import Answer from './answer'
-import Statistics from './statistics'
+import Hints from './hints'
 import Instances from './instances'
 import Settings from './settings'
-import { Dynamic } from 'solid-js/web'
-import { GameStoreType } from '@/lib/storage/game'
-import { TrainingStoreType } from '@/lib/storage/training'
+import Statistics from './statistics'
+import Terminal from './terminal'
 
 function BottomPanel(props: {
   challenge?: Challenge
@@ -41,19 +41,19 @@ function BottomPanel(props: {
         >
           <div class="h-full flex px-2 py-0 items-center space-x-2 min-w-max w-max">
             <Button onClick={() => setPage(0)} ghost={page() !== 0}>
-              <span class="icon-[fluent--code-20-regular] w-5 h-5"></span>
+              <span class="icon-[fluent--code-20-regular] w-5 h-5" />
               <span>{t('game.challenge.terminal')}</span>
             </Button>
             <Button onClick={() => setPage(1)} ghost={page() !== 1}>
-              <span class="icon-[fluent--info-20-regular] w-5 h-5"></span>
+              <span class="icon-[fluent--info-20-regular] w-5 h-5" />
               <span>{t('game.challenge.hint')}</span>
             </Button>
             <Button onClick={() => setPage(2)} ghost={page() !== 2}>
-              <span class="icon-[fluent--save-20-regular] w-5 h-5"></span>
+              <span class="icon-[fluent--save-20-regular] w-5 h-5" />
               <span>{t('game.challenge.files')}</span>
             </Button>
             <Button onClick={() => setPage(3)} ghost={page() !== 3} disabled={!props.inGame}>
-              <span class="icon-[fluent-emoji-flat--hammer] w-5 h-5"></span>
+              <span class="icon-[fluent-emoji-flat--hammer] w-5 h-5" />
               <span>{t('game.challenge.hammer')}</span>
             </Button>
             <Button
@@ -68,7 +68,7 @@ function BottomPanel(props: {
                 )
               }
             >
-              <span class="icon-[fluent--checkmark-circle-20-regular] w-5 h-5"></span>
+              <span class="icon-[fluent--checkmark-circle-20-regular] w-5 h-5" />
               <span>{t('game.challenge.answer')}</span>
             </Button>
             <Show
@@ -79,15 +79,15 @@ function BottomPanel(props: {
               }
             >
               <Button onClick={() => setPage(5)} ghost={page() !== 5}>
-                <span class="icon-[fluent--data-pie-20-regular] w-5 h-5"></span>
+                <span class="icon-[fluent--data-pie-20-regular] w-5 h-5" />
                 <span>{t('game.challenge.statistics')}</span>
               </Button>
               <Button onClick={() => setPage(6)} ghost={page() !== 6}>
-                <span class="icon-[fluent--production-20-regular] w-5 h-5"></span>
+                <span class="icon-[fluent--production-20-regular] w-5 h-5" />
                 <span>{t('game.challenge.instances')}</span>
               </Button>
               <Button onClick={() => setPage(7)} ghost={page() !== 7}>
-                <span class="icon-[fluent--settings-20-regular] w-5 h-5"></span>
+                <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
                 <span>{t('game.challenge.settings')}</span>
               </Button>
             </Show>
@@ -119,7 +119,7 @@ export default function (props: {
   return (
     <div class="flex-1">
       <Splitter
-        startPanel={<div></div>}
+        startPanel={<div />}
         endPanel={
           <BottomPanel
             store={props.store}
@@ -133,7 +133,7 @@ export default function (props: {
           { id: 'a', size: 64, minSize: 24 },
           { id: 'b', size: 36, minSize: 20 },
         ]}
-      ></Splitter>
+      />
     </div>
   )
 }

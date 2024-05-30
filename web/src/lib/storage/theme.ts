@@ -1,9 +1,9 @@
-import { createStore } from 'solid-js/store'
-import { makePersisted } from '@solid-primitives/storage'
-import { createEffect, createResource, untrack } from 'solid-js'
-import { Locale, fetchDictionary, hasLocale } from '@lib/i18n'
+import { type Locale, fetchDictionary, hasLocale } from '@lib/i18n'
 import { resolveTemplate, translator } from '@solid-primitives/i18n'
 import { createPrefersDark } from '@solid-primitives/media'
+import { makePersisted } from '@solid-primitives/storage'
+import { createEffect, createResource, untrack } from 'solid-js'
+import { createStore } from 'solid-js/store'
 
 const prefersDark = createPrefersDark()
 const initPrefersDark = prefersDark()

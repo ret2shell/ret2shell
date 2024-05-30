@@ -432,7 +432,8 @@
     "required": "確認コードを入力してください",
     "minLength": "確認コードは少なくとも 4 桁である必要があります",
     "calculating": "計算中...",
-    "placeholder": "検証コード"
+    "placeholder": "検証コード",
+    "reload": "はっきり見えませんか？別の"
   },
   "article": {
     "loading": "少女は祈っている...",

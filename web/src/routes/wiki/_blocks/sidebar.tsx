@@ -1,11 +1,11 @@
-import { Article } from '@/lib/models/article'
+import type { Article } from '@/lib/models/article'
 import { Permission } from '@/lib/models/user'
 import { accountStore } from '@/lib/storage/account'
 import { fullTheme, t } from '@/lib/storage/theme'
 import { wikiStore } from '@/lib/storage/wiki'
 import Divider from '@/lib/widgets/divider'
 import Link from '@/lib/widgets/link'
-import TreeView, { TreeNode } from '@/lib/widgets/treeview'
+import TreeView, { type TreeNode } from '@/lib/widgets/treeview'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-solid'
 import { Show } from 'solid-js'
 
@@ -32,7 +32,7 @@ function buildLinked(tree: TreeNode[], paths: string[], article: Article) {
       extraPart: (
         <>
           <Show when={!article.published}>
-            <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning"></span>
+            <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
           </Show>
         </>
       ),
@@ -68,8 +68,8 @@ export default function SideBar() {
         <div class="p-3 lg:p-6 flex flex-col space-y-2">
           <Show when={accountStore.permissions.includes(Permission.Wiki)}>
             <>
-              <Link href={`/wiki/create`} level="primary">
-                <span class="icon-[fluent--add-20-regular] w-5 h-5"></span>
+              <Link href={'/wiki/create'} level="primary">
+                <span class="icon-[fluent--add-20-regular] w-5 h-5" />
                 <span>{t('form.create')}</span>
               </Link>
               <Divider class="!mt-6 !mb-4" />

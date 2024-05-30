@@ -14,7 +14,7 @@ export default function Challenges() {
           }}
           class="relative w-full h-full print:h-auto print:overflow-auto"
           defer
-        ></OverlayScrollbarsComponent>
+        />
       </div>
     </>
   )

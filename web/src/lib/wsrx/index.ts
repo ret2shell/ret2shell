@@ -1,6 +1,6 @@
+import type { Instance, Traffic } from '@models/instance'
 import ky from '@reverier/ky'
-import { Accessor, createSignal } from 'solid-js'
-import { Instance, Traffic } from '@models/instance'
+import { type Accessor, createSignal } from 'solid-js'
 
 export enum WsrxState {
   Disconnected = 0,

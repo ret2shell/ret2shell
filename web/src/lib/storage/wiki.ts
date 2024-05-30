@@ -1,9 +1,9 @@
+import type { HTTPError } from '@reverier/ky'
 import { createStore } from 'solid-js/store'
-import { Article } from '../models/article'
 import { getWikiTree } from '../api/wiki'
-import { HTTPError } from '@reverier/ky'
-import { addToast } from './toast'
+import type { Article } from '../models/article'
 import { t } from './theme'
+import { addToast } from './toast'
 
 export const [wikiStore, setWikiStore] = createStore({
   toc: [] as Article[],
@@ -17,7 +17,11 @@ export async function refreshWikiToc() {
     setWikiStore({ toc: resp })
   } catch (err) {
     void (err as HTTPError).response.text().then(reason => {
-      addToast({ level: 'error', description: `${t('wiki.fetchTocFailed')}: ${reason}`, duration: 5000 })
+      addToast({
+        level: 'error',
+        description: `${t('wiki.fetchTocFailed')}: ${reason}`,
+        duration: 5000,
+      })
     })
   }
 }

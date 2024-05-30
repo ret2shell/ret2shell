@@ -1,4 +1,4 @@
-import { ComponentProps } from 'solid-js'
+import type { ComponentProps } from 'solid-js'
 import './logo-animate.css'
 
 export default function (props: ComponentProps<'svg'>) {
@@ -12,14 +12,14 @@ export default function (props: ComponentProps<'svg'>) {
           stroke-opacity="0.564706"
           d="m84.598 189.653-67.953-39.805v-12.37l57.14-32.885 6.491 9.052-52.757 30.017 60.575 35.759zm97.62-6.915-6.494-9.056 52.757-30.017-29.51-16.792 9.634-5.714 30.75 16.32v12.373z"
           class="svg-elem-1 fill-primary stroke-primary"
-        ></path>
+        />
         <path
           stroke-width="6"
           stroke-dasharray="none"
           stroke-opacity="0.564706"
           d="m99.331 76.984 37.088 62.889 23.56-22.568 29.018 4.318 35.858-18.537-24.673-61.7-23.207 34.66-54.136-24.982Z"
           class="svg-elem-2 fill-error stroke-error"
-        ></path>
+        />
         <path
           d="M160.25 218.864 85.98 93.034l8.822-9.267 78.154 132.406Z"
           fill="gray"
@@ -28,7 +28,7 @@ export default function (props: ComponentProps<'svg'>) {
           stroke-dasharray="none"
           stroke-opacity=".564706"
           class="svg-elem-3"
-        ></path>
+        />
         <path
           d="m82.317 86.69 8.764-9.955-6.977-12.503-8.578 11.36z"
           fill="gray"
@@ -37,7 +37,7 @@ export default function (props: ComponentProps<'svg'>) {
           stroke-dasharray="none"
           stroke-opacity=".564706"
           class="svg-elem-4"
-        ></path>
+        />
       </g>
     </svg>
   )

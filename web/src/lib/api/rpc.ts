@@ -1,4 +1,4 @@
-import { SearchParamsOption } from '@reverier/ky'
+import type { SearchParamsOption } from '@reverier/ky'
 import api, { api_root } from '.'
 
 export async function deunicode(text: string) {

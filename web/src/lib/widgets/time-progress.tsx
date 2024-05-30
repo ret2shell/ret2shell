@@ -1,7 +1,7 @@
 import { Progress } from '@ark-ui/solid'
 import { DateTime } from 'luxon'
-import { ComponentProps, createSignal, onCleanup, splitProps } from 'solid-js'
-import { ProgressProps } from './progress'
+import { type ComponentProps, createSignal, onCleanup, splitProps } from 'solid-js'
+import type { ProgressProps } from './progress'
 
 export default function TimeProgress(
   props: { start_at: DateTime; end_at: DateTime } & ProgressProps & ComponentProps<'div'>

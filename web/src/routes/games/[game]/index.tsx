@@ -2,7 +2,7 @@ import { getGameIntroduction, updateGame, updateGameIntroduction } from '@/lib/a
 import { uploadMedia } from '@/lib/api/media'
 import LogoAnimate from '@/lib/assets/animates/logo-animate'
 import Spin from '@/lib/assets/animates/spin'
-import { Article as ArticleModel } from '@/lib/models/article'
+import type { Article as ArticleModel } from '@/lib/models/article'
 import { TeamState, stringifyState } from '@/lib/models/team'
 import { Permission } from '@/lib/models/user'
 import { accountStore, refreshInstitutes } from '@/lib/storage/account'
@@ -21,7 +21,7 @@ import Tag from '@/lib/widgets/tag'
 import Timer from '@/lib/widgets/timer'
 
 import bgGameDefault from '@assets/imgs/bg-game-default.webp'
-import { HTTPError } from '@reverier/ky'
+import type { HTTPError } from '@reverier/ky'
 import { useSearchParams } from '@solidjs/router'
 import { DateTime } from 'luxon'
 import { For, Match, Show, Switch, createEffect, createSignal, onCleanup, untrack } from 'solid-js'
@@ -34,11 +34,14 @@ export default function () {
   const period = () => {
     if (gameStore.current?.register_at && gameStore.current.register_at > DateTime.now()) {
       return t('game.register')!
-    } else if (gameStore.current?.start_at && gameStore.current.start_at > DateTime.now()) {
+    }
+    if (gameStore.current?.start_at && gameStore.current.start_at > DateTime.now()) {
       return t('game.start')!
-    } else if (gameStore.current?.end_at && gameStore.current.end_at > DateTime.now()) {
+    }
+    if (gameStore.current?.end_at && gameStore.current.end_at > DateTime.now()) {
       return t('game.end')!
-    } else if (gameStore.current?.archive_at && gameStore.current.archive_at > DateTime.now()) {
+    }
+    if (gameStore.current?.archive_at && gameStore.current.archive_at > DateTime.now()) {
       return t('game.archive')!
     }
     return ''
@@ -47,11 +50,14 @@ export default function () {
   const timeEnd = () => {
     if (gameStore.current?.register_at && gameStore.current.register_at > DateTime.now()) {
       return gameStore.current.register_at
-    } else if (gameStore.current?.start_at && gameStore.current.start_at > DateTime.now()) {
+    }
+    if (gameStore.current?.start_at && gameStore.current.start_at > DateTime.now()) {
       return gameStore.current.start_at
-    } else if (gameStore.current?.end_at && gameStore.current.end_at > DateTime.now()) {
+    }
+    if (gameStore.current?.end_at && gameStore.current.end_at > DateTime.now()) {
       return gameStore.current.end_at
-    } else if (gameStore.current?.archive_at && gameStore.current.archive_at > DateTime.now()) {
+    }
+    if (gameStore.current?.archive_at && gameStore.current.archive_at > DateTime.now()) {
       return gameStore.current.archive_at
     }
     return DateTime.now()
@@ -256,7 +262,7 @@ export default function () {
             <Picture
               class="aspect-video"
               src={(gameStore.current?.cover && mediaPath(gameStore.current.cover)) || bgGameDefault}
-            ></Picture>
+            />
 
             <div class="absolute top-0 left-0 w-full h-full flex flex-col justify-end items-end z-10 p-3 lg:p-6 space-y-2">
               <Show when={isGameAdmin()}>
@@ -270,11 +276,8 @@ export default function () {
                     disabled={logoSet()}
                   >
                     <input type="file" class="hidden" ref={coverInput!} onChange={handleSelectedCover} />
-                    <Show
-                      when={coverSet()}
-                      fallback={<span class="icon-[fluent--draw-image-20-regular] w-5 h-5"></span>}
-                    >
-                      <span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5 text-primary"></span>
+                    <Show when={coverSet()} fallback={<span class="icon-[fluent--draw-image-20-regular] w-5 h-5" />}>
+                      <span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5 text-primary" />
                     </Show>
                   </Button>
                   <Button
@@ -286,8 +289,8 @@ export default function () {
                     disabled={coverSet()}
                   >
                     <input type="file" class="hidden" ref={logoInput!} onChange={handleSelectedLogo} />
-                    <Show when={logoSet()} fallback={<span class="icon-[fluent--flag-20-regular] w-5 h-5"></span>}>
-                      <span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5 text-primary"></span>
+                    <Show when={logoSet()} fallback={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}>
+                      <span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5 text-primary" />
                     </Show>
                   </Button>
                 </div>
@@ -298,11 +301,11 @@ export default function () {
                     when={gameStore.current?.logo}
                     fallback={
                       <Show when={loading()} fallback={<LogoAnimate width={64} height={64} />}>
-                        <Spin width={64} height={64}></Spin>
+                        <Spin width={64} height={64} />
                       </Show>
                     }
                   >
-                    <img src={mediaPath(gameStore.current!.logo!)} width={64} height={64}></img>
+                    <img src={mediaPath(gameStore.current!.logo!)} width={64} height={64} alt="Logo Broken" />
                   </Show>
                 </div>
                 <div class="flex flex-col space-y-2">
@@ -316,7 +319,7 @@ export default function () {
             <Show when={showTimer()} fallback={<span class="text-3xl font-bold text-warning">{t('game.ended')}</span>}>
               <h3 class="text-xl font-bold opacity-60">{t('game.timerTips', { period: period() })}</h3>
               <p class="text-3xl font-bold">
-                <Timer end={timeEnd()}></Timer>
+                <Timer end={timeEnd()} />
               </p>
             </Show>
           </div>
@@ -327,7 +330,11 @@ export default function () {
                   when={gameStore.current?.team_size && gameStore.current.team_size > 1}
                   fallback={<span>{t('game.team.solo')}</span>}
                 >
-                  <span>{t('game.team.collab', { size: gameStore.current?.team_size || 0 })}</span>
+                  <span>
+                    {t('game.team.collab', {
+                      size: gameStore.current?.team_size || 0,
+                    })}
+                  </span>
                 </Show>
               </Tag>
               <Show
@@ -361,7 +368,7 @@ export default function () {
           <Show when={gameStore.team}>
             <Card contentClass="p-3 lg:p-6 flex flex-row space-x-2 lg:space-x-4 print:hidden">
               <div class="lg:p-2 flex items-center justify-center">
-                <span class="icon-[fluent--flag-20-filled] w-5 h-5 lg:w-10 lg:h-10 text-primary opacity-60"></span>
+                <span class="icon-[fluent--flag-20-filled] w-5 h-5 lg:w-10 lg:h-10 text-primary opacity-60" />
               </div>
               <div class="flex flex-col justify-center flex-1">
                 <h3 class="font-bold lg:text-xl px-2">
@@ -394,7 +401,7 @@ export default function () {
               }
             >
               <Link href={`/games/${gameStore.current?.id}?edit=true`} square level="primary">
-                <span class="icon-[fluent--edit-20-regular] w-5 h-5"></span>
+                <span class="icon-[fluent--edit-20-regular] w-5 h-5" />
               </Link>
             </Show>
             <Show
@@ -406,7 +413,7 @@ export default function () {
               }
             >
               <Link href={`/games/${gameStore.current?.id}/admin`} square level="primary">
-                <span class="icon-[fluent--settings-20-regular] w-5 h-5"></span>
+                <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
               </Link>
             </Show>
             <Switch>
@@ -420,7 +427,7 @@ export default function () {
                     (gameStore.current?.start_at && gameStore.current.start_at > DateTime.now())
                   }
                 >
-                  <span class="icon-[fluent--people-team-20-regular] w-5 h-5"></span>
+                  <span class="icon-[fluent--people-team-20-regular] w-5 h-5" />
                   <Switch>
                     <Match when={gameStore.current?.archive_at && gameStore.current.archive_at < DateTime.now()}>
                       <span class="flex-1 text-start">{t('game.archivedGotoTraining')}</span>
@@ -432,7 +439,7 @@ export default function () {
                       <span class="flex-1 text-start">{t('game.challenge.enter')}</span>
                     </Match>
                   </Switch>
-                  <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5"></span>
+                  <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
                 </Link>
               </Match>
               <Match
@@ -448,9 +455,9 @@ export default function () {
                   href={`/games/${gameStore.current?.id}/challenges`}
                   justify="start"
                 >
-                  <span class="icon-[fluent--code-20-filled] w-5 h-5"></span>
+                  <span class="icon-[fluent--code-20-filled] w-5 h-5" />
                   <span class="flex-1 text-start">{t('game.admin.manageChallenges')}</span>
-                  <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5"></span>
+                  <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
                 </Link>
               </Match>
               <Match when={accountStore.id && !gameStore.team}>
@@ -460,14 +467,14 @@ export default function () {
                   level="info"
                   disabled={!canParticipate()}
                 >
-                  <span class="icon-[fluent--people-team-20-regular] w-5 h-5"></span>
+                  <span class="icon-[fluent--people-team-20-regular] w-5 h-5" />
                   <Show
                     when={canParticipate()}
                     fallback={<span class="flex-1 text-start">{t('game.canNotParticipate')}</span>}
                   >
                     <span class="flex-1 text-start">{t('game.team.create.title')}</span>
                   </Show>
-                  <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5"></span>
+                  <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
                 </Link>
               </Match>
               <Match when={!accountStore.id}>
@@ -476,9 +483,9 @@ export default function () {
                   class="flex-1"
                   level="warning"
                 >
-                  <span class="icon-[fluent--person-20-regular] w-5 h-5"></span>
+                  <span class="icon-[fluent--person-20-regular] w-5 h-5" />
                   <span class="flex-1 text-start">{t('game.team.loginThenBack')}</span>
-                  <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5"></span>
+                  <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
                 </Link>
               </Match>
             </Switch>
@@ -491,22 +498,17 @@ export default function () {
               <IntroForm onDone={onUpdateIntroduction} editSource={introduction() || undefined} />
             </Match>
             <Match when={introduction() && !loading()}>
-              <Article
-                class="self-center"
-                content={introduction()!.content!}
-                extra={true}
-                headingAnchors={true}
-              ></Article>
+              <Article class="self-center" content={introduction()!.content!} extra={true} headingAnchors={true} />
             </Match>
             <Match when={loading()}>
               <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
-                <Spin width={32} height={32}></Spin>
+                <Spin width={32} height={32} />
                 <span>{randomTips()}</span>
               </div>
             </Match>
             <Match when={true}>
               <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
-                <span class="icon-[fluent--thumb-dislike-20-regular] w-24 h-24"></span>
+                <span class="icon-[fluent--thumb-dislike-20-regular] w-24 h-24" />
                 <span>{t('game.introduction.empty')}</span>
               </div>
             </Match>

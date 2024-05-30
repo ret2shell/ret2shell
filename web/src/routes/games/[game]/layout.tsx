@@ -1,9 +1,9 @@
 import { getGame } from '@/lib/api/game'
 import { gameStore, setGameStore } from '@/lib/storage/game'
 import { Title } from '@/lib/storage/header'
-import { HTTPError } from '@reverier/ky'
+import type { HTTPError } from '@reverier/ky'
 import { useNavigate, useParams } from '@solidjs/router'
-import { JSX, onCleanup } from 'solid-js'
+import { type JSX, onCleanup } from 'solid-js'
 
 export default function (props: { children?: JSX.Element }) {
   const navigate = useNavigate()
@@ -11,7 +11,7 @@ export default function (props: { children?: JSX.Element }) {
     setGameStore({ current: null })
   })
   const params = useParams()
-  const game_id = parseInt(params.game)
+  const game_id = Number.parseInt(params.game)
   if (!gameStore.current && game_id) {
     getGame(game_id)
       .then(resp => {

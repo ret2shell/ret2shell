@@ -1,5 +1,5 @@
-import { ComponentProps, JSX, Show, createMemo, splitProps } from 'solid-js'
 import Spin from '@assets/animates/spin'
+import { type ComponentProps, type JSX, Show, createMemo, splitProps } from 'solid-js'
 
 export type ButtonProps = {
   level?: 'primary' | 'info' | 'success' | 'warning' | 'error' | null

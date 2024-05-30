@@ -1,13 +1,13 @@
-import { FormStore, setValue } from '@modular-forms/solid'
-import { ComponentProps, Show, createEffect, createMemo, createSignal } from 'solid-js'
-import Input from './input'
-import Button from './button'
-import { DateTime, MonthNumbers } from 'luxon'
 import { Popover } from '@ark-ui/solid'
-import { t } from '../storage/theme'
-import Divider from './divider'
-import Card from './card'
+import { type FormStore, setValue } from '@modular-forms/solid'
+import { DateTime, type MonthNumbers } from 'luxon'
+import { type ComponentProps, Show, createEffect, createMemo, createSignal } from 'solid-js'
 import { Portal } from 'solid-js/web'
+import { t } from '../storage/theme'
+import Button from './button'
+import Card from './card'
+import Divider from './divider'
+import Input from './input'
 
 type TimePickerPropsRange =
   | {
@@ -24,7 +24,7 @@ type TimePickerPropsRange =
     }
 
 export type TimerPickerProps = {
-  /* eslint-disable  @typescript-eslint/no-explicit-any */
+  // biome-ignore lint/suspicious/noExplicitAny: the options are not ensured
   form: FormStore<any, undefined>
   type: 'time' | 'date'
   error?: string
@@ -44,7 +44,12 @@ function TimePickerButton(props: {
   onDone: (date: DateTime) => void
 }) {
   let currentDate = DateTime.now()
-  currentDate = currentDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
+  currentDate = currentDate.set({
+    hour: 0,
+    minute: 0,
+    second: 0,
+    millisecond: 0,
+  })
   const [timePickerOpened, setTimePickerOpened] = createSignal(false)
   const [hour, setHour] = createSignal(props.date.hour)
   const [minute, setMinute] = createSignal(props.date.minute)
@@ -91,7 +96,7 @@ function TimePickerButton(props: {
                         setHour((hour() - 1 + 24) % 24)
                       }}
                     >
-                      <span class="icon-[fluent--chevron-up-20-regular] w-5 h-5"></span>
+                      <span class="icon-[fluent--chevron-up-20-regular] w-5 h-5" />
                     </Button>
                     <Button square ghost type="button" size="sm">
                       {hour().toString().padStart(2, '0')}
@@ -105,7 +110,7 @@ function TimePickerButton(props: {
                         setHour((hour() + 1) % 24)
                       }}
                     >
-                      <span class="icon-[fluent--chevron-down-20-regular] w-5 h-5"></span>
+                      <span class="icon-[fluent--chevron-down-20-regular] w-5 h-5" />
                     </Button>
                   </div>
                   <div class="flex flex-col space-y-2">
@@ -121,7 +126,7 @@ function TimePickerButton(props: {
                         setMinute((minute() - 10 + 60) % 60)
                       }}
                     >
-                      <span class="icon-[fluent--chevron-up-20-regular] w-5 h-5"></span>
+                      <span class="icon-[fluent--chevron-up-20-regular] w-5 h-5" />
                     </Button>
                     <Button square ghost type="button" size="sm">
                       {minute().toString().padStart(2, '0')}
@@ -138,7 +143,7 @@ function TimePickerButton(props: {
                         setMinute((minute() + 10) % 60)
                       }}
                     >
-                      <span class="icon-[fluent--chevron-down-20-regular] w-5 h-5"></span>
+                      <span class="icon-[fluent--chevron-down-20-regular] w-5 h-5" />
                     </Button>
                   </div>
                 </div>
@@ -183,7 +188,12 @@ function PickerCalendar(props: {
 }) {
   let currentDate = DateTime.now()
   // only keep date
-  currentDate = currentDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
+  currentDate = currentDate.set({
+    hour: 0,
+    minute: 0,
+    second: 0,
+    millisecond: 0,
+  })
   const [year, setYear] = createSignal(currentDate.year)
   const [month, setMonth] = createSignal(currentDate.month)
 
@@ -223,16 +233,30 @@ function PickerCalendar(props: {
     const nextMonthHead = (7 - ((currentMonthFirstDay + currentMonthDays!) % 7)) % 7
     for (let i = prevMonthTail; i < prevMonthDays!; i++) {
       // push as datetime
-      days.push(DateTime.fromObject({ year: prevMonth.year, month: prevMonth.month, day: i + 1 }) as DateTime<true>)
+      days.push(
+        DateTime.fromObject({
+          year: prevMonth.year,
+          month: prevMonth.month,
+          day: i + 1,
+        }) as DateTime<true>
+      )
     }
     for (let i = 0; i < currentMonthDays!; i++) {
       days.push(
-        DateTime.fromObject({ year: currentMonth.year, month: currentMonth.month, day: i + 1 }) as DateTime<true>
+        DateTime.fromObject({
+          year: currentMonth.year,
+          month: currentMonth.month,
+          day: i + 1,
+        }) as DateTime<true>
       )
     }
     for (let i = 0; i < nextMonthHead; i++) {
       days.push(
-        DateTime.fromObject({ year: currentMonth.year, month: currentMonth.month + 1, day: i + 1 }) as DateTime<true>
+        DateTime.fromObject({
+          year: currentMonth.year,
+          month: currentMonth.month + 1,
+          day: i + 1,
+        }) as DateTime<true>
       )
     }
     return days
@@ -404,7 +428,7 @@ export default function TimePicker(props: TimerPickerProps & ComponentProps<'div
           />
         </Show>
         <Input
-          icon={<span class="icon-[fluent--calendar-20-regular] w-5 h-5"></span>}
+          icon={<span class="icon-[fluent--calendar-20-regular] w-5 h-5" />}
           readOnly
           title={props.title}
           placeholder={props.placeholder}
@@ -412,9 +436,10 @@ export default function TimePicker(props: TimerPickerProps & ComponentProps<'div
           value={
             (time()?.toFormat(props.type === 'date' ? 'yyyy-MM-dd' : 'yyyy-MM-dd HH:mm') || t('calendar.startTime')) +
             (props.range
-              ? ' => ' +
-                (timeNext()?.toFormat(props.type === 'date' ? 'yyyy-MM-dd' : 'yyyy-MM-dd HH:mm') ||
-                  t('calendar.endTime'))
+              ? ` => ${
+                  timeNext()?.toFormat(props.type === 'date' ? 'yyyy-MM-dd' : 'yyyy-MM-dd HH:mm') ||
+                  t('calendar.endTime')
+                }`
               : '')
           }
           extraBtn={
@@ -427,7 +452,7 @@ export default function TimePicker(props: TimerPickerProps & ComponentProps<'div
                   setTimeNext(null)
                 }}
               >
-                <span class="icon-[fluent--delete-20-regular] w-5 h-5"></span>
+                <span class="icon-[fluent--delete-20-regular] w-5 h-5" />
               </Button>
             </>
           }

@@ -1,9 +1,9 @@
-import { t } from '@/lib/storage/theme'
-import CreateForm from './_blocks/form'
-import { Article } from '@/lib/models/article'
-import { useNavigate } from '@solidjs/router'
-import { accountStore } from '@/lib/storage/account'
+import type { Article } from '@/lib/models/article'
 import { Permission } from '@/lib/models/user'
+import { accountStore } from '@/lib/storage/account'
+import { t } from '@/lib/storage/theme'
+import { useNavigate } from '@solidjs/router'
+import CreateForm from './_blocks/form'
 
 export default function () {
   const navigate = useNavigate()

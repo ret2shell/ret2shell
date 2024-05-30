@@ -1,6 +1,6 @@
-import { For, JSX, Show, createEffect, createSignal, untrack } from 'solid-js'
-import Link from './link'
+import { For, type JSX, Show, createEffect, createSignal, untrack } from 'solid-js'
 import Button from './button'
+import Link from './link'
 
 export type TreeNode = {
   children: TreeNode[]
@@ -51,7 +51,7 @@ export default function TreeView(props: TreeViewProps) {
               href={node.type === 'item' && node.link ? node.link : '#'}
               activeMatch="exact"
             >
-              <span class={`${node.icon} w-5 h-5`}></span>
+              <span class={`${node.icon} w-5 h-5`} />
               <span class="flex-1 text-start truncate">{node.name}</span>
               <Show when={node.type === 'item' && node.extraPart}>{node.type === 'item' && node.extraPart}</Show>
             </Link>
@@ -67,11 +67,13 @@ export default function TreeView(props: TreeViewProps) {
               setShowChildren(!showChildren())
             }}
           >
-            <span class={`${node.icon} w-5 h-5`}></span>
+            <span class={`${node.icon} w-5 h-5`} />
             <span class="flex-1 text-start truncate">{node.name}</span>
             <span
-              class={`icon-[fluent--chevron-right-20-regular] w-5 h-5 transition-transform ${showChildren() ? 'rotate-90' : 'rotate-0'}`}
-            ></span>
+              class={`icon-[fluent--chevron-right-20-regular] w-5 h-5 transition-transform ${
+                showChildren() ? 'rotate-90' : 'rotate-0'
+              }`}
+            />
           </Button>
         </Show>
         <Show when={node.type === 'category' && showChildren()}>

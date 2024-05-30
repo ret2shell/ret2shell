@@ -1,16 +1,16 @@
-import Popover from '@widgets/popover'
-import Card from '@widgets/card'
+import { accountStore } from '@/lib/storage/account'
+import { addToast } from '@/lib/storage/toast'
+import Input from '@/lib/widgets/input'
+import TimeProgress from '@/lib/widgets/time-progress'
+import { WsrxState, wsrx } from '@/lib/wsrx'
 import { t } from '@storage/theme'
-import Link from '@widgets/link'
 import Button from '@widgets/button'
-import { For, Show, createEffect, createSignal, onCleanup, untrack } from 'solid-js'
+import Card from '@widgets/card'
+import Link from '@widgets/link'
+import Popover from '@widgets/popover'
 import Timer from '@widgets/timer'
 import { DateTime } from 'luxon'
-import { WsrxState, wsrx } from '@/lib/wsrx'
-import { accountStore } from '@/lib/storage/account'
-import Input from '@/lib/widgets/input'
-import { addToast } from '@/lib/storage/toast'
-import TimeProgress from '@/lib/widgets/time-progress'
+import { For, Show, createEffect, createSignal, onCleanup, untrack } from 'solid-js'
 
 export function InstanceBoxContent() {
   const [connecting, setConnecting] = createSignal(false)
@@ -100,9 +100,9 @@ export function InstanceBoxContent() {
         >
           {/* icon-[fluent--settings-20-regular] icon-[fluent--settings-20-filled] */}
           <span
-            class={`icon-[fluent--settings-20-${
-              showSettings() ? 'filled' : 'regular'
-            }] w-5 h-5 ${showSettings() ? 'text-primary' : ''}`}
+            class={`icon-[fluent--settings-20-${showSettings() ? 'filled' : 'regular'}] w-5 h-5 ${
+              showSettings() ? 'text-primary' : ''
+            }`}
           />
         </Button>
         <Link
@@ -126,7 +126,7 @@ export function InstanceBoxContent() {
             onBlur={e => {
               wsrx.setApiAddr(e.target.value)
             }}
-          ></Input>
+          />
           <Button
             size="sm"
             square
@@ -136,11 +136,11 @@ export function InstanceBoxContent() {
               wsrx.setApiAddr('http://127.0.0.1:3307')
             }}
           >
-            <span class="icon-[fluent--arrow-reset-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--arrow-reset-20-regular] w-5 h-5" />
           </Button>
           {/* NOTE: Just a placable button, when you click it, the input box will trigger `onBlur` to save it. */}
           <Button size="sm" square title={t('form.save')} ghost>
-            <span class="icon-[fluent--checkmark-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--checkmark-20-regular] w-5 h-5" />
           </Button>
         </Card>
       </Show>
@@ -148,15 +148,22 @@ export function InstanceBoxContent() {
         {instance => (
           <Card contentClass="p-2 flex flex-col space-y-2">
             <Button size="sm" ghost>
-              <span class="icon-[fluent--play-circle-hint-20-regular] w-5 h-5 text-success"></span>
+              <span class="icon-[fluent--play-circle-hint-20-regular] w-5 h-5 text-success" />
               <span>{instance.challenge_name}</span>
-              <span class="flex-1"></span>
-              <Timer class="opacity-60" end={instance.started_at.plus({ hours: instance.renew_count + 1 })} />
+              <span class="flex-1" />
+              <Timer
+                class="opacity-60"
+                end={instance.started_at.plus({
+                  hours: instance.renew_count + 1,
+                })}
+              />
             </Button>
             <TimeProgress
               class="px-2"
               start_at={instance.started_at}
-              end_at={instance.started_at.plus({ hours: instance.renew_count + 1 })}
+              end_at={instance.started_at.plus({
+                hours: instance.renew_count + 1,
+              })}
             />
             <div class="flex flex-row space-x-2">
               <Button ghost size="sm" title={t('instance.copyWsrxAddr')}>
@@ -181,7 +188,7 @@ export function InstanceBoxContent() {
               >
                 <span class="icon-[fluent--open-20-regular] w-5 h-5 text-info" />
               </Button>
-              <div class="flex-1"></div>
+              <div class="flex-1" />
               <Button size="sm" square ghost title={t('instance.renew')}>
                 <span class="icon-[fluent--clock-alarm-20-regular] w-5 h-5 text-info" />
               </Button>
@@ -202,7 +209,9 @@ export default function InstanceBox() {
       <Popover
         btnContent={
           <span
-            class={`${wsrx.instances().length > 0 ? 'icon-[fluent--fluid-20-filled]' : 'icon-[fluent--fluid-20-regular]'} w-5 h-5 ${wsrx.instances().length > 0 ? (wsrx.connected() ? 'text-success' : 'text-warning') : ''}`}
+            class={`${
+              wsrx.instances().length > 0 ? 'icon-[fluent--fluid-20-filled]' : 'icon-[fluent--fluid-20-regular]'
+            } w-5 h-5 ${wsrx.instances().length > 0 ? (wsrx.connected() ? 'text-success' : 'text-warning') : ''}`}
           />
         }
         square

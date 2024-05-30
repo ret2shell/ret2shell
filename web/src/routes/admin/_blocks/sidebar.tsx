@@ -17,7 +17,7 @@ export default function SideBar() {
             justify="start"
             disabled={!accountStore.permissions.includes(Permission.Statistics)}
           >
-            <span class="icon-[fluent--data-pie-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--data-pie-20-regular] w-5 h-5" />
             <span>{t('admin.statistics.title')}</span>
           </Link>
         </li>
@@ -33,7 +33,7 @@ export default function SideBar() {
               !accountStore.permissions.includes(Permission.DevOps)
             }
           >
-            <span class="icon-[fluent--code-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--code-20-regular] w-5 h-5" />
             <span>{t('admin.logs.title')}</span>
           </Link>
         </li>
@@ -47,7 +47,7 @@ export default function SideBar() {
             justify="start"
             disabled={!accountStore.permissions.includes(Permission.DevOps)}
           >
-            <span class="icon-[fluent--edit-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--edit-20-regular] w-5 h-5" />
             <span>{t('admin.edit.title')}</span>
           </Link>
         </li>
@@ -60,7 +60,7 @@ export default function SideBar() {
             justify="start"
             disabled={!accountStore.permissions.includes(Permission.DevOps)}
           >
-            <span class="icon-[fluent--bot-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--bot-20-regular] w-5 h-5" />
             <span>{t('admin.captcha.title')}</span>
           </Link>
         </li>
@@ -73,7 +73,7 @@ export default function SideBar() {
             justify="start"
             disabled={!accountStore.permissions.includes(Permission.DevOps)}
           >
-            <span class="icon-[fluent--image-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--image-20-regular] w-5 h-5" />
             <span>{t('admin.media.title')}</span>
           </Link>
         </li>
@@ -86,7 +86,7 @@ export default function SideBar() {
             justify="start"
             disabled={!accountStore.permissions.includes(Permission.DevOps)}
           >
-            <span class="icon-[fluent--mail-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--mail-20-regular] w-5 h-5" />
             <span>{t('admin.email.title')}</span>
           </Link>
         </li>
@@ -103,7 +103,7 @@ export default function SideBar() {
               !accountStore.permissions.includes(Permission.User)
             }
           >
-            <span class="icon-[fluent--lock-closed-key-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--lock-closed-key-20-regular] w-5 h-5" />
             <span>{t('admin.oauth.title')}</span>
           </Link>
         </li>
@@ -116,7 +116,7 @@ export default function SideBar() {
             justify="start"
             disabled={!accountStore.permissions.includes(Permission.User)}
           >
-            <span class="icon-[fluent--person-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--person-20-regular] w-5 h-5" />
             <span>{t('admin.users.title')}</span>
           </Link>
         </li>
@@ -130,7 +130,7 @@ export default function SideBar() {
             justify="start"
             disabled={!accountStore.permissions.includes(Permission.DevOps)}
           >
-            <span class="icon-[fluent--flowchart-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--flowchart-20-regular] w-5 h-5" />
             <span>{t('admin.sync.title')}</span>
           </Link>
         </li>
@@ -143,14 +143,14 @@ export default function SideBar() {
             justify="start"
             disabled={!accountStore.permissions.includes(Permission.DevOps)}
           >
-            <span class="icon-[fluent--hexagon-three-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--hexagon-three-20-regular] w-5 h-5" />
             <span>{t('admin.cluster.title')}</span>
           </Link>
         </li>
         <Divider />
         <li class="w-full">
           <Link activeMatch="exact" class="w-full" ghost href="/admin/about" justify="start">
-            <span class="icon-[fluent--info-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--info-20-regular] w-5 h-5" />
             <span>{t('admin.about.title')}</span>
           </Link>
         </li>

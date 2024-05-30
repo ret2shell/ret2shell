@@ -13,13 +13,13 @@ export default function SideBar() {
           when={gameStore.current}
           fallback={
             <Link class="w-full" ghost justify="start" href="/training">
-              <span class="icon-[fluent--dumbbell-20-filled] w-5 h-5 text-primary"></span>
+              <span class="icon-[fluent--dumbbell-20-filled] w-5 h-5 text-primary" />
               <span>{t('training.list')}</span>
             </Link>
           }
         >
           <Link class="w-full" ghost justify="start" href={`/training/${gameStore.current?.id}`}>
-            <span class="icon-[fluent--dumbbell-20-filled] w-5 h-5 text-primary"></span>
+            <span class="icon-[fluent--dumbbell-20-filled] w-5 h-5 text-primary" />
             <span>{gameStore.current?.name}</span>
           </Link>
         </Show>

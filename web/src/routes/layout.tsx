@@ -1,35 +1,35 @@
-import { JSX, Match, Show, Switch, createEffect, createSignal } from 'solid-js'
-import { platformStore, setPlatformStore } from '@storage/platform'
-import { t } from '@storage/theme'
-import Link from '@widgets/link'
+import { getPlatformInfo, getVersion } from '@/lib/api/platform'
+import Spin from '@/lib/assets/animates/spin'
+import { addToast, removeToast, toastStore } from '@/lib/storage/toast'
+import { mediaPath } from '@/lib/utils/media'
+import Button from '@/lib/widgets/button'
+import Divider from '@/lib/widgets/divider'
+import LoadingTips from '@/lib/widgets/loading-tips'
+import TimeProgress from '@/lib/widgets/time-progress'
+import Timer from '@/lib/widgets/timer'
+import { wsrx } from '@/lib/wsrx'
 import LogoAnimate from '@assets/animates/logo-animate'
 import Background from '@blocks/background'
-import { useIsRouting, useLocation, useNavigate, useParams, useSearchParams } from '@solidjs/router'
-import InstanceBox, { InstanceBoxContent } from './_blocks/instance-box'
-import UserBox from './_blocks/user-box'
-import DiyBox, { DiyBoxContent } from './_blocks/diy-box'
-import { canAccessChallenges, gameStore, isGameAdmin } from '@storage/game'
 import { HostType } from '@models/game'
-import { accountStore } from '@storage/account'
 import { Permission } from '@models/user'
-import Popover from '@widgets/popover'
-import Card from '@widgets/card'
-import NotificationBox, { NotificationBoxContent } from './_blocks/notification-box'
-import { getPlatformInfo, getVersion } from '@/lib/api/platform'
-import { addToast, removeToast, toastStore } from '@/lib/storage/toast'
-import Divider from '@/lib/widgets/divider'
-import Toasts from './_blocks/toasts'
-import { Transition } from 'solid-transition-group'
-import Button from '@/lib/widgets/button'
-import { wsrx } from '@/lib/wsrx'
+import type { HTTPError } from '@reverier/ky'
+import { useIsRouting, useLocation, useNavigate, useParams, useSearchParams } from '@solidjs/router'
+import { accountStore } from '@storage/account'
+import { canAccessChallenges, gameStore, isGameAdmin } from '@storage/game'
 import { Title, setupTitleResolver } from '@storage/header'
+import { platformStore, setPlatformStore } from '@storage/platform'
+import { t } from '@storage/theme'
+import Card from '@widgets/card'
+import Link from '@widgets/link'
+import Popover from '@widgets/popover'
 import { DateTime } from 'luxon'
-import Spin from '@/lib/assets/animates/spin'
-import { HTTPError } from '@reverier/ky'
-import LoadingTips from '@/lib/widgets/loading-tips'
-import { mediaPath } from '@/lib/utils/media'
-import Timer from '@/lib/widgets/timer'
-import TimeProgress from '@/lib/widgets/time-progress'
+import { type JSX, Match, Show, Switch, createEffect, createSignal } from 'solid-js'
+import { Transition } from 'solid-transition-group'
+import DiyBox, { DiyBoxContent } from './_blocks/diy-box'
+import InstanceBox, { InstanceBoxContent } from './_blocks/instance-box'
+import NotificationBox, { NotificationBoxContent } from './_blocks/notification-box'
+import Toasts from './_blocks/toasts'
+import UserBox from './_blocks/user-box'
 
 function GlobalTitleLink(props: { loading: boolean }) {
   return (
@@ -38,7 +38,7 @@ function GlobalTitleLink(props: { loading: boolean }) {
         <Show when={!props.loading} fallback={<Spin width={24} height={24} />}>
           <LogoAnimate class="hidden xl:inline-block" width={24} height={24} />
         </Show>
-        <span></span>
+        <span />
         <span>{platformStore.config.name || t('platform.name')}</span>
       </Link>
     </>
@@ -51,10 +51,10 @@ function GameTitleLink(props: { loading: boolean }) {
       <Link ghost href={`/games/${gameStore.current?.id}/`}>
         <Show when={!props.loading} fallback={<Spin width={24} height={24} />}>
           <Show when={gameStore.current?.logo} fallback={<LogoAnimate width={24} height={24} />}>
-            <img src={mediaPath(gameStore.current!.logo!)} width={24} height={24}></img>
+            <img src={mediaPath(gameStore.current!.logo!)} width={24} height={24} alt="CTF" />
           </Show>
         </Show>
-        <span></span>
+        <span />
         <span>{gameStore.current?.name}</span>
       </Link>
     </>
@@ -170,7 +170,7 @@ function GameNav(props: { size: 'sm' | 'md' }) {
         </li>
       </Show>
       <li class="nav">
-        <Link class="w-full" href={`/games/`} ghost justify="start" size={props.size} level="warning">
+        <Link class="w-full" href={'/games/'} ghost justify="start" size={props.size} level="warning">
           <span class="icon-[fluent--arrow-exit-20-regular] w-5 h-5" />
           <span>{t('game.exit')}</span>
         </Link>
@@ -206,14 +206,14 @@ function TitleBar() {
       <div id="page-top" class="print:hidden" />
       <div class="hidden print:flex flex-row border-b border-b-layer-content/60 w-full">
         <span>{platformStore.config.name || t('platform.name')}</span>
-        <span class="flex-1"></span>
+        <span class="flex-1" />
         <span>{DateTime.now().toFormat('yyyy-MM-dd HH:mm:ss')}</span>
       </div>
       <div class="h-16 border-b border-b-layer-content/15 w-screen bg-layer/60 backdrop-blur z-50 print:hidden print:static print:h-0 print:max-h-0 print:overflow-hidden sticky top-0 left-0 transition-colors duration-700">
         <div class="bg-layer-content/5 w-full h-full px-2 py-0 flex flex-row items-center relative">
           <div class="xl:hidden">
             <Popover
-              btnContent={<span class="icon-[fluent--navigation-20-regular] w-5 h-5"></span>}
+              btnContent={<span class="icon-[fluent--navigation-20-regular] w-5 h-5" />}
               square
               ghost
               popContentClass="pt-2"
@@ -244,7 +244,13 @@ function TitleBar() {
                         onClick={() => setAdditionalMobileBox('wsrx')}
                       >
                         <span
-                          class={`${wsrx.instances().length > 0 ? 'icon-[fluent--fluid-20-filled]' : 'icon-[fluent--fluid-20-regular]'} w-5 h-5 ${wsrx.instances().length > 0 ? (wsrx.connected() ? 'text-success' : 'text-warning') : ''}`}
+                          class={`${
+                            wsrx.instances().length > 0
+                              ? 'icon-[fluent--fluid-20-filled]'
+                              : 'icon-[fluent--fluid-20-regular]'
+                          } w-5 h-5 ${
+                            wsrx.instances().length > 0 ? (wsrx.connected() ? 'text-success' : 'text-warning') : ''
+                          }`}
                         />
                         <span>{t('instance.box')}</span>
                       </Button>
@@ -258,7 +264,11 @@ function TitleBar() {
                         onClick={() => setAdditionalMobileBox('notification')}
                       >
                         <span
-                          class={`${toastStore.toasts.length > 0 ? 'icon-[fluent--alert-badge-20-filled] text-primary' : 'icon-[fluent--alert-20-regular]'} w-5 h-5`}
+                          class={`${
+                            toastStore.toasts.length > 0
+                              ? 'icon-[fluent--alert-badge-20-filled] text-primary'
+                              : 'icon-[fluent--alert-20-regular]'
+                          } w-5 h-5`}
                         />
                         <span>{t('platform.notificationBox')}</span>
                       </Button>
@@ -296,7 +306,7 @@ function TitleBar() {
               <GameTitleLink loading={loading()} />
             </Match>
           </Switch>
-          <div class="w-4"></div>
+          <div class="w-4" />
           <ul class="xl:flex flex-row space-x-2 items-center hidden">
             <Switch fallback={<LoadingTips class="opacity-60" />}>
               <Match
@@ -314,7 +324,7 @@ function TitleBar() {
               </Match>
             </Switch>
           </ul>
-          <div class="flex-1"></div>
+          <div class="flex-1" />
           <div class="flex flex-row space-x-2">
             <div class="hidden lg:flex flex-row space-x-2">
               <Show when={platformStore.isOnline && accountStore.token !== null && gameStore.current}>
@@ -342,7 +352,7 @@ function TitleBar() {
             <Switch
               fallback={
                 <Button level="error">
-                  <span class="icon-[fluent--dismiss-circle-20-filled] w-5 h-5"></span>
+                  <span class="icon-[fluent--dismiss-circle-20-filled] w-5 h-5" />
                   <span>{t('platform.unavailable')}</span>
                 </Button>
               }
@@ -352,14 +362,14 @@ function TitleBar() {
               </Match>
               <Match when={platformStore.under_maintenance}>
                 <Button level="warning">
-                  <span class="icon-[fluent--warning-20-filled] w-5 h-5"></span>
+                  <span class="icon-[fluent--warning-20-filled] w-5 h-5" />
                   <span>{t('platform.underMaintenance')}</span>
                 </Button>
               </Match>
             </Switch>
           </div>
           <Show when={loading()}>
-            <div class="absolute bottom-0 left-0 right-0 h-1 skeleton"></div>
+            <div class="absolute bottom-0 left-0 right-0 h-1 skeleton" />
           </Show>
         </div>
       </div>
@@ -400,7 +410,11 @@ export default function (props: { children?: JSX.Element }) {
   setupTitleResolver()
   getPlatformInfo()
     .then(res => {
-      setPlatformStore({ config: res, under_maintenance: false, backend_online: true })
+      setPlatformStore({
+        config: res,
+        under_maintenance: false,
+        backend_online: true,
+      })
     })
     .catch((err: HTTPError) => {
       if (err.response?.status === 503) {
@@ -455,11 +469,11 @@ export default function (props: { children?: JSX.Element }) {
         'color: #808080;'
       )
       console.log(
-        `\n%cHaving issue? You can open a ticket on https://github.com/ret2shell, any bug reports or feature requests are welcome.\n`,
+        '\n%cHaving issue? You can open a ticket on https://github.com/ret2shell, any bug reports or feature requests are welcome.\n',
         'color: currentColor;'
       )
       console.log(
-        `\n%cIf you want to self-host CTF platforms or look for further cooperating, please contact ret2shell@woooo.tech.\n`,
+        '\n%cIf you want to self-host CTF platforms or look for further cooperating, please contact ret2shell@woooo.tech.\n',
         'color: currentColor;'
       )
     })

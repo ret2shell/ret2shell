@@ -14,7 +14,7 @@ export default function SideBar() {
             href={`/games/${gameStore.current?.id}/admin/statistics`}
             justify="start"
           >
-            <span class="icon-[fluent--data-trending-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--data-trending-20-regular] w-5 h-5" />
             <span>{t('game.admin.statistics.title')}</span>
           </Link>
         </li>
@@ -26,7 +26,7 @@ export default function SideBar() {
             href={`/games/${gameStore.current?.id}/admin/events`}
             justify="start"
           >
-            <span class="icon-[fluent--flash-flow-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--flash-flow-20-regular] w-5 h-5" />
             <span>{t('game.admin.events.title')}</span>
           </Link>
         </li>
@@ -38,7 +38,7 @@ export default function SideBar() {
             href={`/games/${gameStore.current?.id}/admin/edit`}
             justify="start"
           >
-            <span class="icon-[fluent--edit-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--edit-20-regular] w-5 h-5" />
             <span>{t('game.admin.edit.title')}</span>
           </Link>
         </li>
@@ -50,7 +50,7 @@ export default function SideBar() {
             href={`/games/${gameStore.current?.id}/admin/hammers`}
             justify="start"
           >
-            <span class="icon-[fluent--chat-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--chat-20-regular] w-5 h-5" />
             <span>{t('game.admin.hammer.title')}</span>
           </Link>
         </li>
@@ -62,7 +62,7 @@ export default function SideBar() {
             href={`/games/${gameStore.current?.id}/admin/teams`}
             justify="start"
           >
-            <span class="icon-[fluent--people-team-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--people-team-20-regular] w-5 h-5" />
             <span>{t('game.admin.teams.title')}</span>
           </Link>
         </li>
@@ -74,7 +74,7 @@ export default function SideBar() {
             href={`/games/${gameStore.current?.id}/admin/automate`}
             justify="start"
           >
-            <span class="icon-[fluent--cloud-flow-20-regular] w-5 h-5"></span>
+            <span class="icon-[fluent--cloud-flow-20-regular] w-5 h-5" />
             <span>{t('game.admin.automate.title')}</span>
           </Link>
         </li>

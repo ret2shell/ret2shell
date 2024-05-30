@@ -1,7 +1,7 @@
-import { ComponentProps, Show, createEffect, createSignal, splitProps, untrack } from 'solid-js'
+import { type ComponentProps, Show, createEffect, createSignal, splitProps, untrack } from 'solid-js'
 
-import LoadingTips from './loading-tips'
 import { addToast } from '../storage/toast'
+import LoadingTips from './loading-tips'
 
 export type ArticleProps = {
   content: string
@@ -19,7 +19,11 @@ export default function (props: ComponentProps<'article'> & ArticleProps) {
     const markdown = new Markdown()
     await markdown.init({
       type: 'html',
-      options: { prism: articleProps.extra, katex: articleProps.extra, headingAnchors: articleProps.headingAnchors },
+      options: {
+        prism: articleProps.extra,
+        katex: articleProps.extra,
+        headingAnchors: articleProps.headingAnchors,
+      },
     })
     return (await markdown.render(content))!
   }
@@ -60,12 +64,8 @@ export default function (props: ComponentProps<'article'> & ArticleProps) {
           </>
         }
       >
-        <article
-          {...nativeProps}
-          class={`article !max-w-5xl w-full ${nativeProps.class}`}
-          innerHTML={contentHtml()}
-        ></article>
-        <div class="h-64"></div>
+        <article {...nativeProps} class={`article !max-w-5xl w-full ${nativeProps.class}`} innerHTML={contentHtml()} />
+        <div class="h-64" />
       </Show>
     </>
   )

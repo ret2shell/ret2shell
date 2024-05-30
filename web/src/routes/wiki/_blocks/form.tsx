@@ -1,5 +1,5 @@
 import { createWiki, updateWiki } from '@/lib/api/wiki'
-import { Article, ArticleAccessPolicy } from '@/lib/models/article'
+import { type Article, ArticleAccessPolicy } from '@/lib/models/article'
 import { accountStore } from '@/lib/storage/account'
 import { t } from '@/lib/storage/theme'
 import { addToast } from '@/lib/storage/toast'
@@ -7,7 +7,7 @@ import Button from '@/lib/widgets/button'
 import Editor from '@/lib/widgets/editor'
 import Input from '@/lib/widgets/input'
 import { createForm, required, setValue, setValues } from '@modular-forms/solid'
-import { HTTPError } from '@reverier/ky'
+import type { HTTPError } from '@reverier/ky'
 import { DateTime } from 'luxon'
 import { createEffect, createSignal, untrack } from 'solid-js'
 
@@ -20,7 +20,10 @@ type WikiForm = {
   published: boolean
 }
 
-export default function (props: { onDone: (article: Article) => void; editSource?: Article }) {
+export default function (props: {
+  onDone: (article: Article) => void
+  editSource?: Article
+}) {
   const [form, { Form, Field }] = createForm<WikiForm>()
   const [loading, setLoading] = createSignal(false)
   createEffect(() => {
@@ -82,7 +85,7 @@ export default function (props: { onDone: (article: Article) => void; editSource
           {(field, props) => (
             <>
               <Input
-                icon={<span class="icon-[fluent--book-20-regular] w-5 h-5"></span>}
+                icon={<span class="icon-[fluent--book-20-regular] w-5 h-5" />}
                 placeholder={t('wiki.titlePlaceholder')}
                 title={t('wiki.titlePlaceholder')}
                 {...props}
@@ -100,7 +103,7 @@ export default function (props: { onDone: (article: Article) => void; editSource
                             name="enable_comment"
                             checked={field.value}
                             class="hidden"
-                          ></input>
+                          />
                           <Button
                             class="!rounded-none"
                             title={t('wiki.enableComment')}
@@ -111,8 +114,10 @@ export default function (props: { onDone: (article: Article) => void; editSource
                           >
                             {/* icon-[fluent--chat-20-regular] icon-[fluent--chat-20-filled] */}
                             <span
-                              class={`w-5 h-5 icon-[fluent--chat-20-${field.value ? 'filled' : 'regular'}] ${field.value ? 'text-primary' : ''}`}
-                            ></span>
+                              class={`w-5 h-5 icon-[fluent--chat-20-${field.value ? 'filled' : 'regular'}] ${
+                                field.value ? 'text-primary' : ''
+                              }`}
+                            />
                           </Button>
                         </>
                       )}
@@ -120,7 +125,7 @@ export default function (props: { onDone: (article: Article) => void; editSource
                     <Field name="draft" type="boolean">
                       {(field, props) => (
                         <>
-                          <input type="checkbox" {...props} name="draft" checked={field.value} class="hidden"></input>
+                          <input type="checkbox" {...props} name="draft" checked={field.value} class="hidden" />
                           <Button
                             class="!rounded-none"
                             title={t('wiki.draft')}
@@ -131,8 +136,10 @@ export default function (props: { onDone: (article: Article) => void; editSource
                           >
                             {/* icon-[fluent--edit-20-regular] icon-[fluent--edit-20-filled] */}
                             <span
-                              class={`w-5 h-5 icon-[fluent--edit-20-${field.value ? 'filled' : 'regular'}] ${field.value ? 'text-primary' : ''}`}
-                            ></span>
+                              class={`w-5 h-5 icon-[fluent--edit-20-${field.value ? 'filled' : 'regular'}] ${
+                                field.value ? 'text-primary' : ''
+                              }`}
+                            />
                           </Button>
                         </>
                       )}
@@ -140,13 +147,7 @@ export default function (props: { onDone: (article: Article) => void; editSource
                     <Field name="published" type="boolean">
                       {(field, props) => (
                         <>
-                          <input
-                            type="checkbox"
-                            {...props}
-                            name="published"
-                            checked={field.value}
-                            class="hidden"
-                          ></input>
+                          <input type="checkbox" {...props} name="published" checked={field.value} class="hidden" />
                           <Button
                             class="!rounded-l-none"
                             title={t('wiki.published')}
@@ -157,8 +158,10 @@ export default function (props: { onDone: (article: Article) => void; editSource
                           >
                             {/* icon-[fluent--megaphone-loud-20-regular] icon-[fluent--megaphone-loud-20-filled] */}
                             <span
-                              class={`w-5 h-5 icon-[fluent--megaphone-loud-20-${field.value ? 'filled' : 'regular'}] ${field.value ? 'text-primary' : ''}`}
-                            ></span>
+                              class={`w-5 h-5 icon-[fluent--megaphone-loud-20-${field.value ? 'filled' : 'regular'}] ${
+                                field.value ? 'text-primary' : ''
+                              }`}
+                            />
                           </Button>
                         </>
                       )}
@@ -173,7 +176,7 @@ export default function (props: { onDone: (article: Article) => void; editSource
           {(field, props) => (
             <>
               <Input
-                icon={<span class="icon-[fluent--code-20-regular] w-5 h-5"></span>}
+                icon={<span class="icon-[fluent--code-20-regular] w-5 h-5" />}
                 placeholder={t('wiki.pathPlaceholder')}
                 title={t('wiki.pathPlaceholder')}
                 {...props}

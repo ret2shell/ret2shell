@@ -2,7 +2,7 @@ import SidebarLayout from '@/lib/blocks/sidebar-layout'
 import { Title } from '@/lib/storage/header'
 import { platformStore } from '@/lib/storage/platform'
 import { t } from '@/lib/storage/theme'
-import { JSX } from 'solid-js'
+import type { JSX } from 'solid-js'
 import SideBar from './_blocks/sidebar'
 
 export default function (props: { children?: JSX.Element }) {
