@@ -85,7 +85,7 @@
     "dev": "vite",
     "build": "vite build",
     "serve": "vite preview",
-    "lint": "prettier --check . && oxlint",
-    "format": "prettier --write ."
+    "lint": "biome format --write . && biome lint .",
+    "format": "biome format --write ."
   }
 }
