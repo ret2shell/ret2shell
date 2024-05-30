@@ -71,7 +71,6 @@
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.38",
     "postcss-import": "^16.1.0",
-    "prettier": "^3.2.5",
     "sass": "^1.77.3",
     "tailwindcss": "^3.4.3",
     "tslib": "^2.6.2",
