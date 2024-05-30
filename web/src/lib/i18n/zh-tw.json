@@ -67,11 +67,24 @@
       "notStarted": "尚未開賽，少安毋躁",
       "solved": "已解決",
       "welcome": "歡迎參賽",
-      "list": "題目列表"
+      "list": "題目列表",
+      "terminal": "終端",
+      "hint": "提示",
+      "files": "文件",
+      "answer": "題解",
+      "statistics": "統計數據",
+      "settings": "設定",
+      "hammer": "錘子",
+      "instances": "實例",
+      "hammerTips": "你在這裡發送的訊息將會與題目狀態一起轉發給出題人，出題人可能會在這裡回覆或透過其他管道聯繫你。",
+      "hammerInput": "請輸入你要回饋的問題...",
+      "confirmUnlockHint": "確認花費 {{ cost }} 分數解鎖這條提示嗎？",
+      "hammerTips2": "請注意，在出題人回覆之前，你只能發送一條訊息，所以請一次發送你的問題，不要在這裡即時聊天。"
     },
     "scoreboard": {
       "title": "積分板",
-      "selectInstitute": "選擇組織..."
+      "selectInstitute": "選擇組織...",
+      "fetchError": "取得積分板失敗"
     },
     "writeup": {
       "title": "題解"
@@ -89,12 +102,15 @@
         "title": "事件看板"
       },
       "automate": {
-        "title": "自動化設施"
+        "title": "事件推播"
       },
       "edit": {
         "title": "編輯訊息"
       },
-      "description": "比賽管理面板"
+      "description": "比賽管理面板",
+      "hammer": {
+        "title": "選手回饋"
+      }
     },
     "exit": "退出",
     "noGameHosted": "沒有舉辦過賽事",
@@ -149,7 +165,8 @@
       "noTeamParticipated": "還沒有隊伍參賽",
       "join": {
         "title": "加入隊伍"
-      }
+      },
+      "joinFirst": "請先參賽"
     },
     "archivedGotoTraining": "已歸檔，請前往練習場",
     "canNotParticipate": "不符合參與條件",

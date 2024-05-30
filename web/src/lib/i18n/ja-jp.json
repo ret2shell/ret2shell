@@ -67,11 +67,24 @@
       "notStarted": "ゲームはまだ始まっていないので、焦らないでください",
       "solved": "解決しました",
       "welcome": "参加歓迎",
-      "list": "質問一覧"
+      "list": "質問一覧",
+      "terminal": "ターミナル",
+      "hint": "ヒント",
+      "files": "書類",
+      "answer": "答え",
+      "statistics": "統計データ",
+      "settings": "設定",
+      "hammer": "ハンマー",
+      "instances": "容器",
+      "hammerTips": "ここで送信したメッセージは、あなたの情報や質問のステータスとともに質問者に転送され、質問者はここで返信するか、他のチャネルを通じて連絡することがあります。",
+      "hammerInput": "フィードバックしたい質問を入力してください...",
+      "confirmUnlockHint": "このヒントをロック解除するために、{{ cost }} ポイントを消費してもよろしいですか?",
+      "hammerTips2": "質問者が応答するまでに送信できるメッセージは 1 つだけであるため、ここではライブチャットを行わず、一度に 1 つずつ質問を送信してください。"
     },
     "scoreboard": {
       "title": "スコアボード",
-      "selectInstitute": "組織を選択..."
+      "selectInstitute": "組織を選択...",
+      "fetchError": "スコアボードの取得に失敗しました"
     },
     "writeup": {
       "title": "答え"
@@ -89,12 +102,15 @@
         "title": "イベントボード"
       },
       "automate": {
-        "title": "自動化設備"
+        "title": "イベントプッシュ"
       },
       "edit": {
         "title": "情報を編集する"
       },
-      "description": "競技運営委員会"
+      "description": "競技運営委員会",
+      "hammer": {
+        "title": "プレイヤーのフィードバック"
+      }
     },
     "exit": "やめる",
     "noGameHosted": "コンテストは開催されていません",
@@ -149,7 +165,8 @@
       "noTeamParticipated": "まだ参加チームはありません",
       "join": {
         "title": "チームに参加する"
-      }
+      },
+      "joinFirst": "まずはご入力ください"
     },
     "archivedGotoTraining": "アーカイブ済み、ゴルフ練習場へ行ってください",
     "canNotParticipate": "参加資格がありません",

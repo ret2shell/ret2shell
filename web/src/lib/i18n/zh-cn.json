@@ -83,11 +83,24 @@
       "notStarted": "尚未开赛，少安毋躁",
       "solved": "已解决",
       "welcome": "欢迎参赛",
-      "list": "题目列表"
+      "list": "题目列表",
+      "terminal": "终端",
+      "hint": "提示",
+      "files": "文件",
+      "answer": "题解",
+      "statistics": "统计数据",
+      "settings": "设置",
+      "hammer": "锤子",
+      "instances": "实例",
+      "hammerTips": "你在这里发送的消息将会与题目状态一起转发给出题人，出题人可能会在这里回复或者通过其他渠道联系你。",
+      "hammerInput": "请输入你要反馈的问题...",
+      "confirmUnlockHint": "确认花费 {{ cost }} 分数解锁这条提示吗？",
+      "hammerTips2": "请注意，在出题人回复之前，你只能发送一条消息，所以请一次发送你的问题，不要在这里实时聊天。"
     },
     "scoreboard": {
       "title": "积分板",
-      "selectInstitute": "选择组织..."
+      "selectInstitute": "选择组织...",
+      "fetchError": "获取积分板失败"
     },
     "writeup": {
       "title": "题解"
@@ -105,12 +118,15 @@
         "title": "事件看板"
       },
       "automate": {
-        "title": "自动化设施"
+        "title": "事件推送"
       },
       "edit": {
         "title": "编辑信息"
       },
-      "description": "比赛管理面板"
+      "description": "比赛管理面板",
+      "hammer": {
+        "title": "选手反馈"
+      }
     },
     "exit": "退出",
     "noGameHosted": "没有举办过赛事",
@@ -165,7 +181,8 @@
       "noTeamParticipated": "还没有队伍参赛",
       "join": {
         "title": "加入队伍"
-      }
+      },
+      "joinFirst": "请先参赛"
     },
     "archivedGotoTraining": "已归档，请前往练习场",
     "canNotParticipate": "不符合参与条件",

@@ -67,11 +67,24 @@
       "notStarted": "The game hasn't started yet",
       "solved": "solved",
       "welcome": "Welcome",
-      "list": "Challenge list"
+      "list": "Challenge list",
+      "terminal": "Terminal",
+      "hint": "Hint",
+      "files": "document",
+      "answer": "Answer",
+      "statistics": "Statistics",
+      "settings": "Settings",
+      "hammer": "Hammer",
+      "instances": "Instances",
+      "hammerTips": "The message you send here will be forwarded to the questioner together with your information and question status. The questioner may reply here or contact you through other channels.",
+      "hammerInput": "Please enter your feedback...",
+      "confirmUnlockHint": "Are you sure you want to use {{ cost }} point(s) to unlock this tip?",
+      "hammerTips2": "Please note that you can only send one message before the questioner responds, so please send your questions one at a time and do not live chat here."
     },
     "scoreboard": {
       "title": "Scoreboard",
-      "selectInstitute": "Select institute..."
+      "selectInstitute": "Select institute...",
+      "fetchError": "Failed to fetch scoreboard"
     },
     "writeup": {
       "title": "Write-up"
@@ -89,12 +102,15 @@
         "title": "Event board"
       },
       "automate": {
-        "title": "Automation facilities"
+        "title": "Event pushing"
       },
       "edit": {
         "title": "Edit game"
       },
-      "description": "Game management panel"
+      "description": "Game management panel",
+      "hammer": {
+        "title": "Player feedback"
+      }
     },
     "exit": "Exit",
     "noGameHosted": "No game is hosted",
@@ -149,7 +165,8 @@
       "noTeamParticipated": "No team has participated yet",
       "join": {
         "title": "Join team"
-      }
+      },
+      "joinFirst": "Please take part in first"
     },
     "archivedGotoTraining": "Archived, please goto training board",
     "canNotParticipate": "Not eligible to participate",
