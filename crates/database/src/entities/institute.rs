@@ -45,24 +45,21 @@ impl Related<super::user::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
-pub async fn get_list<'a, C>(db: &'a C) -> Result<Vec<Model>, DbErr>
+pub async fn get_list<C>(db: &C) -> Result<Vec<Model>, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     Entity::find().all(db).await
 }
 
-pub async fn get<'a, C>(db: &'a C, id: i64) -> Result<Option<Model>, DbErr>
+pub async fn get<C>(db: &C, id: i64) -> Result<Option<Model>, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     Entity::find_by_id(id).one(db).await
 }
 
-pub async fn create<'a, C>(db: &'a C, institute: Model) -> Result<Model, DbErr>
+pub async fn create<C>(db: &C, institute: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let institute = ActiveModel {
         id: ActiveValue::NotSet,
         ..institute.into_active_model().reset_all()
@@ -70,10 +67,9 @@ where
     institute.insert(db).await
 }
 
-pub async fn update<'a, C>(db: &'a C, id: i64, institute: Model) -> Result<Model, DbErr>
+pub async fn update<C>(db: &C, id: i64, institute: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let institute = ActiveModel {
         id: ActiveValue::Unchanged(id),
         ..institute.into_active_model().reset_all()
@@ -81,9 +77,8 @@ where
     institute.update(db).await
 }
 
-pub async fn delete<'a, C>(db: &'a C, id: i64) -> Result<(), DbErr>
+pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

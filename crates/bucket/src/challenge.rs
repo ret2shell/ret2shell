@@ -172,7 +172,11 @@ impl ChallengeBucket {
             .finish()
             .as_ref()
             .iter()
-            .map(|b| format!("{:02x}", b))
-            .collect::<String>()
+            .fold(String::new(), |mut acc, b| {
+                acc.push_str(&format!("{:02x}", b));
+                acc
+            })
+        // .map(|b| format!("{:02x}", b))
+        // .collect::<String>()
     }
 }

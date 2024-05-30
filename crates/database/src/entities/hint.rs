@@ -57,12 +57,9 @@ impl Related<super::extra::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
-pub async fn get_list<'a, C>(
-    db: &'a C, challenge_id: i64, with_all: bool,
-) -> Result<Vec<Model>, DbErr>
+pub async fn get_list<C>(db: &C, challenge_id: i64, with_all: bool) -> Result<Vec<Model>, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let mut sql = Entity::find().filter(Column::ChallengeId.eq(challenge_id));
     if !with_all {
         // SELECT hint.*
@@ -97,10 +94,9 @@ where
     sql.all(db).await
 }
 
-pub async fn create<'a, C>(db: &'a C, hint: Model) -> Result<Model, DbErr>
+pub async fn create<C>(db: &C, hint: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let hint = ActiveModel {
         id: ActiveValue::NotSet,
         created_at: ActiveValue::Set(Utc::now()),
@@ -109,10 +105,9 @@ where
     hint.insert(db).await
 }
 
-pub async fn delete<'a, C>(db: &'a C, hint_id: i64) -> Result<(), DbErr>
+pub async fn delete<C>(db: &C, hint_id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     Entity::delete_by_id(hint_id).exec(db).await.map(|_| ())
 }
 

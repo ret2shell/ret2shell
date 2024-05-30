@@ -67,10 +67,9 @@ impl Related<super::user::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
-pub async fn get_list<'a, C>(db: &'a C, game_id: i64) -> Result<Vec<Model>, DbErr>
+pub async fn get_list<C>(db: &C, game_id: i64) -> Result<Vec<Model>, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let notifications = Entity::find()
         .filter(Column::GameId.eq(game_id))
         .all(db)
@@ -78,10 +77,9 @@ where
     Ok(notifications)
 }
 
-pub async fn get_list_ex<'a, C>(db: &'a C, game_id: i64) -> Result<Vec<ExModel>, DbErr>
+pub async fn get_list_ex<C>(db: &C, game_id: i64) -> Result<Vec<ExModel>, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let notifications = Entity::find()
         .join(JoinType::InnerJoin, Relation::Uploader.def())
         .column_as(user::Column::Nickname, "uploader_name")
@@ -92,10 +90,9 @@ where
     Ok(notifications)
 }
 
-pub async fn create<'a, C>(db: &'a C, notification: Model) -> Result<Model, DbErr>
+pub async fn create<C>(db: &C, notification: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let notification = ActiveModel {
         id: ActiveValue::NotSet,
         ..notification.into_active_model().reset_all()
@@ -103,9 +100,8 @@ where
     notification.insert(db).await
 }
 
-pub async fn delete<'a, C>(db: &'a C, id: i64) -> Result<(), DbErr>
+pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

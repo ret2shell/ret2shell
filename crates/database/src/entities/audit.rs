@@ -29,7 +29,7 @@ use super::{challenge, team, user};
 #[sea_orm(rs_type = "i32", db_type = "Integer")]
 pub enum State {
     #[default]
-    Pending = 0,
+    Pending   = 0,
     Misjudged = 1,
     Confirmed = 2,
 }
@@ -116,13 +116,12 @@ impl Related<super::user::Entity> for Entity {
 impl ActiveModelBehavior for ActiveModel {}
 
 #[allow(clippy::too_many_arguments)]
-pub async fn get_page<'a, C>(
-    db: &'a C, page: u64, page_size: u64, game_id: Option<i64>, team_id: Option<i64>,
+pub async fn get_page<C>(
+    db: &C, page: u64, page_size: u64, game_id: Option<i64>, team_id: Option<i64>,
     user_id: Option<i64>, challenge_id: Option<i64>, state: Option<State>,
 ) -> Result<(Vec<Model>, u64), DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let mut sql = Entity::find();
     if let Some(game_id) = game_id {
         sql = sql.filter(Column::GameId.eq(game_id));
@@ -149,13 +148,12 @@ where
 }
 
 #[allow(clippy::too_many_arguments)]
-pub async fn get_page_ex<'a, C>(
-    db: &'a C, page: u64, page_size: u64, game_id: Option<i64>, team_id: Option<i64>,
+pub async fn get_page_ex<C>(
+    db: &C, page: u64, page_size: u64, game_id: Option<i64>, team_id: Option<i64>,
     user_id: Option<i64>, challenge_id: Option<i64>, state: Option<State>,
 ) -> Result<(Vec<ExModel>, u64), DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let mut sql = Entity::find()
         .join(JoinType::InnerJoin, Relation::Challenge.def())
         .join(JoinType::InnerJoin, Relation::Team.def())
@@ -187,10 +185,9 @@ where
     Ok((articles, total))
 }
 
-pub async fn create<'a, C>(db: &'a C, model: Model) -> Result<Model, DbErr>
+pub async fn create<C>(db: &C, model: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let model = ActiveModel {
         id: ActiveValue::NotSet,
         created_at: ActiveValue::Set(Utc::now()),
@@ -199,9 +196,8 @@ where
     model.insert(db).await
 }
 
-pub async fn delete<'a, C>(db: &'a C, id: i64) -> Result<(), DbErr>
+pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

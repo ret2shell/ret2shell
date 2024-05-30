@@ -105,13 +105,12 @@ impl Related<super::user::Entity> for Entity {
 impl ActiveModelBehavior for ActiveModel {}
 
 #[allow(clippy::too_many_arguments)]
-pub async fn get_page<'a, C>(
-    db: &'a C, page: u64, page_size: u64, only_solved: bool, with_content: bool,
+pub async fn get_page<C>(
+    db: &C, page: u64, page_size: u64, only_solved: bool, with_content: bool,
     challenge_id: Option<i64>, team_id: Option<i64>, user_id: Option<i64>,
 ) -> Result<(Vec<Model>, u64), DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let mut sql = Entity::find();
     if let Some(challenge_id) = challenge_id {
         sql = sql.filter(Column::ChallengeId.eq(challenge_id));
@@ -137,13 +136,12 @@ where
 }
 
 #[allow(clippy::too_many_arguments)]
-pub async fn get_page_ex<'a, C>(
-    db: &'a C, page: u64, page_size: u64, only_solved: bool, with_content: bool,
+pub async fn get_page_ex<C>(
+    db: &C, page: u64, page_size: u64, only_solved: bool, with_content: bool,
     challenge_id: Option<i64>, team_id: Option<i64>, user_id: Option<i64>,
 ) -> Result<(Vec<ExModel>, u64), DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let mut sql = Entity::find()
         .join(JoinType::InnerJoin, Relation::Team.def())
         .join(JoinType::InnerJoin, Relation::Challenge.def())
@@ -174,13 +172,12 @@ where
     Ok((submissions, total))
 }
 
-pub async fn count<'a, C>(
-    db: &'a C, only_solved: bool, challenge_id: Option<i64>, team_id: Option<i64>,
+pub async fn count<C>(
+    db: &C, only_solved: bool, challenge_id: Option<i64>, team_id: Option<i64>,
     user_id: Option<i64>,
 ) -> Result<u64, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let mut sql = Entity::find();
     if let Some(challenge_id) = challenge_id {
         sql = sql.filter(Column::ChallengeId.eq(challenge_id));
@@ -197,10 +194,9 @@ where
     sql.count(db).await
 }
 
-pub async fn create<'a, C>(db: &'a C, submission: Model) -> Result<Model, DbErr>
+pub async fn create<C>(db: &C, submission: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let submission = ActiveModel {
         id: ActiveValue::NotSet,
         created_at: ActiveValue::Set(Utc::now()),
@@ -209,9 +205,8 @@ where
     submission.insert(db).await
 }
 
-pub async fn delete<'a, C>(db: &'a C, id: i64) -> Result<(), DbErr>
+pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

@@ -213,7 +213,7 @@ async fn update_game_intro(
 ) -> Result<impl IntoResponse, ResponseError> {
     let txn = db.conn.begin().await?;
     let result = if let Some(intro_id) = game.introduction_id {
-        let model = article::update(
+        article::update(
             &txn,
             intro_id,
             article::Model {
@@ -222,8 +222,7 @@ async fn update_game_intro(
                 ..model
             },
         )
-        .await?;
-        model
+        .await?
     } else {
         let model = article::create(
             &txn,

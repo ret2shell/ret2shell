@@ -37,10 +37,9 @@ impl Related<super::user::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
-pub async fn get_list<'a, C>(db: &'a C, user_id: i64) -> Result<Vec<Model>, DbErr>
+pub async fn get_list<C>(db: &C, user_id: i64) -> Result<Vec<Model>, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let user = user::Entity::find()
         .filter(Column::Id.eq(user_id))
         .one(db)
@@ -51,10 +50,9 @@ where
     }
 }
 
-pub async fn get_or_create<'a, C>(db: &'a C, address: &str) -> Result<Model, DbErr>
+pub async fn get_or_create<C>(db: &C, address: &str) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     match Entity::find()
         .filter(Column::Address.eq(address))
         .one(db)
@@ -74,17 +72,15 @@ where
     }
 }
 
-pub async fn count<'a, C>(db: &'a C) -> Result<u64, DbErr>
+pub async fn count<C>(db: &C) -> Result<u64, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     Entity::find().count(db).await
 }
 
-pub async fn create<'a, C>(db: &'a C, ip: Model) -> Result<Model, DbErr>
+pub async fn create<C>(db: &C, ip: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let ip = ActiveModel {
         id: ActiveValue::NotSet,
         ..ip.into_active_model().reset_all()
@@ -92,17 +88,15 @@ where
     ip.insert(db).await
 }
 
-pub async fn delete<'a, C>(db: &'a C, id: i64) -> Result<(), DbErr>
+pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }
 
-pub async fn link_user<'a, C>(db: &'a C, user_id: i64, ip_id: i64) -> Result<(), DbErr>
+pub async fn link_user<C>(db: &C, user_id: i64, ip_id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     if user2_ip::Entity::find()
         .filter(user2_ip::Column::UserId.eq(user_id))
         .filter(user2_ip::Column::IpAddressId.eq(ip_id))

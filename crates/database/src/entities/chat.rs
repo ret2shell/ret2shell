@@ -115,10 +115,9 @@ impl Related<super::challenge::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
-pub async fn get_sessions<'a, C>(conn: &'a C, game_id: i64) -> Result<Vec<SessionModel>, DbErr>
+pub async fn get_sessions<C>(conn: &C, game_id: i64) -> Result<Vec<SessionModel>, DbErr>
 where
-    C: sea_orm::ConnectionTrait,
-{
+    C: sea_orm::ConnectionTrait, {
     let mut sql = Entity::find()
         .filter(Column::GameId.eq(game_id))
         .select_only()
@@ -146,12 +145,9 @@ where
     Ok(result)
 }
 
-pub async fn get_list<'a, C>(
-    conn: &'a C, team_id: i64, challenge_id: i64,
-) -> Result<Vec<ExModel>, DbErr>
+pub async fn get_list<C>(conn: &C, team_id: i64, challenge_id: i64) -> Result<Vec<ExModel>, DbErr>
 where
-    C: sea_orm::ConnectionTrait,
-{
+    C: sea_orm::ConnectionTrait, {
     let sql = Entity::find()
         .join(JoinType::InnerJoin, Relation::Challenge.def())
         .join(JoinType::InnerJoin, Relation::Team.def())
@@ -169,10 +165,9 @@ where
     Ok(chats)
 }
 
-pub async fn create<'a, C>(conn: &'a C, chat: Model) -> Result<Model, DbErr>
+pub async fn create<C>(conn: &C, chat: Model) -> Result<Model, DbErr>
 where
-    C: sea_orm::ConnectionTrait,
-{
+    C: sea_orm::ConnectionTrait, {
     let chat = ActiveModel {
         id: ActiveValue::NotSet,
         created_at: ActiveValue::Set(Utc::now()),
@@ -181,10 +176,9 @@ where
     chat.insert(conn).await
 }
 
-pub async fn mark_checked<'a, C>(conn: &'a C, id: i64) -> Result<Model, DbErr>
+pub async fn mark_checked<C>(conn: &C, id: i64) -> Result<Model, DbErr>
 where
-    C: sea_orm::ConnectionTrait,
-{
+    C: sea_orm::ConnectionTrait, {
     let model = ActiveModel {
         id: ActiveValue::Unchanged(id),
         checked: ActiveValue::Set(true),
@@ -198,20 +192,16 @@ where
     model.update(conn).await
 }
 
-pub async fn delete<'a, C>(conn: &'a C, id: i64) -> Result<(), DbErr>
+pub async fn delete<C>(conn: &C, id: i64) -> Result<(), DbErr>
 where
-    C: sea_orm::ConnectionTrait,
-{
+    C: sea_orm::ConnectionTrait, {
     Entity::delete_by_id(id).exec(conn).await?;
     Ok(())
 }
 
-pub async fn delete_session<'a, C>(
-    conn: &'a C, team_id: i64, challenge_id: i64,
-) -> Result<(), DbErr>
+pub async fn delete_session<C>(conn: &C, team_id: i64, challenge_id: i64) -> Result<(), DbErr>
 where
-    C: sea_orm::ConnectionTrait,
-{
+    C: sea_orm::ConnectionTrait, {
     Entity::delete_many()
         .filter(Column::TeamId.eq(team_id))
         .filter(Column::ChallengeId.eq(challenge_id))

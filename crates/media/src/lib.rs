@@ -75,30 +75,30 @@ impl Media {
         &self, hash: impl AsRef<str>, longest_edge: u32,
     ) -> Result<(), MediaError> {
         let hash = hash.as_ref();
-        let original = self.path.join(&hash[..2]).join(&hash[2..4]).join(&hash);
+        let original = self.path.join(&hash[..2]).join(&hash[2..4]).join(hash);
         let dest = self
             .thumbnails_dir()
             .join(&hash[..2])
             .join(&hash[2..4])
-            .join(&hash);
+            .join(hash);
         utils::make_thumbnail(&original, &dest, longest_edge).await
     }
 
     pub async fn get(&self, hash: impl AsRef<str>) -> Result<File, MediaError> {
         let hash = hash.as_ref();
-        let path = self.path.join(&hash[..2]).join(&hash[2..4]).join(&hash);
+        let path = self.path.join(&hash[..2]).join(&hash[2..4]).join(hash);
         Ok(File::open(&path).await?)
     }
 
     pub async fn delete(&self, hash: impl AsRef<str>) -> Result<(), MediaError> {
         let hash = hash.as_ref();
-        let path = self.path.join(&hash[..2]).join(&hash[2..4]).join(&hash);
+        let path = self.path.join(&hash[..2]).join(&hash[2..4]).join(hash);
         fs::remove_file(&path).await?;
         let thumbnails_path = self
             .thumbnails_dir()
             .join(&hash[..2])
             .join(&hash[2..4])
-            .join(&hash);
+            .join(hash);
         if thumbnails_path.exists() {
             fs::remove_file(&thumbnails_path).await?;
         }
@@ -107,7 +107,7 @@ impl Media {
 
     pub async fn get_mime_type(&self, hash: impl AsRef<str>) -> Result<String, MediaError> {
         let hash = hash.as_ref();
-        let path = self.path.join(&hash[..2]).join(&hash[2..4]).join(&hash);
+        let path = self.path.join(&hash[..2]).join(&hash[2..4]).join(hash);
         match infer::get_from_path(path)? {
             Some(mime) => {
                 if mime.mime_type() == "text/xml" {

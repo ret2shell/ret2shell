@@ -15,9 +15,11 @@ use traits::CheckerError;
 pub mod modules;
 pub mod traits;
 
+type CheckerContext = (Arc<Unit>, Arc<RuntimeContext>, DateTime<Utc>);
+
 #[derive(Clone, Debug)]
 pub struct Checker {
-    contexts: Arc<RwLock<HashMap<String, (Arc<Unit>, Arc<RuntimeContext>, DateTime<Utc>)>>>,
+    contexts: Arc<RwLock<HashMap<String, CheckerContext>>>,
 }
 
 macro_rules! to_rune_object {
@@ -30,6 +32,12 @@ macro_rules! to_rune_object {
             object
         }
     };
+}
+
+impl Default for Checker {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Checker {

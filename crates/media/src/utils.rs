@@ -1,9 +1,9 @@
-use crate::traits::MediaError;
-
 use std::path::Path;
 
 use image::imageops::FilterType;
 use tracing::{debug, info, warn};
+
+use crate::traits::MediaError;
 
 #[allow(dead_code)]
 pub fn get_media_extension(content_type: &str) -> Result<String, MediaError> {
@@ -23,8 +23,7 @@ pub async fn make_thumbnail<PA, PB>(
 ) -> Result<(), MediaError>
 where
     PA: AsRef<Path>,
-    PB: AsRef<Path>,
-{
+    PB: AsRef<Path>, {
     // prevent generate thumbnail repeatedly
     if tokio::fs::metadata(&dest).await.is_ok() {
         return Ok(());

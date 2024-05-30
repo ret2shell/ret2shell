@@ -32,8 +32,8 @@ use super::{challenge, team, user};
 #[sea_orm(rs_type = "i32", db_type = "Integer")]
 pub enum State {
     #[default]
-    Pending = 0,
-    Running = 1,
+    Pending  = 0,
+    Running  = 1,
     Finished = 2,
 }
 
@@ -128,13 +128,12 @@ impl Related<super::user::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
-pub async fn get_page<'a, C>(
-    db: &'a C, page: u64, page_size: u64, challenge_id: Option<i64>, user_id: Option<i64>,
+pub async fn get_page<C>(
+    db: &C, page: u64, page_size: u64, challenge_id: Option<i64>, user_id: Option<i64>,
     team_id: Option<i64>,
 ) -> Result<(Vec<Model>, u64), DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let mut sql = Entity::find();
     if let Some(challenge_id) = challenge_id {
         sql = sql.filter(Column::ChallengeId.eq(challenge_id));
@@ -154,13 +153,12 @@ where
     Ok((instances, total))
 }
 
-pub async fn get_page_ex<'a, C>(
-    db: &'a C, page: u64, page_size: u64, challenge_id: Option<i64>, user_id: Option<i64>,
+pub async fn get_page_ex<C>(
+    db: &C, page: u64, page_size: u64, challenge_id: Option<i64>, user_id: Option<i64>,
     team_id: Option<i64>,
 ) -> Result<(Vec<ExModel>, u64), DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let mut sql = Entity::find()
         .join(JoinType::InnerJoin, Relation::Team.def())
         .join(JoinType::InnerJoin, Relation::Challenge.def())
@@ -186,12 +184,11 @@ where
     Ok((instances, total))
 }
 
-pub async fn get_by_user_id<'a, C>(
-    db: &'a C, user_id: i64, with_all: bool,
+pub async fn get_by_user_id<C>(
+    db: &C, user_id: i64, with_all: bool,
 ) -> Result<Option<Model>, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let mut sql = Entity::find().filter(Column::UserId.eq(user_id));
     if !with_all {
         sql = sql.filter(Column::State.lte(State::Running));
@@ -199,12 +196,11 @@ where
     sql.one(db).await
 }
 
-pub async fn get_by_user_id_ex<'a, C>(
-    db: &'a C, user_id: i64, with_all: bool,
+pub async fn get_by_user_id_ex<C>(
+    db: &C, user_id: i64, with_all: bool,
 ) -> Result<Option<ExModel>, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let mut sql = Entity::find()
         .join(JoinType::InnerJoin, Relation::Team.def())
         .join(JoinType::InnerJoin, Relation::Challenge.def())
@@ -219,12 +215,11 @@ where
     sql.into_model().one(db).await
 }
 
-pub async fn get_list_by_team_id<'a, C>(
-    db: &'a C, team_id: i64, with_all: bool,
+pub async fn get_list_by_team_id<C>(
+    db: &C, team_id: i64, with_all: bool,
 ) -> Result<Vec<Model>, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let mut sql = Entity::find().filter(Column::TeamId.eq(team_id));
     if !with_all {
         sql = sql.filter(Column::State.lte(State::Running));
@@ -232,12 +227,11 @@ where
     sql.all(db).await
 }
 
-pub async fn get_list_by_team_id_ex<'a, C>(
-    db: &'a C, team_id: i64, with_all: bool,
+pub async fn get_list_by_team_id_ex<C>(
+    db: &C, team_id: i64, with_all: bool,
 ) -> Result<Vec<ExModel>, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let mut sql = Entity::find()
         .join(JoinType::InnerJoin, Relation::Team.def())
         .join(JoinType::InnerJoin, Relation::Challenge.def())
@@ -252,10 +246,9 @@ where
     sql.into_model().all(db).await
 }
 
-pub async fn create<'a, C>(db: &'a C, instance: Model) -> Result<Model, DbErr>
+pub async fn create<C>(db: &C, instance: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let instance = ActiveModel {
         id: ActiveValue::NotSet,
         ..instance.into_active_model().reset_all()
@@ -263,10 +256,9 @@ where
     instance.insert(db).await
 }
 
-pub async fn update<'a, C>(db: &'a C, instance: Model) -> Result<Model, DbErr>
+pub async fn update<C>(db: &C, instance: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let instance = ActiveModel {
         id: ActiveValue::Unchanged(instance.id),
         ..instance.into_active_model().reset_all()
@@ -274,9 +266,8 @@ where
     instance.update(db).await
 }
 
-pub async fn delete<'a, C>(db: &'a C, id: i64) -> Result<(), DbErr>
+pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

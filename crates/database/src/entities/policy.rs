@@ -23,8 +23,8 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 #[sea_orm(rs_type = "i32", db_type = "Integer")]
 pub enum PermType {
     #[default]
-    Game = 0,
-    User = 1,
+    Game       = 0,
+    User       = 1,
     Statistics = 2,
 }
 
@@ -84,12 +84,11 @@ impl Related<super::user::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
-pub async fn get<'a, C>(
-    db: &'a C, user_id: Option<i64>, perm_type: Option<PermType>,
+pub async fn get<C>(
+    db: &C, user_id: Option<i64>, perm_type: Option<PermType>,
 ) -> Result<Vec<Model>, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let mut sql = Entity::find();
     if let Some(user_id) = user_id {
         sql = sql.filter(Column::UserId.eq(user_id));
@@ -100,10 +99,9 @@ where
     sql.all(db).await
 }
 
-pub async fn create<'a, C>(db: &'a C, policy: Model) -> Result<Model, DbErr>
+pub async fn create<C>(db: &C, policy: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     let policy = ActiveModel {
         id: ActiveValue::NotSet,
         ..policy.into_active_model().reset_all()
@@ -111,9 +109,8 @@ where
     policy.insert(db).await
 }
 
-pub async fn delete<'a, C>(db: &'a C, id: i64) -> Result<(), DbErr>
+pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait,
-{
+    C: ConnectionTrait, {
     Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }
