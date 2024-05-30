@@ -18,4 +18,5 @@ pub mod m_20240104_000006_create_submission;
 pub mod m_20240104_000007_link_team_user;
 pub mod m_20240104_000008_create_extra;
 pub mod m_20240104_000009_create_audit;
+pub mod m_20240104_000010_create_chat;
 pub mod m_20240105_000001_create_instance;
