@@ -32,6 +32,7 @@ impl MigratorTrait for Migrator {
             Box::new(migrations::m_20240104_000007_link_team_user::Migration),
             Box::new(migrations::m_20240104_000008_create_extra::Migration),
             Box::new(migrations::m_20240104_000009_create_audit::Migration),
+            Box::new(migrations::m_20240104_000010_create_chat::Migration),
             Box::new(migrations::m_20240105_000001_create_instance::Migration),
         ]
     }

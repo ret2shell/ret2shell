@@ -66,6 +66,12 @@ macro_rules! get_path_param_i64 {
 
 pub(crate) use get_path_param_i64;
 
+/// Prepare data for the request
+///
+/// * `$model` - the model name
+/// * `$cached` - whether to cache the result
+///
+/// Remember to refresh cache when update the data!
 macro_rules! prepare_data {
     ($model:tt, $cached: expr) => {
         |axum::extract::State(db): axum::extract::State<r2s_migrator::Database>,

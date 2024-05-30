@@ -4,11 +4,12 @@ use chrono::{serde::ts_seconds, DateTime, Utc};
 use num_derive::{FromPrimitive, ToPrimitive};
 use sea_orm::{
     entity::prelude::*, ActiveValue, Condition, FromJsonQueryResult, FromQueryResult,
-    IntoActiveModel, JoinType, QuerySelect,
+    IntoActiveModel, JoinType, Order, QueryOrder, QuerySelect,
 };
 use sea_query::Func;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
+use std::str::FromStr;
 
 use crate::institute;
 
@@ -250,7 +251,7 @@ where
 
 pub async fn get_page<'a, C>(
     db: &'a C, game_id: i64, page: u64, page_size: u64, min_state: Option<State>,
-    filter: Option<String>,
+    institute_id: Option<i64>, filter: Option<String>, order_by: Option<String>, asc: bool,
 ) -> Result<(Vec<Model>, u64), DbErr>
 where
     C: ConnectionTrait,
@@ -260,6 +261,19 @@ where
         .filter(Column::GameId.eq(game_id))
         .filter(Column::State.gte(state));
     sql = filter_sql(sql, filter)?;
+    if let Some(institute_id) = institute_id {
+        sql = sql.filter(Column::InstituteId.eq(institute_id));
+    }
+    if let Some(order_by) = order_by {
+        let order_by = Column::from_str(order_by.as_str())
+            .map_err(|e| DbErr::Custom(format!("invalid order_by: {}", e.to_string())))?;
+        sql = if asc {
+            sql.order_by(order_by, Order::Asc)
+        } else {
+            sql.order_by(order_by, Order::Desc)
+        };
+    }
+    sql = sql.order_by(Column::LastActiveAt, Order::Asc);
     let paginator = sql.into_model().paginate(db, page_size);
     let total = paginator.num_pages().await?;
     let teams = paginator.fetch_page(page - 1).await?;
