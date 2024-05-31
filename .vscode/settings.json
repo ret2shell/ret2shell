@@ -1,34 +1,40 @@
 {
-  "sqltools.connections": [
-    {
-      "previewLimit": 50,
-      "server": "localhost",
-      "port": 5432,
-      "driver": "PostgreSQL",
-      "name": "ret2shell",
-      "database": "ret2shell",
-      "username": "ret2shell"
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "ret2shell",
+            "database": "ret2shell",
+            "username": "ret2shell"
+        }
+    ],
+    "files.associations": {
+        "*.css": "tailwindcss",
+        "*.scss": "tailwindcss",
+        "*.rx": "rune"
+    },
+    "rust-analyzer.showUnlinkedFileNotification": false,
+    "javascript.format.enable": false,
+    "typescript.format.enable": false,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "biomejs.biome",
+    "editor.codeActionsOnSave": {
+        "source.organizeImports.biome": "explicit"
+    },
+    "[rust]": {
+        "editor.defaultFormatter": "rust-lang.rust-analyzer"
+    },
+    "[toml]": {
+        "editor.defaultFormatter": "tamasfe.even-better-toml"
+    },
+    "[sass]": {
+        "editor.defaultFormatter": "syler.sass-indented"
+    },
+    "i18n-ally.localesPaths": ["web/src/lib/i18n"],
+    "i18n-ally.keystyle": "nested",
+    "[typescript]": {
+        "editor.defaultFormatter": "biomejs.biome"
     }
-  ],
-  "files.associations": {
-    "*.css": "tailwindcss",
-    "*.scss": "tailwindcss",
-    "*.rx": "rune"
-  },
-  "rust-analyzer.showUnlinkedFileNotification": false,
-  "javascript.format.enable": false,
-  "typescript.format.enable": false,
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "biomejs.biome",
-  "[rust]": {
-    "editor.defaultFormatter": "rust-lang.rust-analyzer"
-  },
-  "[toml]": {
-    "editor.defaultFormatter": "tamasfe.even-better-toml"
-  },
-  "[sass]": {
-    "editor.defaultFormatter": "syler.sass-indented"
-  },
-  "i18n-ally.localesPaths": ["web/src/lib/i18n"],
-  "i18n-ally.keystyle": "nested"
 }

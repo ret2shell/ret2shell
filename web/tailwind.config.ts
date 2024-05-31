@@ -1,6 +1,7 @@
 import { addDynamicIconSelectors } from "@iconify/tailwind";
 import typography from "@tailwindcss/typography";
 import { okwind } from "okwind";
+import type { Config } from "tailwindcss";
 
 const fontFamily = [
     "JetBrains Mono",
@@ -56,4 +57,4 @@ export default {
         },
     },
     plugins: [typography, okwind, addDynamicIconSelectors()],
-};
+} satisfies Config;
