@@ -16,15 +16,10 @@
     "*.rx": "rune"
   },
   "rust-analyzer.showUnlinkedFileNotification": false,
-  "prettier.bracketSpacing": false,
-  "prettier.configPath": "web/.prettierrc",
-  "prettier.ignorePath": "web/.prettierignore",
-  "prettier.requireConfig": true,
-  "prettier.singleQuote": true,
   "javascript.format.enable": false,
   "typescript.format.enable": false,
   "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.defaultFormatter": "biomejs.biome",
   "[rust]": {
     "editor.defaultFormatter": "rust-lang.rust-analyzer"
   },
@@ -33,9 +28,6 @@
   },
   "[sass]": {
     "editor.defaultFormatter": "syler.sass-indented"
-  },
-  "[css]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "i18n-ally.localesPaths": ["web/src/lib/i18n"],
   "i18n-ally.keystyle": "nested"

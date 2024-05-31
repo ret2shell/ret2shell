@@ -1,18 +1,18 @@
-import type { SearchParamsOption } from '@reverier/ky'
-import api, { api_root } from '.'
-import type { Media } from '../models/media'
+import type { SearchParamsOption } from "@reverier/ky";
+import api, { api_root } from ".";
+import type { Media } from "../models/media";
 
 export async function uploadMedia(file: File, thumbnail?: boolean) {
-  const formData = new FormData()
-  formData.append('file', file)
-  return await api
-    .post(`${api_root}/media`, {
-      body: formData,
-      searchParams: JSON.parse(
-        JSON.stringify({
-          thumbnail,
+    const formData = new FormData();
+    formData.append("file", file);
+    return await api
+        .post(`${api_root}/media`, {
+            body: formData,
+            searchParams: JSON.parse(
+                JSON.stringify({
+                    thumbnail,
+                })
+            ) as SearchParamsOption,
         })
-      ) as SearchParamsOption,
-    })
-    .json<Media>()
+        .json<Media>();
 }

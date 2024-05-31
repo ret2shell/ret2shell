@@ -1,4 +1,4 @@
 export type Ip = {
-  id: number
-  address: string
-}
+    id: number;
+    address: string;
+};

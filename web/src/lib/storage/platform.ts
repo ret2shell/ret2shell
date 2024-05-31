@@ -1,31 +1,31 @@
-import { makePersisted } from '@solid-primitives/storage'
-import { createStore } from 'solid-js/store'
-import type { ServerConfig } from '../models/config'
+import { makePersisted } from "@solid-primitives/storage";
+import { createStore } from "solid-js/store";
+import type { ServerConfig } from "../models/config";
 
 export const [platformStore, setPlatformStore] = makePersisted(
-  createStore({
-    config: {
-      host: location.hostname,
-      port: 0,
-      external_domain: location.hostname,
-      external_https: location.protocol === 'https:',
-      cors_origins: '*',
-      api_base_path: '/api',
-      name: null as string | null,
-      subject_url: null as string | null,
-      subject_info: null as string | null,
-      footer_url: null as string | null,
-      footer_info: null as string | null,
-      record: null as string | null,
-      hide_maker: false as boolean | null,
-    } as ServerConfig,
-    version: 'UNKNOWN' as string,
-    accept_cookies: false,
-    under_maintenance: false,
-    backend_online: false,
-    get isOnline() {
-      return this.backend_online && !this.under_maintenance
-    },
-  }),
-  { name: 'platform' }
-)
+    createStore({
+        config: {
+            host: location.hostname,
+            port: 0,
+            external_domain: location.hostname,
+            external_https: location.protocol === "https:",
+            cors_origins: "*",
+            api_base_path: "/api",
+            name: null as string | null,
+            subject_url: null as string | null,
+            subject_info: null as string | null,
+            footer_url: null as string | null,
+            footer_info: null as string | null,
+            record: null as string | null,
+            hide_maker: false as boolean | null,
+        } as ServerConfig,
+        version: "UNKNOWN" as string,
+        accept_cookies: false,
+        under_maintenance: false,
+        backend_online: false,
+        get isOnline() {
+            return this.backend_online && !this.under_maintenance;
+        },
+    }),
+    { name: "platform" }
+);

@@ -1,473 +1,473 @@
 {
-  "platform": {
-    "name": "Ret 2 Shell",
-    "subject": "Fight for all the beauty in the world",
-    "diyBox": "Language and  themes",
-    "notificationBox": "Notifications",
-    "clearNotifications": "Clear messages",
-    "noNotifications": "No unread messages",
-    "reject": "No",
-    "accept": "Yes",
-    "offline": "The backend seems to be offline, please refresh the page. \nIf this error occurs repeatedly, please contact maintenance personnel.",
-    "cookiePolicy": "We do not use any cookies.",
-    "ok": "OK",
-    "yes": "Yes",
-    "error": "Platform error",
-    "underMaintenance": "Under maintenance...",
-    "unavailable": "System offline"
-  },
-  "wiki": {
-    "title": "Wiki",
-    "titleRequired": "Please fill in the article title",
-    "titlePlaceholder": "Article title",
-    "enableComment": "Open comment area",
-    "contentRequired": "Please fill in the article content",
-    "contentPlaceholder": "Article content",
-    "pathRequired": "Please fill in the article path",
-    "pathPlaceholder": "Article path",
-    "draft": "draft",
-    "published": "release",
-    "fetchTocFailed": "Failed to get wiki toc",
-    "deleteSuccess": "successfully deleted",
-    "selectWikiToRead": "What do you want to learn today?"
-  },
-  "loading": {
-    "0": "Fixing cosmic ray-induced bit flips...",
-    "1": "Proving P != NP...",
-    "2": "Factoring RSA 4096...",
-    "3": "Dividing by 0...",
-    "4": "Downloading more RAM...",
-    "5": "Ordering 1s and 0s...",
-    "6": "Navigating neural network...",
-    "7": "Importing machine learning...",
-    "8": "Issuing Alice and Bob one-time pads...",
-    "9": "Trying to escape vim...",
-    "10": "Using magnifying glass and pencil to rescue data...",
-    "11": "Symlinking emacs and vim to ed...",
-    "12": "Training branch predictor...",
-    "13": "Timing cache hits...",
-    "14": "Speculatively executing recipes...",
-    "15": "Adding LLM hallucinations..."
-  },
-  "training": {
-    "title": "Training",
-    "list": "Training Playgrounds",
-    "noPlaygrounds": "No playgrounds",
-    "noArchivedGames": "No archived games",
-    "selectPlayground": "Start training today!",
-    "failedToFetchPlaygrounds": "Failed to get playground list",
-    "failedToFetchGames": "Failed to get game list",
-    "gameNotArchived": "The game has not been archived yet"
-  },
-  "game": {
-    "title": "Games",
-    "challenge": {
-      "title": "Challenges",
-      "enter": "Solve challenges",
-      "notStarted": "The game hasn't started yet",
-      "solved": "solved",
-      "welcome": "Welcome",
-      "list": "Challenge list",
-      "terminal": "Terminal",
-      "hint": "Hint",
-      "files": "document",
-      "answer": "Answer",
-      "statistics": "Statistics",
-      "settings": "Settings",
-      "hammer": "Hammer",
-      "instances": "Instances",
-      "hammerTips": "The message you send here will be forwarded to the questioner together with your information and question status. The questioner may reply here or contact you through other channels.",
-      "hammerInput": "Please enter your feedback...",
-      "confirmUnlockHint": "Are you sure you want to use {{ cost }} point(s) to unlock this tip?",
-      "hammerTips2": "Please note that you can only send one message before the questioner responds, so please send your questions one at a time and do not live chat here."
+    "platform": {
+        "name": "Ret 2 Shell",
+        "subject": "Fight for all the beauty in the world",
+        "diyBox": "Language and  themes",
+        "notificationBox": "Notifications",
+        "clearNotifications": "Clear messages",
+        "noNotifications": "No unread messages",
+        "reject": "No",
+        "accept": "Yes",
+        "offline": "The backend seems to be offline, please refresh the page. \nIf this error occurs repeatedly, please contact maintenance personnel.",
+        "cookiePolicy": "We do not use any cookies.",
+        "ok": "OK",
+        "yes": "Yes",
+        "error": "Platform error",
+        "underMaintenance": "Under maintenance...",
+        "unavailable": "System offline"
     },
-    "scoreboard": {
-      "title": "Scoreboard",
-      "selectInstitute": "Select institute...",
-      "fetchError": "Failed to fetch scoreboard"
+    "wiki": {
+        "title": "Wiki",
+        "titleRequired": "Please fill in the article title",
+        "titlePlaceholder": "Article title",
+        "enableComment": "Open comment area",
+        "contentRequired": "Please fill in the article content",
+        "contentPlaceholder": "Article content",
+        "pathRequired": "Please fill in the article path",
+        "pathPlaceholder": "Article path",
+        "draft": "draft",
+        "published": "release",
+        "fetchTocFailed": "Failed to get wiki toc",
+        "deleteSuccess": "successfully deleted",
+        "selectWikiToRead": "What do you want to learn today?"
     },
-    "writeup": {
-      "title": "Write-up"
+    "loading": {
+        "0": "Fixing cosmic ray-induced bit flips...",
+        "1": "Proving P != NP...",
+        "2": "Factoring RSA 4096...",
+        "3": "Dividing by 0...",
+        "4": "Downloading more RAM...",
+        "5": "Ordering 1s and 0s...",
+        "6": "Navigating neural network...",
+        "7": "Importing machine learning...",
+        "8": "Issuing Alice and Bob one-time pads...",
+        "9": "Trying to escape vim...",
+        "10": "Using magnifying glass and pencil to rescue data...",
+        "11": "Symlinking emacs and vim to ed...",
+        "12": "Training branch predictor...",
+        "13": "Timing cache hits...",
+        "14": "Speculatively executing recipes...",
+        "15": "Adding LLM hallucinations..."
+    },
+    "training": {
+        "title": "Training",
+        "list": "Training Playgrounds",
+        "noPlaygrounds": "No playgrounds",
+        "noArchivedGames": "No archived games",
+        "selectPlayground": "Start training today!",
+        "failedToFetchPlaygrounds": "Failed to get playground list",
+        "failedToFetchGames": "Failed to get game list",
+        "gameNotArchived": "The game has not been archived yet"
+    },
+    "game": {
+        "title": "Games",
+        "challenge": {
+            "title": "Challenges",
+            "enter": "Solve challenges",
+            "notStarted": "The game hasn't started yet",
+            "solved": "solved",
+            "welcome": "Welcome",
+            "list": "Challenge list",
+            "terminal": "Terminal",
+            "hint": "Hint",
+            "files": "document",
+            "answer": "Answer",
+            "statistics": "Statistics",
+            "settings": "Settings",
+            "hammer": "Hammer",
+            "instances": "Instances",
+            "hammerTips": "The message you send here will be forwarded to the questioner together with your information and question status. The questioner may reply here or contact you through other channels.",
+            "hammerInput": "Please enter your feedback...",
+            "confirmUnlockHint": "Are you sure you want to use {{ cost }} point(s) to unlock this tip?",
+            "hammerTips2": "Please note that you can only send one message before the questioner responds, so please send your questions one at a time and do not live chat here."
+        },
+        "scoreboard": {
+            "title": "Scoreboard",
+            "selectInstitute": "Select institute...",
+            "fetchError": "Failed to fetch scoreboard"
+        },
+        "writeup": {
+            "title": "Write-up"
+        },
+        "admin": {
+            "title": "Admin",
+            "manageChallenges": "Manage challenges",
+            "statistics": {
+                "title": "Statistics"
+            },
+            "teams": {
+                "title": "Participating teams"
+            },
+            "events": {
+                "title": "Event board"
+            },
+            "automate": {
+                "title": "Event pushing"
+            },
+            "edit": {
+                "title": "Edit game"
+            },
+            "description": "Game management panel",
+            "hammer": {
+                "title": "Player feedback"
+            }
+        },
+        "exit": "Exit",
+        "noGameHosted": "No game is hosted",
+        "otherGames": "Non-key games",
+        "pending": "Not started",
+        "ended": "Ended",
+        "started": "Started",
+        "unknown": "Unknown",
+        "seeOtherInteresting": "Look at something else",
+        "fetchFailed": "Failed to fetch game list",
+        "create": "New",
+        "loading": "Loading...",
+        "nameRequired": "Please fill in the game name",
+        "namePlaceholder": "Game name",
+        "briefRequired": "Please fill in the game brief",
+        "briefPlaceholder": "Game brief",
+        "startEndTime": "start and end time",
+        "registerArchiveTime": "Registration and archive time",
+        "weight": "Weight",
+        "teamSizePlaceholder": "Team size limit",
+        "miscSettings": "Misc settings",
+        "canRegisterAfterStarted": "Allow registration after started",
+        "offline": "Offline game",
+        "enableAudit": "Enable team audit",
+        "createFailed": "Create failed",
+        "writeupsOnlyOpenWhenArchived": "The writeups will only be made public after the game is archived!",
+        "adminCanNotTakePartIn": "Administrators cannot participate",
+        "register": "open registration",
+        "start": "game starts",
+        "end": "game ends",
+        "archive": "game archives",
+        "timerTips": "Time until {{ period }}",
+        "introduction": {
+            "title": "Game README",
+            "empty": "The organizer was lazy and didn’t write anything",
+            "fetchFailed": "Failed to fetch game introduction",
+            "updateFailed": "Failed to update game introduction"
+        },
+        "team": {
+            "create": {
+                "title": "Create a team"
+            },
+            "manage": {
+                "title": "View my team"
+            },
+            "loginThenBack": "Log in to participate",
+            "sizeRequired": "Please fill in the team size limit",
+            "sizeMinExceeded": "At least one team member",
+            "sizeMaxExceeded": "The maximum number of team members is 100, please consider sharing accounts",
+            "collab": "Team game with {{ size }} players",
+            "solo": "Solo game",
+            "noTeamParticipated": "No team has participated yet",
+            "join": {
+                "title": "Join team"
+            },
+            "joinFirst": "Please take part in first"
+        },
+        "archivedGotoTraining": "Archived, please goto training board",
+        "canNotParticipate": "Not eligible to participate",
+        "accessPolicy": {
+            "open": "open for participating"
+        },
+        "adminMode": "Administrator mode",
+        "hidden": "Game is hidden",
+        "frozen": "Game is frozen",
+        "cover": {
+            "uploaded": "Game cover updated",
+            "uploadFailed": "Cover upload failed"
+        },
+        "logo": {
+            "uploaded": "Game logo updated",
+            "uploadFailed": "Logo upload failed"
+        },
+        "introRequired": "Please fill in the game introduction",
+        "introPlaceholder": "Game introduction"
+    },
+    "bulletin": {
+        "title": "Bulletin",
+        "create": "Create",
+        "titlePlaceholder": "Bulletin title",
+        "titleRequired": "Please fill in the bulletin title",
+        "pinned": "pin to top",
+        "enableComment": "Open comment area",
+        "contentRequired": "Please fill in the bulletin content",
+        "contentPlaceholder": "Bulletin content",
+        "deleteSuccess": "deleted successfully",
+        "noMore": "no bulletin here, see something else",
+        "fetchFailed": "Failed to fetch bulletin list",
+        "loading": "Loading..."
     },
     "admin": {
-      "title": "Admin",
-      "manageChallenges": "Manage challenges",
-      "statistics": {
-        "title": "Statistics"
-      },
-      "teams": {
-        "title": "Participating teams"
-      },
-      "events": {
-        "title": "Event board"
-      },
-      "automate": {
-        "title": "Event pushing"
-      },
-      "edit": {
-        "title": "Edit game"
-      },
-      "description": "Game management panel",
-      "hammer": {
-        "title": "Player feedback"
-      }
+        "title": "Admin",
+        "statistics": {
+            "title": "Platform statistics",
+            "fetchFailed": "Failed to fetch platform data",
+            "validUsers": "active user(s)",
+            "totalUsers": "registered user(s)",
+            "pendingGames": "games not yet started",
+            "inProgressGames": "ongoing games",
+            "endedGames": "ended games",
+            "comingGames": "Active games",
+            "totalGames": "Host an event",
+            "games": "games",
+            "trainings": "Playgrounds",
+            "solvedSubmissions": "Correct submissions",
+            "totalSubmissions": "Total submissions",
+            "inGameChallenges": "Challenges in games",
+            "totalChallenges": "Total challenges",
+            "instituteUsers": "Distribution of user institutes"
+        },
+        "edit": {
+            "title": "Edit platform settings"
+        },
+        "email": {
+            "title": "Email settings"
+        },
+        "captcha": {
+            "title": "CAPTCHA protection"
+        },
+        "media": {
+            "title": "Media storage settings"
+        },
+        "sync": {
+            "title": "Distributed resource sharing"
+        },
+        "users": {
+            "title": "User list"
+        },
+        "oauth": {
+            "title": "Third-party auth"
+        },
+        "cluster": {
+            "title": "Cluster management",
+            "unavailable": "Cluster is offline",
+            "available": "Online, cluster API is available",
+            "failedToFetchNodes": "Failed to fetch cluster nodes information",
+            "refreshNode": "Refresh node status",
+            "disconnectNode": "disconnect node",
+            "updateNode": "Upgrade node",
+            "nodeInfo": "Node information",
+            "data": {
+                "nodeInfo": {
+                    "architecture": "Architecture",
+                    "bootID": "Boot ID",
+                    "containerRuntimeVersion": "Container Runtime",
+                    "kernelVersion": "Kernel",
+                    "machineID": "Machine ID",
+                    "operatingSystem": "System",
+                    "osImage": "Distribution",
+                    "systemUUID": "System UUID",
+                    "kubeletVersion": "Kubelet",
+                    "kubeProxyVersion": "Kube Proxy"
+                }
+            },
+            "nodeNetwork": "Network",
+            "nodeResources": "Node resources",
+            "selectNode": "Select a node to view detailed information"
+        },
+        "logs": {
+            "title": "Platform log",
+            "socketClosed": "The log pipe has been disconnected and will automatically retry the connection...",
+            "start": "Enable streaming logs",
+            "stop": "Disable streaming logs",
+            "streamingEnabled": "Live streaming logs...",
+            "empty": "After turning on streaming, the logs will be displayed here. Please be careful when opening a large amount of logs.",
+            "emptyTips": "Only the logs of the current day in server time are displayed. For other logs, please download the log files for auditing.",
+            "failedToFetchLogsList": "Failed to get log list"
+        },
+        "description": "Platform management panel",
+        "about": {
+            "title": "About Ret 2 Shell",
+            "failedToFetchLicense": "Failed to fetch platform license"
+        }
     },
-    "exit": "Exit",
-    "noGameHosted": "No game is hosted",
-    "otherGames": "Non-key games",
-    "pending": "Not started",
-    "ended": "Ended",
-    "started": "Started",
-    "unknown": "Unknown",
-    "seeOtherInteresting": "Look at something else",
-    "fetchFailed": "Failed to fetch game list",
-    "create": "New",
-    "loading": "Loading...",
-    "nameRequired": "Please fill in the game name",
-    "namePlaceholder": "Game name",
-    "briefRequired": "Please fill in the game brief",
-    "briefPlaceholder": "Game brief",
-    "startEndTime": "start and end time",
-    "registerArchiveTime": "Registration and archive time",
-    "weight": "Weight",
-    "teamSizePlaceholder": "Team size limit",
-    "miscSettings": "Misc settings",
-    "canRegisterAfterStarted": "Allow registration after started",
-    "offline": "Offline game",
-    "enableAudit": "Enable team audit",
-    "createFailed": "Create failed",
-    "writeupsOnlyOpenWhenArchived": "The writeups will only be made public after the game is archived!",
-    "adminCanNotTakePartIn": "Administrators cannot participate",
-    "register": "open registration",
-    "start": "game starts",
-    "end": "game ends",
-    "archive": "game archives",
-    "timerTips": "Time until {{ period }}",
-    "introduction": {
-      "title": "Game README",
-      "empty": "The organizer was lazy and didn’t write anything",
-      "fetchFailed": "Failed to fetch game introduction",
-      "updateFailed": "Failed to update game introduction"
+    "theme": {
+        "colorScheme": "color scheme",
+        "language": "Language"
     },
-    "team": {
-      "create": {
-        "title": "Create a team"
-      },
-      "manage": {
-        "title": "View my team"
-      },
-      "loginThenBack": "Log in to participate",
-      "sizeRequired": "Please fill in the team size limit",
-      "sizeMinExceeded": "At least one team member",
-      "sizeMaxExceeded": "The maximum number of team members is 100, please consider sharing accounts",
-      "collab": "Team game with {{ size }} players",
-      "solo": "Solo game",
-      "noTeamParticipated": "No team has participated yet",
-      "join": {
-        "title": "Join team"
-      },
-      "joinFirst": "Please take part in first"
+    "calendar": {
+        "scrollToView": "Scroll down to view calendar",
+        "jumpToToday": "Jump to today",
+        "jumpToPrevMonth": "previous month",
+        "jumpToPrevYear": "previous year",
+        "jumpToNextMonth": "next month",
+        "jumpToNextYear": "next year",
+        "day": {
+            "sun": "Sun",
+            "mon": "Mon",
+            "tue": "Tue",
+            "wed": "Wed",
+            "thu": "Thu",
+            "fri": "Fri",
+            "sat": "Sat"
+        },
+        "games": "Games of the month",
+        "noGames": "There are no games this month, so enjoy it",
+        "selectGameToSeeDetail": "Select an game on the left to view details",
+        "unknown": "unknown",
+        "gotoEventHomePage": "Go to participate",
+        "addBy": "Added by {{ name }}",
+        "eventNamePlaceholder": "Event name",
+        "eventNameRequired": "Please fill in the event name",
+        "createEvent": "Create event",
+        "startEndTime": "Start and end time",
+        "eventLinkRequired": "Please fill in the event link",
+        "eventLinkPlaceholder": "Event link",
+        "startTime": "Start time",
+        "endTime": "End time",
+        "introPlaceholder": "Event introduction",
+        "startAtRequired": "Please select a start time",
+        "endAtRequired": "Please select end time",
+        "createFailed": "Creation failed",
+        "createSuccess": "Created successfully",
+        "create": "create",
+        "delete": "Delete",
+        "deleteSuccess": "deleted successfully",
+        "deleteFailed": "delete failed",
+        "introRequired": "Please fill in the event introduction",
+        "editEvent": "Edit event notification",
+        "save": "Save",
+        "edit": "Edit",
+        "saveFailed": "Save failed",
+        "saveSuccess": "Saved successfully",
+        "fetchFailed": "Failed to fetch game events"
     },
-    "archivedGotoTraining": "Archived, please goto training board",
-    "canNotParticipate": "Not eligible to participate",
-    "accessPolicy": {
-      "open": "open for participating"
+    "about": {
+        "donate": "Donate",
+        "source": "Support"
     },
-    "adminMode": "Administrator mode",
-    "hidden": "Game is hidden",
-    "frozen": "Game is frozen",
-    "cover": {
-      "uploaded": "Game cover updated",
-      "uploadFailed": "Cover upload failed"
+    "account": {
+        "login": {
+            "title": "Login",
+            "accountPlaceholder": "account / email",
+            "passwordPlaceholder": "Password",
+            "captchaPlaceholder": "Captcha",
+            "accountMascotTip": "Welcome ^_^",
+            "passwordMascotTip": "Won't watch it >_<",
+            "accountRequired": "Please fill in your username/email",
+            "accountMinLength": "Username/email must be at least 4 characters",
+            "passwordRequired": "Please fill in the password",
+            "passwordMinLength": "Password must be at least 8 characters",
+            "passwordTooWeak": "The password must be between 8-40 characters and contain at least one uppercase letter, one lowercase letter, one number and one special character",
+            "success": "Login successful, welcome back",
+            "successMascotTip": "Welcome back ^_^",
+            "failMascotTip": "Failed, bad x_x"
+        },
+        "settings": {
+            "title": "user settings",
+            "info": {
+                "title": "User Info"
+            },
+            "oauth": {
+                "title": "Third-party auth"
+            },
+            "institute": {
+                "title": "Institute"
+            },
+            "delete": {
+                "title": "Delete account"
+            }
+        },
+        "logout": "sign out",
+        "box": "User detail",
+        "register": {
+            "tips": "No account? \nRegister now!",
+            "title": "Register",
+            "accountRequired": "Please enter your account",
+            "accountMinLength": "Username must be at least 4 characters",
+            "accountMaxLength": "Username can be up to 32 characters",
+            "accountPattern": "Username must be a combination of uppercase and lowercase letters, numbers and underscores",
+            "accountPlaceholder": "Username",
+            "nicknameRequired": "Please fill in nickname",
+            "nicknameMinLength": "Nickname must be at least 2 characters long",
+            "nicknameMaxLength": "Nickname can be up to 32 characters long",
+            "nicknamePlaceholder": "Nick name",
+            "emailRequired": "please enter your email",
+            "emailInvalid": "E-mail format is incorrect",
+            "passwordRequired": "Please fill in the password",
+            "passwordMinLength": "Password must be at least 8 characters",
+            "passwordTooWeak": "The password must be between 8-40 characters and contain at least one uppercase letter, one lowercase letter, one number and one special character",
+            "emailPlaceholder": "E-Mail",
+            "passwordPlaceholder": "password",
+            "success": "Registration successful, welcome to the world of CTF!"
+        },
+        "oauth": {
+            "xdu": {
+                "title": "XDU Identity Authentication"
+            }
+        },
+        "institute": {
+            "none": "No affiliated institute"
+        }
     },
-    "logo": {
-      "uploaded": "Game logo updated",
-      "uploadFailed": "Logo upload failed"
+    "instance": {
+        "disconnected": "Not connected to WSRX",
+        "connected": "Connected to WSRX",
+        "retryLinkWsrx": "try to connect",
+        "downloadWsrx": "Download WSRX",
+        "copyWsrxAddr": "Copy WSRX Address",
+        "copyLocalAddr": "Copy local address",
+        "openLocalAddr": "Open directly",
+        "renew": "Renew timer",
+        "stop": "Terminate environment",
+        "needLocalDaemon": "Need to connect to local WSRX to use",
+        "box": "dynamic environment connection",
+        "connecting": "Connecting...",
+        "wsrxSettings": "Modify WSRX connection settings",
+        "defaultApiAddr": "Reset to default address",
+        "pending": "Waiting for local authorization",
+        "wsrxDisconnected": "WSRX client is offline."
     },
-    "introRequired": "Please fill in the game introduction",
-    "introPlaceholder": "Game introduction"
-  },
-  "bulletin": {
-    "title": "Bulletin",
-    "create": "Create",
-    "titlePlaceholder": "Bulletin title",
-    "titleRequired": "Please fill in the bulletin title",
-    "pinned": "pin to top",
-    "enableComment": "Open comment area",
-    "contentRequired": "Please fill in the bulletin content",
-    "contentPlaceholder": "Bulletin content",
-    "deleteSuccess": "deleted successfully",
-    "noMore": "no bulletin here, see something else",
-    "fetchFailed": "Failed to fetch bulletin list",
-    "loading": "Loading..."
-  },
-  "admin": {
-    "title": "Admin",
-    "statistics": {
-      "title": "Platform statistics",
-      "fetchFailed": "Failed to fetch platform data",
-      "validUsers": "active user(s)",
-      "totalUsers": "registered user(s)",
-      "pendingGames": "games not yet started",
-      "inProgressGames": "ongoing games",
-      "endedGames": "ended games",
-      "comingGames": "Active games",
-      "totalGames": "Host an event",
-      "games": "games",
-      "trainings": "Playgrounds",
-      "solvedSubmissions": "Correct submissions",
-      "totalSubmissions": "Total submissions",
-      "inGameChallenges": "Challenges in games",
-      "totalChallenges": "Total challenges",
-      "instituteUsers": "Distribution of user institutes"
-    },
-    "edit": {
-      "title": "Edit platform settings"
-    },
-    "email": {
-      "title": "Email settings"
+    "magic": {
+        "illustration": "illustration",
+        "source": "source"
     },
     "captcha": {
-      "title": "CAPTCHA protection"
+        "loading": "loading...",
+        "loadFailed": "Failed to load",
+        "required": "Please fill in the verification code",
+        "minLength": "Captcha must be at least 4 chars",
+        "calculating": "Calculating...",
+        "placeholder": "Verification code",
+        "reload": "Can't see clearly? "
     },
-    "media": {
-      "title": "Media storage settings"
+    "article": {
+        "loading": "The girl is praying...",
+        "by": "By {{ name }}",
+        "unknownPublisher": "Anonymous",
+        "createdAt": "Published at {{ time }}",
+        "updatedAt": "Updated at {{ time }}"
     },
-    "sync": {
-      "title": "Distributed resource sharing"
+    "errors": {
+        "401": "please log in first",
+        "403": "Insufficient permissions, access denied",
+        "404": "Resource does not exist",
+        "418": "I am a teapot",
+        "500": "Server internal error",
+        "502": "System down",
+        "401Tip": "Even if you do good deeds, please leave your name",
+        "403Tip": "There is always a door closed to you",
+        "404Tip": "Life is always a little ridiculous",
+        "418Tip": "Does brewing coffee in a teapot really prevent odor transfer?",
+        "500Tip": "You kicked the server and made it smoke.",
+        "502Tip": "Randomly kill a dev&ops man",
+        "unknown": "unknown mistake",
+        "unknownTip": "you fell into the void"
     },
-    "users": {
-      "title": "User list"
-    },
-    "oauth": {
-      "title": "Third-party auth"
-    },
-    "cluster": {
-      "title": "Cluster management",
-      "unavailable": "Cluster is offline",
-      "available": "Online, cluster API is available",
-      "failedToFetchNodes": "Failed to fetch cluster nodes information",
-      "refreshNode": "Refresh node status",
-      "disconnectNode": "disconnect node",
-      "updateNode": "Upgrade node",
-      "nodeInfo": "Node information",
-      "data": {
-        "nodeInfo": {
-          "architecture": "Architecture",
-          "bootID": "Boot ID",
-          "containerRuntimeVersion": "Container Runtime",
-          "kernelVersion": "Kernel",
-          "machineID": "Machine ID",
-          "operatingSystem": "System",
-          "osImage": "Distribution",
-          "systemUUID": "System UUID",
-          "kubeletVersion": "Kubelet",
-          "kubeProxyVersion": "Kube Proxy"
-        }
-      },
-      "nodeNetwork": "Network",
-      "nodeResources": "Node resources",
-      "selectNode": "Select a node to view detailed information"
-    },
-    "logs": {
-      "title": "Platform log",
-      "socketClosed": "The log pipe has been disconnected and will automatically retry the connection...",
-      "start": "Enable streaming logs",
-      "stop": "Disable streaming logs",
-      "streamingEnabled": "Live streaming logs...",
-      "empty": "After turning on streaming, the logs will be displayed here. Please be careful when opening a large amount of logs.",
-      "emptyTips": "Only the logs of the current day in server time are displayed. For other logs, please download the log files for auditing.",
-      "failedToFetchLogsList": "Failed to get log list"
-    },
-    "description": "Platform management panel",
-    "about": {
-      "title": "About Ret 2 Shell",
-      "failedToFetchLicense": "Failed to fetch platform license"
+    "form": {
+        "save": "Save",
+        "create": "Create",
+        "saveFailed": "Save failed",
+        "createFailed": "Create failed",
+        "edit": "Edit",
+        "delete": "Delete",
+        "changeAvatar": "Cover",
+        "cover": "cover",
+        "logo": "Logo",
+        "print": "Print"
     }
-  },
-  "theme": {
-    "colorScheme": "color scheme",
-    "language": "Language"
-  },
-  "calendar": {
-    "scrollToView": "Scroll down to view calendar",
-    "jumpToToday": "Jump to today",
-    "jumpToPrevMonth": "previous month",
-    "jumpToPrevYear": "previous year",
-    "jumpToNextMonth": "next month",
-    "jumpToNextYear": "next year",
-    "day": {
-      "sun": "Sun",
-      "mon": "Mon",
-      "tue": "Tue",
-      "wed": "Wed",
-      "thu": "Thu",
-      "fri": "Fri",
-      "sat": "Sat"
-    },
-    "games": "Games of the month",
-    "noGames": "There are no games this month, so enjoy it",
-    "selectGameToSeeDetail": "Select an game on the left to view details",
-    "unknown": "unknown",
-    "gotoEventHomePage": "Go to participate",
-    "addBy": "Added by {{ name }}",
-    "eventNamePlaceholder": "Event name",
-    "eventNameRequired": "Please fill in the event name",
-    "createEvent": "Create event",
-    "startEndTime": "Start and end time",
-    "eventLinkRequired": "Please fill in the event link",
-    "eventLinkPlaceholder": "Event link",
-    "startTime": "Start time",
-    "endTime": "End time",
-    "introPlaceholder": "Event introduction",
-    "startAtRequired": "Please select a start time",
-    "endAtRequired": "Please select end time",
-    "createFailed": "Creation failed",
-    "createSuccess": "Created successfully",
-    "create": "create",
-    "delete": "Delete",
-    "deleteSuccess": "deleted successfully",
-    "deleteFailed": "delete failed",
-    "introRequired": "Please fill in the event introduction",
-    "editEvent": "Edit event notification",
-    "save": "Save",
-    "edit": "Edit",
-    "saveFailed": "Save failed",
-    "saveSuccess": "Saved successfully",
-    "fetchFailed": "Failed to fetch game events"
-  },
-  "about": {
-    "donate": "Donate",
-    "source": "Support"
-  },
-  "account": {
-    "login": {
-      "title": "Login",
-      "accountPlaceholder": "account / email",
-      "passwordPlaceholder": "Password",
-      "captchaPlaceholder": "Captcha",
-      "accountMascotTip": "Welcome ^_^",
-      "passwordMascotTip": "Won't watch it >_<",
-      "accountRequired": "Please fill in your username/email",
-      "accountMinLength": "Username/email must be at least 4 characters",
-      "passwordRequired": "Please fill in the password",
-      "passwordMinLength": "Password must be at least 8 characters",
-      "passwordTooWeak": "The password must be between 8-40 characters and contain at least one uppercase letter, one lowercase letter, one number and one special character",
-      "success": "Login successful, welcome back",
-      "successMascotTip": "Welcome back ^_^",
-      "failMascotTip": "Failed, bad x_x"
-    },
-    "settings": {
-      "title": "user settings",
-      "info": {
-        "title": "User Info"
-      },
-      "oauth": {
-        "title": "Third-party auth"
-      },
-      "institute": {
-        "title": "Institute"
-      },
-      "delete": {
-        "title": "Delete account"
-      }
-    },
-    "logout": "sign out",
-    "box": "User detail",
-    "register": {
-      "tips": "No account? \nRegister now!",
-      "title": "Register",
-      "accountRequired": "Please enter your account",
-      "accountMinLength": "Username must be at least 4 characters",
-      "accountMaxLength": "Username can be up to 32 characters",
-      "accountPattern": "Username must be a combination of uppercase and lowercase letters, numbers and underscores",
-      "accountPlaceholder": "Username",
-      "nicknameRequired": "Please fill in nickname",
-      "nicknameMinLength": "Nickname must be at least 2 characters long",
-      "nicknameMaxLength": "Nickname can be up to 32 characters long",
-      "nicknamePlaceholder": "Nick name",
-      "emailRequired": "please enter your email",
-      "emailInvalid": "E-mail format is incorrect",
-      "passwordRequired": "Please fill in the password",
-      "passwordMinLength": "Password must be at least 8 characters",
-      "passwordTooWeak": "The password must be between 8-40 characters and contain at least one uppercase letter, one lowercase letter, one number and one special character",
-      "emailPlaceholder": "E-Mail",
-      "passwordPlaceholder": "password",
-      "success": "Registration successful, welcome to the world of CTF!"
-    },
-    "oauth": {
-      "xdu": {
-        "title": "XDU Identity Authentication"
-      }
-    },
-    "institute": {
-      "none": "No affiliated institute"
-    }
-  },
-  "instance": {
-    "disconnected": "Not connected to WSRX",
-    "connected": "Connected to WSRX",
-    "retryLinkWsrx": "try to connect",
-    "downloadWsrx": "Download WSRX",
-    "copyWsrxAddr": "Copy WSRX Address",
-    "copyLocalAddr": "Copy local address",
-    "openLocalAddr": "Open directly",
-    "renew": "Renew timer",
-    "stop": "Terminate environment",
-    "needLocalDaemon": "Need to connect to local WSRX to use",
-    "box": "dynamic environment connection",
-    "connecting": "Connecting...",
-    "wsrxSettings": "Modify WSRX connection settings",
-    "defaultApiAddr": "Reset to default address",
-    "pending": "Waiting for local authorization",
-    "wsrxDisconnected": "WSRX client is offline."
-  },
-  "magic": {
-    "illustration": "illustration",
-    "source": "source"
-  },
-  "captcha": {
-    "loading": "loading...",
-    "loadFailed": "Failed to load",
-    "required": "Please fill in the verification code",
-    "minLength": "Captcha must be at least 4 chars",
-    "calculating": "Calculating...",
-    "placeholder": "Verification code",
-    "reload": "Can't see clearly? "
-  },
-  "article": {
-    "loading": "The girl is praying...",
-    "by": "By {{ name }}",
-    "unknownPublisher": "Anonymous",
-    "createdAt": "Published at {{ time }}",
-    "updatedAt": "Updated at {{ time }}"
-  },
-  "errors": {
-    "401": "please log in first",
-    "403": "Insufficient permissions, access denied",
-    "404": "Resource does not exist",
-    "418": "I am a teapot",
-    "500": "Server internal error",
-    "502": "System down",
-    "401Tip": "Even if you do good deeds, please leave your name",
-    "403Tip": "There is always a door closed to you",
-    "404Tip": "Life is always a little ridiculous",
-    "418Tip": "Does brewing coffee in a teapot really prevent odor transfer?",
-    "500Tip": "You kicked the server and made it smoke.",
-    "502Tip": "Randomly kill a dev&ops man",
-    "unknown": "unknown mistake",
-    "unknownTip": "you fell into the void"
-  },
-  "form": {
-    "save": "Save",
-    "create": "Create",
-    "saveFailed": "Save failed",
-    "createFailed": "Create failed",
-    "edit": "Edit",
-    "delete": "Delete",
-    "changeAvatar": "Cover",
-    "cover": "cover",
-    "logo": "Logo",
-    "print": "Print"
-  }
 }

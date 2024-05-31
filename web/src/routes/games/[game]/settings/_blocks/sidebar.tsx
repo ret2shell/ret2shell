@@ -1,3 +1,3 @@
 export default function SideBar() {
-  return <></>
+    return <></>;
 }

@@ -1,146 +1,159 @@
-import { deleteBulletin, getBulletin } from '@/lib/api/bulletin'
-import Spin from '@/lib/assets/animates/spin'
-import type { Article as ArticleModel } from '@/lib/models/article'
-import { Permission } from '@/lib/models/user'
-import { accountStore } from '@/lib/storage/account'
-import { t } from '@/lib/storage/theme'
-import { addToast } from '@/lib/storage/toast'
-import Article from '@/lib/widgets/article'
-import type { HTTPError } from '@reverier/ky'
-import { useNavigate, useParams, useSearchParams } from '@solidjs/router'
-import { Show, createSignal } from 'solid-js'
-import EditForm from '../_blocks/form'
+import { deleteBulletin, getBulletin } from "@/lib/api/bulletin";
+import Spin from "@/lib/assets/animates/spin";
+import type { Article as ArticleModel } from "@/lib/models/article";
+import { Permission } from "@/lib/models/user";
+import { accountStore } from "@/lib/storage/account";
+import { t } from "@/lib/storage/theme";
+import { addToast } from "@/lib/storage/toast";
+import Article from "@/lib/widgets/article";
+import type { HTTPError } from "@reverier/ky";
+import { useNavigate, useParams, useSearchParams } from "@solidjs/router";
+import { Show, createSignal } from "solid-js";
+import EditForm from "../_blocks/form";
 
 export default function () {
-  const params = useParams()
-  const article_id = Number.parseInt(params.article)
-  const [searchParams, setSearchParams] = useSearchParams()
-  const inEdit = () => searchParams.edit === 'true'
-  const [article, setArticle] = createSignal(null as ArticleModel | null)
-  const navigate = useNavigate()
+    const params = useParams();
+    const article_id = Number.parseInt(params.article);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const inEdit = () => searchParams.edit === "true";
+    const [article, setArticle] = createSignal(null as ArticleModel | null);
+    const navigate = useNavigate();
 
-  if (Number.isNaN(article_id)) navigate('/errors/404', { replace: true })
-  getBulletin(article_id)
-    .then(resp => {
-      setArticle(resp)
-    })
-    .catch((err: HTTPError) => {
-      void err.response.text().then(reason => {
-        addToast({ level: 'error', description: reason, duration: 5000 })
-        navigate(`/errors/${err.response.status}`, { replace: true })
-      })
-    })
+    if (Number.isNaN(article_id)) navigate("/errors/404", { replace: true });
+    getBulletin(article_id)
+        .then((resp) => {
+            setArticle(resp);
+        })
+        .catch((err: HTTPError) => {
+            void err.response.text().then((reason) => {
+                addToast({ level: "error", description: reason, duration: 5000 });
+                navigate(`/errors/${err.response.status}`, { replace: true });
+            });
+        });
 
-  function onDelete() {
-    deleteBulletin(article_id)
-      .then(() => {
-        addToast({
-          level: 'success',
-          description: t('bulletin.deleteSuccess')!,
-          duration: 5000,
-        })
-        navigate('/bulletin', { replace: true })
-      })
-      .catch((err: HTTPError) => {
-        void err.response.text().then(reason => {
-          addToast({ level: 'error', description: reason, duration: 5000 })
-        })
-      })
-  }
+    function onDelete() {
+        deleteBulletin(article_id)
+            .then(() => {
+                addToast({
+                    level: "success",
+                    description: t("bulletin.deleteSuccess")!,
+                    duration: 5000,
+                });
+                navigate("/bulletin", { replace: true });
+            })
+            .catch((err: HTTPError) => {
+                void err.response.text().then((reason) => {
+                    addToast({ level: "error", description: reason, duration: 5000 });
+                });
+            });
+    }
 
-  function onDone(article: ArticleModel) {
-    getBulletin(article.id)
-      .then(resp => {
-        setArticle(resp)
-      })
-      .catch((err: HTTPError) => {
-        void err.response.text().then(reason => {
-          addToast({ level: 'error', description: reason, duration: 5000 })
-          navigate(`/errors/${err.response.status}`, { replace: true })
-        })
-      })
-    setSearchParams({ edit: undefined })
-  }
-  return (
-    <>
-      <h1 class="text-3xl text-center flex flex-row space-x-4 items-center justify-center font-bold mt-8 print:mt-16">
-        <Show
-          when={article()}
-          fallback={
-            <>
-              <Spin width={32} height={32} />
-              <span>{t('article.loading')}</span>
-            </>
-          }
-        >
-          <span>{article()!.title}</span>
-        </Show>
-      </h1>
-      <div class="flex flex-row items-center justify-center space-x-6 print:space-x-2 opacity-60 flex-wrap py-3">
-        <a
-          class="hover:underline font-bold flex flex-row space-x-2 items-center"
-          title={t('article.by', {
-            name: article()?.publisher_name || t('article.unknownPublisher')!,
-          })}
-          href={`/users/${article()?.publisher_id}`}
-        >
-          <span class="icon-[fluent--person-20-regular] w-5 h-5 print:hidden" />
-          <span class="hidden print:inline-block">By</span>
-          <span>{article()?.publisher_name}</span>
-        </a>
-        <div
-          class="font-bold flex flex-row space-x-2 items-center"
-          title={t('article.createdAt', {
-            time: article()?.created_at.toFormat('yyyy-MM-dd HH:mm:ss') || 'UNKNOWN',
-          })}
-        >
-          <span class="icon-[fluent--calendar-20-regular] w-5 h-5 print:hidden" />
-          <span class="hidden print:inline-block">at</span>
-          <span>{article()?.created_at.toFormat('yyyy-MM-dd HH:mm:ss')}</span>
-        </div>
-        <Show when={article()?.created_at && article()?.updated_at && article()!.created_at !== article()!.updated_at}>
-          <div
-            class="font-bold flex flex-row space-x-2 items-center print:hidden"
-            title={t('article.updatedAt', {
-              time: article()?.updated_at.toFormat('yyyy-MM-dd HH:mm:ss') || 'UNKNOWN',
-            })}
-          >
-            <span class="icon-[fluent--calendar-edit-20-regular] w-5 h-5" />
-            <span>{article()?.updated_at.toFormat('yyyy-MM-dd HH:mm:ss')}</span>
-          </div>
-        </Show>
-        <Show when={accountStore.permissions.includes(Permission.Wiki)}>
-          <a
-            class="font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
-            href={`/bulletin/${article()?.id}?edit=true`}
-          >
-            <span class="icon-[fluent--edit-20-regular] w-5 h-5" />
-            <span>{t('form.edit')}</span>
-          </a>
-          <button
-            class="font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
-            onClick={onDelete}
-            type="button"
-          >
-            <span class="icon-[fluent--delete-20-regular] w-5 h-5" />
-            <span>{t('form.delete')}</span>
-          </button>
-        </Show>
-        <button
-          class="font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
-          onClick={() => print()}
-          type="button"
-        >
-          <span class="icon-[fluent--print-20-regular] w-5 h-5" />
-          <span>{t('form.print')}</span>
-        </button>
-      </div>
-      <Show
-        when={inEdit()}
-        fallback={<Article class="self-center" content={article()?.content || ''} extra={true} headingAnchors={true} />}
-      >
-        <EditForm editSource={article() || undefined} onDone={onDone} />
-      </Show>
-    </>
-  )
+    function onDone(article: ArticleModel) {
+        getBulletin(article.id)
+            .then((resp) => {
+                setArticle(resp);
+            })
+            .catch((err: HTTPError) => {
+                void err.response.text().then((reason) => {
+                    addToast({ level: "error", description: reason, duration: 5000 });
+                    navigate(`/errors/${err.response.status}`, { replace: true });
+                });
+            });
+        setSearchParams({ edit: undefined });
+    }
+    return (
+        <>
+            <h1 class="text-3xl text-center flex flex-row space-x-4 items-center justify-center font-bold mt-8 print:mt-16">
+                <Show
+                    when={article()}
+                    fallback={
+                        <>
+                            <Spin width={32} height={32} />
+                            <span>{t("article.loading")}</span>
+                        </>
+                    }
+                >
+                    <span>{article()!.title}</span>
+                </Show>
+            </h1>
+            <div class="flex flex-row items-center justify-center space-x-6 print:space-x-2 opacity-60 flex-wrap py-3">
+                <a
+                    class="hover:underline font-bold flex flex-row space-x-2 items-center"
+                    title={t("article.by", {
+                        name: article()?.publisher_name || t("article.unknownPublisher")!,
+                    })}
+                    href={`/users/${article()?.publisher_id}`}
+                >
+                    <span class="icon-[fluent--person-20-regular] w-5 h-5 print:hidden" />
+                    <span class="hidden print:inline-block">By</span>
+                    <span>{article()?.publisher_name}</span>
+                </a>
+                <div
+                    class="font-bold flex flex-row space-x-2 items-center"
+                    title={t("article.createdAt", {
+                        time: article()?.created_at.toFormat("yyyy-MM-dd HH:mm:ss") || "UNKNOWN",
+                    })}
+                >
+                    <span class="icon-[fluent--calendar-20-regular] w-5 h-5 print:hidden" />
+                    <span class="hidden print:inline-block">at</span>
+                    <span>{article()?.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
+                </div>
+                <Show
+                    when={
+                        article()?.created_at &&
+                        article()?.updated_at &&
+                        article()!.created_at !== article()!.updated_at
+                    }
+                >
+                    <div
+                        class="font-bold flex flex-row space-x-2 items-center print:hidden"
+                        title={t("article.updatedAt", {
+                            time: article()?.updated_at.toFormat("yyyy-MM-dd HH:mm:ss") || "UNKNOWN",
+                        })}
+                    >
+                        <span class="icon-[fluent--calendar-edit-20-regular] w-5 h-5" />
+                        <span>{article()?.updated_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
+                    </div>
+                </Show>
+                <Show when={accountStore.permissions.includes(Permission.Wiki)}>
+                    <a
+                        class="font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
+                        href={`/bulletin/${article()?.id}?edit=true`}
+                    >
+                        <span class="icon-[fluent--edit-20-regular] w-5 h-5" />
+                        <span>{t("form.edit")}</span>
+                    </a>
+                    <button
+                        class="font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
+                        onClick={onDelete}
+                        type="button"
+                    >
+                        <span class="icon-[fluent--delete-20-regular] w-5 h-5" />
+                        <span>{t("form.delete")}</span>
+                    </button>
+                </Show>
+                <button
+                    class="font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
+                    onClick={() => print()}
+                    type="button"
+                >
+                    <span class="icon-[fluent--print-20-regular] w-5 h-5" />
+                    <span>{t("form.print")}</span>
+                </button>
+            </div>
+            <Show
+                when={inEdit()}
+                fallback={
+                    <Article
+                        class="self-center"
+                        content={article()?.content || ""}
+                        extra={true}
+                        headingAnchors={true}
+                    />
+                }
+            >
+                <EditForm editSource={article() || undefined} onDone={onDone} />
+            </Show>
+        </>
+    );
 }
