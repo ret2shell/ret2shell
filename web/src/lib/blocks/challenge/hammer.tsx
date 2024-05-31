@@ -11,14 +11,14 @@ export default function () {
             <div class="flex flex-col min-h-full">
                 <div class="flex flex-col flex-1 p-3 lg:p-6 space-y-4">
                     <div class="self-start flex-row max-w-[calc(100%-4rem)] flex items-center">
-                        <img src={xdsecMascotNormal} width={40} height={40} alt="V(=^･ω･^=)v" />
+                        <img src={xdsecMascotNormal} width={40} height={40} alt="ΦωΦ" />
                         <div class="w-4" />
                         <Card contentClass="p-2">
                             <p class="text-wrap">{t("game.challenge.hammerTips")}</p>
                         </Card>
                     </div>
                     <div class="self-start flex-row max-w-[calc(100%-4rem)] flex items-center">
-                        <img src={xdsecMascotUnsee} width={40} height={40} alt="V(=^>ω<^=)v" />
+                        <img src={xdsecMascotUnsee} width={40} height={40} alt=">ω<" />
                         <div class="w-4" />
                         <Card contentClass="p-2">
                             <p class="text-wrap">{t("game.challenge.hammerTips2")}</p>

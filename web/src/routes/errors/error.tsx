@@ -30,7 +30,7 @@ export default function (props: { status: number | null }) {
                 src={(props.status || 500) >= 500 ? xdsecMascotCrying : xdsecMascotUnsee}
                 width={256}
                 height={256}
-                alt="V(= TωT =)v"
+                alt="TωT"
             />
             <h1 class="font-bold text-3xl space-x-4">
                 <span class="opacity-60">{props.status}</span>
