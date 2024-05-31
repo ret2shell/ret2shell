@@ -21,8 +21,8 @@ import Tag from "@/lib/widgets/tag";
 import Timer from "@/lib/widgets/timer";
 
 import bgGameDefault from "@assets/imgs/bg-game-default.webp";
-import type { HTTPError } from "@reverier/ky";
 import { useSearchParams } from "@solidjs/router";
+import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
 import { For, Match, Show, Switch, createEffect, createSignal, onCleanup, untrack } from "solid-js";
 import IntroForm from "./_blocks/intro-form";

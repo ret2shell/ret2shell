@@ -24,19 +24,6 @@ export default function () {
                             <p class="text-wrap">{t("game.challenge.hammerTips2")}</p>
                         </Card>
                     </div>
-                    {/*
-          <div class="self-end flex-row-reverse max-w-[calc(100%-4rem)] flex items-center">
-            <Avatar
-              class="w-10 h-10"
-              src={accountStore.info?.avatar || undefined}
-              fallback={accountStore.info?.account || undefined}
-            />
-            <div class="w-4"></div>
-            <Card level="info" contentClass="p-2">
-              <p class="text-wrap">Ok(())</p>
-            </Card>
-          </div>
-          */}
                 </div>
                 <div class="sticky bottom-0 p-3 lg:p-6">
                     <Input

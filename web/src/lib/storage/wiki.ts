@@ -1,4 +1,4 @@
-import type { HTTPError } from "@reverier/ky";
+import type { HTTPError } from "ky";
 import { createStore } from "solid-js/store";
 import { getWikiTree } from "../api/wiki";
 import type { Article } from "../models/article";

@@ -1,6 +1,6 @@
 import { luxonReplacer, luxonReviver } from "@models/utils";
-import ky from "@reverier/ky";
 import { accountStore, resetUser, storeToken } from "@storage/account";
+import ky from "ky";
 
 export const api_root = (import.meta.env.VITE_API_ROOT as string) || "/api";
 

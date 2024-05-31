@@ -8,7 +8,7 @@ import { addToast } from "@/lib/storage/toast";
 import Button from "@/lib/widgets/button";
 import LoadingTips from "@/lib/widgets/loading-tips";
 import Tag from "@/lib/widgets/tag";
-import type { HTTPError } from "@reverier/ky";
+import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
 import { For, Show, createSignal, onCleanup } from "solid-js";
 

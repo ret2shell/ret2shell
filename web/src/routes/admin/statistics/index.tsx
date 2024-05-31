@@ -9,7 +9,7 @@ import { addToast } from "@/lib/storage/toast";
 import Card from "@/lib/widgets/card";
 import Chart from "@/lib/widgets/chart";
 import Divider from "@/lib/widgets/divider";
-import type { HTTPError } from "@reverier/ky";
+import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
 import { Show, createSignal } from "solid-js";
 

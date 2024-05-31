@@ -7,7 +7,7 @@ import { addToast } from "@/lib/storage/toast";
 import Button from "@/lib/widgets/button";
 import Divider from "@/lib/widgets/divider";
 import LoadingTips from "@/lib/widgets/loading-tips";
-import type { HTTPError } from "@reverier/ky";
+import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
 import { For, Match, Show, Switch, createSignal } from "solid-js";
 

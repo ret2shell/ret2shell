@@ -1,5 +1,5 @@
 import type { Instance, Traffic } from "@models/instance";
-import ky from "@reverier/ky";
+import ky from "ky";
 import { type Accessor, createSignal } from "solid-js";
 
 export enum WsrxState {

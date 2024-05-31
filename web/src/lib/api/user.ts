@@ -1,4 +1,4 @@
-import type { SearchParamsOption } from "@reverier/ky";
+import type { SearchParamsOption } from "ky";
 import api, { api_root } from ".";
 import type { User } from "../models/user";
 

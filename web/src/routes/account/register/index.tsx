@@ -11,8 +11,8 @@ import Card from "@/lib/widgets/card";
 import Input from "@/lib/widgets/input";
 import xdsecMascotHappy from "@assets/imgs/xdsec-mascot-happy.webp";
 import { createForm, email, maxLength, minLength, pattern, required, setValue } from "@modular-forms/solid";
-import type { HTTPError } from "@reverier/ky";
 import { useNavigate } from "@solidjs/router";
+import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
 import { createSignal } from "solid-js";
 

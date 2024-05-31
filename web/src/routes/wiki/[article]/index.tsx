@@ -9,8 +9,8 @@ import { t } from "@/lib/storage/theme";
 import { addToast } from "@/lib/storage/toast";
 import { refreshWikiToc, setWikiStore, wikiStore } from "@/lib/storage/wiki";
 import Article from "@/lib/widgets/article";
-import type { HTTPError } from "@reverier/ky";
 import { useNavigate, useParams, useSearchParams } from "@solidjs/router";
+import type { HTTPError } from "ky";
 import { Show, createEffect, onCleanup, untrack } from "solid-js";
 import EditForm from "../_blocks/form";
 

@@ -20,9 +20,9 @@ import xdsecMascotHappy from "@assets/imgs/xdsec-mascot-happy.webp";
 import xdsecMascotNormal from "@assets/imgs/xdsec-mascot-normal.webp";
 import xdsecMascotUnsee from "@assets/imgs/xdsec-mascot-unsee.webp";
 import { createForm, minLength, pattern, required, setValue } from "@modular-forms/solid";
-import type { HTTPError } from "@reverier/ky";
 import { useLocation, useNavigate } from "@solidjs/router";
 import { Title } from "@storage/header";
+import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
 import { Match, Show, Switch, createSignal } from "solid-js";
 

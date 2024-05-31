@@ -1,5 +1,5 @@
 import type { AuthConfig, ServerConfig } from "@models/config";
-import type { SearchParamsOption } from "@reverier/ky";
+import type { SearchParamsOption } from "ky";
 import type { DateTime } from "luxon";
 import api, { api_root } from ".";
 import type { HostType } from "../models/game";

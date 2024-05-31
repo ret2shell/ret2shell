@@ -11,7 +11,7 @@ import { randomTips } from "@/lib/utils/loading-tips";
 import Divider from "@/lib/widgets/divider";
 import Link from "@/lib/widgets/link";
 import Pagination from "@/lib/widgets/pagination";
-import type { HTTPError } from "@reverier/ky";
+import type { HTTPError } from "ky";
 import { For, Match, Show, Switch, createEffect, createSignal, untrack } from "solid-js";
 
 export default function () {

@@ -7,7 +7,7 @@ import { t } from "@/lib/storage/theme";
 import { addToast } from "@/lib/storage/toast";
 import Card from "@/lib/widgets/card";
 import Divider from "@/lib/widgets/divider";
-import type { HTTPError } from "@reverier/ky";
+import type { HTTPError } from "ky";
 import { Match, Switch, createSignal } from "solid-js";
 
 export default function () {

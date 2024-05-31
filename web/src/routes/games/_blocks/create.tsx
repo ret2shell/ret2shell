@@ -7,7 +7,7 @@ import Button from "@/lib/widgets/button";
 import Input from "@/lib/widgets/input";
 import TimePicker from "@/lib/widgets/timepicker";
 import { createForm, maxRange, minRange, required, setValue, setValues } from "@modular-forms/solid";
-import type { HTTPError } from "@reverier/ky";
+import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
 import { createSignal } from "solid-js";
 

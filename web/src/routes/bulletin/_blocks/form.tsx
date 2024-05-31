@@ -7,7 +7,7 @@ import Button from "@/lib/widgets/button";
 import Editor from "@/lib/widgets/editor";
 import Input from "@/lib/widgets/input";
 import { createForm, required, setValue, setValues } from "@modular-forms/solid";
-import type { HTTPError } from "@reverier/ky";
+import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
 import { createEffect, createSignal, untrack } from "solid-js";
 

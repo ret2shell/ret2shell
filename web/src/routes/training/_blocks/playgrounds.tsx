@@ -7,7 +7,7 @@ import { addToast } from "@/lib/storage/toast";
 import Button from "@/lib/widgets/button";
 import Divider from "@/lib/widgets/divider";
 import Link from "@/lib/widgets/link";
-import type { HTTPError } from "@reverier/ky";
+import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createEffect, createSignal, untrack } from "solid-js";

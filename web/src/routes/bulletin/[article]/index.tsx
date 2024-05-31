@@ -6,8 +6,8 @@ import { accountStore } from "@/lib/storage/account";
 import { t } from "@/lib/storage/theme";
 import { addToast } from "@/lib/storage/toast";
 import Article from "@/lib/widgets/article";
-import type { HTTPError } from "@reverier/ky";
 import { useNavigate, useParams, useSearchParams } from "@solidjs/router";
+import type { HTTPError } from "ky";
 import { Show, createSignal } from "solid-js";
 import EditForm from "../_blocks/form";
 
