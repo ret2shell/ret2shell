@@ -9,7 +9,6 @@ export default function () {
     ];
     return (
         <>
-            {" "}
             <section
                 id="other-games"
                 class="lg:h-full lg:min-h-full lg:overflow-scroll lg:snap-center flex flex-col relative items-center justify-center space-y-8"
