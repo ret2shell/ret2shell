@@ -65,7 +65,7 @@
         "@tailwindcss/typography": "^0.5.13",
         "@types/howler": "^2.2.11",
         "@types/luxon": "^3.4.2",
-        "@types/node": "^20.12.13",
+        "@types/node": "^20.13.0",
         "@types/postcss-import": "^14.0.3",
         "@types/shell-quote": "^1.7.5",
         "autoprefixer": "^10.4.19",

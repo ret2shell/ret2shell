@@ -225,7 +225,8 @@
       "totalSubmissions": "總提交數量",
       "inGameChallenges": "賽中題目數量",
       "totalChallenges": "總題目數量",
-      "instituteUsers": "使用者組織分佈狀況"
+      "instituteUsers": "使用者組織分佈狀況",
+      "others": "其他"
     },
     "edit": {
       "title": "編輯平台設定"

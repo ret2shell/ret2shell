@@ -225,7 +225,8 @@
       "totalSubmissions": "Total submissions",
       "inGameChallenges": "Challenges in games",
       "totalChallenges": "Total challenges",
-      "instituteUsers": "Distribution of user institutes"
+      "instituteUsers": "Distribution of user institutes",
+      "others": "other"
     },
     "edit": {
       "title": "Edit platform settings"

@@ -405,9 +405,11 @@ export default function () {
                                 toolbox: {},
                                 xAxis: {
                                     type: "category",
-                                    data: statistics()!.users.institutes.map(
-                                        (i) => statistics()!.institutes.find((ii) => ii.id === i[0])!.name
-                                    ),
+                                    data: statistics()!
+                                        .users.institutes.map(
+                                            (i) => statistics()!.institutes.find((ii) => ii.id === i[0])!.name
+                                        )
+                                        .concat(t("admin.statistics.others")!),
                                 },
                                 yAxis: {
                                     type: "value",
@@ -415,7 +417,13 @@ export default function () {
                                 },
                                 series: {
                                     type: "bar",
-                                    data: statistics()!.users.institutes.map((i) => i[1]),
+                                    data: statistics()!
+                                        .users.institutes.map((i) => i[1])
+                                        .concat(
+                                            statistics()!.users.total -
+                                                statistics()!.users.institutes.reduce((a, b) => a + b[1], 0)
+                                        ),
+                                    barMaxWidth: 64,
                                 },
                             }}
                         />
