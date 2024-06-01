@@ -191,7 +191,8 @@
       "uploadFailed": "圖標上傳失敗"
     },
     "introRequired": "請填寫賽事介紹",
-    "introPlaceholder": "賽事介紹"
+    "introPlaceholder": "賽事介紹",
+    "noNotifications": "還沒有任何通知"
   },
   "bulletin": {
     "title": "公告",

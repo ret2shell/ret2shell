@@ -207,7 +207,8 @@
       "uploadFailed": "图标上传失败"
     },
     "introRequired": "请填写赛事介绍",
-    "introPlaceholder": "赛事介绍"
+    "introPlaceholder": "赛事介绍",
+    "noNotifications": "还没有任何通知"
   },
   "bulletin": {
     "title": "公告",

@@ -6,6 +6,6 @@ export type Notification = {
     content: string;
     published_at: DateTime;
     game_id: number;
-    uploader_id: number;
-    uploader_name?: string;
+    publisher_id: number;
+    publisher_name?: string;
 };

@@ -555,13 +555,15 @@ export default function () {
                         </div>
                     </Card>
                     <Divider class="mt-3 mb-1 lg:mt-6 lg:mb-4" />
-                    <Show when={events().length === 0}>
-                        <div class="mt-2 flex-1 flex flex-row items-center justify-center space-x-2 opacity-60 p-3">
-                            <span class="icon-[fluent--person-walking-20-regular] w-5 h-5" />
-                            <span>{t("calendar.noGames")}</span>
-                        </div>
-                    </Show>
-                    <For each={events()}>
+                    <For
+                        each={events()}
+                        fallback={
+                            <div class="mt-2 flex-1 flex flex-row items-center justify-center space-x-2 opacity-60 p-3">
+                                <span class="icon-[fluent--person-walking-20-regular] w-5 h-5" />
+                                <span>{t("calendar.noGames")}</span>
+                            </div>
+                        }
+                    >
                         {(item) => (
                             <>
                                 <Link

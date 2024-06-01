@@ -18,7 +18,7 @@ pub struct Model {
     #[serde(with = "ts_seconds")]
     pub published_at: DateTime<Utc>,
     pub game_id: i64,
-    pub uploader_id: i64,
+    pub publisher_id: i64,
 }
 
 #[derive(Clone, Serialize, Deserialize, FromQueryResult)]
@@ -29,8 +29,8 @@ pub struct ExModel {
     #[serde(with = "ts_seconds")]
     pub published_at: DateTime<Utc>,
     pub game_id: i64,
-    pub uploader_id: i64,
-    pub uploader_name: String,
+    pub publisher_id: i64,
+    pub publisher_name: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -45,12 +45,12 @@ pub enum Relation {
     Game,
     #[sea_orm(
         belongs_to = "super::user::Entity",
-        from = "Column::UploaderId",
+        from = "Column::PublisherId",
         to = "super::user::Column::Id",
         on_update = "Cascade",
         on_delete = "Cascade"
     )]
-    Uploader,
+    Publisher,
 }
 
 impl Related<super::game::Entity> for Entity {
@@ -61,7 +61,7 @@ impl Related<super::game::Entity> for Entity {
 
 impl Related<super::user::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::Uploader.def()
+        Relation::Publisher.def()
     }
 }
 
@@ -69,7 +69,8 @@ impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get_list<C>(db: &C, game_id: i64) -> Result<Vec<Model>, DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let notifications = Entity::find()
         .filter(Column::GameId.eq(game_id))
         .all(db)
@@ -79,10 +80,11 @@ where
 
 pub async fn get_list_ex<C>(db: &C, game_id: i64) -> Result<Vec<ExModel>, DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let notifications = Entity::find()
-        .join(JoinType::InnerJoin, Relation::Uploader.def())
-        .column_as(user::Column::Nickname, "uploader_name")
+        .join(JoinType::InnerJoin, Relation::Publisher.def())
+        .column_as(user::Column::Nickname, "publisher_name")
         .filter(Column::GameId.eq(game_id))
         .into_model()
         .all(db)
@@ -92,7 +94,8 @@ where
 
 pub async fn create<C>(db: &C, notification: Model) -> Result<Model, DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     let notification = ActiveModel {
         id: ActiveValue::NotSet,
         ..notification.into_active_model().reset_all()
@@ -102,6 +105,7 @@ where
 
 pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-    C: ConnectionTrait, {
+    C: ConnectionTrait,
+{
     Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

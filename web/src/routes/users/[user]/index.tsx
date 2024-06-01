@@ -1,9 +1,10 @@
 import SidebarLayout from "@/lib/blocks/sidebar-layout";
+import Sidebar from "./_blocks/sidebar";
 
 export default function () {
     return (
         <>
-            <SidebarLayout leftBar={null}>{null}</SidebarLayout>
+            <SidebarLayout leftBar={<Sidebar />}>{null}</SidebarLayout>
         </>
     );
 }

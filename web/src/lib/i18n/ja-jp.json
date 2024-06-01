@@ -191,7 +191,8 @@
       "uploadFailed": "アイコンのアップロードに失敗しました"
     },
     "introRequired": "イベント紹介文をご記入ください",
-    "introPlaceholder": "競技紹介"
+    "introPlaceholder": "競技紹介",
+    "noNotifications": "まだ通知はありません"
   },
   "bulletin": {
     "title": "アナウンス",
