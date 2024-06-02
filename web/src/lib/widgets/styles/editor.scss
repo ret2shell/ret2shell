@@ -115,7 +115,7 @@
 }
 
 .ace_placeholder {
-  @apply text-base font-mono opacity-30;
+  @apply text-base font-mono opacity-30 transform-none;
 }
 
 @layer components {

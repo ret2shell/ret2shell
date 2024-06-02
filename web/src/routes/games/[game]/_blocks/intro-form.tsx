@@ -59,9 +59,10 @@ export default function IntroForm(props: {
                         <>
                             <Editor
                                 form={form}
+                                lineNumbers
                                 class="flex-1"
                                 lang="markdown"
-                                placeholder={t("game.introPlaceholder")}
+                                placeholder="MARKDOWN"
                                 title={t("game.introPlaceholder")}
                                 name="content"
                                 value={field.value}

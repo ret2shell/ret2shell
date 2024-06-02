@@ -208,9 +208,10 @@ function EventForm(props: {
                             <>
                                 <Editor
                                     form={form}
+                                    lineNumbers={true}
                                     class="flex-1 min-h-80 lg:min-h-auto"
                                     lang="markdown"
-                                    placeholder={t("calendar.introPlaceholder")}
+                                    placeholder="MARKDOWN"
                                     title={t("calendar.introPlaceholder")}
                                     name="intro"
                                     value={field.value}

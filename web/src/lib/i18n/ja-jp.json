@@ -192,7 +192,13 @@
     },
     "introRequired": "イベント紹介文をご記入ください",
     "introPlaceholder": "競技紹介",
-    "noNotifications": "まだ通知はありません"
+    "noNotifications": "まだ通知はありません",
+    "notification": {
+      "titleRequired": "タイトルを入力してください",
+      "titlePlaceholder": "通知のタイトル",
+      "contentRequired": "届出内容をご記入ください",
+      "contentPlaceholder": "お知らせ内容"
+    }
   },
   "bulletin": {
     "title": "アナウンス",

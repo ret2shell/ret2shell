@@ -10,22 +10,21 @@ import Divider from "@/lib/widgets/divider";
 import Editor from "@/lib/widgets/editor";
 import Input from "@/lib/widgets/input";
 import Popover from "@/lib/widgets/popover";
+import { createForm, required } from "@modular-forms/solid";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createSignal } from "solid-js";
 
+type NotificationForm = {
+    title: string;
+    content: string;
+};
+
 export default function () {
-    const [notifications, setNotifications] = createSignal([
-        {
-            id: 1,
-            title: "Test",
-            content: "Test Content",
-            published_at: DateTime.now(),
-            game_id: 1,
-            publisher_id: 1,
-            publisher_name: "Reverier Xu",
-        },
-    ] as Notification[]);
+    const [notifications, setNotifications] = createSignal([] as Notification[]);
+    const [createFormExpanded, setCreateFormExpanded] = createSignal(false);
+    const [form, { Form, Field }] = createForm<NotificationForm>();
+    const onSubmit = (result: NotificationForm) => {};
     return (
         <div class="w-full h-full overflow-hidden">
             <OverlayScrollbarsComponent
@@ -46,26 +45,62 @@ export default function () {
                             accountStore.permissions.includes(Permission.Game)
                         }
                     >
-                        <Popover
-                            btnContent={
-                                <>
-                                    <span class="icon-[fluent--add-20-regular] w-5 h-5" />
-                                    <span>{t("form.create")}</span>
-                                </>
-                            }
-                        >
-                            <Card class="w-96" contentClass="p-2 flex flex-col space-y-2">
-                                {/* TODO: use form here */}
-                                {/* <Input
-                                    extraBtn={
-                                        <Button class="!rounded-l-none">
-                                            <span class="icon-[fluent--send-20-regular] w-5 h-5" />
-                                        </Button>
-                                    }
-                                />
-                                <Editor class="h-48" /> */}
-                            </Card>
-                        </Popover>
+                        <Form onSubmit={onSubmit} class="flex flex-col space-y-2">
+                            <Show when={createFormExpanded()}>
+                                <Field name="title" validate={[required(t("game.notification.titleRequired")!)]}>
+                                    {(field, props) => (
+                                        <Input
+                                            placeholder={t("game.notification.titlePlaceholder")}
+                                            title={t("game.notification.titlePlaceholder")}
+                                            {...props}
+                                            value={field.value}
+                                            error={field.error}
+                                            required
+                                        />
+                                    )}
+                                </Field>
+                                <Field name="content" validate={[required(t("game.notification.contentRequired")!)]}>
+                                    {(field) => (
+                                        <Editor
+                                            form={form}
+                                            class="h-48"
+                                            lang="plaintext"
+                                            placeholder="PLAINTEXT"
+                                            title={t("game.notification.contentPlaceholder")}
+                                            name="content"
+                                            value={field.value}
+                                            error={field.error}
+                                        />
+                                    )}
+                                </Field>
+                            </Show>
+                            <div class="flex flex-row space-x-2">
+                                <Show when={createFormExpanded()}>
+                                    <Button class="flex-1" type="submit">
+                                        <span class="icon-[fluent--add-20-regular] w-5 h-5" />
+                                        <span>{t("form.create")}</span>
+                                    </Button>
+                                </Show>
+                                <Button
+                                    class={`${createFormExpanded() ? "flex-shrink-0" : "flex-1"}`}
+                                    square={createFormExpanded()}
+                                    type="button"
+                                    onClick={() => {
+                                        setCreateFormExpanded(!createFormExpanded());
+                                    }}
+                                >
+                                    <Show
+                                        when={createFormExpanded()}
+                                        fallback={<span class="icon-[fluent--add-20-regular] w-5 h-5" />}
+                                    >
+                                        <span class="icon-[fluent--chevron-double-up-20-regular] w-5 h-5" />
+                                    </Show>
+                                    <Show when={!createFormExpanded()}>
+                                        <span>{t("form.create")}</span>
+                                    </Show>
+                                </Button>
+                            </div>
+                        </Form>
                     </Show>
                     <For
                         each={notifications()}

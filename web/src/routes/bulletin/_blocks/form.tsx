@@ -155,9 +155,10 @@ export default function (props: {
                         <>
                             <Editor
                                 form={form}
+                                lineNumbers
                                 class="flex-1"
                                 lang="markdown"
-                                placeholder={t("bulletin.contentPlaceholder")}
+                                placeholder="MARKDOWN"
                                 title={t("bulletin.contentPlaceholder")}
                                 name="content"
                                 value={field.value}

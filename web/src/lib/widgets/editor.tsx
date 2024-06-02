@@ -16,6 +16,7 @@ export type EditorProps = {
     placeholder?: string;
     name?: string;
     title?: string;
+    lineNumbers?: boolean;
 
     // biome-ignore lint/suspicious/noExplicitAny: the options are not ensured
     form?: FormStore<any, undefined>;
@@ -47,8 +48,8 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
             showPrintMargin: false,
             highlightActiveLine: false,
             highlightGutterLine: false,
-            showGutter: true,
-            showLineNumbers: true,
+            showGutter: props.lineNumbers ?? false,
+            showLineNumbers: props.lineNumbers ?? false,
             tabSize: 2,
             useSoftTabs: true,
             wrap: true,
@@ -121,6 +122,7 @@ export default function Editor(props: EditorProps & ComponentProps<"div">) {
         "form",
         "error",
         "onFocusIn",
+        "lineNumbers",
     ]);
     const [focused, setFocused] = createSignal(false);
     return (

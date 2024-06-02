@@ -192,7 +192,13 @@
     },
     "introRequired": "Please fill in the game introduction",
     "introPlaceholder": "Game introduction",
-    "noNotifications": "No notification yet"
+    "noNotifications": "No notification yet",
+    "notification": {
+      "titleRequired": "Please fill in the title",
+      "titlePlaceholder": "Notification title",
+      "contentRequired": "Please fill in the notification content",
+      "contentPlaceholder": "Notification content"
+    }
   },
   "bulletin": {
     "title": "Bulletin",
