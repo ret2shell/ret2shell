@@ -53,21 +53,19 @@ render(() => {
         }, 1000);
     });
     return (
-        <>
-            <OverlayScrollbarsComponent
-                options={{
-                    scrollbars: {
-                        theme: `os-theme-${fullTheme()}`,
-                        autoHide: "scroll",
-                    },
-                }}
-                class="relative w-screen h-screen print:h-auto print:overflow-auto"
-                defer
-            >
-                <div class="flex flex-col min-h-full min-w-fit">
-                    <Router>{routes}</Router>
-                </div>
-            </OverlayScrollbarsComponent>
-        </>
+        <OverlayScrollbarsComponent
+            options={{
+                scrollbars: {
+                    theme: `os-theme-${fullTheme()}`,
+                    autoHide: "scroll",
+                },
+            }}
+            class="relative w-screen h-screen print:h-auto print:overflow-auto"
+            defer
+        >
+            <div class="flex flex-col min-h-full min-w-fit">
+                <Router>{routes}</Router>
+            </div>
+        </OverlayScrollbarsComponent>
     );
 }, document.getElementById("root") || document.body);

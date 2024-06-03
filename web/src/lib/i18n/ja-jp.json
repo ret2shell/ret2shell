@@ -172,7 +172,8 @@
       "join": {
         "title": "チームに参加する"
       },
-      "joinFirst": "まずはご入力ください"
+      "joinFirst": "まずはご入力ください",
+      "title": "チーム詳細"
     },
     "archivedGotoTraining": "アーカイブ済み、ゴルフ練習場へ行ってください",
     "canNotParticipate": "参加資格がありません",

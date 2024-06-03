@@ -27,86 +27,84 @@ function BottomPanel(props: {
     const [page, setPage] = createSignal(0);
     const pages = [Terminal, Hints, Files, Hammer, Answer, Statistics, Instances, Settings];
     return (
-        <>
-            <div class="w-full h-full overflow-hidden flex flex-col">
-                <OverlayScrollbarsComponent
-                    class="w-full h-16 backdrop-blur border-b border-b-layer-content/10 relative"
-                    options={{
-                        scrollbars: {
-                            theme: `os-theme-${fullTheme()}`,
-                            autoHide: "scroll",
-                        },
-                    }}
-                    defer
-                >
-                    <div class="h-full flex px-2 py-0 items-center space-x-2 min-w-max w-max">
-                        <Button onClick={() => setPage(0)} ghost={page() !== 0}>
-                            <span class="icon-[fluent--code-20-regular] w-5 h-5" />
-                            <span>{t("game.challenge.terminal")}</span>
-                        </Button>
-                        <Button onClick={() => setPage(1)} ghost={page() !== 1}>
-                            <span class="icon-[fluent--info-20-regular] w-5 h-5" />
-                            <span>{t("game.challenge.hint")}</span>
-                        </Button>
-                        <Button onClick={() => setPage(2)} ghost={page() !== 2}>
-                            <span class="icon-[fluent--save-20-regular] w-5 h-5" />
-                            <span>{t("game.challenge.files")}</span>
-                        </Button>
-                        <Button onClick={() => setPage(3)} ghost={page() !== 3} disabled={!props.inGame}>
-                            <span class="icon-[fluent-emoji-flat--hammer] w-5 h-5" />
-                            <span>{t("game.challenge.hammer")}</span>
-                        </Button>
-                        <Button
-                            onClick={() => setPage(4)}
-                            ghost={page() !== 4}
-                            disabled={
-                                props.inGame &&
-                                !(
-                                    !!accountStore.id &&
-                                    accountStore.permissions.includes(Permission.Game) &&
-                                    props.store.current?.admins.includes(accountStore.id)
-                                )
-                            }
-                        >
-                            <span class="icon-[fluent--checkmark-circle-20-regular] w-5 h-5" />
-                            <span>{t("game.challenge.answer")}</span>
-                        </Button>
-                        <Show
-                            when={
+        <div class="w-full h-full overflow-hidden flex flex-col">
+            <OverlayScrollbarsComponent
+                class="w-full h-16 backdrop-blur border-b border-b-layer-content/10 relative"
+                options={{
+                    scrollbars: {
+                        theme: `os-theme-${fullTheme()}`,
+                        autoHide: "scroll",
+                    },
+                }}
+                defer
+            >
+                <div class="h-full flex px-2 py-0 items-center space-x-2 min-w-max w-max">
+                    <Button onClick={() => setPage(0)} ghost={page() !== 0}>
+                        <span class="icon-[fluent--code-20-regular] w-5 h-5" />
+                        <span>{t("game.challenge.terminal")}</span>
+                    </Button>
+                    <Button onClick={() => setPage(1)} ghost={page() !== 1}>
+                        <span class="icon-[fluent--info-20-regular] w-5 h-5" />
+                        <span>{t("game.challenge.hint")}</span>
+                    </Button>
+                    <Button onClick={() => setPage(2)} ghost={page() !== 2}>
+                        <span class="icon-[fluent--save-20-regular] w-5 h-5" />
+                        <span>{t("game.challenge.files")}</span>
+                    </Button>
+                    <Button onClick={() => setPage(3)} ghost={page() !== 3} disabled={!props.inGame}>
+                        <span class="icon-[fluent-emoji-flat--hammer] w-5 h-5" />
+                        <span>{t("game.challenge.hammer")}</span>
+                    </Button>
+                    <Button
+                        onClick={() => setPage(4)}
+                        ghost={page() !== 4}
+                        disabled={
+                            props.inGame &&
+                            !(
                                 !!accountStore.id &&
                                 accountStore.permissions.includes(Permission.Game) &&
                                 props.store.current?.admins.includes(accountStore.id)
-                            }
-                        >
-                            <Button onClick={() => setPage(5)} ghost={page() !== 5}>
-                                <span class="icon-[fluent--data-pie-20-regular] w-5 h-5" />
-                                <span>{t("game.challenge.statistics")}</span>
-                            </Button>
-                            <Button onClick={() => setPage(6)} ghost={page() !== 6}>
-                                <span class="icon-[fluent--production-20-regular] w-5 h-5" />
-                                <span>{t("game.challenge.instances")}</span>
-                            </Button>
-                            <Button onClick={() => setPage(7)} ghost={page() !== 7}>
-                                <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
-                                <span>{t("game.challenge.settings")}</span>
-                            </Button>
-                        </Show>
-                    </div>
-                </OverlayScrollbarsComponent>
-                <OverlayScrollbarsComponent
-                    options={{
-                        scrollbars: {
-                            theme: `os-theme-${fullTheme()}`,
-                            autoHide: "scroll",
-                        },
-                    }}
-                    class="relative w-full flex-1 print:h-auto print:overflow-auto"
-                    defer
-                >
-                    <Dynamic component={pages[page()]} />
-                </OverlayScrollbarsComponent>
-            </div>
-        </>
+                            )
+                        }
+                    >
+                        <span class="icon-[fluent--checkmark-circle-20-regular] w-5 h-5" />
+                        <span>{t("game.challenge.answer")}</span>
+                    </Button>
+                    <Show
+                        when={
+                            !!accountStore.id &&
+                            accountStore.permissions.includes(Permission.Game) &&
+                            props.store.current?.admins.includes(accountStore.id)
+                        }
+                    >
+                        <Button onClick={() => setPage(5)} ghost={page() !== 5}>
+                            <span class="icon-[fluent--data-pie-20-regular] w-5 h-5" />
+                            <span>{t("game.challenge.statistics")}</span>
+                        </Button>
+                        <Button onClick={() => setPage(6)} ghost={page() !== 6}>
+                            <span class="icon-[fluent--production-20-regular] w-5 h-5" />
+                            <span>{t("game.challenge.instances")}</span>
+                        </Button>
+                        <Button onClick={() => setPage(7)} ghost={page() !== 7}>
+                            <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+                            <span>{t("game.challenge.settings")}</span>
+                        </Button>
+                    </Show>
+                </div>
+            </OverlayScrollbarsComponent>
+            <OverlayScrollbarsComponent
+                options={{
+                    scrollbars: {
+                        theme: `os-theme-${fullTheme()}`,
+                        autoHide: "scroll",
+                    },
+                }}
+                class="relative w-full flex-1 print:h-auto print:overflow-auto"
+                defer
+            >
+                <Dynamic component={pages[page()]} />
+            </OverlayScrollbarsComponent>
+        </div>
     );
 }
 

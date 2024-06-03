@@ -13,15 +13,7 @@ export default function (props: { children?: JSX.Element }) {
     return (
         <>
             <Title title={`${t("training.title")} - ${platformStore.config.name || t("platform.name")}`} />
-            <SidebarLayout
-                leftBar={
-                    <>
-                        <SideBar />
-                    </>
-                }
-            >
-                {props.children}
-            </SidebarLayout>
+            <SidebarLayout leftBar={<SideBar />}>{props.children}</SidebarLayout>
         </>
     );
 }

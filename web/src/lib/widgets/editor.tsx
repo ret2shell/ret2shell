@@ -94,18 +94,16 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
     });
 
     return (
-        <>
-            <div {...native} class={`relative ${native.class}`}>
-                <div class="absolute left-0 top-0 bottom-0 right-0 p-2">
-                    <pre class={"w-full min-h-full relative bg-transparent"} ref={editorElement!} />
-                </div>
-                <Show when={editorProps.error}>
-                    <Card class="absolute bottom-2 left-2 right-2" level="error" contentClass="z-50 px-4 p-2">
-                        <p>{editorProps.error}</p>
-                    </Card>
-                </Show>
+        <div {...native} class={`relative ${native.class}`}>
+            <div class="absolute left-0 top-0 bottom-0 right-0 p-2">
+                <pre class={"w-full min-h-full relative bg-transparent"} ref={editorElement!} />
             </div>
-        </>
+            <Show when={editorProps.error}>
+                <Card class="absolute bottom-2 left-2 right-2" level="error" contentClass="z-50 px-4 p-2">
+                    <p>{editorProps.error}</p>
+                </Card>
+            </Show>
+        </div>
     );
 }
 

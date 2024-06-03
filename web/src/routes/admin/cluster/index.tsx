@@ -110,31 +110,27 @@ export default function () {
                     <div class="flex flex-row flex-wrap py-2">
                         <For each={clusterNodes()}>
                             {(node) => (
-                                <>
-                                    <Button
-                                        class="m-1 min-w-fit !h-auto py-2"
-                                        level={
-                                            shownNode()?.metadata.name === node.metadata.name ? "primary" : undefined
-                                        }
-                                        onClick={() => setShownNode(node)}
-                                    >
-                                        <span
-                                            class={`${
-                                                node.metadata.labels["node-role.kubernetes.io/master"] === "true"
-                                                    ? "icon-[fluent--brain-circuit-20-regular]"
-                                                    : "icon-[fluent--production-20-regular]"
-                                            } w-8 h-8 ${
-                                                shownNode()?.metadata.name === node.metadata.name
-                                                    ? "text-primary-content"
-                                                    : "text-success"
-                                            }`}
-                                        />
-                                        <div class="flex flex-col justify-center items-start min-w-fit">
-                                            <span class="font-bold">{node.metadata.name}</span>
-                                            <span class="opacity-60">{node.metadata.creationTimestamp}</span>
-                                        </div>
-                                    </Button>
-                                </>
+                                <Button
+                                    class="m-1 min-w-fit !h-auto py-2"
+                                    level={shownNode()?.metadata.name === node.metadata.name ? "primary" : undefined}
+                                    onClick={() => setShownNode(node)}
+                                >
+                                    <span
+                                        class={`${
+                                            node.metadata.labels["node-role.kubernetes.io/master"] === "true"
+                                                ? "icon-[fluent--brain-circuit-20-regular]"
+                                                : "icon-[fluent--production-20-regular]"
+                                        } w-8 h-8 ${
+                                            shownNode()?.metadata.name === node.metadata.name
+                                                ? "text-primary-content"
+                                                : "text-success"
+                                        }`}
+                                    />
+                                    <div class="flex flex-col justify-center items-start min-w-fit">
+                                        <span class="font-bold">{node.metadata.name}</span>
+                                        <span class="opacity-60">{node.metadata.creationTimestamp}</span>
+                                    </div>
+                                </Button>
                             )}
                         </For>
                     </div>
@@ -148,93 +144,91 @@ export default function () {
                             </div>
                         }
                     >
-                        <>
-                            <div class="h-12 flex flex-row items-center space-x-2 px-3">
-                                <span class="icon-[fluent--organization-20-regular] w-5 h-5" />
-                                <span class="font-bold flex-1 text-start">{shownNode()?.metadata.name}</span>
-                                <span class="opacity-60 hidden lg:inline">
-                                    <span>Online at: </span>
-                                    <span>
-                                        {DateTime.fromISO(shownNode()!.metadata.creationTimestamp).toFormat(
-                                            "yyyy-MM-dd HH:mm:ss"
-                                        )}
-                                    </span>
+                        <div class="h-12 flex flex-row items-center space-x-2 px-3">
+                            <span class="icon-[fluent--organization-20-regular] w-5 h-5" />
+                            <span class="font-bold flex-1 text-start">{shownNode()?.metadata.name}</span>
+                            <span class="opacity-60 hidden lg:inline">
+                                <span>Online at: </span>
+                                <span>
+                                    {DateTime.fromISO(shownNode()!.metadata.creationTimestamp).toFormat(
+                                        "yyyy-MM-dd HH:mm:ss"
+                                    )}
                                 </span>
-                                <Button size="sm" square title={t("admin.cluster.refreshNode")}>
-                                    <span class="icon-[fluent--arrow-clockwise-20-regular] w-5 h-5" />
-                                </Button>
-                                <Button size="sm" square title={t("admin.cluster.updateNode")}>
-                                    <span class="icon-[fluent--arrow-circle-up-20-regular] w-5 h-5" />
-                                </Button>
-                                <Button size="sm" square level="error" title={t("admin.cluster.disconnectNode")}>
-                                    <span class="icon-[fluent--stop-20-regular] w-5 h-5" />
-                                </Button>
-                            </div>
-                            <Divider />
-                            <div class="p-3 lg:p-6 flex flex-col">
-                                <h3 class="text-center font-bold">{t("admin.cluster.nodeInfo")}</h3>
-                                <table>
+                            </span>
+                            <Button size="sm" square title={t("admin.cluster.refreshNode")}>
+                                <span class="icon-[fluent--arrow-clockwise-20-regular] w-5 h-5" />
+                            </Button>
+                            <Button size="sm" square title={t("admin.cluster.updateNode")}>
+                                <span class="icon-[fluent--arrow-circle-up-20-regular] w-5 h-5" />
+                            </Button>
+                            <Button size="sm" square level="error" title={t("admin.cluster.disconnectNode")}>
+                                <span class="icon-[fluent--stop-20-regular] w-5 h-5" />
+                            </Button>
+                        </div>
+                        <Divider />
+                        <div class="p-3 lg:p-6 flex flex-col">
+                            <h3 class="text-center font-bold">{t("admin.cluster.nodeInfo")}</h3>
+                            <table>
+                                <tbody>
+                                    <For each={Object.entries(shownNode()!.status.nodeInfo)}>
+                                        {([key, value]) => (
+                                            <tr class="border-b border-b-layer-content/10">
+                                                <td class="font-bold opacity-60 p-2">{`${
+                                                    /* @ts-expect-error key is dynamic */
+                                                    t(`admin.cluster.data.nodeInfo.${key}`) as string
+                                                }`}</td>
+                                                <td class="p-2">{value}</td>
+                                            </tr>
+                                        )}
+                                    </For>
+                                    <tr class="border-b border-b-layer-content/10">
+                                        <td class="font-bold opacity-60 p-2">Provider ID</td>
+                                        <td class="p-2">{shownNode()?.spec.providerID}</td>
+                                    </tr>
+                                    <tr class="border-b border-b-layer-content/10">
+                                        <td class="font-bold opacity-60 p-2">Addresses</td>
+                                        <td class="p-2">
+                                            {shownNode()
+                                                ?.status.addresses.map((a) => a.address)
+                                                .join(", ")}
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b border-b-layer-content/10">
+                                        <td class="font-bold opacity-60 p-2">Pod CIDRs</td>
+                                        <td class="p-2">{shownNode()?.spec.podCIDRs.join(", ")}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="flex flex-col">
+                            <h3 class="text-center font-bold">{t("admin.cluster.nodeResources")}</h3>
+                            <div class="flex flex-col xl:flex-row p-3 lg:p-6">
+                                <table class="flex-1">
                                     <tbody>
-                                        <For each={Object.entries(shownNode()!.status.nodeInfo)}>
+                                        <For each={Object.entries(shownNode()!.status.capacity)}>
                                             {([key, value]) => (
                                                 <tr class="border-b border-b-layer-content/10">
-                                                    <td class="font-bold opacity-60 p-2">{`${
-                                                        /* @ts-expect-error key is dynamic */
-                                                        t(`admin.cluster.data.nodeInfo.${key}`) as string
-                                                    }`}</td>
+                                                    <td class="font-bold opacity-60 p-2">Capacity {key}</td>
                                                     <td class="p-2">{value}</td>
                                                 </tr>
                                             )}
                                         </For>
-                                        <tr class="border-b border-b-layer-content/10">
-                                            <td class="font-bold opacity-60 p-2">Provider ID</td>
-                                            <td class="p-2">{shownNode()?.spec.providerID}</td>
-                                        </tr>
-                                        <tr class="border-b border-b-layer-content/10">
-                                            <td class="font-bold opacity-60 p-2">Addresses</td>
-                                            <td class="p-2">
-                                                {shownNode()
-                                                    ?.status.addresses.map((a) => a.address)
-                                                    .join(", ")}
-                                            </td>
-                                        </tr>
-                                        <tr class="border-b border-b-layer-content/10">
-                                            <td class="font-bold opacity-60 p-2">Pod CIDRs</td>
-                                            <td class="p-2">{shownNode()?.spec.podCIDRs.join(", ")}</td>
-                                        </tr>
+                                    </tbody>
+                                </table>
+                                <table class="flex-1">
+                                    <tbody>
+                                        <For each={Object.entries(shownNode()!.status.allocatable)}>
+                                            {([key, value]) => (
+                                                <tr class="border-b border-b-layer-content/10">
+                                                    <td class="font-bold opacity-60 p-2">Allocatable {key}</td>
+                                                    <td class="p-2">{value}</td>
+                                                </tr>
+                                            )}
+                                        </For>
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="flex flex-col">
-                                <h3 class="text-center font-bold">{t("admin.cluster.nodeResources")}</h3>
-                                <div class="flex flex-col xl:flex-row p-3 lg:p-6">
-                                    <table class="flex-1">
-                                        <tbody>
-                                            <For each={Object.entries(shownNode()!.status.capacity)}>
-                                                {([key, value]) => (
-                                                    <tr class="border-b border-b-layer-content/10">
-                                                        <td class="font-bold opacity-60 p-2">Capacity {key}</td>
-                                                        <td class="p-2">{value}</td>
-                                                    </tr>
-                                                )}
-                                            </For>
-                                        </tbody>
-                                    </table>
-                                    <table class="flex-1">
-                                        <tbody>
-                                            <For each={Object.entries(shownNode()!.status.allocatable)}>
-                                                {([key, value]) => (
-                                                    <tr class="border-b border-b-layer-content/10">
-                                                        <td class="font-bold opacity-60 p-2">Allocatable {key}</td>
-                                                        <td class="p-2">{value}</td>
-                                                    </tr>
-                                                )}
-                                            </For>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </>
+                        </div>
                     </Show>
                 </Show>
             </div>

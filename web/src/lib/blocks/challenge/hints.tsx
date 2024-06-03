@@ -17,52 +17,48 @@ export default function () {
         },
     });
     return (
-        <>
-            <div class="flex flex-col p-3 lg:p-6">
-                <For each={hints()}>
-                    {(hint) => (
-                        <>
-                            <div class="px-2 min-h-12 border-b border-b-layer-content/10 flex items-center space-x-2">
-                                <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary flex-shrink-0" />
-                                <Show
-                                    when={hint.cost === 0 || extras().find((e) => e.hint_id === hint.id)}
-                                    fallback={
-                                        <>
-                                            <span class="blur pointer-events-none select-none flex-1">
-                                                {lorem.generateSentences(1)}
+        <div class="flex flex-col p-3 lg:p-6">
+            <For each={hints()}>
+                {(hint) => (
+                    <div class="px-2 min-h-12 border-b border-b-layer-content/10 flex items-center space-x-2">
+                        <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary flex-shrink-0" />
+                        <Show
+                            when={hint.cost === 0 || extras().find((e) => e.hint_id === hint.id)}
+                            fallback={
+                                <>
+                                    <span class="blur pointer-events-none select-none flex-1">
+                                        {lorem.generateSentences(1)}
+                                    </span>
+                                    <Popover
+                                        size="sm"
+                                        ghost
+                                        btnContent={
+                                            <>
+                                                <span class="text-warning">-{hint.cost}</span>
+                                                <span class="opacity-60 text-warning">pts</span>
+                                                <span class="icon-[fluent--lock-20-regular] w-5 h-5 text-warning" />
+                                            </>
+                                        }
+                                    >
+                                        <Card contentClass="p-2 flex flex-row items-center">
+                                            <span class="px-2">
+                                                {t("game.challenge.confirmUnlockHint", {
+                                                    cost: hint.cost,
+                                                })}
                                             </span>
-                                            <Popover
-                                                size="sm"
-                                                ghost
-                                                btnContent={
-                                                    <>
-                                                        <span class="text-warning">-{hint.cost}</span>
-                                                        <span class="opacity-60 text-warning">pts</span>
-                                                        <span class="icon-[fluent--lock-20-regular] w-5 h-5 text-warning" />
-                                                    </>
-                                                }
-                                            >
-                                                <Card contentClass="p-2 flex flex-row items-center">
-                                                    <span class="px-2">
-                                                        {t("game.challenge.confirmUnlockHint", {
-                                                            cost: hint.cost,
-                                                        })}
-                                                    </span>
-                                                    <Button size="sm" level="error">
-                                                        {t("platform.yes")}
-                                                    </Button>
-                                                </Card>
-                                            </Popover>
-                                        </>
-                                    }
-                                >
-                                    <span>{hint.content}</span>
-                                </Show>
-                            </div>
-                        </>
-                    )}
-                </For>
-            </div>
-        </>
+                                            <Button size="sm" level="error">
+                                                {t("platform.yes")}
+                                            </Button>
+                                        </Card>
+                                    </Popover>
+                                </>
+                            }
+                        >
+                            <span>{hint.content}</span>
+                        </Show>
+                    </div>
+                )}
+            </For>
+        </div>
     );
 }

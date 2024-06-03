@@ -172,7 +172,8 @@
       "join": {
         "title": "加入隊伍"
       },
-      "joinFirst": "請先參賽"
+      "joinFirst": "請先參賽",
+      "title": "隊伍詳情"
     },
     "archivedGotoTraining": "已歸檔，請前往練習場",
     "canNotParticipate": "不符合參與條件",

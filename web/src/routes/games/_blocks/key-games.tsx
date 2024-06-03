@@ -114,47 +114,45 @@ export default function () {
                     }
                 >
                     {(game) => (
-                        <>
-                            <Link
-                                ghost
-                                class={`w-4/5 ${selectedGameId() === game.id && !showCreate() ? "btn-active" : ""}`}
-                                justify="start"
-                                href={`/games?selected=${game.id}`}
+                        <Link
+                            ghost
+                            class={`w-4/5 ${selectedGameId() === game.id && !showCreate() ? "btn-active" : ""}`}
+                            justify="start"
+                            href={`/games?selected=${game.id}`}
+                        >
+                            {/* icon-[fluent--flag-20-regular] icon-[fluent--flag-20-filled] */}
+                            <span
+                                class={`icon-[fluent--flag-20-${
+                                    selectedGameId() === game.id && !showCreate() ? "filled" : "regular"
+                                }] w-5 h-5 ${
+                                    selectedGameId() === game.id && !showCreate() ? "text-primary" : "opacity-60"
+                                }`}
+                            />
+                            <span
+                                class={`flex-1 text-start ${
+                                    selectedGameId() === game.id && !showCreate()
+                                        ? "font-bold"
+                                        : "font-normal opacity-60"
+                                }`}
                             >
-                                {/* icon-[fluent--flag-20-regular] icon-[fluent--flag-20-filled] */}
-                                <span
-                                    class={`icon-[fluent--flag-20-${
-                                        selectedGameId() === game.id && !showCreate() ? "filled" : "regular"
-                                    }] w-5 h-5 ${
-                                        selectedGameId() === game.id && !showCreate() ? "text-primary" : "opacity-60"
-                                    }`}
-                                />
-                                <span
-                                    class={`flex-1 text-start ${
-                                        selectedGameId() === game.id && !showCreate()
-                                            ? "font-bold"
-                                            : "font-normal opacity-60"
-                                    }`}
-                                >
-                                    {game.name}
-                                </span>
-                                <Show when={game.frozen}>
-                                    <span class="icon-[fluent--weather-snowflake-20-regular] w-5 h-5 text-primary mx-2" />
-                                </Show>
-                                <Show when={game.hidden}>
-                                    <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning mx-2" />
-                                </Show>
-                                <div
-                                    class={`w-2 h-2 rounded-full ${
-                                        DateTime.now() < game.start_at
-                                            ? "bg-info"
-                                            : DateTime.now() > game.end_at
-                                              ? "bg-warning"
-                                              : "bg-success"
-                                    }`}
-                                />
-                            </Link>
-                        </>
+                                {game.name}
+                            </span>
+                            <Show when={game.frozen}>
+                                <span class="icon-[fluent--weather-snowflake-20-regular] w-5 h-5 text-primary mx-2" />
+                            </Show>
+                            <Show when={game.hidden}>
+                                <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning mx-2" />
+                            </Show>
+                            <div
+                                class={`w-2 h-2 rounded-full ${
+                                    DateTime.now() < game.start_at
+                                        ? "bg-info"
+                                        : DateTime.now() > game.end_at
+                                          ? "bg-warning"
+                                          : "bg-success"
+                                }`}
+                            />
+                        </Link>
                     )}
                 </For>
                 <Divider class="w-4/5" />
@@ -199,37 +197,35 @@ export default function () {
                             }
                         >
                             {(game) => (
-                                <>
-                                    <Link
-                                        ghost
-                                        class={`${selectedGameId() === game.id ? "btn-active" : ""}`}
-                                        justify="start"
-                                        href={`/games?selected=${game.id}`}
+                                <Link
+                                    ghost
+                                    class={`${selectedGameId() === game.id ? "btn-active" : ""}`}
+                                    justify="start"
+                                    href={`/games?selected=${game.id}`}
+                                >
+                                    {/* icon-[fluent--flag-20-regular] icon-[fluent--flag-20-filled] */}
+                                    <span
+                                        class={`icon-[fluent--flag-20-${
+                                            selectedGameId() === game.id ? "filled" : "regular"
+                                        }] w-5 h-5 ${selectedGameId() === game.id ? "text-primary" : "opacity-60"}`}
+                                    />
+                                    <span
+                                        class={`flex-1 text-start ${
+                                            selectedGameId() === game.id ? "font-bold" : "font-normal opacity-60"
+                                        }`}
                                     >
-                                        {/* icon-[fluent--flag-20-regular] icon-[fluent--flag-20-filled] */}
-                                        <span
-                                            class={`icon-[fluent--flag-20-${
-                                                selectedGameId() === game.id ? "filled" : "regular"
-                                            }] w-5 h-5 ${selectedGameId() === game.id ? "text-primary" : "opacity-60"}`}
-                                        />
-                                        <span
-                                            class={`flex-1 text-start ${
-                                                selectedGameId() === game.id ? "font-bold" : "font-normal opacity-60"
-                                            }`}
-                                        >
-                                            {game.name}
-                                        </span>
-                                        <div
-                                            class={`w-2 h-2 rounded-full ${
-                                                DateTime.now() < game.start_at
-                                                    ? "bg-info"
-                                                    : DateTime.now() > game.end_at
-                                                      ? "bg-warning"
-                                                      : "bg-success"
-                                            }`}
-                                        />
-                                    </Link>
-                                </>
+                                        {game.name}
+                                    </span>
+                                    <div
+                                        class={`w-2 h-2 rounded-full ${
+                                            DateTime.now() < game.start_at
+                                                ? "bg-info"
+                                                : DateTime.now() > game.end_at
+                                                  ? "bg-warning"
+                                                  : "bg-success"
+                                        }`}
+                                    />
+                                </Link>
                             )}
                         </For>
                     </Card>

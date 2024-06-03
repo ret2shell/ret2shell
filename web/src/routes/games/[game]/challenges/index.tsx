@@ -40,12 +40,10 @@ export default function () {
             <SidebarLayout
                 leftBar={<Challenges />}
                 rightBar={
-                    <>
-                        <div class="flex flex-col">
-                            <Team />
-                            <Notifications />
-                        </div>
-                    </>
+                    <div class="flex flex-col">
+                        <Team />
+                        <Notifications />
+                    </div>
                 }
             >
                 <div class="flex-1 flex flex-col w-0">

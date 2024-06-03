@@ -68,16 +68,14 @@ export function DiyBoxContent() {
 
 export default function DiyBox() {
     return (
-        <>
-            <Popover
-                btnContent={<span class="icon-[fluent--wand-20-regular] w-5 h-5" />}
-                square
-                ghost
-                popContentClass="pt-2"
-                title={t("platform.diyBox")}
-            >
-                <DiyBoxContent />
-            </Popover>
-        </>
+        <Popover
+            btnContent={<span class="icon-[fluent--wand-20-regular] w-5 h-5" />}
+            square
+            ghost
+            popContentClass="pt-2"
+            title={t("platform.diyBox")}
+        >
+            <DiyBoxContent />
+        </Popover>
     );
 }

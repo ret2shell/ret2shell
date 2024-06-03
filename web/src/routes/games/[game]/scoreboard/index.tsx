@@ -38,42 +38,40 @@ function ChartOperations(props: {
         }));
     });
     return (
-        <>
-            <div class="flex flex-row space-x-2 justify-between overflow-hidden">
-                <div class="flex flex-row space-x-2">
-                    <Button square size={props.size} ghost={props.ghost} onClick={() => props.onRefresh?.()}>
-                        <span class="icon-[fluent--arrow-clockwise-20-regular] w-5 h-5" />
-                    </Button>
-                    <Button square size={props.size} ghost={props.ghost} onClick={() => props.onExport?.()}>
-                        <span class="icon-[fluent--open-20-regular] w-5 h-5" />
-                    </Button>
-                    <Button
-                        square
-                        size={props.size}
-                        ghost={props.ghost}
-                        onClick={() => props.onShowHiddenTeams?.(!props.showHiddenTeams)}
-                    >
-                        <Show
-                            when={props.showHiddenTeams}
-                            fallback={<span class="icon-[fluent--eye-20-regular] w-5 h-5" />}
-                        >
-                            <span class="icon-[fluent--eye-off-20-filled] w-5 h-5 text-warning" />
-                        </Show>
-                    </Button>
-                </div>
-                <Select
-                    class="flex-1 max-w-64 min-w-0"
+        <div class="flex flex-row space-x-2 justify-between overflow-hidden">
+            <div class="flex flex-row space-x-2">
+                <Button square size={props.size} ghost={props.ghost} onClick={() => props.onRefresh?.()}>
+                    <span class="icon-[fluent--arrow-clockwise-20-regular] w-5 h-5" />
+                </Button>
+                <Button square size={props.size} ghost={props.ghost} onClick={() => props.onExport?.()}>
+                    <span class="icon-[fluent--open-20-regular] w-5 h-5" />
+                </Button>
+                <Button
+                    square
                     size={props.size}
                     ghost={props.ghost}
-                    placeholder={t("game.scoreboard.selectInstitute")}
-                    items={gameInstitutesSelect()}
-                    onValueChange={(v) => {
-                        props.onInstituteChanged?.((v.value.at(0) && Number.parseInt(v.value.at(0)!)) || null);
-                    }}
-                    value={(props.institute && [props.institute.toString()]) || undefined}
-                />
+                    onClick={() => props.onShowHiddenTeams?.(!props.showHiddenTeams)}
+                >
+                    <Show
+                        when={props.showHiddenTeams}
+                        fallback={<span class="icon-[fluent--eye-20-regular] w-5 h-5" />}
+                    >
+                        <span class="icon-[fluent--eye-off-20-filled] w-5 h-5 text-warning" />
+                    </Show>
+                </Button>
             </div>
-        </>
+            <Select
+                class="flex-1 max-w-64 min-w-0"
+                size={props.size}
+                ghost={props.ghost}
+                placeholder={t("game.scoreboard.selectInstitute")}
+                items={gameInstitutesSelect()}
+                onValueChange={(v) => {
+                    props.onInstituteChanged?.((v.value.at(0) && Number.parseInt(v.value.at(0)!)) || null);
+                }}
+                value={(props.institute && [props.institute.toString()]) || undefined}
+            />
+        </div>
     );
 }
 

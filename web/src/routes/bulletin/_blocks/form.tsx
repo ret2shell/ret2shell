@@ -73,104 +73,98 @@ export default function (props: {
             });
     }
     return (
-        <>
-            <Form onSubmit={onSubmit} class="flex flex-col space-y-2 self-center w-full max-w-5xl flex-1 p-3 lg:p-6">
-                <Field name="title" validate={[required(t("bulletin.titleRequired")!)]}>
-                    {(field, props) => (
-                        <>
-                            <Input
-                                icon={<span class="icon-[fluent--megaphone-20-regular] w-5 h-5" />}
-                                placeholder={t("bulletin.titlePlaceholder")}
-                                title={t("bulletin.titlePlaceholder")}
-                                {...props}
-                                value={field.value}
-                                error={field.error}
-                                required
-                                extraBtn={
-                                    <>
-                                        <Field name="weight" type="number">
-                                            {(field, props) => (
-                                                <>
-                                                    <input
-                                                        type="number"
-                                                        {...props}
-                                                        name="weight"
-                                                        value={field.value}
-                                                        class="hidden"
-                                                    />
-                                                    <Button
-                                                        class="!rounded-none"
-                                                        title={t("bulletin.pinned")}
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setValue(form, "weight", field.value && true ? 0 : 1);
-                                                        }}
-                                                    >
-                                                        {/* icon-[fluent--pin-20-regular] icon-[fluent--pin-20-filled] */}
-                                                        <span
-                                                            class={`w-5 h-5 icon-[fluent--pin-20-${
-                                                                (field.value || 0) > 0 ? "filled" : "regular"
-                                                            }] ${(field.value || 0) > 0 ? "text-primary" : ""}`}
-                                                        />
-                                                    </Button>
-                                                </>
-                                            )}
-                                        </Field>
-                                        <Field name="enable_comment" type="boolean">
-                                            {(field, props) => (
-                                                <>
-                                                    <input
-                                                        type="checkbox"
-                                                        {...props}
-                                                        name="enable_comment"
-                                                        checked={field.value}
-                                                        class="hidden"
-                                                    />
-                                                    <Button
-                                                        class="!rounded-l-none"
-                                                        title={t("bulletin.enableComment")}
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setValue(form, "enable_comment", !field.value);
-                                                        }}
-                                                    >
-                                                        {/* icon-[fluent--chat-20-regular] icon-[fluent--chat-20-filled] */}
-                                                        <span
-                                                            class={`w-5 h-5 icon-[fluent--chat-20-${
-                                                                field.value ? "filled" : "regular"
-                                                            }] ${field.value ? "text-primary" : ""}`}
-                                                        />
-                                                    </Button>
-                                                </>
-                                            )}
-                                        </Field>
-                                    </>
-                                }
-                            />
-                        </>
-                    )}
-                </Field>
-                <Field name="content" validate={[required(t("bulletin.contentRequired")!)]}>
-                    {(field) => (
-                        <>
-                            <Editor
-                                form={form}
-                                lineNumbers
-                                class="flex-1"
-                                lang="markdown"
-                                placeholder="MARKDOWN"
-                                title={t("bulletin.contentPlaceholder")}
-                                name="content"
-                                value={field.value}
-                                error={field.error}
-                            />
-                        </>
-                    )}
-                </Field>
-                <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
-                    {props.editSource ? t("form.save") : t("form.create")}
-                </Button>
-            </Form>
-        </>
+        <Form onSubmit={onSubmit} class="flex flex-col space-y-2 self-center w-full max-w-5xl flex-1 p-3 lg:p-6">
+            <Field name="title" validate={[required(t("bulletin.titleRequired")!)]}>
+                {(field, props) => (
+                    <Input
+                        icon={<span class="icon-[fluent--megaphone-20-regular] w-5 h-5" />}
+                        placeholder={t("bulletin.titlePlaceholder")}
+                        title={t("bulletin.titlePlaceholder")}
+                        {...props}
+                        value={field.value}
+                        error={field.error}
+                        required
+                        extraBtn={
+                            <>
+                                <Field name="weight" type="number">
+                                    {(field, props) => (
+                                        <>
+                                            <input
+                                                type="number"
+                                                {...props}
+                                                name="weight"
+                                                value={field.value}
+                                                class="hidden"
+                                            />
+                                            <Button
+                                                class="!rounded-none"
+                                                title={t("bulletin.pinned")}
+                                                type="button"
+                                                onClick={() => {
+                                                    setValue(form, "weight", field.value && true ? 0 : 1);
+                                                }}
+                                            >
+                                                {/* icon-[fluent--pin-20-regular] icon-[fluent--pin-20-filled] */}
+                                                <span
+                                                    class={`w-5 h-5 icon-[fluent--pin-20-${
+                                                        (field.value || 0) > 0 ? "filled" : "regular"
+                                                    }] ${(field.value || 0) > 0 ? "text-primary" : ""}`}
+                                                />
+                                            </Button>
+                                        </>
+                                    )}
+                                </Field>
+                                <Field name="enable_comment" type="boolean">
+                                    {(field, props) => (
+                                        <>
+                                            <input
+                                                type="checkbox"
+                                                {...props}
+                                                name="enable_comment"
+                                                checked={field.value}
+                                                class="hidden"
+                                            />
+                                            <Button
+                                                class="!rounded-l-none"
+                                                title={t("bulletin.enableComment")}
+                                                type="button"
+                                                onClick={() => {
+                                                    setValue(form, "enable_comment", !field.value);
+                                                }}
+                                            >
+                                                {/* icon-[fluent--chat-20-regular] icon-[fluent--chat-20-filled] */}
+                                                <span
+                                                    class={`w-5 h-5 icon-[fluent--chat-20-${
+                                                        field.value ? "filled" : "regular"
+                                                    }] ${field.value ? "text-primary" : ""}`}
+                                                />
+                                            </Button>
+                                        </>
+                                    )}
+                                </Field>
+                            </>
+                        }
+                    />
+                )}
+            </Field>
+            <Field name="content" validate={[required(t("bulletin.contentRequired")!)]}>
+                {(field) => (
+                    <Editor
+                        form={form}
+                        lineNumbers
+                        class="flex-1"
+                        lang="markdown"
+                        placeholder="MARKDOWN"
+                        title={t("bulletin.contentPlaceholder")}
+                        name="content"
+                        value={field.value}
+                        error={field.error}
+                    />
+                )}
+            </Field>
+            <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
+                {props.editSource ? t("form.save") : t("form.create")}
+            </Button>
+        </Form>
     );
 }

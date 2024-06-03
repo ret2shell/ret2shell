@@ -55,24 +55,20 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
         }
     });
     return (
-        <>
-            <Show
-                when={ready()}
-                fallback={
-                    <>
-                        <article {...nativeProps} class={`article !max-w-5xl w-full ${nativeProps.class}`}>
-                            <LoadingTips />
-                        </article>
-                    </>
-                }
-            >
-                <article
-                    {...nativeProps}
-                    class={`article !max-w-5xl w-full ${nativeProps.class}`}
-                    innerHTML={contentHtml()}
-                />
-                <div class="h-64" />
-            </Show>
-        </>
+        <Show
+            when={ready()}
+            fallback={
+                <article {...nativeProps} class={`article !max-w-5xl w-full ${nativeProps.class}`}>
+                    <LoadingTips />
+                </article>
+            }
+        >
+            <article
+                {...nativeProps}
+                class={`article !max-w-5xl w-full ${nativeProps.class}`}
+                innerHTML={contentHtml()}
+            />
+            <div class="h-64" />
+        </Show>
     );
 }

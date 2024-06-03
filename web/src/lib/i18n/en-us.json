@@ -172,7 +172,8 @@
       "join": {
         "title": "Join team"
       },
-      "joinFirst": "Please take part in first"
+      "joinFirst": "Please take part in first",
+      "title": "Team details"
     },
     "archivedGotoTraining": "Archived, please goto training board",
     "canNotParticipate": "Not eligible to participate",

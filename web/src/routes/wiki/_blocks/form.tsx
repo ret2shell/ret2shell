@@ -79,145 +79,139 @@ export default function (props: {
             });
     }
     return (
-        <>
-            <Form onSubmit={onSubmit} class="flex flex-col space-y-2 self-center w-full max-w-5xl flex-1 p-3 lg:p-6">
-                <Field name="title" validate={[required(t("wiki.titleRequired")!)]}>
-                    {(field, props) => (
-                        <>
-                            <Input
-                                icon={<span class="icon-[fluent--book-20-regular] w-5 h-5" />}
-                                placeholder={t("wiki.titlePlaceholder")}
-                                title={t("wiki.titlePlaceholder")}
-                                {...props}
-                                value={field.value}
-                                error={field.error}
-                                required
-                                extraBtn={
-                                    <>
-                                        <Field name="enable_comment" type="boolean">
-                                            {(field, props) => (
-                                                <>
-                                                    <input
-                                                        type="checkbox"
-                                                        {...props}
-                                                        name="enable_comment"
-                                                        checked={field.value}
-                                                        class="hidden"
-                                                    />
-                                                    <Button
-                                                        class="!rounded-none"
-                                                        title={t("wiki.enableComment")}
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setValue(form, "enable_comment", !field.value);
-                                                        }}
-                                                    >
-                                                        {/* icon-[fluent--chat-20-regular] icon-[fluent--chat-20-filled] */}
-                                                        <span
-                                                            class={`w-5 h-5 icon-[fluent--chat-20-${
-                                                                field.value ? "filled" : "regular"
-                                                            }] ${field.value ? "text-primary" : ""}`}
-                                                        />
-                                                    </Button>
-                                                </>
-                                            )}
-                                        </Field>
-                                        <Field name="draft" type="boolean">
-                                            {(field, props) => (
-                                                <>
-                                                    <input
-                                                        type="checkbox"
-                                                        {...props}
-                                                        name="draft"
-                                                        checked={field.value}
-                                                        class="hidden"
-                                                    />
-                                                    <Button
-                                                        class="!rounded-none"
-                                                        title={t("wiki.draft")}
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setValue(form, "draft", !field.value);
-                                                        }}
-                                                    >
-                                                        {/* icon-[fluent--edit-20-regular] icon-[fluent--edit-20-filled] */}
-                                                        <span
-                                                            class={`w-5 h-5 icon-[fluent--edit-20-${
-                                                                field.value ? "filled" : "regular"
-                                                            }] ${field.value ? "text-primary" : ""}`}
-                                                        />
-                                                    </Button>
-                                                </>
-                                            )}
-                                        </Field>
-                                        <Field name="published" type="boolean">
-                                            {(field, props) => (
-                                                <>
-                                                    <input
-                                                        type="checkbox"
-                                                        {...props}
-                                                        name="published"
-                                                        checked={field.value}
-                                                        class="hidden"
-                                                    />
-                                                    <Button
-                                                        class="!rounded-l-none"
-                                                        title={t("wiki.published")}
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setValue(form, "published", !field.value);
-                                                        }}
-                                                    >
-                                                        {/* icon-[fluent--megaphone-loud-20-regular] icon-[fluent--megaphone-loud-20-filled] */}
-                                                        <span
-                                                            class={`w-5 h-5 icon-[fluent--megaphone-loud-20-${
-                                                                field.value ? "filled" : "regular"
-                                                            }] ${field.value ? "text-primary" : ""}`}
-                                                        />
-                                                    </Button>
-                                                </>
-                                            )}
-                                        </Field>
-                                    </>
-                                }
-                            />
-                        </>
-                    )}
-                </Field>
-                <Field name="path" validate={[required(t("wiki.pathRequired")!)]}>
-                    {(field, props) => (
-                        <>
-                            <Input
-                                icon={<span class="icon-[fluent--code-20-regular] w-5 h-5" />}
-                                placeholder={t("wiki.pathPlaceholder")}
-                                title={t("wiki.pathPlaceholder")}
-                                {...props}
-                                value={field.value}
-                                error={field.error}
-                                required
-                            />
-                        </>
-                    )}
-                </Field>
-                <Field name="content" validate={[required(t("wiki.contentRequired")!)]}>
-                    {(field) => (
-                        <Editor
-                            form={form}
-                            lineNumbers
-                            class="flex-1"
-                            lang="markdown"
-                            placeholder="MARKDOWN"
-                            title={t("wiki.contentPlaceholder")}
-                            name="content"
-                            value={field.value}
-                            error={field.error}
-                        />
-                    )}
-                </Field>
-                <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
-                    {props.editSource ? t("form.save") : t("form.create")}
-                </Button>
-            </Form>
-        </>
+        <Form onSubmit={onSubmit} class="flex flex-col space-y-2 self-center w-full max-w-5xl flex-1 p-3 lg:p-6">
+            <Field name="title" validate={[required(t("wiki.titleRequired")!)]}>
+                {(field, props) => (
+                    <Input
+                        icon={<span class="icon-[fluent--book-20-regular] w-5 h-5" />}
+                        placeholder={t("wiki.titlePlaceholder")}
+                        title={t("wiki.titlePlaceholder")}
+                        {...props}
+                        value={field.value}
+                        error={field.error}
+                        required
+                        extraBtn={
+                            <>
+                                <Field name="enable_comment" type="boolean">
+                                    {(field, props) => (
+                                        <>
+                                            <input
+                                                type="checkbox"
+                                                {...props}
+                                                name="enable_comment"
+                                                checked={field.value}
+                                                class="hidden"
+                                            />
+                                            <Button
+                                                class="!rounded-none"
+                                                title={t("wiki.enableComment")}
+                                                type="button"
+                                                onClick={() => {
+                                                    setValue(form, "enable_comment", !field.value);
+                                                }}
+                                            >
+                                                {/* icon-[fluent--chat-20-regular] icon-[fluent--chat-20-filled] */}
+                                                <span
+                                                    class={`w-5 h-5 icon-[fluent--chat-20-${
+                                                        field.value ? "filled" : "regular"
+                                                    }] ${field.value ? "text-primary" : ""}`}
+                                                />
+                                            </Button>
+                                        </>
+                                    )}
+                                </Field>
+                                <Field name="draft" type="boolean">
+                                    {(field, props) => (
+                                        <>
+                                            <input
+                                                type="checkbox"
+                                                {...props}
+                                                name="draft"
+                                                checked={field.value}
+                                                class="hidden"
+                                            />
+                                            <Button
+                                                class="!rounded-none"
+                                                title={t("wiki.draft")}
+                                                type="button"
+                                                onClick={() => {
+                                                    setValue(form, "draft", !field.value);
+                                                }}
+                                            >
+                                                {/* icon-[fluent--edit-20-regular] icon-[fluent--edit-20-filled] */}
+                                                <span
+                                                    class={`w-5 h-5 icon-[fluent--edit-20-${
+                                                        field.value ? "filled" : "regular"
+                                                    }] ${field.value ? "text-primary" : ""}`}
+                                                />
+                                            </Button>
+                                        </>
+                                    )}
+                                </Field>
+                                <Field name="published" type="boolean">
+                                    {(field, props) => (
+                                        <>
+                                            <input
+                                                type="checkbox"
+                                                {...props}
+                                                name="published"
+                                                checked={field.value}
+                                                class="hidden"
+                                            />
+                                            <Button
+                                                class="!rounded-l-none"
+                                                title={t("wiki.published")}
+                                                type="button"
+                                                onClick={() => {
+                                                    setValue(form, "published", !field.value);
+                                                }}
+                                            >
+                                                {/* icon-[fluent--megaphone-loud-20-regular] icon-[fluent--megaphone-loud-20-filled] */}
+                                                <span
+                                                    class={`w-5 h-5 icon-[fluent--megaphone-loud-20-${
+                                                        field.value ? "filled" : "regular"
+                                                    }] ${field.value ? "text-primary" : ""}`}
+                                                />
+                                            </Button>
+                                        </>
+                                    )}
+                                </Field>
+                            </>
+                        }
+                    />
+                )}
+            </Field>
+            <Field name="path" validate={[required(t("wiki.pathRequired")!)]}>
+                {(field, props) => (
+                    <Input
+                        icon={<span class="icon-[fluent--code-20-regular] w-5 h-5" />}
+                        placeholder={t("wiki.pathPlaceholder")}
+                        title={t("wiki.pathPlaceholder")}
+                        {...props}
+                        value={field.value}
+                        error={field.error}
+                        required
+                    />
+                )}
+            </Field>
+            <Field name="content" validate={[required(t("wiki.contentRequired")!)]}>
+                {(field) => (
+                    <Editor
+                        form={form}
+                        lineNumbers
+                        class="flex-1"
+                        lang="markdown"
+                        placeholder="MARKDOWN"
+                        title={t("wiki.contentPlaceholder")}
+                        name="content"
+                        value={field.value}
+                        error={field.error}
+                    />
+                )}
+            </Field>
+            <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
+                {props.editSource ? t("form.save") : t("form.create")}
+            </Button>
+        </Form>
     );
 }

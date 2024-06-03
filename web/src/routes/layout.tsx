@@ -33,31 +33,27 @@ import UserBox from "./_blocks/user-box";
 
 function GlobalTitleLink(props: { loading: boolean }) {
     return (
-        <>
-            <Link ghost href="/">
-                <Show when={!props.loading} fallback={<Spin width={24} height={24} />}>
-                    <LogoAnimate class="hidden xl:inline-block" width={24} height={24} />
-                </Show>
-                <span />
-                <span>{platformStore.config.name || t("platform.name")}</span>
-            </Link>
-        </>
+        <Link ghost href="/">
+            <Show when={!props.loading} fallback={<Spin width={24} height={24} />}>
+                <LogoAnimate class="hidden xl:inline-block" width={24} height={24} />
+            </Show>
+            <span />
+            <span>{platformStore.config.name || t("platform.name")}</span>
+        </Link>
     );
 }
 
 function GameTitleLink(props: { loading: boolean }) {
     return (
-        <>
-            <Link ghost href={`/games/${gameStore.current?.id}/`}>
-                <Show when={!props.loading} fallback={<Spin width={24} height={24} />}>
-                    <Show when={gameStore.current?.logo} fallback={<LogoAnimate width={24} height={24} />}>
-                        <img src={mediaPath(gameStore.current!.logo!)} width={24} height={24} alt="CTF" />
-                    </Show>
+        <Link ghost href={`/games/${gameStore.current?.id}/`}>
+            <Show when={!props.loading} fallback={<Spin width={24} height={24} />}>
+                <Show when={gameStore.current?.logo} fallback={<LogoAnimate width={24} height={24} />}>
+                    <img src={mediaPath(gameStore.current!.logo!)} width={24} height={24} alt="CTF" />
                 </Show>
-                <span />
-                <span>{gameStore.current?.name}</span>
-            </Link>
-        </>
+            </Show>
+            <span />
+            <span>{gameStore.current?.name}</span>
+        </Link>
     );
 }
 

@@ -188,7 +188,8 @@
       "join": {
         "title": "加入队伍"
       },
-      "joinFirst": "请先参赛"
+      "joinFirst": "请先参赛",
+      "title": "队伍详情"
     },
     "archivedGotoTraining": "已归档，请前往练习场",
     "canNotParticipate": "不符合参与条件",

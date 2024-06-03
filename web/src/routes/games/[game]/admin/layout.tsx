@@ -9,15 +9,7 @@ export default function (props: { children?: JSX.Element }) {
     return (
         <>
             <Title title={`${t("game.admin.title")} - ${gameStore.current?.name || "CTF"}`} />
-            <SidebarLayout
-                leftBar={
-                    <>
-                        <SideBar />
-                    </>
-                }
-            >
-                {props.children}
-            </SidebarLayout>
+            <SidebarLayout leftBar={<SideBar />}>{props.children}</SidebarLayout>
         </>
     );
 }

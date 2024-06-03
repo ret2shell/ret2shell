@@ -205,26 +205,24 @@ export function InstanceBoxContent() {
 
 export default function InstanceBox() {
     return (
-        <>
-            <Popover
-                btnContent={
-                    <span
-                        class={`${
-                            wsrx.instances().length > 0
-                                ? "icon-[fluent--fluid-20-filled]"
-                                : "icon-[fluent--fluid-20-regular]"
-                        } w-5 h-5 ${
-                            wsrx.instances().length > 0 ? (wsrx.connected() ? "text-success" : "text-warning") : ""
-                        }`}
-                    />
-                }
-                square
-                ghost
-                popContentClass="pt-2"
-                title={t("instance.box")}
-            >
-                <InstanceBoxContent />
-            </Popover>
-        </>
+        <Popover
+            btnContent={
+                <span
+                    class={`${
+                        wsrx.instances().length > 0
+                            ? "icon-[fluent--fluid-20-filled]"
+                            : "icon-[fluent--fluid-20-regular]"
+                    } w-5 h-5 ${
+                        wsrx.instances().length > 0 ? (wsrx.connected() ? "text-success" : "text-warning") : ""
+                    }`}
+                />
+            }
+            square
+            ghost
+            popContentClass="pt-2"
+            title={t("instance.box")}
+        >
+            <InstanceBoxContent />
+        </Popover>
     );
 }

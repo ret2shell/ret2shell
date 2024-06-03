@@ -18,20 +18,18 @@ export default function TimeProgress(
     const cleanup = () => clearInterval(interval);
     onCleanup(cleanup);
     return (
-        <>
-            <Progress.Root {...nativeProps} min={0} max={100} value={progress()}>
-                <Progress.Track class="progress-track">
-                    <Progress.Range
-                        class="progress-range"
-                        classList={{
-                            "progress-range-error": !progressProps.static && progress() > 60,
-                            "progress-range-warning": !progressProps.static && progress() > 30 && progress() <= 60,
-                            "progress-range-success": !progressProps.static && progress() <= 30,
-                            "progress-range-primary": progressProps.static,
-                        }}
-                    />
-                </Progress.Track>
-            </Progress.Root>
-        </>
+        <Progress.Root {...nativeProps} min={0} max={100} value={progress()}>
+            <Progress.Track class="progress-track">
+                <Progress.Range
+                    class="progress-range"
+                    classList={{
+                        "progress-range-error": !progressProps.static && progress() > 60,
+                        "progress-range-warning": !progressProps.static && progress() > 30 && progress() <= 60,
+                        "progress-range-success": !progressProps.static && progress() <= 30,
+                        "progress-range-primary": progressProps.static,
+                    }}
+                />
+            </Progress.Track>
+        </Progress.Root>
     );
 }

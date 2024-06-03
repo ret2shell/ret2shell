@@ -54,128 +54,122 @@ function TimePickerButton(props: {
     const [hour, setHour] = createSignal(props.date.hour);
     const [minute, setMinute] = createSignal(props.date.minute);
     return (
-        <>
-            <Popover.Root
-                autoFocus={false}
-                open={timePickerOpened()}
-                onInteractOutside={() => setTimePickerOpened(false)}
-            >
-                <Popover.Anchor>
-                    <Button
-                        ghost={!props.active && !timePickerOpened()}
-                        square
-                        class="relative"
-                        disabled={props.disabled}
-                        onClick={() => {
-                            if (props.type === "time") {
-                                setTimePickerOpened(true);
-                            } else {
-                                props.onDone(props.date);
-                            }
+        <Popover.Root autoFocus={false} open={timePickerOpened()} onInteractOutside={() => setTimePickerOpened(false)}>
+            <Popover.Anchor>
+                <Button
+                    ghost={!props.active && !timePickerOpened()}
+                    square
+                    class="relative"
+                    disabled={props.disabled}
+                    onClick={() => {
+                        if (props.type === "time") {
+                            setTimePickerOpened(true);
+                        } else {
+                            props.onDone(props.date);
+                        }
+                    }}
+                    type="button"
+                >
+                    <span
+                        classList={{
+                            "opacity-30": !props.current,
+                            "text-primary": currentDate.equals(props.date),
                         }}
-                        type="button"
                     >
-                        <span
-                            classList={{
-                                "opacity-30": !props.current,
-                                "text-primary": currentDate.equals(props.date),
-                            }}
-                        >
-                            {props.date.day.toString().padStart(2, "0")}
-                        </span>
-                    </Button>
-                </Popover.Anchor>
-                <Portal>
-                    <Popover.Positioner>
-                        <Popover.Content class="card">
-                            <div class="card-content p-2 flex flex-col space-y-2">
-                                <div class="flex flex-row space-x-2">
-                                    <div class="flex flex-col space-y-2">
-                                        <Button
-                                            square
-                                            ghost
-                                            type="button"
-                                            size="sm"
-                                            onClick={() => {
-                                                setHour((hour() - 1 + 24) % 24);
-                                            }}
-                                        >
-                                            <span class="icon-[fluent--chevron-up-20-regular] w-5 h-5" />
-                                        </Button>
-                                        <Button square ghost type="button" size="sm">
-                                            {hour().toString().padStart(2, "0")}
-                                        </Button>
-                                        <Button
-                                            square
-                                            ghost
-                                            type="button"
-                                            size="sm"
-                                            onClick={() => {
-                                                setHour((hour() + 1) % 24);
-                                            }}
-                                        >
-                                            <span class="icon-[fluent--chevron-down-20-regular] w-5 h-5" />
-                                        </Button>
-                                    </div>
-                                    <div class="flex flex-col space-y-2">
-                                        <Button
-                                            square
-                                            ghost
-                                            type="button"
-                                            size="sm"
-                                            onClick={() => {
-                                                if (minute() < 10) {
-                                                    setHour((hour() - 1 + 24) % 24);
-                                                }
-                                                setMinute((minute() - 10 + 60) % 60);
-                                            }}
-                                        >
-                                            <span class="icon-[fluent--chevron-up-20-regular] w-5 h-5" />
-                                        </Button>
-                                        <Button square ghost type="button" size="sm">
-                                            {minute().toString().padStart(2, "0")}
-                                        </Button>
-                                        <Button
-                                            square
-                                            ghost
-                                            type="button"
-                                            size="sm"
-                                            onClick={() => {
-                                                if (minute() >= 50) {
-                                                    setHour((hour() + 1) % 24);
-                                                }
-                                                setMinute((minute() + 10) % 60);
-                                            }}
-                                        >
-                                            <span class="icon-[fluent--chevron-down-20-regular] w-5 h-5" />
-                                        </Button>
-                                    </div>
+                        {props.date.day.toString().padStart(2, "0")}
+                    </span>
+                </Button>
+            </Popover.Anchor>
+            <Portal>
+                <Popover.Positioner>
+                    <Popover.Content class="card">
+                        <div class="card-content p-2 flex flex-col space-y-2">
+                            <div class="flex flex-row space-x-2">
+                                <div class="flex flex-col space-y-2">
+                                    <Button
+                                        square
+                                        ghost
+                                        type="button"
+                                        size="sm"
+                                        onClick={() => {
+                                            setHour((hour() - 1 + 24) % 24);
+                                        }}
+                                    >
+                                        <span class="icon-[fluent--chevron-up-20-regular] w-5 h-5" />
+                                    </Button>
+                                    <Button square ghost type="button" size="sm">
+                                        {hour().toString().padStart(2, "0")}
+                                    </Button>
+                                    <Button
+                                        square
+                                        ghost
+                                        type="button"
+                                        size="sm"
+                                        onClick={() => {
+                                            setHour((hour() + 1) % 24);
+                                        }}
+                                    >
+                                        <span class="icon-[fluent--chevron-down-20-regular] w-5 h-5" />
+                                    </Button>
                                 </div>
-                                <Button
-                                    level="primary"
-                                    type="button"
-                                    size="sm"
-                                    onClick={() => {
-                                        setTimePickerOpened(false);
-                                        props.onDone(
-                                            DateTime.fromObject({
-                                                year: props.date.year,
-                                                month: props.date.month,
-                                                day: props.date.day,
-                                                hour: hour(),
-                                                minute: minute(),
-                                            })
-                                        );
-                                    }}
-                                >
-                                    OK
-                                </Button>
+                                <div class="flex flex-col space-y-2">
+                                    <Button
+                                        square
+                                        ghost
+                                        type="button"
+                                        size="sm"
+                                        onClick={() => {
+                                            if (minute() < 10) {
+                                                setHour((hour() - 1 + 24) % 24);
+                                            }
+                                            setMinute((minute() - 10 + 60) % 60);
+                                        }}
+                                    >
+                                        <span class="icon-[fluent--chevron-up-20-regular] w-5 h-5" />
+                                    </Button>
+                                    <Button square ghost type="button" size="sm">
+                                        {minute().toString().padStart(2, "0")}
+                                    </Button>
+                                    <Button
+                                        square
+                                        ghost
+                                        type="button"
+                                        size="sm"
+                                        onClick={() => {
+                                            if (minute() >= 50) {
+                                                setHour((hour() + 1) % 24);
+                                            }
+                                            setMinute((minute() + 10) % 60);
+                                        }}
+                                    >
+                                        <span class="icon-[fluent--chevron-down-20-regular] w-5 h-5" />
+                                    </Button>
+                                </div>
                             </div>
-                        </Popover.Content>
-                    </Popover.Positioner>
-                </Portal>
-            </Popover.Root>
-        </>
+                            <Button
+                                level="primary"
+                                type="button"
+                                size="sm"
+                                onClick={() => {
+                                    setTimePickerOpened(false);
+                                    props.onDone(
+                                        DateTime.fromObject({
+                                            year: props.date.year,
+                                            month: props.date.month,
+                                            day: props.date.day,
+                                            hour: hour(),
+                                            minute: minute(),
+                                        })
+                                    );
+                                }}
+                            >
+                                OK
+                            </Button>
+                        </div>
+                    </Popover.Content>
+                </Popover.Positioner>
+            </Portal>
+        </Popover.Root>
     );
 }
 
@@ -351,7 +345,6 @@ function PickerCalendar(props: {
                     <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
                 </Button>
             </div>
-
             <Divider class="hidden lg:inline-block" />
             <div class="grid grid-cols-7 gap-2 justify-items-center">
                 {/* first, render sunday to monday */}
@@ -420,62 +413,58 @@ export default function TimePicker(props: TimerPickerProps & ComponentProps<"div
         }
     });
     return (
-        <>
-            <div class={`flex flex-col ${props.class}`}>
-                <input class="hidden" type="number" value={props.value} name={props.name} />
-                <Show when={props.range}>
-                    <input
-                        class="hidden"
-                        type="number"
-                        value={(props.range && props.valueNext) || undefined}
-                        name={(props.range && props.nameNext) || undefined}
-                    />
-                </Show>
-                <Input
-                    icon={<span class="icon-[fluent--calendar-20-regular] w-5 h-5" />}
-                    readOnly
-                    title={props.title}
-                    placeholder={props.placeholder}
-                    error={props.error}
-                    value={
-                        (time()?.toFormat(props.type === "date" ? "yyyy-MM-dd" : "yyyy-MM-dd HH:mm") ||
-                            t("calendar.startTime")) +
-                        (props.range
-                            ? ` => ${
-                                  timeNext()?.toFormat(props.type === "date" ? "yyyy-MM-dd" : "yyyy-MM-dd HH:mm") ||
-                                  t("calendar.endTime")
-                              }`
-                            : "")
-                    }
-                    extraBtn={
-                        <>
-                            <Button
-                                class="!rounded-l-none"
-                                type="button"
-                                onClick={() => {
-                                    setTime(null);
-                                    setTimeNext(null);
-                                }}
-                            >
-                                <span class="icon-[fluent--delete-20-regular] w-5 h-5" />
-                            </Button>
-                        </>
-                    }
+        <div class={`flex flex-col ${props.class}`}>
+            <input class="hidden" type="number" value={props.value} name={props.name} />
+            <Show when={props.range}>
+                <input
+                    class="hidden"
+                    type="number"
+                    value={(props.range && props.valueNext) || undefined}
+                    name={(props.range && props.nameNext) || undefined}
                 />
-                <Card class="mt-2 card-field" contentClass="p-2 flex flex-col space-y-2">
-                    <PickerCalendar
-                        value={time()}
-                        setValue={setTime}
-                        valueNext={timeNext()}
-                        setValueNext={setTimeNext}
-                        range={props.range}
-                        type={props.type}
-                        startEdge={props.startEdge}
-                        endEdge={props.endEdge}
-                        reverseEdge={props.reverseEdge}
-                    />
-                </Card>
-            </div>
-        </>
+            </Show>
+            <Input
+                icon={<span class="icon-[fluent--calendar-20-regular] w-5 h-5" />}
+                readOnly
+                title={props.title}
+                placeholder={props.placeholder}
+                error={props.error}
+                value={
+                    (time()?.toFormat(props.type === "date" ? "yyyy-MM-dd" : "yyyy-MM-dd HH:mm") ||
+                        t("calendar.startTime")) +
+                    (props.range
+                        ? ` => ${
+                              timeNext()?.toFormat(props.type === "date" ? "yyyy-MM-dd" : "yyyy-MM-dd HH:mm") ||
+                              t("calendar.endTime")
+                          }`
+                        : "")
+                }
+                extraBtn={
+                    <Button
+                        class="!rounded-l-none"
+                        type="button"
+                        onClick={() => {
+                            setTime(null);
+                            setTimeNext(null);
+                        }}
+                    >
+                        <span class="icon-[fluent--delete-20-regular] w-5 h-5" />
+                    </Button>
+                }
+            />
+            <Card class="mt-2 card-field" contentClass="p-2 flex flex-col space-y-2">
+                <PickerCalendar
+                    value={time()}
+                    setValue={setTime}
+                    valueNext={timeNext()}
+                    setValueNext={setTimeNext}
+                    range={props.range}
+                    type={props.type}
+                    startEdge={props.startEdge}
+                    endEdge={props.endEdge}
+                    reverseEdge={props.reverseEdge}
+                />
+            </Card>
+        </div>
     );
 }

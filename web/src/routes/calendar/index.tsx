@@ -149,34 +149,30 @@ function EventForm(props: {
                 <div class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4">
                     <Field name="name" validate={[required(t("calendar.eventNameRequired")!)]}>
                         {(field, props) => (
-                            <>
-                                <Input
-                                    icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
-                                    placeholder={t("calendar.eventNamePlaceholder")}
-                                    title={t("calendar.eventNamePlaceholder")}
-                                    {...props}
-                                    value={field.value}
-                                    error={field.error}
-                                    required
-                                    class="flex-1"
-                                />
-                            </>
+                            <Input
+                                icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
+                                placeholder={t("calendar.eventNamePlaceholder")}
+                                title={t("calendar.eventNamePlaceholder")}
+                                {...props}
+                                value={field.value}
+                                error={field.error}
+                                required
+                                class="flex-1"
+                            />
                         )}
                     </Field>
                     <Field name="link" validate={[required(t("calendar.eventLinkRequired")!)]}>
                         {(field, props) => (
-                            <>
-                                <Input
-                                    icon={<span class="icon-[fluent--link-20-regular] w-5 h-5" />}
-                                    placeholder={t("calendar.eventLinkPlaceholder")}
-                                    title={t("calendar.eventLinkPlaceholder")}
-                                    {...props}
-                                    value={field.value}
-                                    error={field.error}
-                                    required
-                                    class="flex-1"
-                                />
-                            </>
+                            <Input
+                                icon={<span class="icon-[fluent--link-20-regular] w-5 h-5" />}
+                                placeholder={t("calendar.eventLinkPlaceholder")}
+                                title={t("calendar.eventLinkPlaceholder")}
+                                {...props}
+                                value={field.value}
+                                error={field.error}
+                                required
+                                class="flex-1"
+                            />
                         )}
                     </Field>
                 </div>
@@ -185,39 +181,35 @@ function EventForm(props: {
                         {(field) => (
                             <Field name="end_at" type="number" validate={[required(t("calendar.endAtRequired")!)]}>
                                 {(field2) => (
-                                    <>
-                                        <TimePicker
-                                            form={form}
-                                            type="date"
-                                            range
-                                            title={t("calendar.startEndTime")}
-                                            placeholder={t("calendar.startEndTime")}
-                                            name={field.name}
-                                            value={field.value}
-                                            nameNext={field2.name}
-                                            valueNext={field2.value}
-                                            error={field.error || field2.error}
-                                        />
-                                    </>
+                                    <TimePicker
+                                        form={form}
+                                        type="date"
+                                        range
+                                        title={t("calendar.startEndTime")}
+                                        placeholder={t("calendar.startEndTime")}
+                                        name={field.name}
+                                        value={field.value}
+                                        nameNext={field2.name}
+                                        valueNext={field2.value}
+                                        error={field.error || field2.error}
+                                    />
                                 )}
                             </Field>
                         )}
                     </Field>
                     <Field name="intro" validate={[required(t("calendar.introRequired")!)]}>
                         {(field) => (
-                            <>
-                                <Editor
-                                    form={form}
-                                    lineNumbers={true}
-                                    class="flex-1 min-h-80 lg:min-h-auto"
-                                    lang="markdown"
-                                    placeholder="MARKDOWN"
-                                    title={t("calendar.introPlaceholder")}
-                                    name="intro"
-                                    value={field.value}
-                                    error={field.error}
-                                />
-                            </>
+                            <Editor
+                                form={form}
+                                lineNumbers={true}
+                                class="flex-1 min-h-80 lg:min-h-auto"
+                                lang="markdown"
+                                placeholder="MARKDOWN"
+                                title={t("calendar.introPlaceholder")}
+                                name="intro"
+                                value={field.value}
+                                error={field.error}
+                            />
                         )}
                     </Field>
                 </div>
@@ -427,216 +419,212 @@ export default function () {
                 });
     }
     return (
-        <>
-            <div class="w-full h-full overflow-hidden flex flex-col lg:flex-row">
-                <div class="flex-none flex flex-col p-3 lg:p-6 backdrop-blur sticky top-0 border-r border-r-layer-content/10">
-                    <Card contentClass="p-2 flex flex-col space-y-2">
-                        <div class="flex flex-row space-x-2">
-                            <Button
-                                class="hidden md:inline-flex"
-                                ghost
-                                square
-                                onClick={() => setYear(year() - 1)}
-                                title={t("calendar.jumpToPrevYear")}
-                            >
-                                <span class="icon-[fluent--chevron-double-left-20-regular] w-5 h-5" />
-                            </Button>
-                            <Button
-                                ghost
-                                square
-                                onClick={() => {
-                                    if (month() === 1) {
-                                        setYear(year() - 1);
-                                        setMonth(12);
-                                    } else {
-                                        setMonth((month() - 1) as MonthNumbers);
-                                    }
-                                }}
-                                title={t("calendar.jumpToPrevMonth")}
-                            >
-                                <span class="icon-[fluent--chevron-left-20-regular] w-5 h-5" />
-                            </Button>
-                            <Button
-                                ghost
-                                class="flex-1"
-                                onClick={() => {
-                                    setYear(currentDate.year);
-                                    setMonth(currentDate.month);
-                                }}
-                                title={t("calendar.jumpToToday")}
-                            >
-                                <span>
-                                    {year().toString().padStart(4, "0")}-{month().toString().padStart(2, "0")}
-                                </span>
-                            </Button>
-                            <Show when={accountStore.permissions?.includes(Permission.Calendar)}>
-                                <Button
-                                    ghost
-                                    square
-                                    onClick={() => {
-                                        setInEdit(true);
-                                        setSearchParams({ event: null });
-                                        setSelectedDay(null);
-                                        setSelectedEvent(null);
-                                    }}
-                                >
-                                    <span class="icon-[fluent--add-20-regular] w-5 h-5" />
-                                </Button>
-                            </Show>
+        <div class="w-full h-full overflow-hidden flex flex-col lg:flex-row">
+            <div class="flex-none flex flex-col p-3 lg:p-6 backdrop-blur sticky top-0 border-r border-r-layer-content/10">
+                <Card contentClass="p-2 flex flex-col space-y-2">
+                    <div class="flex flex-row space-x-2">
+                        <Button
+                            class="hidden md:inline-flex"
+                            ghost
+                            square
+                            onClick={() => setYear(year() - 1)}
+                            title={t("calendar.jumpToPrevYear")}
+                        >
+                            <span class="icon-[fluent--chevron-double-left-20-regular] w-5 h-5" />
+                        </Button>
+                        <Button
+                            ghost
+                            square
+                            onClick={() => {
+                                if (month() === 1) {
+                                    setYear(year() - 1);
+                                    setMonth(12);
+                                } else {
+                                    setMonth((month() - 1) as MonthNumbers);
+                                }
+                            }}
+                            title={t("calendar.jumpToPrevMonth")}
+                        >
+                            <span class="icon-[fluent--chevron-left-20-regular] w-5 h-5" />
+                        </Button>
+                        <Button
+                            ghost
+                            class="flex-1"
+                            onClick={() => {
+                                setYear(currentDate.year);
+                                setMonth(currentDate.month);
+                            }}
+                            title={t("calendar.jumpToToday")}
+                        >
+                            <span>
+                                {year().toString().padStart(4, "0")}-{month().toString().padStart(2, "0")}
+                            </span>
+                        </Button>
+                        <Show when={accountStore.permissions?.includes(Permission.Calendar)}>
                             <Button
                                 ghost
                                 square
                                 onClick={() => {
-                                    if (month() === 12) {
-                                        setYear(year() + 1);
-                                        setMonth(1);
-                                    } else {
-                                        setMonth((month() + 1) as MonthNumbers);
-                                    }
+                                    setInEdit(true);
+                                    setSearchParams({ event: null });
+                                    setSelectedDay(null);
+                                    setSelectedEvent(null);
                                 }}
-                                title={t("calendar.jumpToNextMonth")}
                             >
-                                <span class="icon-[fluent--chevron-right-20-regular] w-5 h-5" />
+                                <span class="icon-[fluent--add-20-regular] w-5 h-5" />
                             </Button>
-                            <Button
-                                class="hidden md:inline-flex"
-                                ghost
-                                square
-                                onClick={() => setYear(year() + 1)}
-                                title={t("calendar.jumpToNextYear")}
-                            >
-                                <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
-                            </Button>
-                        </div>
-                        <Divider class="hidden lg:inline-block" />
-                        <div class="hidden lg:grid grid-cols-7 gap-2">
-                            {/* first, render sunday to monday */}
-                            {Array.from({ length: 7 }).map((_, index) => (
-                                <div class="h-12 min-w-12 w-full flex justify-center items-center font-bold opacity-60">
-                                    {t(convertWeekKey(index))}
-                                </div>
-                            ))}
-                            {/* then, render the days use square button */}
-                            {currentMonthDays().map((day) => (
-                                <Button
-                                    ghost={
-                                        !(
-                                            selectedEvent()?.start_at &&
-                                            selectedEvent()!.start_at <= day &&
-                                            selectedEvent()?.end_at &&
-                                            selectedEvent()!.end_at >= day
-                                        ) && !(selectedDay() === day)
-                                    }
-                                    square
-                                    class={`relative ${day.month === month() ? "" : "opacity-30"}`}
-                                    onClick={() => {
-                                        setSelectedDay(day);
-                                        setSearchParams({ event: null });
-                                    }}
-                                >
-                                    <span
-                                        classList={{
-                                            "text-primary":
-                                                currentDate.year === year() &&
-                                                currentDate.month === month() &&
-                                                currentDate.day === day.day,
-                                        }}
-                                    >
-                                        {day.day.toString().padStart(2, "0")}
-                                    </span>
-                                    <Show
-                                        when={eventDays().find(
-                                            (i) => i.day === day.day && i.month === day.month && i.year === day.year
-                                        )}
-                                    >
-                                        <span class="absolute h-1 w-3 bottom-2 left-1/2 -translate-x-1/2 flex flex-row space-x-1 bg-primary rounded-full" />
-                                    </Show>
-                                </Button>
-                            ))}
-                        </div>
-                    </Card>
-                    <Divider class="mt-3 mb-1 lg:mt-6 lg:mb-4" />
-                    <For
-                        each={events()}
-                        fallback={
-                            <div class="mt-2 flex-1 flex flex-row items-center justify-center space-x-2 opacity-60 p-3">
-                                <span class="icon-[fluent--person-walking-20-regular] w-5 h-5" />
-                                <span>{t("calendar.noGames")}</span>
-                            </div>
-                        }
-                    >
-                        {(item) => (
-                            <>
-                                <Link
-                                    ghost
-                                    justify="start"
-                                    class={`mt-2 ${item.id === selectedEventId() ? "btn-active" : ""}`}
-                                    href={`/?event=${item.id}`}
-                                    onClick={() => {
-                                        setSelectedDay(null);
-                                        setInEdit(false);
-                                    }}
-                                    disabled={selectedEventId() === item.id && selectedEvent()?.id !== item.id}
-                                >
-                                    {/* icon-[fluent--flag-20-regular] icon-[fluent--flag-20-filled] */}
-                                    <Show
-                                        when={selectedEventId() === item.id && selectedEvent()?.id !== item.id}
-                                        fallback={
-                                            // text-primary text-base-content
-                                            <span
-                                                class={`icon-[fluent--flag-20-${
-                                                    selectedDayMappedEvents().find((s) => s.id === item.id) ||
-                                                    selectedEventId() === item.id
-                                                        ? "filled"
-                                                        : "regular"
-                                                }] w-5 h-5 text-${
-                                                    selectedDayMappedEvents().find((s) => s.id === item.id) ||
-                                                    selectedEventId() === item.id
-                                                        ? "primary"
-                                                        : "layer-content"
-                                                }`}
-                                            />
-                                        }
-                                    >
-                                        <Spin width={20} height={20} />
-                                    </Show>
-                                    <span class="flex-1 text-start">{item.name}</span>
-                                    <span class="opacity-60">{item.start_at.toFormat("MM-dd")}</span>
-                                </Link>
-                            </>
-                        )}
-                    </For>
-                </div>
-                <OverlayScrollbarsComponent
-                    options={{
-                        scrollbars: {
-                            theme: `os-theme-${fullTheme()}`,
-                            autoHide: "scroll",
-                        },
-                    }}
-                    class="flex-1 relative"
-                    defer
-                >
-                    <div class="flex flex-col items-center w-full min-h-full">
-                        <div class="flex flex-col w-full max-w-5xl flex-1 p-3 lg:p-6 space-y-2">
-                            <Switch>
-                                <Match when={inEdit()}>
-                                    <EventForm onDone={onDone} editSource={selectedEvent() || undefined} />
-                                </Match>
-                                <Match when={!inEdit() && selectedEvent() !== null}>
-                                    <EventDetail event={selectedEvent()!} onEdit={onEdit} onDeleted={onDeleted} />
-                                </Match>
-                                <Match when={true}>
-                                    <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
-                                        <span class="icon-[fluent--flag-20-regular] w-24 h-24" />
-                                        <span>{t("calendar.selectGameToSeeDetail")}</span>
-                                    </div>
-                                </Match>
-                            </Switch>
-                        </div>
+                        </Show>
+                        <Button
+                            ghost
+                            square
+                            onClick={() => {
+                                if (month() === 12) {
+                                    setYear(year() + 1);
+                                    setMonth(1);
+                                } else {
+                                    setMonth((month() + 1) as MonthNumbers);
+                                }
+                            }}
+                            title={t("calendar.jumpToNextMonth")}
+                        >
+                            <span class="icon-[fluent--chevron-right-20-regular] w-5 h-5" />
+                        </Button>
+                        <Button
+                            class="hidden md:inline-flex"
+                            ghost
+                            square
+                            onClick={() => setYear(year() + 1)}
+                            title={t("calendar.jumpToNextYear")}
+                        >
+                            <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
+                        </Button>
                     </div>
-                </OverlayScrollbarsComponent>
+                    <Divider class="hidden lg:inline-block" />
+                    <div class="hidden lg:grid grid-cols-7 gap-2">
+                        {/* first, render sunday to monday */}
+                        {Array.from({ length: 7 }).map((_, index) => (
+                            <div class="h-12 min-w-12 w-full flex justify-center items-center font-bold opacity-60">
+                                {t(convertWeekKey(index))}
+                            </div>
+                        ))}
+                        {/* then, render the days use square button */}
+                        {currentMonthDays().map((day) => (
+                            <Button
+                                ghost={
+                                    !(
+                                        selectedEvent()?.start_at &&
+                                        selectedEvent()!.start_at <= day &&
+                                        selectedEvent()?.end_at &&
+                                        selectedEvent()!.end_at >= day
+                                    ) && !(selectedDay() === day)
+                                }
+                                square
+                                class={`relative ${day.month === month() ? "" : "opacity-30"}`}
+                                onClick={() => {
+                                    setSelectedDay(day);
+                                    setSearchParams({ event: null });
+                                }}
+                            >
+                                <span
+                                    classList={{
+                                        "text-primary":
+                                            currentDate.year === year() &&
+                                            currentDate.month === month() &&
+                                            currentDate.day === day.day,
+                                    }}
+                                >
+                                    {day.day.toString().padStart(2, "0")}
+                                </span>
+                                <Show
+                                    when={eventDays().find(
+                                        (i) => i.day === day.day && i.month === day.month && i.year === day.year
+                                    )}
+                                >
+                                    <span class="absolute h-1 w-3 bottom-2 left-1/2 -translate-x-1/2 flex flex-row space-x-1 bg-primary rounded-full" />
+                                </Show>
+                            </Button>
+                        ))}
+                    </div>
+                </Card>
+                <Divider class="mt-3 mb-1 lg:mt-6 lg:mb-4" />
+                <For
+                    each={events()}
+                    fallback={
+                        <div class="mt-2 flex-1 flex flex-row items-center justify-center space-x-2 opacity-60 p-3">
+                            <span class="icon-[fluent--person-walking-20-regular] w-5 h-5" />
+                            <span>{t("calendar.noGames")}</span>
+                        </div>
+                    }
+                >
+                    {(item) => (
+                        <Link
+                            ghost
+                            justify="start"
+                            class={`mt-2 ${item.id === selectedEventId() ? "btn-active" : ""}`}
+                            href={`/?event=${item.id}`}
+                            onClick={() => {
+                                setSelectedDay(null);
+                                setInEdit(false);
+                            }}
+                            disabled={selectedEventId() === item.id && selectedEvent()?.id !== item.id}
+                        >
+                            {/* icon-[fluent--flag-20-regular] icon-[fluent--flag-20-filled] */}
+                            <Show
+                                when={selectedEventId() === item.id && selectedEvent()?.id !== item.id}
+                                fallback={
+                                    // text-primary text-base-content
+                                    <span
+                                        class={`icon-[fluent--flag-20-${
+                                            selectedDayMappedEvents().find((s) => s.id === item.id) ||
+                                            selectedEventId() === item.id
+                                                ? "filled"
+                                                : "regular"
+                                        }] w-5 h-5 text-${
+                                            selectedDayMappedEvents().find((s) => s.id === item.id) ||
+                                            selectedEventId() === item.id
+                                                ? "primary"
+                                                : "layer-content"
+                                        }`}
+                                    />
+                                }
+                            >
+                                <Spin width={20} height={20} />
+                            </Show>
+                            <span class="flex-1 text-start">{item.name}</span>
+                            <span class="opacity-60">{item.start_at.toFormat("MM-dd")}</span>
+                        </Link>
+                    )}
+                </For>
             </div>
-        </>
+            <OverlayScrollbarsComponent
+                options={{
+                    scrollbars: {
+                        theme: `os-theme-${fullTheme()}`,
+                        autoHide: "scroll",
+                    },
+                }}
+                class="flex-1 relative"
+                defer
+            >
+                <div class="flex flex-col items-center w-full min-h-full">
+                    <div class="flex flex-col w-full max-w-5xl flex-1 p-3 lg:p-6 space-y-2">
+                        <Switch>
+                            <Match when={inEdit()}>
+                                <EventForm onDone={onDone} editSource={selectedEvent() || undefined} />
+                            </Match>
+                            <Match when={!inEdit() && selectedEvent() !== null}>
+                                <EventDetail event={selectedEvent()!} onEdit={onEdit} onDeleted={onDeleted} />
+                            </Match>
+                            <Match when={true}>
+                                <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
+                                    <span class="icon-[fluent--flag-20-regular] w-24 h-24" />
+                                    <span>{t("calendar.selectGameToSeeDetail")}</span>
+                                </div>
+                            </Match>
+                        </Switch>
+                    </div>
+                </div>
+            </OverlayScrollbarsComponent>
+        </div>
     );
 }

@@ -52,29 +52,25 @@ export default function IntroForm(props: {
             .catch(() => setLoading(false));
     }
     return (
-        <>
-            <Form onSubmit={onSubmit} class="flex flex-col space-y-2 self-center w-full max-w-5xl flex-1 p-3 lg:p-6">
-                <Field name="content" validate={[required(t("game.introRequired")!)]}>
-                    {(field) => (
-                        <>
-                            <Editor
-                                form={form}
-                                lineNumbers
-                                class="flex-1"
-                                lang="markdown"
-                                placeholder="MARKDOWN"
-                                title={t("game.introPlaceholder")}
-                                name="content"
-                                value={field.value}
-                                error={field.error}
-                            />
-                        </>
-                    )}
-                </Field>
-                <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
-                    {t("form.save")}
-                </Button>
-            </Form>
-        </>
+        <Form onSubmit={onSubmit} class="flex flex-col space-y-2 self-center w-full max-w-5xl flex-1 p-3 lg:p-6">
+            <Field name="content" validate={[required(t("game.introRequired")!)]}>
+                {(field) => (
+                    <Editor
+                        form={form}
+                        lineNumbers
+                        class="flex-1"
+                        lang="markdown"
+                        placeholder="MARKDOWN"
+                        title={t("game.introPlaceholder")}
+                        name="content"
+                        value={field.value}
+                        error={field.error}
+                    />
+                )}
+            </Field>
+            <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
+                {t("form.save")}
+            </Button>
+        </Form>
     );
 }

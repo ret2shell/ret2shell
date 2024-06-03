@@ -30,11 +30,9 @@ function buildLinked(tree: TreeNode[], paths: string[], article: Article) {
             name: article.title,
             link: `/wiki/${article.id}`,
             extraPart: (
-                <>
-                    <Show when={!article.published}>
-                        <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
-                    </Show>
-                </>
+                <Show when={!article.published}>
+                    <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
+                </Show>
             ),
             children: [],
         });
@@ -54,30 +52,28 @@ function buildTocTree(articles: Article[]) {
 export default function SideBar() {
     const toc = () => buildTocTree(wikiStore.toc);
     return (
-        <>
-            <OverlayScrollbarsComponent
-                options={{
-                    scrollbars: {
-                        theme: `os-theme-${fullTheme()}`,
-                        autoHide: "scroll",
-                    },
-                }}
-                class="relative w-full h-full print:h-auto print:overflow-auto"
-                defer
-            >
-                <div class="p-3 lg:p-6 flex flex-col space-y-2">
-                    <Show when={accountStore.permissions.includes(Permission.Wiki)}>
-                        <>
-                            <Link href={"/wiki/create"} level="primary">
-                                <span class="icon-[fluent--add-20-regular] w-5 h-5" />
-                                <span>{t("form.create")}</span>
-                            </Link>
-                            <Divider class="!mt-6 !mb-4" />
-                        </>
-                    </Show>
-                    <TreeView tree={toc()} size="sm" highlightPaths={wikiStore.current?.path} />
-                </div>
-            </OverlayScrollbarsComponent>
-        </>
+        <OverlayScrollbarsComponent
+            options={{
+                scrollbars: {
+                    theme: `os-theme-${fullTheme()}`,
+                    autoHide: "scroll",
+                },
+            }}
+            class="relative w-full h-full print:h-auto print:overflow-auto"
+            defer
+        >
+            <div class="p-3 lg:p-6 flex flex-col space-y-2">
+                <Show when={accountStore.permissions.includes(Permission.Wiki)}>
+                    <>
+                        <Link href={"/wiki/create"} level="primary">
+                            <span class="icon-[fluent--add-20-regular] w-5 h-5" />
+                            <span>{t("form.create")}</span>
+                        </Link>
+                        <Divider class="!mt-6 !mb-4" />
+                    </>
+                </Show>
+                <TreeView tree={toc()} size="sm" highlightPaths={wikiStore.current?.path} />
+            </div>
+        </OverlayScrollbarsComponent>
     );
 }
