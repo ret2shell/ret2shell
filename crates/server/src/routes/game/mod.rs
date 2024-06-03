@@ -22,6 +22,7 @@ use crate::{
 };
 
 mod challenge;
+mod chat;
 mod team;
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
@@ -38,6 +39,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
                 .layer(middleware::from_fn(auth::game_admin_required))
                 .nest("/challenge", challenge::router(state))
                 .nest("/team", team::router(state))
+                .nest("/chat", chat::router(state))
                 .route("/introduction", get(get_game_intro))
                 .route("/", get(get_game))
                 .layer(middleware::from_fn_with_state(

@@ -17,7 +17,7 @@
   --spread: 8px;
   --offset: 0px;
 
-  @apply rounded-lg h-12 w-48 relative focus:outline-none border-none overflow-hidden isolate;
+  @apply rounded-lg h-12 w-full relative focus:outline-none border-none overflow-hidden isolate;
   background-color: var(--darkmode-clr-background-day);
   font-size: 1em;
   transition: all 0.75s var(--darkmode-ease);

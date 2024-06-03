@@ -20,7 +20,9 @@
     "notImplementedTips": "Randomly sacrifice an rx",
     "notImplementedTips1": "Are you willing to form a lifelong band with me?",
     "notImplementedTips2": "This is rx, he is even more of a genius at building shit mountains of code.",
-    "notImplementedTips3": "Why...why write \"Rust\"!"
+    "notImplementedTips3": "Why...why write \"Rust\"!",
+    "followSystem": "System sync",
+    "systemTheme": "OS Theme"
   },
   "wiki": {
     "title": "Wiki",

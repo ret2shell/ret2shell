@@ -6,7 +6,6 @@ import { createEffect, createResource, untrack } from "solid-js";
 import { createStore } from "solid-js/store";
 
 const prefersDark = createPrefersDark();
-const initPrefersDark = prefersDark();
 
 let systemPrefersLocale = (window.navigator.language || window.navigator.languages[0])
     .replace("-", "_")
@@ -20,7 +19,8 @@ export const [themeStore, setThemeStore] = makePersisted(
     createStore({
         theme: "cyber",
         locale: systemPrefersLocale,
-        colorScheme: initPrefersDark ? "dark" : "light",
+        colorScheme: "dark",
+        colorSchemeFollowsSystem: false,
     }),
     { name: "theme" }
 );
@@ -48,11 +48,9 @@ export function initTheme() {
         document.documentElement.setAttribute("data-style", themeStore.colorScheme);
     });
     createEffect(() => {
-        if (prefersDark()) {
-            untrack(() => setColorScheme("dark"));
-        } else {
-            untrack(() => setColorScheme("light"));
-        }
+        if (themeStore.colorSchemeFollowsSystem)
+            if (prefersDark()) untrack(() => setColorScheme("dark"));
+            else untrack(() => setColorScheme("light"));
     });
 }
 

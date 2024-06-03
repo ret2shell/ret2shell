@@ -20,7 +20,9 @@
     "notImplementedTips": "随机献祭一个rx",
     "notImplementedTips1": "你愿意和我组一辈子乐队吗？",
     "notImplementedTips2": "这边这位rx桑，更是堆屎山代码的天才",
-    "notImplementedTips3": "为什么……为什么要写《Rust》！"
+    "notImplementedTips3": "为什么……为什么要写《Rust》！",
+    "followSystem": "同步系统主题",
+    "systemTheme": "系统主题"
   },
   "wiki": {
     "title": "知识",

@@ -20,7 +20,9 @@
     "notImplementedTips": "ランダムにrxを生け贄に捧げる",
     "notImplementedTips1": "じゃ……一生 バンドしてくれる？",
     "notImplementedTips2": "こちらの rx さんは たわごとの山のコードの天才ですの",
-    "notImplementedTips3": "何でよ 何で「Rust」やったの！"
+    "notImplementedTips3": "何でよ 何で「Rust」やったの！",
+    "followSystem": "同期システム",
+    "systemTheme": "システムテーマ"
   },
   "wiki": {
     "title": "知識",

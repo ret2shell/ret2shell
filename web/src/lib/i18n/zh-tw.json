@@ -20,7 +20,9 @@
     "notImplementedTips": "隨機獻祭一個rx",
     "notImplementedTips1": "你願意跟我組一輩子樂團嗎？",
     "notImplementedTips2": "這邊這位rx桑，更是堆屎山代碼的天才",
-    "notImplementedTips3": "為什麼……為什麼要寫《Rust》！"
+    "notImplementedTips3": "為什麼……為什麼要寫《Rust》！",
+    "followSystem": "同步系統主題",
+    "systemTheme": "系統主題"
   },
   "wiki": {
     "title": "知識",
