@@ -201,19 +201,17 @@ export default function (props: {
                 </Field>
                 <Field name="content" validate={[required(t("wiki.contentRequired")!)]}>
                     {(field) => (
-                        <>
-                            <Editor
-                                form={form}
-                                lineNumbers
-                                class="flex-1"
-                                lang="markdown"
-                                placeholder="MARKDOWN"
-                                title={t("wiki.contentPlaceholder")}
-                                name="content"
-                                value={field.value}
-                                error={field.error}
-                            />
-                        </>
+                        <Editor
+                            form={form}
+                            lineNumbers
+                            class="flex-1"
+                            lang="markdown"
+                            placeholder="MARKDOWN"
+                            title={t("wiki.contentPlaceholder")}
+                            name="content"
+                            value={field.value}
+                            error={field.error}
+                        />
                     )}
                 </Field>
                 <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
