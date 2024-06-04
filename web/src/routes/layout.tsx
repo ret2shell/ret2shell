@@ -32,13 +32,19 @@ import Toasts from "./_blocks/toasts";
 import UserBox from "./_blocks/user-box";
 
 function GlobalTitleLink(props: { loading: boolean }) {
+    const location = useLocation();
+    const inDocs = () => location.pathname.startsWith("/docs");
     return (
         <Link ghost href="/">
             <Show when={!props.loading} fallback={<Spin width={24} height={24} />}>
                 <LogoAnimate class="hidden xl:inline-block" width={24} height={24} />
             </Show>
             <span />
-            <span>{platformStore.config.name || t("platform.name")}</span>
+            <span>
+                {inDocs()
+                    ? `${t("docs.title")} - ${t("platform.name")}`
+                    : platformStore.config.name || t("platform.name")}
+            </span>
         </Link>
     );
 }
@@ -178,6 +184,8 @@ function GameNav(props: { size: "sm" | "md" }) {
 function TitleBar() {
     const [additionalMobileBox, setAdditionalMobileBox] = createSignal<"wsrx" | "notification" | "diy" | null>(null);
     const params = useParams();
+    const location = useLocation();
+    const inDocs = () => location.pathname.startsWith("/docs");
 
     // TODO: it does not work at this point, see solidjs/solid-router#102
     // const isRouting = useIsRouting()
@@ -201,7 +209,7 @@ function TitleBar() {
         <>
             <div id="page-top" class="print:hidden" />
             <div class="hidden print:flex flex-row border-b border-b-layer-content/60 w-full">
-                <span>{platformStore.config.name || t("platform.name")}</span>
+                <span>{inDocs() ? t("docs.titleTips") : platformStore.config.name || t("platform.name")}</span>
                 <span class="flex-1" />
                 <span>{DateTime.now().toFormat("yyyy-MM-dd HH:mm:ss")}</span>
             </div>
@@ -327,6 +335,12 @@ function TitleBar() {
                             >
                                 <GameNav size="md" />
                             </Match>
+                            <Match when={inDocs()}>
+                                <span class="flex flex-row items-center space-x-2">
+                                    <span class="opacity-60">{t("docs.forVersion")}:</span>
+                                    <span class="font-bold opacity-80">{platformStore.version}</span>
+                                </span>
+                            </Match>
                             <Match when={platformStore.isOnline}>
                                 <GlobalNav size="md" />
                             </Match>
@@ -414,6 +428,8 @@ export default function (props: { children?: JSX.Element }) {
     const [hideAnimation, setHideAnimation] = createSignal(false);
     const showAnimation = useLocation().pathname === "/" && useSearchParams()[0].event === undefined;
     const navigate = useNavigate();
+    const location = useLocation();
+    const inDocs = () => location.pathname.startsWith("/docs");
     checkCookiePolicy();
     setupTitleResolver();
     getPlatformInfo()
@@ -428,13 +444,13 @@ export default function (props: { children?: JSX.Element }) {
             if (err.response?.status === 503) {
                 setPlatformStore({ under_maintenance: true });
                 navigate("/");
-            } else if (err.response?.status === 502) {
+            } else if (err.response?.status === 502 && !inDocs()) {
                 addToast({
                     level: "error",
                     description: `${t("platform.offline")}`,
                 });
                 navigate(`/errors/${err.response?.status || 502}`);
-            } else {
+            } else if (!inDocs()) {
                 addToast({
                     level: "error",
                     description: `${t("platform.error")}: ${err.response?.statusText || err.message}`,

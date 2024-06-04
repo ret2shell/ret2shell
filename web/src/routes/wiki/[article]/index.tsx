@@ -9,6 +9,7 @@ import { t } from "@/lib/storage/theme";
 import { addToast } from "@/lib/storage/toast";
 import { refreshWikiToc, setWikiStore, wikiStore } from "@/lib/storage/wiki";
 import Article from "@/lib/widgets/article";
+import Divider from "@/lib/widgets/divider";
 import { useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import type { HTTPError } from "ky";
 import { Show, createEffect, onCleanup, untrack } from "solid-js";
@@ -76,8 +77,8 @@ export default function () {
     return (
         <>
             <Title title={`${wikiStore.current?.title} - ${platformStore.config.name || t("platform.name")}`} />
-            <div class="flex-1 flex flex-col">
-                <h1 class="text-3xl text-center flex flex-row space-x-4 items-center justify-center font-bold mt-8 print:mt-16">
+            <div class="flex-1 flex flex-col items-center">
+                <h1 class="text-3xl flex flex-row space-x-4 items-center w-full px-3 lg:px-6 max-w-5xl justify-start print:justify-center font-bold mt-8 print:mt-16">
                     <Show
                         when={wikiStore.current}
                         fallback={
@@ -90,7 +91,7 @@ export default function () {
                         <span>{wikiStore.current!.title}</span>
                     </Show>
                 </h1>
-                <div class="flex flex-row items-center justify-center space-x-6 print:space-x-2 opacity-60 flex-wrap py-3">
+                <div class="flex flex-row items-center w-full px-3 lg:px-6 max-w-5xl justify-start print:justify-center space-x-6 print:space-x-2 opacity-60 flex-wrap py-3">
                     <a
                         class="hover:underline font-bold flex flex-row space-x-2 items-center"
                         title={t("article.by", {
@@ -155,6 +156,7 @@ export default function () {
                         <span>{t("form.print")}</span>
                     </button>
                 </div>
+                <Divider class="w-full max-w-5xl" />
                 <Show
                     when={inEdit()}
                     fallback={

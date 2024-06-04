@@ -19,6 +19,7 @@ declare module "*.jpeg" {
     const src: string;
     export default src;
 }
+declare module "*.md";
 declare module "*.module.css" {
     const styles: Record<string, string>;
     export default styles;

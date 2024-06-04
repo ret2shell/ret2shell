@@ -62,7 +62,7 @@ export default function SideBar() {
             class="relative w-full h-full print:h-auto print:overflow-auto"
             defer
         >
-            <div class="p-3 lg:p-6 flex flex-col space-y-2">
+            <div class="p-3 lg:p-6 flex flex-col space-y-2 flex-1 min-h-[calc(100%-4rem)]">
                 <Show when={accountStore.permissions.includes(Permission.Wiki)}>
                     <>
                         <Link href={"/wiki/create"} level="primary">
@@ -74,6 +74,16 @@ export default function SideBar() {
                 </Show>
                 <TreeView tree={toc()} size="sm" highlightPaths={wikiStore.current?.path} />
             </div>
+            <a
+                class="sticky bottom-0 h-16 border-t border-t-layer-content/10 flex flex-row items-center justify-center px-4 space-x-2"
+                href="/docs"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <span class="icon-[fluent--book-20-regular] w-5 h-5" />
+                <span>{t("docs.titleTips")}</span>
+                <span class="icon-[fluent--open-20-regular] w-5 h-5 text-primary" />
+            </a>
         </OverlayScrollbarsComponent>
     );
 }

@@ -1,4 +1,4 @@
-import { lazy } from "solid-js";
+import { children, lazy } from "solid-js";
 
 export const routes = {
     path: "/",
@@ -83,6 +83,20 @@ export const routes = {
                 {
                     path: "/:article",
                     component: lazy(() => import("./wiki/[article]/index")),
+                },
+            ],
+        },
+        {
+            path: "/docs",
+            component: lazy(() => import("./docs/layout")),
+            children: [
+                {
+                    path: "/",
+                    component: lazy(() => import("./docs/index")),
+                },
+                {
+                    path: "/*",
+                    component: lazy(() => import("./docs/article")),
                 },
             ],
         },

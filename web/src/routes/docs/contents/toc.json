@@ -1,0 +1,47 @@
+{
+  "devops": {
+    "title": {
+      "en_us": "Deployments & Maintainance",
+      "zh_cn": "平台部署 & 运维",
+      "zh_tw": "平台部署 & 運維",
+      "ja_jp": "デプロイメント & メンテナンス"
+    },
+    "children": {}
+  },
+  "cluster": {
+    "title": {
+      "en_us": "Cluster Management",
+      "zh_cn": "集群管理",
+      "zh_tw": "集群管理",
+      "ja_jp": "クラスタ管理"
+    },
+    "children": {}
+  },
+  "checker": {
+    "title": {
+      "en_us": "The Rune Script Language",
+      "zh_cn": "Rune 脚本语言",
+      "zh_tw": "Rune 腳本語言",
+      "ja_jp": "Rune スクリプト言語"
+    },
+    "children": {}
+  },
+  "events": {
+    "title": {
+      "en_us": "Events API",
+      "zh_cn": "事件 API",
+      "zh_tw": "事件 API",
+      "ja_jp": "イベント API"
+    },
+    "children": {}
+  },
+  "http-api": {
+    "title": {
+      "en_us": "HTTP API",
+      "zh_cn": "HTTP API",
+      "zh_tw": "HTTP API",
+      "ja_jp": "HTTP API"
+    },
+    "children": {}
+  }
+}

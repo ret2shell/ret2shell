@@ -126,17 +126,25 @@ export default function () {
                                         </div>
                                     </Card>
                                     <Card contentClass="flex flex-row p-2 space-x-2">
-                                        <Link href="mailto:ret2shell@woooo.tech" ghost size="sm">
+                                        <Link
+                                            href="mailto:ret2shell@woooo.tech"
+                                            ghost
+                                            size="sm"
+                                            class="flex-1"
+                                            justify="start"
+                                            title={t("about.contactTips")}
+                                            target="_blank"
+                                        >
                                             <span class="icon-[fluent--mail-20-regular] w-5 h-5" />
                                             <span class="font-normal opacity-60">ret2shell@woooo.tech</span>
                                         </Link>
-                                        <div class="flex-1" />
                                         <Link
-                                            href="https://github.com/ret2shell"
+                                            href="https://afdian.net/a/reverier"
                                             ghost
                                             size="sm"
                                             square
                                             title={t("about.donate")}
+                                            target="_blank"
                                         >
                                             <span class="icon-[fluent--flash-sparkle-20-regular] w-5 h-5" />
                                         </Link>
@@ -146,6 +154,7 @@ export default function () {
                                             size="sm"
                                             square
                                             title={t("about.source")}
+                                            target="_blank"
                                         >
                                             <span class="icon-[fluent--open-20-regular] w-5 h-5" />
                                         </Link>

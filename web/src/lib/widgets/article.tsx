@@ -52,6 +52,9 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
                         duration: 5000,
                     });
                 });
+        } else {
+            setReady(true);
+            setContentHtml("");
         }
     });
     return (
