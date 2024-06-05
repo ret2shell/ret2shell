@@ -14,7 +14,7 @@ type DocNode = {
         zh_tw: string;
         ja_jp: string;
     };
-    children: { [key: string]: DocNode };
+    children?: { [key: string]: DocNode };
 };
 
 export default function () {
@@ -22,6 +22,7 @@ export default function () {
     const [content, setContent] = createSignal(null as null | string);
     const [notFound, setNotFound] = createSignal(false);
     const navigate = useNavigate();
+    const comps = import.meta.glob("./contents/**/*.md");
     async function getDoc(path: string) {
         const pathArr = path.split("/");
         const toc = tocJson as { [key: string]: DocNode };
@@ -39,9 +40,12 @@ export default function () {
         }
         setTitle(node.title[themeStore.locale]);
         try {
-            const content = await import(`./contents/${path}/index.${themeStore.locale}.md?raw`);
+            // console.log(comps);
+            const match = comps[`./contents/${path}/index.${themeStore.locale}.md`];
+            const content = (await match()) as { default: string };
             setContent(content.default);
-        } catch {
+        } catch (e) {
+            // console.error(e);
             setNotFound(true);
         }
     }
@@ -52,7 +56,7 @@ export default function () {
         getDoc(location.pathname.replace("/docs/", ""));
     });
     createEffect(() => {
-        if (notFound()) navigate("/errors/404", { replace: true });
+        if (notFound()) navigate("/sigtrap/404", { replace: true });
     });
     return (
         <>

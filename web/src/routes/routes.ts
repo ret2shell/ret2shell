@@ -95,7 +95,7 @@ export const routes = {
                     component: lazy(() => import("./docs/index")),
                 },
                 {
-                    path: "/*",
+                    path: "/*article",
                     component: lazy(() => import("./docs/article")),
                 },
             ],
@@ -316,37 +316,37 @@ export const routes = {
             ],
         },
         {
-            path: "/errors",
+            path: "/sigtrap",
             children: [
                 {
                     path: "/401",
-                    component: lazy(() => import("./errors/e401")),
+                    component: lazy(() => import("./sigtrap/e401")),
                 },
                 {
                     path: "/403",
-                    component: lazy(() => import("./errors/e403")),
+                    component: lazy(() => import("./sigtrap/e403")),
                 },
                 {
                     path: "/404",
-                    component: lazy(() => import("./errors/e404")),
+                    component: lazy(() => import("./sigtrap/e404")),
                 },
                 {
                     path: "/418",
-                    component: lazy(() => import("./errors/e418")),
+                    component: lazy(() => import("./sigtrap/e418")),
                 },
                 {
                     path: "/500",
-                    component: lazy(() => import("./errors/e500")),
+                    component: lazy(() => import("./sigtrap/e500")),
                 },
                 {
                     path: "/502",
-                    component: lazy(() => import("./errors/e502")),
+                    component: lazy(() => import("./sigtrap/e502")),
                 },
             ],
         },
         {
             path: "*",
-            component: lazy(() => import("./errors/e404")),
+            component: lazy(() => import("./sigtrap/e404")),
         },
     ],
 };

@@ -23,7 +23,7 @@ export default function () {
     const navigate = useNavigate();
 
     createEffect(() => {
-        if (Number.isNaN(article_id())) navigate("/errors/404", { replace: true });
+        if (Number.isNaN(article_id())) navigate("/sigtrap/404", { replace: true });
         untrack(() => {
             getWiki(article_id())
                 .then((resp) => {
@@ -33,7 +33,7 @@ export default function () {
                 .catch((err: HTTPError) => {
                     void err.response.text().then((reason) => {
                         addToast({ level: "error", description: reason, duration: 5000 });
-                        navigate(`/errors/${err.response.status}`, { replace: true });
+                        navigate(`/sigtrap/${err.response.status}`, { replace: true });
                     });
                 });
         });
@@ -69,7 +69,7 @@ export default function () {
             .catch((err: HTTPError) => {
                 void err.response.text().then((reason) => {
                     addToast({ level: "error", description: reason, duration: 5000 });
-                    navigate(`/errors/${err.response.status}`, { replace: true });
+                    navigate(`/sigtrap/${err.response.status}`, { replace: true });
                 });
             });
         setSearchParams({ edit: undefined });

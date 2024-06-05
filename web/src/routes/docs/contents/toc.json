@@ -17,14 +17,195 @@
     },
     "children": {}
   },
-  "checker": {
+  "rune": {
     "title": {
       "en_us": "The Rune Script Language",
       "zh_cn": "Rune 脚本语言",
       "zh_tw": "Rune 腳本語言",
       "ja_jp": "Rune スクリプト言語"
     },
-    "children": {}
+    "children": {
+      "getting-started": {
+        "title": {
+          "en_us": "Getting Started",
+          "zh_cn": "快速入门",
+          "zh_tw": "快速入門",
+          "ja_jp": "はじめに"
+        }
+      },
+      "concepts": {
+        "title": {
+          "en_us": "Concepts",
+          "zh_cn": "基础概念",
+          "zh_tw": "基礎概念",
+          "ja_jp": "コンセプト"
+        },
+        "children": {
+          "items-imports": {
+            "title": {
+              "en_us": "Items & Imports",
+              "zh_cn": "项 & 模块导入",
+              "zh_tw": "項 & 模塊導入",
+              "ja_jp": "アイテム & インポート"
+            }
+          },
+          "functions": {
+            "title": {
+              "en_us": "Functions",
+              "zh_cn": "函数",
+              "zh_tw": "函數",
+              "ja_jp": "関数"
+            }
+          },
+          "control-flow": {
+            "title": {
+              "en_us": "Control Flow",
+              "zh_cn": "控制流",
+              "zh_tw": "控制流",
+              "ja_jp": "制御フロー"
+            }
+          },
+          "variables": {
+            "title": {
+              "en_us": "Variables & Memory",
+              "zh_cn": "变量 & 内存",
+              "zh_tw": "變量 & 內存",
+              "ja_jp": "変数 & メモリ"
+            }
+          },
+          "loops": {
+            "title": {
+              "en_us": "Loops",
+              "zh_cn": "循环",
+              "zh_tw": "循環",
+              "ja_jp": "ループ"
+            }
+          },
+          "pattern-matching": {
+            "title": {
+              "en_us": "Pattern Matching",
+              "zh_cn": "模式匹配",
+              "zh_tw": "模式匹配",
+              "ja_jp": "パターンマッチ"
+            }
+          },
+          "template-literals": {
+            "title": {
+              "en_us": "Template Literals",
+              "zh_cn": "模板字符串",
+              "zh_tw": "模板字符串",
+              "ja_jp": "テンプレートリテラル"
+            }
+          },
+          "struct-functions": {
+            "title": {
+              "en_us": "Struct Functions",
+              "zh_cn": "结构体函数",
+              "zh_tw": "結構體函數",
+              "ja_jp": "構造体関数"
+            }
+          },
+          "field-functions": {
+            "title": {
+              "en_us": "Field Functions",
+              "zh_cn": "字段函数",
+              "zh_tw": "字段函數",
+              "ja_jp": "フィールド関数"
+            }
+          }
+        }
+      },
+      "types": {
+        "title": {
+          "en_us": "Types",
+          "zh_cn": "类型",
+          "zh_tw": "類型",
+          "ja_jp": "タイプ"
+        },
+        "children": {
+          "primitives": {
+            "title": {
+              "en_us": "Primitive Types",
+              "zh_cn": "基本类型",
+              "zh_tw": "基本類型",
+              "ja_jp": "プリミティブタイプ"
+            }
+          },
+          "vectors": {
+            "title": {
+              "en_us": "Vector Types",
+              "zh_cn": "向量类型",
+              "zh_tw": "向量類型",
+              "ja_jp": "ベクトルタイプ"
+            }
+          },
+          "objects": {
+            "title": {
+              "en_us": "Object Types",
+              "zh_cn": "对象类型",
+              "zh_tw": "對象類型",
+              "ja_jp": "オブジェクトタイプ"
+            }
+          },
+          "tuples": {
+            "title": {
+              "en_us": "Tuple Types",
+              "zh_cn": "元组类型",
+              "zh_tw": "元組類型",
+              "ja_jp": "タプルタイプ"
+            }
+          },
+          "struct-enums": {
+            "title": {
+              "en_us": "Structs & Enums",
+              "zh_cn": "结构体 & 枚举",
+              "zh_tw": "結構體 & 枚舉",
+              "ja_jp": "構造体 & 列挙型"
+            }
+          },
+          "external-types": {
+            "title": {
+              "en_us": "External Types",
+              "zh_cn": "外部类型",
+              "zh_tw": "外部類型",
+              "ja_jp": "外部タイプ"
+            }
+          }
+        }
+      },
+      "error-handling": {
+        "title": {
+          "en_us": "Error Handling",
+          "zh_cn": "错误处理",
+          "zh_tw": "錯誤處理",
+          "ja_jp": "エラーハンドリング"
+        }
+      },
+      "generators": {
+        "title": {
+          "en_us": "Generators",
+          "zh_cn": "生成器",
+          "zh_tw": "生成器",
+          "ja_jp": "ジェネレータ"
+        }
+      },
+      "closures": {
+        "title": {
+          "en_us": "Closures",
+          "zh_cn": "闭包",
+          "zh_tw": "閉包",
+          "ja_jp": "クロージャ"
+        }
+      },
+      "asynchronous": {
+        "title": {
+          "en_us": "Asynchronous Programming",
+          "zh_cn": "异步编程",
+          "zh_tw": "異步編程",
+          "ja_jp": "非同期プログラミング"
+        }
+      }
+    }
   },
   "events": {
     "title": {

@@ -3,12 +3,12 @@ import Button from "./button";
 import Link from "./link";
 
 export type TreeNode = {
+    id: string | number;
     children: TreeNode[];
     name: string;
     icon: string;
 } & (
     | {
-          id: string | number;
           type: "item";
           link?: string;
           extraPart?: JSX.Element;
@@ -31,7 +31,7 @@ export default function TreeView(props: TreeViewProps) {
         createEffect(() => {
             if (props.highlightPaths) {
                 untrack(() => {
-                    if (props.highlightPaths?.at(level) === node.name) {
+                    if (props.highlightPaths?.at(level) === node.id.toString()) {
                         setShowChildren(true);
                     }
                 });

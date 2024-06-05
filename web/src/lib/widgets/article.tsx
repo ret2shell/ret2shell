@@ -62,7 +62,9 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
             when={ready()}
             fallback={
                 <article {...nativeProps} class={`article !max-w-5xl w-full ${nativeProps.class}`}>
-                    <LoadingTips />
+                    <p>
+                        <LoadingTips />
+                    </p>
                 </article>
             }
         >

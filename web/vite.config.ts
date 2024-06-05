@@ -1,10 +1,22 @@
-import { defineConfig } from "vite";
-import solidPlugin from "vite-plugin-solid";
 import path from "node:path";
+import { defineConfig } from "vite";
 import viteCompression from "vite-plugin-compression";
+import solidPlugin from "vite-plugin-solid";
 
 export default defineConfig({
-    plugins: [solidPlugin(), viteCompression()],
+    plugins: [
+        solidPlugin(),
+        viteCompression(),
+        {
+            name: "markdown-loader",
+            transform(code, id) {
+                if (id.slice(-3) === ".md") {
+                    // For .md files, get the raw content
+                    return `export default ${JSON.stringify(code)};`;
+                }
+            },
+        },
+    ],
     server: {
         port: 5173,
     },

@@ -93,3 +93,8 @@ code.language-css .token.selector > .token.pseudo-class,
 code.language-css .token.selector > .token.pseudo-element {
   @apply text-warning;
 }
+
+.line-number::before {
+  @apply inline-block w-5 text-right mr-4 -ml-2 text-gray-500;
+  content: attr(line);
+}

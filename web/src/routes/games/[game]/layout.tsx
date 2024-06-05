@@ -19,7 +19,7 @@ export default function (props: { children?: JSX.Element }) {
                 setGameStore({ current: resp });
             })
             .catch((err: HTTPError) => {
-                navigate(`/errors/${err.response.status}`, { replace: true });
+                navigate(`/sigtrap/${err.response.status}`, { replace: true });
             });
     }
     return (

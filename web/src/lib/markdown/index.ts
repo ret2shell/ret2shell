@@ -61,7 +61,7 @@ export class Markdown {
         if (options?.prism) {
             const rehypePrismPlus = await import("rehype-prism-plus/all");
             await import("./prism.scss");
-            this.processor?.use(rehypePrismPlus.default, { ignoreMissing: true });
+            this.processor?.use(rehypePrismPlus.default, { ignoreMissing: true, showLineNumbers: true });
         }
         if (options?.headingAnchors) {
             this.processor?.use(rehypeSlug);

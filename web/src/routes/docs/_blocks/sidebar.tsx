@@ -1,5 +1,7 @@
-import { t, themeStore } from "@/lib/storage/theme";
+import { fullTheme, t, themeStore } from "@/lib/storage/theme";
 import TreeView, { type TreeNode } from "@/lib/widgets/treeview";
+import { useLocation } from "@solidjs/router";
+import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import tocJson from "../contents/toc.json";
 
 type DocNode = {
@@ -16,15 +18,16 @@ function transformNode(tree: TreeNode[], root: string, docNode: DocNode) {
     const keys = Object.keys(docNode.children);
     for (const key of keys) {
         const node = docNode.children[key];
-        if (Object.keys(node.children).length) {
+        if (node.children && Object.keys(node.children).length) {
             tree.push({
+                id: key,
                 type: "category",
                 icon: "icon-[fluent--book-20-regular]",
                 name: node.title[themeStore.locale],
                 children: [
                     {
                         type: "item",
-                        id: key,
+                        id: "index",
                         icon: "icon-[fluent--document-one-page-20-regular]",
                         name: t("docs.intro")!,
                         link: `${root}/${key}`,
@@ -52,13 +55,14 @@ export default function () {
     for (const key of Object.keys(toc)) {
         const node = toc[key];
         tree.push({
+            id: key,
             type: "category",
             icon: "icon-[fluent--book-20-regular]",
             name: node.title[themeStore.locale],
             children: [
                 {
                     type: "item",
-                    id: key,
+                    id: "index",
                     icon: "icon-[fluent--document-one-page-20-regular]",
                     name: t("docs.intro")!,
                     link: `/docs/${key}`,
@@ -68,9 +72,22 @@ export default function () {
         });
         transformNode(tree[tree.length - 1].children, `/docs/${key}`, node);
     }
+    const location = useLocation();
+    const paths = () => location.pathname.replace("/docs/", "").split("/");
     return (
-        <div class="p-3 lg:p-6">
-            <TreeView tree={tree} size="sm" />
-        </div>
+        <OverlayScrollbarsComponent
+            options={{
+                scrollbars: {
+                    theme: `os-theme-${fullTheme()}`,
+                    autoHide: "scroll",
+                },
+            }}
+            class="relative w-full h-full print:h-auto print:overflow-auto"
+            defer
+        >
+            <div class="p-3 lg:p-6 flex flex-col space-y-2 flex-1 min-h-[calc(100%-4rem)]">
+                <TreeView tree={tree} size="sm" highlightPaths={paths()} />
+            </div>
+        </OverlayScrollbarsComponent>
     );
 }

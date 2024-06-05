@@ -8,7 +8,7 @@ import CreateForm from "./_blocks/form";
 export default function () {
     const navigate = useNavigate();
     if (!accountStore.permissions.includes(Permission.Bulletin)) {
-        navigate("/errors/403", { replace: true });
+        navigate("/sigtrap/403", { replace: true });
     }
     function onDone(article: Article) {
         navigate(`/bulletin/${article.id}`);

@@ -1,19 +1,20 @@
 article.prose,
 article.prose * {
-  @apply scroll-m-20;
+  @apply scroll-m-20 indent-[2em];
 }
 
 article > pre,
 article > pre * {
-  @apply whitespace-pre-wrap text-base break-words #{!important};
+  @apply text-base break-words indent-0 #{!important};
 }
 
 article > pre {
-  @apply bg-layer-content/5 rounded-md mx-1 #{!important};
+  @apply bg-layer-content/5 backdrop-blur rounded-md mx-1 indent-0 #{!important};
 }
 
 code:not(pre code) {
-  @apply whitespace-pre-wrap text-base break-all bg-layer-content/5 rounded-md mx-1 #{!important};
+  @apply text-[1em] break-words bg-layer-content/10 rounded-sm mx-1 px-1 indent-0 #{!important};
+  @apply before:content-[''] after:content-[''] #{!important};
 }
 
 article.prose img {
@@ -26,7 +27,16 @@ article > h3 > a,
 article > h4 > a,
 article > h5 > a,
 article > h6 > a {
-  @apply no-underline #{!important};
+  @apply no-underline indent-0 #{!important};
+}
+
+article > h1, article > h2, article > h3, article > h4, article > h5, article > h6 {
+  @apply indent-0 #{!important};
+}
+
+article > ol > li,
+article > ul > li {
+  @apply list-inside indent-0 #{!important};
 }
 
 article > h1 > a,
@@ -47,6 +57,19 @@ article > h5 > a:hover::after,
 article > h6 > a:hover::after {
   content: '¶';
   @apply text-primary opacity-60 ml-4;
+}
+
+article blockquote {
+  @apply border-l-primary bg-primary/10 indent-0 rounded-md p-0 m-1 backdrop-blur #{!important};
+
+  & > p {
+    @apply px-4 py-2 indent-0 #{!important};
+    @apply before:content-[''] after:content-[''] #{!important};
+  }
+}
+
+article a:not(h1 > a, h2 > a, h3 > a, h4 > a, h5 > a, h6 > a) {
+  @apply text-primary no-underline hover:underline #{!important};
 }
 
 @layer components {

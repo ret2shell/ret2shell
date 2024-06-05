@@ -19,7 +19,7 @@ export default function () {
     const [article, setArticle] = createSignal(null as ArticleModel | null);
     const navigate = useNavigate();
 
-    if (Number.isNaN(article_id)) navigate("/errors/404", { replace: true });
+    if (Number.isNaN(article_id)) navigate("/sigtrap/404", { replace: true });
     getBulletin(article_id)
         .then((resp) => {
             setArticle(resp);
@@ -27,7 +27,7 @@ export default function () {
         .catch((err: HTTPError) => {
             void err.response.text().then((reason) => {
                 addToast({ level: "error", description: reason, duration: 5000 });
-                navigate(`/errors/${err.response.status}`, { replace: true });
+                navigate(`/sigtrap/${err.response.status}`, { replace: true });
             });
         });
 
@@ -56,7 +56,7 @@ export default function () {
             .catch((err: HTTPError) => {
                 void err.response.text().then((reason) => {
                     addToast({ level: "error", description: reason, duration: 5000 });
-                    navigate(`/errors/${err.response.status}`, { replace: true });
+                    navigate(`/sigtrap/${err.response.status}`, { replace: true });
                 });
             });
         setSearchParams({ edit: undefined });

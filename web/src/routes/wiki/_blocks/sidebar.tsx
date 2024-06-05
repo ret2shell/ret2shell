@@ -13,6 +13,7 @@ function buildLinked(tree: TreeNode[], paths: string[], article: Article) {
     let node = tree.find((node) => node.type === "category" && node.name === paths[0]);
     if (!node) {
         node = {
+            id: paths[0],
             type: "category",
             icon: "icon-[fluent--book-20-regular]",
             name: paths[0],
@@ -23,7 +24,7 @@ function buildLinked(tree: TreeNode[], paths: string[], article: Article) {
     if (paths.length === 1) {
         node.children.push({
             type: "item",
-            id: article.id,
+            id: article.title,
             icon: article.draft
                 ? "icon-[fluent--edit-20-regular] text-primary"
                 : "icon-[fluent--document-one-page-20-regular]",

@@ -12,7 +12,7 @@ import LogoAnimate from "@assets/animates/logo-animate";
 import Background from "@blocks/background";
 import { HostType } from "@models/game";
 import { Permission } from "@models/user";
-import { useIsRouting, useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
+import { useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { canAccessChallenges, gameStore, isGameAdmin } from "@storage/game";
 import { Title, setupTitleResolver } from "@storage/header";
@@ -23,7 +23,7 @@ import Link from "@widgets/link";
 import Popover from "@widgets/popover";
 import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
-import { type JSX, Match, Show, Switch, createEffect, createSignal } from "solid-js";
+import { type JSX, Match, Show, Switch, createSignal } from "solid-js";
 import { Transition } from "solid-transition-group";
 import DiyBox, { DiyBoxContent } from "./_blocks/diy-box";
 import InstanceBox, { InstanceBoxContent } from "./_blocks/instance-box";
@@ -31,14 +31,12 @@ import NotificationBox, { NotificationBoxContent } from "./_blocks/notification-
 import Toasts from "./_blocks/toasts";
 import UserBox from "./_blocks/user-box";
 
-function GlobalTitleLink(props: { loading: boolean }) {
+function GlobalTitleLink() {
     const location = useLocation();
     const inDocs = () => location.pathname.startsWith("/docs");
     return (
         <Link ghost href="/">
-            <Show when={!props.loading} fallback={<Spin width={24} height={24} />}>
-                <LogoAnimate class="hidden xl:inline-block" width={24} height={24} />
-            </Show>
+            <LogoAnimate class="hidden xl:inline-block" width={24} height={24} />
             <span />
             <span>
                 {inDocs()
@@ -49,13 +47,11 @@ function GlobalTitleLink(props: { loading: boolean }) {
     );
 }
 
-function GameTitleLink(props: { loading: boolean }) {
+function GameTitleLink() {
     return (
         <Link ghost href={`/games/${gameStore.current?.id}/`}>
-            <Show when={!props.loading} fallback={<Spin width={24} height={24} />}>
-                <Show when={gameStore.current?.logo} fallback={<LogoAnimate width={24} height={24} />}>
-                    <img src={mediaPath(gameStore.current!.logo!)} width={24} height={24} alt="CTF" />
-                </Show>
+            <Show when={gameStore.current?.logo} fallback={<LogoAnimate width={24} height={24} />}>
+                <img src={mediaPath(gameStore.current!.logo!)} width={24} height={24} alt="CTF" />
             </Show>
             <span />
             <span>{gameStore.current?.name}</span>
@@ -187,24 +183,6 @@ function TitleBar() {
     const location = useLocation();
     const inDocs = () => location.pathname.startsWith("/docs");
 
-    // TODO: it does not work at this point, see solidjs/solid-router#102
-    // const isRouting = useIsRouting()
-    const [loading] = createSignal(false);
-    // createEffect(() => {
-    //   if (isRouting()) {
-    //     // console.log('routing', isRouting())
-    //     setTimeout(() => {
-    //       // console.log('set routing', isRouting())
-    //       if (isRouting()) {
-    //         // console.log('set routing true')
-    //         setLoading(true)
-    //       }
-    //     }, 500)
-    //   } else {
-    //     setLoading(false)
-    //   }
-    // })
-
     return (
         <>
             <div id="page-top" class="print:hidden" />
@@ -315,11 +293,11 @@ function TitleBar() {
                             </div>
                         </Popover>
                     </div>
-                    <Switch fallback={<GlobalTitleLink loading={loading()} />}>
+                    <Switch fallback={<GlobalTitleLink />}>
                         <Match
                             when={gameStore.current && gameStore.current.host_type === HostType.CTFGame && params.game}
                         >
-                            <GameTitleLink loading={loading()} />
+                            <GameTitleLink />
                         </Match>
                     </Switch>
                     <div class="w-4" />
@@ -390,9 +368,6 @@ function TitleBar() {
                             </Match>
                         </Switch>
                     </div>
-                    <Show when={loading()}>
-                        <div class="absolute bottom-0 left-0 right-0 h-1 skeleton" />
-                    </Show>
                 </div>
             </div>
         </>
@@ -449,13 +424,13 @@ export default function (props: { children?: JSX.Element }) {
                     level: "error",
                     description: `${t("platform.offline")}`,
                 });
-                navigate(`/errors/${err.response?.status || 502}`);
+                navigate(`/sigtrap/${err.response?.status || 502}`);
             } else if (!inDocs()) {
                 addToast({
                     level: "error",
                     description: `${t("platform.error")}: ${err.response?.statusText || err.message}`,
                 });
-                navigate(`/errors/${err.response?.status || 500}`);
+                navigate(`/sigtrap/${err.response?.status || 500}`);
             }
             setPlatformStore({ backend_online: false });
         })
