@@ -43,10 +43,18 @@
         "children": {
           "items-imports": {
             "title": {
-              "en_us": "Items & Imports",
-              "zh_cn": "项 & 模块导入",
-              "zh_tw": "項 & 模塊導入",
-              "ja_jp": "アイテム & インポート"
+              "en_us": "Items, Modules, Expressions",
+              "zh_cn": "项、模块、表达式",
+              "zh_tw": "項、模塊、表達式",
+              "ja_jp": "アイテム、モジュール、式"
+            }
+          },
+          "variables": {
+            "title": {
+              "en_us": "Variables & Memory",
+              "zh_cn": "变量 & 内存",
+              "zh_tw": "變量 & 內存",
+              "ja_jp": "変数 & メモリ"
             }
           },
           "functions": {
@@ -63,14 +71,6 @@
               "zh_cn": "控制流",
               "zh_tw": "控制流",
               "ja_jp": "制御フロー"
-            }
-          },
-          "variables": {
-            "title": {
-              "en_us": "Variables & Memory",
-              "zh_cn": "变量 & 内存",
-              "zh_tw": "變量 & 內存",
-              "ja_jp": "変数 & メモリ"
             }
           },
           "loops": {
@@ -203,6 +203,90 @@
           "zh_cn": "异步编程",
           "zh_tw": "異步編程",
           "ja_jp": "非同期プログラミング"
+        }
+      },
+      "stdlib": {
+        "title": {
+          "en_us": "Standard Library",
+          "zh_cn": "标准库",
+          "zh_tw": "標準庫",
+          "ja_jp": "標準ライブラリ"
+        },
+        "children": {
+          "http": {
+            "title": {
+              "en_us": "http",
+              "zh_cn": "http",
+              "zh_tw": "http",
+              "ja_jp": "http"
+            }
+          },
+          "json": {
+            "title": {
+              "en_us": "json",
+              "zh_cn": "json",
+              "zh_tw": "json",
+              "ja_jp": "json"
+            }
+          },
+          "toml": {
+            "title": {
+              "en_us": "toml",
+              "zh_cn": "toml",
+              "zh_tw": "toml",
+              "ja_jp": "toml"
+            }
+          },
+          "process": {
+            "title": {
+              "en_us": "process",
+              "zh_cn": "process",
+              "zh_tw": "process",
+              "ja_jp": "process"
+            }
+          }
+        }
+      },
+      "ret2api": {
+        "title": {
+          "en_us": "Ret 2 Shell SDK",
+          "zh_cn": "回归终端 SDK",
+          "zh_tw": "回歸終端 SDK",
+          "ja_jp": "リターン 2 シェル SDK"
+        },
+        "children": {
+          "audit": {
+            "title": {
+              "en_us": "ret2api::audit",
+              "zh_cn": "ret2api::audit",
+              "zh_tw": "ret2api::audit",
+              "ja_jp": "ret2api::audit"
+            }
+          },
+          "bucket": {
+            "title": {
+              "en_us": "ret2api::bucket",
+              "zh_cn": "ret2api::bucket",
+              "zh_tw": "ret2api::bucket",
+              "ja_jp": "ret2api::bucket"
+            }
+          },
+          "crypto": {
+            "title": {
+              "en_us": "ret2api::crypto",
+              "zh_cn": "ret2api::crypto",
+              "zh_tw": "ret2api::crypto",
+              "ja_jp": "ret2api::crypto"
+            }
+          },
+          "utils": {
+            "title": {
+              "en_us": "ret2api::utils",
+              "zh_cn": "ret2api::utils",
+              "zh_tw": "ret2api::utils",
+              "ja_jp": "ret2api::utils"
+            }
+          }
         }
       }
     }

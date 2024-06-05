@@ -69,7 +69,6 @@ impl Checker {
             context.install(rune_modules::json::module(true)?)?;
             context.install(rune_modules::toml::module(true)?)?;
             context.install(rune_modules::process::module(true)?)?;
-            context.install(rune_modules::rand::module(true)?)?;
             let mut sources = Sources::new();
             sources.insert(Source::from_path(script_folder.join("main.rx"))?)?;
             info!("Preloading checker script: {}", script_folder.display());

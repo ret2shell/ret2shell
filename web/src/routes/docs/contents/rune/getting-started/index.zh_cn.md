@@ -1,3 +1,5 @@
+好了，让我们开始吧，希望接下来的内容足够有趣。
+
 ## 设置开发环境
 
 回归终端提供了一个脚本工具 `ret2script` 来测试你的脚本，你也可以使用 Rune 原生的解释器来进行测试。请注意，`ret2script` 提供了一些额外的模块，因此你的脚本可能不能完全在 Rune 原生解释器中运行。
@@ -14,9 +16,11 @@ cargo install ret2script
 
 > 如果你想升级 `ret2script`，或者时刻保证你的 `cargo` 工具链是最新的，你可以使用 [`cargo-update`](https://github.com/nabijaczleweli/cargo-update) 工具。
 
-### 安装 Rune
+### 安装 Rune 官方环境
 
-请参考：[Rune-rs](https://rune-rs.github.io/)。
+Rune 的原生解释器请参考：[Rune-rs](https://rune-rs.github.io/)。
+
+需要注意，回归终端的 Rune 解释器与官方解释器在一些细节与特性支持上稍有群别，不推荐使用官方解释器来测试题目脚本。
 
 ## 你好，世界！
 
@@ -47,7 +51,7 @@ fn function() {
 它的输出可能是这样的：
 
 ```text
-$ ret2script dbg.rx
+$ ret2script scripts/getting-started/dbg.rx
 [1, 2, 3]
 "Hello, world!"
 '今'

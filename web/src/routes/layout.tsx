@@ -1,5 +1,4 @@
 import { getPlatformInfo, getVersion } from "@/lib/api/platform";
-import Spin from "@/lib/assets/animates/spin";
 import { addToast, removeToast, toastStore } from "@/lib/storage/toast";
 import { mediaPath } from "@/lib/utils/media";
 import Button from "@/lib/widgets/button";
@@ -35,7 +34,7 @@ function GlobalTitleLink() {
     const location = useLocation();
     const inDocs = () => location.pathname.startsWith("/docs");
     return (
-        <Link ghost href="/">
+        <Link ghost href={inDocs() ? "/docs" : "/"}>
             <LogoAnimate class="hidden xl:inline-block" width={24} height={24} />
             <span />
             <span>
