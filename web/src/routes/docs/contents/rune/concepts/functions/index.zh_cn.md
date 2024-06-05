@@ -16,8 +16,8 @@ fn foo(condition) {
 }
 
 pub fn main() {
-    println!("{}", foo(true));
-    println!("{}", foo(false));
+    println(`${foo(true)}`);
+    println(`${foo(false)}`);
 }
 ```
 

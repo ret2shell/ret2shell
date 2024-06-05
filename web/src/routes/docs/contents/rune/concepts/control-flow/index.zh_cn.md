@@ -22,8 +22,8 @@ fn test_control_flow() {
 }
 
 pub fn main() {
-    println!("{}", foo(0)); // => outputs: "less than one"
-    println!("{}", foo(10)); // => outputs: "something else"
+    println(`${foo(0)}`);  // => outputs: "less than one"
+    println(`${foo(10)}`); // => outputs: "something else"
 }
 ```
 
@@ -42,11 +42,11 @@ pub fn main() {
     let number = 3;
 
     if number < 5 {
-        println!("the number is smaller than 5");
+        println("the number is smaller than 5");
     } else if number < 10 {
-        println!("the number is smaller than 10");
+        println("the number is smaller than 10");
     } else {
-        println!("the number is 10 or bigger");
+        println("the number is 10 or bigger");
     }
 }
 ```
