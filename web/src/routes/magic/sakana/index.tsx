@@ -95,15 +95,30 @@ export default function () {
             </div>
             <div class="h-24 self-center text-zinc-500 text-center space-x-2">
                 <span>{t("magic.illustration")} By</span>
-                <a class="hover:underline" href="https://twitter.com/LAttic1ng" target="_blank" rel="noopener noreferrer">
+                <a
+                    class="hover:underline"
+                    href="https://twitter.com/LAttic1ng"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
                     Ac4ae0
                 </a>
-                <a class="hover:underline" href="https://twitter.com/arttnba3" target="_blank" rel="noopener noreferrer">
+                <a
+                    class="hover:underline"
+                    href="https://twitter.com/arttnba3"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
                     arttnba3
                 </a>
                 <br />
                 <span>{t("magic.source")}</span>
-                <a class="hover:underline" href="https://lab.magiconch.com/sakana/" target="_blank" rel="noopener noreferrer">
+                <a
+                    class="hover:underline"
+                    href="https://lab.magiconch.com/sakana/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
                     https://lab.magiconch.com/sakana
                 </a>
             </div>
