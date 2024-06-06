@@ -1,6 +1,6 @@
 [package]
 name = "r2s-database"
-version = "1.0.0"
+version = "1.4.2"
 edition = "2021"
 rust-version = "1.77.2"
 description = "Database for Ret2Shell - A feature-riches CTF challenge platform."
@@ -26,7 +26,7 @@ num-traits = "0.2"
 tokio = { version = "1.38", features = ["full"] }
 tracing = "0.1"
 
-r2s-config = { version = "1.0.0", path = "../config" }
+r2s-config = { version = "1.4.2", path = "../config" }
 
 [lib]
 path = "src/lib.rs"

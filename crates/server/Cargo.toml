@@ -1,6 +1,6 @@
 [package]
 name = "r2s-server"
-version = "1.0.0"
+version = "1.4.2"
 edition = "2021"
 rust-version = "1.77.2"
 description = "Server for Ret2Shell - A feature-riches CTF challenge platform."
@@ -65,21 +65,21 @@ tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 tracing-appender = "0.2"
 
 # local crates
-r2s-auditor = { version = "1.0.0", path = "../auditor" }
-r2s-bucket = { version = "1.0.0", path = "../bucket" }
-r2s-cache = { version = "1.0.0", path = "../cache" }
-r2s-captcha = { version = "1.0.0", path = "../captcha" }
-r2s-checker = { version = "1.0.0", path = "../checker" }
-r2s-cluster = { version = "1.0.0", path = "../cluster" }
-r2s-config = { version = "1.0.0", path = "../config" }
-r2s-database = { version = "1.0.0", path = "../database" }
-r2s-email = { version = "1.0.0", path = "../email" }
-r2s-license = { version = "1.0.0", path = "../license" }
-r2s-media = { version = "1.0.0", path = "../media" }
-r2s-migrator = { version = "1.0.0", path = "../migrator" }
-r2s-oauth = { version = "1.0.0", path = "../oauth" }
-r2s-queue = { version = "1.0.0", path = "../queue" }
-r2s-traffic = { version = "1.0.0", path = "../traffic" }
+r2s-auditor = { version = "1.4.2", path = "../auditor" }
+r2s-bucket = { version = "1.4.2", path = "../bucket" }
+r2s-cache = { version = "1.4.2", path = "../cache" }
+r2s-captcha = { version = "1.4.2", path = "../captcha" }
+r2s-checker = { version = "1.4.2", path = "../checker" }
+r2s-cluster = { version = "1.4.2", path = "../cluster" }
+r2s-config = { version = "1.4.2", path = "../config" }
+r2s-database = { version = "1.4.2", path = "../database" }
+r2s-email = { version = "1.4.2", path = "../email" }
+r2s-license = { version = "1.4.2", path = "../license" }
+r2s-media = { version = "1.4.2", path = "../media" }
+r2s-migrator = { version = "1.4.2", path = "../migrator" }
+r2s-oauth = { version = "1.4.2", path = "../oauth" }
+r2s-queue = { version = "1.4.2", path = "../queue" }
+r2s-traffic = { version = "1.4.2", path = "../traffic" }
 
 [lib]
 path = "src/lib.rs"

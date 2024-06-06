@@ -1,6 +1,6 @@
 [package]
 name = "r2s-cluster"
-version = "1.0.0"
+version = "1.4.2"
 edition = "2021"
 rust-version = "1.77.2"
 description = "Cluster manager for Ret2Shell - A feature-riches CTF challenge platform."
@@ -29,7 +29,7 @@ chrono = { version = "0.4", features = ["serde"] }
 futures-io = "0.3"
 nanoid = "0.4"
 
-r2s-config = { version = "1.0.0", path = "../config" }
+r2s-config = { version = "1.4.2", path = "../config" }
 
 [lib]
 path = "src/lib.rs"

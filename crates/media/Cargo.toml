@@ -1,6 +1,6 @@
 [package]
 name = "r2s-media"
-version = "1.0.0"
+version = "1.4.2"
 edition = "2021"
 rust-version = "1.77.2"
 description = "Media storage for Ret2Shell - A feature-riches CTF challenge platform."
@@ -21,8 +21,8 @@ image = "0.25"
 nanoid = "0.4"
 hex = "0.4"
 
-r2s-database = { version = "1.0.0", path = "../database" }
-r2s-config = { version = "1.0.0", path = "../config" }
+r2s-database = { version = "1.4.2", path = "../database" }
+r2s-config = { version = "1.4.2", path = "../config" }
 
 [lib]
 path = "src/lib.rs"

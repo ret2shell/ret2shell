@@ -12,30 +12,6 @@ export function DiyBoxContent() {
                 <DarkmodeButton />
             </Card>
             <Card contentClass="p-2 flex flex-col space-y-2">
-                <Button
-                    size="sm"
-                    ghost
-                    class="flex-1"
-                    onClick={() => {
-                        setThemeStore({ colorSchemeFollowsSystem: !themeStore.colorSchemeFollowsSystem });
-                    }}
-                >
-                    <span
-                        class={`flex-1 text-start ${
-                            themeStore.colorSchemeFollowsSystem ? "font-normal" : "font-normal opacity-60"
-                        }`}
-                    >
-                        {t("platform.followSystem")}
-                    </span>
-                    <Show
-                        when={themeStore.colorSchemeFollowsSystem}
-                        fallback={<span class="icon-[fluent--position-forward-20-regular] w-5 h-5 opacity-60" />}
-                    >
-                        <span class="icon-[fluent--position-forward-20-filled] w-5 h-5 text-primary" />
-                    </Show>
-                </Button>
-            </Card>
-            <Card contentClass="p-2 flex flex-col space-y-2">
                 <ul class="flex flex-row space-x-2">
                     <li>
                         <Button square onClick={() => setLocale("zh_cn")} ghost justify="center" size="sm">
@@ -55,6 +31,27 @@ export function DiyBoxContent() {
                     <li>
                         <Button square onClick={() => setLocale("ja_jp")} ghost justify="center" size="sm">
                             <span>な</span>
+                        </Button>
+                    </li>
+                    <li>
+                        <Button
+                            size="sm"
+                            ghost
+                            square
+                            justify="center"
+                            onClick={() => {
+                                setThemeStore({ colorSchemeFollowsSystem: !themeStore.colorSchemeFollowsSystem });
+                            }}
+                            title={t("platform.followSystem")}
+                        >
+                            <Show
+                                when={themeStore.colorSchemeFollowsSystem}
+                                fallback={
+                                    <span class="icon-[fluent--position-forward-20-regular] w-5 h-5 opacity-60" />
+                                }
+                            >
+                                <span class="icon-[fluent--position-forward-20-filled] w-5 h-5 text-primary" />
+                            </Show>
                         </Button>
                     </li>
                 </ul>

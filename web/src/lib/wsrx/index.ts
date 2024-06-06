@@ -34,6 +34,7 @@ export class Wsrx {
         }
         return this.connected();
     }
+
     async tryConnect() {
         await ky.post(`${this.apiAddr()}/connect`, {
             json: location.origin,
