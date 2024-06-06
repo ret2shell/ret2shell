@@ -10,7 +10,7 @@ import { addToast } from "@/lib/storage/toast";
 import { refreshWikiToc, setWikiStore, wikiStore } from "@/lib/storage/wiki";
 import Article from "@/lib/widgets/article";
 import Divider from "@/lib/widgets/divider";
-import { useNavigate, useParams, useSearchParams } from "@solidjs/router";
+import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import type { HTTPError } from "ky";
 import { Show, createEffect, onCleanup, untrack } from "solid-js";
 import EditForm from "../_blocks/form";
@@ -92,7 +92,7 @@ export default function () {
                     </Show>
                 </h1>
                 <div class="flex flex-row items-center w-full px-3 lg:px-6 max-w-5xl justify-start print:justify-center space-x-6 print:space-x-2 opacity-60 flex-wrap py-3">
-                    <a
+                    <A
                         class="hover:underline font-bold flex flex-row space-x-2 items-center"
                         title={t("article.by", {
                             name: wikiStore.current?.publisher_name || t("article.unknownPublisher")!,
@@ -102,7 +102,7 @@ export default function () {
                         <span class="icon-[fluent--person-20-regular] w-5 h-5 print:hidden" />
                         <span class="hidden print:inline-block">By</span>
                         <span>{wikiStore.current?.publisher_name}</span>
-                    </a>
+                    </A>
                     <div
                         class="font-bold flex flex-row space-x-2 items-center"
                         title={t("article.createdAt", {
@@ -131,13 +131,13 @@ export default function () {
                         </div>
                     </Show>
                     <Show when={accountStore.permissions.includes(Permission.Wiki)}>
-                        <a
+                        <A
                             class="font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
                             href={`/wiki/${wikiStore.current?.id}?edit=true`}
                         >
                             <span class="icon-[fluent--edit-20-regular] w-5 h-5" />
                             <span>{t("form.edit")}</span>
-                        </a>
+                        </A>
                         <button
                             class="font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
                             onClick={onDelete}

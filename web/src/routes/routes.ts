@@ -1,4 +1,4 @@
-import { children, lazy } from "solid-js";
+import { lazy } from "solid-js";
 
 export const routes = {
     path: "/",
@@ -192,6 +192,7 @@ export const routes = {
                         },
                         {
                             path: "/teams",
+                            component: lazy(() => import("./games/[game]/teams/layout")),
                             children: [
                                 {
                                     path: "/",
@@ -317,6 +318,7 @@ export const routes = {
         },
         {
             path: "/sigtrap",
+            component: lazy(() => import("./sigtrap/layout")),
             children: [
                 {
                     path: "/401",

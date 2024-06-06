@@ -6,7 +6,7 @@ import "./sidebar-layout.scss";
 export type SidebarLayoutProps = {
     leftBar?: JSX.Element;
     showLeftBar?: boolean;
-    children: JSX.Element;
+    children?: JSX.Element;
     rightBar?: JSX.Element;
     showRightBar?: boolean;
 };

@@ -1,5 +1,5 @@
 import Spin from "@assets/animates/spin";
-import { useMatch } from "@solidjs/router";
+import { A, useMatch } from "@solidjs/router";
 import { type ComponentProps, type JSX, Show, children, createMemo } from "solid-js";
 import type { ButtonProps } from "./button";
 
@@ -34,9 +34,9 @@ export default function (props: ComponentProps<"a"> & ButtonProps & LinkProps & 
             .join(" ");
     });
     return (
-        <a
+        <A
             {...props}
-            href={props.disabled ? "#" : props.href}
+            href={props.disabled ? "#" : props.href ?? "#"}
             type={props.type}
             class={`${className()} ${props.class}`}
         >
@@ -44,6 +44,6 @@ export default function (props: ComponentProps<"a"> & ButtonProps & LinkProps & 
                 <Spin />
             </Show>
             {children(() => props.children)()}
-        </a>
+        </A>
     );
 }

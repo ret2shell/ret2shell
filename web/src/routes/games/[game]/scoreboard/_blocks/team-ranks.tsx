@@ -4,6 +4,7 @@ import { gameStore } from "@/lib/storage/game";
 import { t } from "@/lib/storage/theme";
 import { randomTips } from "@/lib/utils/loading-tips";
 import Pagination from "@/lib/widgets/pagination";
+import { A } from "@solidjs/router";
 import { For, Match, Show, Switch } from "solid-js";
 
 // icon-[fluent-emoji-flat--1st-place-medal]
@@ -60,12 +61,12 @@ export default function TeamRanks(props: {
                                     </Match>
                                 </Switch>
                             </span>
-                            <a
+                            <A
                                 class="font-bold hover:underline flex-1 truncate"
                                 href={`/games/${gameStore.current?.id}/teams/${team.id}`}
                             >
                                 {team.name}
-                            </a>
+                            </A>
                             <span class="w-20 text-end">
                                 <span>{team.score}</span>
                                 <span class="opacity-60">&nbsp;pts</span>

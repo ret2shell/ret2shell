@@ -11,6 +11,7 @@ import Editor from "@/lib/widgets/editor";
 import Input from "@/lib/widgets/input";
 import Popover from "@/lib/widgets/popover";
 import { createForm, required } from "@modular-forms/solid";
+import { A } from "@solidjs/router";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createSignal } from "solid-js";
@@ -123,12 +124,12 @@ export default function () {
                                         <span class="flex-shrink-0 icon-[fluent--alert-20-regular] w-5 h-5" />
                                         <span class="flex-1 truncate">{notification.title}</span>
                                         <span class="flex-shrink-0 icon-[fluent--calendar-20-regular] w-5 h-5" />
-                                        <a
+                                        <A
                                             class="flex-shrink-0 flex items-center"
                                             href={`/users/${notification.publisher_id}`}
                                         >
                                             <span class="icon-[fluent--person-20-regular] w-5 h-5" />
-                                        </a>
+                                        </A>
                                         <Show
                                             when={
                                                 accountStore.id &&

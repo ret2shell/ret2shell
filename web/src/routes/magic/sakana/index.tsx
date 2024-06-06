@@ -65,6 +65,7 @@ export default function () {
                         class="absolute left-1/2 -bottom-12 transform -translate-x-1/2 normal-case z-[10] w-24 h-24"
                         href="https://l.xdsec.org"
                         target="_blank"
+                        rel="noopener noreferrer"
                     >
                         <LTeam width={64} height={64} />
                     </Link>
@@ -75,6 +76,7 @@ export default function () {
                         class="absolute left-1/2 -bottom-12 transform -translate-x-1/2 normal-case z-[10] w-24 h-24"
                         href="https://vidar.club"
                         target="_blank"
+                        rel="noopener noreferrer"
                     >
                         <img src={vidarTeam} class="w-16 h-16" width={64} height={64} alt="Vidar" />
                     </Link>
@@ -85,6 +87,7 @@ export default function () {
                         class="absolute left-1/2 -bottom-12 transform -translate-x-1/2 normal-case z-[10] w-24 h-24"
                         href="https://cnss.io"
                         target="_blank"
+                        rel="noopener noreferrer"
                     >
                         <img src={cnssTeam} class="w-16 h-16" width={64} height={64} alt="CNSS" />
                     </Link>
@@ -92,15 +95,15 @@ export default function () {
             </div>
             <div class="h-24 self-center text-zinc-500 text-center space-x-2">
                 <span>{t("magic.illustration")} By</span>
-                <a class="hover:underline" href="https://twitter.com/LAttic1ng">
+                <a class="hover:underline" href="https://twitter.com/LAttic1ng" target="_blank" rel="noopener noreferrer">
                     Ac4ae0
                 </a>
-                <a class="hover:underline" href="https://twitter.com/arttnba3">
+                <a class="hover:underline" href="https://twitter.com/arttnba3" target="_blank" rel="noopener noreferrer">
                     arttnba3
                 </a>
                 <br />
                 <span>{t("magic.source")}</span>
-                <a class="hover:underline" href="https://lab.magiconch.com/sakana/">
+                <a class="hover:underline" href="https://lab.magiconch.com/sakana/" target="_blank" rel="noopener noreferrer">
                     https://lab.magiconch.com/sakana
                 </a>
             </div>

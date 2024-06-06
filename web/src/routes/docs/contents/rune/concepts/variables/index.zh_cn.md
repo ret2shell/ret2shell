@@ -78,7 +78,7 @@ pub fn main() {
     if is_readable(object) {
         println(`field: ${object.field}`);
     } else {
-        println("object is no longer readable 😢");
+        println("object is no longer readable 🔨");
     }
 }
 ```
@@ -86,5 +86,5 @@ pub fn main() {
 ```
 $ ret2script scripts/variables/is_readable.rx
 field: 1
-object is no longer readable 😢
+object is no longer readable 🔨
 ```

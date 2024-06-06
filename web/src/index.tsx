@@ -64,7 +64,7 @@ render(() => {
             defer
         >
             <div class="flex flex-col min-h-full min-w-fit">
-                <Router>{routes}</Router>
+                <Router explicitLinks>{routes}</Router>
             </div>
         </OverlayScrollbarsComponent>
     );

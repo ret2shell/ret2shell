@@ -14,7 +14,7 @@ import Input from "@/lib/widgets/input";
 import Link from "@/lib/widgets/link";
 import TimePicker from "@/lib/widgets/timepicker";
 import { createForm, required, setValues } from "@modular-forms/solid";
-import { useSearchParams } from "@solidjs/router";
+import { A, useSearchParams } from "@solidjs/router";
 import type { HTTPError } from "ky";
 import { DateTime, type MonthNumbers } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
@@ -33,7 +33,7 @@ function EventDetail(props: {
                 </a>
             </h1>
             <div class="flex flex-row items-center justify-center space-x-6 opacity-60 flex-wrap">
-                <a
+                <A
                     class="font-bold hover:underline flex flex-row space-x-2 items-center"
                     href={`/users/${props.event.reporter_id}`}
                 >
@@ -44,7 +44,7 @@ function EventDetail(props: {
                         })}
                     </span>
                     <span />
-                </a>
+                </A>
                 <a
                     class="font-bold hover:underline flex flex-row space-x-2 items-center"
                     href={props.event.link}

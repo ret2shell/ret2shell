@@ -3,6 +3,7 @@ import type { Team } from "@/lib/models/team";
 import { gameStore } from "@/lib/storage/game";
 import { t } from "@/lib/storage/theme";
 import Progress from "@/lib/widgets/progress";
+import { A } from "@solidjs/router";
 import { For, Match, Switch } from "solid-js";
 
 function TeamDetail(props: {
@@ -29,9 +30,9 @@ function TeamDetail(props: {
             </div>
             <div class="flex-1 flex flex-col justify-center">
                 <h2 class="text-xl font-bold flex flex-row">
-                    <a class="hover:underline flex-1" href={`/games/${gameStore.current?.id}/teams/${props.team.id}`}>
+                    <A class="hover:underline flex-1" href={`/games/${gameStore.current?.id}/teams/${props.team.id}`}>
                         {props.team.name}
-                    </a>
+                    </A>
                     <span>
                         <span class="text-primary">{props.team.score}</span>&nbsp;
                         <span class="opacity-60">pts</span>
