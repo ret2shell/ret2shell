@@ -11,7 +11,7 @@ keywords = ["ctf", "challenge", "platform", "security", "education"]
 resolver = "2"
 
 [dependencies]
-rune = { version = "0.13", features = ["workspace", "tokio"] }
+rune = { version = "0.13", features = ["tokio"] }
 rune-modules = { version = "0.13", features = ["full"] }
 thiserror = "1.0"
 async-trait = "0.1"
@@ -26,10 +26,3 @@ r2s-config = { version = "1.4.2", path = "../config" }
 r2s-database = { version = "1.4.2", path = "../database" }
 r2s-cluster = { version = "1.4.2", path = "../cluster" }
 r2s-bucket = { version = "1.4.2", path = "../bucket" }
-
-[lib]
-path = "src/lib.rs"
-
-[[bin]]
-name = "r2s-checker"
-path = "src/main.rs"

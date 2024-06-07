@@ -55,34 +55,36 @@ export default function () {
     const [timestamp, setTimestamp] = createSignal(DateTime.now().toMillis());
     function handleLogin(result: LoginForm) {
         setLoading(true);
-        login(result)
-            .then(() => {
-                addToast({
-                    level: "success",
-                    description: t("account.login.success")!,
-                    duration: 5000,
-                    img: xdsecMascotHappy,
+        setTimeout(() => {
+            login(result)
+                .then(() => {
+                    addToast({
+                        level: "success",
+                        description: t("account.login.success")!,
+                        duration: 5000,
+                        img: xdsecMascotHappy,
+                    });
+                    const redirectUrl = location.query.redirect;
+                    if (redirectUrl) {
+                        navigate(redirectUrl, { replace: true });
+                    } else {
+                        navigate("/", { replace: true });
+                    }
+                })
+                .catch((err: HTTPError) => {
+                    void err.response.text().then((text) => {
+                        addToast({ level: "error", description: text, duration: 5000 });
+                    });
+                    setTimestamp(DateTime.now().toMillis());
+                    setValue(form, "password", "");
+                    setTimeout(() => {
+                        setMascot(xdsecMascotCrying);
+                    }, 500);
+                })
+                .finally(() => {
+                    setLoading(false);
                 });
-                const redirectUrl = location.query.redirect;
-                if (redirectUrl) {
-                    navigate(redirectUrl, { replace: true });
-                } else {
-                    navigate("/", { replace: true });
-                }
-            })
-            .catch((err: HTTPError) => {
-                void err.response.text().then((text) => {
-                    addToast({ level: "error", description: text, duration: 5000 });
-                });
-                setTimestamp(DateTime.now().toMillis());
-                setValue(form, "password", "");
-                setTimeout(() => {
-                    setMascot(xdsecMascotCrying);
-                }, 500);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
+        }, 500);
     }
     return (
         <>

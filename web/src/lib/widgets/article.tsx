@@ -1,31 +1,45 @@
 import { type ComponentProps, Show, createEffect, createSignal, splitProps, untrack } from "solid-js";
 
+import type { Markdown } from "@lib/markdown";
+import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
+import { fullTheme } from "../storage/theme";
 import { addToast } from "../storage/toast";
+import Card from "./card";
 import LoadingTips from "./loading-tips";
+import Popover from "./popover";
 
 export type ArticleProps = {
     content: string;
     extra: boolean;
     headingAnchors: boolean;
+    toc?: boolean;
 };
 
 export default function (props: ComponentProps<"article"> & ArticleProps) {
-    const [articleProps, nativeProps] = splitProps(props, ["content", "extra", "headingAnchors"]);
+    const [articleProps, nativeProps] = splitProps(props, ["content", "extra", "headingAnchors", "toc"]);
     const [ready, setReady] = createSignal(false);
-    const [contentHtml, setContentHtml] = createSignal("");
+    const [markdown, setMarkdown] = createSignal(null as Markdown | null);
+    const initMarkdown = async () => {
+        const { Markdown } = await import("@lib/markdown");
+        if (!markdown()) {
+            const markdownInst = new Markdown();
+            await markdownInst.init({
+                type: "html",
+                options: {
+                    prism: articleProps.extra,
+                    katex: articleProps.extra,
+                    headingAnchors: articleProps.headingAnchors,
+                    toc: articleProps.toc,
+                },
+            });
+            setMarkdown(markdownInst);
+        }
+    };
     const render = async (content: string) => {
         setReady(false);
-        const { Markdown } = await import("@lib/markdown");
-        const markdown = new Markdown();
-        await markdown.init({
-            type: "html",
-            options: {
-                prism: articleProps.extra,
-                katex: articleProps.extra,
-                headingAnchors: articleProps.headingAnchors,
-            },
-        });
-        return (await markdown.render(content))!;
+        await initMarkdown();
+        await markdown()!.renderContent(content);
+        // console.log(markdown.toc());
     };
     function scrollToView() {
         setTimeout(() => {
@@ -37,10 +51,10 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
     }
     createEffect(() => {
         if (articleProps.content) {
+            setReady(false);
             render(articleProps.content)
-                .then((html) =>
+                .then(() =>
                     untrack(() => {
-                        setContentHtml(html);
                         setReady(true);
                         scrollToView();
                     })
@@ -53,8 +67,8 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
                     });
                 });
         } else {
+            markdown()?.reset();
             setReady(true);
-            setContentHtml("");
         }
     });
     return (
@@ -71,9 +85,32 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
             <article
                 {...nativeProps}
                 class={`article !max-w-5xl w-full ${nativeProps.class}`}
-                innerHTML={contentHtml()}
+                innerHTML={markdown()?.html()}
             />
             <div class="h-64" />
+            <Show when={articleProps.toc && ready() && markdown()?.toc()}>
+                <Popover
+                    class="fixed right-3 bottom-16 lg:bottom-3 print:hidden"
+                    square
+                    type="button"
+                    btnContent={<span class="icon-[fluent--navigation-20-regular] w-5 h-5" />}
+                >
+                    <Card class="m-1">
+                        <OverlayScrollbarsComponent
+                            class="w-full relative max-h-[60vh]"
+                            options={{
+                                scrollbars: {
+                                    theme: `os-theme-${fullTheme()}`,
+                                    autoHide: "scroll",
+                                },
+                            }}
+                            defer
+                        >
+                            <div class="p-3" innerHTML={markdown()?.toc() || undefined} />
+                        </OverlayScrollbarsComponent>
+                    </Card>
+                </Popover>
+            </Show>
         </Show>
     );
 }

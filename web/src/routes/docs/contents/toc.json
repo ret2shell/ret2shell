@@ -104,14 +104,6 @@
                             "zh_tw": "結構體函數",
                             "ja_jp": "構造体関数"
                         }
-                    },
-                    "field-functions": {
-                        "title": {
-                            "en_us": "Field Functions",
-                            "zh_cn": "字段函数",
-                            "zh_tw": "字段函數",
-                            "ja_jp": "フィールド関数"
-                        }
                     }
                 }
             },
@@ -213,6 +205,38 @@
                     "ja_jp": "標準ライブラリ"
                 },
                 "children": {
+                    "io": {
+                        "title": {
+                            "en_us": "io",
+                            "zh_cn": "io",
+                            "zh_tw": "io",
+                            "ja_jp": "io"
+                        }
+                    },
+                    "fmt": {
+                        "title": {
+                            "en_us": "fmt",
+                            "zh_cn": "fmt",
+                            "zh_tw": "fmt",
+                            "ja_jp": "fmt"
+                        }
+                    },
+                    "time": {
+                        "title": {
+                            "en_us": "time",
+                            "zh_cn": "time",
+                            "zh_tw": "time",
+                            "ja_jp": "time"
+                        }
+                    },
+                    "process": {
+                        "title": {
+                            "en_us": "process",
+                            "zh_cn": "process",
+                            "zh_tw": "process",
+                            "ja_jp": "process"
+                        }
+                    },
                     "http": {
                         "title": {
                             "en_us": "http",
@@ -235,14 +259,6 @@
                             "zh_cn": "toml",
                             "zh_tw": "toml",
                             "ja_jp": "toml"
-                        }
-                    },
-                    "process": {
-                        "title": {
-                            "en_us": "process",
-                            "zh_cn": "process",
-                            "zh_tw": "process",
-                            "ja_jp": "process"
                         }
                     }
                 }

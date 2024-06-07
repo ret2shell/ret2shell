@@ -163,8 +163,9 @@ export default function () {
                         <Article
                             class="self-center"
                             content={wikiStore.current?.content || ""}
-                            extra={true}
-                            headingAnchors={true}
+                            extra
+                            headingAnchors
+                            toc
                         />
                     }
                 >

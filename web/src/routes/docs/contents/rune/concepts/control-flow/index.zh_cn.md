@@ -57,3 +57,28 @@ the number is smaller than 5
 ```
 
 但请注意，如果您有很多条件，使用模式匹配 `match` 可能会更干净，这一节将在 [模式匹配](/docs/rune/concepts/pattern-matching) 中介绍。
+
+## 用作值
+
+我们在 [表达式与语句](http://localhost/docs/rune/concepts/items-imports#%E8%A1%A8%E8%BE%BE%E5%BC%8F%E4%B8%8E%E8%AF%AD%E5%8F%A5) 提到了语句块可以作为表达式使用。这意味着你可以将 `if` 语句块作为一个值返回。
+
+```rust
+pub fn main() {
+    let number = 3;
+
+    let message = if number < 5 {
+        "the number is smaller than 5"
+    } else {
+        "the number is 5 or bigger"
+    };
+
+    println(`Message: ${message}`);
+}
+```
+
+```
+$ ret2script scripts/control_flow/if_as_value.rx
+Message: the number is smaller than 5
+```
+
+> 请注意，当你把一个代码块当作表达式使用时，一定不要忘记了在块的末尾加上一个分号 `;`，这样代码块表达式才能与前面的 `let` 关键字构成一个完整的语句，不加的话就会触发语法错误。

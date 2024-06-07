@@ -76,7 +76,7 @@ export default function () {
                     </Show>
                 </h1>
                 <Divider class="w-full max-w-5xl my-4" />
-                <Article class="self-center" content={content() || ""} extra headingAnchors />
+                <Article class="self-center" content={content() || ""} extra headingAnchors toc />
             </div>
         </>
     );

@@ -30,9 +30,9 @@ Rune 的原生解释器请参考：[Rune-rs](https://rune-rs.github.io/)。
 
 ```rust
 pub fn main() {
-    let a = [1, 2, 3];
+    let a = [1, 1, 4, 5, 1, 4];
     let hello = "Hello, world!";
-    let b = '🦀';
+    let b = '👴';
     let closure = || println("Hello");
 
     dbg(a);
@@ -52,9 +52,9 @@ fn function() {
 
 ```text
 $ ret2script scripts/getting-started/dbg.rx
-[1, 2, 3]
+[1, 1, 4, 5, 1, 4]
 "Hello, world!"
-'今'
+'👴'
 dynamic function (at: 0x1a)
 native function (0x1bd03b8ee40)
 dynamic function (at: 0x17)

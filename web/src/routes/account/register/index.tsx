@@ -35,6 +35,36 @@ export default function () {
     const [loading, setLoading] = createSignal(false);
     const [timestamp, setTimestamp] = createSignal(DateTime.now().toMillis());
     let accountInputRef: HTMLInputElement;
+
+    function onSubmit(result: RegisterForm) {
+        setLoading(true);
+        setTimeout(() => {
+            register(result)
+                .then(() => {
+                    addToast({
+                        level: "success",
+                        description: t("account.register.success")!,
+                        duration: 5000,
+                        img: xdsecMascotHappy,
+                    });
+                    navigate("/", { replace: true });
+                })
+                .catch((err: HTTPError) => {
+                    void err.response.text().then((text) => {
+                        addToast({
+                            level: "error",
+                            description: text,
+                            duration: 5000,
+                        });
+                    });
+                    setTimestamp(DateTime.now().toMillis());
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        }, 500);
+    }
+
     return (
         <>
             <Title title={`${t("account.register.title")} - ${platformStore.config.name || t("platform.name")}`} />
@@ -43,35 +73,7 @@ export default function () {
                     class="w-full max-w-3xl"
                     contentClass="p-6 flex flex-col md:flex-row space-y-2 space-x-0 md:space-x-6 md:space-y-0"
                 >
-                    <Form
-                        onSubmit={(result) => {
-                            setLoading(true);
-                            register(result)
-                                .then(() => {
-                                    addToast({
-                                        level: "success",
-                                        description: t("account.register.success")!,
-                                        duration: 5000,
-                                        img: xdsecMascotHappy,
-                                    });
-                                    navigate("/", { replace: true });
-                                })
-                                .catch((err: HTTPError) => {
-                                    void err.response.text().then((text) => {
-                                        addToast({
-                                            level: "error",
-                                            description: text,
-                                            duration: 5000,
-                                        });
-                                    });
-                                    setTimestamp(DateTime.now().toMillis());
-                                })
-                                .finally(() => {
-                                    setLoading(false);
-                                });
-                        }}
-                        class="md:w-0 flex-1 flex-shrink-0 flex flex-col space-y-2"
-                    >
+                    <Form onSubmit={onSubmit} class="md:w-0 flex-1 flex-shrink-0 flex flex-col space-y-2">
                         <h2 class="font-bold text-center">{t("account.register.title")}</h2>
                         <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
                             <Field

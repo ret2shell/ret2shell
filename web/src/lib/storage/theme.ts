@@ -52,6 +52,17 @@ export function initTheme() {
             if (prefersDark()) untrack(() => setColorScheme("dark"));
             else untrack(() => setColorScheme("light"));
     });
+
+    function onBeforePrint() {
+        document.documentElement.setAttribute("data-theme", `${themeStore.theme}-light`);
+        document.documentElement.setAttribute("data-style", "light");
+    }
+    function onAfterPrint() {
+        document.documentElement.setAttribute("data-theme", fullTheme());
+        document.documentElement.setAttribute("data-style", themeStore.colorScheme);
+    }
+    window.onbeforeprint = onBeforePrint;
+    window.onafterprint = onAfterPrint;
 }
 
 const [dict] = createResource(themeStore.locale || "en_us", fetchDictionary);

@@ -1,3 +1,6 @@
+import rehypeToc, { type HtmlElementNode } from "@jsdevtools/rehype-toc";
+import { toHtml } from "hast-util-to-html";
+import type { Nodes } from "hast-util-to-html/lib";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeSanitize from "rehype-sanitize";
@@ -5,18 +8,28 @@ import rehypeSlug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
+import { type Accessor, createSignal } from "solid-js";
 import { type Processor, unified } from "unified";
 import type { MarkToHtmlOptions } from "./interface";
 
-type IParams = {
+type MarkdownProps = {
     type: "html";
     options?: MarkToHtmlOptions;
 };
 
 export class Markdown {
-    private processor: Processor | undefined;
+    private processor?: Processor;
+    public html: Accessor<string>;
+    private setHtml: (html: string) => void;
+    public toc: Accessor<string | null>;
+    private setToc: (toc: string | null) => void;
 
-    public async init(params: IParams) {
+    public constructor() {
+        [this.html, this.setHtml] = createSignal("");
+        [this.toc, this.setToc] = createSignal(null as string | null);
+    }
+
+    public async init(params: MarkdownProps) {
         // @ts-expect-error remark has not updated
         this.processor = unified().use(remarkParse);
         switch (params.type) {
@@ -26,10 +39,16 @@ export class Markdown {
         }
     }
 
-    public async render(markdown: string) {
-        // console.log(this.processor?.attachers)
+    public async renderContent(markdown: string) {
+        this.setHtml("");
+        this.setToc(null);
         const result = await this.processor?.process(markdown);
-        return result?.toString();
+        this.setHtml(result?.toString() as string);
+    }
+
+    public reset() {
+        this.setHtml("");
+        this.setToc(null);
     }
 
     private async initHtml(options?: MarkToHtmlOptions) {
@@ -59,13 +78,20 @@ export class Markdown {
             this.processor?.use(rehypeKatex.default);
         }
         if (options?.prism) {
-            const rehypePrismPlus = await import("rehype-prism-plus/all");
+            const rehypePrismPlus = await import("rehype-prism-plus/common");
             await import("./prism.scss");
             this.processor?.use(rehypePrismPlus.default, { ignoreMissing: true, showLineNumbers: true });
         }
         if (options?.headingAnchors) {
             this.processor?.use(rehypeSlug);
             this.processor?.use(rehypeAutolinkHeadings, { behavior: "wrap" });
+            this.processor?.use(rehypeToc, {
+                headings: ["h2", "h3"],
+                customizeTOC: (toc) => {
+                    this.setToc(toHtml(toc as unknown as Nodes));
+                    return false;
+                },
+            });
         }
         this.processor?.use(rehypeStringify);
     }

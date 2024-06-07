@@ -3,13 +3,33 @@ article.prose * {
   @apply scroll-m-20 indent-[2em];
 }
 
+nav.toc * {
+  @apply indent-0;
+}
+
+nav.toc {
+  @apply prose m-0 p-0;
+}
+
+nav.toc ol {
+  @apply m-0 p-0 pl-2 #{!important};
+}
+
+nav.toc li {
+  @apply list-disc list-inside leading-relaxed;
+}
+
+nav.toc a {
+  @apply text-layer-content/80 no-underline hover:underline;
+}
+
 article > pre,
 article > pre * {
   @apply text-base break-words indent-0 #{!important};
 }
 
 article > pre {
-  @apply bg-layer-content/5 backdrop-blur rounded-md mx-1 indent-0 #{!important};
+  @apply bg-layer-content/5 backdrop-blur rounded-md mx-1 indent-0 min-w-0 text-wrap #{!important};
 }
 
 code:not(pre code) {
