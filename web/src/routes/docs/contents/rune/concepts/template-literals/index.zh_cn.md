@@ -4,14 +4,14 @@
 
 ```rust
 pub fn main() {
-    let age = 30;
+    let age = 22;
     dbg(`I am ${age} years old!`);
 }
 ```
 
 ```
 $ ret2script scripts/template_literals/age.rx
-"I am 30 years old!"
+"I am 22 years old!"
 ```
 
 模板字符串由 Rune 的 VM 加速渲染，每个参数都使用*显示协议*，因此可以非常有效地构建复杂字符串。
