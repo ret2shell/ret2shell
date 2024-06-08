@@ -154,14 +154,6 @@
                             "zh_tw": "結構體 & 枚舉",
                             "ja_jp": "構造体 & 列挙型"
                         }
-                    },
-                    "external-types": {
-                        "title": {
-                            "en_us": "External Types",
-                            "zh_cn": "外部类型",
-                            "zh_tw": "外部類型",
-                            "ja_jp": "外部タイプ"
-                        }
                     }
                 }
             },

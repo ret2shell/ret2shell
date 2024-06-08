@@ -31,3 +31,29 @@ key did not exist
 ```
 
 对象类型支持动态指定数据，在没有数据结构定义的时候非常有用。
+
+```rust
+async fn get_commits(repo, limit) {
+    let limit = limit.unwrap_or(10);
+
+    let client = http::Client::new();
+    let request = client.get(`https://api.github.com/repos/${repo}/commits`);
+    let response = request.header("User-Agent", "Ret2Shell").send().await?;
+    let text = response.text().await?;
+    let json = json::from_string(text)?;
+
+    let commits = json.iter().take(limit).map(|e| e.sha).collect::<Vec>();
+    Ok(commits)
+}
+
+pub async fn main() {
+    for commit in get_commits("ret2shell/ret2script", Some(5)).await? {
+        println(commit);
+    }
+}
+```
+
+```
+$ ret2script scripts/types/json.rx
+23b603ea52e600b0969537401f1a89fe976a7c22
+```
