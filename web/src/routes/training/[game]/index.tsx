@@ -1,5 +1,4 @@
 import Challenge from "@/lib/blocks/challenge";
-import { trainingStore } from "@/lib/storage/training";
 import { useSearchParams } from "@solidjs/router";
 import { DateTime } from "luxon";
 import { Match, Switch, createMemo } from "solid-js";
@@ -12,7 +11,6 @@ export default function () {
             <Match when={selectedChallengeId() !== null}>
                 <Challenge
                     inGame={false}
-                    store={trainingStore}
                     challenge={{
                         id: selectedChallengeId()!,
                         name: "Challenge",

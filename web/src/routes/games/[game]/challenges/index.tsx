@@ -101,7 +101,6 @@ export default function () {
                         <Match when={selectedChallengeId() !== null}>
                             <Challenge
                                 inGame
-                                store={gameStore}
                                 challenge={{
                                     id: selectedChallengeId()!,
                                     name: "Challenge",

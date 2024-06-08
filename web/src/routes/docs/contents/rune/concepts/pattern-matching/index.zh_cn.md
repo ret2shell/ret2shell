@@ -56,14 +56,14 @@ Something else. Can I go eat now?
 可以在匹配项前加上结构名称前缀来匹配结构：
 
 * 一个单元结构： `Reverier`；
-* 一个元组结构： `Reverier(1, _, 3, "Reverier")`；
-* 一个对象结构： `Reverier{ field: 42, name: "RX wants a girlfriend rather than an object" }`；
+* 一个元组结构： `Reverier(1, _, 1, 4, 51.4, "Rubbish")`；
+* 一个对象结构： `Reverier{ field: 114514, name: "Reverier wants a girlfriend" }`；
 
 类似的，枚举中的变体也可以以相同的形式进行匹配：
 
 * 单位变体：`DevOps::Reverier`；
 * 元组变体：`DevOps::Reverier(114514, _, ..)`；
-* 对象变体：`DevOps::Reverier{ field: 42, name: "RX wants a girlfriend rather than an object" }`；
+* 对象变体：`DevOps::Reverier{ field: 114514, name: "Reverier wants a girlfriend" }`；
 
 模式几乎可以是上述模式的任意组合，甚至 `{"categories": ["Reverse", "Web", "Crypto", "Misc", "Pwn"]}` 都可以作为一个匹配的模式来使用。
 

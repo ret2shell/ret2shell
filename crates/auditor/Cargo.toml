@@ -2,7 +2,7 @@
 name = "r2s-auditor"
 version = "1.4.2"
 edition = "2021"
-rust-version = "1.77.2"
+rust-version = "1.78.0"
 description = "Auditor for Ret2Shell - A feature-riches CTF challenge platform."
 authors = ["Reverier-Xu <reverier.xu@woooo.tech>"]
 publish = false

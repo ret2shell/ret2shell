@@ -1,498 +1,499 @@
 {
-    "platform": {
-        "name": "回歸終端",
-        "subject": "為世間的所有美好而戰",
-        "diyBox": "語言與明暗主題",
-        "notificationBox": "提示訊息",
-        "clearNotifications": "清空訊息",
-        "noNotifications": "沒有未讀訊息",
-        "reject": "不行",
-        "accept": "好的",
-        "offline": "後端似乎離線了，請刷新頁面。\n如果此錯誤反覆出現，請聯絡維護人員。",
-        "cookiePolicy": "我們不使用任何 Cookie 來追蹤您。",
-        "ok": "好的",
-        "yes": "確定",
-        "error": "平台錯誤",
-        "underMaintenance": "維護中...",
-        "unavailable": "系統離線",
-        "hello": "亻爾女子",
-        "notImplemented": "沒寫，別急",
-        "notImplementedTips": "隨機獻祭一個rx",
-        "notImplementedTips1": "你願意跟我組一輩子樂團嗎？",
-        "notImplementedTips2": "這邊這位rx桑，更是堆屎山代碼的天才",
-        "notImplementedTips3": "為什麼……為什麼要寫《Rust》！",
-        "followSystem": "同步系統主題",
-        "systemTheme": "系統主題"
+  "platform": {
+    "name": "回歸終端",
+    "subject": "為世間的所有美好而戰",
+    "diyBox": "語言與明暗主題",
+    "notificationBox": "提示訊息",
+    "clearNotifications": "清空訊息",
+    "noNotifications": "沒有未讀訊息",
+    "reject": "不行",
+    "accept": "好的",
+    "offline": "後端似乎離線了，請刷新頁面。\n如果此錯誤反覆出現，請聯絡維護人員。",
+    "cookiePolicy": "我們不使用任何 Cookie 來追蹤您。",
+    "ok": "好的",
+    "yes": "確定",
+    "error": "平台錯誤",
+    "underMaintenance": "維護中...",
+    "unavailable": "系統離線",
+    "hello": "亻爾女子",
+    "notImplemented": "沒寫，別急",
+    "notImplementedTips": "隨機獻祭一個rx",
+    "notImplementedTips1": "你願意跟我組一輩子樂團嗎？",
+    "notImplementedTips2": "這邊這位rx桑，更是堆屎山代碼的天才",
+    "notImplementedTips3": "為什麼……為什麼要寫《Rust》！",
+    "followSystem": "同步系統主題",
+    "systemTheme": "系統主題"
+  },
+  "wiki": {
+    "title": "知識",
+    "titleRequired": "請填寫文章標題",
+    "titlePlaceholder": "文章標題",
+    "enableComment": "開啟評論區",
+    "contentRequired": "請填寫文章內容",
+    "contentPlaceholder": "文章內容",
+    "pathRequired": "請填寫文章路徑",
+    "pathPlaceholder": "文章路徑",
+    "draft": "草稿",
+    "published": "發布",
+    "fetchTocFailed": "取得文章索引目錄失敗",
+    "deleteSuccess": "刪除成功",
+    "selectWikiToRead": "今天想學些什麼？"
+  },
+  "loading": {
+    "0": "正在修復宇宙射線引發的比特翻轉...",
+    "1": "正在試圖證明 P != NP...",
+    "2": "正在試圖分解 RSA 4096...",
+    "3": "正在除以 0...",
+    "4": "正在連網下載更多的實體記憶體...",
+    "5": "正在排序 1 和 0...",
+    "6": "正在列舉機器學習網路...",
+    "7": "正在導入人工智障...",
+    "8": "正在破解 Alice 與 Bob 的 one-time pads...",
+    "9": "正在試圖退出 VIM...",
+    "10": "正在使用放大鏡與鉛筆搶救數據...",
+    "11": "正在將 emacs 和 vim 軟連結到 ed...",
+    "12": "正在訓練分支預測演算法...",
+    "13": "正在命中定時快取...",
+    "14": "正在執行投機取巧演算法...",
+    "15": "正在加入大語言模型幻覺..."
+  },
+  "training": {
+    "title": "訓練",
+    "list": "練習場列表",
+    "noPlaygrounds": "沒有練習場",
+    "noArchivedGames": "沒有歸檔的往期賽事",
+    "selectPlayground": "開始今日份的訓練！",
+    "failedToFetchPlaygrounds": "取得練習場清單失敗",
+    "failedToFetchGames": "取得賽事清單失敗",
+    "gameNotArchived": "比賽尚未歸檔"
+  },
+  "game": {
+    "title": "賽事",
+    "challenge": {
+      "title": "題目",
+      "enter": "攻克挑戰",
+      "notStarted": "尚未開賽，少安毋躁",
+      "solved": "已解決",
+      "welcome": "歡迎參賽",
+      "list": "題目列表",
+      "terminal": "終端",
+      "hint": "提示",
+      "files": "文件",
+      "answer": "題解",
+      "statistics": "統計數據",
+      "settings": "設定",
+      "hammer": "錘子",
+      "instances": "實例",
+      "hammerTips": "你在這裡發送的訊息將會與題目狀態一起轉發給出題人，出題人可能會在這裡回覆或透過其他管道聯繫你。",
+      "hammerInput": "請輸入你要回饋的問題...",
+      "confirmUnlockHint": "確認花費 {{ cost }} 分數解鎖這條提示嗎？",
+      "hammerTips2": "請注意，在出題人回覆之前，你只能發送一條訊息，所以請一次發送你的問題，不要在這裡即時聊天。"
     },
-    "wiki": {
-        "title": "知識",
-        "titleRequired": "請填寫文章標題",
-        "titlePlaceholder": "文章標題",
-        "enableComment": "開啟評論區",
-        "contentRequired": "請填寫文章內容",
-        "contentPlaceholder": "文章內容",
-        "pathRequired": "請填寫文章路徑",
-        "pathPlaceholder": "文章路徑",
-        "draft": "草稿",
-        "published": "發布",
-        "fetchTocFailed": "取得文章索引目錄失敗",
-        "deleteSuccess": "刪除成功",
-        "selectWikiToRead": "今天想學些什麼？"
+    "scoreboard": {
+      "title": "積分板",
+      "selectInstitute": "選擇組織...",
+      "fetchError": "取得積分板失敗"
     },
-    "loading": {
-        "0": "正在修復宇宙射線引發的比特翻轉...",
-        "1": "正在試圖證明 P != NP...",
-        "2": "正在試圖分解 RSA 4096...",
-        "3": "正在除以 0...",
-        "4": "正在連網下載更多的實體記憶體...",
-        "5": "正在排序 1 和 0...",
-        "6": "正在列舉機器學習網路...",
-        "7": "正在導入人工智障...",
-        "8": "正在破解 Alice 與 Bob 的 one-time pads...",
-        "9": "正在試圖退出 VIM...",
-        "10": "正在使用放大鏡與鉛筆搶救數據...",
-        "11": "正在將 emacs 和 vim 軟連結到 ed...",
-        "12": "正在訓練分支預測演算法...",
-        "13": "正在命中定時快取...",
-        "14": "正在執行投機取巧演算法...",
-        "15": "正在加入大語言模型幻覺..."
-    },
-    "training": {
-        "title": "訓練",
-        "list": "練習場列表",
-        "noPlaygrounds": "沒有練習場",
-        "noArchivedGames": "沒有歸檔的往期賽事",
-        "selectPlayground": "開始今日份的訓練！",
-        "failedToFetchPlaygrounds": "取得練習場清單失敗",
-        "failedToFetchGames": "取得賽事清單失敗",
-        "gameNotArchived": "比賽尚未歸檔"
-    },
-    "game": {
-        "title": "賽事",
-        "challenge": {
-            "title": "題目",
-            "enter": "攻克挑戰",
-            "notStarted": "尚未開賽，少安毋躁",
-            "solved": "已解決",
-            "welcome": "歡迎參賽",
-            "list": "題目列表",
-            "terminal": "終端",
-            "hint": "提示",
-            "files": "文件",
-            "answer": "題解",
-            "statistics": "統計數據",
-            "settings": "設定",
-            "hammer": "錘子",
-            "instances": "實例",
-            "hammerTips": "你在這裡發送的訊息將會與題目狀態一起轉發給出題人，出題人可能會在這裡回覆或透過其他管道聯繫你。",
-            "hammerInput": "請輸入你要回饋的問題...",
-            "confirmUnlockHint": "確認花費 {{ cost }} 分數解鎖這條提示嗎？",
-            "hammerTips2": "請注意，在出題人回覆之前，你只能發送一條訊息，所以請一次發送你的問題，不要在這裡即時聊天。"
-        },
-        "scoreboard": {
-            "title": "積分板",
-            "selectInstitute": "選擇組織...",
-            "fetchError": "取得積分板失敗"
-        },
-        "writeup": {
-            "title": "題解"
-        },
-        "admin": {
-            "title": "管理",
-            "manageChallenges": "管理賽事題目",
-            "statistics": {
-                "title": "統計數據"
-            },
-            "teams": {
-                "title": "參賽隊伍"
-            },
-            "events": {
-                "title": "事件看板"
-            },
-            "automate": {
-                "title": "事件推播"
-            },
-            "edit": {
-                "title": "編輯訊息"
-            },
-            "description": "比賽管理面板",
-            "hammer": {
-                "title": "選手回饋"
-            }
-        },
-        "exit": "退出",
-        "noGameHosted": "沒有舉辦過賽事",
-        "otherGames": "非重點賽事",
-        "pending": "未開始",
-        "ended": "已結束",
-        "started": "進行中",
-        "unknown": "未知",
-        "seeOtherInteresting": "看看別的吧",
-        "fetchFailed": "取得比賽清單失敗",
-        "create": "新建",
-        "loading": "載入中...",
-        "nameRequired": "請填寫賽事名稱",
-        "namePlaceholder": "賽事名稱",
-        "briefRequired": "請填寫賽事簡介",
-        "briefPlaceholder": "賽事簡介",
-        "startEndTime": "開始與結束時間",
-        "registerArchiveTime": "註冊與歸檔時間",
-        "weight": "權重",
-        "teamSizePlaceholder": "隊伍人數限制",
-        "miscSettings": "雜項設定",
-        "canRegisterAfterStarted": "允許開賽後註冊",
-        "offline": "線下比賽",
-        "enableAudit": "開啟隊伍審核",
-        "createFailed": "創建失敗",
-        "writeupsOnlyOpenWhenArchived": "題解僅在賽事歸檔後才公開！",
-        "adminCanNotTakePartIn": "管理員不能參賽",
-        "register": "開放註冊",
-        "start": "比賽開始",
-        "end": "比賽結束",
-        "archive": "比賽歸檔",
-        "timerTips": "距離 {{ period }} 還有",
-        "introduction": {
-            "title": "比賽須知",
-            "empty": "主辦單位很懶，什麼也沒寫",
-            "fetchFailed": "取得賽事介紹失敗",
-            "updateFailed": "更新賽事介紹失敗"
-        },
-        "team": {
-            "create": {
-                "title": "創建隊伍"
-            },
-            "manage": {
-                "title": "查看我的隊伍"
-            },
-            "loginThenBack": "登入後參與",
-            "sizeRequired": "請填寫隊伍人數限制",
-            "sizeMinExceeded": "隊伍成員最少一人",
-            "sizeMaxExceeded": "隊伍成員最多不能超過 100 人，請考慮共享帳號",
-            "collab": "{{ size }} 人組隊賽",
-            "solo": "單人賽",
-            "noTeamParticipated": "還沒有隊伍參賽",
-            "join": {
-                "title": "加入隊伍"
-            },
-            "joinFirst": "請先參賽",
-            "title": "隊伍詳情"
-        },
-        "archivedGotoTraining": "已歸檔，請前往練習場",
-        "canNotParticipate": "不符合參與條件",
-        "accessPolicy": {
-            "open": "開放賽事"
-        },
-        "adminMode": "管理員模式",
-        "hidden": "賽事已隱藏",
-        "frozen": "賽事已凍結",
-        "cover": {
-            "uploaded": "已更新賽事封面",
-            "uploadFailed": "封面上傳失敗"
-        },
-        "logo": {
-            "uploaded": "已更新賽事圖標",
-            "uploadFailed": "圖標上傳失敗"
-        },
-        "introRequired": "請填寫賽事介紹",
-        "introPlaceholder": "賽事介紹",
-        "noNotifications": "還沒有任何通知",
-        "notification": {
-            "titleRequired": "請填寫標題",
-            "titlePlaceholder": "通知標題",
-            "contentRequired": "請填寫通知內容",
-            "contentPlaceholder": "通知內容"
-        }
-    },
-    "bulletin": {
-        "title": "公告",
-        "create": "創建",
-        "titlePlaceholder": "公告標題",
-        "titleRequired": "請填寫公告標題",
-        "pinned": "置頂",
-        "enableComment": "開啟評論區",
-        "contentRequired": "請填寫公告內容",
-        "contentPlaceholder": "公告內容",
-        "deleteSuccess": "刪除成功",
-        "noMore": "沒有公告，看看別的吧",
-        "fetchFailed": "取得公告清單失敗",
-        "loading": "載入中..."
+    "writeup": {
+      "title": "題解"
     },
     "admin": {
-        "title": "管理",
-        "statistics": {
-            "title": "平台統計訊息",
-            "fetchFailed": "取得平台資料失敗",
-            "validUsers": "活躍用戶",
-            "totalUsers": "註冊用戶",
-            "pendingGames": "未開始的比賽",
-            "inProgressGames": "進行中的比賽",
-            "endedGames": "已結束的比賽",
-            "comingGames": "活躍賽事",
-            "totalGames": "舉辦賽事",
-            "games": "賽事",
-            "trainings": "練習場",
-            "solvedSubmissions": "正確提交數量",
-            "totalSubmissions": "總提交數量",
-            "inGameChallenges": "賽中題目數量",
-            "totalChallenges": "總題目數量",
-            "instituteUsers": "使用者組織分佈狀況",
-            "others": "其他"
-        },
-        "edit": {
-            "title": "編輯平台設定"
-        },
-        "email": {
-            "title": "信箱設定"
-        },
-        "captcha": {
-            "title": "驗證碼保護"
-        },
-        "media": {
-            "title": "媒體儲存設定"
-        },
-        "sync": {
-            "title": "分散式資源共享"
-        },
-        "users": {
-            "title": "使用者列表"
-        },
-        "oauth": {
-            "title": "第三方認證"
-        },
-        "cluster": {
-            "title": "叢集管理",
-            "unavailable": "叢集已離線，狀態不可用",
-            "available": "正常運行，叢集 API 可用",
-            "failedToFetchNodes": "取得叢集節點資訊失敗",
-            "refreshNode": "刷新節點狀態",
-            "disconnectNode": "斷開節點",
-            "updateNode": "升級節點",
-            "nodeInfo": "節點資訊",
-            "data": {
-                "nodeInfo": {
-                    "architecture": "架構",
-                    "bootID": "啟動 ID",
-                    "containerRuntimeVersion": "容器運行時",
-                    "kernelVersion": "內核版本",
-                    "machineID": "機器 ID",
-                    "operatingSystem": "作業系統",
-                    "osImage": "作業系統映像",
-                    "systemUUID": "系統 UUID",
-                    "kubeletVersion": "Kubelet 版本",
-                    "kubeProxyVersion": "Kube Proxy 版本"
-                }
-            },
-            "nodeNetwork": "網路狀況",
-            "nodeResources": "節點資源",
-            "selectNode": "選擇節點，查看詳細信息"
-        },
-        "logs": {
-            "title": "平台日誌",
-            "socketClosed": "日誌管道已斷開，將自動重試連線...",
-            "start": "開啟日誌串流",
-            "stop": "關閉日誌串流",
-            "streamingEnabled": "正在即時串流日誌...",
-            "empty": "開啟串流後日誌會顯示在這裡，日誌量大時請謹慎開啟",
-            "emptyTips": "僅顯示伺服器時間的當天日誌，其他日誌請下載日誌檔案進行審計",
-            "failedToFetchLogsList": "取得日誌清單失敗"
-        },
-        "description": "平台管理面板",
-        "about": {
-            "title": "關於回歸終端",
-            "failedToFetchLicense": "取得平台授權失敗"
-        }
+      "title": "管理",
+      "manageChallenges": "管理賽事題目",
+      "statistics": {
+        "title": "統計數據"
+      },
+      "teams": {
+        "title": "參賽隊伍"
+      },
+      "events": {
+        "title": "事件看板"
+      },
+      "automate": {
+        "title": "事件推播"
+      },
+      "edit": {
+        "title": "編輯訊息"
+      },
+      "description": "比賽管理面板",
+      "hammer": {
+        "title": "選手回饋"
+      }
     },
-    "theme": {
-        "colorScheme": "明暗主題",
-        "language": "語言 / Language"
+    "exit": "退出",
+    "noGameHosted": "沒有舉辦過賽事",
+    "otherGames": "非重點賽事",
+    "pending": "未開始",
+    "ended": "已結束",
+    "started": "進行中",
+    "unknown": "未知",
+    "seeOtherInteresting": "看看別的吧",
+    "fetchFailed": "取得比賽清單失敗",
+    "create": "新建",
+    "loading": "載入中...",
+    "nameRequired": "請填寫賽事名稱",
+    "namePlaceholder": "賽事名稱",
+    "briefRequired": "請填寫賽事簡介",
+    "briefPlaceholder": "賽事簡介",
+    "startEndTime": "開始與結束時間",
+    "registerArchiveTime": "註冊與歸檔時間",
+    "weight": "權重",
+    "teamSizePlaceholder": "隊伍人數限制",
+    "miscSettings": "雜項設定",
+    "canRegisterAfterStarted": "允許開賽後註冊",
+    "offline": "線下比賽",
+    "enableAudit": "開啟隊伍審核",
+    "createFailed": "創建失敗",
+    "writeupsOnlyOpenWhenArchived": "題解僅在賽事歸檔後才公開！",
+    "adminCanNotTakePartIn": "管理員不能參賽",
+    "register": "開放註冊",
+    "start": "比賽開始",
+    "end": "比賽結束",
+    "archive": "比賽歸檔",
+    "timerTips": "距離 {{ period }} 還有",
+    "introduction": {
+      "title": "比賽須知",
+      "empty": "主辦單位很懶，什麼也沒寫",
+      "fetchFailed": "取得賽事介紹失敗",
+      "updateFailed": "更新賽事介紹失敗"
     },
-    "calendar": {
-        "scrollToView": "向下捲動查看日曆",
-        "jumpToToday": "跳到今天",
-        "jumpToPrevMonth": "上個月",
-        "jumpToPrevYear": "前一年",
-        "jumpToNextMonth": "下個月",
-        "jumpToNextYear": "下一年",
-        "day": {
-            "sun": "日",
-            "mon": "一",
-            "tue": "二",
-            "wed": "三",
-            "thu": "四",
-            "fri": "五",
-            "sat": "六"
-        },
-        "games": "當月賽事",
-        "noGames": "這個月沒有賽事，享受一下吧",
-        "selectGameToSeeDetail": "在左側選擇賽事查看詳情",
-        "unknown": "未知",
-        "gotoEventHomePage": "前往參與",
-        "addBy": "由 {{ name }} 添加",
-        "eventNamePlaceholder": "賽事名稱",
-        "eventNameRequired": "請填寫賽事名稱",
-        "createEvent": "建立賽事通知",
-        "startEndTime": "起止時間",
-        "eventLinkRequired": "請填寫賽事連結",
-        "eventLinkPlaceholder": "賽事連結",
-        "startTime": "開始時間",
-        "endTime": "結束時間",
-        "introPlaceholder": "賽事介紹",
-        "startAtRequired": "請選擇開始時間",
-        "endAtRequired": "請選擇結束時間",
-        "createFailed": "創建失敗",
-        "createSuccess": "創建成功",
-        "create": "創建",
-        "delete": "刪除",
-        "deleteSuccess": "刪除成功",
-        "deleteFailed": "刪除失敗",
-        "introRequired": "請填寫賽事簡介",
-        "editEvent": "編輯賽事通知",
-        "save": "儲存",
-        "edit": "編輯",
-        "saveFailed": "保存失敗",
-        "saveSuccess": "保存成功",
-        "fetchFailed": "取得賽事日曆失敗"
+    "team": {
+      "create": {
+        "title": "創建隊伍"
+      },
+      "manage": {
+        "title": "查看我的隊伍"
+      },
+      "loginThenBack": "登入後參與",
+      "sizeRequired": "請填寫隊伍人數限制",
+      "sizeMinExceeded": "隊伍成員最少一人",
+      "sizeMaxExceeded": "隊伍成員最多不能超過 100 人，請考慮共享帳號",
+      "collab": "{{ size }} 人組隊賽",
+      "solo": "單人賽",
+      "noTeamParticipated": "還沒有隊伍參賽",
+      "join": {
+        "title": "加入隊伍"
+      },
+      "joinFirst": "請先參賽",
+      "title": "隊伍詳情"
     },
-    "about": {
-        "donate": "捐款",
-        "source": "支援",
-        "contactTips": "平台軟體支援郵箱"
+    "archivedGotoTraining": "已歸檔，請前往練習場",
+    "canNotParticipate": "不符合參與條件",
+    "accessPolicy": {
+      "open": "開放賽事"
     },
-    "account": {
-        "login": {
-            "title": "登入",
-            "accountPlaceholder": "使用者名稱/郵箱",
-            "passwordPlaceholder": "密碼",
-            "captchaPlaceholder": "驗證碼",
-            "accountMascotTip": "歡迎歡迎 ^_^",
-            "passwordMascotTip": "看不見看不見 >_<",
-            "accountRequired": "請填寫使用者名稱/信箱",
-            "accountMinLength": "使用者名稱/信箱至少4個字符",
-            "passwordRequired": "請填寫密碼",
-            "passwordMinLength": "密碼最少8位",
-            "passwordTooWeak": "密碼在8-40字符之間，至少包含一個大寫字母、一個小寫字母、一個數字和一個特殊字符",
-            "success": "登入成功，歡迎回來",
-            "successMascotTip": "歡迎回來 ^_^",
-            "failMascotTip": "失敗了，壞耶 x_x"
-        },
-        "settings": {
-            "title": "使用者設定",
-            "info": {
-                "title": "使用者資訊"
-            },
-            "oauth": {
-                "title": "第三方認證"
-            },
-            "institute": {
-                "title": "組織機構"
-            },
-            "delete": {
-                "title": "刪號跑路"
-            }
-        },
-        "logout": "登出登入",
-        "box": "使用者詳情",
-        "register": {
-            "tips": "沒有帳號？\n現在註冊！",
-            "title": "註冊",
-            "accountRequired": "請填寫用戶名",
-            "accountMinLength": "使用者名稱至少4個字符",
-            "accountMaxLength": "使用者名稱最多32個字符",
-            "accountPattern": "使用者名稱必須是大小寫字母、數字與底線的組合",
-            "accountPlaceholder": "使用者名稱",
-            "nicknameRequired": "請填寫暱稱",
-            "nicknameMinLength": "暱稱最短2個字符",
-            "nicknameMaxLength": "暱稱最長32個字符",
-            "nicknamePlaceholder": "暱稱",
-            "emailRequired": "請填寫信箱",
-            "emailInvalid": "郵箱格式不正確",
-            "passwordRequired": "請填寫密碼",
-            "passwordMinLength": "密碼最少8位",
-            "passwordTooWeak": "密碼在8-40字符之間，至少包含一個大寫字母、一個小寫字母、一個數字和一個特殊字符",
-            "emailPlaceholder": "信箱",
-            "passwordPlaceholder": "密碼",
-            "success": "註冊成功，歡迎來到 CTF 的世界！"
-        },
-        "oauth": {
-            "xdu": {
-                "title": "西電統一身分認證"
-            }
-        },
-        "institute": {
-            "none": "無從屬組織機構"
-        }
+    "adminMode": "管理員模式",
+    "hidden": "賽事已隱藏",
+    "frozen": "賽事已凍結",
+    "cover": {
+      "uploaded": "已更新賽事封面",
+      "uploadFailed": "封面上傳失敗"
     },
-    "instance": {
-        "disconnected": "WSRX 未連接",
-        "connected": "WSRX 已連接",
-        "retryLinkWsrx": "嘗試連接",
-        "downloadWsrx": "下載 WSRX",
-        "copyWsrxAddr": "複製WSRX地址",
-        "copyLocalAddr": "複製本地地址",
-        "openLocalAddr": "直接打開",
-        "renew": "延長時間",
-        "stop": "終止環境",
-        "needLocalDaemon": "需要連接本地WSRX才能使用",
-        "box": "動態環境連接",
-        "connecting": "連接中...",
-        "wsrxSettings": "修改 WSRX 連線設定",
-        "defaultApiAddr": "重設為預設地址",
-        "pending": "正在等待本地授權",
-        "wsrxDisconnected": "WSRX 用戶端離線了。"
+    "logo": {
+      "uploaded": "已更新賽事圖標",
+      "uploadFailed": "圖標上傳失敗"
     },
-    "magic": {
-        "illustration": "插畫",
-        "source": "來源"
+    "introRequired": "請填寫賽事介紹",
+    "introPlaceholder": "賽事介紹",
+    "noNotifications": "還沒有任何通知",
+    "notification": {
+      "titleRequired": "請填寫標題",
+      "titlePlaceholder": "通知標題",
+      "contentRequired": "請填寫通知內容",
+      "contentPlaceholder": "通知內容"
+    }
+  },
+  "bulletin": {
+    "title": "公告",
+    "create": "創建",
+    "titlePlaceholder": "公告標題",
+    "titleRequired": "請填寫公告標題",
+    "pinned": "置頂",
+    "enableComment": "開啟評論區",
+    "contentRequired": "請填寫公告內容",
+    "contentPlaceholder": "公告內容",
+    "deleteSuccess": "刪除成功",
+    "noMore": "沒有公告，看看別的吧",
+    "fetchFailed": "取得公告清單失敗",
+    "loading": "載入中..."
+  },
+  "admin": {
+    "title": "管理",
+    "statistics": {
+      "title": "平台統計訊息",
+      "fetchFailed": "取得平台資料失敗",
+      "validUsers": "活躍用戶",
+      "totalUsers": "註冊用戶",
+      "pendingGames": "未開始的比賽",
+      "inProgressGames": "進行中的比賽",
+      "endedGames": "已結束的比賽",
+      "comingGames": "活躍賽事",
+      "totalGames": "舉辦賽事",
+      "games": "賽事",
+      "trainings": "練習場",
+      "solvedSubmissions": "正確提交數量",
+      "totalSubmissions": "總提交數量",
+      "inGameChallenges": "賽中題目數量",
+      "totalChallenges": "總題目數量",
+      "instituteUsers": "使用者組織分佈狀況",
+      "others": "其他"
+    },
+    "edit": {
+      "title": "編輯平台設定"
+    },
+    "email": {
+      "title": "信箱設定"
     },
     "captcha": {
-        "loading": "載入中...",
-        "loadFailed": "載入失敗",
-        "required": "請填寫驗證碼",
-        "minLength": "驗證碼至少4位",
-        "calculating": "計算中...",
-        "placeholder": "驗證碼",
-        "reload": "看不清？換一個"
+      "title": "驗證碼保護"
     },
-    "article": {
-        "loading": "少女祈禱中...",
-        "by": "由 {{ name }} 發布",
-        "unknownPublisher": "佚名",
-        "createdAt": "發佈於 {{ time }}",
-        "updatedAt": "更新於 {{ time }}"
+    "media": {
+      "title": "媒體儲存設定"
     },
-    "errors": {
-        "401": "請先登入",
-        "403": "權限不足，拒絕訪問",
-        "404": "資源不存在",
-        "418": "我是個茶壺",
-        "500": "伺服器內部錯誤",
-        "502": "系統宕機",
-        "401Tip": "即使是做好事也請留名",
-        "403Tip": "總有一扇門是對你關上的",
-        "404Tip": "生活總歸帶點荒謬",
-        "500Tip": "一腳給伺服器乾冒煙了",
-        "502Tip": "隨機挑一個運維祭天",
-        "unknown": "未知錯誤",
-        "418Tip": "用茶壺泡咖啡真的不會串味嗎",
-        "unknownTip": "你墜入了虛空",
-        "gotoDocs": "如果你是維，可以查看"
+    "sync": {
+      "title": "分散式資源共享"
     },
-    "form": {
-        "save": "儲存",
-        "create": "創建",
-        "saveFailed": "保存失敗",
-        "createFailed": "創建失敗",
-        "edit": "編輯",
-        "delete": "刪除",
-        "changeAvatar": "封面",
-        "cover": "封面",
-        "logo": "標識",
-        "print": "列印"
+    "users": {
+      "title": "使用者列表"
     },
-    "docs": {
-        "titleTips": "回歸終端 - 開發者文檔",
-        "forVersion": "適用於版本",
-        "title": "開發者文檔",
-        "intro": "簡介"
+    "oauth": {
+      "title": "第三方認證"
+    },
+    "cluster": {
+      "title": "叢集管理",
+      "unavailable": "叢集已離線，狀態不可用",
+      "available": "正常運行，叢集 API 可用",
+      "failedToFetchNodes": "取得叢集節點資訊失敗",
+      "refreshNode": "刷新節點狀態",
+      "disconnectNode": "斷開節點",
+      "updateNode": "升級節點",
+      "nodeInfo": "節點資訊",
+      "data": {
+        "nodeInfo": {
+          "architecture": "架構",
+          "bootID": "啟動 ID",
+          "containerRuntimeVersion": "容器運行時",
+          "kernelVersion": "內核版本",
+          "machineID": "機器 ID",
+          "operatingSystem": "作業系統",
+          "osImage": "作業系統映像",
+          "systemUUID": "系統 UUID",
+          "kubeletVersion": "Kubelet 版本",
+          "kubeProxyVersion": "Kube Proxy 版本"
+        }
+      },
+      "nodeNetwork": "網路狀況",
+      "nodeResources": "節點資源",
+      "selectNode": "選擇節點，查看詳細信息"
+    },
+    "logs": {
+      "title": "平台日誌",
+      "socketClosed": "日誌管道已斷開，將自動重試連線...",
+      "start": "開啟日誌串流",
+      "stop": "關閉日誌串流",
+      "streamingEnabled": "正在即時串流日誌...",
+      "empty": "開啟串流後日誌會顯示在這裡，日誌量大時請謹慎開啟",
+      "emptyTips": "僅顯示伺服器時間的當天日誌，其他日誌請下載日誌檔案進行審計",
+      "failedToFetchLogsList": "取得日誌清單失敗"
+    },
+    "description": "平台管理面板",
+    "about": {
+      "title": "關於回歸終端",
+      "failedToFetchLicense": "取得平台授權失敗"
     }
+  },
+  "theme": {
+    "colorScheme": "明暗主題",
+    "language": "語言 / Language"
+  },
+  "calendar": {
+    "scrollToView": "向下捲動查看日曆",
+    "jumpToToday": "跳到今天",
+    "jumpToPrevMonth": "上個月",
+    "jumpToPrevYear": "前一年",
+    "jumpToNextMonth": "下個月",
+    "jumpToNextYear": "下一年",
+    "day": {
+      "sun": "日",
+      "mon": "一",
+      "tue": "二",
+      "wed": "三",
+      "thu": "四",
+      "fri": "五",
+      "sat": "六"
+    },
+    "games": "當月賽事",
+    "noGames": "這個月沒有賽事，享受一下吧",
+    "selectGameToSeeDetail": "在左側選擇賽事查看詳情",
+    "unknown": "未知",
+    "gotoEventHomePage": "前往參與",
+    "addBy": "由 {{ name }} 添加",
+    "eventNamePlaceholder": "賽事名稱",
+    "eventNameRequired": "請填寫賽事名稱",
+    "createEvent": "建立賽事通知",
+    "startEndTime": "起止時間",
+    "eventLinkRequired": "請填寫賽事連結",
+    "eventLinkPlaceholder": "賽事連結",
+    "startTime": "開始時間",
+    "endTime": "結束時間",
+    "introPlaceholder": "賽事介紹",
+    "startAtRequired": "請選擇開始時間",
+    "endAtRequired": "請選擇結束時間",
+    "createFailed": "創建失敗",
+    "createSuccess": "創建成功",
+    "create": "創建",
+    "delete": "刪除",
+    "deleteSuccess": "刪除成功",
+    "deleteFailed": "刪除失敗",
+    "introRequired": "請填寫賽事簡介",
+    "editEvent": "編輯賽事通知",
+    "save": "儲存",
+    "edit": "編輯",
+    "saveFailed": "保存失敗",
+    "saveSuccess": "保存成功",
+    "fetchFailed": "取得賽事日曆失敗"
+  },
+  "about": {
+    "donate": "捐款",
+    "source": "支援",
+    "contactTips": "平台軟體支援郵箱"
+  },
+  "account": {
+    "login": {
+      "title": "登入",
+      "accountPlaceholder": "使用者名稱/郵箱",
+      "passwordPlaceholder": "密碼",
+      "captchaPlaceholder": "驗證碼",
+      "accountMascotTip": "歡迎歡迎 ^_^",
+      "passwordMascotTip": "看不見看不見 >_<",
+      "accountRequired": "請填寫使用者名稱/信箱",
+      "accountMinLength": "使用者名稱/信箱至少4個字符",
+      "passwordRequired": "請填寫密碼",
+      "passwordMinLength": "密碼最少8位",
+      "passwordTooWeak": "密碼在8-40字符之間，至少包含一個大寫字母、一個小寫字母、一個數字和一個特殊字符",
+      "success": "登入成功，歡迎回來",
+      "successMascotTip": "歡迎回來 ^_^",
+      "failMascotTip": "失敗了，壞耶 x_x"
+    },
+    "settings": {
+      "title": "使用者設定",
+      "info": {
+        "title": "使用者資訊"
+      },
+      "oauth": {
+        "title": "第三方認證"
+      },
+      "institute": {
+        "title": "組織機構"
+      },
+      "delete": {
+        "title": "刪號跑路"
+      }
+    },
+    "logout": "登出登入",
+    "box": "使用者詳情",
+    "register": {
+      "tips": "沒有帳號？\n現在註冊！",
+      "title": "註冊",
+      "accountRequired": "請填寫用戶名",
+      "accountMinLength": "使用者名稱至少4個字符",
+      "accountMaxLength": "使用者名稱最多32個字符",
+      "accountPattern": "使用者名稱必須是大小寫字母、數字與底線的組合",
+      "accountPlaceholder": "使用者名稱",
+      "nicknameRequired": "請填寫暱稱",
+      "nicknameMinLength": "暱稱最短2個字符",
+      "nicknameMaxLength": "暱稱最長32個字符",
+      "nicknamePlaceholder": "暱稱",
+      "emailRequired": "請填寫信箱",
+      "emailInvalid": "郵箱格式不正確",
+      "passwordRequired": "請填寫密碼",
+      "passwordMinLength": "密碼最少8位",
+      "passwordTooWeak": "密碼在8-40字符之間，至少包含一個大寫字母、一個小寫字母、一個數字和一個特殊字符",
+      "emailPlaceholder": "信箱",
+      "passwordPlaceholder": "密碼",
+      "success": "註冊成功，歡迎來到 CTF 的世界！"
+    },
+    "oauth": {
+      "xdu": {
+        "title": "西電統一身分認證"
+      }
+    },
+    "institute": {
+      "none": "無從屬組織機構"
+    }
+  },
+  "instance": {
+    "disconnected": "WSRX 未連接",
+    "connected": "WSRX 已連接",
+    "retryLinkWsrx": "嘗試連接",
+    "downloadWsrx": "下載 WSRX",
+    "copyWsrxAddr": "複製WSRX地址",
+    "copyLocalAddr": "複製本地地址",
+    "openLocalAddr": "直接打開",
+    "renew": "延長時間",
+    "stop": "終止環境",
+    "needLocalDaemon": "需要連接本地WSRX才能使用",
+    "box": "動態環境連接",
+    "connecting": "連接中...",
+    "wsrxSettings": "修改 WSRX 連線設定",
+    "defaultApiAddr": "重設為預設地址",
+    "pending": "正在等待本地授權",
+    "wsrxDisconnected": "WSRX 用戶端離線了。",
+    "instanceCount": "{{ count }} 個容器"
+  },
+  "magic": {
+    "illustration": "插畫",
+    "source": "來源"
+  },
+  "captcha": {
+    "loading": "載入中...",
+    "loadFailed": "載入失敗",
+    "required": "請填寫驗證碼",
+    "minLength": "驗證碼至少4位",
+    "calculating": "計算中...",
+    "placeholder": "驗證碼",
+    "reload": "看不清？換一個"
+  },
+  "article": {
+    "loading": "少女祈禱中...",
+    "by": "由 {{ name }} 發布",
+    "unknownPublisher": "佚名",
+    "createdAt": "發佈於 {{ time }}",
+    "updatedAt": "更新於 {{ time }}"
+  },
+  "errors": {
+    "401": "請先登入",
+    "403": "權限不足，拒絕訪問",
+    "404": "資源不存在",
+    "418": "我是個茶壺",
+    "500": "伺服器內部錯誤",
+    "502": "系統宕機",
+    "401Tip": "即使是做好事也請留名",
+    "403Tip": "總有一扇門是對你關上的",
+    "404Tip": "生活總歸帶點荒謬",
+    "500Tip": "一腳給伺服器乾冒煙了",
+    "502Tip": "隨機挑一個運維祭天",
+    "unknown": "未知錯誤",
+    "418Tip": "用茶壺泡咖啡真的不會串味嗎",
+    "unknownTip": "你墜入了虛空",
+    "gotoDocs": "如果你是維，可以查看"
+  },
+  "form": {
+    "save": "儲存",
+    "create": "創建",
+    "saveFailed": "保存失敗",
+    "createFailed": "創建失敗",
+    "edit": "編輯",
+    "delete": "刪除",
+    "changeAvatar": "封面",
+    "cover": "封面",
+    "logo": "標識",
+    "print": "列印"
+  },
+  "docs": {
+    "titleTips": "回歸終端 - 開發者文檔",
+    "forVersion": "適用於版本",
+    "title": "開發者文檔",
+    "intro": "簡介"
+  }
 }

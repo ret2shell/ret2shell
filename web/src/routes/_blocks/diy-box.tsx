@@ -7,7 +7,7 @@ import { Show } from "solid-js";
 
 export function DiyBoxContent() {
     return (
-        <div class="flex flex-col space-y-2">
+        <div class="flex flex-col space-y-2 max-w-64">
             <Card>
                 <DarkmodeButton />
             </Card>

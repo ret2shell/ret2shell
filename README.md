@@ -4,7 +4,7 @@
 
 ## Requirements
 
-MSRV `1.77.2`+, solidjs `1.8`+.
+MSRV `1.78.0`+, solidjs `1.8`+.
 
 ## Developments
 

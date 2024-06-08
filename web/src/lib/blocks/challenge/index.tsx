@@ -1,8 +1,6 @@
 import { Permission } from "@/lib/models/user";
 import { accountStore } from "@/lib/storage/account";
-import type { GameStoreType } from "@/lib/storage/game";
 import { fullTheme, t } from "@/lib/storage/theme";
-import type { TrainingStoreType } from "@/lib/storage/training";
 import Button from "@/lib/widgets/button";
 import type { Challenge } from "@models/challenge";
 import Splitter from "@widgets/splitter";
@@ -17,12 +15,12 @@ import Instances from "./instances";
 import Settings from "./settings";
 import Statistics from "./statistics";
 import Terminal from "./terminal";
+import { gameStore } from "@/lib/storage/game";
 
 function BottomPanel(props: {
     challenge?: Challenge;
     onStateChange?: (challenge: Challenge) => void;
     inGame: boolean;
-    store: GameStoreType | TrainingStoreType;
 }) {
     const [page, setPage] = createSignal(0);
     const pages = [Terminal, Hints, Files, Hammer, Answer, Statistics, Instances, Settings];
@@ -63,7 +61,7 @@ function BottomPanel(props: {
                             !(
                                 !!accountStore.id &&
                                 accountStore.permissions.includes(Permission.Game) &&
-                                props.store.current?.admins.includes(accountStore.id)
+                                gameStore.current?.admins.includes(accountStore.id)
                             )
                         }
                     >
@@ -74,7 +72,7 @@ function BottomPanel(props: {
                         when={
                             !!accountStore.id &&
                             accountStore.permissions.includes(Permission.Game) &&
-                            props.store.current?.admins.includes(accountStore.id)
+                            gameStore.current?.admins.includes(accountStore.id)
                         }
                     >
                         <Button onClick={() => setPage(5)} ghost={page() !== 5}>
@@ -112,7 +110,6 @@ export default function (props: {
     challenge?: Challenge;
     onStateChange?: (challenge: Challenge) => void;
     inGame: boolean;
-    store: GameStoreType | TrainingStoreType;
 }) {
     return (
         <div class="flex-1">
@@ -120,7 +117,6 @@ export default function (props: {
                 startPanel={<div />}
                 endPanel={
                     <BottomPanel
-                        store={props.store}
                         inGame={props.inGame}
                         challenge={props.challenge}
                         onStateChange={props.onStateChange}

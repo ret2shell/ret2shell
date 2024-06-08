@@ -181,6 +181,13 @@ function TitleBar() {
     const params = useParams();
     const location = useLocation();
     const inDocs = () => location.pathname.startsWith("/docs");
+    const [offlineLoading, setOfflineLoading] = createSignal(false);
+    function reloadPage() {
+        setOfflineLoading(true);
+        setTimeout(() => {
+            window.location.reload();
+        }, 500);
+    }
 
     return (
         <>
@@ -199,7 +206,7 @@ function TitleBar() {
                             ghost
                             popContentClass="pt-2"
                         >
-                            <div class="flex flex-col space-y-2 w-48">
+                            <div class="flex flex-col space-y-2 max-w-64">
                                 <Card contentClass="p-2 flex flex-col space-y-2">
                                     <ul class="flex flex-col space-y-2">
                                         <Switch>
@@ -294,7 +301,12 @@ function TitleBar() {
                     </div>
                     <Switch fallback={<GlobalTitleLink />}>
                         <Match
-                            when={gameStore.current && gameStore.current.host_type === HostType.CTFGame && params.game}
+                            when={
+                                gameStore.current &&
+                                gameStore.current.host_type === HostType.CTFGame &&
+                                params.game &&
+                                location.pathname.startsWith(`/games/${params.game}/`)
+                            }
                         >
                             <GameTitleLink />
                         </Match>
@@ -307,7 +319,8 @@ function TitleBar() {
                                     platformStore.isOnline &&
                                     gameStore.current &&
                                     gameStore.current.host_type === HostType.CTFGame &&
-                                    params.game
+                                    params.game &&
+                                    location.pathname.startsWith(`/games/${params.game}`)
                                 }
                             >
                                 <GameNav size="md" />
@@ -325,7 +338,7 @@ function TitleBar() {
                     </ul>
                     <div class="flex-1" />
                     <div class="flex flex-row space-x-2">
-                        <div class="hidden lg:flex flex-row space-x-2">
+                        <div class="hidden xl:flex flex-row space-x-2">
                             <Show when={platformStore.isOnline && accountStore.token !== null && gameStore.current}>
                                 <Show
                                     when={
@@ -350,8 +363,10 @@ function TitleBar() {
                         </div>
                         <Switch
                             fallback={
-                                <Button level="error">
-                                    <span class="icon-[fluent--dismiss-circle-20-filled] w-5 h-5" />
+                                <Button level="error" loading={offlineLoading()} onClick={reloadPage}>
+                                    <Show when={!offlineLoading()}>
+                                        <span class="icon-[fluent--dismiss-circle-20-filled] w-5 h-5" />
+                                    </Show>
                                     <span>{t("platform.unavailable")}</span>
                                 </Button>
                             }
@@ -360,8 +375,10 @@ function TitleBar() {
                                 <UserBox />
                             </Match>
                             <Match when={platformStore.under_maintenance}>
-                                <Button level="warning">
-                                    <span class="icon-[fluent--warning-20-filled] w-5 h-5" />
+                                <Button level="warning" loading={offlineLoading()} onClick={reloadPage}>
+                                    <Show when={!offlineLoading()}>
+                                        <span class="icon-[fluent--warning-20-filled] w-5 h-5" />
+                                    </Show>
                                     <span>{t("platform.underMaintenance")}</span>
                                 </Button>
                             </Match>

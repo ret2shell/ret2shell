@@ -117,10 +117,10 @@
                 "children": {
                     "primitives": {
                         "title": {
-                            "en_us": "Primitive Types",
-                            "zh_cn": "基本类型",
-                            "zh_tw": "基本類型",
-                            "ja_jp": "プリミティブタイプ"
+                            "en_us": "Primitive & References",
+                            "zh_cn": "基本类型 & 引用",
+                            "zh_tw": "基本類型 & 引用",
+                            "ja_jp": "プリミティブ & リファレンス"
                         }
                     },
                     "vectors": {

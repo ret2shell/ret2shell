@@ -9,7 +9,6 @@ import Card from "@widgets/card";
 import Link from "@widgets/link";
 import Popover from "@widgets/popover";
 import Timer from "@widgets/timer";
-import { DateTime } from "luxon";
 import { For, Show, createEffect, createSignal, onCleanup, untrack } from "solid-js";
 
 export function InstanceBoxContent() {
@@ -43,7 +42,6 @@ export function InstanceBoxContent() {
         cachedState = wsrx.connected();
     });
 
-    const [now, setNow] = createSignal(DateTime.now());
     const heartbeatTimer = setInterval(() => {
         // Pending or Connected
         if (wsrx.connected()) {
@@ -207,18 +205,13 @@ export default function InstanceBox() {
     return (
         <Popover
             btnContent={
-                <span
-                    class={`${
-                        wsrx.instances().length > 0
-                            ? "icon-[fluent--fluid-20-filled]"
-                            : "icon-[fluent--fluid-20-regular]"
-                    } w-5 h-5 ${
-                        wsrx.instances().length > 0 ? (wsrx.connected() ? "text-success" : "text-warning") : ""
-                    }`}
-                />
+                <>
+                    <span class="icon-[fluent--fluid-20-regular] w-5 h-5" />
+                    {/* <span class="opacity-60">{t("instance.instanceCount", { count: wsrx.instances.length })}</span> */}
+                </>
             }
-            square
             ghost
+            square
             popContentClass="pt-2"
             title={t("instance.box")}
         >
