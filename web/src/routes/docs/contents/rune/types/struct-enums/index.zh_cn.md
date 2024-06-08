@@ -129,4 +129,30 @@ Count: 1
 
 使用 `Option`，我们可以轻松处理具有可选参数或者默认值的函数。
 
-更多有关 `Option` 的用法，我们会在 [错误处理](/docs/rune/error-handling) 中进行讨论。
+### `Try` 运算符
+
+Rune 中也具有类似于 Rust 的 `?` 运算符，用于简化错误处理。
+
+对于 `Option` 而言，如果某条语句返回了 `Option::None`，在其后使用 `?` 运算符会导致整个函数提前返回；如果返回了 `Option::Some`，则会将 `Option::Some` 中的值解包并继续执行。
+
+```rust
+fn checked_div_mod(a, b) {
+    let div = a.checked_div(b)?;
+    Some((div, a % b))
+}
+
+pub fn main() {
+    if let Some((div, m)) = checked_div_mod(5, 2) {
+        println(`Result: ${div}, ${m}`);
+    }
+
+    if let Some((div, m)) = checked_div_mod(5, 0) {
+        println(`Result: ${div}, ${m}`);
+    }
+}
+```
+
+```
+$ ret2script scripts/types/checked_div_mod.rx
+Result: 2, 1
+```

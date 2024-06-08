@@ -46,7 +46,7 @@ export default function (props: ComponentProps<"button"> & ButtonProps & { child
             .join(" ");
     });
 
-    const size = buttonProps.size === "sm" ? 16 : 24;
+    const size = buttonProps.size === "sm" ? 16 : 20;
 
     return (
         <button {...nativeProps} class={`${className()} ${nativeProps.class}`}>

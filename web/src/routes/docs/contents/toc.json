@@ -157,14 +157,6 @@
                     }
                 }
             },
-            "error-handling": {
-                "title": {
-                    "en_us": "Error Handling",
-                    "zh_cn": "错误处理",
-                    "zh_tw": "錯誤處理",
-                    "ja_jp": "エラーハンドリング"
-                }
-            },
             "generators": {
                 "title": {
                     "en_us": "Generators",
