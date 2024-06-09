@@ -207,7 +207,12 @@
       "titleRequired": "Please fill in the title",
       "titlePlaceholder": "Notification title",
       "contentRequired": "Please fill in the notification content",
-      "contentPlaceholder": "Notification content"
+      "contentPlaceholder": "Notification content",
+      "fetchFailed": "Failed to fetch notifications",
+      "createSuccess": "Created successfully",
+      "createFailed": "Creation failed",
+      "deleteSuccess": "successfully deleted",
+      "deleteFailed": "failed to delete"
     },
     "startAtRequired": "Please select a start time",
     "endAtRequired": "Please select end time",

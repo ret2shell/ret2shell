@@ -207,7 +207,12 @@
       "titleRequired": "請填寫標題",
       "titlePlaceholder": "通知標題",
       "contentRequired": "請填寫通知內容",
-      "contentPlaceholder": "通知內容"
+      "contentPlaceholder": "通知內容",
+      "fetchFailed": "取得賽事通知失敗",
+      "createSuccess": "創建成功",
+      "createFailed": "創建失敗",
+      "deleteSuccess": "刪除成功",
+      "deleteFailed": "刪除失敗"
     },
     "startAtRequired": "請選擇開始時間",
     "endAtRequired": "請選擇結束時間",

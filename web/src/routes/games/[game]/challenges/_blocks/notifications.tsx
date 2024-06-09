@@ -1,20 +1,21 @@
-import { Markdown } from "@/lib/markdown";
+import { createNotification, deleteNotification, getNotifications } from "@/lib/api/notification";
 import type { Notification } from "@/lib/models/notification";
 import { Permission } from "@/lib/models/user";
 import { accountStore } from "@/lib/storage/account";
 import { gameStore } from "@/lib/storage/game";
 import { fullTheme, t } from "@/lib/storage/theme";
+import { addToast } from "@/lib/storage/toast";
 import Button from "@/lib/widgets/button";
-import Card from "@/lib/widgets/card";
 import Divider from "@/lib/widgets/divider";
 import Editor from "@/lib/widgets/editor";
 import Input from "@/lib/widgets/input";
-import Popover from "@/lib/widgets/popover";
+import LoadingTips from "@/lib/widgets/loading-tips";
 import { createForm, required } from "@modular-forms/solid";
 import { A } from "@solidjs/router";
+import type { HTTPError } from "ky";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { For, Show, createSignal } from "solid-js";
+import { For, Show, createEffect, createSignal } from "solid-js";
 
 type NotificationForm = {
     title: string;
@@ -23,9 +24,84 @@ type NotificationForm = {
 
 export default function () {
     const [notifications, setNotifications] = createSignal([] as Notification[]);
+    const sortedNotifications = () =>
+        notifications().sort((a, b) => b.published_at.toMillis() - a.published_at.toMillis());
     const [createFormExpanded, setCreateFormExpanded] = createSignal(false);
     const [form, { Form, Field }] = createForm<NotificationForm>();
-    const onSubmit = (result: NotificationForm) => {};
+    const onSubmit = (result: NotificationForm) => {
+        const payload = {
+            id: 0,
+            title: result.title,
+            content: result.content,
+            published_at: DateTime.now(),
+            publisher_id: accountStore.id,
+            game_id: gameStore.current!.id,
+        } as Notification;
+        createNotification(gameStore.current!.id, payload)
+            .then(() => {
+                addToast({
+                    level: "success",
+                    description: t("game.notification.createSuccess")!,
+                    duration: 5000,
+                });
+                refreshNotifications();
+            })
+            .catch((err: HTTPError) => {
+                err.response.text().then((text) => {
+                    addToast({
+                        level: "error",
+                        description: `${t("game.notification.createFailed")}: ${text}`,
+                        duration: 5000,
+                    });
+                });
+            });
+    };
+    const [loading, setLoading] = createSignal(false);
+    function refreshNotifications() {
+        setLoading(true);
+        getNotifications(gameStore.current!.id)
+            .then(setNotifications)
+            .catch((err: HTTPError) => {
+                err.response.text().then((text) => {
+                    addToast({
+                        level: "error",
+                        description: `${t("game.notification.fetchFailed")}: ${text}`,
+                        duration: 5000,
+                    });
+                });
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }
+    function onDelete(id: number) {
+        deleteNotification(gameStore.current!.id, id)
+            .then(() => {
+                addToast({
+                    level: "success",
+                    description: t("game.notification.deleteSuccess")!,
+                    duration: 5000,
+                });
+                refreshNotifications();
+            })
+            .catch((err: HTTPError) => {
+                err.response.text().then((text) => {
+                    addToast({
+                        level: "error",
+                        description: `${t("game.notification.deleteFailed")}: ${text}`,
+                        duration: 5000,
+                    });
+                });
+            })
+            .finally(() => {
+                refreshNotifications();
+            });
+    }
+    createEffect(() => {
+        if (gameStore.current) {
+            refreshNotifications();
+        }
+    });
     return (
         <div class="w-full h-full overflow-hidden">
             <OverlayScrollbarsComponent
@@ -104,11 +180,20 @@ export default function () {
                         </Form>
                     </Show>
                     <For
-                        each={notifications()}
+                        each={sortedNotifications()}
                         fallback={
                             <div class="flex flex-row items-center justify-center space-x-2 opacity-60 p-3">
-                                <span class="icon-[fluent--chat-empty-20-regular] w-5 h-5" />
-                                <span>{t("game.noNotifications")}</span>
+                                <Show
+                                    when={loading()}
+                                    fallback={
+                                        <>
+                                            <span class="icon-[fluent--chat-empty-20-regular] w-5 h-5" />
+                                            <span>{t("game.noNotifications")}</span>
+                                        </>
+                                    }
+                                >
+                                    <LoadingTips />
+                                </Show>
                             </div>
                         }
                     >
@@ -141,6 +226,7 @@ export default function () {
                                                 class="flex-shrink-0 flex items-center"
                                                 type="button"
                                                 title={t("form.delete")}
+                                                onClick={() => onDelete(notification.id)}
                                             >
                                                 <span class="icon-[fluent--delete-20-regular] w-5 h-5" />
                                             </button>

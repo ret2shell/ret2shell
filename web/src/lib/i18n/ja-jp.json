@@ -207,7 +207,12 @@
       "titleRequired": "タイトルを入力してください",
       "titlePlaceholder": "通知のタイトル",
       "contentRequired": "届出内容をご記入ください",
-      "contentPlaceholder": "お知らせ内容"
+      "contentPlaceholder": "お知らせ内容",
+      "fetchFailed": "イベント通知の取得に失敗しました",
+      "createSuccess": "正常に作成されました",
+      "createFailed": "作成に失敗しました",
+      "deleteSuccess": "正常に削除されました",
+      "deleteFailed": "削除に失敗しました"
     },
     "startAtRequired": "開始時間を選択してください",
     "endAtRequired": "終了時間を選択してください",

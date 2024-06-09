@@ -92,6 +92,13 @@ where
     Ok(notifications)
 }
 
+pub async fn get<C>(db: &C, id: i64) -> Result<Option<Model>, DbErr>
+where
+    C: ConnectionTrait,
+{
+    Entity::find_by_id(id).one(db).await
+}
+
 pub async fn create<C>(db: &C, notification: Model) -> Result<Model, DbErr>
 where
     C: ConnectionTrait,

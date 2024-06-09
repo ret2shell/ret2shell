@@ -12,9 +12,10 @@ use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, 
 use r2s_cache::Cache;
 use r2s_config::auth;
 use r2s_database::{
-    config, game,
+    config, game, team,
     user::{Permission, Permissions},
 };
+use r2s_migrator::Database;
 use serde::{Deserialize, Serialize};
 use tokio::sync::Mutex;
 use tracing::{debug, error};
@@ -262,4 +263,40 @@ pub async fn game_admin_required(
             ),
         ))
     }
+}
+
+#[allow(dead_code)]
+pub async fn game_access_required(
+    State(ref db): State<Database>, Extension(token): Extension<Token>,
+    Extension(game): Extension<game::Model>, req: Request, next: Next,
+) -> Result<impl IntoResponse, ResponseError> {
+    if token.permissions.0.contains(&Permission::Game) && game.admins.0.contains(&token.id) {
+        return Ok(next.run(req).await);
+    }
+    if game.hidden {
+        return Err(ResponseError::Forbidden(
+            "permission denied".to_owned(),
+            format!(
+                "user {}:'{}' ({}) want to access hidden game {}:'{}'",
+                token.id, token.account, token.nickname, game.id, game.name
+            ),
+        ));
+    }
+    if game.host_type == game::HostType::CTFTraining {
+        return Ok(next.run(req).await);
+    }
+    if game.archive_at < Utc::now() {
+        return Ok(next.run(req).await);
+    }
+    let team = team::get_by_user_id(&db.conn, game.id, token.id).await?;
+    if team.is_none() || team.is_some_and(|team| team.state == team::State::Banned) {
+        return Err(ResponseError::Forbidden(
+            "permission denied".to_owned(),
+            format!(
+                "user {}:'{}' ({}) want to access game {}:'{}' api with out participation or banned",
+                token.id, token.account, token.nickname, game.id, game.name
+            ),
+        ));
+    }
+    Ok(next.run(req).await)
 }
