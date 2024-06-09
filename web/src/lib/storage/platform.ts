@@ -1,5 +1,6 @@
 import { makePersisted } from "@solid-primitives/storage";
 import { createStore } from "solid-js/store";
+import type { PlatformLicense } from "../api/platform";
 import type { ServerConfig } from "../models/config";
 
 export const [platformStore, setPlatformStore] = makePersisted(
@@ -23,6 +24,7 @@ export const [platformStore, setPlatformStore] = makePersisted(
         accept_cookies: false,
         under_maintenance: false,
         backend_online: false,
+        license: null as null | PlatformLicense,
         get isOnline() {
             return this.backend_online && !this.under_maintenance;
         },

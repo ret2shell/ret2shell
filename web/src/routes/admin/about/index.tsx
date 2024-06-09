@@ -2,7 +2,7 @@ import { type PlatformLicense, getPlatformLicense } from "@/lib/api/platform";
 import LogoAnimate from "@/lib/assets/animates/logo-animate";
 import Spin from "@/lib/assets/animates/spin";
 import { Title } from "@/lib/storage/header";
-import { platformStore } from "@/lib/storage/platform";
+import { platformStore, setPlatformStore } from "@/lib/storage/platform";
 import { t } from "@/lib/storage/theme";
 import { addToast } from "@/lib/storage/toast";
 import Card from "@/lib/widgets/card";
@@ -11,9 +11,10 @@ import type { HTTPError } from "ky";
 import { Match, Switch, createSignal } from "solid-js";
 
 export default function () {
-    const [license, setLicense] = createSignal(null as PlatformLicense | null);
     getPlatformLicense()
-        .then(setLicense)
+        .then((resp) => {
+            setPlatformStore({ license: resp });
+        })
         .catch((err: HTTPError) => {
             void err.response.text().then((text) => {
                 addToast({
@@ -35,13 +36,13 @@ export default function () {
                     </div>
                     <Card contentClass="p-3 lg:p-6 flex flex-row items-center space-x-2">
                         <Switch>
-                            <Match when={license()?.level === "free"}>
+                            <Match when={platformStore.license?.level === "free"}>
                                 <span class="icon-[fluent--key-multiple-20-regular] w-8 h-8 lg:w-12 lg:h-12 text-primary" />
                             </Match>
-                            <Match when={license()?.level === "pro"}>
+                            <Match when={platformStore.license?.level === "pro"}>
                                 <span class="icon-[fluent--key-multiple-20-regular] w-8 h-8 lg:w-12 lg:h-12 text-success" />
                             </Match>
-                            <Match when={license()?.level === "enterprise"}>
+                            <Match when={platformStore.license?.level === "enterprise"}>
                                 <span class="icon-[fluent--key-multiple-20-regular] w-8 h-8 lg:w-12 lg:h-12 text-warning" />
                             </Match>
                             <Match when={true}>
@@ -50,9 +51,9 @@ export default function () {
                         </Switch>
                         <div class="lg:flex flex-col items-start hidden">
                             <h2 class="font-bold">
-                                {license()?.issuer} ({license()?.website})
+                                {platformStore.license?.issuer} ({platformStore.license?.website})
                             </h2>
-                            <p class="opacity-60">Expires at {license()?.date}</p>
+                            <p class="opacity-60">Expires at {platformStore.license?.date}</p>
                         </div>
                     </Card>
                 </div>

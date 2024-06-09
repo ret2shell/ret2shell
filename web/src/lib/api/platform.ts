@@ -1,4 +1,4 @@
-import type { AuthConfig, ServerConfig } from "@models/config";
+import type { AuthConfig, Config, ServerConfig } from "@models/config";
 import type { SearchParamsOption } from "ky";
 import type { DateTime } from "luxon";
 import api, { api_root } from ".";
@@ -71,4 +71,12 @@ export type PlatformLicense = {
 
 export async function getPlatformLicense() {
     return await api.get(`${api_root}/platform/license`).json<PlatformLicense>();
+}
+
+export async function getPlatformConfig() {
+    return await api.get(`${api_root}/platform/config`).json<Config>();
+}
+
+export async function updatePlatformConfig(config: Config) {
+    return await api.patch(`${api_root}/platform/config`, { json: config }).json<Config>();
 }

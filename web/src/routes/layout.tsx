@@ -1,4 +1,4 @@
-import { getPlatformInfo, getVersion } from "@/lib/api/platform";
+import { getPlatformInfo, getPlatformLicense, getVersion } from "@/lib/api/platform";
 import { addToast, removeToast, toastStore } from "@/lib/storage/toast";
 import { mediaPath } from "@/lib/utils/media";
 import Button from "@/lib/widgets/button";
@@ -305,7 +305,7 @@ function TitleBar() {
                                 gameStore.current &&
                                 gameStore.current.host_type === HostType.CTFGame &&
                                 params.game &&
-                                location.pathname.startsWith(`/games/${params.game}/`)
+                                location.pathname.startsWith(`/games/${params.game}`)
                             }
                         >
                             <GameTitleLink />
@@ -493,6 +493,19 @@ export default function (props: { children?: JSX.Element }) {
             );
         })
         .catch(() => {});
+    getPlatformLicense()
+        .then((resp) => {
+            setPlatformStore({ license: resp });
+        })
+        .catch((err: HTTPError) => {
+            void err.response.text().then((text) => {
+                addToast({
+                    level: "error",
+                    description: `${t("admin.about.failedToFetchLicense")}: ${text}`,
+                    duration: 5000,
+                });
+            });
+        });
     return (
         <>
             <Title title={platformStore.config.name || t("platform.name")!} />

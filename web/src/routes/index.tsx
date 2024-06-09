@@ -61,18 +61,6 @@ export default function () {
                                 >
                                     {platformStore.config.footer_info}
                                 </a>
-                                <Show when={!platformStore.config.hide_maker}>
-                                    <span class="opacity-40">|</span>
-                                    <span>By</span>
-                                    <a
-                                        class="hover:underline"
-                                        href="https://github.com/ret2shell"
-                                        target="_blank"
-                                        rel="noreferrer"
-                                    >
-                                        {t("platform.name")}
-                                    </a>
-                                </Show>
                                 <Show when={platformStore.config.record}>
                                     <span class="opacity-40">|</span>
                                     <a
@@ -94,73 +82,75 @@ export default function () {
                                 <span>{t("calendar.scrollToView")}</span>
                                 <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5" />
                             </Button>
-                            <Link square href="/magic/sakana" ghost>
-                                <span class="icon-[fluent--gift-20-regular] w-5 h-5" />
-                            </Link>
-                            <Popover
-                                ghost
-                                popContentClass="pb-2"
-                                square
-                                btnContent={<span class="icon-[fluent--info-20-regular] w-5 h-5" />}
-                            >
-                                <div class="w-max flex flex-col space-y-2">
-                                    <Card contentClass="flex flex-row items-center space-x-6 p-4 px-8">
-                                        <LogoAnimate width={64} height={64} />
-                                        <div class="flex flex-col space-y-1">
-                                            <h2 class="text-2xl font-bold flex flex-row">
-                                                <span class="text-primary">R</span>
-                                                <span class="opacity-80">et</span>
-                                                <span class="opacity-60">&nbsp;2&nbsp;</span>
-                                                <span class="text-error">S</span>
-                                                <span class="opacity-80">hell</span>
-                                            </h2>
-                                            <p class="text-base font-bold opacity-60 space-x-2">
-                                                <Show
-                                                    when={(platformStore.version || "UNKNOWN").includes("*")}
-                                                    fallback={<span class="text-primary">REL</span>}
-                                                >
-                                                    <span class="text-warning">DEV</span>
-                                                </Show>
-                                                <span>{(platformStore.version || "UNKNOWN").replace("*", "")}</span>
-                                            </p>
-                                        </div>
-                                    </Card>
-                                    <Card contentClass="flex flex-row p-2 space-x-2">
-                                        <Link
-                                            href="mailto:ret2shell@woooo.tech"
-                                            ghost
-                                            size="sm"
-                                            class="flex-1"
-                                            justify="start"
-                                            title={t("about.contactTips")}
-                                            target="_blank"
-                                        >
-                                            <span class="icon-[fluent--mail-20-regular] w-5 h-5" />
-                                            <span class="font-normal opacity-60">ret2shell@woooo.tech</span>
-                                        </Link>
-                                        <Link
-                                            href="https://afdian.net/a/reverier"
-                                            ghost
-                                            size="sm"
-                                            square
-                                            title={t("about.donate")}
-                                            target="_blank"
-                                        >
-                                            <span class="icon-[fluent--flash-sparkle-20-regular] w-5 h-5" />
-                                        </Link>
-                                        <Link
-                                            href="https://github.com/ret2shell"
-                                            ghost
-                                            size="sm"
-                                            square
-                                            title={t("about.source")}
-                                            target="_blank"
-                                        >
-                                            <span class="icon-[fluent--open-20-regular] w-5 h-5" />
-                                        </Link>
-                                    </Card>
-                                </div>
-                            </Popover>
+                            <Show when={!platformStore.config.hide_maker}>
+                                <Link square href="/magic/sakana" ghost>
+                                    <span class="icon-[fluent--gift-20-regular] w-5 h-5" />
+                                </Link>
+                                <Popover
+                                    ghost
+                                    popContentClass="pb-2"
+                                    square
+                                    btnContent={<span class="icon-[fluent--info-20-regular] w-5 h-5" />}
+                                >
+                                    <div class="w-max flex flex-col space-y-2">
+                                        <Card contentClass="flex flex-row items-center space-x-6 p-4 px-8">
+                                            <LogoAnimate width={64} height={64} />
+                                            <div class="flex flex-col space-y-1">
+                                                <h2 class="text-2xl font-bold flex flex-row">
+                                                    <span class="text-primary">R</span>
+                                                    <span class="opacity-80">et</span>
+                                                    <span class="opacity-60">&nbsp;2&nbsp;</span>
+                                                    <span class="text-error">S</span>
+                                                    <span class="opacity-80">hell</span>
+                                                </h2>
+                                                <p class="text-base font-bold opacity-60 space-x-2">
+                                                    <Show
+                                                        when={(platformStore.version || "UNKNOWN").includes("*")}
+                                                        fallback={<span class="text-primary">REL</span>}
+                                                    >
+                                                        <span class="text-warning">DEV</span>
+                                                    </Show>
+                                                    <span>{(platformStore.version || "UNKNOWN").replace("*", "")}</span>
+                                                </p>
+                                            </div>
+                                        </Card>
+                                        <Card contentClass="flex flex-row p-2 space-x-2">
+                                            <Link
+                                                href="mailto:ret2shell@woooo.tech"
+                                                ghost
+                                                size="sm"
+                                                class="flex-1"
+                                                justify="start"
+                                                title={t("about.contactTips")}
+                                                target="_blank"
+                                            >
+                                                <span class="icon-[fluent--mail-20-regular] w-5 h-5" />
+                                                <span class="font-normal opacity-60">ret2shell@woooo.tech</span>
+                                            </Link>
+                                            <Link
+                                                href="https://afdian.net/a/reverier"
+                                                ghost
+                                                size="sm"
+                                                square
+                                                title={t("about.donate")}
+                                                target="_blank"
+                                            >
+                                                <span class="icon-[fluent--flash-sparkle-20-regular] w-5 h-5" />
+                                            </Link>
+                                            <Link
+                                                href="https://github.com/ret2shell"
+                                                ghost
+                                                size="sm"
+                                                square
+                                                title={t("about.source")}
+                                                target="_blank"
+                                            >
+                                                <span class="icon-[fluent--open-20-regular] w-5 h-5" />
+                                            </Link>
+                                        </Card>
+                                    </div>
+                                </Popover>
+                            </Show>
                         </div>
                     </section>
                     <Show when={platformStore.isOnline}>

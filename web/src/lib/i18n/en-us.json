@@ -17,12 +17,25 @@
     "unavailable": "System offline",
     "hello": "H E L O",
     "notImplemented": "Not Implemented",
-    "notImplementedTips": "Randomly sacrifice an rx",
-    "notImplementedTips1": "Are you willing to form a lifelong band with me?",
+    "notImplementedTips": "Sacrificing an rx randomly, productivity increased!",
+    "notImplementedTips1": "Oh no guys, even the donkeys in the production team dare not rest like you",
     "notImplementedTips2": "This is rx, he is even more of a genius at building shit mountains of code.",
-    "notImplementedTips3": "Why...why write \"Rust\"!",
+    "notImplementedTips3": "You are right, but rx is a homo...",
     "followSystem": "System sync",
-    "systemTheme": "OS Theme"
+    "systemTheme": "OS Theme",
+    "form": {
+      "nameTitle": "Platform name",
+      "footerInfoPlaceholder": "Copyright information at the bottom of the platform",
+      "footerInfoTitle": "Copyright information at the bottom of the platform",
+      "footerUrlPlaceholder": "Copyright information link",
+      "footerUrlTitle": "Copyright information link",
+      "subjectInfoTitle": "Home page subtitle",
+      "subjectUrlTitle": "subtitle link",
+      "recordPlaceholder": "China Ministry of Industry and Information Technology registration number (no need to fill in if not serving mainland China)",
+      "recordTitle": "China Ministry of Industry and Information Technology registration number",
+      "hideMaker": "Hide developer information",
+      "hideMakerDisabled": "Your license does not allow hiding developer information"
+    }
   },
   "wiki": {
     "title": "Wiki",
@@ -316,6 +329,11 @@
     "about": {
       "title": "About Ret 2 Shell",
       "failedToFetchLicense": "Failed to fetch platform license"
+    },
+    "platform": {
+      "fetchNotReady": "The complete configuration is still being obtained, and the update operation is refused.",
+      "updateFailed": "Platform configuration update failed",
+      "updateSuccess": "Platform configuration updated successfully"
     }
   },
   "theme": {

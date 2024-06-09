@@ -3,6 +3,7 @@ import rxSticker from "@assets/imgs/rx.webp";
 
 export default function () {
     const randomTips = [
+        t("platform.notImplementedTips"),
         t("platform.notImplementedTips1"),
         t("platform.notImplementedTips2"),
         t("platform.notImplementedTips3"),

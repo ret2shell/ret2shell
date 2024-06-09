@@ -17,12 +17,25 @@
     "unavailable": "システムがオフライン",
     "hello": "こんにちは",
     "notImplemented": "私が書いたわけではありません、心配しないでください",
-    "notImplementedTips": "ランダムにrxを生け贄に捧げる",
-    "notImplementedTips1": "じゃ……一生 バンドしてくれる？",
+    "notImplementedTips": "rxをランダムに犠牲にすることで生産性が向上しました！",
+    "notImplementedTips1": "私の仲間ではありません、制作チームのロバでさえあなたのように休む勇気はありません",
     "notImplementedTips2": "こちらの rx さんは たわごとの山のコードの天才ですの",
-    "notImplementedTips3": "何でよ 何で「Rust」やったの！",
+    "notImplementedTips3": "あなたは正しいですが、rx は 1 つずつです...",
     "followSystem": "同期システム",
-    "systemTheme": "システムテーマ"
+    "systemTheme": "システムテーマ",
+    "form": {
+      "nameTitle": "プラットフォーム名",
+      "footerInfoPlaceholder": "プラットフォームの下部にある著作権情報",
+      "footerInfoTitle": "プラットフォームの下部にある著作権情報",
+      "footerUrlPlaceholder": "著作権情報リンク",
+      "footerUrlTitle": "著作権情報リンク",
+      "subjectInfoTitle": "ホームページのサブタイトル",
+      "subjectUrlTitle": "字幕リンク",
+      "recordPlaceholder": "中国工業情報化部の登録番号 (中国本土にサービスを提供していない場合は入力する必要はありません)",
+      "recordTitle": "中国工業情報化部の登録番号",
+      "hideMaker": "開発者情報を非表示にする",
+      "hideMakerDisabled": "お使いのライセンスでは、開発者情報を隠すことは許可されていません"
+    }
   },
   "wiki": {
     "title": "知識",
@@ -316,6 +329,11 @@
     "about": {
       "title": "About Ret 2 Shell",
       "failedToFetchLicense": "プラットフォームライセンスの取得に失敗しました"
+    },
+    "platform": {
+      "fetchNotReady": "完全な構成はまだ取得中のため、更新操作は拒否されます。",
+      "updateFailed": "プラットフォーム構成の更新に失敗しました",
+      "updateSuccess": "プラットフォーム構成が正常に更新されました"
     }
   },
   "theme": {

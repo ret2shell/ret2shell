@@ -20,7 +20,7 @@ use r2s_database::{
     institute, ip, submission,
     user::{self, Permission},
 };
-use r2s_license::License;
+use r2s_license::{License, LicenseLevel};
 use r2s_migrator::Database;
 use sea_orm::DbErr;
 use serde::{Deserialize, Serialize};
@@ -38,7 +38,7 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
         .nest(
             "/",
             Router::new()
-                .route("/config", get(get_config))
+                .route("/config", get(get_config).patch(update_config))
                 .route_layer(middleware::from_fn(auth::permission_required_all!(
                     Permission::DevOps
                 ))),
@@ -66,10 +66,22 @@ async fn get_config(
     Ok(Json(config))
 }
 
-async fn get_platform_info(
-    Extension(config): Extension<config::Model>,
+async fn update_config(
+    State(ref db): State<Database>, State(ref cache): State<Cache>,
+    Json(config): Json<config::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-    let server_config = config.server.clone().unwrap_or_default();
+    let result = config::update(&db.conn, config).await?;
+    cache.at("platform").del("config").await?;
+    Ok(Json(result))
+}
+
+async fn get_platform_info(
+    State(ref license): State<License>, Extension(config): Extension<config::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+    let mut server_config = config.server.clone().unwrap_or_default();
+    if license.level < LicenseLevel::Enterprise {
+        server_config.hide_maker = Some(false);
+    }
     Ok(Json(server_config.desensitize()))
 }
 

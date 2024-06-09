@@ -17,12 +17,25 @@
     "unavailable": "系統離線",
     "hello": "亻爾女子",
     "notImplemented": "沒寫，別急",
-    "notImplementedTips": "隨機獻祭一個rx",
-    "notImplementedTips1": "你願意跟我組一輩子樂團嗎？",
+    "notImplementedTips": "隨機獻祭一個rx，生產力提升了！",
+    "notImplementedTips1": "不是哥們，生產隊的驢子都不敢像你這麼歇",
     "notImplementedTips2": "這邊這位rx桑，更是堆屎山代碼的天才",
-    "notImplementedTips3": "為什麼……為什麼要寫《Rust》！",
+    "notImplementedTips3": "你說得對，但是rx是一個一個一個一個……",
     "followSystem": "同步系統主題",
-    "systemTheme": "系統主題"
+    "systemTheme": "系統主題",
+    "form": {
+      "nameTitle": "平台名稱",
+      "footerInfoPlaceholder": "平台底部版權資訊",
+      "footerInfoTitle": "平台底部版權資訊",
+      "footerUrlPlaceholder": "版權資訊連結",
+      "footerUrlTitle": "版權資訊連結",
+      "subjectInfoTitle": "首頁副標題",
+      "subjectUrlTitle": "副標題連結",
+      "recordPlaceholder": "中國工信部備案號（不對中國大陸服務則不需要填寫）",
+      "recordTitle": "中國工信部備案號",
+      "hideMaker": "隱藏開發者訊息",
+      "hideMakerDisabled": "你的許可證不允許隱藏開發者訊息"
+    }
   },
   "wiki": {
     "title": "知識",
@@ -316,6 +329,11 @@
     "about": {
       "title": "關於回歸終端",
       "failedToFetchLicense": "取得平台授權失敗"
+    },
+    "platform": {
+      "fetchNotReady": "完整配置還在取得中，拒絕更新操作。",
+      "updateFailed": "平台配置更新失敗",
+      "updateSuccess": "平台配置更新成功"
     }
   },
   "theme": {
