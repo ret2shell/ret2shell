@@ -1,12 +1,12 @@
 use axum::{
-    extract::State,
+    extract::{Query, State},
     http::StatusCode,
     middleware,
     response::IntoResponse,
     routing::{get, post},
     Extension, Json, Router,
 };
-use chrono::Utc;
+use chrono::{serde::ts_seconds, DateTime, Utc};
 use nanoid::{alphabet, nanoid};
 use r2s_cache::Cache;
 use r2s_config::email;
@@ -17,6 +17,7 @@ use r2s_database::{
 use r2s_email::{EmailCtx, EmailRequest};
 use r2s_migrator::Database;
 use r2s_queue::Queue;
+use rand::Rng;
 use serde::{Deserialize, Serialize};
 use tracing::{debug, info, warn};
 
@@ -34,6 +35,7 @@ mod institute;
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
     Router::new()
+        .route("/code", get(get_account_code).post(generate_account_code))
         .route(
             "/profile",
             get(get_profile).patch(change_profile).delete(delete_self),
@@ -51,6 +53,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .route("/forgot", post(forgot_password))
         .route("/login", post(login))
         .route("/register", post(register))
+        .route("/query", get(query_code_for_account))
         .nest("/captcha", captcha::router(state))
         .nest("/institute", institute::router(state))
 }
@@ -104,6 +107,76 @@ macro_rules! check_email_validation {
         }
         checked_email
     }};
+}
+
+#[derive(Serialize, Deserialize)]
+struct CodeWithTime {
+    pub code: u64,
+    #[serde(with = "ts_seconds")]
+    pub generate_at: DateTime<Utc>,
+}
+
+async fn get_account_code(
+    State(cache): State<Cache>, Extension(token): Extension<Token>,
+) -> Result<impl IntoResponse, ResponseError> {
+    let code: Option<CodeWithTime> = cache.at("account-code").get(token.id).await?;
+    Ok(Json(code))
+}
+
+async fn generate_account_code(
+    State(cache): State<Cache>, Extension(token): Extension<Token>,
+) -> Result<impl IntoResponse, ResponseError> {
+    if let Some(code) = cache
+        .at("account-code")
+        .get::<CodeWithTime>(token.id)
+        .await?
+    {
+        cache.at("account-code-rev").del(code.code).await.ok();
+    }
+    let mut code: u64 = rand::thread_rng().gen_range(0..=0xFF_FFFF);
+    while cache
+        .at("account-code-rev")
+        .get::<i64>(code)
+        .await?
+        .is_some()
+    {
+        code = rand::thread_rng().gen_range(0..=0xFF_FFFF);
+    }
+    let resp = CodeWithTime {
+        code,
+        generate_at: Utc::now(),
+    };
+    cache
+        .at("account-code")
+        .set_ex(token.id, &resp, 300)
+        .await?;
+    cache
+        .at("account-code-rev")
+        .set_ex(code, token.id, 300)
+        .await?;
+    Ok(Json(resp))
+}
+
+#[derive(Deserialize)]
+struct CodeQuery {
+    pub code: u64,
+}
+
+async fn query_code_for_account(
+    State(db): State<Database>, State(cache): State<Cache>,
+    Query(CodeQuery { code }): Query<CodeQuery>,
+) -> Result<impl IntoResponse, ResponseError> {
+    let user_id: Option<i64> = cache.at("account-code-rev").getdel(code).await?;
+    if let Some(user_id) = user_id {
+        cache.at("account-code").del(user_id).await.ok();
+        if let Some(user) = user::get(&db.conn, user_id).await? {
+            Ok(Json(user))
+        } else {
+            Err(ResponseError::NotFound("user not found".to_owned()))
+        }
+    } else {
+        Err(ResponseError::NotFound("user not found".to_owned()))
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]

@@ -34,4 +34,5 @@ export type Game = {
     award_rate: number;
     admins: number[];
     weight: number;
+    token: string | null;
 };

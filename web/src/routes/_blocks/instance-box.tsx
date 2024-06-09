@@ -158,8 +158,8 @@ export function InstanceBoxContent() {
                         </Button>
                         <TimeProgress
                             class="px-2"
-                            start_at={instance.started_at}
-                            end_at={instance.started_at.plus({
+                            startAt={instance.started_at}
+                            endAt={instance.started_at.plus({
                                 hours: instance.renew_count + 1,
                             })}
                         />

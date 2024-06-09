@@ -13,7 +13,7 @@ import { HostType } from "@models/game";
 import { Permission } from "@models/user";
 import { useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
-import { canAccessChallenges, gameStore, isGameAdmin } from "@storage/game";
+import { canAccessChallenges, gameStore, isGameAdmin, setGameStore } from "@storage/game";
 import { Title, setupTitleResolver } from "@storage/header";
 import { platformStore, setPlatformStore } from "@storage/platform";
 import { t } from "@storage/theme";
@@ -351,8 +351,8 @@ function TitleBar() {
                                         <Timer end={gameStore.current!.end_at} />
                                         <TimeProgress
                                             class="w-full"
-                                            start_at={gameStore.current!.start_at}
-                                            end_at={gameStore.current!.end_at}
+                                            startAt={gameStore.current!.start_at}
+                                            endAt={gameStore.current!.end_at}
                                         />
                                     </div>
                                 </Show>

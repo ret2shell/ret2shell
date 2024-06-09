@@ -1,7 +1,9 @@
 import { Permission } from "@/lib/models/user";
 import { accountStore } from "@/lib/storage/account";
+import { gameStore } from "@/lib/storage/game";
 import { fullTheme, t } from "@/lib/storage/theme";
 import Button from "@/lib/widgets/button";
+import Divider from "@/lib/widgets/divider";
 import type { Challenge } from "@models/challenge";
 import Splitter from "@widgets/splitter";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
@@ -15,7 +17,6 @@ import Instances from "./instances";
 import Settings from "./settings";
 import Statistics from "./statistics";
 import Terminal from "./terminal";
-import { gameStore } from "@/lib/storage/game";
 
 function BottomPanel(props: {
     challenge?: Challenge;
@@ -45,10 +46,6 @@ function BottomPanel(props: {
                         <span class="icon-[fluent--info-20-regular] w-5 h-5" />
                         <span>{t("game.challenge.hint")}</span>
                     </Button>
-                    <Button onClick={() => setPage(2)} ghost={page() !== 2}>
-                        <span class="icon-[fluent--save-20-regular] w-5 h-5" />
-                        <span>{t("game.challenge.files")}</span>
-                    </Button>
                     <Button onClick={() => setPage(3)} ghost={page() !== 3} disabled={!props.inGame}>
                         <span class="icon-[fluent-emoji-flat--hammer] w-5 h-5" />
                         <span>{t("game.challenge.hammer")}</span>
@@ -68,6 +65,7 @@ function BottomPanel(props: {
                         <span class="icon-[fluent--checkmark-circle-20-regular] w-5 h-5" />
                         <span>{t("game.challenge.answer")}</span>
                     </Button>
+                    <Divider direction="vertical" class="h-8" />
                     <Show
                         when={
                             !!accountStore.id &&
@@ -78,6 +76,10 @@ function BottomPanel(props: {
                         <Button onClick={() => setPage(5)} ghost={page() !== 5}>
                             <span class="icon-[fluent--data-pie-20-regular] w-5 h-5" />
                             <span>{t("game.challenge.statistics")}</span>
+                        </Button>
+                        <Button onClick={() => setPage(2)} ghost={page() !== 2}>
+                            <span class="icon-[fluent--save-20-regular] w-5 h-5" />
+                            <span>{t("game.challenge.files")}</span>
                         </Button>
                         <Button onClick={() => setPage(6)} ghost={page() !== 6}>
                             <span class="icon-[fluent--production-20-regular] w-5 h-5" />

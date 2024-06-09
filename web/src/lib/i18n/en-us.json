@@ -87,7 +87,10 @@
       "hammerTips": "The message you send here will be forwarded to the questioner together with your information and question status. The questioner may reply here or contact you through other channels.",
       "hammerInput": "Please enter your feedback...",
       "confirmUnlockHint": "Are you sure you want to use {{ cost }} point(s) to unlock this tip?",
-      "hammerTips2": "Please note that you can only send one message before the questioner responds, so please send your questions one at a time and do not live chat here."
+      "hammerTips2": "Please note that you can only send one message before the questioner responds, so please send your questions one at a time and do not live chat here.",
+      "createHint": "Create new hint...",
+      "createHintCost": "Score cost",
+      "hintRequired": "Please fill in the hint content"
     },
     "scoreboard": {
       "title": "Scoreboard",
@@ -110,7 +113,11 @@
         "title": "Event board"
       },
       "automate": {
-        "title": "Event pushing"
+        "title": "Event pushing",
+        "tips1": "Connect to the following WebSocket address to access platform event API subscription. \nYou can find the docking method of the event API here:",
+        "tips2": "Please note that the event API only authenticates through Token, be careful to prevent this link from being leaked.",
+        "linkedDevices": "Connected devices",
+        "noDevicesLinked": "No connected device"
       },
       "edit": {
         "title": "Edit game"
@@ -201,7 +208,11 @@
       "titlePlaceholder": "Notification title",
       "contentRequired": "Please fill in the notification content",
       "contentPlaceholder": "Notification content"
-    }
+    },
+    "startAtRequired": "Please select a start time",
+    "endAtRequired": "Please select end time",
+    "registerAtRequired": "Please select registration time",
+    "archiveAtRequired": "Please select archive time"
   },
   "bulletin": {
     "title": "Bulletin",
@@ -420,6 +431,11 @@
     },
     "institute": {
       "none": "No affiliated institute"
+    },
+    "code": {
+      "refresh": "Generate / Refresh",
+      "null": "No temporary ID",
+      "title": "Temporary user ID"
     }
   },
   "instance": {
@@ -488,7 +504,8 @@
     "changeAvatar": "Cover",
     "cover": "cover",
     "logo": "Logo",
-    "print": "Print"
+    "print": "Print",
+    "copy": "Copy"
   },
   "docs": {
     "titleTips": "Ret 2 Shell - Developer Docs",

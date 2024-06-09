@@ -5,6 +5,7 @@ use axum::{
     routing::{get, patch, post},
     Extension, Json, Router,
 };
+use nanoid::nanoid;
 use r2s_bucket::Bucket;
 use r2s_cache::Cache;
 use r2s_database::{article, game, user::Permission};
@@ -114,7 +115,11 @@ async fn get_game(
         );
         return Err(ResponseError::NotFound("game not found".to_owned()));
     }
-    Ok(Json(game))
+    if token.permissions.0.contains(&Permission::Game) && game.admins.0.contains(&token.id) {
+        Ok(Json(game))
+    } else {
+        Ok(Json(game.desensitize()))
+    }
 }
 
 async fn create_game(
@@ -129,6 +134,7 @@ async fn create_game(
         game::Model {
             admins: game::Admins(vec![token.id]),
             introduction_id: None,
+            token: Some(nanoid!()),
             ..model
         },
     )

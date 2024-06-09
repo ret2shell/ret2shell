@@ -8,11 +8,12 @@ export type TextInputProps = {
     extraBtn?: JSX.Element;
     size?: "sm" | "md";
     error?: string;
+    noLabel?: boolean;
 };
 
 export default function (props: TextInputProps & ComponentProps<"input">) {
     const size = props.size || "md";
-    const [inputProps, others] = splitProps(props, ["icon", "extraBtn", "size", "error"]);
+    const [inputProps, others] = splitProps(props, ["icon", "extraBtn", "size", "error", "noLabel"]);
     // input-sm input-md
     const mergedInputClasses = () =>
         `input w-0 flex-1 input-${size} ${inputProps.icon ? "!rounded-l-none" : ""} ${
@@ -31,7 +32,7 @@ export default function (props: TextInputProps & ComponentProps<"input">) {
     return (
         <Popover.Root autoFocus={false} open={!!props.error} closeOnInteractOutside={false}>
             <Popover.Anchor class={mergedClasses()}>
-                <Show when={props.title || props.name}>
+                <Show when={!inputProps.noLabel && (props.title || props.name)}>
                     <label class="label" for={props.name}>
                         {props.title || props.name}
                     </label>

@@ -6,7 +6,7 @@ import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 export default function () {
     return (
         <>
-            <div class="border-b border-b-layer-content/10 p-3 lg:p-6">
+            <div class="border-b border-b-layer-content/10 px-2 h-16 flex items-center justify-center">
                 <Link class="w-full" ghost justify="start" href={`/games/${gameStore.current?.id}/challenges`}>
                     <span class="icon-[fluent--flag-20-filled] w-5 h-5 text-primary" />
                     <span>{t("game.challenge.list")}</span>

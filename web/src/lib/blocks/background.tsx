@@ -15,7 +15,7 @@ export default function () {
     });
     return (
         <div class="fixed -left-1 -right-1 -top-1 -bottom-1 -z-10 print:hidden">
-            <div class="w-full h-full relative">
+            {/* <div class="w-full h-full relative">
                 <img
                     src={BgBlurNight}
                     alt=""
@@ -36,7 +36,7 @@ export default function () {
                         return false;
                     }}
                 />
-            </div>
+            </div> */}
             <div class="fixed left-0 right-0 top-0 bottom-0 bg-layer/90 transition-colors duration-700" />
             <svg
                 viewBox="0 0 960 1080"

@@ -24,7 +24,6 @@
         "@xterm/xterm": "^5.5.0",
         "ace-builds": "^1.34.2",
         "ansi-escapes": "^7.0.0",
-        "copy-to-clipboard": "^3.3.3",
         "echarts": "^5.5.0",
         "emoji-regex": "^10.3.0",
         "hast-util-to-html": "^9.0.1",

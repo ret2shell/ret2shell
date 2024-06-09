@@ -2,6 +2,7 @@ import type { Captcha } from "@models/captcha";
 import type { User } from "@models/user";
 import api, { api_root } from ".";
 import type { Institute } from "../models/institute";
+import type { DateTime } from "luxon";
 
 export async function getCaptcha() {
     return await api.get(`${api_root}/account/captcha`).json<Captcha>();
@@ -71,4 +72,12 @@ export async function deleteSelf() {
 
 export async function getInstitutes() {
     return await api.get(`${api_root}/account/institute`).json<Institute[]>();
+}
+
+export async function getAccountCode() {
+    return await api.get(`${api_root}/account/code`).json<{ code: number; generate_at: DateTime } | null>();
+}
+
+export async function generateAccountCode() {
+    return await api.post(`${api_root}/account/code`).json<{ code: number; generate_at: DateTime }>();
 }

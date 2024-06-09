@@ -12,16 +12,14 @@ export default function (props: { children?: JSX.Element }) {
     });
     const params = useParams();
     const game_id = Number.parseInt(params.game);
-    if (!gameStore.current && game_id) {
+    if (game_id)
         getGame(game_id)
             .then((resp) => {
-                // console.log(resp)
                 setGameStore({ current: resp });
             })
             .catch((err: HTTPError) => {
                 navigate(`/sigtrap/${err.response.status}`, { replace: true });
             });
-    }
     return (
         <>
             <Title title={gameStore.current?.name || "CTF"} />

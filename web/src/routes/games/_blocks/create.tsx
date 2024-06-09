@@ -54,6 +54,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
             logo: null,
             award_rate: 0,
             admins: [accountStore.id!],
+            token: null,
         };
         createGame(req)
             .then((resp) => {
@@ -249,13 +250,21 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
                         />
                     )}
                 </Field>
-                <Field name="start_at" type="number">
+                <Field name="start_at" type="number" validate={[required(t("game.startAtRequired")!)]}>
                     {(startAtField) => (
-                        <Field name="end_at" type="number">
+                        <Field name="end_at" type="number" validate={[required(t("game.endAtRequired")!)]}>
                             {(endAtField) => (
-                                <Field name="register_at" type="number">
+                                <Field
+                                    name="register_at"
+                                    type="number"
+                                    validate={[required(t("game.registerAtRequired")!)]}
+                                >
                                     {(registerAtField) => (
-                                        <Field name="archive_at" type="number">
+                                        <Field
+                                            name="archive_at"
+                                            type="number"
+                                            validate={[required(t("game.archiveAtRequired")!)]}
+                                        >
                                             {(archiveAtField) => (
                                                 <div class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4">
                                                     <TimePicker

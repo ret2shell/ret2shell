@@ -53,7 +53,7 @@ export default {
             chroma: 0.17,
             bgLight: 0.96,
             bgDark: 0.18,
-            bgChroma: 0.01,
+            bgChroma: 0,
         },
     },
     plugins: [typography, okwind, addDynamicIconSelectors()],

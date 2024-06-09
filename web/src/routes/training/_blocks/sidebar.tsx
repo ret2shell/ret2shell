@@ -8,7 +8,7 @@ import Playgrounds from "./playgrounds";
 export default function SideBar() {
     return (
         <div class="flex flex-col overflow-hidden w-full h-full">
-            <div class="border-b border-b-layer-content/10 p-3 lg:p-6">
+            <div class="border-b border-b-layer-content/10 px-2 h-16 flex items-center justify-center">
                 <Show
                     when={gameStore.current}
                     fallback={

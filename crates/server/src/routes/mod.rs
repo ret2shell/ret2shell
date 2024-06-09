@@ -25,10 +25,10 @@ use crate::{
 };
 
 mod account;
-mod automate;
 mod bulletin;
 mod calendar;
 mod cluster;
+mod event;
 mod game;
 mod media;
 mod platform;
@@ -87,9 +87,9 @@ pub async fn initialize(
 fn construct_router(state: &GlobalState) -> Router<GlobalState> {
     Router::new()
         .nest("/account", account::router(state))
-        .nest("/automate", automate::router(state))
         .nest("/bulletin", bulletin::router(state))
         .nest("/calendar", calendar::router(state))
+        .nest("/event", event::router(state))
         .nest("/game", game::router(state))
         .nest("/cluster", cluster::router(state))
         .nest("/media", media::router(state))

@@ -8,10 +8,10 @@ export default function () {
     // TODO: refreshSelfTeam()
     return (
         <>
-            <div class="border-b border-b-layer-content/10 p-3 lg:p-6">
+            <div class="border-b border-b-layer-content/10 px-2 h-16 flex items-center justify-center">
                 <Switch>
                     <Match when={gameStore.current?.admins.includes(accountStore.id!)}>
-                        <Button disabled class="w-full" justify="start">
+                        <Button ghost disabled class="w-full" justify="start">
                             <span class="icon-[fluent--person-settings-20-filled] w-5 h-5 text-error" />
                             <span>{t("game.adminMode")}</span>
                         </Button>

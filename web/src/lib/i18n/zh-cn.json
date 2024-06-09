@@ -104,7 +104,10 @@
       "hammerTips": "你在这里发送的消息将会与题目状态一起转发给出题人，出题人可能会在这里回复或者通过其他渠道联系你。",
       "hammerInput": "请输入你要反馈的问题...",
       "confirmUnlockHint": "确认花费 {{ cost }} 分数解锁这条提示吗？",
-      "hammerTips2": "请注意，在出题人回复之前，你只能发送一条消息，所以请一次发送你的问题，不要在这里实时聊天。"
+      "hammerTips2": "请注意，在出题人回复之前，你只能发送一条消息，所以请一次发送你的问题，不要在这里实时聊天。",
+      "createHint": "创建新提示...",
+      "createHintCost": "分数花费",
+      "hintRequired": "请填写提示内容"
     },
     "scoreboard": {
       "title": "积分板",
@@ -127,7 +130,11 @@
         "title": "事件看板"
       },
       "automate": {
-        "title": "事件推送"
+        "title": "事件推送",
+        "tips1": "连接下述 WebSocket 地址即可接入平台事件 API 订阅。你可以在这里找到事件 API 的对接方法：",
+        "tips2": "请注意，事件 API 只通过 Token 进行鉴权，谨防此链接泄露。",
+        "linkedDevices": "已连接的设备",
+        "noDevicesLinked": "没有已连接的设备"
       },
       "edit": {
         "title": "编辑信息"
@@ -218,7 +225,11 @@
       "titlePlaceholder": "通知标题",
       "contentRequired": "请填写通知内容",
       "contentPlaceholder": "通知内容"
-    }
+    },
+    "startAtRequired": "请选择开始时间",
+    "endAtRequired": "请选择结束时间",
+    "registerAtRequired": "请选择注册时间",
+    "archiveAtRequired": "请选择归档时间"
   },
   "bulletin": {
     "title": "公告",
@@ -437,6 +448,11 @@
     },
     "institute": {
       "none": "无从属组织机构"
+    },
+    "code": {
+      "refresh": "生成 / 刷新",
+      "null": "没有临时识别码",
+      "title": "临时用户识别码"
     }
   },
   "instance": {
@@ -488,7 +504,8 @@
     "changeAvatar": "封面",
     "cover": "封面",
     "logo": "标识",
-    "print": "打印"
+    "print": "打印",
+    "copy": "复制"
   },
   "docs": {
     "titleTips": "回归终端 - 开发者文档",
