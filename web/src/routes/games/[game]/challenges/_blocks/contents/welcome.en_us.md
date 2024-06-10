@@ -20,4 +20,4 @@ In addition to the above guidelines, we encourage you to:
 
 ## Best of luck!
 
-We wish you a smooth contest experience and great results! ΦωΦ
+We wish you a smooth contest experience and great results! 🌟

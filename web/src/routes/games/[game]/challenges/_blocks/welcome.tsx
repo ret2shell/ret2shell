@@ -30,7 +30,7 @@ export default function () {
                     defer
                 >
                     <div class="flex flex-col">
-                        <Article class="self-center" content={content() || ""} extra headingAnchors />
+                        <Article class="self-center" content={content() || ""} />
                     </div>
                 </OverlayScrollbarsComponent>
             </div>

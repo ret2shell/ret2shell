@@ -10,8 +10,8 @@ import Popover from "./popover";
 
 export type ArticleProps = {
     content: string;
-    extra: boolean;
-    headingAnchors: boolean;
+    extra?: boolean;
+    headingAnchors?: boolean;
     toc?: boolean;
 };
 
