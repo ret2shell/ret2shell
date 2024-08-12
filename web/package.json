@@ -16,7 +16,7 @@
     "@solid-primitives/platform": "^0.1.2",
     "@solid-primitives/refs": "^1.0.8",
     "@solid-primitives/resize-observer": "^2.0.26",
-    "@solid-primitives/storage": "^3.8.0",
+    "@solid-primitives/storage": "^4.0.0",
     "@solidjs/router": "^0.14.1",
     "@xterm/addon-canvas": "^0.7.0",
     "@xterm/addon-fit": "^0.10.0",
