@@ -1,3 +1,6 @@
+//! * dynamic-leet.rx
+//! Dynamic flag check with tempalte and steganographic data.
+
 use ret2api::audit;
 use ret2api::utils;
 
@@ -9,7 +12,7 @@ const PREFIX = "flag";
 const TEMPLATE = "you_said_right_but_you_should_play_genshin_impact";
 
 /// Check flag submitted by user.
-/// 
+///
 /// * bucket: the challenge `ret2api::bucket::Bucket` object
 /// * user: { id: number, account: string, institute_id: number }
 /// * team: { id: Option<number>, name: Option<string>, institute_id: Option<number> }
@@ -32,13 +35,21 @@ pub async fn check(bucket, user, team, submission) {
     user.id
   };
 
+  // the flag is correct, full matched
   let correct_content = audit::encode(TEMPLATE, ENCRYPT_KEY, enc_id);
   if correct_content == flag.content() {
     return Ok((true, "Correct!", None));
   }
 
-  // the flag is wrong, we try extract peer_team id here.
-  let dec_id = audit::decode(TEMPLATE, ENCRYPT_KEY, flag.content())?;
+  // extract peer_team id
+  let res = audit::decode(TEMPLATE, ENCRYPT_KEY, flag.content());
+  let dec_id = match res {
+    Ok(id) => id,
+    // error handling
+    Err(_) => return Ok((false, "Incorrect!", None))
+  };
+
+  // the flag is wrong, let's see whether the team has cheated
   if let Some(id) = team.get("id") {
     if dec_id != id {
       return Ok((false, "Incorrect!", Some(#{
@@ -52,11 +63,11 @@ pub async fn check(bucket, user, team, submission) {
 }
 
 /// Provides the environment variables when user starts the challenge container.
-/// 
+///
 /// * bucket: the challenge `ret2api::bucket::Bucket` object
 /// * user: { id: number, account: string, institute_id: number }
 /// * team: { id: Option<number>, name: Option<string>, institute_id: Option<number> }
-/// 
+///
 /// Returns: Result<#{ [key: string]: string }, any>
 pub async fn environ(bucket, user, team) {
   let enc_id = if let Some(id) = team.get("id") {

@@ -1,3 +1,6 @@
+//! * simple.rx
+//! Static flag check.
+
 use ret2api::utils;
 use ret2api::regex;
 
@@ -7,11 +10,12 @@ const ENABLE_REGEX = false;
 const CASE_SENSITIVE = true;
 /// the flag prefix, maybe the game name, `flag` means the flag will be `flag{...}`
 const PREFIX = "flag";
-/// the flag template name, used to generate the correct flag content
+/// the flag template name, used to generate the correct flag content, and
+/// if regex enabled, the template is like `^you_.+_impact$`
 const TEMPLATE = "you_said_right_but_you_should_play_genshin_impact";
 
 /// Check flag submitted by user.
-/// 
+///
 /// * bucket: the challenge `ret2api::bucket::Bucket` object
 /// * user: { id: number, account: string, institute_id: number }
 /// * team: { id: Option<number>, name: Option<string>, institute_id: Option<number> }
@@ -50,11 +54,11 @@ pub async fn check(bucket, user, team, submission) {
 }
 
 /// Provides the environment variables when user starts the challenge container.
-/// 
+///
 /// * bucket: the challenge `ret2api::bucket::Bucket` object
 /// * user: { id: number, account: string, institute_id: number }
 /// * team: { id: Option<number>, name: Option<string>, institute_id: Option<number> }
-/// 
+///
 /// Returns: Result<#{ [key: string]: string }, any>
 pub async fn environ(bucket, user, team) {
   Ok(#{})

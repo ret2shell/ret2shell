@@ -1,8 +1,11 @@
+//! * mapped.rx
+//! Flag check for mapped attachments.
+
 /// the flag json file, should be `{"file_name.ext": "flag{...}", ...}`
 const FLAG_JSON_FILE = "checker/flag.json";
 
 /// Check flag submitted by user.
-/// 
+///
 /// * bucket: the challenge `ret2api::bucket::Bucket` object
 /// * user: { id: number, account: string, institute_id: number }
 /// * team: { id: Option<number>, name: Option<string>, institute_id: Option<number> }
@@ -22,7 +25,7 @@ pub async fn check(bucket, user, team, submission) {
     } else {
       user.id
     };
-  
+
     let mapped_file = bucket.mapped("mapped", mapped_id)?;
     if let Some(flag) = flag_json.get(mapped_file) {
       if submission.content == flag {
@@ -39,11 +42,11 @@ pub async fn check(bucket, user, team, submission) {
 }
 
 /// Provides the environment variables when user starts the challenge container.
-/// 
+///
 /// * bucket: the challenge `ret2api::bucket::Bucket` object
 /// * user: { id: number, account: string, institute_id: number }
 /// * team: { id: Option<number>, name: Option<string>, institute_id: Option<number> }
-/// 
+///
 /// Returns: Result<#{ [key: string]: string }, any>
 pub async fn environ(bucket, user, team) {
   Ok(#{})

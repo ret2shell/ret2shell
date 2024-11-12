@@ -1,3 +1,6 @@
+//! * dynamic-uuid.rx
+//! Dynamic flag check with uuid and steganographic data.
+
 use ret2api::audit;
 use ret2api::utils;
 
@@ -40,12 +43,18 @@ pub async fn check(bucket, user, team, submission) {
     user.id
   };
 
-  // extract peer_team id.
-  let dec_id = audit::decode_uuid(HASH_KEY, ENCRYPT_KEY, flag.content(), WITH_HYPHEN)?;
+  // extract peer_team id
+  let res = audit::decode_uuid(HASH_KEY, ENCRYPT_KEY, flag.content(), WITH_HYPHEN);
+  let dec_id = match res {
+    Ok(id) => id,
+    // error handling
+    Err(_) => return Ok((false, "Incorrect!", None))
+  };
+  // the flag is correct, with steganographic data matched
   if dec_id == enc_id {
     return Ok((true, "Correct!", None));
   }
-  // the flag is wrong, let's see whether the team cheated
+  // the flag is wrong, let's see whether the team has cheated
   if let Some(id) = team.get("id") {
     if dec_id != id {
       return Ok((false, "Incorrect!", Some(#{
