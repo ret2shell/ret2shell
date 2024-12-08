@@ -1,3 +1,137 @@
 [workspace]
 members = ['crates/*']
 resolver = "2"
+
+[profile.release]
+opt-level = 3
+strip = true
+lto = "thin"
+panic = "abort"
+codegen-units = 1
+
+[workspace.dependencies]
+hex = "0.4"
+toml = "0.8"
+ring = "0.17"
+rand = "0.8"
+heck = "0.5"
+mime = "0.3"
+tower = "0.5"
+infer = "0.16"
+image = "0.25"
+regex = "1.11"
+argon2 = "0.5"
+bcrypt = "0.16"
+base64 = "0.22"
+nanoid = "0.4"
+biosvg = "0.1"
+anyhow = "1.0"
+tracing = "0.1"
+tempdir = "0.3"
+sea-orm = "1.1"
+futures = "0.3"
+colored = "2.1"
+roxmltree = "0.20"
+deunicode = "1.6"
+thiserror = "2.0"
+once_cell = "1.20"
+serde_json = "1.0"
+serde_repr = "0.1"
+num-derive = "0.4"
+num-traits = "0.2"
+futures-io = "0.3"
+sea-query = "0.32"
+async-nats = "0.38"
+async-trait = "0.1"
+git-version = "0.3"
+tokio-stream = "0.1"
+aho-corasick = "1.1"
+tracing-core = "0.1"
+rustc_version = "0.4"
+build-target = "0.4"
+tracing-appender = "0.2"
+sea-orm-migration = "1.1"
+clap = { version = "4.5", features = ["derive"] }
+rune = { version = "0.13", features = ["tokio"] }
+tokio = { version = "1.42", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+chrono = { version = "0.4", features = ["serde"] }
+rustls = { version = "0.23", features = ["ring"] }
+systemstat = { version = "0.2", features = ["serde"] }
+tokio-util = { version = "0.7", features = ["codec"] }
+rune-modules = { version = "0.13", features = ["full"] }
+k8s-openapi = { version = "0.23", features = ["latest"] }
+ret2script = { version = "1.6", default-features = false }
+jsonwebtoken = { version = "9.3", default-features = false }
+wsrx = { version = "0.2", features = ["server"], default-features = false }
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+r2s-cache = { version = "3", path = "crates/cache" }
+r2s-email = { version = "3", path = "crates/email" }
+r2s-event = { version = "3", path = "crates/event" }
+r2s-media = { version = "3", path = "crates/media" }
+r2s-oauth = { version = "3", path = "crates/oauth" }
+r2s-queue = { version = "3", path = "crates/queue" }
+r2s-bucket = { version = "3", path = "crates/bucket" }
+r2s-config = { version = "3", path = "crates/config" }
+r2s-auditor = { version = "3", path = "crates/auditor" }
+r2s-captcha = { version = "3", path = "crates/captcha" }
+r2s-checker = { version = "3", path = "crates/checker" }
+r2s-cluster = { version = "3", path = "crates/cluster" }
+r2s-license = { version = "3", path = "crates/license" }
+r2s-database = { version = "3", path = "crates/database" }
+r2s-migrator = { version = "3", path = "crates/migrator" }
+
+[workspace.dependencies.axum]
+version = "0.7"
+features = ["ws", "http2", "tower-log", "tracing"]
+
+[workspace.dependencies.tower-http]
+version = "0.6"
+features = ["cors", "fs", "trace"]
+
+[workspace.dependencies.axum-extra]
+version = "0.9"
+features = [
+  "typed-header",
+  "query",
+  "multipart",
+  "typed-routing",
+  "async-read-body",
+]
+
+[workspace.dependencies.reqwest]
+version = "0.12"
+default-features = false
+features = ["json", "rustls-tls", "http2", "charset"]
+
+[workspace.dependencies.lettre]
+version = "0.11"
+default-features = false
+features = [
+  "smtp-transport",
+  "tokio1",
+  "rustls-tls",
+  "rustls-native-certs",
+  "tokio1-rustls-tls",
+  "pool",
+  "hostname",
+  "tracing",
+  "builder",
+]
+
+[workspace.dependencies.fred]
+version = "10.0"
+features = [
+  "enable-rustls",
+  "partial-tracing",
+  "monitor",
+  "sentinel-client",
+  "serde-json",
+  "mocks",
+  "dns",
+]
+
+[workspace.dependencies.kube]
+version = "0.97"
+features = ["config", "client", "rustls-tls", "runtime", "derive", "ws"]

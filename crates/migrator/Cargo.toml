@@ -11,18 +11,16 @@ keywords = ["ctf", "challenge", "platform", "security", "education"]
 resolver = "2"
 
 [dependencies]
-tokio = { version = "1.42", features = ["full"] }
-
-sea-orm = { version = "1.1", features = [
+tokio = { workspace = true }
+tracing = { workspace = true }
+sea-orm = { workspace = true, features = [
   "sqlx-postgres",
   "runtime-tokio-rustls",
 ] }
-sea-orm-migration = "1.1"
-sea-query = "0.32"
+sea-query = { workspace = true }
+sea-orm-migration = { workspace = true }
 
-tracing = "0.1"
-
-r2s-config = { version = "3", path = "../config" }
+r2s-config = { workspace = true }
 
 [lib]
 path = "src/lib.rs"

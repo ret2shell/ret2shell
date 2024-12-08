@@ -11,38 +11,26 @@ keywords = ["ctf", "challenge", "platform", "security", "education"]
 resolver = "2"
 
 [dependencies]
-kube = { version = "0.97", features = [
-  "config",
-  "client",
-  "rustls-tls",
-  "runtime",
-  "derive",
-  "ws",
-] }
-axum = { version = "0.7", features = ["ws", "http2", "tower-log", "tracing"] }
-reqwest = { version = "0.12", features = [
-  "json",
-  "rustls-tls",
-  "http2",
-  "charset",
-], default-features = false }
-k8s-openapi = { version = "0.23", features = ["v1_28"] }
-tracing = "0.1"
-thiserror = "2.0"
-tempdir = "0.3"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-serde_repr = "0.1"
-num-derive = "0.4"
-num-traits = "0.2"
-chrono = { version = "0.4", features = ["serde"] }
-futures-io = "0.3"
-nanoid = "0.4"
-tokio-util = { version = "0.7", features = ["codec"] }
-wsrx = { version = "0.2", features = ["server"] }
-tokio = { version = "1.42", features = ["full"] }
+kube = { workspace = true }
+axum = { workspace = true }
+wsrx = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+nanoid = { workspace = true }
+chrono = { workspace = true }
+tempdir = { workspace = true }
+reqwest = { workspace = true }
+tracing = { workspace = true }
+thiserror = { workspace = true }
+serde_json = { workspace = true }
+serde_repr = { workspace = true }
+num-derive = { workspace = true }
+num-traits = { workspace = true }
+k8s-openapi = { workspace = true }
+futures-io = { workspace = true }
+tokio-util = { workspace = true }
 
-r2s-config = { version = "3", path = "../config" }
+r2s-config = { workspace = true }
 
 [lib]
 path = "src/lib.rs"

@@ -11,14 +11,14 @@ keywords = ["ctf", "challenge", "platform", "security", "education"]
 resolver = "2"
 
 [dependencies]
-async-nats = "0.38"
-thiserror = "2.0"
-tracing = "0.1"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-futures = "0.3"
+serde = { workspace = true }
+tracing = { workspace = true }
+futures = { workspace = true }
+thiserror = { workspace = true }
+async-nats = { workspace = true }
+serde_json = { workspace = true }
 
-r2s-config = { version = "3", path = "../config" }
+r2s-config = { workspace = true }
 
 [lib]
 path = "src/lib.rs"

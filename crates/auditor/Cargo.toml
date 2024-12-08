@@ -11,13 +11,12 @@ keywords = ["ctf", "challenge", "platform", "security", "education"]
 resolver = "2"
 
 [dependencies]
-aho-corasick = "1.1"
-tokio = { version = "1.42", features = ["full"] }
-thiserror = "2.0"
-tracing = "0.1"
-once_cell = "1.20"
-
-r2s-config = { version = "3", path = "../config" }
+tokio = { workspace = true }
+tracing = { workspace = true }
+thiserror = { workspace = true }
+once_cell = { workspace = true }
+r2s-config = { workspace = true }
+aho-corasick = { workspace = true }
 
 [lib]
 path = "src/lib.rs"

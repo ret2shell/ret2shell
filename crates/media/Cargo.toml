@@ -11,18 +11,18 @@ keywords = ["ctf", "challenge", "platform", "security", "education"]
 resolver = "2"
 
 [dependencies]
-tokio = { version = "1.42", features = ["full"] }
-thiserror = "2.0"
-tracing = "0.1"
-ring = "0.17"
-mime = "0.3"
-infer = "0.16"
-image = "0.25"
-nanoid = "0.4"
-hex = "0.4"
+hex = { workspace = true }
+ring = { workspace = true }
+mime = { workspace = true }
+infer = { workspace = true }
+image = { workspace = true }
+tokio = { workspace = true }
+nanoid = { workspace = true }
+tracing = { workspace = true }
+thiserror = { workspace = true }
 
-r2s-database = { version = "3", path = "../database" }
-r2s-config = { version = "3", path = "../config" }
+r2s-config = { workspace = true }
+r2s-database = { workspace = true }
 
 [lib]
 path = "src/lib.rs"

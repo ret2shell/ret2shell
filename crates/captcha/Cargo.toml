@@ -11,18 +11,18 @@ keywords = ["ctf", "challenge", "platform", "security", "education"]
 resolver = "2"
 
 [dependencies]
-nanoid = "0.4"
-ring = "0.17"
-thiserror = "2.0"
-hex = "0.4"
-biosvg = "0.1"
-serde = { version = "1.0", features = ["derive"] }
-async-trait = "0.1"
-serde_repr = "0.1"
-serde_json = "1.0"
-tokio = { version = "1.42", features = ["full"] }
+hex = { workspace = true }
+ring = { workspace = true }
+serde = { workspace = true }
+tokio = { workspace = true }
+nanoid = { workspace = true }
+biosvg = { workspace = true }
+thiserror = { workspace = true }
+serde_repr = { workspace = true }
+serde_json = { workspace = true }
+async-trait = { workspace = true }
 
-r2s-config = { version = "3", path = "../config" }
+r2s-config = { workspace = true }
 
 [lib]
 path = "src/lib.rs"

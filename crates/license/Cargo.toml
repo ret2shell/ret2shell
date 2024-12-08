@@ -11,13 +11,13 @@ keywords = ["ctf", "challenge", "platform", "security", "education"]
 resolver = "2"
 
 [dependencies]
-hex = "0.4"
-ring = "0.17"
-clap = { version = "4.5", features = ["derive"] }
-serde_json = "1.0"
-chrono = "0.4"
-serde = { version = "1.0", features = ["derive"] }
-thiserror = "2.0"
+hex = { workspace = true }
+ring = { workspace = true }
+clap = { workspace = true }
+serde = { workspace = true }
+chrono = { workspace = true }
+thiserror = { workspace = true }
+serde_json = { workspace = true }
 
 [lib]
 path = "src/lib.rs"

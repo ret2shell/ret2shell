@@ -11,20 +11,15 @@ keywords = ["ctf", "challenge", "platform", "security", "education"]
 resolver = "2"
 
 [dependencies]
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-async-trait = "0.1"
-thiserror = "2.0"
-reqwest = { version = "0.12", features = [
-  "json",
-  "rustls-tls",
-  "http2",
-  "charset",
-], default-features = false }
-roxmltree = "0.20"
-tracing = "0.1"
+serde = { workspace = true }
+tracing = { workspace = true }
+reqwest = { workspace = true }
+roxmltree = { workspace = true }
+thiserror = { workspace = true }
+serde_json = { workspace = true }
+async-trait = { workspace = true }
 
-r2s-config = { version = "3", path = "../config" }
+r2s-config = { workspace = true }
 
 [lib]
 path = "src/lib.rs"

@@ -11,79 +11,66 @@ keywords = ["ctf", "challenge", "platform", "security", "education"]
 resolver = "2"
 
 [dependencies]
-tokio = { version = "1.42", features = ["full"] }
-tokio-util = "0.7"
-tokio-stream = "0.1"
-futures = "0.3"
-axum = { version = "0.7", features = [
-  "ws",
-  "http2",
-  "multipart",
-  "macros",
-  "tower-log",
-  "tracing",
-] }
-axum-extra = { version = "0.9", features = [
-  "typed-header",
-  "query",
-  "multipart",
-  "typed-routing",
-  "async-read-body",
-] }
-base64 = "0.22"
-tower = "0.5"
-tower-http = { version = "0.6", features = ["cors", "fs", "trace"] }
-jsonwebtoken = { version = "9.3", default-features = false }
-thiserror = "2.0"
-sea-orm = "1.1"
-clap = { version = "4.5", features = ["derive"] }
-colored = "2.1"
-anyhow = "1.0"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-chrono = "0.4"
-async-nats = "0.38"
-argon2 = "0.5"
-bcrypt = "0.16"
-ring = "0.17"
-hex = "0.4"
-nanoid = "0.4"
-deunicode = "1.6"
-once_cell = "1.20"
-rand = "0.8"
-rustls = { version = "0.23", features = ["ring"] }
-heck = "0.5"
+hex = { workspace = true }
+clap = { workspace = true }
+ring = { workspace = true }
+heck = { workspace = true }
+rand = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+tower = { workspace = true }
+base64 = { workspace = true }
+anyhow = { workspace = true }
+chrono = { workspace = true }
+argon2 = { workspace = true }
+bcrypt = { workspace = true }
+rustls = { workspace = true }
+nanoid = { workspace = true }
+sea-orm = { workspace = true }
+colored = { workspace = true }
+futures = { workspace = true }
+thiserror = { workspace = true }
+once_cell = { workspace = true }
+deunicode = { workspace = true }
+axum-extra = { workspace = true }
+tower-http = { workspace = true }
+serde_json = { workspace = true }
+async-nats = { workspace = true }
+tokio-util = { workspace = true }
+tokio-stream = { workspace = true }
+jsonwebtoken = { workspace = true }
+axum = { workspace = true, features = ["multipart", "macros"] }
 
 # System stat
-systemstat = { version = "0.2", features = ["serde"] }
+systemstat = { workspace = true }
 
 # Logger
-tracing = "0.1"
-tracing-core = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
-tracing-appender = "0.2"
+tracing = { workspace = true }
+tracing-core = { workspace = true }
+tracing-subscriber = { workspace = true }
+tracing-appender = { workspace = true }
 
 # local crates
-r2s-auditor = { version = "3", path = "../auditor" }
-r2s-bucket = { version = "3", path = "../bucket" }
-r2s-cache = { version = "3", path = "../cache" }
-r2s-captcha = { version = "3", path = "../captcha" }
-r2s-checker = { version = "3", path = "../checker" }
-r2s-cluster = { version = "3", path = "../cluster" }
-r2s-config = { version = "3", path = "../config" }
-r2s-database = { version = "3", path = "../database" }
-r2s-email = { version = "3", path = "../email" }
-r2s-event = { version = "3", path = "../event" }
-r2s-license = { version = "3", path = "../license" }
-r2s-media = { version = "3", path = "../media" }
-r2s-migrator = { version = "3", path = "../migrator" }
-r2s-oauth = { version = "3", path = "../oauth" }
-r2s-queue = { version = "3", path = "../queue" }
+r2s-cache = { workspace = true }
+r2s-email = { workspace = true }
+r2s-event = { workspace = true }
+r2s-media = { workspace = true }
+r2s-oauth = { workspace = true }
+r2s-queue = { workspace = true }
+r2s-bucket = { workspace = true }
+r2s-config = { workspace = true }
+r2s-captcha = { workspace = true }
+r2s-auditor = { workspace = true }
+r2s-checker = { workspace = true }
+r2s-cluster = { workspace = true }
+r2s-license = { workspace = true }
+r2s-database = { workspace = true }
+r2s-migrator = { workspace = true }
 
 [build-dependencies]
-rustc_version = "0.4"
-git-version = "0.3"
-build-target = "0.4"
+git-version = { workspace = true }
+build-target = { workspace = true }
+rustc_version = { workspace = true }
 
 [lib]
 path = "src/lib.rs"
