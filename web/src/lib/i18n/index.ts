@@ -19,9 +19,6 @@ export async function fetchDictionary(locale: Locale): Promise<Dict> {
     case "zh_tw":
       dict = await import("./zh-tw.json");
       break;
-    case "ja_jp":
-      dict = await import("./ja-jp.json");
-      break;
     default:
       dict = await import("./zh-cn.json");
   }
