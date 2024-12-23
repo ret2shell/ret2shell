@@ -238,6 +238,7 @@
       "stopEnvSuccess": "已发送停止指令",
       "delayEnv": "环境延长 1 小时",
       "stopEnv": "停止环境",
+      "showAll": "显示全部",
       "envIsPending": "题目环境开启中...",
       "envHasError": "发生错误，请尝试 1 分钟后重启环境或者联系管理员...",
       "fetchSolvesFailed": "获取解题记录失败",
@@ -368,6 +369,15 @@
         "needReview": "等待复审",
         "misjudged": "误判",
         "confirmed": "属实"
+      },
+      "git": {
+        "title": "题目仓库"
+      },
+      "traffic": {
+        "title": "环境路由"
+      },
+      "captures": {
+        "title": "容器流量"
       }
     },
     "exit": "退出",

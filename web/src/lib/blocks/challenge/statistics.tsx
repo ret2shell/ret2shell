@@ -1,4 +1,4 @@
-import { getChallengeCommitHistory, getChallengeSolves } from "@api/game";
+import { getChallengeCommitHistory, getChallengeSubmission } from "@api/game";
 import type { Challenge, CommitHistory } from "@models/challenge";
 import type { Submission } from "@models/submission";
 import { challengeStore } from "@storage/challenge";
@@ -11,6 +11,7 @@ import LoadingTips from "@widgets/loading-tips";
 import { DateTime } from "luxon";
 import { For, Match, Show, Switch, createEffect, createSignal, untrack } from "solid-js";
 import { handleHttpError } from "@api";
+import Tag from "@widgets/tag";
 
 function StatisticsPanel() {
   const [solves, setSolves] = createSignal([] as Submission[]);
@@ -18,10 +19,17 @@ function StatisticsPanel() {
   const [pageSize, _setPageSize] = createSignal(10);
   const [total, setTotal] = createSignal(0);
   const [loading, setLoading] = createSignal(false);
+  const [onlySolved, setOnlySolved] = createSignal(true);
   async function fetchSolves() {
     setLoading(true);
     try {
-      const resp = await getChallengeSolves(gameStore.current!.id, challengeStore.current!.id, page(), pageSize());
+      const resp = await getChallengeSubmission(
+        gameStore.current!.id,
+        challengeStore.current!.id,
+        page(),
+        pageSize(),
+        onlySolved()
+      );
       setSolves(resp[0]);
       setTotal(resp[1]);
     } catch (err) {
@@ -32,19 +40,40 @@ function StatisticsPanel() {
 
   createEffect(() => {
     if (challengeStore.current && page()) {
+      if (onlySolved()) {
+        // .. NOTE: just placable
+      }
       untrack(fetchSolves);
     }
   });
   return (
     <>
+      <h3 class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden h-12">
+        <span class="icon-[fluent--data-trending-20-regular] w-5 h-5 text-primary" />
+        <span class="flex-1">{t("game.challenge.statistics")}</span>
+        <Button
+          size="sm"
+          onClick={() => {
+            setOnlySolved(!onlySolved());
+            setPage(1);
+          }}
+        >
+          <span
+            class={
+              onlySolved() ? "icon-[fluent--eye-20-regular] w-5 h-5" : "icon-[fluent--eye-20-regular] w-5 h-5 text-info"
+            }
+          />
+          <span>{t("game.challenge.showAll")}</span>
+        </Button>
+      </h3>
       <Show when={loading()}>
-        <div class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden">
+        <div class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden h-12">
           <LoadingTips />
         </div>
       </Show>
       <For each={solves()}>
         {(item) => (
-          <div class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden">
+          <div class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden h-12">
             <span class="icon-[fluent--checkmark-circle-20-regular] w-5 h-5 text-success" />
             <a class="truncate hover:underline" href={`/users/${item.user_id}`}>
               {item.user_name}
@@ -53,7 +82,19 @@ function StatisticsPanel() {
             <a class="truncate hover:underline" href={`/games/${gameStore.current?.id}/teams/${item.team_id}`}>
               {item.team_name ?? "wheel"}
             </a>
-            <div class="flex-1" />
+            <span>{t("game.monitor.submit")}</span>
+            <span class="flex-1 w-0 overflow-hidden flex items-center" title={item.content!}>
+              <span class="max-w-full truncate py-1 px-2 rounded-lg bg-layer-content/5">{item.content}</span>
+            </span>
+            <Tag level={item.solved ? "success" : "warning"}>
+              <span>
+                {item.solved === null
+                  ? t("game.admin.monitor.pending")
+                  : item.solved
+                    ? t("game.admin.monitor.solved")
+                    : t("game.admin.monitor.notSolved")}
+              </span>
+            </Tag>
             <span class="opacity-40">{item.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
           </div>
         )}
@@ -87,14 +128,18 @@ function HistoryPanel() {
   });
   return (
     <>
+      <h3 class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden h-12">
+        <span class="icon-[fluent--data-trending-20-regular] w-5 h-5 text-primary" />
+        <span>{t("game.challenge.commitHistory")}</span>
+      </h3>
       <Show when={loading()}>
-        <div class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden">
+        <div class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden h-12">
           <LoadingTips />
         </div>
       </Show>
       <For each={history()}>
         {(item) => (
-          <div class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden">
+          <div class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden h-12">
             <span class="icon-[fluent--branch-request-20-regular] w-5 h-5 text-primary" />
             <span class="flex-1 truncate w-0">{item.subject}</span>
             <span class="font-bold">{item.author.name}</span>
@@ -147,7 +192,7 @@ export default function (_props: {
         </li>
       </ul>
       <Divider direction="vertical" />
-      <div class="flex-1 w-0 flex flex-col space-y-2 p-3 lg:p-6">
+      <div class="flex-1 w-0 flex flex-col p-3 lg:p-6">
         <Switch>
           <Match when={tab() === "statistics"}>
             <StatisticsPanel />

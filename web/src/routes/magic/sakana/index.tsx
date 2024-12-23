@@ -98,9 +98,6 @@ export default function () {
         <a class="hover:underline" href="https://twitter.com/LAttic1ng" target="_blank" rel="noopener noreferrer">
           Ac4ae0
         </a>
-        <a class="hover:underline" href="https://twitter.com/arttnba3" target="_blank" rel="noopener noreferrer">
-          arttnba3
-        </a>
         <br />
         <span>{t("magic.source")}</span>
         <a class="hover:underline" href="https://lab.magiconch.com/sakana/" target="_blank" rel="noopener noreferrer">

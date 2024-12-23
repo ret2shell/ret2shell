@@ -1,6 +1,6 @@
 [package]
 name = "r2s-migrator"
-version = "3.4.1"
+version = "3.4.2"
 edition = "2021"
 rust-version = "1.80.0"
 description = "Database migrator for Ret2Shell - A feature-riches CTF challenge platform."

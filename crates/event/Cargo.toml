@@ -1,6 +1,6 @@
 [package]
 name = "r2s-event"
-version = "3.4.1"
+version = "3.4.2"
 edition = "2021"
 rust-version = "1.80.0"
 description = "Event pusher for Ret2Shell - A feature-riches CTF challenge platform."

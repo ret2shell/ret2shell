@@ -1,7 +1,7 @@
 import { handleHttpError } from "@api";
 import { register } from "@api/account";
 import { deunicode, leet } from "@api/rpc";
-import xdsecMascotHappy from "@assets/imgs/xdsec-mascot-happy.webp";
+// import xdsecMascotHappy from "@assets/imgs/xdsec-mascot-happy.webp";
 import Captcha from "@blocks/captcha";
 import { createForm, email, maxLength, minLength, pattern, required, setValue } from "@modular-forms/solid";
 import { useNavigate } from "@solidjs/router";
@@ -45,7 +45,7 @@ export default function () {
           level: "success",
           description: t("account.register.success")!,
           duration: 5000,
-          img: xdsecMascotHappy,
+          // img: xdsecMascotHappy,
         });
         navigate("/", { replace: true });
       } catch (err) {

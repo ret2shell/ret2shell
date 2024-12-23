@@ -2,7 +2,7 @@ import { handleHttpError } from "@api";
 import { loginWithOAuth } from "@api/account";
 import LogoAnimate from "@assets/animates/logo-animate";
 import { getLogo } from "@assets/brands";
-import xdsecMascotHappy from "@assets/imgs/xdsec-mascot-happy.webp";
+// import xdsecMascotHappy from "@assets/imgs/xdsec-mascot-happy.webp";
 import logo from "@assets/logo-gray.svg";
 import { useLocation, useNavigate, useSearchParams } from "@solidjs/router";
 import { t } from "@storage/theme";
@@ -37,7 +37,7 @@ export default function () {
         level: "success",
         description: t("account.login.success")!,
         duration: 5000,
-        img: xdsecMascotHappy,
+        // img: xdsecMascotHappy,
       });
     } catch (err) {
       handleHttpError(err as Error, t("account.oauth.failedToLogin")!);
@@ -56,12 +56,11 @@ export default function () {
           class={`transition-all duration-700 ${animate() ? "" : "translate-x-16 opacity-0"}`}
         />
         <span class={`transition-all duration-700 ${animate() ? "opacity-60" : "translate-x-8 opacity-0"}`}>-*-</span>
-
-        <img
-          src={xdsecMascotHappy}
-          alt="Broken"
-          class={`w-24 h-24 animate-bounce transition-all duration-700 ${animate() ? "" : "translate-y-6 opacity-0"}`}
-        />
+        {/* <img */}
+        {/*   src={xdsecMascotHappy} */}
+        {/*   alt="Broken" */}
+        {/*   class={`w-24 h-24 animate-bounce transition-all duration-700 ${animate() ? "" : "translate-y-6 opacity-0"}`} */}
+        {/* /> */}
         <span class={`transition-all duration-700 ${animate() ? "opacity-60" : "-translate-x-8 opacity-0"}`}>-*-</span>
 
         <img

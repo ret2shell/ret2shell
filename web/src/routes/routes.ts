@@ -170,6 +170,18 @@ export const routes = {
                   path: "/events",
                   component: lazy(() => import("./games/[game]/admin/events/index")),
                 },
+                {
+                  path: "/git",
+                  component: lazy(() => import("./games/[game]/admin/git/index")),
+                },
+                {
+                  path: "/traffic",
+                  component: lazy(() => import("./games/[game]/admin/traffic/index")),
+                },
+                {
+                  path: "/captures",
+                  component: lazy(() => import("./games/[game]/admin/captures/index")),
+                },
               ],
             },
             {

@@ -1,6 +1,7 @@
 import teapot from "@assets/imgs/teapot.svg";
-import xdsecMascotCrying from "@assets/imgs/xdsec-mascot-crying.webp";
-import xdsecMascotUnsee from "@assets/imgs/xdsec-mascot-unsee.webp";
+// import xdsecMascotCrying from "@assets/imgs/xdsec-mascot-crying.webp";
+// import xdsecMascotUnsee from "@assets/imgs/xdsec-mascot-unsee.webp";
+import platformAvatar from "@assets/imgs/rx.webp";
 import { t } from "@storage/theme";
 import { Match, Show, Switch } from "solid-js";
 
@@ -30,16 +31,16 @@ export default function (props: { status: number | null }) {
 
   return (
     <div class="flex-1 flex flex-col items-center justify-center space-y-8">
-      <Switch>
+      <Switch fallback={<img src={platformAvatar} width={256} height={256} alt="TωT" />}>
         <Match when={props.status === 418}>
           <img src={teapot} width={256} height={256} alt="TωT" />
         </Match>
-        <Match when={props.status && props.status >= 500}>
-          <img src={xdsecMascotCrying} width={256} height={256} alt="TωT" />
-        </Match>
-        <Match when={props.status && props.status < 500}>
-          <img src={xdsecMascotUnsee} width={256} height={256} alt="TωT" />
-        </Match>
+        {/* <Match when={props.status && props.status >= 500}> */}
+        {/*   <img src={xdsecMascotCrying} width={256} height={256} alt="TωT" /> */}
+        {/* </Match> */}
+        {/* <Match when={props.status && props.status < 500}> */}
+        {/*   <img src={xdsecMascotUnsee} width={256} height={256} alt="TωT" /> */}
+        {/* </Match> */}
       </Switch>
       <h1 class="font-bold text-3xl space-x-4">
         <span class="opacity-60">{props.status}</span>

@@ -53,12 +53,18 @@ pub struct AccessPolicy {
 pub struct Admins(pub Vec<i64>);
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
+pub struct AwardRates(pub Vec<i32>);
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct TimelinePreset {
   #[serde(with = "ts_seconds")]
   pub start_at: DateTime<Utc>,
   #[serde(with = "ts_seconds")]
   pub end_at: DateTime<Utc>,
 }
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
+pub struct TimelinePresets(pub Vec<TimelinePreset>);
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "game")]
@@ -91,14 +97,14 @@ pub struct Model {
   pub can_register_after_started: bool,
   pub award_rate: i32,
   #[sea_orm(column_type = "JsonBinary")]
-  pub award_rates: Option<Vec<i32>>,
+  pub award_rates: Option<AwardRates>,
   #[sea_orm(column_type = "JsonBinary")]
   pub admins: Admins,
   pub weight: i32,
   pub bucket: Option<String>,
   pub token: Option<String>,
   #[sea_orm(column_type = "JsonBinary")]
-  pub timeline_presets: Option<Vec<TimelinePreset>>,
+  pub timeline_presets: Option<TimelinePresets>,
   #[serde(default = "Option::default")]
   pub node_selector: Option<String>,
   #[serde(default = "Option::default")]
@@ -110,6 +116,8 @@ impl Model {
     Self {
       bucket: None,
       token: None,
+      node_selector: None,
+      traffic: None,
       ..self
     }
   }

@@ -105,6 +105,45 @@ export default function SideBar() {
             <Show when={expanded()}>{t("game.admin.automate.title")}</Show>
           </Link>
         </li>
+        <li class="w-full">
+          <Link
+            activeMatch="exact"
+            class="w-full"
+            ghost
+            square={!expanded()}
+            href={`/games/${gameStore.current?.id}/admin/git`}
+            justify={expanded() ? "start" : "center"}
+          >
+            <span class="icon-[fluent--branch-fork-20-regular] w-5 h-5" />
+            <Show when={expanded()}>{t("game.admin.git.title")}</Show>
+          </Link>
+        </li>
+        <li class="w-full">
+          <Link
+            activeMatch="exact"
+            class="w-full"
+            ghost
+            square={!expanded()}
+            href={`/games/${gameStore.current?.id}/admin/traffic`}
+            justify={expanded() ? "start" : "center"}
+          >
+            <span class="icon-[fluent--airplane-20-regular] w-5 h-5" />
+            <Show when={expanded()}>{t("game.admin.traffic.title")}</Show>
+          </Link>
+        </li>
+        <li class="w-full">
+          <Link
+            activeMatch="exact"
+            class="w-full"
+            ghost
+            square={!expanded()}
+            href={`/games/${gameStore.current?.id}/admin/captures`}
+            justify={expanded() ? "start" : "center"}
+          >
+            <span class="icon-[fluent--slide-record-20-regular] w-5 h-5" />
+            <Show when={expanded()}>{t("game.admin.captures.title")}</Show>
+          </Link>
+        </li>
       </ul>
       <Show when={!expanded()}>
         <Divider direction="vertical" />

@@ -227,14 +227,20 @@ export async function updateChallengeCheckerScript(game_id: number, challenge_id
     .json<void>();
 }
 
-export async function getChallengeSolves(game_id: number, challenge_id: number, page: number, page_size: number) {
+export async function getChallengeSubmission(
+  game_id: number,
+  challenge_id: number,
+  page: number,
+  page_size: number,
+  only_solved: boolean
+) {
   return (
-    await api.get(`${api_root}/game/${game_id}/challenge/${challenge_id}/solve`, {
+    await api.get(`${api_root}/game/${game_id}/challenge/${challenge_id}/submission`, {
       searchParams: JSON.parse(
         JSON.stringify({
           page,
           page_size,
-          only_solved: true,
+          only_solved,
         })
       ) as SearchParamsOption,
     })

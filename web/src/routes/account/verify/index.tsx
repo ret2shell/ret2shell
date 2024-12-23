@@ -1,7 +1,7 @@
 import { handleHttpError } from "@api";
 import { verifyEmail } from "@api/account";
 import Spin from "@assets/animates/spin";
-import xdsecMascotHappy from "@assets/imgs/xdsec-mascot-happy.webp";
+// import xdsecMascotHappy from "@assets/imgs/xdsec-mascot-happy.webp";
 import { useNavigate, useSearchParams } from "@solidjs/router";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
@@ -40,7 +40,7 @@ export default function () {
   });
   return (
     <div class="flex-1 flex flex-col items-center justify-center space-y-8">
-      <img src={xdsecMascotHappy} alt="Broken" class="w-48 h-48 animate-bounce" />
+      {/* <img src={xdsecMascotHappy} alt="Broken" class="w-48 h-48 animate-bounce" /> */}
       <div class="flex flex-row space-x-4 items-center">
         <Spin />
         <span class="font-bold text-xl">{t("account.verifyingEmail")}...</span>

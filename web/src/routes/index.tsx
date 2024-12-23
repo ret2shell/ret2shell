@@ -89,9 +89,10 @@ export default function () {
               {/*   </Button> */}
               {/* </Show> */}
               <Show when={!platformStore.config.hide_maker}>
-                <Link square href="/magic/sakana" ghost name="gift">
-                  <span class="icon-[fluent--gift-20-regular] w-5 h-5" />
-                </Link>
+                {/* <Link square href="/magic/sakana" ghost name="gift"> */}
+                {/*   <span class="icon-[fluent--gift-20-regular] w-5 h-5" /> */}
+                {/* </Link> */}
+                <div />
               </Show>
               <Popover
                 aria-label="about"

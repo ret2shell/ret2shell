@@ -1,7 +1,8 @@
 import { handleHttpError } from "@api";
 import { getGamePlayerChatMessages, getTeamSolves, sendGamePlayerChatMessage } from "@api/game";
-import xdsecMascotCiallo from "@assets/imgs/xdsec-mascot-ciallo.webp";
-import { stickerSet } from "@assets/stickers";
+// import xdsecMascotCiallo from "@assets/imgs/xdsec-mascot-ciallo.webp";
+import platformAvatar from "@assets/imgs/rx.webp";
+// import { stickerSet } from "@assets/stickers";
 import { mediaPath } from "@lib/utils/media";
 import type { Challenge } from "@models/challenge";
 import type { Chat } from "@models/chat";
@@ -9,16 +10,16 @@ import { A } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { challengeStore } from "@storage/challenge";
 import { gameStore, isGameAdmin } from "@storage/game";
-import { fullTheme, t } from "@storage/theme";
+import { t } from "@storage/theme";
 import Article from "@widgets/article";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Editor from "@widgets/editor";
 import Link from "@widgets/link";
-import Popover from "@widgets/popover";
+// import Popover from "@widgets/popover";
 import type { DateTime } from "luxon";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
+// import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createMemo, createSignal, onCleanup, onMount } from "solid-js";
 import { TransitionGroup } from "solid-transition-group";
 
@@ -172,7 +173,7 @@ export default function (props: {
           fallback={
             <div class="self-start flex-row max-w-[calc(100%-4rem)] flex items-center">
               <A class="w-10 h-10 flex-shrink-0 self-start mt-2" href="/magic/sakana">
-                <Avatar class="w-full h-full" src={xdsecMascotCiallo} fallback="Ciallo" />
+                <Avatar class="w-full h-full" src={platformAvatar} fallback="Ciallo" />
               </A>
               <div class="w-4 flex-shrink-0" />
               <div class="flex flex-col space-y-1">
@@ -187,7 +188,7 @@ export default function (props: {
         >
           <div class="self-start flex-row max-w-[calc(100%-4rem)] flex items-center">
             <A class="w-10 h-10 flex-shrink-0 self-start mt-2" href="/magic/sakana">
-              <Avatar class="w-full h-full" src={xdsecMascotCiallo} fallback="Ciallo" />
+              <Avatar class="w-full h-full" src={platformAvatar} fallback="Ciallo" />
             </A>
             <div class="w-4 flex-shrink-0" />
             <div class="flex flex-col space-y-1">
@@ -200,7 +201,7 @@ export default function (props: {
           </div>
           <div class="self-start flex-row max-w-[calc(100%-4rem)] flex items-center">
             <A class="w-10 h-10 flex-shrink-0 self-start mt-2" href="/magic/sakana">
-              <Avatar class="w-full h-full" src={xdsecMascotCiallo} fallback="Ciallo" />
+              <Avatar class="w-full h-full" src={platformAvatar} fallback="Ciallo" />
             </A>
             <div class="w-4 flex-shrink-0" />
             <div class="flex flex-col space-y-1 items-start">
@@ -248,7 +249,7 @@ export default function (props: {
                     when={chat.id !== 0}
                     fallback={
                       <A class="w-10 h-10 flex-shrink-0 self-start mt-2" href="/magic/sakana">
-                        <Avatar class="w-full h-full" src={xdsecMascotCiallo} fallback="Ciallo" />
+                        <Avatar class="w-full h-full" src={platformAvatar} fallback="Ciallo" />
                       </A>
                     }
                   >
@@ -307,44 +308,44 @@ export default function (props: {
       </div>
       <div class="sticky bottom-0 flex flex-col space-y-2 p-3 border-t border-t-layer-content/5 backdrop-blur">
         <div class="flex flex-row items-center h-8 space-x-2">
-          <Popover size="sm" square ghost btnContent={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}>
-            <Card contentClass="p-2 aspect-square">
-              <OverlayScrollbarsComponent
-                options={{
-                  scrollbars: {
-                    theme: `os-theme-${fullTheme()}`,
-                    autoHide: "scroll",
-                  },
-                }}
-                class="relative w-full h-full print:h-auto print:overflow-auto"
-                defer
-              >
-                <div class="grid grid-cols-4 gap-2">
-                  <For each={stickerSet}>
-                    {(sticker) => (
-                      <Button
-                        ghost
-                        class="p-0 aspect-square overflow-hidden"
-                        onClick={() => {
-                          setChat(`![${sticker.alt}](${sticker.src})`);
-                          setTimeout(() => {
-                            handleSendChat();
-                          });
-                        }}
-                      >
-                        <img
-                          class="w-16 h-16 transition-transform duration-300 hover:scale-[1.1]"
-                          src={sticker.src}
-                          alt={sticker.alt}
-                          title={sticker.alt}
-                        />
-                      </Button>
-                    )}
-                  </For>
-                </div>
-              </OverlayScrollbarsComponent>
-            </Card>
-          </Popover>
+          {/* <Popover size="sm" square ghost btnContent={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}> */}
+          {/*   <Card contentClass="p-2 aspect-square"> */}
+          {/*     <OverlayScrollbarsComponent */}
+          {/*       options={{ */}
+          {/*         scrollbars: { */}
+          {/*           theme: `os-theme-${fullTheme()}`, */}
+          {/*           autoHide: "scroll", */}
+          {/*         }, */}
+          {/*       }} */}
+          {/*       class="relative w-full h-full print:h-auto print:overflow-auto" */}
+          {/*       defer */}
+          {/*     > */}
+          {/*       <div class="grid grid-cols-4 gap-2"> */}
+          {/*         <For each={stickerSet}> */}
+          {/*           {(sticker) => ( */}
+          {/*             <Button */}
+          {/*               ghost */}
+          {/*               class="p-0 aspect-square overflow-hidden" */}
+          {/*               onClick={() => { */}
+          {/*                 setChat(`![${sticker.alt}](${sticker.src})`); */}
+          {/*                 setTimeout(() => { */}
+          {/*                   handleSendChat(); */}
+          {/*                 }); */}
+          {/*               }} */}
+          {/*             > */}
+          {/*               <img */}
+          {/*                 class="w-16 h-16 transition-transform duration-300 hover:scale-[1.1]" */}
+          {/*                 src={sticker.src} */}
+          {/*                 alt={sticker.alt} */}
+          {/*                 title={sticker.alt} */}
+          {/*               /> */}
+          {/*             </Button> */}
+          {/*           )} */}
+          {/*         </For> */}
+          {/*       </div> */}
+          {/*     </OverlayScrollbarsComponent> */}
+          {/*   </Card> */}
+          {/* </Popover> */}
           <span class="hidden lg:flex items-center space-x-2">
             <span class={`w-2 h-2 rounded-full ${availableMsg() <= 0 ? "bg-error" : "bg-success"}`} />
             <span class="opacity-60">
