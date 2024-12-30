@@ -1,9 +1,11 @@
 #!/bin/fish
 
-set git_v (git describe --abbrev=8 --always --dirty='*')
+set app_v (grep -m 1 -oP '^\s*version\s*=\s*"\K[^"]+' Cargo.toml; or echo "unknown")
+set git_v (command -q git; and git describe --abbrev=8 --always --dirty='*' 2>/dev/null; or echo "unknown")
 
 echo '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-'
 echo -e "\033[1;34mR\033[0met 2 \033[1;31mS\033[0mhell OCI Distribution Script\n"
+echo -e "App version: \033[1;32m$app_v\033[0m"
 echo -e "Build on commit: \033[1;32m$git_v\033[0m"
 
 if command -q docker
