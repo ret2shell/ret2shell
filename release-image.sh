@@ -15,8 +15,7 @@ app_v="$(grep -m 1 -oP '^\s*version\s*=\s*"\K[^"]+' Cargo.toml 2>/dev/null || ec
 git_v="$(command_t git && git describe --abbrev=8 --always --dirty='*' 2>/dev/null || echo "unknown")"
 echo '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-'
 echo "${x1b}[1;34mR${x1b}[0met 2 ${x1b}[1;31mS${x1b}[0mhell OCI Distribution Script" && echo
-echo "App version: ${x1b}[1;32m$app_v${x1b}[0m"
-echo "Build on commit: ${x1b}[1;32m$git_v${x1b}[0m"
+echo "Build on version: ${x1b}[1;32m$app_v-$git_v${x1b}[0m"
 
 # prepare build command
 buildkit=""
