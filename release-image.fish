@@ -5,8 +5,7 @@ set git_v (command -q git; and git describe --abbrev=8 --always --dirty='*' 2>/d
 
 echo '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-'
 echo -e "\033[1;34mR\033[0met 2 \033[1;31mS\033[0mhell OCI Distribution Script\n"
-echo -e "App version: \033[1;32m$app_v\033[0m"
-echo -e "Build on commit: \033[1;32m$git_v\033[0m"
+echo -e "Build on version: \033[1;32m$app_v-$git_v\033[0m"
 
 if command -q docker
     set buildkit docker
