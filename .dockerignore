@@ -11,3 +11,12 @@ Cargo.dup
 pnpm-lock.yaml
 **/*.rs.bk
 data/*
+/release-image.*
+.vscode/
+.idea/
+
+/config/
+!/config/pub.bin
+
+/.cargo/
+!/.cargo/config.toml
