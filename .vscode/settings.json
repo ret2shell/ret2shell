@@ -18,7 +18,6 @@
     "rust-analyzer.showUnlinkedFileNotification": false,
     "javascript.format.enable": false,
     "typescript.format.enable": false,
-    "editor.formatOnSave": true,
     "editor.defaultFormatter": "biomejs.biome",
     "editor.codeActionsOnSave": {
         "source.organizeImports.biome": "explicit"
@@ -35,6 +34,9 @@
     "i18n-ally.localesPaths": ["web/src/lib/i18n"],
     "i18n-ally.keystyle": "nested",
     "[typescript]": {
+        "editor.defaultFormatter": "biomejs.biome"
+    },
+    "[typescriptreact]": {
         "editor.defaultFormatter": "biomejs.biome"
     }
 }
