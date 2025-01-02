@@ -1,7 +1,6 @@
 import { setGameStore } from "@storage/game";
-import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
-import { t } from "@storage/theme";
+import { Title, tmpl } from "@storage/header";
+import { E, t } from "@storage/theme";
 import { type JSX, onCleanup } from "solid-js";
 import Cover from "./_blocks/cover";
 
@@ -11,7 +10,7 @@ export default function (props: { children?: JSX.Element }) {
   });
   return (
     <>
-      <Title title={`${t("game.title")} - ${platformStore.config.name || t("platform.name")}`} />
+      <Title title={tmpl`${t("game.title")} - ${E("platform.name")}`} />
       {props.children}
       <Cover />
     </>

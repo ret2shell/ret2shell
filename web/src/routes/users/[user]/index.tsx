@@ -1,16 +1,15 @@
+import { handleHttpError } from "@api";
 import { getUser, getUserTeams } from "@api/user";
 import SidebarLayout from "@blocks/sidebar-layout";
 import type { Team } from "@models/team";
 import type { User } from "@models/user";
 import { A, useNavigate, useParams } from "@solidjs/router";
-import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
-import { t } from "@storage/theme";
+import { Title, tmpl } from "@storage/header";
+import { E, t } from "@storage/theme";
 import Article from "@widgets/article";
 import LoadingTips from "@widgets/loading-tips";
 import { For, Match, Switch, createEffect, createSignal, untrack } from "solid-js";
 import Sidebar from "./_blocks/sidebar";
-import { handleHttpError } from "@api";
 
 export default function () {
   const [user, setUser] = createSignal(null as null | User);
@@ -39,7 +38,7 @@ export default function () {
 
   return (
     <>
-      <Title title={`${user()?.nickname} - ${platformStore.config.name || t("platform.name")!}`} />
+      <Title title={tmpl`${user()?.nickname} - ${E("platform.name")}`} />
       <SidebarLayout leftBar={() => <Sidebar user={user()} loading={loading()} />}>
         <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
           <div class="flex flex-col w-full max-w-5xl">

@@ -2,9 +2,8 @@ import { api_root, handleHttpError } from "@api";
 import { getPlatformLogs } from "@api/platform";
 import DownloadButton from "@blocks/download-button";
 import { accountStore } from "@storage/account";
-import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
-import { t } from "@storage/theme";
+import { Title, tmpl } from "@storage/header";
+import { E, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import LoadingTips from "@widgets/loading-tips";
@@ -119,7 +118,7 @@ export default function () {
   let bottomDiv: HTMLDivElement;
   return (
     <>
-      <Title title={`${t("admin.logs.title")} - ${platformStore.config.name || t("platform.name")}`} />
+      <Title title={tmpl`${t("admin.logs.title")} - ${E("platform.name")}`} />
       <div class="flex-1 flex flex-col">
         <div class="sticky top-16 h-16 z-20 backdrop-blur border-b border-b-layer-content/10 flex flex-row space-x-4 items-center px-3 lg:px-6">
           <h1 class="flex-1 font-bold flex flex-row space-x-2 items-center">

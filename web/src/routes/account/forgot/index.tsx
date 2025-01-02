@@ -3,9 +3,8 @@ import { forgotPassword } from "@api/account";
 import Captcha from "@blocks/captcha";
 import { createForm, email, minLength, required } from "@modular-forms/solid";
 import { useNavigate } from "@solidjs/router";
-import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
-import { t } from "@storage/theme";
+import { Title, tmpl } from "@storage/header";
+import { E, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
@@ -53,7 +52,7 @@ export default function () {
   }
   return (
     <div class="flex-1 flex flex-col items-center md:justify-center p-3 md:p-6">
-      <Title title={`${t("account.forgot.title")} - ${platformStore.config.name || t("platform.name")}`} />
+      <Title title={tmpl`${t("account.forgot.title")} - ${E("platform.name")}`} />
       <Card
         class="w-full max-w-md"
         contentClass="p-6 flex flex-col md:flex-row space-y-2 space-x-0 md:space-x-6 md:space-y-0"

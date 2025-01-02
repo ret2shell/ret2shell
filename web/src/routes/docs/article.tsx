@@ -1,7 +1,7 @@
 import Spin from "@assets/animates/spin";
 import { useLocation, useNavigate } from "@solidjs/router";
-import { Title } from "@storage/header";
-import { t, themeStore } from "@storage/theme";
+import { Title, tmpl } from "@storage/header";
+import { E, t, themeStore } from "@storage/theme";
 import Article from "@widgets/article";
 import Divider from "@widgets/divider";
 import { Show, createEffect, createSignal } from "solid-js";
@@ -61,7 +61,7 @@ export default function () {
   });
   return (
     <>
-      <Title title={`${title()} - ${t("platform.name")}`} />
+      <Title title={tmpl`${title()} - ${E("platform.name")}`} />
       <div class="flex-1 flex flex-col items-center px-3 lg:px-6">
         <h1 class="text-3xl flex flex-row space-x-4 items-center w-full max-w-5xl justify-start print:justify-center font-bold mt-8 print:mt-16">
           <Show

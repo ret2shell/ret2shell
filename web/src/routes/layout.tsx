@@ -1,3 +1,4 @@
+import { handleHttpError } from "@api";
 import { getPlatformInfo, getPlatformLicense, getVersion } from "@api/platform";
 import LogoAnimate from "@assets/animates/logo-animate";
 import Background from "@blocks/background";
@@ -8,9 +9,9 @@ import { Permission } from "@models/user";
 import { useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { canAccessChallenges, gameStore, inProgress, isGameAdmin } from "@storage/game";
-import { setupTitleResolver } from "@storage/header";
+import { resolveTitle, setupTitleResolver } from "@storage/header";
 import { frontendCompatVersion, platformStore, setPlatformStore } from "@storage/platform";
-import { t } from "@storage/theme";
+import { j, t } from "@storage/theme";
 import { addToast, removeToast, toastStore } from "@storage/toast";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
@@ -24,12 +25,11 @@ import { HTTPError } from "ky";
 import { DateTime } from "luxon";
 import { type JSX, Match, Show, Switch, createEffect, createMemo, createSignal, onMount, untrack } from "solid-js";
 import { Transition } from "solid-transition-group";
-import ThemeBox, { ThemeBoxContent } from "./_blocks/theme-box";
 import InstanceBox, { InstanceBoxContent } from "./_blocks/instance-box";
 import NotificationBox, { NotificationBoxContent } from "./_blocks/notification-box";
+import ThemeBox, { ThemeBoxContent } from "./_blocks/theme-box";
 import Toasts from "./_blocks/toasts";
 import UserBox from "./_blocks/user-box";
-import { handleHttpError } from "@api";
 
 function GlobalTitleLink() {
   const location = useLocation();
@@ -38,9 +38,7 @@ function GlobalTitleLink() {
     <Link ghost href={inDocs() ? "/docs" : "/"}>
       <LogoAnimate class="hidden xl:inline-block" width={24} height={24} />
       <span />
-      <span>
-        {inDocs() ? `${t("docs.title")} - ${t("platform.name")}` : platformStore.config.name || t("platform.name")}
-      </span>
+      <span>{inDocs() ? `${t("docs.title")} - ${j["platform.name"]}` : j["platform.name"]}</span>
     </Link>
   );
 }
@@ -177,7 +175,7 @@ function TitleBar() {
     <>
       <div id="page-top" class="print:hidden" />
       <div class="hidden print:flex flex-row border-b border-b-layer-content/60 w-full">
-        <span>{inDocs() ? t("docs.titleTips") : platformStore.config.name || t("platform.name")}</span>
+        <span>{inDocs() ? t("docs.titleTips") : j["platform.name"]}</span>
         <span class="flex-1" />
         <span>{DateTime.now().toFormat("yyyy-MM-dd HH:mm:ss")}</span>
       </div>
@@ -395,7 +393,7 @@ function checkCookiePolicy() {
 }
 
 export default function (props: { children?: JSX.Element }) {
-  let platformName = `\xa0\xa0[\xa0${platformStore.config.name || t("platform.name")}\xa0]\xa0`;
+  let platformName = `\xa0\xa0[\xa0${j["platform.name"]}\xa0]\xa0`;
   const [platformTyped, setPlatformTyped] = createSignal("");
   const [hideAnimation, setHideAnimation] = createSignal(false);
   const showAnimation = useLocation().pathname === "/" && useSearchParams()[0].event === undefined;
@@ -423,6 +421,7 @@ export default function (props: { children?: JSX.Element }) {
         config: res,
         backend_online: true,
       });
+      resolveTitle(location.pathname);
       loadVersion();
     } catch (err) {
       if (err instanceof HTTPError && err.response?.status === 503) {
@@ -446,7 +445,7 @@ export default function (props: { children?: JSX.Element }) {
       }
       setPlatformStore({ backend_online: false });
     }
-    platformName = `\xa0\xa0[\xa0${platformStore.config.name || t("platform.name")}\xa0]\xa0`;
+    platformName = `\xa0\xa0[\xa0${j["platform.name"]}\xa0]\xa0`;
 
     setTimeout(checkCookiePolicy, 1000);
 

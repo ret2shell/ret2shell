@@ -6,9 +6,8 @@ import Captcha from "@blocks/captcha";
 import { createForm, email, maxLength, minLength, pattern, required, setValue } from "@modular-forms/solid";
 import { useNavigate } from "@solidjs/router";
 import { accountStore } from "@storage/account";
-import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
-import { t } from "@storage/theme";
+import { Title, tmpl } from "@storage/header";
+import { E, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
@@ -58,7 +57,7 @@ export default function () {
 
   return (
     <>
-      <Title title={`${t("account.register.title")} - ${platformStore.config.name || t("platform.name")}`} />
+      <Title title={tmpl`${t("account.register.title")} - ${E("platform.name")}`} />
       <div class="flex-1 flex flex-col items-center md:justify-center p-3 md:p-6">
         <Card
           class="w-full max-w-3xl"

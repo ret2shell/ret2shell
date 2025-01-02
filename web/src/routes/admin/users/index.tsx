@@ -1,11 +1,11 @@
+import { handleHttpError } from "@api";
 import { getUser, getUserList, updateUser } from "@api/user";
 import { mediaPath } from "@lib/utils/media";
 import { type User, permissionToIcon } from "@models/user";
 import { A, useSearchParams } from "@solidjs/router";
 import { accountStore, refreshInstitutes } from "@storage/account";
-import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
-import { t } from "@storage/theme";
+import { Title, tmpl } from "@storage/header";
+import { E, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Avatar from "@widgets/avatar";
 import Input from "@widgets/input";
@@ -15,7 +15,6 @@ import Select from "@widgets/select";
 import Tag from "@widgets/tag";
 import { For, Show, createEffect, createMemo, createSignal, onMount, untrack } from "solid-js";
 import Form from "./_blocks/form";
-import { handleHttpError } from "@api";
 
 type OrderType = "id" | "account" | "institute_id" | "registered_at";
 
@@ -207,7 +206,7 @@ export default function () {
   });
   return (
     <div class="flex-1 flex flex-col items-center">
-      <Title title={`${t("admin.users.title")} - ${platformStore.config.name || t("platform.name")}`} />
+      <Title title={tmpl`${t("admin.users.title")} - ${E("platform.name")}`} />
       <Show when={inEdit()} fallback={<UserList />}>
         <Form editSource={user() || undefined} onDone={handleUpdateUser} loading={updatingUser()} />
       </Show>

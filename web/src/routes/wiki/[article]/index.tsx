@@ -1,12 +1,12 @@
+import { handleHttpError } from "@api";
 import { deleteWiki, getWiki } from "@api/wiki";
 import Spin from "@assets/animates/spin";
 import type { Article as ArticleModel } from "@models/article";
 import { Permission } from "@models/user";
 import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
-import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
-import { t } from "@storage/theme";
+import { Title, tmpl } from "@storage/header";
+import { E, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import { refreshWikiToc, setWikiStore, wikiStore } from "@storage/wiki";
 import Article from "@widgets/article";
@@ -14,7 +14,6 @@ import Divider from "@widgets/divider";
 import { HTTPError } from "ky";
 import { Show, createEffect, onCleanup, untrack } from "solid-js";
 import EditForm from "../_blocks/form";
-import { handleHttpError } from "@api";
 
 export default function () {
   const params = useParams();
@@ -74,7 +73,7 @@ export default function () {
   }
   return (
     <>
-      <Title title={`${wikiStore.current?.title} - ${platformStore.config.name || t("platform.name")}`} />
+      <Title title={tmpl`${wikiStore.current?.title} - ${E("platform.name")}`} />
       <div class="flex-1 flex flex-col items-center px-3 lg:px-6">
         <h1 class="text-3xl flex flex-row space-x-4 items-center w-full max-w-5xl justify-start print:justify-center font-bold mt-8 print:mt-16">
           <Show

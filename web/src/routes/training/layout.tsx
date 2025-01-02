@@ -1,9 +1,8 @@
 import SidebarLayout from "@blocks/sidebar-layout";
 import { createBreakpoints } from "@solid-primitives/media";
 import { setGameStore } from "@storage/game";
-import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
-import { t } from "@storage/theme";
+import { Title, tmpl } from "@storage/header";
+import { E, t } from "@storage/theme";
 import Button from "@widgets/button";
 import { type JSX, Show, createSignal, onCleanup } from "solid-js";
 import { Transition } from "solid-transition-group";
@@ -20,7 +19,7 @@ export default function (props: { children?: JSX.Element }) {
   const [showSidebar, setShowSidebar] = createSignal(false);
   return (
     <>
-      <Title title={`${t("training.title")} - ${platformStore.config.name || t("platform.name")}`} />
+      <Title title={tmpl`${t("training.title")} - ${E("platform.name")}`} />
       <SidebarLayout leftBar={() => <SideBar />} showLeftBar={showSidebar()}>
         {props.children}
       </SidebarLayout>

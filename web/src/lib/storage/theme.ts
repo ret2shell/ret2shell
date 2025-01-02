@@ -1,9 +1,11 @@
 import { type Locale, fetchDictionary, hasLocale } from "@lib/i18n";
+import { DynamicRecord } from "@lib/utils/dynamic-record";
 import { resolveTemplate, translator } from "@solid-primitives/i18n";
 import { createPrefersDark } from "@solid-primitives/media";
 import { makePersisted } from "@solid-primitives/storage";
 import { createEffect, createResource, untrack } from "solid-js";
 import { createStore } from "solid-js/store";
+import { platformStore } from "./platform";
 
 const prefersDark = createPrefersDark();
 
@@ -82,3 +84,10 @@ export const colorPalette = {
   warning: "#db640e",
   error: "#e05864",
 };
+
+const dynamicRecord = new DynamicRecord({
+  "platform.name": () => platformStore.config.name || t("platform.name"),
+});
+
+export const j = dynamicRecord.dynamicJson();
+export const E = dynamicRecord.createElement.bind(dynamicRecord);

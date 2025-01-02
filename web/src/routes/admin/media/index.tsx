@@ -2,9 +2,8 @@ import { handleHttpError } from "@api";
 import { getPlatformConfig, updatePlatformConfig } from "@api/platform";
 import type { Config, MediaConfig } from "@models/config";
 import { createForm, setValues } from "@modular-forms/solid";
-import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
-import { t } from "@storage/theme";
+import { Title, tmpl } from "@storage/header";
+import { E, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Checkbox from "@widgets/checkbox";
@@ -59,7 +58,7 @@ export default function () {
   }
   return (
     <>
-      <Title title={`${t("admin.media.title")} - ${platformStore.config.name || t("platform.name")}`} />
+      <Title title={tmpl`${t("admin.media.title")} - ${E("platform.name")}`} />
       <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
         <Form onSubmit={onSubmit} class="w-full max-w-5xl flex flex-col space-y-2">
           <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">

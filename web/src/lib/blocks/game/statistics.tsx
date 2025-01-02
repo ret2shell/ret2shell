@@ -1,20 +1,19 @@
+import { handleHttpError } from "@api";
 import { type GameStatisticsExport, getGameStatistics, getGameStatisticsExport } from "@api/game";
-import { gameStore } from "@storage/game";
-import { t } from "@storage/theme";
-import { createEffect, createMemo, createSignal, Show, untrack } from "solid-js";
-import { platformStore } from "@storage/platform";
-import { Title } from "@storage/header";
-import logo from "@assets/logo.svg";
-import { mediaPath } from "@lib/utils/media";
-import Divider from "@widgets/divider";
 import Spin from "@assets/animates/spin";
-import Chart from "@widgets/chart";
+import logo from "@assets/logo.svg";
+import XLSX from "@e965/xlsx";
+import { mediaPath } from "@lib/utils/media";
 import { accountStore, refreshInstitutes } from "@storage/account";
 import { challengeStore, refreshChallenges } from "@storage/challenge";
+import { gameStore } from "@storage/game";
+import { Title, tmpl } from "@storage/header";
+import { E, t } from "@storage/theme";
 import Button from "@widgets/button";
+import Chart from "@widgets/chart";
+import Divider from "@widgets/divider";
 import Select from "@widgets/select";
-import XLSX from "@e965/xlsx";
-import { handleHttpError } from "@api";
+import { Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
 
 export default function GameStatistics(props: {
   inGame?: boolean;
@@ -208,7 +207,7 @@ export default function GameStatistics(props: {
 
   return (
     <>
-      <Title title={`${t("game.statistics.title")} - ${platformStore.config.name || t("platform.name")}`} />
+      <Title title={tmpl`${t("game.statistics.title")} - ${E("platform.name")}`} />
       <div class="flex-1 flex flex-col p-3 lg:p-6 gap-3 lg:gap-6 w-full">
         <div class="hidden xl:flex items-center justify-start space-x-12 px-12">
           <img class="w-24 h-24" src={gameStore.current?.logo ? mediaPath(gameStore.current!.logo) : logo} alt="CTF" />

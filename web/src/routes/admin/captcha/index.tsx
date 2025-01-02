@@ -1,17 +1,16 @@
+import { handleHttpError } from "@api";
 import { getPlatformConfig, updatePlatformConfig } from "@api/platform";
 import type { CaptchaConfig, Config } from "@models/config";
+import { createForm, getValue, required, setValues } from "@modular-forms/solid";
+import { Title, tmpl } from "@storage/header";
+import { E, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Checkbox from "@widgets/checkbox";
 import Select from "@widgets/select";
 import Slider from "@widgets/slider";
-import { createForm, getValue, required, setValues } from "@modular-forms/solid";
-import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
-import { t } from "@storage/theme";
 import type { HTTPError } from "ky";
 import { createSignal, onMount } from "solid-js";
-import { handleHttpError } from "@api";
 
 export default function () {
   const [form, { Form, Field }] = createForm<CaptchaConfig>();
@@ -63,7 +62,7 @@ export default function () {
   }
   return (
     <>
-      <Title title={`${t("admin.captcha.title")} - ${platformStore.config.name || t("platform.name")}`} />
+      <Title title={tmpl`${t("admin.captcha.title")} - ${E("platform.name")}`} />
       <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
         <Form onSubmit={onSubmit} class="w-full max-w-5xl flex flex-col space-y-2">
           <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">

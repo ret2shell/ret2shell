@@ -3,7 +3,7 @@ import LogoAnimate from "@assets/animates/logo-animate";
 import { useSearchParams } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { platformStore } from "@storage/platform";
-import { t } from "@storage/theme";
+import { E, j, t } from "@storage/theme";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Link from "@widgets/link";
@@ -30,14 +30,14 @@ export default function () {
   });
   return (
     <>
-      <Title title={platformStore.config.name || t("platform.name")!} />
+      <Title title={E("platform.name")} />
       <div class="flex-1 relative">
         <div class="absolute h-full w-full overflow-scroll snap-mandatory snap-y">
           <section class="h-full min-h-full snap-center flex flex-col items-center justify-center relative">
             <div class="flex-1" />
             <h1 class="text-3xl font-bold opacity-80">
               &nbsp;&nbsp;
-              <span>[&nbsp;{platformStore.config.name || t("platform.name")}&nbsp;]</span>
+              <span>[&nbsp;{j["platform.name"]}&nbsp;]</span>
               &nbsp;
               <span class="text-primary animate-ping">_</span>
             </h1>

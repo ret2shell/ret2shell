@@ -3,9 +3,8 @@ import { type PlatformStatistics, getPlatformStatistics } from "@api/platform";
 import LogoAnimate from "@assets/animates/logo-animate";
 import Spin from "@assets/animates/spin";
 import { HostType } from "@models/game";
-import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
-import { t } from "@storage/theme";
+import { Title, tmpl } from "@storage/header";
+import { E, j, t } from "@storage/theme";
 import Chart from "@widgets/chart";
 import Divider from "@widgets/divider";
 import { DateTime } from "luxon";
@@ -26,11 +25,11 @@ export default function () {
 
   return (
     <>
-      <Title title={`${t("admin.statistics.title")} - ${platformStore.config.name || t("platform.name")}`} />
+      <Title title={tmpl`${t("admin.statistics.title")} - ${E("platform.name")}`} />
       <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 p-3 lg:p-6 gap-3 lg:gap-6">
         <div class="hidden xl:flex xl:col-span-2 items-center justify-start space-x-12 px-12">
           <LogoAnimate class="w-36 h-36" />
-          <h1 class="text-5xl font-bold">{platformStore.config.name || t("platform.name")!}</h1>
+          <h1 class="text-5xl font-bold">{j["platform.name"]}</h1>
         </div>
         <div class="col-span-1 h-48 p-6 flex flex-row items-center space-x-8">
           <div class="flex-1 flex flex-col space-y-4">

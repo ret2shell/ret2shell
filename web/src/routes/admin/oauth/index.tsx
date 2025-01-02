@@ -1,11 +1,12 @@
+import { handleHttpError } from "@api";
 import { createInstitute, deleteInstitute, updateInstitute } from "@api/account";
 import { getAuthConfig } from "@api/platform";
+import { getLogo } from "@assets/brands";
 import type { AuthConfig } from "@models/config";
 import type { Institute } from "@models/institute";
 import { accountStore, refreshInstitutes } from "@storage/account";
-import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
-import { t } from "@storage/theme";
+import { Title, tmpl } from "@storage/header";
+import { E, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
@@ -14,8 +15,6 @@ import Popover from "@widgets/popover";
 import type { HTTPError } from "ky";
 import { For, Show, createMemo, createSignal, onMount } from "solid-js";
 import InstituteForm from "./_blocks/form";
-import { getLogo } from "@assets/brands";
-import { handleHttpError } from "@api";
 
 export default function () {
   const [authConfig, setAuthConfig] = createSignal({
@@ -82,7 +81,7 @@ export default function () {
   }
   return (
     <>
-      <Title title={`${t("admin.oauth.title")} - ${platformStore.config.name || t("platform.name")}`} />
+      <Title title={tmpl`${t("admin.oauth.title")} - ${E("platform.name")}`} />
       <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
         <div class="w-full max-w-5xl flex flex-col">
           <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">

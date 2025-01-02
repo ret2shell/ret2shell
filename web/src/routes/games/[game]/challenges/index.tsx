@@ -19,12 +19,12 @@ import Notifications from "./_blocks/notifications";
 import Team from "./_blocks/team";
 import Welcome from "./_blocks/welcome";
 
+import { handleHttpError } from "@api";
 import Tabs from "@blocks/challenge/tabs";
 import { createBreakpoints } from "@solid-primitives/media";
 import { challengeStore, refreshChallengeAssets, refreshChallenges, setChallengeStore } from "@storage/challenge";
 import Button from "@widgets/button";
 import { Transition } from "solid-transition-group";
-import { handleHttpError } from "@api";
 
 export default function () {
   const navigate = useNavigate();

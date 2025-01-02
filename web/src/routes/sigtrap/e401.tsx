@@ -1,12 +1,11 @@
-import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
-import { t } from "@storage/theme";
+import { Title, tmpl } from "@storage/header";
+import { E, t } from "@storage/theme";
 import ErrorSection from "./error";
 
 export default function () {
   return (
     <>
-      <Title title={`${t("errors.401")} - ${platformStore.config.name || t("platform.name")}`} />
+      <Title title={tmpl`${t("errors.401")} - ${E("platform.name")}`} />
       <ErrorSection status={401} />
     </>
   );

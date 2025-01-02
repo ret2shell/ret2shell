@@ -1,15 +1,14 @@
+import { handleHttpError } from "@api";
 import { bindWithOAuth } from "@api/account";
 import LogoAnimate from "@assets/animates/logo-animate";
+import { getLogo } from "@assets/brands";
 import xdsecMascotHappy from "@assets/imgs/xdsec-mascot-happy.webp";
+import logo from "@assets/logo-gray.svg";
 import { useLocation, useNavigate, useSearchParams } from "@solidjs/router";
-import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
-import { t } from "@storage/theme";
+import { Title, tmpl } from "@storage/header";
+import { E, t } from "@storage/theme";
 import LoadingTips from "@widgets/loading-tips";
 import { createSignal, onMount } from "solid-js";
-import logo from "@assets/logo-gray.svg";
-import { getLogo } from "@assets/brands";
-import { handleHttpError } from "@api";
 
 export default function () {
   const [animate, setAnimate] = createSignal(false);
@@ -43,7 +42,7 @@ export default function () {
 
   return (
     <div class="flex-1 w-full flex flex-col space-y-8 items-center justify-center">
-      <Title title={`${t("account.bind.title")} - ${platformStore.config.name || t("platform.name")}`} />
+      <Title title={tmpl`${t("account.bind.title")} - ${E("platform.name")}`} />
       <div class="flex flex-row space-x-8 items-center">
         <LogoAnimate
           width={128}
