@@ -1,8 +1,8 @@
 import { getGames } from "@api/game";
 import LogoAnimate from "@assets/animates/logo-animate";
 import Spin from "@assets/animates/spin";
-import bluredBgDark from "@assets/imgs/bg-blur-stars.webp";
-import bluredBgLight from "@assets/imgs/bg-blur-suzume.webp";
+import blurredBgDark from "@assets/imgs/bg-blur-stars.webp";
+import blurredBgLight from "@assets/imgs/bg-blur-suzume.webp";
 import bgGameDefault from "@assets/imgs/bg-game-default.webp";
 import { randomTips } from "@lib/utils/loading-tips";
 import { mediaPath } from "@lib/utils/media";
@@ -234,9 +234,9 @@ export default function () {
                   <>
                     <Show
                       when={themeStore.colorScheme === "dark"}
-                      fallback={<Picture src={bluredBgLight} class="w-full h-full" />}
+                      fallback={<Picture src={blurredBgLight} class="w-full h-full" />}
                     >
-                      <Picture src={bluredBgDark} class="w-full h-full" />
+                      <Picture src={blurredBgDark} class="w-full h-full" />
                     </Show>
                     <div class="w-full h-full absolute top-0 left-0 bg-layer/70 backdrop-blur flex items-center justify-center">
                       <LogoAnimate height="h-1/3" class="grayscale" />

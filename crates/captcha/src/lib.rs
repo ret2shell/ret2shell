@@ -10,8 +10,10 @@ mod utils;
 use r2s_config::captcha::ValidatorType;
 pub use traits::{Captcha, CaptchaError, CaptchaValidator};
 
-/// Generate a captcha. you should desentisize the captcha before sending it to
-/// the client, and store the original captcha object into cache.
+/// Generate a captcha.
+///
+/// You should ONLY send the desensitized captcha to the client.
+/// and store the original captcha object into cache.
 ///
 /// * `validator` - The type of the validator.
 /// * `difficulty` - The difficulty of the captcha.

@@ -102,7 +102,7 @@ export default function ScorePicker(props: {
                 {
                   type: "line",
                   showSymbol: false,
-                  slient: true,
+                  silent: true,
                   clip: true,
                   data: [
                     [0, props.min],
@@ -116,7 +116,7 @@ export default function ScorePicker(props: {
                 {
                   type: "line",
                   showSymbol: false,
-                  slient: true,
+                  silent: true,
                   clip: true,
                   data: [
                     [props.decay, 1200],

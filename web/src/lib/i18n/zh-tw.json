@@ -327,7 +327,7 @@
         "shouldGoto": "管理員請移步管理面板查看選手反饋信息"
       },
       "answer": {
-        "notAccessableWhenInGame": "比賽結束前無法發佈題解"
+        "notAccessibleWhenInGame": "比賽結束前無法發佈題解"
       },
       "organize": {
         "title": "組織管理",

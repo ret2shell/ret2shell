@@ -42,7 +42,7 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
   ]);
   const [imageFile, setImageFile] = createSignal<File | null>(null);
   const [uploading, setUploading] = createSignal(false);
-  const [draging, setDraging] = createSignal(false);
+  const [dragging, setDragging] = createSignal(false);
   async function handleUploadImage() {
     if (imageFile()) {
       setUploading(true);
@@ -111,19 +111,19 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
     });
 
     editor.container.addEventListener("dragenter", () => {
-      setDraging(true);
+      setDragging(true);
     });
     editor.container.addEventListener("dragover", (e) => {
       e.preventDefault();
       e.stopPropagation();
     });
     editor.container.addEventListener("dragleave", () => {
-      setDraging(false);
+      setDragging(false);
     });
     editor.container.addEventListener("drop", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      setDraging(false);
+      setDragging(false);
       const file = e.dataTransfer?.files[0];
       if (file) {
         setImageFile(file);
@@ -159,7 +159,7 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
           <p>{t("form.uploading")}</p>
         </Card>
       </Show>
-      <Show when={draging()}>
+      <Show when={dragging()}>
         <Card class="absolute bottom-2 left-2 right-2 top-2" contentClass="z-50 flex items-center justify-center">
           <span class="icon-[fluent--image-20-regular] w-12 h-12" />
         </Card>

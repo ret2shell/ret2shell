@@ -32,9 +32,9 @@ pub enum CaptchaError {
   MissingFields(String),
   #[error("serialization error: {0}")]
   SerializationError(#[from] serde_json::Error),
-  #[error("Uknown captcha type: {0}")]
+  #[error("Unknown captcha type: {0}")]
   UnknownType(String),
-  #[error("Uknown error")]
+  #[error("Unknown error")]
   Unknown,
 }
 

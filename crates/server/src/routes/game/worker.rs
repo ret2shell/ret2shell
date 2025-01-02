@@ -35,11 +35,11 @@ pub async fn spawn_game_workers(state: GlobalState) {
     bucket,
     cluster,
   ));
-  tokio::spawn(score_maintainance_worker(queue, database));
+  tokio::spawn(score_maintenance_worker(queue, database));
 }
 
-async fn score_maintainance_worker(queue: Queue, db: Database) {
-  info!("Score maintainance worker started");
+async fn score_maintenance_worker(queue: Queue, db: Database) {
+  info!("Score maintenance worker started");
   let messages = queue
     .subscribe("scoreboard")
     .await
@@ -73,7 +73,7 @@ async fn score_maintainance_worker(queue: Queue, db: Database) {
         continue;
       }
       let challenge = challenge.unwrap();
-      score_maintainance_worker_exec(db.clone(), challenge.clone())
+      score_maintenance_worker_exec(db.clone(), challenge.clone())
         .await
         .inspect_err(|e| error!("Failed to process message: {:?}", e))
         .ok();
@@ -82,7 +82,7 @@ async fn score_maintainance_worker(queue: Queue, db: Database) {
   }
 }
 
-async fn score_maintainance_worker_exec(
+async fn score_maintenance_worker_exec(
   db: Database, challenge: challenge::Model,
 ) -> Result<(), ResponseError> {
   let txn = db.conn.begin().await?;
@@ -362,7 +362,7 @@ async fn submission_worker_exec(
       })),
     };
     txn.commit().await?;
-    queue.publish("event", event).await.ok(); // publish scoreboard update event if nessary
+    queue.publish("event", event).await.ok(); // publish scoreboard update event if necessary
     if changed {
       queue.publish("scoreboard", challenge.clone()).await.ok();
       cache.at("challenge").del(challenge.id).await.ok();

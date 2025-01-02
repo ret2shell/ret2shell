@@ -372,7 +372,7 @@
         "shouldGoto": "Administrators, please go to the management panel to view player feedback"
       },
       "answer": {
-        "notAccessableWhenInGame": "failed to publish solution when game is ongoing"
+        "notAccessibleWhenInGame": "failed to publish solution when game is ongoing"
       },
       "organize": {
         "title": "Organization Management",

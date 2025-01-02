@@ -176,7 +176,7 @@ export default function () {
               <Reverier width={128} height={128} class="" />
               <h2 class="flex flex-col space-y-2 justify-center">
                 <span class="text-3xl font-bold">Powered by Reverier</span>
-                <span class="opacity-60 self-end">with caffine, a cat named 'dog', and love.</span>
+                <span class="opacity-60 self-end">with caffeine, a cat named 'dog', and love.</span>
               </h2>
             </div>
             <p class="font-bold opacity-60 max-w-3xl">

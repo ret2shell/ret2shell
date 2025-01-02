@@ -14,14 +14,14 @@ import { TransitionGroup } from "solid-transition-group";
 
 function mergeChats(oldSessions: ChatSession[], newSessions: ChatSession[]) {
   const result = oldSessions;
-  const incomming = newSessions;
+  const incoming = newSessions;
   result.sort((a, b) => {
     if (a.team_id === b.team_id) {
       return a.challenge_id - b.challenge_id;
     }
     return a.team_id - b.team_id;
   });
-  incomming.sort((a, b) => {
+  incoming.sort((a, b) => {
     if (a.team_id === b.team_id) {
       return a.challenge_id - b.challenge_id;
     }
@@ -30,10 +30,10 @@ function mergeChats(oldSessions: ChatSession[], newSessions: ChatSession[]) {
   let i = 0;
   const iLen = result.length;
   let j = 0;
-  const jLen = incomming.length;
+  const jLen = incoming.length;
   while (i < iLen && j < jLen) {
     const oldSession = result[i];
-    const newSession = incomming[j];
+    const newSession = incoming[j];
     if (oldSession.team_id === newSession.team_id && oldSession.challenge_id === newSession.challenge_id) {
       if (
         newSession.last_active_at.toMillis() > oldSession.last_active_at.toMillis() ||
@@ -55,7 +55,7 @@ function mergeChats(oldSessions: ChatSession[], newSessions: ChatSession[]) {
     }
   }
   while (j < jLen) {
-    result.push(incomming[j]);
+    result.push(incoming[j]);
     j++;
   }
   return result.sort((a, b) => b.last_active_at.toMillis() - a.last_active_at.toMillis());

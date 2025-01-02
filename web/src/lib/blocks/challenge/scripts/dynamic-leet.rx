@@ -1,5 +1,5 @@
 //! * dynamic-leet.rx
-//! Dynamic flag check with tempalte and steganographic data.
+//! Dynamic flag check with template and steganographic data.
 
 use ret2api::audit;
 use ret2api::utils;
