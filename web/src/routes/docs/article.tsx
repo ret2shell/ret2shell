@@ -61,7 +61,7 @@ export default function () {
   });
   return (
     <>
-      <Title title={`${title()} - ${t("platform.name")}`} />
+      <Title page={title() ?? t("docs.title")} route={location.pathname} />
       <div class="flex-1 flex flex-col items-center px-3 lg:px-6">
         <h1 class="text-3xl flex flex-row space-x-4 items-center w-full max-w-5xl justify-start print:justify-center font-bold mt-8 print:mt-16">
           <Show

@@ -2,6 +2,7 @@ import { handleHttpError } from "@api";
 import { updateGame } from "@api/game";
 import GameEdit, { type GameForm } from "@blocks/game/form";
 import { gameStore, setGameStore } from "@storage/game";
+import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import { DateTime } from "luxon";
@@ -37,8 +38,11 @@ export default function () {
     setLoading(false);
   }
   return (
-    <div class="flex flex-col p-3 lg:p-6 w-full items-center">
-      <GameEdit onDone={onSubmit} editSource={gameStore.current || undefined} loading={loading()} inGame />
-    </div>
+    <>
+      <Title page={t("game.admin.edit.title")} route={`/games/${gameStore.current?.id}/admin/edit`} />
+      <div class="flex flex-col p-3 lg:p-6 w-full items-center">
+        <GameEdit onDone={onSubmit} editSource={gameStore.current || undefined} loading={loading()} inGame />
+      </div>
+    </>
   );
 }

@@ -4,6 +4,7 @@ import { useNavigate } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { t } from "@storage/theme";
 import CreateForm from "./_blocks/form";
+import { Title } from "@storage/header";
 
 export default function () {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ export default function () {
   }
   return (
     <>
+      <Title page={`${t("bulletin.create")}${t("bulletin.title")}`} route="/bulletin/create" />
       <h1 class="text-3xl text-center flex flex-row space-x-4 items-center justify-center font-bold mt-8">
         <span>
           {t("bulletin.create")} - {t("bulletin.title")}

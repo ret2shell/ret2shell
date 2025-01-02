@@ -26,7 +26,7 @@ export default function () {
 
   return (
     <>
-      <Title title={`${t("admin.statistics.title")} - ${platformStore.config.name || t("platform.name")}`} />
+      <Title page={t("admin.statistics.title")} route="/admin/statistics" />
       <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 p-3 lg:p-6 gap-3 lg:gap-6">
         <div class="hidden xl:flex xl:col-span-2 items-center justify-start space-x-12 px-12">
           <LogoAnimate class="w-36 h-36" />

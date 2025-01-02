@@ -2,7 +2,6 @@ import { handleHttpError } from "@api";
 import { getClusterConfig, getClusterNodes } from "@api/cluster";
 import Spin from "@assets/animates/spin";
 import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Divider from "@widgets/divider";
@@ -50,7 +49,7 @@ export default function () {
   const [shownNode, setShownNode] = createSignal(null as Node | null);
   return (
     <>
-      <Title title={`${t("admin.cluster.title")} - ${platformStore.config.name || t("platform.name")}`} />
+      <Title page={t("admin.cluster.title")} route="/admin/cluster" />
       <div class="flex-1 flex flex-col p-3 lg:p-6">
         <div class="h-32 lg:h-48 flex flex-row items-center">
           <div class="h-full aspect-square flex items-center justify-center">

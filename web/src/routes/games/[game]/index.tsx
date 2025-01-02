@@ -17,7 +17,6 @@ import {
   isGameAdmin,
   setGameStore,
 } from "@storage/game";
-import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Article from "@widgets/article";
@@ -205,7 +204,6 @@ export default function () {
 
   return (
     <>
-      <Title title={gameStore.current?.name || "CTF"} />
       <div class="flex-1 flex flex-col lg:flex-row-reverse">
         <div class="lg:w-1/3 max-h-[calc(100vh-4rem)] lg:sticky lg:top-16 lg:left-0 flex flex-col backdrop-blur border-b border-b-layer-content/10 lg:border-b-0 lg:backdrop-blur-none p-3 lg:p-6 space-y-2">
           <Card contentClass="relative">

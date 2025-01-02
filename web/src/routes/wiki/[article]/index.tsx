@@ -5,7 +5,6 @@ import { Permission } from "@models/user";
 import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import { refreshWikiToc, setWikiStore, wikiStore } from "@storage/wiki";
@@ -74,7 +73,7 @@ export default function () {
   }
   return (
     <>
-      <Title title={`${wikiStore.current?.title} - ${platformStore.config.name || t("platform.name")}`} />
+      <Title page={wikiStore.current?.title} route={`/wiki/${wikiStore.current?.id}`} />
       <div class="flex-1 flex flex-col items-center px-3 lg:px-6">
         <h1 class="text-3xl flex flex-row space-x-4 items-center w-full max-w-5xl justify-start print:justify-center font-bold mt-8 print:mt-16">
           <Show

@@ -447,7 +447,10 @@ export default function () {
 
   return (
     <>
-      <Title title={`${team()?.name ?? t("game.team.title")} - ${gameStore.current?.name ?? "CTF"}`} />
+      <Title
+        page={team()?.name ?? t("game.team.title")}
+        route={`/games/${gameStore.current?.id}/teams/${team()?.id}`}
+      />
       <SidebarLayout leftBar={() => <Sidebar team={team()} members={members()} loading={loadingMembers()} />}>
         <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
           <div class="flex flex-col w-full max-w-5xl">

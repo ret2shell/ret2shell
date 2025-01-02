@@ -238,6 +238,7 @@
       "stopEnvSuccess": "已發送停止指令",
       "delayEnv": "環境延長 1 小時",
       "stopEnv": "停止環境",
+      "showAll": "顯示全部",
       "envIsPending": "題目環境開啟中...",
       "envHasError": "發生錯誤，請嘗試 1 分鐘後重啟環境或者聯繫管理員...",
       "fetchSolvesFailed": "獲取解題記錄失敗",
@@ -310,9 +311,6 @@
         "hidden": "已隱藏"
       },
       "events": {
-        "title": "事件看板"
-      },
-      "automate": {
         "title": "事件推送",
         "tips1": "連接下述 WebSocket 地址即可接入平臺事件 API 訂閱。你可以在這裡找到事件 API 的對接方法：",
         "tips2": "請注意，事件 API 只通過 Token 進行鑑權，謹防此鏈接洩露。",
@@ -361,6 +359,7 @@
         "loadMore": "加載更多"
       },
       "monitor": {
+        "title": "事件看板",
         "fetchFailed": "獲取失敗",
         "pending": "隊列中",
         "solved": "正確",
@@ -368,6 +367,20 @@
         "needReview": "等待複審",
         "misjudged": "誤判",
         "confirmed": "屬實"
+      },
+      "git": {
+        "title": "題目倉庫"
+      },
+      "traffic": {
+        "title": "環境路由",
+        "deleteTips": "確定要刪除路由腳本嗎？刪除後將使用平臺默認腳本 / WSRX。",
+        "selectPresetScripts": "選擇預設腳本...",
+        "singleNodeDirectScript": "單節點直連",
+        "multiNodeDirectScript": "多節點直連",
+        "nodeSelector": "節點負載"
+      },
+      "captures": {
+        "title": "容器流量"
       }
     },
     "exit": "退出",
@@ -569,6 +582,9 @@
       "users": "平臺用戶",
       "challenges": "題目狀態",
       "submissions": "選手提交"
+    },
+    "traffic": {
+      "title": "環境路由"
     },
     "edit": {
       "title": "編輯平臺設置"
@@ -779,17 +795,6 @@
       "successMascotTip": "歡迎回來 ^_^",
       "failMascotTip": "失敗了，壞耶 x_x"
     },
-    "deleteAccountTitle": "警告！賬號停用後不可恢復！",
-    "deleteAccountTipsTitle1": "請明確你的賬戶並不是真的被刪除了，而是被置於刪除並無法恢復的狀態，以下操作將被執行：",
-    "deleteAccountTips1": "請明確你的賬戶並不是真的被刪除了，而是被置於停用並無法恢復的狀態，以下操作將被執行：",
-    "deleteAccountTipsList1": "你的賬戶將被重命名為 [DELETED]_<hash>；",
-    "deleteAccountTipsList2": "你的賬戶將被移除所有權限並禁止登錄，也不能通過郵箱找回，郵箱可以用於註冊另一個賬號；",
-    "deleteAccountTipsList3": "賬戶隱私信息將被移除，但是公開發布的內容將保留；",
-    "deleteAccountTipsList4": "與賬戶綁定的競賽成績、數據等會留存，但無法提供信息來證明這是你的。",
-    "deleteAccountTips2": "請認真閱讀並確定上述內容！如果你真的確定要停用賬戶，請在下方輸入你的完整用戶名 {{name}} 以確認：",
-    "deleteAccountTips3": "請注意，由於刪除了身份驗證相關的隱私信息，即使你聯繫管理/運維人員，也無法恢復被停用的賬號，請三思而後行。",
-    "bye": "再見",
-    "deleteAccountFailed": "賬戶停用失敗",
     "settings": {
       "title": "用戶設置",
       "info": {
@@ -813,7 +818,19 @@
         "title": "組織機構"
       },
       "delete": {
-        "title": "刪號跑路"
+        "title": "刪號跑路",
+        "topWarning": "警告！賬號停用後不可恢復！",
+        "tipsTitle1": "請明確你的賬戶並不是真的被刪除了，而是被置於刪除並無法恢復的狀態，以下操作將被執行：",
+        "tips1": "請明確你的賬戶並不是真的被刪除了，而是被置於停用並無法恢復的狀態，以下操作將被執行：",
+        "tipsList1": "你的賬戶將被重命名為 [DELETED]_<hash>；",
+        "tipsList2": "你的賬戶將被移除所有權限並禁止登錄，也不能通過郵箱找回，郵箱可以用於註冊另一個賬號；",
+        "tipsList3": "賬戶隱私信息將被移除，但是公開發布的內容將保留；",
+        "tipsList4": "與賬戶綁定的競賽成績、數據等會留存，但無法提供信息來證明這是你的。",
+        "tips2": "請認真閱讀並確定上述內容！如果你真的確定要停用賬戶，請在下方輸入你的完整用戶名 {{name}} 以確認：",
+        "tips3": "請注意，由於刪除了身份驗證相關的隱私信息，即使你聯繫管理/運維人員，也無法恢復被停用的賬號，請三思而後行。",
+        "bye": "再見",
+        "canNotDeleteWhenGameInProgress": "為了防止作弊行為，當你參加了正在進行中的比賽時，無法刪除賬戶。",
+        "failed": "賬戶停用失敗"
       },
       "password": {
         "title": "修改密碼",
@@ -851,6 +868,7 @@
       "success": "註冊成功，歡迎來到 CTF 的世界！"
     },
     "oauth": {
+      "title": "第三方認證",
       "xdu": {
         "title": "西電統一身份認證"
       },
@@ -935,19 +953,12 @@
       "confirmWarn": "我已知曉，繼續",
       "verify": "此功能僅在你通過郵箱驗證之後才可以使用"
     },
-    "resendVerifyEmail": "重新發送驗證郵件",
-    "verifyingEmail": "正在驗證你的郵箱",
-    "emailVerified": "郵箱驗證成功",
-    "emailVerifyBroken": "驗證鏈接存在問題，請確保郵件鏈接正確",
-    "emailVerifyFailed": "郵箱驗證失敗",
     "forgot": {
       "title": "忘記密碼",
       "sendResetEmail": "發送找回郵件",
       "success": "重置郵件已發送，請查收",
       "rateLimit": "發送頻率超過限制，請15分鐘後再試"
     },
-    "resendVerifyEmailSuccess": "驗證郵件已重新發送至郵箱，請查收",
-    "resendVerifyEmailFailed": "郵件發送失敗",
     "bind": {
       "title": "綁定第三方賬戶"
     },
@@ -960,9 +971,18 @@
       "invalidLink": "鏈接無效，請檢查郵箱重置鏈接是否一致",
       "confirm": "重置"
     },
-    "verifyEmail": "驗證郵箱",
     "emailNotVerified": "你的賬戶郵箱尚未通過驗證，功能受限",
-    "canNotDeleteWhenGameInProgress": "為了防止作弊行為，當你參加了正在進行中的比賽時，無法刪除賬戶。"
+    "verify": {
+      "title": "驗證郵箱",
+      "notVerified": "你的賬戶郵箱尚未通過驗證，功能受限",
+      "resend": "重新發送驗證郵件",
+      "verifying": "正在驗證你的郵箱",
+      "verifyFailed": "驗證失敗",
+      "verifySuccess": "驗證成功",
+      "verifyBroken": "驗證鏈接存在問題，請確保郵件鏈接正確",
+      "resendSuccess": "驗證郵件已重新發送至郵箱，請查收",
+      "resendFailed": "郵件發送失敗"
+    }
   },
   "instance": {
     "disconnected": "WSRX 未連接",
@@ -987,8 +1007,14 @@
     "fetchFailed": "獲取題目環境失敗"
   },
   "magic": {
-    "illustration": "插畫",
-    "source": "來源"
+    "sakana": {
+      "title": "彩蛋！",
+      "illustration": "插畫",
+      "source": "來源"
+    },
+    "about": {
+      "title": "關於"
+    }
   },
   "captcha": {
     "loading": "加載中...",

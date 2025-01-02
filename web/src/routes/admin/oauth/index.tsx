@@ -4,7 +4,6 @@ import type { AuthConfig } from "@models/config";
 import type { Institute } from "@models/institute";
 import { accountStore, refreshInstitutes } from "@storage/account";
 import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
@@ -82,7 +81,7 @@ export default function () {
   }
   return (
     <>
-      <Title title={`${t("admin.oauth.title")} - ${platformStore.config.name || t("platform.name")}`} />
+      <Title page={t("admin.oauth.title")} route="/admin/oauth" />
       <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
         <div class="w-full max-w-5xl flex flex-col">
           <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">

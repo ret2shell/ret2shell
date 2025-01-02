@@ -59,7 +59,7 @@ export default function () {
   const [dialogOpen, setDialogOpen] = createSignal(false);
   return (
     <>
-      <Title title={`${t("game.team.join.title")} - ${gameStore.current?.name || "CTF"}`} />
+      <Title page={t("game.team.join.title")} route={`/games/${gameStore.current?.id}/teams/join`} />
       <div class="flex-1 flex flex-col items-center md:justify-center p-3 md:p-6">
         <Card
           class="w-full max-w-xl"

@@ -2,8 +2,6 @@ import { type GameStatisticsExport, getGameStatistics, getGameStatisticsExport }
 import { gameStore } from "@storage/game";
 import { t } from "@storage/theme";
 import { createEffect, createMemo, createSignal, Show, untrack } from "solid-js";
-import { platformStore } from "@storage/platform";
-import { Title } from "@storage/header";
 import logo from "@assets/logo.svg";
 import { mediaPath } from "@lib/utils/media";
 import Divider from "@widgets/divider";
@@ -208,7 +206,6 @@ export default function GameStatistics(props: {
 
   return (
     <>
-      <Title title={`${t("game.statistics.title")} - ${platformStore.config.name || t("platform.name")}`} />
       <div class="flex-1 flex flex-col p-3 lg:p-6 gap-3 lg:gap-6 w-full">
         <div class="hidden xl:flex items-center justify-start space-x-12 px-12">
           <img class="w-24 h-24" src={gameStore.current?.logo ? mediaPath(gameStore.current!.logo) : logo} alt="CTF" />

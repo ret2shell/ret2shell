@@ -4,7 +4,6 @@ import { type User, permissionToIcon } from "@models/user";
 import { A, useSearchParams } from "@solidjs/router";
 import { accountStore, refreshInstitutes } from "@storage/account";
 import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Avatar from "@widgets/avatar";
@@ -206,11 +205,13 @@ export default function () {
     refreshInstitutes();
   });
   return (
-    <div class="flex-1 flex flex-col items-center">
-      <Title title={`${t("admin.users.title")} - ${platformStore.config.name || t("platform.name")}`} />
-      <Show when={inEdit()} fallback={<UserList />}>
-        <Form editSource={user() || undefined} onDone={handleUpdateUser} loading={updatingUser()} />
-      </Show>
-    </div>
+    <>
+      <Title page={t("admin.users.title")} route="/admin/users" />
+      <div class="flex-1 flex flex-col items-center">
+        <Show when={inEdit()} fallback={<UserList />}>
+          <Form editSource={user() || undefined} onDone={handleUpdateUser} loading={updatingUser()} />
+        </Show>
+      </div>
+    </>
   );
 }

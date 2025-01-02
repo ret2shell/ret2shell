@@ -8,7 +8,6 @@ import { Permission } from "@models/user";
 import { useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { canAccessChallenges, gameStore, inProgress, isGameAdmin } from "@storage/game";
-import { setupTitleResolver } from "@storage/header";
 import { frontendCompatVersion, platformStore, setPlatformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import { addToast, removeToast, toastStore } from "@storage/toast";
@@ -30,6 +29,7 @@ import NotificationBox, { NotificationBoxContent } from "./_blocks/notification-
 import Toasts from "./_blocks/toasts";
 import UserBox from "./_blocks/user-box";
 import { handleHttpError } from "@api";
+import { Title } from "@storage/header";
 
 function GlobalTitleLink() {
   const location = useLocation();
@@ -402,7 +402,6 @@ export default function (props: { children?: JSX.Element }) {
   const navigate = useNavigate();
   const location = useLocation();
   const inDocs = () => location.pathname.startsWith("/docs");
-  setupTitleResolver();
   function checkEmailVerification() {
     if (accountStore.token && !accountStore.permissions.includes(Permission.Verified)) {
       addToast({
@@ -524,6 +523,7 @@ export default function (props: { children?: JSX.Element }) {
 
   return (
     <>
+      <Title domain={platformStore.config.name ?? t("platform.name")} route="/" />
       <Background />
       <TitleBar />
       {props.children}

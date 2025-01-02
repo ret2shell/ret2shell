@@ -4,6 +4,8 @@ import Button from "@widgets/button";
 import { type JSX, Show, createSignal } from "solid-js";
 import { Transition } from "solid-transition-group";
 import Sidebar from "./_blocks/sidebar";
+import { t } from "@storage/theme";
+import { Title } from "@storage/header";
 
 export default function (props: { children?: JSX.Element }) {
   const breakpoints = {
@@ -13,6 +15,7 @@ export default function (props: { children?: JSX.Element }) {
   const [showSidebar, setShowSidebar] = createSignal(false);
   return (
     <>
+      <Title domain={`${t("docs.title")} - ${t("platform.name")}`} route="/docs" />
       <SidebarLayout leftBar={() => <Sidebar />} showLeftBar={showSidebar()}>
         {props.children}
       </SidebarLayout>

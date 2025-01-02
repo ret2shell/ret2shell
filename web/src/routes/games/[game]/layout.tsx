@@ -43,7 +43,7 @@ export default function (props: { children?: JSX.Element }) {
 
   return (
     <>
-      <Title title={gameStore.current?.name || "CTF"} />
+      <Title domain={gameStore.current?.name || "CTF"} route={`/games/${gameStore.current?.id}`} />
       {props.children}
       <TeamCover />
     </>

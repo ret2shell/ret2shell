@@ -4,6 +4,7 @@ import AdministratorsManagement from "@blocks/game/administrators";
 import NarrowTips from "@blocks/narrow-tips";
 import { accountStore } from "@storage/account";
 import { gameStore, setGameStore } from "@storage/game";
+import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Checkbox from "@widgets/checkbox";
@@ -68,6 +69,7 @@ function InstituteManagement() {
   }
   return (
     <>
+      <Title page={t("game.admin.organize.title")} route={`/games/${gameStore.current?.id}/admin/organize`} />
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
         <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
         <span>{t("game.admin.organize.title")}</span>

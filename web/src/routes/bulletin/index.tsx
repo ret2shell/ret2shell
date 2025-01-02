@@ -6,7 +6,6 @@ import type { Article } from "@models/article";
 import { Permission } from "@models/user";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import Divider from "@widgets/divider";
 import Link from "@widgets/link";
@@ -34,7 +33,7 @@ export default function () {
   });
   return (
     <>
-      <Title title={`${t("bulletin.title")} - ${platformStore.config.name || t("platform.name")}`} />
+      <Title page={t("bulletin.title")} route="/bulletin" />
       <div class="flex flex-col items-center p-3 lg:p-6 flex-1">
         <div class="flex flex-col flex-1 w-full max-w-5xl">
           <div class="h-12 relative flex flex-row items-center px-4">

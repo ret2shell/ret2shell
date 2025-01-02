@@ -9,6 +9,7 @@ import { t } from "@storage/theme";
 import Link from "@widgets/link";
 import SakanaWidget from "sakana-widget";
 import { onMount } from "solid-js";
+import { Title } from "@storage/header";
 
 export default function () {
   const xdsec = SakanaWidget.getCharacter("takina");
@@ -58,6 +59,7 @@ export default function () {
   });
   return (
     <>
+      <Title page={t("magic.sakana.title")} route="/magic/sakana" />
       <div class="flex-1 flex flex-row items-center justify-center">
         <div class="relative">
           <div id="xdsec-box" />
@@ -94,12 +96,12 @@ export default function () {
         </div>
       </div>
       <div class="h-24 self-center text-zinc-500 text-center space-x-2">
-        <span>{t("magic.illustration")} By</span>
+        <span>{t("magic.sakana.illustration")} By</span>
         <a class="hover:underline" href="https://twitter.com/LAttic1ng" target="_blank" rel="noopener noreferrer">
           Ac4ae0
         </a>
         <br />
-        <span>{t("magic.source")}</span>
+        <span>{t("magic.sakana.source")}</span>
         <a class="hover:underline" href="https://lab.magiconch.com/sakana/" target="_blank" rel="noopener noreferrer">
           https://lab.magiconch.com/sakana
         </a>

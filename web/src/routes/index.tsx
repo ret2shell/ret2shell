@@ -1,7 +1,6 @@
 import LogoAnimate from "@assets/animates/logo-animate";
 // import NarrowTips from "@blocks/narrow-tips";
 import { useSearchParams } from "@solidjs/router";
-import { Title } from "@storage/header";
 import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
@@ -30,7 +29,6 @@ export default function () {
   });
   return (
     <>
-      <Title title={platformStore.config.name || t("platform.name")!} />
       <div class="flex-1 relative">
         <div class="absolute h-full w-full overflow-scroll snap-mandatory snap-y">
           <section class="h-full min-h-full snap-center flex flex-col items-center justify-center relative">

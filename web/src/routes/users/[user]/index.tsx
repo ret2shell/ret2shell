@@ -4,7 +4,6 @@ import type { Team } from "@models/team";
 import type { User } from "@models/user";
 import { A, useNavigate, useParams } from "@solidjs/router";
 import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import Article from "@widgets/article";
 import LoadingTips from "@widgets/loading-tips";
@@ -39,7 +38,7 @@ export default function () {
 
   return (
     <>
-      <Title title={`${user()?.nickname} - ${platformStore.config.name || t("platform.name")!}`} />
+      <Title page={user()?.nickname} route={`/users/${user()?.id}`} />
       <SidebarLayout leftBar={() => <Sidebar user={user()} loading={loading()} />}>
         <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
           <div class="flex flex-col w-full max-w-5xl">

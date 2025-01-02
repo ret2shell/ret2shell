@@ -83,7 +83,7 @@ export default function () {
   });
   return (
     <>
-      <Title title={`${t("admin.edit.title")} - ${platformStore.config.name || t("platform.name")}`} />
+      <Title page={t("admin.edit.title")} route="/admin/edit" />
       <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
         <Form onSubmit={onSubmit} class="w-full max-w-5xl flex flex-col space-y-2">
           <div class="p-6 flex items-center justify-center">

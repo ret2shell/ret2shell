@@ -204,7 +204,7 @@ export default function () {
 
   return (
     <>
-      <Title title={`${t("game.scoreboard.title")} - ${gameStore.current?.name || "CTF"}`} />
+      <Title page={t("game.scoreboard.title")} route={`/games/${gameStore.current?.id}/scoreboard`} />
       <div class="flex flex-col xl:flex-row flex-1 min-w-min">
         <div ref={autoPageSizeWatcher!} class="fixed h-[calc(100vh-24rem)]" />
         <Show when={topTeams().length > 0}>

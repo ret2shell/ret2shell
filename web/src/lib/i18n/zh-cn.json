@@ -311,9 +311,6 @@
         "hidden": "已隐藏"
       },
       "events": {
-        "title": "事件看板"
-      },
-      "automate": {
         "title": "事件推送",
         "tips1": "连接下述 WebSocket 地址即可接入平台事件 API 订阅。你可以在这里找到事件 API 的对接方法：",
         "tips2": "请注意，事件 API 只通过 Token 进行鉴权，谨防此链接泄露。",
@@ -362,6 +359,7 @@
         "loadMore": "加载更多"
       },
       "monitor": {
+        "title": "事件看板",
         "fetchFailed": "获取失败",
         "pending": "队列中",
         "solved": "正确",
@@ -797,17 +795,6 @@
       "successMascotTip": "欢迎回来 ^_^",
       "failMascotTip": "失败了，坏耶 x_x"
     },
-    "deleteAccountTitle": "警告！账号停用后不可恢复！",
-    "deleteAccountTipsTitle1": "请明确你的账户并不是真的被删除了，而是被置于删除并无法恢复的状态，以下操作将被执行：",
-    "deleteAccountTips1": "请明确你的账户并不是真的被删除了，而是被置于停用并无法恢复的状态，以下操作将被执行：",
-    "deleteAccountTipsList1": "你的账户将被重命名为 [DELETED]_<hash>；",
-    "deleteAccountTipsList2": "你的账户将被移除所有权限并禁止登录，也不能通过邮箱找回，邮箱可以用于注册另一个账号；",
-    "deleteAccountTipsList3": "账户隐私信息将被移除，但是公开发布的内容将保留；",
-    "deleteAccountTipsList4": "与账户绑定的竞赛成绩、数据等会留存，但无法提供信息来证明这是你的。",
-    "deleteAccountTips2": "请认真阅读并确定上述内容！如果你真的确定要停用账户，请在下方输入你的完整用户名 {{name}} 以确认：",
-    "deleteAccountTips3": "请注意，由于删除了身份验证相关的隐私信息，即使你联系管理/运维人员，也无法恢复被停用的账号，请三思而后行。",
-    "bye": "再见",
-    "deleteAccountFailed": "账户停用失败",
     "settings": {
       "title": "用户设置",
       "info": {
@@ -831,7 +818,19 @@
         "title": "组织机构"
       },
       "delete": {
-        "title": "删号跑路"
+        "title": "删号跑路",
+        "topWarning": "警告！账号停用后不可恢复！",
+        "tipsTitle1": "请明确你的账户并不是真的被删除了，而是被置于删除并无法恢复的状态，以下操作将被执行：",
+        "tips1": "请明确你的账户并不是真的被删除了，而是被置于停用并无法恢复的状态，以下操作将被执行：",
+        "tipsList1": "你的账户将被重命名为 [DELETED]_<hash>；",
+        "tipsList2": "你的账户将被移除所有权限并禁止登录，也不能通过邮箱找回，邮箱可以用于注册另一个账号；",
+        "tipsList3": "账户隐私信息将被移除，但是公开发布的内容将保留；",
+        "tipsList4": "与账户绑定的竞赛成绩、数据等会留存，但无法提供信息来证明这是你的。",
+        "tips2": "请认真阅读并确定上述内容！如果你真的确定要停用账户，请在下方输入你的完整用户名 {{name}} 以确认：",
+        "tips3": "请注意，由于删除了身份验证相关的隐私信息，即使你联系管理/运维人员，也无法恢复被停用的账号，请三思而后行。",
+        "bye": "再见",
+        "canNotDeleteWhenGameInProgress": "为了防止作弊行为，当你参加了正在进行中的比赛时，无法删除账户。",
+        "failed": "账户停用失败"
       },
       "password": {
         "title": "修改密码",
@@ -869,6 +868,7 @@
       "success": "注册成功，欢迎来到 CTF 的世界！"
     },
     "oauth": {
+      "title": "第三方认证",
       "xdu": {
         "title": "西电统一身份认证"
       },
@@ -953,19 +953,12 @@
       "confirmWarn": "我已知晓，继续",
       "verify": "此功能仅在你通过邮箱验证之后才可以使用"
     },
-    "resendVerifyEmail": "重新发送验证邮件",
-    "verifyingEmail": "正在验证你的邮箱",
-    "emailVerified": "邮箱验证成功",
-    "emailVerifyBroken": "验证链接存在问题，请确保邮件链接正确",
-    "emailVerifyFailed": "邮箱验证失败",
     "forgot": {
       "title": "忘记密码",
       "sendResetEmail": "发送找回邮件",
       "success": "重置邮件已发送，请查收",
       "rateLimit": "发送频率超过限制，请15分钟后再试"
     },
-    "resendVerifyEmailSuccess": "验证邮件已重新发送至邮箱，请查收",
-    "resendVerifyEmailFailed": "邮件发送失败",
     "bind": {
       "title": "绑定第三方账户"
     },
@@ -978,9 +971,18 @@
       "invalidLink": "链接无效，请检查邮箱重置链接是否一致",
       "confirm": "重置"
     },
-    "verifyEmail": "验证邮箱",
     "emailNotVerified": "你的账户邮箱尚未通过验证，功能受限",
-    "canNotDeleteWhenGameInProgress": "为了防止作弊行为，当你参加了正在进行中的比赛时，无法删除账户。"
+    "verify": {
+      "title": "验证邮箱",
+      "notVerified": "你的账户邮箱尚未通过验证，功能受限",
+      "resend": "重新发送验证邮件",
+      "verifying": "正在验证你的邮箱",
+      "verifyFailed": "验证失败",
+      "verifySuccess": "验证成功",
+      "verifyBroken": "验证链接存在问题，请确保邮件链接正确",
+      "resendSuccess": "验证邮件已重新发送至邮箱，请查收",
+      "resendFailed": "邮件发送失败"
+    }
   },
   "instance": {
     "disconnected": "WSRX 未连接",
@@ -1005,8 +1007,14 @@
     "fetchFailed": "获取题目环境失败"
   },
   "magic": {
-    "illustration": "插画",
-    "source": "来源"
+    "sakana": {
+      "title": "彩蛋！",
+      "illustration": "插画",
+      "source": "来源"
+    },
+    "about": {
+      "title": "关于"
+    }
   },
   "captcha": {
     "loading": "加载中...",

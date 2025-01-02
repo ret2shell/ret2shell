@@ -11,6 +11,7 @@ import { Show, createSignal, onMount } from "solid-js";
 import EditForm from "../_blocks/form";
 import { handleHttpError } from "@api";
 import { HTTPError } from "ky";
+import { Title } from "@storage/header";
 
 export default function () {
   const params = useParams();
@@ -58,6 +59,7 @@ export default function () {
   }
   return (
     <>
+      <Title page={article()?.title ?? t("bulletin.title")} route={`/bulletin/${article()?.id}`} />
       <h1 class="text-3xl text-center flex flex-row space-x-4 items-center justify-center font-bold mt-8 print:mt-16">
         <Show
           when={article()}

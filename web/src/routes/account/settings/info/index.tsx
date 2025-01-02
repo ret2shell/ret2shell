@@ -5,6 +5,7 @@ import { mediaPath } from "@lib/utils/media";
 import { Permission } from "@models/user";
 import { createForm, email, required, setValue, setValues } from "@modular-forms/solid";
 import { accountStore, refreshUser, setAccountStore } from "@storage/account";
+import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Avatar from "@widgets/avatar";
@@ -79,11 +80,11 @@ export default function () {
       await resendEmail();
       addToast({
         level: "success",
-        description: t("account.resendVerifyEmailSuccess")!,
+        description: t("account.verify.resendSuccess")!,
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as Error, t("account.resendVerifyEmailFailed")!);
+      handleHttpError(err as Error, t("account.verify.resendFailed")!);
     }
   }
   async function onSubmit(result: UserForm) {
@@ -105,129 +106,132 @@ export default function () {
     setLoading(false);
   }
   return (
-    <div class="flex flex-col p-3 lg:p-6 w-full items-center">
-      <Form onSubmit={onSubmit} class="flex flex-col w-full max-w-5xl space-y-2 relative">
-        <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-          <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
-          <span>{t("account.settings.info.title")}</span>
-        </h3>
-        <div class="flex flex-row space-x-4 items-center">
-          <div class="flex flex-col space-y-2 flex-1">
-            <Input
-              icon={<span class="icon-[fluent--person-20-regular] w-5 h-5" />}
-              title={t("account.settings.info.account")}
-              placeholder={t("account.settings.info.account")}
-              value={accountStore.account!}
-              disabled
-            />
-            <Field name="nickname" validate={[required(t("account.settings.info.nicknameRequired")!)]}>
+    <>
+      <Title page={t("account.settings.info.title")} route="/account/settings/info" />
+      <div class="flex flex-col p-3 lg:p-6 w-full items-center">
+        <Form onSubmit={onSubmit} class="flex flex-col w-full max-w-5xl space-y-2 relative">
+          <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
+            <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+            <span>{t("account.settings.info.title")}</span>
+          </h3>
+          <div class="flex flex-row space-x-4 items-center">
+            <div class="flex flex-col space-y-2 flex-1">
+              <Input
+                icon={<span class="icon-[fluent--person-20-regular] w-5 h-5" />}
+                title={t("account.settings.info.account")}
+                placeholder={t("account.settings.info.account")}
+                value={accountStore.account!}
+                disabled
+              />
+              <Field name="nickname" validate={[required(t("account.settings.info.nicknameRequired")!)]}>
+                {(field, props) => (
+                  <Input
+                    icon={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}
+                    title={t("account.settings.info.nickname")}
+                    placeholder={t("account.settings.info.nickname")}
+                    {...props}
+                    value={field.value}
+                    error={field.error}
+                    required
+                  />
+                )}
+              </Field>
+            </div>
+            <Field name="avatar">
               {(field, props) => (
-                <Input
-                  icon={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}
-                  title={t("account.settings.info.nickname")}
-                  placeholder={t("account.settings.info.nickname")}
-                  {...props}
-                  value={field.value}
-                  error={field.error}
-                  required
-                />
+                <Avatar
+                  class="w-28 h-28 relative m-2"
+                  src={(accountStore.info?.avatar && mediaPath(accountStore.info?.avatar)) || undefined}
+                  fallback={accountStore.info?.nickname}
+                >
+                  <Button
+                    loading={avatarUploading()}
+                    disabled={avatarUploading()}
+                    type="button"
+                    class="opacity-0 hover:opacity-100 !bg-layer/80 absolute top-0 left-0 w-full h-full"
+                    onClick={() => {
+                      if (avatarSet()) {
+                        setAvatarSet(false);
+                        setAvatarFile(null);
+                        setValue(form, "avatar", "");
+                        setAccountStore({
+                          info: {
+                            ...accountStore.info!,
+                            avatar: "",
+                          },
+                        });
+                      } else {
+                        handleSelectAvatar();
+                      }
+                    }}
+                  >
+                    <input
+                      type="file"
+                      class="hidden"
+                      id={field.name}
+                      {...props}
+                      ref={avatarInput!}
+                      onChange={handleSelectedAvatar}
+                    />
+                    <Show
+                      when={accountStore.info?.avatar}
+                      fallback={<span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />}
+                    >
+                      <span class="icon-[fluent--delete-20-regular] w-5 h-5 text-error" />
+                    </Show>
+                  </Button>
+                </Avatar>
               )}
             </Field>
           </div>
-          <Field name="avatar">
+          <Field
+            name="email"
+            validate={[
+              required(t("account.settings.info.emailRequired")!),
+              email(t("account.settings.info.emailInvalid")!),
+            ]}
+          >
             {(field, props) => (
-              <Avatar
-                class="w-28 h-28 relative m-2"
-                src={(accountStore.info?.avatar && mediaPath(accountStore.info?.avatar)) || undefined}
-                fallback={accountStore.info?.nickname}
-              >
-                <Button
-                  loading={avatarUploading()}
-                  disabled={avatarUploading()}
-                  type="button"
-                  class="opacity-0 hover:opacity-100 !bg-layer/80 absolute top-0 left-0 w-full h-full"
-                  onClick={() => {
-                    if (avatarSet()) {
-                      setAvatarSet(false);
-                      setAvatarFile(null);
-                      setValue(form, "avatar", "");
-                      setAccountStore({
-                        info: {
-                          ...accountStore.info!,
-                          avatar: "",
-                        },
-                      });
-                    } else {
-                      handleSelectAvatar();
-                    }
-                  }}
-                >
-                  <input
-                    type="file"
-                    class="hidden"
-                    id={field.name}
-                    {...props}
-                    ref={avatarInput!}
-                    onChange={handleSelectedAvatar}
-                  />
-                  <Show
-                    when={accountStore.info?.avatar}
-                    fallback={<span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />}
-                  >
-                    <span class="icon-[fluent--delete-20-regular] w-5 h-5 text-error" />
-                  </Show>
-                </Button>
-              </Avatar>
+              <Input
+                icon={<span class="icon-[fluent--mail-20-regular] w-5 h-5" />}
+                title={t("account.settings.info.email")}
+                placeholder={t("account.settings.info.email")}
+                {...props}
+                value={field.value}
+                error={field.error}
+                required
+              />
             )}
           </Field>
-        </div>
-        <Field
-          name="email"
-          validate={[
-            required(t("account.settings.info.emailRequired")!),
-            email(t("account.settings.info.emailInvalid")!),
-          ]}
-        >
-          {(field, props) => (
-            <Input
-              icon={<span class="icon-[fluent--mail-20-regular] w-5 h-5" />}
-              title={t("account.settings.info.email")}
-              placeholder={t("account.settings.info.email")}
-              {...props}
-              value={field.value}
-              error={field.error}
-              required
-            />
-          )}
-        </Field>
-        <Show when={!accountStore.permissions.includes(Permission.Verified)}>
-          <Card level="warning" contentClass="p-2 flex flex-row space-x-2 items-center pl-4">
-            <span class="icon-[fluent--warning-20-filled] w-5 h-5 text-warning" />
-            <span class="flex-1 text-start">{t("account.settings.info.emailNotVerified")}</span>
-            <Button size="sm" type="button" onClick={handleResendVerifyEmail}>
-              <span>{t("account.resendVerifyEmail")}</span>
-            </Button>
-          </Card>
-        </Show>
-        <Field name="description">
-          {(field) => (
-            <Editor
-              form={form}
-              lineNumbers
-              class="h-80"
-              lang="markdown"
-              placeholder="MARKDOWN"
-              title={t("account.settings.info.description")}
-              name="description"
-              value={field.value}
-              error={field.error}
-            />
-          )}
-        </Field>
-        <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
-          {t("form.save")}
-        </Button>
-      </Form>
-    </div>
+          <Show when={!accountStore.permissions.includes(Permission.Verified)}>
+            <Card level="warning" contentClass="p-2 flex flex-row space-x-2 items-center pl-4">
+              <span class="icon-[fluent--warning-20-filled] w-5 h-5 text-warning" />
+              <span class="flex-1 text-start">{t("account.settings.info.emailNotVerified")}</span>
+              <Button size="sm" type="button" onClick={handleResendVerifyEmail}>
+                <span>{t("account.verify.resend")}</span>
+              </Button>
+            </Card>
+          </Show>
+          <Field name="description">
+            {(field) => (
+              <Editor
+                form={form}
+                lineNumbers
+                class="h-80"
+                lang="markdown"
+                placeholder="MARKDOWN"
+                title={t("account.settings.info.description")}
+                name="description"
+                value={field.value}
+                error={field.error}
+              />
+            )}
+          </Field>
+          <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
+            {t("form.save")}
+          </Button>
+        </Form>
+      </div>
+    </>
   );
 }

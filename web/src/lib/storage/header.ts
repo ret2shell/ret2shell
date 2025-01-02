@@ -1,70 +1,80 @@
 import { useLocation } from "@solidjs/router";
 import { createEffect, untrack } from "solid-js";
-import { platformStore } from "./platform";
 import { t } from "./theme";
 
 class RouteHeader {
-  title: string;
-  path: string;
-  subRoutes: RouteHeader[];
+  page?: string;
+  domain?: string;
+  route: string;
+  children: RouteHeader[];
   constructor() {
-    this.title = "";
-    this.path = "";
-    this.subRoutes = [];
+    this.route = "";
+    this.children = [];
   }
 
-  /// returns: [parentRoute, exactRoute]
-  findRoute(subPath: string[]): [RouteHeader, RouteHeader | null] {
-    if (subPath.length === 0) {
-      return [this, this];
-    }
-    const subRoute = this.subRoutes.find((r) => r.path === subPath[0]);
-    if (subRoute) {
-      return subRoute.findRoute(subPath.slice(1));
-    }
-    return [this, null];
-  }
-
-  insertRoute(subPath: string[], title: string) {
-    if (subPath.length === 0) {
-      this.title = title;
-      return;
-    }
-    const subRoute = this.subRoutes.find((r) => r.path === subPath[0]);
-    if (subRoute) {
-      subRoute.insertRoute(subPath.slice(1), title);
+  public insert(fullRoutes: string[], domain?: string, page?: string) {
+    if (fullRoutes.length === 0) {
+      this.page = page;
+      this.domain = domain;
+      this.page = page;
     } else {
-      const newRoute = new RouteHeader();
-      newRoute.path = subPath[0];
-      newRoute.insertRoute(subPath.slice(1), title);
-      this.subRoutes.push(newRoute);
+      const [current, ...rest] = fullRoutes;
+      let child = this.children.find((c) => c.route === current);
+      if (!child) {
+        child = new RouteHeader();
+        child.route = current;
+        this.children.push(child);
+      }
+      child.insert(rest, domain, page);
     }
+  }
+
+  public title(fullRoutes: string[]): string {
+    let head: RouteHeader = this;
+    let page = this.page;
+    let domain = this.domain;
+    for (const route of fullRoutes) {
+      const child = head.children.find((c) => c.route === route);
+      if (child) {
+        head = child;
+        if (child.domain) {
+          domain = child.domain;
+          page = undefined;
+        }
+        if (child.page) page = child.page;
+      }
+    }
+    if (page) return `${page} - ${domain}`;
+    return domain ?? t("platform.name")!;
+  }
+
+  public duplicate(fullRoutes: string[]): boolean {
+    if (fullRoutes.length === 0) {
+      return true;
+    }
+    const [current, ...rest] = fullRoutes;
+    const child = this.children.find((c) => c.route === current);
+    if (child) {
+      return child.duplicate(rest);
+    }
+    return false;
   }
 }
 
 export const headerStore = new RouteHeader();
 
-export function Title(props: { title: string }) {
-  const path = useLocation().pathname;
-  const pathArr = path.split("/");
-  const [, exactRoute] = headerStore.findRoute(pathArr);
-  if (exactRoute) {
-    exactRoute.title = props.title;
-  } else {
-    headerStore.insertRoute(pathArr, props.title);
-  }
-  return null;
-}
-
-export function setupTitleResolver() {
+export function Title(props: { page?: string; route: string; domain?: string }) {
   const watchedLocation = useLocation();
   createEffect(() => {
-    let path = watchedLocation.pathname;
-    untrack(() => {
-      if (path.endsWith("/")) path = path.slice(0, path.length - 1);
-      const pathArr = path.split("/");
-      const [parentRoute, exactRoute] = headerStore.findRoute(pathArr);
-      document.title = exactRoute?.title || parentRoute.title || platformStore.config.name || t("platform.name")!;
-    });
+    if (props.page || props.domain || props.route) {
+      const fullRoutes = props.route.split("/").filter((r) => r);
+      untrack(() => headerStore.insert(fullRoutes, props.domain, props.page));
+    }
+    if (watchedLocation.pathname.startsWith(props.route)) {
+      untrack(() => {
+        document.title = headerStore.title(watchedLocation.pathname.split("/").filter((r) => r));
+      });
+    }
   });
+  return null;
 }

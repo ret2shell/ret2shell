@@ -1,8 +1,8 @@
 import { handleHttpError } from "@api";
 import { verifyEmail } from "@api/account";
 import Spin from "@assets/animates/spin";
-// import xdsecMascotHappy from "@assets/imgs/xdsec-mascot-happy.webp";
 import { useNavigate, useSearchParams } from "@solidjs/router";
+import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import type { HTTPError } from "ky";
@@ -20,18 +20,18 @@ export default function () {
           await verifyEmail({ email: email()!, token: token()! });
           addToast({
             level: "success",
-            description: t("account.emailVerified")!,
+            description: t("account.verify.verifySuccess")!,
             duration: 5000,
           });
           navigate("/account/settings", { replace: true });
         } catch (err) {
-          handleHttpError(err as HTTPError, t("account.emailVerifyFailed")!);
+          handleHttpError(err as HTTPError, t("account.verify.verifyFailed")!);
           navigate("/sigtrap/412", { replace: true });
         }
       } else {
         addToast({
           level: "error",
-          description: t("account.emailVerifyBroken")!,
+          description: t("account.verify.verifyBroken")!,
           duration: 5000,
         });
         navigate("/sigtrap/418", { replace: true });
@@ -39,12 +39,12 @@ export default function () {
     }, 1000);
   });
   return (
-    <div class="flex-1 flex flex-col items-center justify-center space-y-8">
-      {/* <img src={xdsecMascotHappy} alt="Broken" class="w-48 h-48 animate-bounce" /> */}
-      <div class="flex flex-row space-x-4 items-center">
+    <>
+      <Title page={t("account.verify.title")} route="/account/verify" />
+      <div class="flex-1 flex flex-row space-x-4 items-center justify-center">
         <Spin />
-        <span class="font-bold text-xl">{t("account.verifyingEmail")}...</span>
+        <span class="font-bold text-xl">{t("account.verify.verifying")}...</span>
       </div>
-    </div>
+    </>
   );
 }

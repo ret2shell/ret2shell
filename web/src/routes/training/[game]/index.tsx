@@ -21,6 +21,7 @@ import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { accountStore } from "@storage/account";
 import { Permission } from "@models/user";
 import { handleHttpError } from "@api";
+import { Title } from "@storage/header";
 
 export default function () {
   const navigate = useNavigate();
@@ -135,65 +136,68 @@ export default function () {
   }
 
   return (
-    <div class="flex-1 flex flex-col w-0">
-      <Tabs baseUrl={`/training/${gameStore.current?.id}`} loading={loadingChallenge()} />
-      <Switch fallback={<Intro />}>
-        <Match when={inEdit()}>
-          <div class="flex-1 w-full relative">
-            <div class="absolute top-0 left-0 w-full h-full overflow-hidden">
-              <OverlayScrollbarsComponent
-                options={{
-                  scrollbars: {
-                    theme: `os-theme-${fullTheme()}`,
-                    autoHide: "scroll",
-                  },
-                }}
-                class="relative w-full h-full print:h-auto print:overflow-auto"
-                defer
-              >
-                <div class="w-full flex flex-col p-3 lg:p-6 items-center">
-                  <GameEdit onDone={onEditGame} loading={editing()} editSource={gameStore.current || undefined} />
-                  <div class="h-16" />
-                  <div class="w-full max-w-5xl flex flex-col space-y-2 relative">
-                    <AdministratorsManagement />
+    <>
+      <Title page={gameStore.current?.name} route={`/training/${gameStore.current?.id}`} />
+      <div class="flex-1 flex flex-col w-0">
+        <Tabs baseUrl={`/training/${gameStore.current?.id}`} loading={loadingChallenge()} />
+        <Switch fallback={<Intro />}>
+          <Match when={inEdit()}>
+            <div class="flex-1 w-full relative">
+              <div class="absolute top-0 left-0 w-full h-full overflow-hidden">
+                <OverlayScrollbarsComponent
+                  options={{
+                    scrollbars: {
+                      theme: `os-theme-${fullTheme()}`,
+                      autoHide: "scroll",
+                    },
+                  }}
+                  class="relative w-full h-full print:h-auto print:overflow-auto"
+                  defer
+                >
+                  <div class="w-full flex flex-col p-3 lg:p-6 items-center">
+                    <GameEdit onDone={onEditGame} loading={editing()} editSource={gameStore.current || undefined} />
+                    <div class="h-16" />
+                    <div class="w-full max-w-5xl flex flex-col space-y-2 relative">
+                      <AdministratorsManagement />
+                    </div>
                   </div>
-                </div>
-              </OverlayScrollbarsComponent>
+                </OverlayScrollbarsComponent>
+              </div>
             </div>
-          </div>
-        </Match>
-        <Match when={inStatistics()}>
-          <div class="flex-1 w-full relative">
-            <div class="absolute top-0 left-0 w-full h-full overflow-hidden">
-              <OverlayScrollbarsComponent
-                options={{
-                  scrollbars: {
-                    theme: `os-theme-${fullTheme()}`,
-                    autoHide: "scroll",
-                  },
-                }}
-                class="relative w-full h-full print:h-auto print:overflow-auto"
-                defer
-              >
-                <div class="w-full flex flex-col p-3 lg:p-6 items-center">
-                  <GameStatistics />
-                </div>
-              </OverlayScrollbarsComponent>
+          </Match>
+          <Match when={inStatistics()}>
+            <div class="flex-1 w-full relative">
+              <div class="absolute top-0 left-0 w-full h-full overflow-hidden">
+                <OverlayScrollbarsComponent
+                  options={{
+                    scrollbars: {
+                      theme: `os-theme-${fullTheme()}`,
+                      autoHide: "scroll",
+                    },
+                  }}
+                  class="relative w-full h-full print:h-auto print:overflow-auto"
+                  defer
+                >
+                  <div class="w-full flex flex-col p-3 lg:p-6 items-center">
+                    <GameStatistics />
+                  </div>
+                </OverlayScrollbarsComponent>
+              </div>
             </div>
-          </div>
-        </Match>
-        <Match when={loadingChallenge()}>
-          <div class="flex-1 flex flex-row space-x-2 items-center justify-center">
-            <LoadingTips />
-          </div>
-        </Match>
-        <Match when={inCreate()}>
-          <Form onDone={onCreateChallenge} loading={creating()} />
-        </Match>
-        <Match when={challengeStore.current}>
-          <Challenge onStateChange={refreshChallenges} />
-        </Match>
-      </Switch>
-    </div>
+          </Match>
+          <Match when={loadingChallenge()}>
+            <div class="flex-1 flex flex-row space-x-2 items-center justify-center">
+              <LoadingTips />
+            </div>
+          </Match>
+          <Match when={inCreate()}>
+            <Form onDone={onCreateChallenge} loading={creating()} />
+          </Match>
+          <Match when={challengeStore.current}>
+            <Challenge onStateChange={refreshChallenges} />
+          </Match>
+        </Switch>
+      </div>
+    </>
   );
 }

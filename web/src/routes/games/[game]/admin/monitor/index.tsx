@@ -5,6 +5,7 @@ import { type Audit, AuditState } from "@models/audit";
 import type { Submission } from "@models/submission";
 import { A, useSearchParams } from "@solidjs/router";
 import { gameStore } from "@storage/game";
+import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
@@ -266,43 +267,46 @@ function SubmissionList() {
 export default function () {
   const [tab, setTab] = createSignal("submissions" as "submissions" | "audits");
   return (
-    <div class="w-full p-3 lg:p-6 flex flex-col flex-1 relative">
-      <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-        <span class="icon-[fluent--flash-flow-20-regular] w-5 h-5" />
-        <span class="flex-1 text-start">{t("game.admin.events.title")}</span>
-        <Tag level="success">
-          <span>{t("game.monitor.autoRefreshEnabled")}</span>
-        </Tag>
-        <Button
-          size="sm"
-          ghost={tab() !== "submissions"}
-          onClick={() => {
-            setTab("submissions");
-          }}
-        >
-          <span class="icon-[fluent--number-symbol-16-regular] w-4 h-4" />
-          <span>{t("game.monitor.submissions")}</span>
-        </Button>
-        <Button
-          size="sm"
-          ghost={tab() !== "audits"}
-          onClick={() => {
-            setTab("audits");
-          }}
-        >
-          <span class="icon-[fluent--alert-16-regular] w-4 h-4" />
-          <span>{t("game.monitor.audits")}</span>
-        </Button>
-      </h3>
-      <Switch>
-        <Match when={tab() === "submissions"}>
-          <SubmissionList />
-        </Match>
-        <Match when={tab() === "audits"}>
-          <AuditList />
-        </Match>
-      </Switch>
-      <NarrowTips breakpoint="xl" />
-    </div>
+    <>
+      <Title page={t("game.admin.monitor.title")} route={`/games/${gameStore.current?.id}/admin/monitor`} />
+      <div class="w-full p-3 lg:p-6 flex flex-col flex-1 relative">
+        <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
+          <span class="icon-[fluent--flash-flow-20-regular] w-5 h-5" />
+          <span class="flex-1 text-start">{t("game.admin.monitor.title")}</span>
+          <Tag level="success">
+            <span>{t("game.monitor.autoRefreshEnabled")}</span>
+          </Tag>
+          <Button
+            size="sm"
+            ghost={tab() !== "submissions"}
+            onClick={() => {
+              setTab("submissions");
+            }}
+          >
+            <span class="icon-[fluent--number-symbol-16-regular] w-4 h-4" />
+            <span>{t("game.monitor.submissions")}</span>
+          </Button>
+          <Button
+            size="sm"
+            ghost={tab() !== "audits"}
+            onClick={() => {
+              setTab("audits");
+            }}
+          >
+            <span class="icon-[fluent--alert-16-regular] w-4 h-4" />
+            <span>{t("game.monitor.audits")}</span>
+          </Button>
+        </h3>
+        <Switch>
+          <Match when={tab() === "submissions"}>
+            <SubmissionList />
+          </Match>
+          <Match when={tab() === "audits"}>
+            <AuditList />
+          </Match>
+        </Switch>
+        <NarrowTips breakpoint="xl" />
+      </div>
+    </>
   );
 }

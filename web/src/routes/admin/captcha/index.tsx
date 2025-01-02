@@ -7,7 +7,6 @@ import Select from "@widgets/select";
 import Slider from "@widgets/slider";
 import { createForm, getValue, required, setValues } from "@modular-forms/solid";
 import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import type { HTTPError } from "ky";
 import { createSignal, onMount } from "solid-js";
@@ -63,7 +62,7 @@ export default function () {
   }
   return (
     <>
-      <Title title={`${t("admin.captcha.title")} - ${platformStore.config.name || t("platform.name")}`} />
+      <Title page={t("admin.captcha.title")} route="/admin/captcha" />
       <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
         <Form onSubmit={onSubmit} class="w-full max-w-5xl flex flex-col space-y-2">
           <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">

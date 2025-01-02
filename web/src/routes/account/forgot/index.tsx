@@ -4,7 +4,6 @@ import Captcha from "@blocks/captcha";
 import { createForm, email, minLength, required } from "@modular-forms/solid";
 import { useNavigate } from "@solidjs/router";
 import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
@@ -52,58 +51,60 @@ export default function () {
     }, 500);
   }
   return (
-    <div class="flex-1 flex flex-col items-center md:justify-center p-3 md:p-6">
-      <Title title={`${t("account.forgot.title")} - ${platformStore.config.name || t("platform.name")}`} />
-      <Card
-        class="w-full max-w-md"
-        contentClass="p-6 flex flex-col md:flex-row space-y-2 space-x-0 md:space-x-6 md:space-y-0"
-      >
-        <Form onSubmit={handleSubmit} class="md:w-0 flex-1 flex-shrink-0 flex flex-col space-y-2">
-          <h2 class="font-bold text-center">{t("account.forgot.title")}</h2>
-          <Field
-            name="email"
-            validate={[required(t("account.register.emailRequired")!), email(t("account.register.emailInvalid")!)]}
-          >
-            {(field, props) => (
-              <Input
-                icon={<span class="icon-[fluent--mail-20-regular] w-5 h-5" />}
-                placeholder={t("account.register.emailPlaceholder")}
-                title={t("account.register.emailPlaceholder")}
-                autocomplete="email"
-                {...props}
-                value={field.value}
-                error={field.error}
-                class="flex-1"
-                required
-              />
-            )}
-          </Field>
-          <Field name="captcha_id">
-            {(idField) => (
-              <Field
-                name="captcha_answer"
-                validate={[required(t("captcha.required")!), minLength(4, t("captcha.minLength")!)]}
-              >
-                {(answerField, props) => (
-                  <Captcha
-                    {...props}
-                    captchaForm={form}
-                    class="flex-1"
-                    idFieldValue={idField.value}
-                    idFieldError={idField.error}
-                    answerFieldValue={answerField.value}
-                    answerFieldError={answerField.error}
-                    timestamp={timestamp()}
-                  />
-                )}
-              </Field>
-            )}
-          </Field>
-          <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
-            {t("account.forgot.sendResetEmail")}
-          </Button>
-        </Form>
-      </Card>
-    </div>
+    <>
+      <Title page={t("account.forgot.title")} route="/account/forgot" />
+      <div class="flex-1 flex flex-col items-center md:justify-center p-3 md:p-6">
+        <Card
+          class="w-full max-w-md"
+          contentClass="p-6 flex flex-col md:flex-row space-y-2 space-x-0 md:space-x-6 md:space-y-0"
+        >
+          <Form onSubmit={handleSubmit} class="md:w-0 flex-1 flex-shrink-0 flex flex-col space-y-2">
+            <h2 class="font-bold text-center">{t("account.forgot.title")}</h2>
+            <Field
+              name="email"
+              validate={[required(t("account.register.emailRequired")!), email(t("account.register.emailInvalid")!)]}
+            >
+              {(field, props) => (
+                <Input
+                  icon={<span class="icon-[fluent--mail-20-regular] w-5 h-5" />}
+                  placeholder={t("account.register.emailPlaceholder")}
+                  title={t("account.register.emailPlaceholder")}
+                  autocomplete="email"
+                  {...props}
+                  value={field.value}
+                  error={field.error}
+                  class="flex-1"
+                  required
+                />
+              )}
+            </Field>
+            <Field name="captcha_id">
+              {(idField) => (
+                <Field
+                  name="captcha_answer"
+                  validate={[required(t("captcha.required")!), minLength(4, t("captcha.minLength")!)]}
+                >
+                  {(answerField, props) => (
+                    <Captcha
+                      {...props}
+                      captchaForm={form}
+                      class="flex-1"
+                      idFieldValue={idField.value}
+                      idFieldError={idField.error}
+                      answerFieldValue={answerField.value}
+                      answerFieldError={answerField.error}
+                      timestamp={timestamp()}
+                    />
+                  )}
+                </Field>
+              )}
+            </Field>
+            <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
+              {t("account.forgot.sendResetEmail")}
+            </Button>
+          </Form>
+        </Card>
+      </div>
+    </>
   );
 }

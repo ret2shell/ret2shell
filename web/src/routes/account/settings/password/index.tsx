@@ -3,6 +3,7 @@ import { changePassword } from "@api/account";
 import { createForm, custom, getValue, minLength, pattern, required } from "@modular-forms/solid";
 import { useNavigate } from "@solidjs/router";
 import { accountStore, resetUser } from "@storage/account";
+import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
@@ -42,6 +43,7 @@ export default function () {
   }
   return (
     <>
+      <Title page={t("account.settings.password.title")} route="/account/settings/password" />
       <div class="flex flex-col p-3 lg:p-6 w-full items-center">
         <Form onSubmit={onSubmit} class="flex flex-col w-full max-w-5xl space-y-2 relative">
           <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">

@@ -20,11 +20,11 @@ export default function SideBar() {
             class="w-full"
             ghost
             square={!expanded()}
-            href={`/games/${gameStore.current?.id}/admin/statistics`}
+            href={`/games/${gameStore.current?.id}/admin/monitor`}
             justify={expanded() ? "start" : "center"}
           >
-            <span class="icon-[fluent--data-trending-20-regular] w-5 h-5" />
-            <Show when={expanded()}>{t("game.admin.statistics.title")}</Show>
+            <span class="icon-[fluent--flash-flow-20-regular] w-5 h-5" />
+            <Show when={expanded()}>{t("game.admin.monitor.title")}</Show>
           </Link>
         </li>
         <li class="w-full">
@@ -33,11 +33,11 @@ export default function SideBar() {
             class="w-full"
             ghost
             square={!expanded()}
-            href={`/games/${gameStore.current?.id}/admin/monitor`}
+            href={`/games/${gameStore.current?.id}/admin/statistics`}
             justify={expanded() ? "start" : "center"}
           >
-            <span class="icon-[fluent--flash-flow-20-regular] w-5 h-5" />
-            <Show when={expanded()}>{t("game.admin.events.title")}</Show>
+            <span class="icon-[fluent--data-trending-20-regular] w-5 h-5" />
+            <Show when={expanded()}>{t("game.admin.statistics.title")}</Show>
           </Link>
         </li>
         <li class="w-full">
@@ -102,7 +102,7 @@ export default function SideBar() {
             justify={expanded() ? "start" : "center"}
           >
             <span class="icon-[fluent--cloud-flow-20-regular] w-5 h-5" />
-            <Show when={expanded()}>{t("game.admin.automate.title")}</Show>
+            <Show when={expanded()}>{t("game.admin.events.title")}</Show>
           </Link>
         </li>
         <li class="w-full">

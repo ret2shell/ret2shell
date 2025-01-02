@@ -1,12 +1,11 @@
 import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import ErrorSection from "./error";
 
 export default function () {
   return (
     <>
-      <Title title={`${t("errors.401")} - ${platformStore.config.name || t("platform.name")}`} />
+      <Title page={t("errors.401")} route="/sigtrap/401" />
       <ErrorSection status={401} />
     </>
   );

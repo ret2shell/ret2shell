@@ -121,7 +121,7 @@ export default function () {
   const [showRightSidebar, setShowRightSidebar] = createSignal(false);
   return (
     <>
-      <Title title={`${t("game.challenge.title")} - ${gameStore.current?.name || "CTF"}`} />
+      <Title page={t("game.challenge.title")} route={`/games/${gameStore.current?.id}/challenges`} />
       <SidebarLayout
         showLeftBar={showLeftSidebar()}
         leftBar={() => (
