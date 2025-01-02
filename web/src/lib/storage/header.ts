@@ -52,7 +52,10 @@ class RichTitle {
   }
 
   toString() {
-    const _Args = this.args.map((arg) => arg?.toString() || String(arg));
+    const _Args = this.args.map((arg) => {
+      if (typeof arg === "undefined" || arg === null) return String(arg);
+      return Object.prototype.hasOwnProperty.call(arg, "toString") ? arg.toString() : String(arg);
+    });
     return this.raw.reduce((acc, val, idx) => {
       return acc + val + (_Args[idx] || "");
     }, "");
@@ -62,6 +65,7 @@ class RichTitle {
     if (title instanceof RichTitle) {
       return title.toString();
     }
+    if (typeof title === "undefined" || title === null) return String(title);
     return Object.prototype.hasOwnProperty.call(title, "toString") ? title.toString() : String(title);
   }
 }
@@ -135,6 +139,7 @@ export function Title(props: { title: string | DynamicElement | RichTitle }) {
   } else {
     headerStore.insertRoute(pathArr, RichTitle.from(props.title));
   }
+  document.title = RichTitle.toString(props.title);
   return null;
 }
 

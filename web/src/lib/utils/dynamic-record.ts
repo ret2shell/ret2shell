@@ -3,21 +3,35 @@ type ReduceGetter<T extends Record<string, unknown>> = { [K in keyof T]: ReturnT
 
 export class DynamicElement<T extends Record<string, unknown> = { [k: string]: unknown }, K extends keyof T = keyof T> {
   key: K;
+  fallback: (DynamicElement<T, K> | ReduceGetter<T>[K])[];
   /**
    * Wrapper of the value of the record.
+   *
+   * @param fallback Given same final type of `k`, or the `Element` object
    */
-  constructor(k: K) {
+  constructor(k: K, ...fallback: (DynamicElement<T, K> | ReduceGetter<T>[K])[]) {
     this.key = k;
+    this.fallback = fallback;
   }
   // implement this
   get(): ReduceGetter<T>[K] {
-    return this.key as ReduceGetter<T>[K];
+    let t = this.key as ReduceGetter<T>[K];
+    for (const v of this.fallback) {
+      if (!t) break;
+      if (v instanceof DynamicElement) {
+        t = v.get();
+      } else {
+        t = v;
+      }
+    }
+    return t;
   }
   valueOf() {
     return this.get();
   }
   toString() {
     const t = this.get();
+    if (typeof t === "undefined" || t === null) return String(t);
     return Object.prototype.hasOwnProperty.call(t, "toString") ? t!.toString() : String(t);
   }
 }
@@ -96,7 +110,7 @@ export class DynamicRecord<G extends Record<string, unknown>> {
    * console.log(element.toString()); // "0,3"
    * ```
    */
-  createElement<K extends keyof G>(key: K) {
-    return new this.Element(key) as DynamicElement<G, K>;
+  createElement<K extends keyof G>(key: K, ...fallback: (DynamicElement<G, K> | ReduceGetter<G>[K])[]) {
+    return new this.Element(key, ...fallback) as DynamicElement<G, K>;
   }
 }

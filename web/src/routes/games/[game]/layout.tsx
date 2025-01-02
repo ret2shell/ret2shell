@@ -1,15 +1,15 @@
+import { handleHttpError } from "@api";
 import { getGame } from "@api/game";
 import { HostType } from "@models/game";
-import { useNavigate, useParams } from "@solidjs/router";
+import { useLocation, useNavigate, useParams } from "@solidjs/router";
+import { refreshInstitutes } from "@storage/account";
 import { setChallengeStore } from "@storage/challenge";
-import { gameStore, refreshSelfTeam, setGameStore } from "@storage/game";
-import { Title } from "@storage/header";
+import { refreshSelfTeam, setGameStore } from "@storage/game";
+import { Title, resolveTitle } from "@storage/header";
+import { E, t } from "@storage/theme";
 import { HTTPError } from "ky";
 import { type JSX, onCleanup, onMount } from "solid-js";
 import TeamCover from "./_blocks/team-cover";
-import { refreshInstitutes } from "@storage/account";
-import { handleHttpError } from "@api";
-import { t } from "@storage/theme";
 
 export default function (props: { children?: JSX.Element }) {
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ export default function (props: { children?: JSX.Element }) {
     setGameStore({ current: null, preload: null, team: null, showTeamCover: false });
     setChallengeStore({ current: null, challenges: [], solves: [] });
   });
+  const location = useLocation();
   const params = useParams();
   const game_id = Number.parseInt(params.game);
   onMount(async () => {
@@ -28,6 +29,7 @@ export default function (props: { children?: JSX.Element }) {
           return null;
         }
         setGameStore({ current: resp });
+        resolveTitle(location.pathname);
         setTimeout(() => {
           refreshSelfTeam();
         });
@@ -43,7 +45,7 @@ export default function (props: { children?: JSX.Element }) {
 
   return (
     <>
-      <Title title={gameStore.current?.name || "CTF"} />
+      <Title title={E("gamestore.current.name", "CTF")} />
       {props.children}
       <TeamCover />
     </>

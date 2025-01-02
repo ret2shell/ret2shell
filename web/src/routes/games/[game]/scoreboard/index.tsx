@@ -8,7 +8,7 @@ import { accountStore } from "@storage/account";
 import { challengeStore, refreshChallenges } from "@storage/challenge";
 import { canAccessChallenges, gameStore, inArchived } from "@storage/game";
 import { Title } from "@storage/header";
-import { t } from "@storage/theme";
+import { E, t } from "@storage/theme";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Chart from "@widgets/chart";
@@ -204,7 +204,7 @@ export default function () {
 
   return (
     <>
-      <Title title={`${t("game.scoreboard.title")} - ${gameStore.current?.name || "CTF"}`} />
+      <Title title={`${t("game.scoreboard.title")} - ${E("gamestore.current.name", "CTF")}`} />
       <div class="flex flex-col xl:flex-row flex-1 min-w-min">
         <div ref={autoPageSizeWatcher!} class="fixed h-[calc(100vh-24rem)]" />
         <Show when={topTeams().length > 0}>

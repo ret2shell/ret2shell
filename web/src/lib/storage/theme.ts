@@ -3,6 +3,7 @@ import { DynamicRecord } from "@lib/utils/dynamic-record";
 import { resolveTemplate, translator } from "@solid-primitives/i18n";
 import { createPrefersDark } from "@solid-primitives/media";
 import { makePersisted } from "@solid-primitives/storage";
+import { gameStore } from "@storage/game";
 import { createEffect, createResource, untrack } from "solid-js";
 import { createStore } from "solid-js/store";
 import { platformStore } from "./platform";
@@ -87,6 +88,7 @@ export const colorPalette = {
 
 const dynamicRecord = new DynamicRecord({
   "platform.name": () => platformStore.config.name || t("platform.name"),
+  "gamestore.current.name": () => gameStore.current?.name,
 });
 
 export const j = dynamicRecord.dynamicJson();

@@ -4,7 +4,7 @@ import { createForm, required, setValue } from "@modular-forms/solid";
 import { useNavigate } from "@solidjs/router";
 import { canParticipate, gameParticipateState, gameStore, setGameStore } from "@storage/game";
 import { Title } from "@storage/header";
-import { t, themeStore } from "@storage/theme";
+import { E, t, themeStore } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Article from "@widgets/article";
 import Button from "@widgets/button";
@@ -59,7 +59,7 @@ export default function () {
   const [dialogOpen, setDialogOpen] = createSignal(false);
   return (
     <>
-      <Title title={`${t("game.team.join.title")} - ${gameStore.current?.name || "CTF"}`} />
+      <Title title={`${t("game.team.join.title")} - ${E("gamestore.current.name", "CTF")}`} />
       <div class="flex-1 flex flex-col items-center md:justify-center p-3 md:p-6">
         <Card
           class="w-full max-w-xl"

@@ -3,7 +3,7 @@ import { createBreakpoints } from "@solid-primitives/media";
 import { useNavigate } from "@solidjs/router";
 import { gameStore, isGameAdmin } from "@storage/game";
 import { Title } from "@storage/header";
-import { t } from "@storage/theme";
+import { E, t } from "@storage/theme";
 import Button from "@widgets/button";
 import { type JSX, Show, createEffect, createSignal } from "solid-js";
 import { Transition } from "solid-transition-group";
@@ -26,7 +26,7 @@ export default function (props: { children?: JSX.Element }) {
   const [showSidebar, setShowSidebar] = createSignal(false);
   return (
     <>
-      <Title title={`${t("game.admin.title")} - ${gameStore.current?.name || "CTF"}`} />
+      <Title title={`${t("game.admin.title")} - ${E("gamestore.current.name", "CTF")}`} />
       <SidebarLayout leftBar={() => <SideBar />} showLeftBar={showSidebar()}>
         {props.children}
       </SidebarLayout>

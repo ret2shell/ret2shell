@@ -7,7 +7,7 @@ import { useNavigate, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { gameStore, isGameAdmin } from "@storage/game";
 import { Title } from "@storage/header";
-import { t } from "@storage/theme";
+import { E, t } from "@storage/theme";
 import Link from "@widgets/link";
 import LoadingTips from "@widgets/loading-tips";
 
@@ -121,7 +121,7 @@ export default function () {
   const [showRightSidebar, setShowRightSidebar] = createSignal(false);
   return (
     <>
-      <Title title={`${t("game.challenge.title")} - ${gameStore.current?.name || "CTF"}`} />
+      <Title title={`${t("game.challenge.title")} - ${E("gamestore.current.name", "CTF")}`} />
       <SidebarLayout
         showLeftBar={showLeftSidebar()}
         leftBar={() => (
