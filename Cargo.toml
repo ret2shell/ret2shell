@@ -110,7 +110,7 @@ features = [
   "typed-routing",
   "async-read-body",
 ]
-version = "0.9"
+version = "0.10"
 
 [workspace.dependencies.reqwest]
 default-features = false
