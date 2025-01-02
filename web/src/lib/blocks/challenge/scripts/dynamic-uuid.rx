@@ -9,7 +9,7 @@ const WITH_HYPHEN = true;
 /// whether the flag uuid is case sensitive
 const CASE_SENSITIVE  = true;
 /// the key to initialize the flag encryptor
-const ENCRYPT_KEY = "Ave_mujija";
+const ENCRYPT_KEY = "Ave_mujica";
 /// the flag prefix, maybe the game name, `flag` means the flag will be `flag{...}`
 const PREFIX = "flag";
 /// the flag hash key, used to generate the uuid content
