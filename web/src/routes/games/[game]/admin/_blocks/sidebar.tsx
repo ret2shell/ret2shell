@@ -22,6 +22,7 @@ export default function SideBar() {
             square={!expanded()}
             href={`/games/${gameStore.current?.id}/admin/monitor`}
             justify={expanded() ? "start" : "center"}
+            title={t("game.admin.monitor.title")}
           >
             <span class="icon-[fluent--flash-flow-20-regular] w-5 h-5" />
             <Show when={expanded()}>{t("game.admin.monitor.title")}</Show>
@@ -35,6 +36,7 @@ export default function SideBar() {
             square={!expanded()}
             href={`/games/${gameStore.current?.id}/admin/statistics`}
             justify={expanded() ? "start" : "center"}
+            title={t("game.admin.statistics.title")}
           >
             <span class="icon-[fluent--data-trending-20-regular] w-5 h-5" />
             <Show when={expanded()}>{t("game.admin.statistics.title")}</Show>
@@ -48,6 +50,7 @@ export default function SideBar() {
             square={!expanded()}
             href={`/games/${gameStore.current?.id}/admin/edit`}
             justify={expanded() ? "start" : "center"}
+            title={t("game.admin.edit.title")}
           >
             <span class="icon-[fluent--edit-20-regular] w-5 h-5" />
             <Show when={expanded()}>{t("game.admin.edit.title")}</Show>
@@ -59,8 +62,23 @@ export default function SideBar() {
             class="w-full"
             ghost
             square={!expanded()}
+            href={`/games/${gameStore.current?.id}/admin/timeline`}
+            justify={expanded() ? "start" : "center"}
+            title={t("game.admin.timeline.title")}
+          >
+            <span class="icon-[fluent--filmstrip-split-20-regular] w-5 h-5" />
+            <Show when={expanded()}>{t("game.admin.timeline.title")}</Show>
+          </Link>
+        </li>
+        <li class="w-full">
+          <Link
+            activeMatch="exact"
+            class="w-full"
+            ghost
+            square={!expanded()}
             href={`/games/${gameStore.current?.id}/admin/hammers`}
             justify={expanded() ? "start" : "center"}
+            title={t("game.admin.hammer.title")}
           >
             <span class="icon-[fluent--chat-20-regular] w-5 h-5" />
             <Show when={expanded()}>{t("game.admin.hammer.title")}</Show>
@@ -74,6 +92,7 @@ export default function SideBar() {
             square={!expanded()}
             href={`/games/${gameStore.current?.id}/admin/teams`}
             justify={expanded() ? "start" : "center"}
+            title={t("game.admin.teams.title")}
           >
             <span class="icon-[fluent--people-team-20-regular] w-5 h-5" />
             <Show when={expanded()}>{t("game.admin.teams.title")}</Show>
@@ -87,6 +106,7 @@ export default function SideBar() {
             square={!expanded()}
             href={`/games/${gameStore.current?.id}/admin/organize`}
             justify={expanded() ? "start" : "center"}
+            title={t("game.admin.organize.title")}
           >
             <span class="icon-[fluent--person-passkey-20-regular] w-5 h-5" />
             <Show when={expanded()}>{t("game.admin.organize.title")}</Show>
@@ -100,6 +120,7 @@ export default function SideBar() {
             square={!expanded()}
             href={`/games/${gameStore.current?.id}/admin/events`}
             justify={expanded() ? "start" : "center"}
+            title={t("game.admin.events.title")}
           >
             <span class="icon-[fluent--cloud-flow-20-regular] w-5 h-5" />
             <Show when={expanded()}>{t("game.admin.events.title")}</Show>
@@ -111,21 +132,9 @@ export default function SideBar() {
             class="w-full"
             ghost
             square={!expanded()}
-            href={`/games/${gameStore.current?.id}/admin/git`}
-            justify={expanded() ? "start" : "center"}
-          >
-            <span class="icon-[fluent--branch-fork-20-regular] w-5 h-5" />
-            <Show when={expanded()}>{t("game.admin.git.title")}</Show>
-          </Link>
-        </li>
-        <li class="w-full">
-          <Link
-            activeMatch="exact"
-            class="w-full"
-            ghost
-            square={!expanded()}
             href={`/games/${gameStore.current?.id}/admin/traffic`}
             justify={expanded() ? "start" : "center"}
+            title={t("game.admin.traffic.title")}
           >
             <span class="icon-[fluent--airplane-20-regular] w-5 h-5" />
             <Show when={expanded()}>{t("game.admin.traffic.title")}</Show>
@@ -139,9 +148,24 @@ export default function SideBar() {
             square={!expanded()}
             href={`/games/${gameStore.current?.id}/admin/captures`}
             justify={expanded() ? "start" : "center"}
+            title={t("game.admin.captures.title")}
           >
             <span class="icon-[fluent--slide-record-20-regular] w-5 h-5" />
             <Show when={expanded()}>{t("game.admin.captures.title")}</Show>
+          </Link>
+        </li>
+        <li class="w-full">
+          <Link
+            activeMatch="exact"
+            class="w-full"
+            ghost
+            square={!expanded()}
+            href={`/games/${gameStore.current?.id}/admin/git`}
+            justify={expanded() ? "start" : "center"}
+            title={t("game.admin.git.title")}
+          >
+            <span class="icon-[fluent--branch-fork-20-regular] w-5 h-5" />
+            <Show when={expanded()}>{t("game.admin.git.title")}</Show>
           </Link>
         </li>
       </ul>

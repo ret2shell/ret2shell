@@ -17,6 +17,7 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
   const [loading, setLoading] = createSignal(false);
   const [search, setSearch] = createSignal("");
   const [hideSolved, setHideSolved] = createSignal(false);
+  const [hideArchived, setHideArchived] = createSignal(true);
   const selectedChallenge = createMemo(() => challengeStore.challenges.find((c) => c.id === selectedChallengeId()));
   const challengesEx = createMemo(() => {
     const result = [];
@@ -94,24 +95,51 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
           defer
         >
           <div class="flex flex-col space-y-2 p-3 lg:p-6">
-            <Input
-              class="sticky top-3 lg:top-6 z-20 bg-layer rounded-lg"
-              icon={<span class="icon-[fluent--filter-20-regular] w-5 h-5" />}
-              placeholder={t("game.challenge.filterNameOrLabel")}
-              onInput={(e) => setSearch(e.currentTarget.value)}
-              extraBtn={
-                <Button
-                  class="!rounded-l-none"
-                  title={t("game.challenge.hideSolved")!}
-                  square
-                  onClick={() => setHideSolved(!hideSolved())}
-                >
-                  <Show when={hideSolved()} fallback={<span class="icon-[fluent--eye-off-20-regular] w-5 h-5" />}>
-                    <span class="icon-[fluent--eye-off-20-filled] w-5 h-5 text-warning" />
-                  </Show>
-                </Button>
-              }
-            />
+            <div class="sticky top-3 lg:top-6 z-20 flex flex-col">
+              <Input
+                class="bg-layer"
+                size="sm"
+                icon={<span class="icon-[fluent--filter-20-regular] w-5 h-5" />}
+                placeholder={t("game.challenge.filterNameOrLabel")}
+                onInput={(e) => setSearch(e.currentTarget.value)}
+              />
+              <Show when={props.inGame}>
+                <div class="flex flex-row space-x-1">
+                  <Button
+                    class="my-1"
+                    size="sm"
+                    title={t("game.challenge.hideSolved")}
+                    onClick={() => {
+                      setHideSolved(!hideSolved());
+                    }}
+                  >
+                    <Show
+                      when={hideSolved()}
+                      fallback={<span class="icon-[fluent--eye-20-regular] w-5 h-5 text-success" />}
+                    >
+                      <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
+                    </Show>
+                    <span>{t("game.challenge.solved")}</span>
+                  </Button>
+                  <Button
+                    class="my-1"
+                    size="sm"
+                    title={t("game.challenge.hideArchived")}
+                    onClick={() => {
+                      setHideArchived(!hideArchived());
+                    }}
+                  >
+                    <Show
+                      when={hideArchived()}
+                      fallback={<span class="icon-[fluent--eye-20-regular] w-5 h-5 text-success" />}
+                    >
+                      <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
+                    </Show>
+                    <span>{t("game.challenge.archived")}</span>
+                  </Button>
+                </div>
+              </Show>
+            </div>
             <Switch
               fallback={
                 <div class="flex flex-row items-center justify-center space-x-2 opacity-60 p-3">

@@ -57,6 +57,7 @@ pub struct AwardRates(pub Vec<i32>);
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct TimelinePreset {
+  pub label: String,
   #[serde(with = "ts_seconds")]
   pub start_at: DateTime<Utc>,
   #[serde(with = "ts_seconds")]

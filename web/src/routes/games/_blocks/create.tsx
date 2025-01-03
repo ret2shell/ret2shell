@@ -55,6 +55,11 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
       award_rate: 0,
       admins: [accountStore.id!],
       token: null,
+      timeline_presets: [],
+      award_rates: [0, 0, 0],
+      node_selector: null,
+      traffic: null,
+      bucket: null,
     };
     try {
       props.onDone(await createGame(req));

@@ -121,6 +121,8 @@
       "enter": "攻克挑战",
       "notStarted": "尚未开赛，少安毋躁",
       "solved": "已解决",
+      "archived": "已归档",
+      "hideArchived": "隐藏已归档题目",
       "welcome": "欢迎参赛",
       "list": "题目列表",
       "terminal": "终端",
@@ -381,6 +383,16 @@
       },
       "captures": {
         "title": "容器流量"
+      },
+      "timeline": {
+        "title": "时段管理",
+        "labelRequired": "请填写时段名称",
+        "labelPlaceholder": "时段名称",
+        "startAtRequired": "请选择开始时间",
+        "endAtRequired": "请选择结束时间",
+        "startEndTime": "开始与结束时间",
+        "noTimeline": "没有时段",
+        "deleteTips": "确定要删除这个时段吗？即使删除了也不影响现有题目的时段控制。"
       }
     },
     "exit": "退出",

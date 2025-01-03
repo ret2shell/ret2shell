@@ -182,6 +182,10 @@ export const routes = {
                   path: "/captures",
                   component: lazy(() => import("./games/[game]/admin/captures/index")),
                 },
+                {
+                  path: "/timeline",
+                  component: lazy(() => import("./games/[game]/admin/timeline/index")),
+                },
               ],
             },
             {

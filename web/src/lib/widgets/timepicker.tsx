@@ -262,16 +262,18 @@ function PickerCalendar(props: {
 
   function canChoose(day: DateTime) {
     // if startEdge is set, then the day should be later than startEdge
-    if (props.startEdge && day < props.startEdge) {
+    if (props.startEdge && day.set({ hour: 0, minute: 0 }) < props.startEdge.set({ hour: 0, minute: 0 })) {
       return !!props.reverseEdge;
     }
     // if endEdge is set, then the day should be earlier than endEdge
-    if (props.endEdge && day > props.endEdge) {
+    if (props.endEdge && day.set({ hour: 0, minute: 0 }) > props.endEdge.set({ hour: 0, minute: 0 })) {
       return !!props.reverseEdge;
     }
-
     if (props.reverseEdge && props.startEdge && props.endEdge) {
-      return day < props.startEdge || day > props.endEdge;
+      return (
+        day.set({ hour: 0, minute: 0 }) < props.startEdge.set({ hour: 0, minute: 0 }) ||
+        day.set({ hour: 0, minute: 0 }) > props.endEdge.set({ hour: 0, minute: 0 })
+      );
     }
     return true;
   }

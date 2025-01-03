@@ -38,6 +38,7 @@ export type Game = {
   token: string | null;
   bucket: string | null;
   timeline_presets: {
+    label: string;
     start_at: DateTime;
     end_at: DateTime;
   }[];
