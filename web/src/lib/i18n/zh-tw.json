@@ -121,8 +121,14 @@
       "enter": "攻克挑戰",
       "notStarted": "尚未開賽，少安毋躁",
       "solved": "已解決",
+      "archived": "已歸檔",
+      "archivedTips": "這個題目已經歸檔，不再計分",
+      "hideArchived": "隱藏已歸檔題目",
       "welcome": "歡迎參賽",
+      "periodTips": "限時題目，僅在當前時間段解題計分",
+      "releaseTips": "題目發佈倒計時",
       "list": "題目列表",
+      "notReleased": "題目尚未發佈，選手看不見這道題",
       "terminal": "終端",
       "hint": "提示",
       "info": "基礎信息",
@@ -269,12 +275,15 @@
       "hammerHowto": "如何使用 Markdown？",
       "hammerSend": "發送",
       "hammerLastMessage": "還可發送 {{last}} 條消息",
-      "hideSolved": "隱藏已解出題目"
+      "hideSolved": "隱藏已解出題目",
+      "releasePeriod": "發佈時段",
+      "releasePeriodPlaceholder": "發佈前題目不可見，歸檔後題目不計分，留空則全時段有效..."
     },
     "scoreboard": {
       "title": "積分板",
       "selectInstitute": "選擇組織...",
-      "fetchError": "獲取積分板失敗"
+      "fetchError": "獲取積分板失敗",
+      "currentPeriod": "本週目"
     },
     "writeup": {
       "title": "題解"
@@ -381,6 +390,16 @@
       },
       "captures": {
         "title": "容器流量"
+      },
+      "timeline": {
+        "title": "時段管理",
+        "labelRequired": "請填寫時段名稱",
+        "labelPlaceholder": "時段名稱",
+        "startAtRequired": "請選擇開始時間",
+        "endAtRequired": "請選擇結束時間",
+        "startEndTime": "開始與結束時間",
+        "noTimeline": "沒有時段",
+        "deleteTips": "確定要刪除這個時段嗎？即使刪除了也不影響現有題目的時段控制。"
       }
     },
     "exit": "退出",
@@ -478,6 +497,8 @@
       "pendingTips": "你的隊伍需要審核，長時間未通過審核請聯繫管理員。",
       "pending": "隊伍需要審核",
       "banned": "隊伍已被封禁",
+      "bannedTips1": "似乎有人幹壞事……",
+      "bannedTips2": "你的隊伍因違反比賽規則已被管理員封禁，無法繼續參賽，以前的成績也作廢。如有疑問或申訴需求，請聯繫管理員。",
       "state": {
         "title": "隊伍狀態",
         "banned": "已封禁",
