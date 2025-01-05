@@ -11,6 +11,8 @@ export type Challenge = {
   score_rule: { initial: number; minimum: number; decay: number };
   score: number;
   bucket: string | null;
+  release_at: DateTime | null;
+  archive_at: DateTime | null;
 };
 
 export type ChallengeImage = {

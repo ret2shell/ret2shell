@@ -7,7 +7,8 @@ import { gameStore } from "@storage/game";
 import { t } from "@storage/theme";
 import Pagination from "@widgets/pagination";
 import Tag from "@widgets/tag";
-import { For, Match, Show, Switch } from "solid-js";
+import { DateTime } from "luxon";
+import { createMemo, For, Match, Show, Switch } from "solid-js";
 
 export default function TeamRanks(props: {
   teams: Team[];
@@ -21,6 +22,11 @@ export default function TeamRanks(props: {
   function realIndex(index: number) {
     return index + (props.page - 1) * props.pageSize + 1;
   }
+  const currentPeriod = createMemo(() => {
+    return gameStore.current?.timeline_presets.find(
+      (v) => v.start_at && v.end_at && v.start_at < DateTime.now() && v.end_at > DateTime.now()
+    );
+  });
   return (
     <>
       <ul class="flex-1 flex flex-col w-full max-w-5xl self-center">
@@ -73,9 +79,18 @@ export default function TeamRanks(props: {
                   <span>{accountStore.institutes.find((v) => v.id === team.institute_id)?.name}</span>
                 </Tag>
               </Show>
-              <span class="w-20 text-end">
+              <span class={`text-end ${currentPeriod() && props.showTime ? "w-48" : "w-20"}`}>
                 <span>{team.score}</span>
                 <span class="opacity-60">&nbsp;pts</span>
+                <Show when={props.showTime && currentPeriod()}>
+                  <span class="text-success">
+                    &nbsp;+
+                    {team.history
+                      .filter((h) => h.changed_at > currentPeriod()!.start_at)
+                      .reduce((a, b) => a + b.score, 0)}
+                    &nbsp;pts
+                  </span>
+                </Show>
               </span>
               <Show when={props.showTime}>
                 <span class="w-56 text-end font-bold opacity-40 hidden xl:inline-block">

@@ -337,11 +337,15 @@ pub async fn challenge_access_required(
   if is_game_admin!(token, game) {
     return Ok(next.run(req).await);
   }
-  if game.hidden || challenge.hidden || game.frozen {
+  if game.hidden
+    || challenge.hidden
+    || game.frozen
+    || challenge.release_at.is_some_and(|c| c > Utc::now())
+  {
     return Err(ResponseError::Forbidden(
       "permission denied".to_owned(),
       format!(
-        "user {}:'{}' ({}) want to access hidden game {}:'{}' challenge {}:{}",
+        "user {}:'{}' ({}) want to access game {}:'{}' challenge {}:'{}' which is hidden or not released",
         token.id, token.account, token.nickname, game.id, game.name, challenge.id, challenge.name
       ),
     ));

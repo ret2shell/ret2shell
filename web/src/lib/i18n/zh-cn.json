@@ -122,9 +122,13 @@
       "notStarted": "尚未开赛，少安毋躁",
       "solved": "已解决",
       "archived": "已归档",
+      "archivedTips": "这个题目已经归档，不再计分",
       "hideArchived": "隐藏已归档题目",
       "welcome": "欢迎参赛",
+      "periodTips": "限时题目，仅在当前时间段解题计分",
+      "releaseTips": "题目发布倒计时",
       "list": "题目列表",
+      "notReleased": "题目尚未发布，选手看不见这道题",
       "terminal": "终端",
       "hint": "提示",
       "info": "基础信息",
@@ -271,12 +275,15 @@
       "hammerHowto": "如何使用 Markdown？",
       "hammerSend": "发送",
       "hammerLastMessage": "还可发送 {{last}} 条消息",
-      "hideSolved": "隐藏已解出题目"
+      "hideSolved": "隐藏已解出题目",
+      "releasePeriod": "发布时段",
+      "releasePeriodPlaceholder": "发布前题目不可见，归档后题目不计分，留空则全时段有效..."
     },
     "scoreboard": {
       "title": "积分板",
       "selectInstitute": "选择组织...",
-      "fetchError": "获取积分板失败"
+      "fetchError": "获取积分板失败",
+      "currentPeriod": "本周目"
     },
     "writeup": {
       "title": "题解"
@@ -490,6 +497,8 @@
       "pendingTips": "你的队伍需要审核，长时间未通过审核请联系管理员。",
       "pending": "队伍需要审核",
       "banned": "队伍已被封禁",
+      "bannedTips1": "似乎有人干坏事……",
+      "bannedTips2": "你的队伍因违反比赛规则已被管理员封禁，无法继续参赛，以前的成绩也作废。如有疑问或申诉需求，请联系管理员。",
       "state": {
         "title": "队伍状态",
         "banned": "已封禁",

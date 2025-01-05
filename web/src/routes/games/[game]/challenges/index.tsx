@@ -99,6 +99,8 @@ export default function () {
       },
       score: result.initial,
       bucket: null,
+      release_at: result.release_at ? DateTime.fromSeconds(result.release_at) : null,
+      archive_at: result.archive_at ? DateTime.fromSeconds(result.archive_at) : null,
     } as ChallengeModel;
     try {
       const result = await createChallenge(gameStore.current!.id, challenge);

@@ -6,6 +6,7 @@ import Button from "@widgets/button";
 import Input from "@widgets/input";
 import LoadingTips from "@widgets/loading-tips";
 import TreeView, { type TreeNode } from "@widgets/treeview";
+import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { Match, Show, Switch, createEffect, createMemo, createSignal, untrack } from "solid-js";
 
@@ -27,7 +28,7 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
         !!c.tag.find((t) => t.name.toLowerCase().includes(search().toLowerCase()))
     )) {
       const submission = challengeStore.solves.find((s) => s.challenge_id === challenge.id);
-      result.push({ challenge, solved: !!submission });
+      result.push({ challenge, solved: (props.inGame && submission?.team_id) || !!submission });
     }
     const tree = [] as TreeNode[];
     const tags = new Set(
@@ -38,9 +39,10 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
       const taggedChallenges = result
         .filter((c) => c.challenge.tag.find((t) => t.primary)?.name === tag)
         .filter((c) => !c.solved || !hideSolved())
+        .filter((c) => !c.challenge.archive_at || !hideArchived() || c.challenge.archive_at > DateTime.now())
         .sort((a, b) => {
           if (a.challenge.score !== b.challenge.score) return a.challenge.score - b.challenge.score;
-          return a.challenge.updated_at < b.challenge.updated_at ? -1 : 1;
+          return a.challenge.name < b.challenge.name ? -1 : 1;
         });
       if (taggedChallenges.length === 0) continue;
       tree.push({
@@ -62,7 +64,13 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
             : c.solved
               ? "icon-[fluent--checkmark-circle-20-regular] text-success"
               : "icon-[fluent--flag-20-regular]",
-          extraPart: props.showScore ? <span class="opacity-60">{c.challenge.score} pts</span> : null,
+          extraPart: props.showScore ? (
+            <span
+              class={`opacity-60 ${c.challenge.archive_at && c.challenge.archive_at < DateTime.now() ? "line-through" : ""}`}
+            >
+              {c.challenge.score} pts
+            </span>
+          ) : null,
           children: [],
         })),
       });

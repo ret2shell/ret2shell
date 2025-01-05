@@ -1,5 +1,5 @@
 import type { Challenge } from "@models/challenge";
-import { createForm, required, setValue } from "@modular-forms/solid";
+import { createForm, getValue, required, setValue } from "@modular-forms/solid";
 import { fullTheme, t } from "@storage/theme";
 import Button from "@widgets/button";
 import Editor from "@widgets/editor";
@@ -7,6 +7,8 @@ import Input from "@widgets/input";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { Show, createEffect, untrack } from "solid-js";
 import ScorePicker from "./score-picker";
+import Select from "@widgets/select";
+import { gameStore } from "@storage/game";
 
 export type ChallengeForm = {
   name: string;
@@ -15,6 +17,8 @@ export type ChallengeForm = {
   initial: number;
   minimum: number;
   decay: number;
+  release_at: number | null;
+  archive_at: number | null;
 };
 
 export function FormBare(props: {
@@ -36,6 +40,8 @@ export function FormBare(props: {
         setValue(form, "initial", props.editSource!.score_rule.initial);
         setValue(form, "minimum", props.editSource!.score_rule.minimum);
         setValue(form, "decay", props.editSource!.score_rule.decay);
+        setValue(form, "release_at", props.editSource!.release_at?.toSeconds() ?? null);
+        setValue(form, "archive_at", props.editSource!.archive_at?.toSeconds() ?? null);
       });
     } else {
       setValue(form, "initial", 1000);
@@ -146,6 +152,50 @@ export function FormBare(props: {
             )}
           </Field>
         </div>
+      </Show>
+      <Show when={props.inGame && (gameStore.current?.timeline_presets?.length ?? 0) > 0}>
+        <Field name="release_at" type="number">
+          {() => (
+            <Field name="archive_at" type="number">
+              {() => (
+                <>
+                  <Select
+                    placeholder={t("game.challenge.releasePeriodPlaceholder")}
+                    label={t("game.challenge.releasePeriod")}
+                    class="flex-1"
+                    items={
+                      gameStore.current?.timeline_presets.map((t) => {
+                        return {
+                          value: t.label,
+                          label: `${t.start_at.toFormat("yyyy-MM-dd HH:mm:ss")} - ${t.end_at.toFormat("yyyy-MM-dd HH:mm:ss")}: ${t.label}`,
+                        };
+                      }) ?? []
+                    }
+                    value={
+                      [
+                        gameStore.current?.timeline_presets.find(
+                          (i) =>
+                            i.start_at.toSeconds() === getValue(form, "release_at") &&
+                            i.end_at.toSeconds() === getValue(form, "archive_at")
+                        )?.label ?? "",
+                      ].filter((s) => s) ?? []
+                    }
+                    onValueChange={(v) => {
+                      if (v.value[0]) {
+                        const item = gameStore.current?.timeline_presets.find((i) => i.label === v.value[0]);
+                        setValue(form, "release_at", item?.start_at.toSeconds() ?? null);
+                        setValue(form, "archive_at", item?.end_at.toSeconds() ?? null);
+                      } else {
+                        setValue(form, "release_at", null);
+                        setValue(form, "archive_at", null);
+                      }
+                    }}
+                  />
+                </>
+              )}
+            </Field>
+          )}
+        </Field>
       </Show>
       <Field name="content" validate={[required(t("game.challenge.contentRequired")!)]}>
         {(field) => (

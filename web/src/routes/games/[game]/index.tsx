@@ -34,6 +34,24 @@ import { For, Match, Show, Switch, createEffect, createSignal, onCleanup, untrac
 import IntroForm from "./_blocks/intro-form";
 import { handleHttpError } from "@api";
 
+function BannedWarning() {
+  const [close, setClose] = createSignal(false);
+  return (
+    <Show when={!close()}>
+      <div class="bg-error/60 backdrop-blur fixed top-16 left-0 right-0 bottom-0 flex flex-col space-y-8 items-center justify-center">
+        <span class="icon-[fluent--warning-20-filled] w-12 h-12" />
+        <span class="font-bold text-2xl">{t("game.team.banned")}</span>
+        <span>{t("game.team.bannedTips1")}</span>
+        <span>{t("game.team.bannedTips2")}</span>
+        <Button level="error" onClick={() => setClose(true)}>
+          <span class="icon-[fluent--emoji-sad-20-regular] w-5 h-5" />
+          <span>{t("platform.ok")}</span>
+        </Button>
+      </div>
+    </Show>
+  );
+}
+
 export default function () {
   const [searchParams, setSearchParams] = useSearchParams();
   const inEdit = () => searchParams.edit === "true";
@@ -452,6 +470,9 @@ export default function () {
           </Switch>
         </div>
       </div>
+      <Show when={gameStore.team?.state === TeamState.Banned}>
+        <BannedWarning />
+      </Show>
     </>
   );
 }

@@ -31,7 +31,7 @@ export default function Timeline() {
 
   createEffect(() => {
     if (gameStore.current) {
-      setPresets(gameStore.current.timeline_presets);
+      setPresets(gameStore.current.timeline_presets ?? []);
     }
   });
 
@@ -61,19 +61,17 @@ export default function Timeline() {
 
   async function onSubmit(result: TimelinePresetFormType) {
     setLoading(true);
-    setPresets(
-      [
-        ...presets(),
-        {
-          label: result.label,
-          start_at: DateTime.fromSeconds(result.start_at),
-          end_at: DateTime.fromSeconds(result.end_at),
-        },
-      ].sort((a, b) => a.start_at.toSeconds() - b.start_at.toSeconds())
-    );
+    const results = [
+      ...presets(),
+      {
+        label: result.label,
+        start_at: DateTime.fromSeconds(result.start_at),
+        end_at: DateTime.fromSeconds(result.end_at),
+      },
+    ].sort((a, b) => a.start_at.toSeconds() - b.start_at.toSeconds());
     const payload = {
       ...gameStore.current!,
-      timeline_presets: presets(),
+      timeline_presets: results,
     };
     try {
       const game = await updateGame(gameStore.current!.id, payload);

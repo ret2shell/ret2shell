@@ -37,6 +37,8 @@ export default function (props: {
         minimum: result.minimum || 1,
         decay: result.decay || 1,
       },
+      release_at: result.release_at ? DateTime.fromSeconds(result.release_at) : null,
+      archive_at: result.archive_at ? DateTime.fromSeconds(result.archive_at) : null,
     };
     try {
       const result = await updateChallenge(gameStore.current!.id, challenge);

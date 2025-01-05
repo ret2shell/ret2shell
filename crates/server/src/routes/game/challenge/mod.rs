@@ -209,13 +209,35 @@ async fn get_challenge_list(
   let with_hidden = is_game_admin!(token, game);
   if query.page.is_none() || query.page_size.is_none() {
     let challenges = challenge::get_list(&db.conn, game.id, with_hidden).await?;
-    return Ok(Json((challenges, 1)));
+    return Ok(Json((
+      if with_hidden {
+        challenges
+      } else {
+        challenges
+          .iter()
+          .filter(|c| c.release_at.is_none_or(|t| t < Utc::now()))
+          .cloned()
+          .collect()
+      },
+      1,
+    )));
   }
   let page = query.page.unwrap_or(1);
   let page_size = query.page_size.unwrap_or(15);
-  Ok(Json(
-    challenge::get_page(&db.conn, page, page_size, game.id, with_hidden).await?,
-  ))
+  let result = challenge::get_page(&db.conn, page, page_size, game.id, with_hidden).await?;
+  Ok(Json((
+    if with_hidden {
+      result.0
+    } else {
+      result
+        .0
+        .iter()
+        .filter(|c| c.release_at.is_none_or(|t| t < Utc::now()))
+        .cloned()
+        .collect()
+    },
+    result.1,
+  )))
 }
 
 async fn get_challenge(
@@ -224,15 +246,6 @@ async fn get_challenge(
 ) -> Result<impl IntoResponse, ResponseError> {
   if is_game_admin!(token, game) {
     return Ok(Json(challenge));
-  }
-  if challenge.hidden {
-    return Err(ResponseError::Forbidden(
-      "permission denied".to_owned(),
-      format!(
-        "user {}:'{}' ({}) want to access hidden challenge {}:'{}'",
-        token.id, token.account, token.nickname, challenge.id, challenge.name
-      ),
-    ));
   }
 
   Ok(Json(challenge.desensitize()))
@@ -558,7 +571,7 @@ async fn submit_flag(
     solved: None,
     result: None,
     team_id: if let Some(team) = team.clone() {
-      if game.in_progress() {
+      if game.in_progress() && challenge.archive_at.is_none_or(|t| t > Utc::now()) {
         Some(team.id)
       } else {
         None

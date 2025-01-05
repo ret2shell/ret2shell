@@ -14,7 +14,7 @@ import Divider from "@widgets/divider";
 import Tag from "@widgets/tag";
 import TimeProgress from "@widgets/time-progress";
 import Timer from "@widgets/timer";
-import type { DateTime } from "luxon";
+import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { passiveSupport } from "passive-events-support/src/utils";
 import { For, Match, Show, Switch, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
@@ -57,6 +57,7 @@ export default function (props: { inGame?: boolean }) {
       untrack(refreshStatus);
     }
   });
+
   let instanceStateIter = 0;
   async function maintainInstances() {
     await wsrx.refreshInstances();
@@ -163,7 +164,15 @@ export default function (props: { inGame?: boolean }) {
                         : "icon-[fluent--flag-20-regular] w-5 h-5"
                     }
                   />
-                  <span>{challengeStore.current?.score} pts</span>
+                  <span
+                    class={
+                      challengeStore.current?.archive_at && challengeStore.current.archive_at < DateTime.now()
+                        ? "line-through"
+                        : ""
+                    }
+                  >
+                    {challengeStore.current?.score} pts
+                  </span>
                 </span>
               </Show>
               <span class="font-bold flex flex-row space-x-2 items-center">
@@ -174,6 +183,38 @@ export default function (props: { inGame?: boolean }) {
                 </span>
               </span>
             </header>
+            <Switch>
+              <Match when={challengeStore.current?.release_at && challengeStore.current.release_at > DateTime.now()}>
+                <section class="h-12 border-b border-b-layer-content/15 flex flex-row items-center space-x-2">
+                  <span class="icon-[fluent--flag-20-regular] w-5 h-5 text-info" />
+                  <span class="text-info flex-1 text-start">{t("game.challenge.notReleased")}</span>
+                  <span>{t("game.challenge.releaseTips")}:</span>
+                  <Timer end={challengeStore.current!.release_at!} hasHours />
+                </section>
+              </Match>
+              <Match when={challengeStore.current?.archive_at && challengeStore.current.archive_at < DateTime.now()}>
+                <section class="h-12 border-b border-b-layer-content/15 flex flex-row items-center space-x-2">
+                  <span class="icon-[fluent--archive-20-regular] w-5 h-5 text-warning" />
+                  <span class="text-warning flex-1 truncate text-start">{t("game.challenge.archivedTips")}</span>
+                  <span class="text-warning">
+                    {challengeStore.current?.release_at?.toFormat("yyyy-MM-dd HH:mm:ss")}
+                    &nbsp;-&nbsp;
+                    {challengeStore.current?.archive_at?.toFormat("yyyy-MM-dd HH:mm:ss")}
+                  </span>
+                </section>
+              </Match>
+              <Match when={challengeStore.current?.archive_at}>
+                <section class="h-12 border-b border-b-layer-content/15 flex flex-row items-center space-x-2">
+                  <span class="icon-[fluent--clock-20-regular] w-5 h-5 text-info" />
+                  <span class="text-info flex-1 truncate text-start">{t("game.challenge.periodTips")}</span>
+                  <span class="text-info">
+                    {challengeStore.current?.release_at?.toFormat("yyyy-MM-dd HH:mm:ss")}
+                    &nbsp;-&nbsp;
+                    {challengeStore.current?.archive_at?.toFormat("yyyy-MM-dd HH:mm:ss")}
+                  </span>
+                </section>
+              </Match>
+            </Switch>
             <Show when={challengeStore.files.length > 0}>
               <section class="inline-flex flex-row items-center flex-wrap min-h-12 border-b border-b-layer-content/15">
                 <h3 class="font-bold flex space-x-2 items-center">
