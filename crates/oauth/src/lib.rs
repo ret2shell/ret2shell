@@ -4,30 +4,36 @@ use std::{collections::HashMap, sync::Arc};
 
 use chrono::{DateTime, Utc};
 use r2s_config::auth::Config;
-use r2s_database::{oauth, user};
 use rune::{
-  alloc,
   runtime::{Object, RuntimeContext},
   termcolor::Buffer,
-  Context, Diagnostics, Source, Sources, Unit, Value, Vm,
+  Any, Context, ContextError, Diagnostics, Module, Source, Sources, Unit, Value, Vm,
 };
 use tokio::sync::RwLock;
-use tracing::debug;
 pub use traits::OAuthError;
 
-type OAuthContext = (Arc<Unit>, Arc<RuntimeContext>, DateTime<Utc>);
-macro_rules! to_rune_object {
-    ($model:tt, $($column:tt), *) => {
-        {
-            let mut object = Object::new();
-            $(
-                object.insert(alloc::String::try_from(stringify!($column))?, rune::to_value($model.$column.clone())?)?;
-            )*
-            object
-        }
-    };
+#[derive(Clone, Debug, Any)]
+#[rune(item = ::ret2shell::oauth)]
+pub struct RuneMap(pub HashMap<String, String>);
+
+impl RuneMap {
+  #[rune::function(path = Self::get)]
+  pub fn get(&self, key: &str) -> Option<String> {
+    self.0.get(key).cloned()
+  }
 }
-#[derive(Debug, Clone)]
+
+#[rune::module(::ret2shell::oauth)]
+pub fn module() -> Result<Module, ContextError> {
+  let mut module = Module::from_meta(self::module_meta)?;
+  module.ty::<RuneMap>()?;
+  module.function_meta(RuneMap::get)?;
+  Ok(module)
+}
+
+type OAuthContext = (Arc<Unit>, Arc<RuntimeContext>, DateTime<Utc>);
+
+#[derive(Debug, Clone, Default)]
 pub struct OAuth {
   contexts: Arc<RwLock<HashMap<String, OAuthContext>>>,
 }
@@ -40,6 +46,7 @@ impl OAuth {
     context.install(rune_modules::toml::module(true)?)?;
     context.install(rune_modules::process::module(true)?)?;
     context.install(utility::xml::module(true)?)?;
+    context.install(module()?)?;
     Ok(context)
   }
 
@@ -88,48 +95,66 @@ impl OAuth {
     vm.lookup_function(["login"])
       .map_err(|_| OAuthError::MissingFunction("login".to_owned()))?;
 
+    vm.lookup_function(["bind"])
+      .map_err(|_| OAuthError::MissingFunction("bind".to_owned()))?;
+
     Ok(())
   }
 
   pub async fn login(
-    &self, key: &str, user: &user::Model, params: &HashMap<String, String>,
-  ) -> Result<oauth::Model, OAuthError> {
+    &self, key: &str, params: &HashMap<String, String>,
+  ) -> Result<HashMap<String, String>, OAuthError> {
     let contexts = self.contexts.read().await;
-    debug!("Login user {user:?} with params: {params:?}");
     let (unit, runtime, _) = contexts.get(key).ok_or_else(|| {
       OAuthError::MissingField(format!("oauth provider not found for key: {}", key))
     })?;
-    let mut vm = Vm::new(runtime.clone(), unit.clone());
-    let mut params_object = Object::new();
-    let user_object = to_rune_object!(user, id, account, institute_id, email, nickname);
-    for (key, value) in params.iter() {
-      params_object.insert(
-        alloc::String::try_from(key.as_str())?,
-        rune::to_value(value.clone())?,
-      )?;
-    }
-    let result = vm.call(["login"], (user_object, params_object))?;
+    let vm = Vm::new(runtime.clone(), unit.clone());
+    let params_object = RuneMap(params.clone());
+    let result = vm.send_execute(["login"], (params_object,))?;
+    let result = result.async_complete().await.into_result()?;
     let output: Result<Object, Value> = rune::from_value(result)?;
     if let Ok(object) = output {
-      let auth_key = object
+      let _ = object
         .get("auth_key")
         .ok_or_else(|| OAuthError::MissingField("auth_key".to_owned()))?;
-      let mut data : HashMap<String, String> = HashMap::new();
+      let mut data: HashMap<String, String> = HashMap::new();
       for (key, value) in object.iter() {
-        if key != "auth_key" {
-          data.insert(key.clone(), rune::from_value(value.clone())?);
-        }
+        data.insert(key.to_string(), rune::from_value(value.clone())?);
       }
-      Ok(oauth::Model {
-        id: 0,
-        user_id: user.id,
-        provider: key.to_string(),
-        auth_key: auth_key.(),
-        data: serde_json::to_value(data)?,
-        created_at: Utc::now(),
-        updated_at: Utc::now(),
-        institute_id: None,
-      })
+      Ok(data)
+    } else {
+      Err(OAuthError::ScriptError(
+        "unexpected value in oauth script".to_owned(),
+      ))
+    }
+  }
+
+  pub async fn bind(
+    &self, key: &str, params: &HashMap<String, String>, user: &HashMap<String, String>,
+  ) -> Result<HashMap<String, String>, OAuthError> {
+    let contexts = self.contexts.read().await;
+    let (unit, runtime, _) = contexts.get(key).ok_or_else(|| {
+      OAuthError::MissingField(format!("oauth provider not found for key: {}", key))
+    })?;
+    let vm = Vm::new(runtime.clone(), unit.clone());
+    let params_object = RuneMap(params.clone());
+    let user_object = RuneMap(user.clone());
+    let result = vm.send_execute(["bind"], (params_object, user_object))?;
+    let result = result.async_complete().await.into_result()?;
+    let output: Result<Object, Value> = rune::from_value(result)?;
+    if let Ok(object) = output {
+      let _ = object
+        .get("auth_key")
+        .ok_or_else(|| OAuthError::MissingField("auth_key".to_owned()))?;
+      let mut data: HashMap<String, String> = HashMap::new();
+      for (key, value) in object.iter() {
+        data.insert(key.to_string(), rune::from_value(value.clone())?);
+      }
+      Ok(data)
+    } else {
+      Err(OAuthError::ScriptError(
+        "unexpected value in oauth script".to_owned(),
+      ))
     }
   }
 
@@ -155,5 +180,10 @@ impl OAuth {
 }
 
 pub async fn initialize(_config: &Option<Config>) -> OAuth {
-  OAuth {}
+  let client = OAuth::default();
+  let mut client_worker = client.clone();
+  tokio::spawn(async move {
+    client_worker.cleanup_worker().await;
+  });
+  client
 }

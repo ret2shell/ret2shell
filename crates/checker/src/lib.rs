@@ -4,10 +4,9 @@ use chrono::{DateTime, Utc};
 use r2s_bucket::challenge::ChallengeBucket;
 use r2s_database::{challenge, submission, team, user};
 use rune::{
-  alloc,
   runtime::{Object, RuntimeContext},
   termcolor::Buffer,
-  Context, Diagnostics, Source, Sources, Unit, Value, Vm,
+  Any, Context, ContextError, Diagnostics, Module, Source, Sources, Unit, Value, Vm,
 };
 use serde::{Deserialize, Serialize};
 use tokio::sync::RwLock;
@@ -29,16 +28,82 @@ pub struct AuditMessage {
   pub reason: String,
 }
 
-macro_rules! to_rune_object {
-    ($model:tt, $($column:tt), *) => {
-        {
-            let mut object = Object::new();
-            $(
-                object.insert(alloc::String::try_from(stringify!($column))?, rune::to_value($model.$column.clone())?)?;
-            )*
-            object
-        }
-    };
+#[derive(Clone, Debug, Any)]
+#[rune(item = ::ret2shell::checker)]
+pub struct RuneUser {
+  #[rune(get)]
+  pub id: i64,
+  #[rune(get)]
+  pub account: String,
+  #[rune(get)]
+  pub institute_id: Option<i64>,
+}
+
+impl From<&user::Model> for RuneUser {
+  fn from(user: &user::Model) -> Self {
+    Self {
+      id: user.id,
+      account: user.account.clone(),
+      institute_id: user.institute_id,
+    }
+  }
+}
+
+#[derive(Clone, Debug, Any, Default)]
+#[rune(item = ::ret2shell::checker)]
+pub struct RuneTeam {
+  #[rune(get)]
+  pub id: Option<i64>,
+  #[rune(get)]
+  pub name: Option<String>,
+  #[rune(get)]
+  pub institute_id: Option<i64>,
+}
+
+impl From<&team::Model> for RuneTeam {
+  fn from(team: &team::Model) -> Self {
+    Self {
+      id: Some(team.id),
+      name: Some(team.name.clone()),
+      institute_id: team.institute_id,
+    }
+  }
+}
+
+#[derive(Clone, Debug, Any)]
+#[rune(item = ::ret2shell::checker)]
+pub struct RuneSubmission {
+  #[rune(get)]
+  pub id: i64,
+  #[rune(get)]
+  pub user_id: i64,
+  #[rune(get)]
+  pub team_id: Option<i64>,
+  #[rune(get)]
+  pub challenge_id: i64,
+  #[rune(get)]
+  pub content: String,
+}
+
+impl From<&submission::Model> for RuneSubmission {
+  fn from(submission: &submission::Model) -> Self {
+    Self {
+      id: submission.id,
+      user_id: submission.user_id,
+      team_id: submission.team_id,
+      challenge_id: submission.challenge_id,
+      content: submission.content.clone().unwrap_or_default(),
+    }
+  }
+}
+
+#[rune::module(::ret2shell::checker)]
+fn module(_stdio: bool) -> Result<Module, ContextError> {
+  let mut module = Module::from_meta(self::module_meta)?;
+  module.ty::<RuneUser>()?;
+  module.ty::<RuneTeam>()?;
+  module.ty::<RuneSubmission>()?;
+  Ok(module)
 }
 
 impl Checker {
@@ -53,6 +118,7 @@ impl Checker {
     context.install(ret2script::modules::audit::module(true)?)?;
     context.install(ret2script::modules::utils::module(true)?)?;
     context.install(ret2script::modules::regex::module(true)?)?;
+    context.install(module(true)?)?;
     Ok(context)
   }
 
@@ -131,25 +197,22 @@ impl Checker {
     let (unit, runtime, _) = contexts
       .get(&bucket.hash())
       .ok_or(CheckerError::MissingCheckerScript(bucket.name.clone()))?;
-    let mut vm = Vm::new(runtime.clone(), unit.clone());
+    let vm = Vm::new(runtime.clone(), unit.clone());
     debug!("load user: {:?}", user);
-    let user_object = to_rune_object!(user, id, account, institute_id);
+    let user_object: RuneUser = user.into();
     debug!("load submission: {:?}", submission);
-    let mut submission_object = to_rune_object!(submission, id, user_id, team_id, challenge_id);
-    submission_object.insert(
-      alloc::String::try_from("content")?,
-      rune::to_value(submission.content.clone().unwrap())?,
-    )?;
+    let submission_object: RuneSubmission = submission.into();
     debug!("load team: {:?}", team);
     let team_object = match team {
-      Some(team) => to_rune_object!(team, id, name, institute_id),
-      None => Object::new(),
+      Some(team) => RuneTeam::from(team),
+      None => RuneTeam::default(),
     };
     let bucket = ret2script::modules::bucket::Bucket::try_new(bucket.path())?;
-    let output = vm.call(
+    let output = vm.send_execute(
       ["check"],
       (bucket, user_object, team_object, submission_object),
     )?;
+    let output = output.async_complete().await.into_result()?;
     debug!("check output: {:?}", output);
     let output: Result<(bool, String, Option<Object>), Value> = rune::from_value(output)?;
     if let Ok((result, message, audit)) = output {
@@ -191,15 +254,16 @@ impl Checker {
     let (unit, runtime, _) = contexts
       .get(&bucket.hash())
       .ok_or(CheckerError::MissingCheckerScript(bucket.name.clone()))?;
-    let mut vm = Vm::new(runtime.clone(), unit.clone());
-    let user_object = to_rune_object!(user, id, account, institute_id);
+    let vm = Vm::new(runtime.clone(), unit.clone());
+    let user_object = RuneUser::from(user);
     let team_object = match team {
-      Some(team) => to_rune_object!(team, id, name, institute_id),
-      None => Object::new(),
+      Some(team) => RuneTeam::from(team),
+      None => RuneTeam::default(),
     };
     let bucket = ret2script::modules::bucket::Bucket::try_new(bucket.path())?;
     debug!("calling environ");
-    let output = vm.call(["environ"], (bucket, user_object, team_object))?;
+    let output = vm.send_execute(["environ"], (bucket, user_object, team_object))?;
+    let output = output.async_complete().await.into_result()?;
     debug!("environ output: {:?}", output);
     let object: Result<Object, Value> = rune::from_value(output)?;
     if let Ok(object) = object {

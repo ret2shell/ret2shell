@@ -1,15 +1,13 @@
 import { handleHttpError } from "@api";
-import { login } from "@api/account";
-import { getAuthConfig } from "@api/platform";
+import { getOAuthProviders, login } from "@api/account";
 import LogoAnimate from "@assets/animates/logo-animate";
-import xdu from "@assets/brands/xdu.svg";
-import xmu from "@assets/brands/xmu.svg";
 // import xdsecMascotCrying from "@assets/imgs/xdsec-mascot-crying.webp";
 // import xdsecMascotHappy from "@assets/imgs/xdsec-mascot-happy.webp";
 // import xdsecMascotNormal from "@assets/imgs/xdsec-mascot-normal.webp";
 // import xdsecMascotUnsee from "@assets/imgs/xdsec-mascot-unsee.webp";
 import Captcha from "@blocks/captcha";
-import type { AuthConfig } from "@models/config";
+import { mediaPath } from "@lib/utils/media";
+import type { OAuthProvider } from "@models/oauth-provider";
 import { createForm, minLength, pattern, required, setValue } from "@modular-forms/solid";
 import { A, useLocation, useNavigate } from "@solidjs/router";
 import { accountStore } from "@storage/account";
@@ -22,7 +20,7 @@ import Divider from "@widgets/divider";
 import Input from "@widgets/input";
 import Link from "@widgets/link";
 import { DateTime } from "luxon";
-import { Show, createMemo, createSignal, onMount } from "solid-js";
+import { For, createSignal, onMount } from "solid-js";
 
 type LoginForm = {
   account: string;
@@ -39,22 +37,16 @@ export default function () {
     return null;
   }
   const [form, { Form, Field }] = createForm<LoginForm>();
-  const [authConfig, setAuthConfig] = createSignal({
-    signing_key: "",
-    buffer_time: 0,
-    expires_time: 0,
-    oauth_keys: {},
-  } as AuthConfig);
+  const [oauthServices, setOAuthServices] = createSignal([] as OAuthProvider[]);
 
   onMount(async () => {
     try {
-      setAuthConfig(await getAuthConfig());
+      setOAuthServices(await getOAuthProviders());
     } catch (err) {
-      handleHttpError(err as Error, t("errors.unknown")!);
+      handleHttpError(err as Error, t("errors.500")!);
     }
   });
 
-  const oauthServices = createMemo(() => Object.keys(authConfig().oauth_keys || {}));
   const [_, setMascot] = createSignal(null as string | null);
   const [loading, setLoading] = createSignal(false);
   const [timestamp, setTimestamp] = createSignal(DateTime.now().toMillis());
@@ -230,45 +222,14 @@ export default function () {
             <Link class="w-full" href="/account/register">
               {t("account.register.tips")}
             </Link>
-            <Show when={authConfig().oauth_keys !== null && (oauthServices().length || 0) > 0}>
-              <div class="flex flex-row flex-wrap space-x-2 items-start w-full">
-                <Show when={oauthServices().find((s) => s === "xdu_cas")}>
-                  <Link
-                    class="flex-1"
-                    href={`https://ids.xidian.edu.cn/authserver/login?service=${window.location.origin}/account/oauth?service=xdu_cas`}
-                    title={t("account.oauth.xdu.title")}
-                  >
-                    <img src={xdu} alt="XDU" width={24} height={24} />
-                    <span>XDU</span>
-                  </Link>
-                </Show>
-                <Show when={oauthServices().find((s) => s === "xmu_cas")}>
-                  <Link
-                    class="flex-1"
-                    href={`https://ids.xmu.edu.cn/authserver/login?service=${window.location.origin}/account/oauth?service=xmu_cas`}
-                    title={t("account.oauth.xmu.title")}
-                  >
-                    <img src={xmu} alt="XMU" width={24} height={24} />
-                    <span>XMU</span>
-                  </Link>
-                </Show>
-                {/* <Show when={(authConfig().oauth_keys || []).find((s) => s.service === "google")}>
-                  <Link href="/account/oauth?type=redirect&service=google" square>
-                    <Google width={24} height={24} />
-                  </Link>
-                </Show>
-                <Show when={(authConfig().oauth_keys || []).find((s) => s.service === "github")}>
-                  <Link href="/account/oauth?type=redirect&service=github" square>
-                    <Github width={24} height={24} />
-                  </Link>
-                </Show>
-                <Show when={(authConfig().oauth_keys || []).find((s) => s.service === "gitlab")}>
-                  <Link href="/account/oauth?type=redirect&service=gitlab" square>
-                    <Gitlab width={24} height={24} />
-                  </Link>
-                </Show> */}
-              </div>
-            </Show>
+            <For each={oauthServices().filter((s) => s.portal)}>
+              {(service) => (
+                <Link class="w-full" href={service.portal} title={service.name}>
+                  <img src={mediaPath(service.avatar ?? "")} alt={service.name} width={24} height={24} />
+                  <span>{service.name}</span>
+                </Link>
+              )}
+            </For>
           </div>
         </Card>
       </div>

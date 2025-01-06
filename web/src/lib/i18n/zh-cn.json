@@ -740,7 +740,22 @@
       "nameRequired": "请输入组织名称",
       "provider": "第三方身份验证器",
       "providerNeeded": "请选择第三方验证器，留空为手动...",
-      "token": "管理密钥"
+      "token": "管理密钥",
+      "providerName": "验证器名称",
+      "providerNameRequired": "请输入验证器名称",
+      "providerIdentifier": "验证器标识",
+      "providerIdentifierRequired": "请输入验证器标识",
+      "providerIdentifierMinLength": "验证器标识至少为 2 个字符",
+      "providerIdentifierMaxLength": "验证器标识最多为 32 个字符",
+      "providerIdentifierPattern": "验证器标识只能由小写字母、数字和下划线组成",
+      "providerPortalInvalid": "验证器门户地址不合法",
+      "providerPortal": "验证器门户地址（留空关闭登录功能）",
+      "providerScript": "验证器脚本",
+      "providerScriptRequired": "请输入验证器脚本",
+      "selectPresetScripts": "选择预设脚本...",
+      "emailScript": "邮箱后缀验证",
+      "yaleCasScript": "Edu CAS 登录",
+      "oauth2AuthCodeScript": "OAuth2 授权码模式"
     }
   },
   "theme": {

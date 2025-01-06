@@ -37,10 +37,6 @@ export const routes = {
           component: lazy(() => import("./account/oauth/index")),
         },
         {
-          path: "/bind",
-          component: lazy(() => import("./account/bind/index")),
-        },
-        {
           path: "/verify",
           component: lazy(() => import("./account/verify/index")),
         },

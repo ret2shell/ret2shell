@@ -46,8 +46,8 @@ export default function Traffic() {
   const [script, setScript] = createSignal("");
   const [lint, setLint] = createSignal(null as string | null);
   const [nodeSelector, setNodeSelector] = createSignal("");
-  const [renderedLint, setRenderedLint] = createSignal(null as string | null);
   const [saving, setSaving] = createSignal(false);
+  const [renderedLint, setRenderedLint] = createSignal(null as string | null);
   const ansi_up = new AnsiUp();
   ansi_up.use_classes = true;
   createEffect(() => {

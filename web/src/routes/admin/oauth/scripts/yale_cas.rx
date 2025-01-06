@@ -1,0 +1,22 @@
+use ret2shell::oauth::cas;
+
+const AUTH_SERVER_URL = "https://ids.example.edu/authserver/serviceValidate";
+const ORIGINAL_SERVER_URL = "https://ctf.ret.sh.cn/account/oauth/";
+
+pub async fn login(params) {
+    let ticket = params.get("ticket")?;
+    let url = `${AUTH_SERVER_URL}?service=${ORIGINAL_SERVER_URL}&ticket=${ticket}`;
+    let result = http::get(url).await?.text().await?;
+    let ids_info = cas::get_info_from_yale_xml(result)?;
+
+    Ok(#{
+        auth_key: ids_info.id.clone(),
+        id: ids_info.id,
+        name: ids_info.name
+    })
+}
+
+pub async fn bind(params, user) {
+    Ok(login(params).await?)
+}
+

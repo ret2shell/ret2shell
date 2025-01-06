@@ -28,10 +28,6 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
     let cluster = state.cluster.clone();
     let queue = state.queue.clone();
     tokio::spawn(cluster_maintain_worker(state.clone(), cluster, queue));
-    let cluster = state.cluster.clone();
-    tokio::spawn(async move {
-      cluster.traffic.unwrap().cleanup_worker().await;
-    });
   }
   Router::new()
     .merge(

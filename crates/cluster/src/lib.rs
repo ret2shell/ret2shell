@@ -42,6 +42,10 @@ pub async fn initialize(config: &Option<cluster::Config>) -> Result<Cluster, Clu
   let client = Cluster::new(Some(client), &config);
   check_namespace(&client).await?;
   check_network_policy(&client).await?;
+  let cluster = client.clone();
+  tokio::spawn(async move {
+    cluster.traffic.unwrap().cleanup_worker().await;
+  });
   Ok(client)
 }
 

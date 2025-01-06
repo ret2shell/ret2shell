@@ -740,7 +740,22 @@
       "nameRequired": "請輸入組織名稱",
       "provider": "第三方身份驗證器",
       "providerNeeded": "請選擇第三方驗證器，留空為手動...",
-      "token": "管理密鑰"
+      "token": "管理密鑰",
+      "providerName": "驗證器名稱",
+      "providerNameRequired": "請輸入驗證器名稱",
+      "providerIdentifier": "驗證器標識",
+      "providerIdentifierRequired": "請輸入驗證器標識",
+      "providerIdentifierMinLength": "驗證器標識至少為 2 個字符",
+      "providerIdentifierMaxLength": "驗證器標識最多為 32 個字符",
+      "providerIdentifierPattern": "驗證器標識只能由小寫字母、數字和下劃線組成",
+      "providerPortalInvalid": "驗證器門戶地址不合法",
+      "providerPortal": "驗證器門戶地址（留空關閉登錄功能）",
+      "providerScript": "驗證器腳本",
+      "providerScriptRequired": "請輸入驗證器腳本",
+      "selectPresetScripts": "選擇預設腳本...",
+      "emailScript": "郵箱後綴驗證",
+      "yaleCasScript": "Edu CAS 登錄",
+      "oauth2AuthCodeScript": "OAuth2 授權碼模式"
     }
   },
   "theme": {

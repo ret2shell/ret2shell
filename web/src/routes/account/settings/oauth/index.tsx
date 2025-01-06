@@ -1,39 +1,28 @@
 import { handleHttpError } from "@api";
-import { getInstitutes, getOAuthStatus, unbindWithOAuth } from "@api/account";
-import { getAuthConfig } from "@api/platform";
-import { getLogo } from "@assets/brands";
-import type { AuthConfig } from "@models/config";
+import { getInstitutes, getOAuthProviders, getOAuthStatus, unbindWithOAuth } from "@api/account";
+import { mediaPath } from "@lib/utils/media";
 import type { Institute } from "@models/institute";
 import type { OAuth } from "@models/oauth";
+import type { OAuthProvider } from "@models/oauth-provider";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Link from "@widgets/link";
 import Tag from "@widgets/tag";
-import { For, Match, Show, Switch, createEffect, createMemo, createSignal, onMount, untrack } from "solid-js";
+import { For, Show, createEffect, createSignal, onMount, untrack } from "solid-js";
 
-function getOAuthLink(service: string) {
-  if (service.endsWith("_email")) {
-    return `${window.location.origin}/account/bind?service=${service}`;
+function getOAuthLink(service: OAuthProvider) {
+  if (!service.portal) {
+    return `${window.location.origin}/account/oauth?service=${service.provider}`;
   }
-  if (service.endsWith("_cas")) {
-    if (service.startsWith("xdu"))
-      return `https://ids.xidian.edu.cn/authserver/login?service=${window.location.origin}/account/bind?service=${service}`;
-    if (service.startsWith("xmu"))
-      return `https://ids.xmu.edu.cn/authserver/login?service=${window.location.origin}/account/bind?service=${service}`;
-  }
+  return service.portal;
 }
 
 export default function () {
-  const [authConfig, setAuthConfig] = createSignal({
-    signing_key: "",
-    buffer_time: 0,
-    expires_time: 0,
-    oauth_keys: {},
-  } as AuthConfig);
   const [institutes, setInstitutes] = createSignal([] as Institute[]);
   const [selfOAuthItems, setSelfOAuthItems] = createSignal([] as OAuth[]);
+  const [oauthServices, setOAuthServices] = createSignal([] as OAuthProvider[]);
   onMount(async () => {
     try {
       setInstitutes(await getInstitutes());
@@ -41,9 +30,9 @@ export default function () {
       handleHttpError(err as Error, t("errors.unknown")!);
     }
     try {
-      setAuthConfig(await getAuthConfig());
+      setOAuthServices(await getOAuthProviders());
     } catch (err) {
-      handleHttpError(err as Error, t("errors.unknown")!);
+      handleHttpError(err as Error, t("errors.500")!);
     }
   });
   async function refreshOAuthStatus() {
@@ -60,15 +49,6 @@ export default function () {
         refreshOAuthStatus();
       });
     }
-  });
-  const oauthServices = createMemo(() => {
-    const result = [];
-    const keys = Object.keys(authConfig().oauth_keys || {});
-    // console.log(keys);
-    for (const key of keys) {
-      if (authConfig().oauth_keys[key] !== null) result.push(key);
-    }
-    return result;
   });
 
   async function handleUnbind(id: number) {
@@ -91,18 +71,17 @@ export default function () {
           <For each={oauthServices()}>
             {(service) => (
               <div class="h-12 flex flex-row items-center border-b border-b-layer-content/10 space-x-2">
-                <img src={getLogo(service)} alt={service.toUpperCase()} class="w-5 h-5" />
+                <img src={mediaPath(service.avatar ?? "")} alt={service.name} class="w-5 h-5" />
                 <h4 class="font-bold text-start flex-1">
-                  {/* @ts-expect-error key is dynamic */}
-                  <span>{t(`account.oauth.${service}.title`) as string}</span>
+                  <span>{service.name}</span>
                 </h4>
-                <Show when={institutes().find((v) => v.provider === service)}>
+                <Show when={institutes().find((v) => v.provider === service.provider)}>
                   <Tag level="info">
-                    <span>{institutes().find((v) => v.provider === service)?.name}</span>
+                    <span>{institutes().find((v) => v.provider === service.provider)?.name}</span>
                   </Tag>
                 </Show>
                 <Show
-                  when={selfOAuthItems().find((v) => v.provider === service)}
+                  when={selfOAuthItems().find((v) => v.provider === service.provider)}
                   fallback={
                     <>
                       <span class="opacity-60">{t("account.oauth.notBind")}</span>
@@ -113,20 +92,11 @@ export default function () {
                   }
                 >
                   <span class="opacity-60">
-                    <Switch>
-                      <Match when={service.endsWith("cas")}>
-                        <span>{selfOAuthItems().find((v) => v.provider === service)?.data.name ?? "UNKNOWN"}</span>
-                        &nbsp;
-                        <span>({selfOAuthItems().find((v) => v.provider === service)?.data.id ?? "UNKNOWN"})</span>
-                      </Match>
-                      <Match when={service.endsWith("email")}>
-                        <span>{selfOAuthItems().find((v) => v.provider === service)?.data.email ?? "UNKNOWN"}</span>
-                      </Match>
-                    </Switch>
+                    {JSON.stringify(selfOAuthItems().find((v) => v.provider === service.provider)?.data)}
                   </span>
                   <Button
                     size="sm"
-                    onClick={() => handleUnbind(selfOAuthItems().find((v) => v.provider === service)!.id)}
+                    onClick={() => handleUnbind(selfOAuthItems().find((v) => v.provider === service.provider)!.id)}
                   >
                     {t("account.oauth.unbind")}
                   </Button>

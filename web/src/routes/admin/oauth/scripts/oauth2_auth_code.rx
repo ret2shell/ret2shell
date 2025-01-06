@@ -1,0 +1,35 @@
+const AUTH_SERVER_URL = "https://example.com/login/oauth/access_token";
+const DATA_SERVER_URL = "https://api.example.com/user";
+const CLIENT_ID = "";
+const CLIENT_SECRET = "";
+
+pub async fn login(params) {
+    let code = params.get("code")?;
+    let url = `${AUTH_SERVER_URL}?code=${code}&state=NOT_IMP0RTANT`;
+    let client = http::Client::new();
+    let token_resp = client.post(AUTH_SERVER_URL)
+                           .header("Accept", "application/json")
+                           .header("Content-Type", "application/json")
+                           .body_bytes(json::to_bytes(#{
+                               client_id: CLIENT_ID,
+                               client_secret: CLIENT_SECRET,
+                               code: code,
+                           })?).send().await?.json().await?;
+    let token = token_resp.access_token;
+    dbg(token);
+    let user = client.get(DATA_SERVER_URL)
+                     .header("Accept", "application/json")
+                     .header("User-Agent", "ret2shell/3")
+                     .header("Authorization", `Bearer ${token}`)
+                     .send().await?;
+    let user = user.json().await?;
+    Ok(#{
+        auth_key: user.login.clone(),
+        login: user.login,
+    })
+}
+
+pub async fn bind(params, user) {
+    Ok(login(params).await?)
+}
+

@@ -5,7 +5,7 @@ use serde_json::Value;
 use thiserror::Error;
 
 #[derive(Error, Debug, Any)]
-#[rune(item = ::ret2oauth::xml)]
+#[rune(item = ::ret2shell::oauth)]
 pub enum OAuthError {
   #[error("missing oauth field: {0}")]
   MissingField(String),
@@ -37,6 +37,8 @@ pub enum OAuthError {
   FromUtf8Error(#[from] std::string::FromUtf8Error),
   #[error("script error: {0}")]
   ScriptError(String),
+  #[error("serde error: {0}")]
+  SerdeError(#[from] serde_json::Error),
 }
 
 #[async_trait::async_trait]

@@ -45,7 +45,7 @@ impl MigrationTrait for Migration {
               .unique_key()
               .not_null(),
           )
-          .col(ColumnDef::new(OauthProvider::Script).text())
+          .col(ColumnDef::new(OauthProvider::Script).text().not_null())
           .col(ColumnDef::new(OauthProvider::Portal).string_len(255))
           .to_owned(),
       )

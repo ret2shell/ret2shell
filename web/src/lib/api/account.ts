@@ -4,6 +4,7 @@ import type { OAuth } from "@models/oauth";
 import type { User } from "@models/user";
 import type { DateTime } from "luxon";
 import api, { api_root } from ".";
+import type { OAuthProvider } from "@models/oauth-provider";
 
 export async function getCaptcha() {
   return await api.get(`${api_root}/account/captcha`).json<Captcha>();
@@ -94,17 +95,43 @@ export async function changePassword(req: { old_password: string; new_password: 
   return await api.patch(`${api_root}/account/password`, { json: req }).json();
 }
 
+export async function getOAuthProviders() {
+  return await api.get(`${api_root}/account/oauth/provider`).json<OAuthProvider[]>();
+}
+
+export async function getOAuthProvider(service: string) {
+  return await api
+    .get(`${api_root}/account/oauth/provider/${service}`)
+    .json<{ item: OAuthProvider; lint: string | null }>();
+}
+
+export async function updateOAuthProvider(service: string, req: OAuthProvider) {
+  return await api
+    .patch(`${api_root}/account/oauth/provider/${service}`, { json: req })
+    .json<{ item: OAuthProvider; lint: string | null }>();
+}
+
+export async function deleteOAuthProvider(service: string) {
+  return await api.delete(`${api_root}/account/oauth/provider/${service}`).json<void>();
+}
+
+export async function createOAuthProvider(req: OAuthProvider) {
+  return await api
+    .post(`${api_root}/account/oauth/provider`, { json: req })
+    .json<{ item: OAuthProvider; lint: string | null }>();
+}
+
 export async function loginWithOAuth(query: string) {
-  return await api.post(`${api_root}/account/oauth${query}`).json();
+  return await api.post(`${api_root}/account/oauth/login${query}`).json();
 }
 
 export async function bindWithOAuth(query: string) {
-  return await api.post(`${api_root}/account/bind${query}`).json();
+  return await api.post(`${api_root}/account/oauth/bind${query}`).json();
 }
 
 export async function unbindWithOAuth(id: number) {
   return await api
-    .delete(`${api_root}/account/bind`, {
+    .delete(`${api_root}/account/oauth/bind`, {
       searchParams: {
         id,
       },
@@ -113,7 +140,7 @@ export async function unbindWithOAuth(id: number) {
 }
 
 export async function getOAuthStatus() {
-  return await api.get(`${api_root}/account/bind`).json<OAuth[]>();
+  return await api.get(`${api_root}/account/oauth/bind`).json<OAuth[]>();
 }
 
 export async function updateInstitute(req: Institute) {

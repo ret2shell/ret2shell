@@ -1,10 +1,12 @@
 import { handleHttpError } from "@api";
-import { loginWithOAuth } from "@api/account";
+import { bindWithOAuth, getOAuthProviders, loginWithOAuth } from "@api/account";
 import LogoAnimate from "@assets/animates/logo-animate";
-import { getLogo } from "@assets/brands";
 // import xdsecMascotHappy from "@assets/imgs/xdsec-mascot-happy.webp";
 import logo from "@assets/logo-gray.svg";
+import { mediaPath } from "@lib/utils/media";
+import type { OAuthProvider } from "@models/oauth-provider";
 import { useLocation, useNavigate, useSearchParams } from "@solidjs/router";
+import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
@@ -16,19 +18,35 @@ export default function () {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams, _] = useSearchParams();
-  onMount(() => {
+  const [oauthServices, setOAuthServices] = createSignal([] as OAuthProvider[]);
+  onMount(async () => {
+    try {
+      setOAuthServices(await getOAuthProviders());
+    } catch (err) {
+      handleHttpError(err as Error, t("errors.500")!);
+    }
     setTimeout(() => {
       setAnimate(true);
     }, 100);
     setTimeout(() => {
-      handleLoginWithOAuth();
+      handleAction();
     }, 2000);
   });
+
   const brand = () => {
     const service = searchParams.service;
-    if (service) return getLogo(service as string);
+    const avatar = oauthServices().find((s) => s.name === service)?.avatar;
+    if (avatar) return mediaPath(avatar);
     return logo;
   };
+
+  async function handleAction() {
+    if (accountStore.token) {
+      handleBindWithOAuth();
+    } else {
+      handleLoginWithOAuth();
+    }
+  }
 
   async function handleLoginWithOAuth() {
     try {
@@ -48,6 +66,18 @@ export default function () {
     }
   }
 
+  async function handleBindWithOAuth() {
+    try {
+      await bindWithOAuth(location.search);
+      navigate("/account/settings/oauth", { replace: true });
+    } catch (err) {
+      handleHttpError(err as Error, t("account.oauth.failedToBind")!);
+      setTimeout(() => {
+        navigate("/account/settings/oauth", { replace: true });
+      });
+    }
+  }
+
   return (
     <>
       <Title page={t("account.oauth.title")} route="/account/oauth" />
@@ -58,16 +88,16 @@ export default function () {
             height={128}
             class={`transition-all duration-700 ${animate() ? "" : "translate-x-16 opacity-0"}`}
           />
-          <span class={`transition-all duration-700 ${animate() ? "opacity-60" : "translate-x-8 opacity-0"}`}>-*-</span>
+          {/* <span class={`transition-all duration-700 ${animate() ? "opacity-60" : "translate-x-8 opacity-0"}`}>-*-</span> */}
           {/* <img */}
           {/*   src={xdsecMascotHappy} */}
           {/*   alt="Broken" */}
           {/*   class={`w-24 h-24 animate-bounce transition-all duration-700 ${animate() ? "" : "translate-y-6 opacity-0"}`} */}
           {/* /> */}
-          <span class={`transition-all duration-700 ${animate() ? "opacity-60" : "-translate-x-8 opacity-0"}`}>
-            -*-
-          </span>
-
+          {/* <span class={`transition-all duration-700 ${animate() ? "opacity-60" : "-translate-x-8 opacity-0"}`}> */}
+          {/*   -*- */}
+          {/* </span> */}
+          <span class="text-2xl font-bold">+</span>
           <img
             src={brand()}
             alt="Brand"

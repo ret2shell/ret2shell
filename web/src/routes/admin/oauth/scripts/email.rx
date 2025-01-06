@@ -1,0 +1,18 @@
+const EMAIL_DOMAIN_SUFFIX = "user.ret.sh.cn";
+
+pub async fn login(params) {
+    Err("DISABLED")
+}
+
+pub async fn bind(params, user) {
+    let email = user.get("email")?;
+
+    if email.ends_with(EMAIL_DOMAIN_SUFFIX) {
+        Ok(#{
+            auth_key: email.clone(),
+            email: email
+        })
+    } else {
+        Err("Invalid")
+    }
+}

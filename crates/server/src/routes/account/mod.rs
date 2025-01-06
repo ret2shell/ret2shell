@@ -1,4 +1,4 @@
-use std::{collections::HashMap, net::IpAddr};
+use std::net::IpAddr;
 
 use axum::{
   extract::{Query, State},
@@ -18,7 +18,6 @@ use r2s_database::{
 };
 use r2s_email::{EmailCtx, EmailRequest};
 use r2s_migrator::Database;
-use r2s_oauth::OAuth;
 use r2s_queue::Queue;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
@@ -35,16 +34,11 @@ use crate::{
 
 mod captcha;
 mod institute;
+mod oauth;
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
   Router::new()
     .route("/code", get(get_account_code).post(generate_account_code))
-    .route(
-      "/bind",
-      get(get_oauth_status)
-        .post(bind_oauth_account)
-        .delete(unbind_oauth_account),
-    )
     .route_layer(middleware::from_fn(permission_required_all!(
       Permission::Verified
     )))
@@ -62,7 +56,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
     .route_layer(middleware::from_fn(permission_required_all!(
       Permission::Basic
     )))
-    .route("/oauth", post(login_with_oauth_account))
+    .nest("/oauth", oauth::router(state))
     .route("/verify", post(verify_email))
     .route("/reset", post(reset_password))
     .route("/forgot", post(forgot_password))
@@ -900,216 +894,5 @@ async fn delete_self(
   }
   cache.at("token").del(format!("user-{}", user.id)).await?;
   user::update(&db.conn, user).await?;
-  Ok(StatusCode::OK)
-}
-
-async fn login_with_oauth_account(
-  State(db): State<Database>, State(oauth): State<OAuth>,
-  Extension(token_tracker): Extension<TokenTracker>, Query(params): Query<HashMap<String, String>>,
-) -> Result<impl IntoResponse, ResponseError> {
-  let provider = params
-    .get("service")
-    .ok_or(ResponseError::BadRequest("service required".to_owned()))?;
-  let provider_str = provider.as_str();
-  let provider = match oauth.get_provider(provider_str) {
-    Some(provider) => provider,
-    None => {
-      return Err(ResponseError::BadRequest("service not found".to_owned()));
-    }
-  };
-  let (auth_id, _) = provider.login("", "", params.clone()).await?;
-  let oauth_item = r2s_database::oauth::get_by_auth_key(&db.conn, provider_str, &auth_id).await?;
-  if let Some(item) = oauth_item {
-    let user = user::get(&db.conn, item.user_id).await?;
-    let user = match user {
-      Some(user) => user,
-      None => {
-        return Err(ResponseError::NotFound("user not found".to_owned()));
-      }
-    };
-    info!(
-      "User logged in via oauth {provider_str}: {}:'{}' ({}) <{}>",
-      user.id,
-      user.account,
-      user.nickname,
-      user.email.unwrap_or_default()
-    );
-    *(token_tracker.token.lock().await) = Token {
-      id: user.id,
-      account: user.account.clone(),
-      nickname: user.nickname.clone(),
-      permissions: user.permissions,
-      ..Default::default()
-    };
-    token_tracker
-      .renew_requested
-      .store(true, std::sync::atomic::Ordering::Relaxed);
-
-    Ok(StatusCode::OK)
-  } else {
-    Err(ResponseError::NotFound(
-      "oauth account not found".to_owned(),
-    ))
-  }
-}
-
-async fn get_oauth_status(
-  State(db): State<Database>, Extension(token): Extension<Token>,
-) -> Result<impl IntoResponse, ResponseError> {
-  let oauth_items = r2s_database::oauth::get_list_ex(&db.conn, token.id).await?;
-  Ok(Json(oauth_items))
-}
-
-async fn bind_oauth_account(
-  State(db): State<Database>, State(cache): State<Cache>, State(oauth): State<OAuth>,
-  Extension(token): Extension<Token>, Query(params): Query<HashMap<String, String>>,
-) -> Result<impl IntoResponse, ResponseError> {
-  let action_times = cache.at("oauth").get::<i64>(token.id).await?;
-  if action_times.is_some() && action_times.unwrap() > 5 {
-    return Err(ResponseError::TooManyRequests(
-      "too many requests, please try again 15 mins later".to_owned(),
-      format!(
-        "user {} has requested change oauth account too many times",
-        token.id
-      ),
-    ));
-  }
-  cache.at("oauth").incr(token.id).await?;
-  cache.at("oauth").expire(token.id, 15 * 60).await?;
-  let user = user::get(&db.conn, token.id).await?;
-  let user = match user {
-    Some(user) => user,
-    None => {
-      return Err(ResponseError::NotFound("user not found".to_owned()));
-    }
-  };
-  let provider = params
-    .get("service")
-    .ok_or(ResponseError::BadRequest("service required".to_owned()))?;
-  let provider_str = provider.as_str();
-  let provider = match oauth.get_provider(provider_str) {
-    Some(provider) => provider,
-    None => {
-      return Err(ResponseError::BadRequest("service not found".to_owned()));
-    }
-  };
-  let (auth_key, data) = provider
-    .login(&user.account, &user.email.unwrap(), params.clone())
-    .await?;
-  let bind_institute = r2s_database::institute::get_by_provider(&db.conn, provider_str).await?;
-  let oauth_item = r2s_database::oauth::Model {
-    id: 0,
-    user_id: token.id,
-    provider: provider_str.to_owned(),
-    auth_key,
-    institute_id: bind_institute.clone().map(|i| i.id),
-    data: Some(data),
-    created_at: Utc::now(),
-    updated_at: Utc::now(),
-  };
-  r2s_database::oauth::create(&db.conn, oauth_item).await?;
-  if let Some(institute) = bind_institute {
-    let user = user::get(&db.conn, token.id).await?;
-    let user = match user {
-      Some(user) => user,
-      None => {
-        return Err(ResponseError::NotFound("user not found".to_owned()));
-      }
-    };
-    user::update(
-      &db.conn,
-      user::Model {
-        id: user.id,
-        institute_id: Some(institute.id),
-        ..user
-      },
-    )
-    .await?;
-  }
-  Ok(StatusCode::OK)
-}
-
-#[derive(Deserialize)]
-struct UnbindOAuthRequest {
-  pub id: i64,
-}
-
-async fn unbind_oauth_account(
-  State(db): State<Database>, State(cache): State<Cache>, Extension(token): Extension<Token>,
-  Query(params): Query<UnbindOAuthRequest>,
-) -> Result<impl IntoResponse, ResponseError> {
-  let action_times = cache.at("oauth").get::<i64>(token.id).await?;
-  if action_times.is_some() && action_times.unwrap() > 5 {
-    return Err(ResponseError::TooManyRequests(
-      "too many requests, please try again 15 mins later".to_owned(),
-      format!(
-        "user {} has requested change oauth account too many times",
-        token.id
-      ),
-    ));
-  }
-  cache.at("oauth").incr(token.id).await?;
-  cache.at("oauth").expire(token.id, 15 * 60).await?;
-  let oauth_item = r2s_database::oauth::get(&db.conn, params.id).await?;
-  let oauth_item = match oauth_item {
-    Some(item) => item,
-    None => {
-      return Err(ResponseError::NotFound(
-        "oauth account not found".to_owned(),
-      ));
-    }
-  };
-  if oauth_item.institute_id.is_some() {
-    let games = game::get_list(&db.conn, Some(Utc::now()), None, None, Some(Utc::now())).await?;
-    for game in games {
-      if team::get_by_user_id(&db.conn, game.id, token.id)
-        .await?
-        .is_some()
-      {
-        return Err(ResponseError::Forbidden(
-          "you can not unbind oauth account before game archived".to_owned(),
-          format!(
-            "user {}:'{}' ({}) want to unbind oauth account {}:'{}' before game {}:'{}' archived",
-            token.id,
-            token.account,
-            token.nickname,
-            oauth_item.provider,
-            oauth_item.auth_key,
-            game.id,
-            game.name
-          ),
-        ));
-      }
-    }
-  }
-  if oauth_item.user_id != token.id {
-    return Err(ResponseError::Forbidden(
-      "you can only unbind your own oauth account".to_owned(),
-      format!(
-        "user {}:'{}' ({}) want to unbind oauth account {}:'{}' which is not belong to him",
-        token.id, token.account, token.nickname, oauth_item.provider, oauth_item.auth_key
-      ),
-    ));
-  };
-  r2s_database::oauth::delete(&db.conn, oauth_item.id).await?;
-  if oauth_item.institute_id.is_some() {
-    let user = user::get(&db.conn, token.id).await?;
-    let user = match user {
-      Some(user) => user,
-      None => {
-        return Err(ResponseError::NotFound("user not found".to_owned()));
-      }
-    };
-    user::update(
-      &db.conn,
-      user::Model {
-        id: user.id,
-        institute_id: None,
-        ..user
-      },
-    )
-    .await?;
-  }
-
   Ok(StatusCode::OK)
 }
