@@ -24,3 +24,4 @@ pub mod m_20241122_000002_challenge_timeline;
 pub mod m_20241122_000003_game_cluster_configs;
 pub mod m_20241220_000001_game_award_rates;
 pub mod m_20241226_000001_game_traffic;
+pub mod m_20250105_000001_create_oauth_provider;

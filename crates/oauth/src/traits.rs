@@ -1,9 +1,11 @@
 use std::collections::HashMap;
 
+use rune::Any;
 use serde_json::Value;
 use thiserror::Error;
 
-#[derive(Debug, Error)]
+#[derive(Error, Debug, Any)]
+#[rune(item = ::ret2oauth::xml)]
 pub enum OAuthError {
   #[error("missing oauth field: {0}")]
   MissingField(String),
@@ -15,6 +17,26 @@ pub enum OAuthError {
   AdapterUnavailable(String),
   #[error("invalid email: {0}")]
   InvalidEmail(String),
+  #[error("Rune context error: {0}")]
+  RuneError(#[from] rune::ContextError),
+  #[error("Can not load script source: {0}")]
+  SourceError(#[from] rune::source::FromPathError),
+  #[error("Can not build script unit: {0}")]
+  BuildError(#[from] rune::BuildError),
+  #[error("Can not alloc script engine runtime: {0}")]
+  AllocError(#[from] rune::alloc::Error),
+  #[error("Executed script error: {0}")]
+  ExecError(#[from] rune::runtime::VmError),
+  #[error("Compile error: {0}")]
+  CompileError(String),
+  #[error("Missing function: {0}")]
+  MissingFunction(String),
+  #[error("Failed to emit diagnostics: {0}")]
+  DiagnosticsError(#[from] rune::diagnostics::EmitError),
+  #[error("String UTF-8 decode error: {0}")]
+  FromUtf8Error(#[from] std::string::FromUtf8Error),
+  #[error("script error: {0}")]
+  ScriptError(String),
 }
 
 #[async_trait::async_trait]

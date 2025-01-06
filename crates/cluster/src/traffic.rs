@@ -193,7 +193,7 @@ impl TrafficMapper {
       tokio::time::sleep(tokio::time::Duration::from_secs(15 * 60)).await;
       tracing::debug!("Running traffic mapper cleanup...");
       self.cleanup().await;
-      tracing::trace!("Live checkers: {:?}", self.contexts.read().await.keys());
+      tracing::trace!("Live mappers: {:?}", self.contexts.read().await.keys());
     }
   }
 }

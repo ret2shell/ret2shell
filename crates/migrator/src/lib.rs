@@ -38,6 +38,7 @@ impl MigratorTrait for Migrator {
       Box::new(migrations::m_20241122_000003_game_cluster_configs::Migration),
       Box::new(migrations::m_20241220_000001_game_award_rates::Migration),
       Box::new(migrations::m_20241226_000001_game_traffic::Migration),
+      Box::new(migrations::m_20250105_000001_create_oauth_provider::Migration),
     ]
   }
 }
