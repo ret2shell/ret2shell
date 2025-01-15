@@ -303,10 +303,12 @@
       "dropCap": "No privileged run (no privileged port permissions)",
       "hintHistory": "Hint Status",
       "hintHistoryTips": "Who bought my question?",
-      "chatQuickReply1": "Please think independently and solve the challenge.",
-      "chatQuickReply2": "Please read the competition rules and handbook carefully.",
-      "chatQuickReply3": "Think again, and keep going!",
-      "chatQuickReply4": "Don't worry, think again.",
+      "chatQuickReplies": [
+        "Please think independently and solve the challenge.",
+        "Please read the competition rules and handbook carefully.",
+        "Think again, and keep going!",
+        "Don't worry, think again."
+      ],
       "hammerTips3": "For logs, code, and other lengthy messages, it is recommended to use a web pasteboard to send, for example:",
       "hammerHowto": "How to use Markdown?",
       "hammerSend": "Send",
