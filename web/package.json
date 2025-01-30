@@ -54,7 +54,7 @@
     "remark-rehype": "^11.1.1",
     "sakana-widget": "^2.7.0",
     "shell-quote": "^1.8.2",
-    "shiki": "^1.29.1",
+    "shiki": "^2.1.0",
     "solid-js": "^1.9.4",
     "solid-transition-group": "^0.2.3",
     "strip-ansi": "^7.1.0",
