@@ -25,7 +25,7 @@ argon2             = "0.5"
 async-nats         = "0.38"
 async-trait        = "0.1"
 base64             = "0.22"
-bcrypt             = "0.16"
+bcrypt             = "0.17"
 biosvg             = "0.1"
 build-target       = "0.4"
 chrono             = { version = "0.4", features = ["serde"] }
