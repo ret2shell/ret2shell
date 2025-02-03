@@ -43,7 +43,7 @@ corepack enable pnpm
 
 #### Generate license
 
-Ret2Shell server binary has public key `priv.bin` (in [config/](config/)) integrated. It will check the `license` file (in [config/](config/)) which is signed by the paired private key, at the startup.
+Ret2Shell server binary has public key `pub.bin` (in [config/](config/)) integrated. It will check the `license` file (in [config/](config/)) which is signed by the paired private key, at the startup.
 
 To generate a new CA with `priv.bin` and `pub.bin`, please run:
 
@@ -71,7 +71,7 @@ pnpm install
 
 #### Setup other services
 
-See [deploy/nginx-http.dev.conf](deploy/nginx-http.dev.conf). You could put it into your nginx config directory like `/etc/nginx/sites-enabled/`.
+See [deploy/nginx-http.dev.conf](deploy/nginx-http.dev.conf). You could put it into your nginx configuration directory like `/etc/nginx/sites-enabled/`.
 
 You may need other services like database, redis to be configured, please refer to [deploy/docker-compose.dev.yml](deploy/docker-compose.dev.yml).
 
