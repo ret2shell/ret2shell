@@ -81,7 +81,7 @@
     "@tailwindcss/vite": "^4.0.3",
     "@types/howler": "^2.2.12",
     "@types/luxon": "^3.4.2",
-    "@types/node": "^22.13.0",
+    "@types/node": "^22.13.1",
     "@types/shell-quote": "^1.7.5",
     "kubernetes-types": "^1.30.0",
     "tailwindcss": "^4.0.3",
