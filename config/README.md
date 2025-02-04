@@ -2,7 +2,7 @@
 
 ## `config.toml` (required)
 
-> provided as [config.example.toml](config.example.toml) at this directory.
+> provided as [config.sample.toml](config.sample.toml) at this directory.
 
 The example configuration file for ret2shell.
 
@@ -29,7 +29,6 @@ The license file for ret2shell.
 >   ```shell
 >   cargo run --bin r2s-license -- new --ca ./config/priv.bin --path ./config/ --issuer '<Organization>' --website '<Domain>' --level enterprise --date 2077-01-01
 >   ```
->
 
 ## `sensitive_word_list.txt`
 

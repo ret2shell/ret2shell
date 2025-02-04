@@ -75,7 +75,7 @@ See [deploy/nginx-http.dev.conf](deploy/nginx-http.dev.conf). You could put it i
 
 You may need other services like database, redis to be configured, please refer to [deploy/docker-compose.dev.yml](deploy/docker-compose.dev.yml).
 
-Copy [config/config.example.toml](config/config.exmaple.toml) to `config/config.toml`, and modify it to fit your environment.
+Copy [config/config.sample.toml](config/config.sample.toml) to `config/config.toml`, and modify it to fit your environment.
 
 For other deployments, see at [deploy/](deploy/).
 
