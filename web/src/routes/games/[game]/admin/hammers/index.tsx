@@ -8,12 +8,12 @@ import {
 } from "@api/game";
 // import xdsecMascotCiallo from "@assets/imgs/xdsec-mascot-ciallo.webp";
 import platformAvatar from "@assets/imgs/rx.webp";
+import { m_chat } from "@lib/i18n/chats";
 // import { stickerSet } from "@assets/stickers";
 import { mediaPath } from "@lib/utils/media";
 import type { Challenge } from "@models/challenge";
 import type { Chat } from "@models/chat";
 import type { Team } from "@models/team";
-import { Flatten } from "@solid-primitives/i18n";
 import { A, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { gameStore } from "@storage/game";
@@ -32,10 +32,7 @@ import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
 import { TransitionGroup } from "solid-transition-group";
 
-const chatModule = import.meta.glob<typeof import("@lib/i18n/chats/zh-cn.json")>("@lib/i18n/chats/*.json");
-const match = chatModule[`@lib/i18n/chats/${themeStore.locale}.json`];
-
-const quickReplies = (await match()).quickReplies ?? [];
+const chatConfig = await m_chat(themeStore.locale);
 
 function mergeChats(
   challengeId: number,
@@ -375,7 +372,7 @@ export default function () {
                         defer
                       >
                         <div class="flex flex-col space-y-2">
-                          <For each={quickReplies}>
+                          <For each={chatConfig.quickReplies ?? []}>
                             {(reply) => (
                               <Button
                                 size="sm"
