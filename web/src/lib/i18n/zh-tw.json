@@ -690,7 +690,7 @@
       "title": "集群管理",
       "unavailable": "集群已離線，狀態不可用",
       "available": "正常運行，集群 API 可用",
-      "failedToFetchNodes": "獲取集群���點信息失敗",
+      "failedToFetchNodes": "獲取集群節點信息失敗",
       "refreshNode": "刷新節點狀態",
       "disconnectNode": "斷開節點",
       "updateNode": "升級節點",
