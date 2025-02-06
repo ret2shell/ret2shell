@@ -268,7 +268,6 @@
       "dropCap": "无特权运行（无特权端口权限）",
       "hintHistory": "提示情况",
       "hintHistoryTips": "谁买了我的题？",
-      "chatQuickReplies": ["请独立思考并解题。", "请仔细阅读参赛须知和手册。", "再想一想，加油！", "别着急，再想想。"],
       "hammerTips3": "日志、代码等过长的消息建议使用网络剪贴板发送，例如：",
       "hammerHowto": "如何使用 Markdown？",
       "hammerSend": "发送",

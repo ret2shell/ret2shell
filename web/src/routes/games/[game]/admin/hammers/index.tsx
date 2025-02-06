@@ -13,11 +13,12 @@ import { mediaPath } from "@lib/utils/media";
 import type { Challenge } from "@models/challenge";
 import type { Chat } from "@models/chat";
 import type { Team } from "@models/team";
+import { Flatten } from "@solid-primitives/i18n";
 import { A, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { gameStore } from "@storage/game";
 import { Title } from "@storage/header";
-import { fullTheme, t } from "@storage/theme";
+import { fullTheme, t, themeStore } from "@storage/theme";
 import Article from "@widgets/article";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
@@ -31,7 +32,10 @@ import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
 import { TransitionGroup } from "solid-transition-group";
 
-const quickReplies = t("game.challenge.chatQuickReplies") ?? [];
+const chatModule = import.meta.glob<typeof import("@lib/i18n/chats/zh-cn.json")>("@lib/i18n/chats/*.json");
+const match = chatModule[`@lib/i18n/chats/${themeStore.locale}.json`];
+
+const quickReplies = (await match()).quickReplies ?? [];
 
 function mergeChats(
   challengeId: number,
