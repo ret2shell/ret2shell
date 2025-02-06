@@ -6,22 +6,12 @@ export type RawChatDict = typeof rawChatDict;
 
 export async function m_chat(locale: Locale): Promise<RawChatDict> {
   let dict: RawChatDict;
-  // NOTE: workaround for dynamic import
-  switch (locale) {
-    case "en_us":
-      dict = await import("./en-us.json");
-      break;
-    case "zh_cn":
-      dict = await import("./zh-cn.json");
-      break;
-    case "zh_tw":
-      dict = await import("./zh-tw.json");
-      break;
-    case "ja_jp":
-      dict = await import("./ja-jp.json");
-      break;
-    default:
-      dict = await import("./zh-cn.json");
+  const dictModules = import.meta.glob("./*.json");
+  const match = dictModules[`./${locale.replace("_", "-")}.json`];
+  try {
+    dict = (await match()) as RawChatDict;
+  } catch {
+    dict = await import("./zh-cn.json");
   }
   return dict;
 }

@@ -958,8 +958,7 @@
       "invalidLink": "链接无效，请检查邮箱重置链接是否一致",
       "confirm": "重置"
     },
-    "emailNotVerified": "你的账户邮箱尚未通过验证，功能受限",
-    "verify": {}
+    "emailNotVerified": "你的账户邮箱尚未通过验证，功能受限"
   },
   "instance": {
     "disconnected": "WSRX 未连接",
