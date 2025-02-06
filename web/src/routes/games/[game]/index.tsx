@@ -26,6 +26,7 @@ import Link from "@widgets/link";
 import Picture from "@widgets/picture";
 import Tag from "@widgets/tag";
 import Timer from "@widgets/timer";
+import EditFlag from "@assets/icons/edit-flag";
 
 import bgGameDefault from "@assets/imgs/bg-game-default.webp";
 import { useSearchParams } from "@solidjs/router";
@@ -38,7 +39,7 @@ function BannedWarning() {
   const [close, setClose] = createSignal(false);
   return (
     <Show when={!close()}>
-      <div class="bg-error/60 backdrop-blur fixed top-16 left-0 right-0 bottom-0 flex flex-col space-y-8 items-center justify-center">
+      <div class="bg-error/60 backdrop-blur-sm fixed top-16 left-0 right-0 bottom-0 flex flex-col space-y-8 items-center justify-center">
         <span class="icon-[fluent--warning-20-filled] w-12 h-12" />
         <span class="font-bold text-2xl">{t("game.team.banned")}</span>
         <span>{t("game.team.bannedTips1")}</span>
@@ -223,7 +224,7 @@ export default function () {
   return (
     <>
       <div class="flex-1 flex flex-col lg:flex-row-reverse">
-        <div class="lg:w-1/3 max-h-[calc(100vh-4rem)] lg:sticky lg:top-16 lg:left-0 flex flex-col backdrop-blur border-b border-b-layer-content/10 lg:border-b-0 lg:backdrop-blur-none p-3 lg:p-6 space-y-2">
+        <div class="lg:w-1/3 max-h-[calc(100vh-4rem)] lg:sticky lg:top-16 lg:left-0 flex flex-col backdrop-blur-sm border-b border-b-layer-content/10 lg:border-b-0 lg:backdrop-blur-none p-3 lg:p-6 space-y-2">
           <Card contentClass="relative">
             <Picture
               class="aspect-video"
@@ -255,13 +256,13 @@ export default function () {
                     disabled={coverSet()}
                   >
                     <input type="file" class="hidden" ref={logoInput!} onChange={handleSelectedLogo} />
-                    <Show when={logoSet()} fallback={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}>
+                    <Show when={logoSet()} fallback={<EditFlag class="w-5 h-5" />}>
                       <span class="icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5 text-primary" />
                     </Show>
                   </Button>
                 </div>
               </Show>
-              <h2 class="font-bold p-4 rounded-lg bg-layer/50 backdrop-blur flex flex-row space-x-2 w-full">
+              <h2 class="font-bold p-4 rounded-lg bg-layer/50 backdrop-blur-sm flex flex-row space-x-2 w-full">
                 <div class="mx-4">
                   <Show
                     when={gameStore.current?.logo}

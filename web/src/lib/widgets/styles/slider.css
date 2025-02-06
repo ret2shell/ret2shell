@@ -1,0 +1,44 @@
+@layer components {
+  .slider {
+    @apply flex flex-col;
+    .slider-label {
+      @apply flex flex-row justify-between items-end;
+    }
+
+    .slider-control {
+      @apply inline-flex flex-row items-center h-8 cursor-pointer;
+    }
+
+    .slider-track {
+      @apply bg-layer-content/15 rounded-full h-[2px] transition-[width] transition-[height] flex-1;
+    }
+
+    .slider-range {
+      @apply bg-primary rounded-full h-[2px] transition-all;
+    }
+
+    .slider-thumb {
+      @apply outline-hidden bg-layer border-4 border-layer-content/60 w-5 h-5 rounded-full transition-all;
+    }
+
+    &.slider-vertical {
+      @apply flex-row;
+
+      .slider-label {
+        @apply flex-row [writing-mode:vertical-rl] w-4;
+      }
+
+      .slider-control {
+        @apply inline-flex flex-col-reverse items-center w-8 h-auto cursor-pointer;
+      }
+
+      .slider-track {
+        @apply w-[2px] transition-[width] transition-[height] h-auto flex-1;
+      }
+
+      .slider-range {
+        @apply w-[2px] h-auto;
+      }
+    }
+  }
+}

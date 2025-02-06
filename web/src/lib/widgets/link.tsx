@@ -1,7 +1,8 @@
 import Spin from "@assets/animates/spin";
 import { A, useMatch } from "@solidjs/router";
-import { type ComponentProps, type JSX, Show, children, createMemo } from "solid-js";
+import { type ComponentProps, type JSX, Show, children } from "solid-js";
 import type { ButtonProps } from "./button";
+import clsx from "clsx";
 
 export type LinkProps = {
   activeMatch?: "exact" | "partial";
@@ -11,38 +12,33 @@ export type LinkProps = {
 
 export default function (props: ComponentProps<"a"> & ButtonProps & LinkProps & { children?: JSX.Element }) {
   const match = useMatch(() => (props.activeMatch === "exact" ? props.href! : `${props.href}/*`));
-  const classList = createMemo(() => {
-    return {
-      btn: true,
+  const className = () =>
+    clsx(
+      "btn",
       // btn-primary btn-info btn-success btn-warning btn-error
-      [`btn-${props.level}`]: !!props.level,
+      !!props.level && `btn-${props.level}`,
       // btn-sm btn-md
-      [`btn-${props.size || "md"}`]: true,
-      "btn-ghost": props.ghost,
-      "btn-bold": props.bold,
+      `btn-${props.size || "md"}`,
+      props.ghost && "btn-ghost",
+      props.bold && "btn-bold",
       // justify-start justify-center justify-end
-      [`justify-${props.justify || "center"}`]: true,
-      uppercase: props.uppercase,
-      "btn-disabled": props.disabled,
-      "btn-square": props.square,
-      "btn-active": props.activeMatch ? Boolean(match()) : props.active,
-    };
-  });
-  const className = createMemo(() => {
-    return Object.keys(classList())
-      .filter((key) => classList()[key])
-      .join(" ");
-  });
+      `justify-${props.justify || "center"}`,
+      props.uppercase && "uppercase",
+      props.square && "btn-square",
+      props.activeMatch ? Boolean(match()) && "btn-active" : props.active && "btn-active",
+      props.class,
+      props.classList
+    );
   return (
     <Show
       when={!props.disabled}
       fallback={
-        <div class={`${className()} ${props.class}`.trim()} title={props.title}>
+        <div class={className()} title={props.title}>
           {children(() => props.children)()}
         </div>
       }
     >
-      <A {...props} href={props.href ?? "#"} type={props.type} class={`${className()} ${props.class}`.trim()}>
+      <A {...props} href={props.href ?? "#"} type={props.type} class={className()}>
         <Show when={props.loading}>
           <Spin />
         </Show>

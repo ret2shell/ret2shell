@@ -4,6 +4,7 @@ import { mediaPath } from "@lib/utils/media";
 import { useLocation, useNavigate } from "@solidjs/router";
 import { gameStore } from "@storage/game";
 import LoadingTips from "@widgets/loading-tips";
+import clsx from "clsx";
 import { type ComponentProps, Show, createEffect, createSignal, untrack } from "solid-js";
 
 export default function (props: ComponentProps<"div">) {
@@ -46,15 +47,19 @@ export default function (props: ComponentProps<"div">) {
   return (
     <div
       {...props}
-      class={`fixed w-full top-0 left-0 overflow-hidden lg:overflow-clip transition-all ease-in-out z-50 duration-500 ${
-        expanded() ? "h-full" : "h-0"
-      } ${props.class}`.trim()}
+      class={clsx(
+        "fixed w-full top-0 left-0 overflow-hidden lg:overflow-clip transition-all ease-in-out z-50 duration-500",
+        expanded() ? "h-full" : "h-0",
+        props.class,
+        props.classList
+      )}
     >
       <div class="w-screen h-screen relative bg-layer">
         <img
-          class={`w-screen h-screen transition-all ease-out duration-[2000ms] object-cover ${
-            expanded() ? "scale-125 blur-md" : ""
-          }`.trim()}
+          class={clsx(
+            "w-screen h-screen transition-all ease-out duration-[2000ms] object-cover",
+            expanded() && "scale-125 blur-md"
+          )}
           alt="Cover"
           src={
             (gameStore.preload?.cover && mediaPath(gameStore.preload.cover)) ||
@@ -63,12 +68,16 @@ export default function (props: ComponentProps<"div">) {
           }
         />
         <div
-          class={`absolute top-0 left-0 w-screen h-screen flex flex-col items-center justify-center transition-all duration-1000 ${expanded() ? "bg-layer/80" : "bg-layer/20"}`.trim()}
+          class={clsx(
+            "absolute top-0 left-0 w-screen h-screen flex flex-col items-center justify-center transition-all duration-1000",
+            expanded() ? "bg-layer/80" : "bg-layer/20"
+          )}
         >
           <div
-            class={`aspect-square h-48 transition-all ease-out duration-500 delay-500 ${
+            class={clsx(
+              "aspect-square h-48 transition-all ease-out duration-500 delay-500",
               expanded() ? "" : "scale-150 blur-xl opacity-0 rotate-90"
-            }`}
+            )}
           >
             <Show when={gameStore.current?.logo} fallback={<LogoAnimate class="w-full h-full object-contain" />}>
               <img
@@ -79,9 +88,10 @@ export default function (props: ComponentProps<"div">) {
             </Show>
           </div>
           <div
-            class={`flex flex-col items-center space-y-4 transition-all ease-out duration-500 delay-1000 overflow-hidden mt-8 ${
+            class={clsx(
+              "flex flex-col items-center space-y-4 transition-all ease-out duration-500 delay-1000 overflow-hidden mt-8",
               expanded() ? "h-32" : "h-0"
-            }`}
+            )}
           >
             <h1 class="text-4xl font-bold">{gameStore.current?.name}</h1>
             <p class="text-base opacity-60">{gameStore.current?.brief}</p>

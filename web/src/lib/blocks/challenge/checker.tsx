@@ -1,3 +1,4 @@
+import { handleHttpError } from "@api";
 import { getChallengeCheckerScript, updateChallengeCheckerScript } from "@api/game";
 import type { Challenge } from "@models/challenge";
 import { challengeStore } from "@storage/challenge";
@@ -14,7 +15,6 @@ import dynamicLeetChecker from "./scripts/dynamic-leet.rx";
 import dynamicUuidChecker from "./scripts/dynamic-uuid.rx";
 import mappedChecker from "./scripts/mapped.rx";
 import simpleChecker from "./scripts/simple.rx";
-import { handleHttpError } from "@api";
 
 type PresetChecker = "simple" | "mapped" | "dynamic-leet" | "dynamic-uuid";
 
@@ -25,6 +25,53 @@ const checkerMap = {
   "dynamic-uuid": dynamicUuidChecker,
 };
 
+class Tmpl {
+  context: Record<string, any>;
+  constructor(context: Record<string, any>) {
+    this.context = context;
+  }
+
+  static with_context(context: Record<string, any>) {
+    return new Tmpl(context);
+  }
+
+  // from expression to value
+  protected handleToken(token: string, callable: boolean, args: any[]) {
+    if (!Object.prototype.hasOwnProperty.call(checkerCtx, token)) {
+      throw new Error(`Cannot find token in context: ${token}`);
+    }
+    if (callable) return this.context[token].apply(checkerCtx, args);
+    return this.context[token];
+  }
+
+  private result2str(result: any) {
+    if (result === null || typeof result === "undefined") return String(result);
+    if (Object.prototype.hasOwnProperty.call(result, "toString")) return result.toString();
+    if (Object.prototype.hasOwnProperty.call(Object.getPrototypeOf(result), "toString")) return result.toString();
+    return String(result);
+  }
+
+  // replace tokens in %token% format
+  execute(tmpl: string) {
+    const reg = /%([a-zA-Z_]\w*)(\((.*?)\))?%/g;
+    return tmpl.replace(reg, (_match, token: string, _callable?: string, _args?: string) => {
+      try {
+        return this.result2str(this.handleToken(token, !!_callable, _args ? JSON.parse(`[${_args}]`) : []));
+      } catch (err) {
+        console.error(err);
+        return _match;
+      }
+    });
+  }
+}
+
+const checkerCtx = {
+  RANDSTR(n: number) {
+    const alphabet = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    return Array.from({ length: n }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
+  },
+} as const;
+
 export default function (_props: {
   onStateChange?: (challenge?: Challenge) => void;
   inGame?: boolean;
@@ -32,7 +79,7 @@ export default function (_props: {
   const [preset, setPreset] = createSignal(null as PresetChecker | null);
   const presetChecker = createMemo(() => {
     if (!preset()) return null;
-    return checkerMap[preset()!];
+    return Tmpl.with_context(checkerCtx).execute(checkerMap[preset()!]);
   });
   const [script, setScript] = createSignal("");
   const [lint, setLint] = createSignal(null as string | null);
@@ -56,7 +103,7 @@ export default function (_props: {
   createEffect(() => {
     if (presetChecker()) {
       untrack(() => {
-        setScript(presetChecker());
+        setScript(presetChecker()!);
       });
     }
   });

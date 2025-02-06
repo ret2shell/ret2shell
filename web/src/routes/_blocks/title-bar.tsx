@@ -5,7 +5,7 @@ import { HostType } from "@models/game";
 import { Permission } from "@models/user";
 import { useLocation, useParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
-import { canAccessChallenges, gameStore, inProgress, isGameAdmin } from "@storage/game";
+import { canAccessChallenges, currentTimelinePeriod, gameStore, inProgress, isGameAdmin } from "@storage/game";
 import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import { toastStore } from "@storage/toast";
@@ -23,6 +23,7 @@ import ThemeBox, { ThemeBoxContent } from "./theme-box";
 import InstanceBox, { InstanceBoxContent } from "./instance-box";
 import NotificationBox, { NotificationBoxContent } from "./notification-box";
 import UserBox from "./user-box";
+import clsx from "clsx";
 function GlobalTitleLink() {
   const location = useLocation();
   const inDocs = createMemo(() => location.pathname.startsWith("/docs"));
@@ -173,7 +174,7 @@ export default function TitleBar() {
         <span class="flex-1" />
         <span>{DateTime.now().toFormat("yyyy-MM-dd HH:mm:ss")}</span>
       </div>
-      <div class="h-16 border-b border-b-layer-content/15 w-screen bg-layer/60 backdrop-blur z-50 print:hidden print:static print:h-0 print:max-h-0 print:overflow-hidden sticky top-0 left-0 transition-colors duration-700">
+      <div class="h-16 border-b border-b-layer-content/15 w-screen bg-layer/60 backdrop-blur-sm z-50 print:hidden print:static print:h-0 print:max-h-0 print:overflow-hidden sticky top-0 left-0 transition-colors duration-700">
         <div class="bg-layer-content/5 w-full h-full px-2 py-0 flex flex-row items-center relative">
           <div class="xl:hidden">
             <Popover
@@ -209,13 +210,13 @@ export default function TitleBar() {
                         onClick={() => setAdditionalMobileBox("wsrx")}
                       >
                         <span
-                          class={`${
+                          class={clsx(
                             wsrx.instances().length > 0
                               ? "icon-[fluent--fluid-20-filled]"
-                              : "icon-[fluent--fluid-20-regular]"
-                          } w-5 h-5 ${
-                            wsrx.instances().length > 0 ? (wsrx.connected() ? "text-success" : "text-warning") : ""
-                          }`.trim()}
+                              : "icon-[fluent--fluid-20-regular]",
+                            "w-5 h-5",
+                            wsrx.instances().length > 0 && (wsrx.connected() ? "text-success" : "text-warning")
+                          )}
                         />
                         <span>{t("instance.box")}</span>
                       </Button>
@@ -229,11 +230,12 @@ export default function TitleBar() {
                         onClick={() => setAdditionalMobileBox("notification")}
                       >
                         <span
-                          class={`${
+                          class={clsx(
                             toastStore.toasts.length > 0
                               ? "icon-[fluent--alert-badge-20-filled] text-primary"
-                              : "icon-[fluent--alert-20-regular]"
-                          } w-5 h-5`}
+                              : "icon-[fluent--alert-20-regular]",
+                            "w-5 h-5"
+                          )}
                         />
                         <span>{t("platform.notificationBox")}</span>
                       </Button>
@@ -321,11 +323,12 @@ export default function TitleBar() {
                   <Match when={inProgress()}>
                     <div class="flex flex-col items-center justify-center px-4 relative">
                       <div class="flex flex-row space-x-2">
-                        <span class="font-bold text-primary">
-                          {gameStore.current?.timeline_presets?.find(
-                            (preset) => preset.start_at < DateTime.now() && preset.end_at > DateTime.now()
-                          )?.label ?? ""}
-                        </span>
+                        <Show when={currentTimelinePeriod()?.end_at}>
+                          <span>[</span>
+                          <span class="font-bold text-primary">{currentTimelinePeriod()?.label ?? ""}</span>
+                          <Timer class="text-primary" end={currentTimelinePeriod()!.end_at} hasHours />
+                          <span>]</span>
+                        </Show>
                         <Timer end={gameStore.current!.end_at} hasHours />
                       </div>
                       <TimeProgress

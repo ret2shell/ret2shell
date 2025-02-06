@@ -8,6 +8,7 @@ import { uploadMedia } from "@api/media";
 import { mediaPath } from "@lib/utils/media";
 import Spin from "@assets/animates/spin";
 import { handleHttpError } from "@api";
+import clsx from "clsx";
 
 export type EditorProps = {
   value?: string;
@@ -144,9 +145,9 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
   });
 
   return (
-    <div {...native} class={`relative ${native.class}`.trim()}>
+    <div {...native} class={clsx("relative", native.class, native.classList)}>
       <div class="absolute left-0 top-0 bottom-0 right-0 p-2">
-        <pre class="w-full min-h-full relative bg-transparent" ref={editorElement!} />
+        <pre class="w-full min-h-full relative !bg-[transparent]" ref={editorElement!} />
       </div>
       <Show when={editorProps.error}>
         <Card class="absolute bottom-2 left-2 right-2" level="error" contentClass="z-50 px-4 p-2">
@@ -184,16 +185,17 @@ export default function Editor(props: EditorProps & ComponentProps<"div">) {
     "lineNumbers",
   ]);
   const [focused, setFocused] = createSignal(false);
-  const cardClasses = () =>
-    `flex-1 card-field ${editorProps.error ? "card-error" : ""} ${focused() ? "card-focused" : ""}`.trim();
   return (
-    <div {...nativeProps} class={`flex flex-col space-y-1 ${nativeProps.class}`.trim()}>
+    <div {...nativeProps} class={clsx("flex flex-col space-y-1", nativeProps.class)}>
       <Show when={editorProps.title}>
         <label class="label" for={editorProps.name}>
           {editorProps.title}
         </label>
       </Show>
-      <Card class={cardClasses()} contentClass="p-2">
+      <Card
+        class={clsx("flex-1 card-field", editorProps.error && "card-error", focused() && "card-focused")}
+        contentClass="p-2"
+      >
         <EditorBare
           {...editorProps}
           class="w-full h-full"

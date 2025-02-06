@@ -12,6 +12,7 @@ import Link from "@widgets/link";
 import Popover from "@widgets/popover";
 import TimeProgress from "@widgets/time-progress";
 import Timer from "@widgets/timer";
+import clsx from "clsx";
 import { For, Show, createEffect, createSignal, onCleanup, untrack } from "solid-js";
 
 export function InstanceBoxContent() {
@@ -81,9 +82,10 @@ export function InstanceBoxContent() {
         >
           <Show when={!connecting() && wsrx.connected() !== WsrxState.Pending}>
             <span
-              class={`icon-[fluent--fluid-20-regular] w-5 h-5 ${
+              class={clsx(
+                "icon-[fluent--fluid-20-regular] w-5 h-5",
                 wsrx.connected() === WsrxState.Connected ? "text-success" : "text-warning"
-              }`}
+              )}
             />
           </Show>
           <span
@@ -113,9 +115,12 @@ export function InstanceBoxContent() {
         >
           {/* icon-[fluent--settings-20-regular] icon-[fluent--settings-20-filled] */}
           <span
-            class={`icon-[fluent--settings-20-${showSettings() ? "filled" : "regular"}] w-5 h-5 ${
-              showSettings() ? "text-primary" : ""
-            }`.trim()}
+            class={clsx(
+              "icon-[fluent--settings-20-",
+              showSettings() ? "filled" : "regular",
+              "] w-5 h-5",
+              showSettings() && "text-primary"
+            )}
           />
         </Button>
         <Link

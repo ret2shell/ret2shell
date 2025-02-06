@@ -50,7 +50,7 @@ export default function () {
           </div>
           <Divider class="w-full" />
           <Card level="warning" contentClass="p-2 flex space-x-2 items-center">
-            <span class="icon-[fluent--warning-20-filled] w-5 h-5 text-warning flex-shrink-0" />
+            <span class="icon-[fluent--warning-20-filled] w-5 h-5 text-warning shrink-0" />
             <p class="font-bold">{t("account.settings.delete.canNotDeleteWhenGameInProgress")}</p>
           </Card>
           <article class="article w-full max-w-5xl self-center mt-4">

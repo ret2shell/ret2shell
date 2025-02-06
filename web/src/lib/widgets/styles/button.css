@@ -1,0 +1,209 @@
+@layer components {
+  .btn {
+    @apply gap-2 font-bold no-underline duration-200 ease-out backdrop-blur-sm border border-transparent;
+    @apply inline-flex shrink-0 cursor-pointer select-none items-center text-center;
+    @apply text-layer-content outline-layer-content/60 bg-layer-content/10;
+    /* default md size */
+    @apply px-4 rounded-lg min-h-12;
+
+    &:active:hover,
+    &:active:focus {
+      @apply bg-layer-content/15;
+    }
+
+    @media (hover: hover) {
+      &:hover {
+        @apply bg-layer-content/20;
+      }
+    }
+
+    &:focus-visible {
+      @apply outline outline-2 outline-offset-2;
+    }
+
+    &:disabled,
+    &.btn-disabled,
+    &[disabled] {
+      @apply cursor-not-allowed opacity-80;
+    }
+
+    &.btn-md {
+      @apply px-4 rounded-lg min-h-12;
+
+      &.btn-square {
+        @apply rounded-lg !h-12 !w-12 !p-0;
+      }
+    }
+
+    &.btn-sm {
+      @apply px-2 rounded-md min-h-8;
+
+      &.btn-square {
+        @apply rounded-md !h-8 !w-8 !p-0;
+      }
+    }
+
+    &.btn-xs {
+      @apply px-1 rounded-xs min-h-6;
+
+      &.btn-square {
+        @apply rounded-xs !h-6 !w-6 !p-0;
+      }
+    }
+
+    &.btn-primary {
+      @apply bg-primary text-primary-content outline-primary;
+
+      &:active:hover,
+      &:active:focus {
+        @apply bg-primary/70;
+      }
+
+      @media (hover: hover) {
+        &:hover {
+          @apply bg-primary/80;
+        }
+      }
+
+      &:disabled,
+      &.btn-disabled,
+      &[disabled] {
+        @apply cursor-not-allowed bg-primary/85 text-primary-content/60;
+      }
+    }
+
+    &.btn-error {
+      @apply bg-error text-error-content outline-error;
+
+      &:active:hover,
+      &:active:focus {
+        @apply bg-error/70;
+      }
+
+      @media (hover: hover) {
+        &:hover {
+          @apply bg-error/80;
+        }
+      }
+      &:disabled,
+      &.btn-disabled,
+      &[disabled] {
+        @apply cursor-not-allowed bg-error/85 text-error-content/60;
+      }
+    }
+
+    &.btn-warning {
+      @apply bg-warning text-warning-content outline-warning;
+
+      &:active:hover,
+      &:active:focus {
+        @apply bg-warning/70;
+      }
+
+      @media (hover: hover) {
+        &:hover {
+          @apply bg-warning/80;
+        }
+      }
+
+      &:disabled,
+      &.btn-disabled,
+      &[disabled] {
+        @apply cursor-not-allowed bg-warning/85 text-warning-content/60;
+      }
+    }
+
+    &.btn-success {
+      @apply bg-success text-success-content outline-success;
+
+      &:active:hover,
+      &:active:focus {
+        @apply bg-success/70;
+      }
+
+      @media (hover: hover) {
+        &:hover {
+          @apply bg-success/80;
+        }
+      }
+
+      &:disabled,
+      &.btn-disabled,
+      &[disabled] {
+        @apply cursor-not-allowed bg-success/85 text-success-content/60;
+      }
+    }
+
+    &.btn-info {
+      @apply bg-info text-info-content outline-info;
+
+      &:active:hover,
+      &:active:focus {
+        @apply bg-info/70;
+      }
+
+      @media (hover: hover) {
+        &:hover {
+          @apply bg-info/80;
+        }
+      }
+      &:disabled,
+      &.btn-disabled,
+      &[disabled] {
+        @apply cursor-not-allowed bg-info/85 text-info-content/60;
+      }
+    }
+
+    &.btn-ghost {
+      @apply border border-transparent bg-transparent shadow-none outline-current backdrop-filter-none;
+
+      @media (hover: hover) {
+        &:hover {
+          @apply border-transparent bg-layer-content/20;
+        }
+      }
+
+      &:active:hover,
+      &:active:focus {
+        @apply bg-layer-content/15;
+      }
+
+      &.btn-active {
+        @apply bg-layer-content/10 border-transparent;
+      }
+
+      &.btn-primary {
+        @apply text-primary;
+      }
+
+      &.btn-error {
+        @apply text-error;
+      }
+
+      &.btn-warning {
+        @apply text-warning;
+      }
+
+      &.btn-success {
+        @apply text-success;
+      }
+
+      &.btn-info {
+        @apply text-info;
+      }
+    }
+
+    &:is(input[type="checkbox"]:checked),
+    &:is(input[type="radio"]:checked) {
+      @apply border-primary bg-primary text-primary-content;
+      @media (hover: hover) {
+        &:hover {
+          @apply bg-primary/85;
+        }
+      }
+      &:focus-visible {
+        @apply outline-primary;
+      }
+    }
+  }
+}

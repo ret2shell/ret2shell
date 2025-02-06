@@ -90,6 +90,21 @@ export default function () {
                         Cnily03
                       </a>
                     </Tag>
+                    <Tag level="info" class="m-1">
+                      <a href="https://github.com/ElaBosak233" target="_blank" rel="noreferrer">
+                        ElaBosak233
+                      </a>
+                    </Tag>
+                    <Tag level="info" class="m-1">
+                      <a href="https://github.com/CSharperMantle" target="_blank" rel="noreferrer">
+                        csmantle
+                      </a>
+                    </Tag>
+                    <Tag level="info" class="m-1">
+                      <a href="https://github.com/h4kuy4" target="_blank" rel="noreferrer">
+                        h4kuy4
+                      </a>
+                    </Tag>
                   </div>
                   {/* <h3 class="font-bold">Artists</h3> */}
                   {/* <div class="flex flex-row flex-wrap justify-center"> */}

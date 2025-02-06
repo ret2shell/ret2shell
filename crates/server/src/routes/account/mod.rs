@@ -160,14 +160,14 @@ async fn generate_account_code(
   {
     cache.at("account-code-rev").del(code.code).await.ok();
   }
-  let mut code: u64 = rand::thread_rng().gen_range(0..=0xFF_FFFF);
+  let mut code: u64 = rand::rng().random_range(0..=0xFF_FFFF);
   while cache
     .at("account-code-rev")
     .get::<i64>(code)
     .await?
     .is_some()
   {
-    code = rand::thread_rng().gen_range(0..=0xFF_FFFF);
+    code = rand::rng().random_range(0..=0xFF_FFFF);
   }
   let resp = CodeWithTime {
     code,
@@ -409,11 +409,11 @@ async fn send_email(
   let verify_email_body = email_config
     .verify_email_body
     .clone()
-    .unwrap_or(r"Hi %USER%, Please verify your account follow this link: %LINK% ".to_owned());
+    .unwrap_or(include_str!("./verify-email.html").to_owned());
   let reset_password_body = email_config
     .reset_password_email_body
     .clone()
-    .unwrap_or(r"Hi %USER%, Please reset your password follow this link: %LINK% ".to_owned());
+    .unwrap_or(include_str!("./reset-password.html").to_owned());
   let (subject, body) = match email_type {
     EmailType::Verify => (verify_email_subject, verify_email_body),
     EmailType::Reset => (reset_password_subject, reset_password_body),
@@ -488,7 +488,7 @@ async fn register(
 
   let password = hash_password(&body.password)?;
 
-  let mut permissions = match user::count(&txn, true, None, None).await? {
+  let mut permissions = match user::count(&txn, true, None, None, false).await? {
     0 => Permissions(vec![
       Permission::Basic,
       Permission::Verified,
@@ -649,7 +649,10 @@ async fn forgot_password(
   let user = match user {
     Some(u) => u,
     None => {
-      return Err(ResponseError::NotFound("user not found".to_owned()));
+      warn!("user not found: {}", body.email);
+      // shadowing the error to prevent leaking user information
+      //return Err(ResponseError::NotFound("user not found".to_owned()));
+      return Ok(StatusCode::OK);
     }
   };
 
@@ -857,7 +860,7 @@ async fn delete_self(
   let txn = db.conn.begin().await?;
 
   // Check if user is the only user
-  let user_count = user::count(&txn, false, None, None).await?;
+  let user_count = user::count(&txn, false, None, None, false).await?;
   if user_count == 1 {
     return Err(ResponseError::Forbidden(
       "you are the only user, can't delete yourself".to_owned(),

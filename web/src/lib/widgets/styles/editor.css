@@ -1,0 +1,255 @@
+.ace_search {
+  @apply text-base text-layer-content bg-layer flex flex-col shadow-xs;
+  @apply border-layer-content/15 border rounded-lg !space-y-0 !px-4 !py-2;
+
+  .ace_search_form {
+    @apply text-layer-content !bg-transparent !p-0 !m-0 flex flex-row space-x-2 items-center !h-12;
+
+    .ace_search_field {
+      @apply text-base m-1 border-none;
+      @apply backdrop-blur-sm text-layer-content outline-layer-content/60 bg-layer-content/5;
+      /* @apply outline outline-2 outline-offset-2; */
+      @apply px-2 rounded-md min-h-8;
+
+      &:active:hover,
+      &:active:focus {
+        @apply bg-layer-content/5;
+      }
+
+      @media (hover: hover) {
+        &:hover {
+          @apply bg-layer-content/5;
+        }
+      }
+
+      &:focus {
+        @apply outline outline-2 outline-offset-2 bg-layer-content/5;
+      }
+
+      &:disabled {
+        @apply bg-layer-content/5 text-layer-content/40 cursor-not-allowed;
+      }
+    }
+
+    .ace_searchbtn {
+      @apply gap-2 font-bold no-underline duration-200 ease-out;
+      @apply inline-flex shrink-0 cursor-pointer select-none items-center text-center;
+      @apply text-layer-content outline-layer-content/60;
+      @apply px-2 rounded-md min-h-8;
+
+      &:focus-visible {
+        @apply outline outline-2 outline-offset-2;
+      }
+      &:disabled,
+      &[disabled] {
+        @apply cursor-not-allowed opacity-80;
+      }
+      @apply border border-transparent bg-transparent shadow-none outline-current;
+
+      @media (hover: hover) {
+        &:hover {
+          @apply border-transparent bg-layer-content/20;
+        }
+      }
+      &:active:hover,
+      &:active:focus {
+        @apply bg-layer-content/15;
+      }
+      @apply h-8 inline-flex flex-row items-center justify-center flex-1;
+    }
+
+    .ace_searchbtn.prev:after,
+    .ace_searchbtn.next:after {
+      @apply hidden;
+    }
+
+    .ace_searchbtn.prev,
+    .ace_searchbtn.next {
+      @apply gap-2 font-bold no-underline duration-200 ease-out;
+      @apply inline-flex shrink-0 cursor-pointer select-none items-center text-center;
+      @apply text-layer-content outline-layer-content/60;
+      @apply px-2 rounded-md min-h-8;
+
+      &:focus-visible {
+        @apply outline outline-2 outline-offset-2;
+      }
+      &:disabled,
+      &[disabled] {
+        @apply cursor-not-allowed opacity-80;
+      }
+      @apply border border-transparent bg-transparent shadow-none outline-current;
+
+      @media (hover: hover) {
+        &:hover {
+          @apply border-transparent bg-layer-content/20;
+        }
+      }
+      &:active:hover,
+      &:active:focus {
+        @apply bg-layer-content/15;
+      }
+      @apply h-8 inline-flex flex-row items-center justify-center flex-1;
+    }
+
+    .ace_searchbtn.prev:before,
+    .ace_searchbtn.next:before {
+      @apply absolute top-0 left-0 w-full h-full flex flex-row justify-center items-center;
+    }
+
+    .ace_searchbtn.prev:before {
+      content: "<";
+    }
+
+    .ace_searchbtn.next:before {
+      content: ">";
+    }
+  }
+
+  .ace_replace_form {
+    @apply text-layer-content bg-transparent p-0 m-0 flex flex-row space-x-2 items-center h-12;
+
+    .ace_search_field {
+      @apply text-base m-1 border-none;
+      @apply backdrop-blur-sm text-layer-content outline-layer-content/60 bg-layer-content/5;
+      /* @apply outline outline-2 outline-offset-2; */
+      @apply px-2 rounded-md min-h-8;
+
+      &:active:hover,
+      &:active:focus {
+        @apply bg-layer-content/5;
+      }
+
+      @media (hover: hover) {
+        &:hover {
+          @apply bg-layer-content/5;
+        }
+      }
+
+      &:focus {
+        @apply outline outline-2 outline-offset-2 bg-layer-content/5;
+      }
+
+      &:disabled {
+        @apply bg-layer-content/5 text-layer-content/40 cursor-not-allowed;
+      }
+    }
+
+    .ace_searchbtn {
+      @apply gap-2 font-bold no-underline duration-200 ease-out;
+      @apply inline-flex shrink-0 cursor-pointer select-none items-center text-center;
+      @apply text-layer-content outline-layer-content/60;
+      @apply px-2 rounded-md min-h-8;
+
+      &:focus-visible {
+        @apply outline outline-2 outline-offset-2;
+      }
+      &:disabled,
+      &[disabled] {
+        @apply cursor-not-allowed opacity-80;
+      }
+      @apply border border-transparent bg-transparent shadow-none outline-current;
+
+      @media (hover: hover) {
+        &:hover {
+          @apply border-transparent bg-layer-content/20;
+        }
+      }
+      &:active:hover,
+      &:active:focus {
+        @apply bg-layer-content/15;
+      }
+      @apply h-8 inline-flex flex-row items-center justify-center flex-1;
+    }
+  }
+
+  .ace_searchbtn_close {
+    @apply hidden;
+  }
+
+  .ace_search_options {
+    @apply flex flex-row space-x-2 p-0 m-0 items-center h-12;
+  }
+
+  .ace_search_counter {
+    @apply text-base text-layer-content font-mono flex-1 text-left;
+  }
+
+  .ace_button {
+    @apply gap-2 font-bold no-underline duration-200 ease-out;
+    @apply inline-flex shrink-0 cursor-pointer select-none items-center text-center;
+    @apply text-layer-content outline-layer-content/60;
+    @apply px-2 rounded-md min-h-8;
+
+    &:focus-visible {
+      @apply outline outline-2 outline-offset-2;
+    }
+    &:disabled,
+    &[disabled] {
+      @apply cursor-not-allowed opacity-80;
+    }
+    @apply border border-transparent bg-transparent shadow-none outline-current;
+
+    @media (hover: hover) {
+      &:hover {
+        @apply border-transparent bg-layer-content/20;
+      }
+    }
+    &:active:hover,
+    &:active:focus {
+      @apply bg-layer-content/15;
+    }
+    @apply h-8 inline-flex flex-row items-center justify-center flex-1;
+  }
+
+  .ace_button.checked {
+    @apply bg-primary;
+  }
+}
+
+.ace_search.right {
+  @apply right-4 top-2;
+  border-right: 1px solid;
+  border-top: 1px solid;
+}
+
+.ace-github-dark .ace_gutter {
+  @apply bg-transparent text-layer-content opacity-60 border-r border-r-layer-content/20;
+}
+
+.ace-kuroir .ace_gutter {
+  @apply bg-transparent text-layer-content opacity-60 border-r border-r-layer-content/20;
+}
+
+.ace_nomatch {
+  @apply !outline-hidden;
+}
+
+.ace_scrollbar {
+  -ms-overflow-style: auto;
+  scrollbar-width: auto;
+
+  &::-webkit-scrollbar {
+    display: initial;
+    width: 6px;
+    height: 6px;
+  }
+
+  /* Track */
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* Handle */
+  &::-webkit-scrollbar-thumb {
+    @apply bg-layer-content/30 rounded-lg min-h-[4rem] min-w-[4rem];
+  }
+
+  /* Handle on hover */
+  &::-webkit-scrollbar-thumb:hover {
+    @apply bg-layer-content/60 rounded-lg;
+  }
+}
+
+.ace_placeholder {
+  @apply text-base font-mono opacity-30 transform-none;
+}

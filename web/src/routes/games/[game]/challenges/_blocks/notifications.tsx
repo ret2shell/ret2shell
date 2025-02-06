@@ -132,7 +132,7 @@ export default function () {
                   </Button>
                 </Show>
                 <Button
-                  class={`${createFormExpanded() ? "flex-shrink-0" : "flex-1"}`}
+                  class={createFormExpanded() ? "shrink-0" : "flex-1"}
                   square={createFormExpanded()}
                   type="button"
                   onClick={() => {
@@ -176,15 +176,15 @@ export default function () {
                       "yyyy-MM-dd HH:mm:ss"
                     )}`}
                   >
-                    <span class="flex-shrink-0 icon-[fluent--alert-20-regular] w-5 h-5" />
+                    <span class="shrink-0 icon-[fluent--alert-20-regular] w-5 h-5" />
                     <span class="flex-1 truncate">{notification.title}</span>
-                    <span class="flex-shrink-0 icon-[fluent--calendar-20-regular] w-5 h-5" />
-                    <A class="flex-shrink-0 flex items-center" href={`/users/${notification.publisher_id}`}>
+                    <span class="shrink-0 icon-[fluent--calendar-20-regular] w-5 h-5" />
+                    <A class="shrink-0 flex items-center" href={`/users/${notification.publisher_id}`}>
                       <span class="icon-[fluent--person-20-regular] w-5 h-5" />
                     </A>
                     <Show when={isGameAdmin()}>
                       <button
-                        class="flex-shrink-0 flex items-center"
+                        class="shrink-0 flex items-center"
                         type="button"
                         title={t("form.delete")}
                         onClick={() => onDelete(notification.id)}

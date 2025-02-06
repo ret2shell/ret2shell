@@ -31,6 +31,7 @@ export type ChallengeEnv = {
   internet: boolean;
   restricted: boolean | null;
   images: ChallengeImage[];
+  pull_secret: string | null;
 };
 
 export type CommitHistory = {

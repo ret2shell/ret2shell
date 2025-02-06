@@ -6,6 +6,7 @@ import Button from "@widgets/button";
 import { type JSX, Show, createEffect, createSignal } from "solid-js";
 import { Transition } from "solid-transition-group";
 import SideBar from "./_blocks/sidebar";
+import clsx from "clsx";
 
 export default function (props: { children?: JSX.Element }) {
   const navigate = useNavigate();
@@ -35,11 +36,13 @@ export default function (props: { children?: JSX.Element }) {
             onClick={() => setShowSidebar(!showSidebar())}
             type="button"
           >
-            {/* icon-[fluent--navigation-20-regular] icon-[fluent--dismiss-20-regular] rotate-90 rotate-0 */}
             <span
-              class={`transition-transform rotate-${showSidebar() ? "90" : "0"} icon-[fluent--${
-                showSidebar() ? "dismiss" : "navigation"
-              }-20-regular] w-5 h-5`}
+              class={clsx(
+                "transition-transform",
+                showSidebar() && "rotate-90",
+                showSidebar() ? "icon-[fluent--dismiss-20-regular]" : "icon-[fluent--navigation-20-regular]",
+                "w-5 h-5"
+              )}
             />
           </Button>
         </Show>

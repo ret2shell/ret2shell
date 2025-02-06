@@ -28,7 +28,7 @@ export default function (props: {
       >
         <div class="flex flex-col min-h-full space-y-2 p-3 lg:p-6">
           <div class="flex flex-row space-x-4 lg:space-x-6 p-2 lg:p-4 items-center">
-            <span class="w-12 h-12 flex-shrink-0 icon-[fluent--flag-20-regular]" />
+            <span class="w-12 h-12 shrink-0 icon-[fluent--flag-20-regular]" />
             <div class="flex-1 flex flex-col space-y-1 justify-center overflow-hidden">
               <h2 class="font-bold w-full text-start truncate">{props.team?.name}</h2>
               <p class="opacity-60 w-full text-start truncate">

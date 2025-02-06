@@ -87,7 +87,7 @@ export default function () {
           class="w-full max-w-3xl"
           contentClass="p-6 flex flex-col md:flex-row space-y-2 space-x-0 md:space-x-6 md:space-y-0"
         >
-          <Form onSubmit={handleLogin} class="md:w-0 flex-1 flex-shrink-0 flex flex-col space-y-2">
+          <Form onSubmit={handleLogin} class="md:w-0 flex-1 shrink-0 flex flex-col space-y-2">
             <h2 class="font-bold text-center">{t("account.login.title")}</h2>
             <Field
               name="account"
@@ -178,7 +178,7 @@ export default function () {
           </Form>
           <Divider class="md:hidden" />
           <Divider class="hidden md:inline-block" direction="vertical" />
-          <div class="md:w-0 flex-1 flex-shrink-0 flex flex-col items-center space-y-2">
+          <div class="md:w-0 flex-1 shrink-0 flex flex-col items-center space-y-2">
             <div class="flex-1 flex flex-col items-center justify-center">
               <LogoAnimate class="w-36 h-36 hidden md:inline-block my-6" />
               {/* <Switch fallback={<LogoAnimate class="w-36 h-36 hidden md:inline-block my-6" />}> */}

@@ -1,0 +1,13 @@
+@layer components {
+  .toast {
+    @apply transition-all duration-300 ease-in-out;
+  }
+}
+
+.toast {
+  &.toast-enter,
+  &.toast-exit-to {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}

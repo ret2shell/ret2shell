@@ -1,19 +1,30 @@
 use async_nats::jetstream::{consumer::pull::Stream, Message};
 use futures::StreamExt;
-use tracing::error;
+use tracing::{error, warn};
 
 use crate::{events::EventContainer, traits::EventError, EventManager};
 
 pub async fn event_pusher(mut messages: Stream, manager: EventManager) {
-  while let Some(message) = messages.next().await {
-    if let Ok(message) = message {
-      let result = push_event(message.clone(), manager.clone()).await;
-      if let Err(error) = result {
-        error!("Failed to process message: {:?}", error);
+  let mut retries = 0;
+  loop {
+    while let Some(message) = messages.next().await {
+      if let Ok(message) = message {
+        let result = push_event(message.clone(), manager.clone()).await;
+        if let Err(error) = result {
+          error!("Failed to process message: {:?}", error);
+        }
+        message.ack().await.ok();
+      } else {
+        error!("Failed to receive message from nats: {:?}", message);
       }
-      message.ack().await.ok();
+    }
+    retries += 1;
+    if retries < 5 {
+      warn!("Event pusher worker stopped unexpectedly! Maybe a message queue issue? Trying to restart...");
+      continue;
     } else {
-      error!("Failed to receive message from nats: {:?}", message);
+      error!("Event pusher worker stopped unexpectedly for 5 times, exiting...");
+      break;
     }
   }
 }

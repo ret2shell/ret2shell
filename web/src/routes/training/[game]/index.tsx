@@ -35,7 +35,7 @@ export default function () {
   if (!accountStore.permissions.includes(Permission.Verified)) {
     addToast({
       level: "warning",
-      description: t("account.emailNotVerified")!,
+      description: t("account.settings.verify.notVerified")!,
       duration: 5000,
     });
     navigate("/account/settings/info");

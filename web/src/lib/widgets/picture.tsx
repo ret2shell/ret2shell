@@ -1,4 +1,5 @@
 import Spin from "@assets/animates/spin";
+import clsx from "clsx";
 import { type ComponentProps, Show, createEffect, createSignal, splitProps, untrack } from "solid-js";
 import { Transition } from "solid-transition-group";
 
@@ -23,7 +24,7 @@ export default function (props: ImageProps & ComponentProps<"div">) {
     }
   });
   return (
-    <div {...rest} class={`overflow-hidden relative bg-layer ${rest.class}`.trim()}>
+    <div {...rest} class={clsx("overflow-hidden relative bg-layer", rest.class, rest.classList)}>
       <img
         class="w-full h-full object-cover"
         width={imageProps.width}

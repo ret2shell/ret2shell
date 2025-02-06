@@ -6,11 +6,16 @@ import Button from "@widgets/button";
 import Input from "@widgets/input";
 import LoadingTips from "@widgets/loading-tips";
 import TreeView, { type TreeNode } from "@widgets/treeview";
+import clsx from "clsx";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { Match, Show, Switch, createEffect, createMemo, createSignal, untrack } from "solid-js";
 
-export default function ChallengeList(props: { showScore?: boolean; paginated?: boolean; inGame?: boolean }) {
+export default function ChallengeList(props: {
+  showScore?: boolean;
+  paginated?: boolean;
+  inGame?: boolean;
+}) {
   const [searchParams, _] = useSearchParams();
   const selectedChallengeId = createMemo(() => {
     return Number.parseInt((searchParams.challenge as string) || "") ?? null;
@@ -28,7 +33,10 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
         !!c.tag.find((t) => t.name.toLowerCase().includes(search().toLowerCase()))
     )) {
       const submission = challengeStore.solves.find((s) => s.challenge_id === challenge.id);
-      result.push({ challenge, solved: (props.inGame && submission?.team_id) || !!submission });
+      result.push({
+        challenge,
+        solved: (props.inGame && submission?.team_id) || !!submission,
+      });
     }
     const tree = [] as TreeNode[];
     const tags = new Set(
@@ -66,7 +74,10 @@ export default function ChallengeList(props: { showScore?: boolean; paginated?: 
               : "icon-[fluent--flag-20-regular]",
           extraPart: props.showScore ? (
             <span
-              class={`opacity-60 ${c.challenge.archive_at && c.challenge.archive_at < DateTime.now() ? "line-through" : ""}`}
+              class={clsx(
+                "opacity-60",
+                c.challenge.archive_at && c.challenge.archive_at < DateTime.now() && "line-through"
+              )}
             >
               {c.challenge.score} pts
             </span>

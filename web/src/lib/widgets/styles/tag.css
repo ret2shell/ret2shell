@@ -1,0 +1,13 @@
+@layer components {
+  .tag {
+    @apply overflow-hidden rounded-full bg-layer/60 backdrop-blur;
+
+    .tag-content {
+      @apply w-full h-full inline-flex items-center px-3 py-1 space-x-2 bg-layer-content/10 -z-10;
+    }
+
+    .tag-dot {
+      @apply w-2 h-2 rounded-full bg-layer-content/60;
+    }
+  }
+}

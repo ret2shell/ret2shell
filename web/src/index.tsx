@@ -3,7 +3,7 @@ import { render } from "solid-js/web";
 import { routes } from "./routes/routes";
 import "@fontsource/jetbrains-mono";
 import "overlayscrollbars/overlayscrollbars.css";
-import "@widgets/styles/base.scss";
+import "@widgets/styles/base.css";
 import { Router } from "@solidjs/router";
 import { fullTheme, initTheme } from "@storage/theme";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";

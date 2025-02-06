@@ -3,6 +3,10 @@ use std::{io::Write, net::SocketAddr, process};
 use colored::Colorize;
 use hyper_util::{client::legacy::connect::HttpConnector, rt::TokioExecutor};
 use r2s_config::GlobalConfig;
+use r2s_event::{
+  events::{DevopsEvent, DevopsEventType, EventContainer},
+  Event,
+};
 use rustls::crypto;
 use tokio::signal;
 use tracing::{error, info, warn};
@@ -86,6 +90,9 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
   let media = r2s_media::initialize(&config.media).await?;
   info!("Loading module: < Checker >");
   let checker = r2s_checker::initialize().await;
+
+  info!("Setup panic event handler...");
+  push_panic_event(queue.clone()).await;
 
   let state = GlobalState {
     config: config.clone(),
@@ -176,6 +183,53 @@ pub async fn down(config: GlobalConfig) -> anyhow::Result<()> {
   drop(console_guard);
   drop(file_guard);
   Ok(())
+}
+
+async fn push_panic_event(queue: r2s_queue::Queue) {
+  std::panic::set_hook(Box::new(move |panic| {
+    if let Some(location) = panic.location() {
+      tracing::error!(
+          message = %panic,
+          panic.file = location.file(),
+          panic.line = location.line(),
+          panic.column = location.column(),
+      );
+      let event = EventContainer {
+        game_id: 0,
+        event: Event::Devops(Box::new(DevopsEvent {
+          event_type: DevopsEventType::ServerPanic,
+          running: None,
+          pending: None,
+          message: Some(format!(
+            "Panic at: file={}, line={}:{}, message={}",
+            location.file(),
+            location.line(),
+            location.column(),
+            panic
+          )),
+        })),
+      };
+      let queue = queue.clone();
+      tokio::spawn(async move {
+        queue.publish("event", event).await.ok();
+      });
+    } else {
+      tracing::error!(message = %panic);
+      let event = EventContainer {
+        game_id: 0,
+        event: Event::Devops(Box::new(DevopsEvent {
+          event_type: DevopsEventType::ServerPanic,
+          running: None,
+          pending: None,
+          message: Some(format!("Panic at: {}", panic)),
+        })),
+      };
+      let queue = queue.clone();
+      tokio::spawn(async move {
+        queue.publish("event", event).await.ok();
+      });
+    }
+  }));
 }
 
 async fn shutdown_signal() {

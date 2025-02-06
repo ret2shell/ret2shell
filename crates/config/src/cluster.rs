@@ -92,6 +92,7 @@ pub struct ChallengeEnv {
   pub internet: bool,
   pub restricted: Option<bool>,
   pub images: Vec<ChallengeImage>,
+  pub pull_secret: Option<String>,
 }
 
 impl ChallengeImage {
@@ -111,6 +112,7 @@ impl ChallengeEnv {
       internet: false,
       restricted: None,
       images: self.images.into_iter().map(|i| i.desensitize()).collect(),
+      pull_secret: None,
     }
   }
 }

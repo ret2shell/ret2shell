@@ -71,13 +71,15 @@ pub struct ChatEvent {
 pub enum DevopsEventType {
   ClusterOverloaded,
   ClusterRecovered,
+  ServerPanic,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct DevopsEvent {
   pub event_type: DevopsEventType,
-  pub running: i64,
-  pub pending: i64,
+  pub running: Option<i64>,
+  pub pending: Option<i64>,
+  pub message: Option<String>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -87,7 +89,7 @@ pub enum Event {
   Submission(Box<SubmissionEvent>),
   Game(GameEvent),
   Chat(Box<ChatEvent>),
-  Devops(DevopsEvent),
+  Devops(Box<DevopsEvent>),
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]

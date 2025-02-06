@@ -759,12 +759,12 @@ async fn get_game_statistics_impl(
 ) -> Result<GameStatistics, ResponseError> {
   let in_game = query.in_game.unwrap_or(false);
   let institutes = institute::get_list(&db.conn).await?;
-  let total_players = user::count(&db.conn, false, query.institute, Some(game.id)).await?;
+  let total_players = user::count(&db.conn, false, query.institute, Some(game.id), in_game).await?;
   let mut institute_players = HashMap::new();
   for i in institutes.iter() {
     institute_players.insert(
       i.id,
-      user::count(&db.conn, false, Some(i.id), Some(game.id)).await?,
+      user::count(&db.conn, false, Some(i.id), Some(game.id), in_game).await?,
     );
   }
   let total_teams =

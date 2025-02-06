@@ -18,7 +18,17 @@ pub struct FrontendConfig {
   pub path: String,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, FromJsonQueryResult, PartialEq, Eq, Default)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default, FromJsonQueryResult, PartialEq, Eq)]
+pub struct RateLimitConfig {
+  // /// request rate per 5 seconds
+  // pub api_rate_limit: Option<i32>,
+  /// Rate limit use Generic cell rate algorithm
+  /// https://en.wikipedia.org/wiki/Generic_cell_rate_algorithm
+  pub burst_limit: Option<u32>,
+  pub burst_restore_rate: Option<u64>, // in milliseconds
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Default, FromJsonQueryResult, PartialEq, Eq)]
 pub struct Config {
   /// The host address of the server.
   pub host: String,
@@ -32,8 +42,8 @@ pub struct Config {
   pub api_base_path: String,
   /// CORS rules enabled
   pub cors_origins: String,
-  /// request rate per 5 seconds
-  pub api_rate_limit: Option<i32>,
+  /// API request rate config limit
+  pub rate_limit: Option<RateLimitConfig>,
   /// Frontend configuration
   pub frontend: Option<FrontendConfig>,
 
@@ -87,7 +97,8 @@ impl Config {
       subject_url: self.subject_url.clone(),
       record: self.record.clone(),
       hide_maker: self.hide_maker,
-      api_rate_limit: self.api_rate_limit,
+      // api_rate_limit: self.api_rate_limit,
+      rate_limit: None,
     }
   }
 }
@@ -111,7 +122,8 @@ impl Merge for Option<Config> {
         subject_url: b.subject_url.or(a.subject_url),
         record: b.record.or(a.record),
         hide_maker: b.hide_maker.or(a.hide_maker),
-        api_rate_limit: b.api_rate_limit.or(a.api_rate_limit),
+        // api_rate_limit: b.api_rate_limit.or(a.api_rate_limit),
+        rate_limit: a.rate_limit,
       }),
       (Some(a), None) => Some(a),
       (None, Some(b)) => Some(b),

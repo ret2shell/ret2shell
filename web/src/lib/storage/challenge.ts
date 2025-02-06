@@ -45,17 +45,24 @@ export async function refreshChallengeAssets() {
     if (challengeStore.current) {
       const files = await getChallengeAttachments(challengeStore.current.game_id, challengeStore.current.id);
       setChallengeStore({ files });
+    }
+  } catch (err) {
+    handleHttpError(err as Error, t("game.challenge.fetchAssetsFailed")!);
+  }
+  try {
+    if (challengeStore.current) {
       const env = await getChallengeEnv(challengeStore.current.game_id, challengeStore.current.id);
       setChallengeStore({ env });
     }
   } catch (err) {
-    handleHttpError(err as Error, t("game.challenge.fetchAssetsFailed")!);
+    handleHttpError(err as Error, t("game.challenge.fetchEnvFailed")!);
   }
 }
 
 export async function refreshSolves() {
   try {
-    setChallengeStore({ solves: await getSelfSolves(gameStore.current!.id) });
+    if (!gameStore.current) return;
+    setChallengeStore({ solves: await getSelfSolves(gameStore.current.id) });
   } catch (err) {
     handleHttpError(err as Error, t("game.challenge.fetchSolvesFailed")!);
   }
@@ -63,8 +70,9 @@ export async function refreshSolves() {
 
 export async function refreshStatus() {
   try {
+    if (!challengeStore.current) return;
     setChallengeStore({
-      status: await getChallengeSolveStatus(challengeStore.current!.game_id, challengeStore.current!.id),
+      status: await getChallengeSolveStatus(challengeStore.current.game_id, challengeStore.current.id),
     });
   } catch (err) {
     setChallengeStore({ status: null });
@@ -74,7 +82,8 @@ export async function refreshStatus() {
 
 export async function refreshCurrentChallenge() {
   try {
-    const resp = await getChallenge(gameStore.current!.id, challengeStore.current!.id);
+    if (!gameStore.current || !challengeStore.current) return;
+    const resp = await getChallenge(gameStore.current.id, challengeStore.current.id);
     setChallengeStore({ current: resp });
     refreshChallengeAssets();
   } catch (err) {

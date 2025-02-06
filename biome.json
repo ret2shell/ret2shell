@@ -7,7 +7,9 @@
     "indentWidth": 2,
     "lineEnding": "lf",
     "lineWidth": 120,
-    "attributePosition": "auto",
+    "attributePosition": "auto"
+  },
+  "files": {
     "ignore": [
       "**/.DS_Store",
       "**/node_modules",
@@ -33,6 +35,9 @@
       },
       "a11y": {
         "noSvgWithoutTitle": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "off"
       },
       "correctness": {
         "useJsxKeyInIterable": "off",

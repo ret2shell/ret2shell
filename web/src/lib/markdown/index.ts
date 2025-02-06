@@ -68,7 +68,7 @@ export class Markdown {
           SUCCESS: ["markdown-alert", "markdown-alert-green"],
           DEBUG: ["markdown-alert", "markdown-alert-magenta"],
           WARN: ["markdown-alert", "markdown-alert-yellow"],
-          ERROR: ["markdown-alert", "markdown-alert-error"],
+          ERROR: ["markdown-alert", "markdown-alert-red"],
           DANGER: ["markdown-alert", "markdown-alert-red"],
           // github
           NOTE: ["markdown-alert", "markdown-alert-blue"],
@@ -105,7 +105,7 @@ export class Markdown {
     if (options?.math) {
       const rehypeKatex = await import("rehype-katex");
       await import("katex/dist/katex.css");
-      await import("./katex.scss");
+      await import("./katex.css");
       this.processor?.use(rehypeKatex.default);
     }
     if (options?.code) {
@@ -149,7 +149,13 @@ export class Markdown {
   const test = new Markdown();
   await test.init({
     type: "html",
-    options: { math: true, code: true, headingAnchors: true, alertBlockquote: true, toc: true },
+    options: {
+      math: true,
+      code: true,
+      headingAnchors: true,
+      alertBlockquote: true,
+      toc: true,
+    },
   });
   test.renderContent(`
 $1$

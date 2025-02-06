@@ -1,5 +1,6 @@
 import { createListCollection, Select, type SelectRootProps, type CollectionItem } from "@ark-ui/solid";
 import { fullTheme } from "@storage/theme";
+import clsx from "clsx";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { type ComponentProps, createMemo, Index, Show, splitProps } from "solid-js";
 import { Portal } from "solid-js/web";
@@ -44,7 +45,7 @@ export default function (
   return (
     <Select.Root
       {...others}
-      class={`flex flex-col ${others.class}`}
+      class={clsx("flex flex-col", others.class)}
       collection={collection()}
       // value={selectProps.inputProps?.value}
       positioning={{
@@ -65,15 +66,29 @@ export default function (
       />
       <Select.Control class="w-full">
         <Select.Trigger
-          class={`btn flex flex-row gap-0 items-center w-full ${selectProps.size === "sm" ? "btn-sm" : "btn-md"} ${selectProps.ghost ? "btn-ghost" : ""} ${
-            selectProps.error ? "border-error" : ""
-          } ${selectProps.size === "sm" ? "px-1" : "px-2"}`.trim()}
+          class={clsx(
+            "btn",
+            "flex",
+            "flex-row",
+            "gap-0",
+            "items-center",
+            "w-full",
+            selectProps.size === "sm" ? "btn-sm" : "btn-md",
+            selectProps.ghost && "btn-ghost",
+            selectProps.error && "border-error",
+            selectProps.size === "sm" ? "px-1" : "px-2"
+          )}
         >
           <Show
             when={props.error}
             fallback={
               <Select.ValueText
-                class={`${selectProps.size === "sm" ? "px-1" : "px-2"} text-start truncate ${props.error ? "" : "flex-1"}`.trim()}
+                class={clsx(
+                  selectProps.size === "sm" ? "px-1" : "px-2",
+                  "text-start",
+                  "truncate",
+                  !props.error && "flex-1"
+                )}
                 placeholder={selectProps.placeholder}
               />
             }
@@ -81,12 +96,18 @@ export default function (
             <span class="text-error flex-1 px-4 text-start">{props.error}</span>
           </Show>
           <Select.Indicator
-            class={`btn ${selectProps.size === "sm" ? "btn-xs" : "btn-sm"} btn-square btn-ghost items-center justify-center`}
+            class={clsx(
+              "btn btn-square btn-ghost items-center justify-center",
+              selectProps.size === "sm" ? "btn-xs" : "btn-sm"
+            )}
           >
             <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5" />
           </Select.Indicator>
           <Select.ClearTrigger
-            class={`btn ${selectProps.size === "sm" ? "btn-xs" : "btn-sm"} btn-square btn-ghost items-center justify-center`}
+            class={clsx(
+              "btn btn-square btn-ghost items-center justify-center",
+              selectProps.size === "sm" ? "btn-xs" : "btn-sm"
+            )}
           >
             <span class="icon-[fluent--dismiss-circle-20-regular] w-5 h-5" />
           </Select.ClearTrigger>
@@ -116,12 +137,12 @@ export default function (
                       >
                         <Select.ItemText class="flex-1 text-start data-[state=checked]:text-primary flex flex-row space-x-2 items-center overflow-hidden">
                           <Show when={item().icon}>
-                            <span class={`${item().icon} flex-shrink-0`.trim()} />
+                            <span class={clsx(item().icon, "shrink-0")} />
                           </Show>
                           <span class="truncate">{item().label}</span>
                         </Select.ItemText>
                         <Select.ItemIndicator class="flex items-center">
-                          <span class="icon-[fluent--checkmark-20-regular] w-5 h-5 text-success flex-shrink-0" />
+                          <span class="icon-[fluent--checkmark-20-regular] w-5 h-5 text-success shrink-0" />
                         </Select.ItemIndicator>
                       </Select.Item>
                     )}

@@ -63,7 +63,7 @@ export default function UserBox() {
           <Card contentClass="p-2 flex flex-col space-y-2">
             <Link
               ghost
-              class="h-16 space-x-2 flex-shrink-0 py-1 flex-nowrap"
+              class="h-16 space-x-2 shrink-0 py-1 flex-nowrap"
               justify="start"
               href={`/users/${accountStore.info?.id}`}
             >

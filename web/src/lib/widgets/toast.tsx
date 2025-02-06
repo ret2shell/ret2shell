@@ -3,6 +3,7 @@ import { type ToastMessage, removeToast } from "@storage/toast";
 import { type ComponentProps, Show, onMount, splitProps } from "solid-js";
 import Button from "./button";
 import Card from "./card";
+import clsx from "clsx";
 
 export type ToastProps = {
   toast: ToastMessage;
@@ -43,7 +44,11 @@ export default function (props: ComponentProps<"div"> & ToastProps) {
   }
 
   return (
-    <Card {...otherProps} class={`toast ${otherProps.class ?? ""}`.trim()} contentClass="p-2 group relative">
+    <Card
+      {...otherProps}
+      class={clsx("toast", otherProps.class, otherProps.classList)}
+      contentClass="p-2 group relative"
+    >
       <div class="flex flex-col space-y-2">
         <Show when={toastMsgProps.toast.img}>
           <div class="flex flex-row items-center justify-center p-6">
@@ -53,7 +58,12 @@ export default function (props: ComponentProps<"div"> & ToastProps) {
         {/* text-info text-success text-warning text-error */}
         <span class="inline-block space-x-2 px-2 py-1">
           <span
-            class={`align-middle ${getLevelIcon(toastMsgProps.toast.level)} w-5 h-5 text-${toastMsgProps.toast.level}`}
+            class={clsx(
+              "align-middle",
+              getLevelIcon(toastMsgProps.toast.level),
+              "w-5 h-5",
+              `text-${toastMsgProps.toast.level}`
+            )}
           />
           <span class="text-wrap align-middle">{toastMsgProps.toast.description}</span>
         </span>
@@ -83,7 +93,10 @@ export default function (props: ComponentProps<"div"> & ToastProps) {
       <Show when={props.selfDestroy && toastMsgProps.toast.duration}>
         {/* bg-info bg-success bg-warning bg-error */}
         <div class="absolute bottom-1 left-4 h-[2px] right-4">
-          <div ref={progressRef!} class={`w-full h-full bg-${toastMsgProps.toast.level} transition-all ease-linear`} />
+          <div
+            ref={progressRef!}
+            class={clsx("w-full h-full", `bg-${toastMsgProps.toast.level}`, "transition-all ease-linear")}
+          />
         </div>
       </Show>
     </Card>

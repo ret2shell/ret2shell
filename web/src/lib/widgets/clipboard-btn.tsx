@@ -1,5 +1,6 @@
 import { Clipboard, type ClipboardRootProps } from "@ark-ui/solid";
 import { t } from "@storage/theme";
+import clsx from "clsx";
 import { Show, splitProps } from "solid-js";
 
 export default function ClipboardBtn(
@@ -17,7 +18,12 @@ export default function ClipboardBtn(
         <Clipboard.Input hidden class="hidden" />
         {/* btn-sm btn-md */}
         <Clipboard.Trigger
-          class={`btn btn-${btnProps.size || "md"} flex items-center space-x-2 justify-center ${btnProps.square ? "btn-square" : ""}`.trim()}
+          class={clsx(
+            "btn",
+            btnProps.size && `btn-${btnProps.size}`,
+            btnProps.square && "btn-square",
+            "flex items-center space-x-2 justify-center"
+          )}
           title={others.title ?? t("form.copy")}
         >
           <Clipboard.Indicator

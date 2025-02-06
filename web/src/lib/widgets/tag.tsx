@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { type ComponentProps, type JSX, splitProps } from "solid-js";
 
 export type TagProps = {
@@ -7,10 +8,10 @@ export type TagProps = {
 export default function Tag(props: { children?: JSX.Element } & TagProps & ComponentProps<"div">) {
   const [tagProps, others] = splitProps(props, ["children", "level"]);
   return (
-    <div {...others} class={`tag ${others.class}`.trim()}>
+    <div {...others} class={clsx("tag", others.class, others.classList)}>
       <div class="tag-content">
         {/* bg-info bg-success bg-warning bg-error */}
-        <span class={`tag-dot bg-${tagProps.level}`} />
+        <span class={clsx("tag-dot", `bg-${tagProps.level}`)} />
         {tagProps.children}
       </div>
     </div>

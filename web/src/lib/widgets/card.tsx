@@ -1,4 +1,5 @@
-import { type ComponentProps, createMemo, splitProps } from "solid-js";
+import clsx from "clsx";
+import { type ComponentProps, splitProps } from "solid-js";
 
 export interface CardProps {
   solid?: boolean;
@@ -8,21 +9,19 @@ export interface CardProps {
 
 export default function (props: CardProps & ComponentProps<"div">) {
   const [cardProps, nativeProps] = splitProps(props, ["solid", "contentClass", "level"]);
-  const mergedClassesList = {
-    card: true,
-    "card-solid": cardProps.solid,
-  } as Record<string, boolean>;
-  const mergedClasses = createMemo(() => {
-    return (
-      Object.keys(mergedClassesList)
-        .filter((k) => mergedClassesList[k])
-        .join(" ") + (nativeProps.class ? ` ${nativeProps.class}` : "")
-    );
-  });
   // card-info card-success card-warning card-error
   return (
-    <div {...nativeProps} class={`${mergedClasses()} ${cardProps.level ? `card-${cardProps.level}` : ""}`.trim()}>
-      <div class={`card-content ${cardProps.contentClass || ""}`.trim()}>{nativeProps.children}</div>
+    <div
+      {...nativeProps}
+      class={clsx(
+        "card",
+        cardProps.solid && "card-solid",
+        cardProps.level && `card-${cardProps.level}`,
+        nativeProps.class,
+        nativeProps.classList
+      )}
+    >
+      <div class={clsx("card-content", cardProps.contentClass)}>{nativeProps.children}</div>
     </div>
   );
 }

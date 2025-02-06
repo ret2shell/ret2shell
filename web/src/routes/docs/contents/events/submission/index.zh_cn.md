@@ -47,7 +47,7 @@
 
 ## 触发规则
 
-选手在正在进行的比赛中解题成功时会触发 `correct` 事件，限定时间内提交了过多的 flag 则会会触发 `too_many_submits` 事件，此时 `submission` 为最后一次失败提交的内容；选手在比赛中作弊时会触发 `cheated` 事件，此时 `submission` 为作弊提交的内容，`peer_team` 是可能疑似作弊的另一只队伍；选手在比赛中提交速度过快时会触发 `too_quick` 事件，此时 `submission` 为最后一次提交的内容。
+选手在正在进行的比赛中解题成功时会触发 `correct` 事件；选手在比赛中作弊时会触发 `cheated` 事件，此时 `submission` 为作弊提交的内容，`peer_team` 是可能疑似作弊的另一只队伍；选手在比赛中提交速度过快时会触发 `too_quick` 事件，此时 `submission` 为最后一次提交的内容。
 
 ## 使用场景
 

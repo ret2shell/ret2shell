@@ -1,6 +1,7 @@
 use std::{env, fs, path::Path};
 
 fn main() {
+  println!("cargo::rerun-if-env-changed=R2S_GIT_VERSION");
   let out_dir = env::var_os("OUT_DIR").unwrap();
   let dest_path = Path::new(&out_dir).join("constants.rs");
   let git_v = if env::var("R2S_GIT_VERSION").is_ok() {

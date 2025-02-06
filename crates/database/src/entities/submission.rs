@@ -335,16 +335,24 @@ where
   if let Some(institute_id) = institute_id {
     sql = sql.filter(team::Column::InstituteId.eq(institute_id));
   }
-  if only_solved {
-    sql = sql.filter(Column::Solved.eq(true));
-  }
-  if in_game && only_solved {
+  if in_game {
     sql = sql
       .filter(Column::TeamId.is_not_null())
-      .filter(team::Column::State.gte(team::State::Hidden))
-      .distinct_on([(Entity, Column::ChallengeId), (Entity, Column::TeamId)]);
-  } else if only_solved {
-    sql = sql.distinct_on([(Entity, Column::ChallengeId), (Entity, Column::UserId)]);
+      .filter(team::Column::State.gte(team::State::Hidden));
+  }
+  if only_solved {
+    sql = sql.filter(Column::Solved.eq(true));
+    sql = sql.distinct_on([
+      (Entity, Column::ChallengeId),
+      (
+        Entity,
+        if in_game {
+          Column::TeamId
+        } else {
+          Column::UserId
+        },
+      ),
+    ]);
   }
   sql.count(db).await
 }

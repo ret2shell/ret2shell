@@ -29,6 +29,7 @@ import { DateTime } from "luxon";
 import { For, Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
 import Sidebar from "./_blocks/sidebar";
 import { handleHttpError } from "@api";
+import clsx from "clsx";
 
 type TeamAdminUpdateForm = {
   name: string;
@@ -186,9 +187,7 @@ type TeamSelfUpdateForm = {
   institute_id: string;
 };
 
-function SelfManagement(props: {
-  members: User[];
-}) {
+function SelfManagement(props: { members: User[] }) {
   const [form, { Form, Field }] = createForm<TeamSelfUpdateForm>();
   createEffect(() => {
     if (gameStore.team) {
@@ -306,10 +305,7 @@ type CreateExtraForm = {
   score: number;
 };
 
-function ExtraForm(props: {
-  team: Team | null;
-  onDone?: () => void;
-}) {
+function ExtraForm(props: { team: Team | null; onDone?: () => void }) {
   const [form, { Form, Field }] = createForm<CreateExtraForm>();
   setValue(form, "score", 0);
 
@@ -573,7 +569,7 @@ export default function () {
                       <span class="icon-[fluent--checkmark-circle-20-regular] w-5 h-5 text-success" />
                     </Show>
                     <span class="flex-1 text-start truncate">{extra.reason}</span>
-                    <span class={`font-bold ${extra.score > 0 ? "text-success" : "text-warning"}`}>
+                    <span class={clsx("font-bold", extra.score > 0 ? "text-success" : "text-warning")}>
                       {extra.score} pts
                     </span>
                     <span class="opacity-60">{extra.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>

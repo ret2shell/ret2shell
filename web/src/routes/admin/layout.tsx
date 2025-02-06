@@ -3,11 +3,14 @@ import SidebarLayout from "@blocks/sidebar-layout";
 import { useNavigate } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
-import { platformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
-import type { JSX } from "solid-js";
+import { createSignal, Show, type JSX } from "solid-js";
 import SideBar from "./_blocks/sidebar";
+import { createBreakpoints } from "@solid-primitives/media";
+import { Transition } from "solid-transition-group";
+import Button from "@widgets/button";
+import clsx from "clsx";
 
 export default function (props: { children?: JSX.Element }) {
   const navigate = useNavigate();
@@ -24,10 +27,36 @@ export default function (props: { children?: JSX.Element }) {
     navigate("/sigtrap/403");
     return null;
   }
+  const breakpoints = {
+    lg: "1024px",
+  };
+  const matches = createBreakpoints(breakpoints);
+  const [showSidebar, setShowSidebar] = createSignal(false);
   return (
     <>
-      <Title title={`${t("admin.title")} - ${platformStore.config.name || t("platform.name")}`} />
-      <SidebarLayout leftBar={() => <SideBar />}>{props.children}</SidebarLayout>
+      <Title page={t("admin.title")} route="/admin" />
+      <SidebarLayout leftBar={() => <SideBar />} showLeftBar={showSidebar()}>
+        {props.children}
+      </SidebarLayout>
+      <Transition name="slide-fade-right">
+        <Show when={!matches.lg}>
+          <Button
+            class="fixed bottom-3 right-3 z-30"
+            square
+            onClick={() => setShowSidebar(!showSidebar())}
+            type="button"
+          >
+            <span
+              class={clsx(
+                "transition-transform",
+                showSidebar() && "rotate-90",
+                showSidebar() ? "icon-[fluent--dismiss-20-regular]" : "icon-[fluent--navigation-20-regular]",
+                "w-5 h-5"
+              )}
+            />
+          </Button>
+        </Show>
+      </Transition>
     </>
   );
 }

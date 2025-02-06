@@ -5,6 +5,7 @@ import Divider from "@widgets/divider";
 import Link from "@widgets/link";
 import { Show, createMemo } from "solid-js";
 import ChatList from "./chat-list";
+import clsx from "clsx";
 
 export default function SideBar() {
   const location = useLocation();
@@ -12,7 +13,10 @@ export default function SideBar() {
   return (
     <div class="flex flex-row h-full">
       <ul
-        class={`flex flex-col h-full space-y-2 transition-all duration-300 ${expanded() ? "w-full p-3 lg:p-6" : "w-16 p-2"}`}
+        class={clsx(
+          "flex flex-col h-full space-y-2 transition-all duration-300",
+          expanded() ? "w-full p-3 lg:p-6" : "w-16 p-2"
+        )}
       >
         <li class="w-full">
           <Link
@@ -166,6 +170,20 @@ export default function SideBar() {
           >
             <span class="icon-[fluent--branch-fork-20-regular] w-5 h-5" />
             <Show when={expanded()}>{t("game.admin.git.title")}</Show>
+          </Link>
+        </li>
+        <li class="w-full">
+          <Link
+            activeMatch="exact"
+            class="w-full"
+            ghost
+            square={!expanded()}
+            href={`/games/${gameStore.current?.id}/admin/delete`}
+            justify={expanded() ? "start" : "center"}
+            title={t("game.admin.delete.title")}
+          >
+            <span class="icon-[fluent--delete-20-regular] w-5 h-5" />
+            <Show when={expanded()}>{t("game.admin.delete.title")}</Show>
           </Link>
         </li>
       </ul>

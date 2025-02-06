@@ -280,7 +280,7 @@ async fn register_with_oauth_account(
 
   let password = hash_password(&req.password)?;
 
-  let mut permissions = match user::count(&txn, true, None, None).await? {
+  let mut permissions = match user::count(&txn, true, None, None, false).await? {
     0 => Permissions(vec![
       Permission::Basic,
       Permission::Verified,

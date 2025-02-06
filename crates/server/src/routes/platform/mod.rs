@@ -131,13 +131,14 @@ async fn get_platform_statistics(
 ) -> Result<impl IntoResponse, ResponseError> {
   let institutes = institute::get_list(&db.conn).await?;
   let users = UserStatistics {
-    total: user::count(&db.conn, true, None, None).await?,
-    valid: user::count(&db.conn, false, None, None).await?,
-    institutes: join_all(
-      institutes
-        .iter()
-        .map(|i| async { Ok((i.id, user::count(&db.conn, true, Some(i.id), None).await?)) }),
-    )
+    total: user::count(&db.conn, true, None, None, false).await?,
+    valid: user::count(&db.conn, false, None, None, false).await?,
+    institutes: join_all(institutes.iter().map(|i| async {
+      Ok((
+        i.id,
+        user::count(&db.conn, true, Some(i.id), None, false).await?,
+      ))
+    }))
     .await
     .into_iter()
     .map(|r: Result<(i64, u64), DbErr>| r.unwrap_or((0, 0)))

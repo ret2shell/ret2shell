@@ -7,6 +7,7 @@ import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import Card from "./card";
 import LoadingTips from "./loading-tips";
 import Popover from "./popover";
+import clsx from "clsx";
 
 export type ArticleProps = {
   content: string;
@@ -85,7 +86,13 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
       fallback={
         <article
           {...nativeProps}
-          class={`article ${articleProps.compact ? "article-compact" : ""} !max-w-5xl w-full ${nativeProps.class}`.trim()}
+          class={clsx(
+            "article",
+            articleProps.compact && "article-compact",
+            "!max-w-5xl w-full",
+            nativeProps.class,
+            nativeProps.classList
+          )}
         >
           <p>
             <LoadingTips />
@@ -95,7 +102,13 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
     >
       <article
         {...nativeProps}
-        class={`article ${articleProps.compact ? "article-compact" : ""} !max-w-5xl w-full ${nativeProps.class ?? ""}`.trim()}
+        class={clsx(
+          "article",
+          articleProps.compact && "article-compact",
+          "!max-w-5xl w-full",
+          nativeProps.class,
+          nativeProps.classList
+        )}
         innerHTML={markdown()?.html()}
       />
       <Show when={!articleProps.noExtraPaddings}>

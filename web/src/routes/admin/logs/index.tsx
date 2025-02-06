@@ -8,6 +8,7 @@ import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import LoadingTips from "@widgets/loading-tips";
 import Tag from "@widgets/tag";
+import clsx from "clsx";
 import { DateTime } from "luxon";
 import { For, Show, createSignal, onCleanup, onMount } from "solid-js";
 
@@ -120,7 +121,7 @@ export default function () {
     <>
       <Title page={t("admin.logs.title")} route="/admin/logs" />
       <div class="flex-1 flex flex-col">
-        <div class="sticky top-16 h-16 z-20 backdrop-blur border-b border-b-layer-content/10 flex flex-row space-x-4 items-center px-3 lg:px-6">
+        <div class="sticky top-16 h-16 z-20 backdrop-blur-sm border-b border-b-layer-content/10 flex flex-row space-x-4 items-center px-3 lg:px-6">
           <h1 class="flex-1 font-bold flex flex-row space-x-2 items-center">
             <span class="icon-[fluent--code-20-regular] w-5 h-5" />
             <span>{t("admin.logs.title")}</span>
@@ -157,13 +158,13 @@ export default function () {
           <For each={logs()}>
             {(log) => (
               <div class="h-8 flex flex-row items-center space-x-2 border-b border-b-layer-content/10 overflow-hidden min-w-0">
-                <span class={`w-16 ${getColor(log.level)}`}>{log.level}</span>
+                <span class={clsx("w-16", getColor(log.level))}>{log.level}</span>
                 <span class="opacity-40">[{log.target}]</span>
                 {log.span?.name && <span class="opacity-60">[{log.span.name}]</span>}
                 {log.span?.method && <span class="opacity-60">[{log.span.method}]</span>}
                 {log.span?.from && <span class="opacity-60">[{log.span.from}]</span>}
                 {log.span?.uri && <span class="opacity-60">[{log.span.uri}]</span>}
-                <span class={`flex-1 truncate w-0 ${getContentColor(log.level)}`} title={log.fields.message}>
+                <span class={clsx("flex-1 truncate w-0", getContentColor(log.level))} title={log.fields.message}>
                   {log.fields.message}
                 </span>
                 <span class="opacity-60 font-bold">

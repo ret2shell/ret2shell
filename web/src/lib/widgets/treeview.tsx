@@ -2,6 +2,7 @@ import { useSearchParams } from "@solidjs/router";
 import { For, type JSX, Show, createEffect, createSignal, untrack } from "solid-js";
 import Button from "./button";
 import Link from "./link";
+import clsx from "clsx";
 
 export type TreeNode = {
   id: string | number;
@@ -53,7 +54,7 @@ export default function TreeView(props: TreeViewProps) {
               justify="start"
               ghost
               title={node.name}
-              class={`font-normal w-full overflow-hidden ${node.extraClasses}`.trim()}
+              class={clsx("font-normal w-full overflow-hidden", node.extraClasses)}
               href={node.type === "item" && node.link ? node.link : "#"}
               activeMatch={props.activeMatch}
               active={
@@ -62,7 +63,7 @@ export default function TreeView(props: TreeViewProps) {
                 searchParams[props.activeSearchParams] === node.searchValue
               }
             >
-              <span class={`${node.icon} w-5 h-5`} />
+              <span class={clsx("w-5 h-5", node.icon)} />
               <span class="flex-1 text-start truncate">{node.name}</span>
               <Show when={node.type === "item" && node.extraPart}>{node.type === "item" && node.extraPart}</Show>
             </Link>
@@ -73,17 +74,18 @@ export default function TreeView(props: TreeViewProps) {
             title={node.name}
             size={props.size}
             justify="start"
-            class={`font-normal w-full overflow-hidden ${node.extraClasses}`.trim()}
+            class={clsx("font-normal w-full overflow-hidden", node.extraClasses)}
             onClick={() => {
               setShowChildren(!showChildren());
             }}
           >
-            <span class={`${node.icon} w-5 h-5`} />
+            <span class={clsx("w-5 h-5", node.icon)} />
             <span class="flex-1 text-start truncate">{node.name}</span>
             <span
-              class={`icon-[fluent--chevron-right-20-regular] w-5 h-5 transition-transform ${
-                showChildren() ? "rotate-90" : "rotate-0"
-              }`.trim()}
+              class={clsx(
+                "icon-[fluent--chevron-right-20-regular] w-5 h-5 transition-transform",
+                showChildren() && "rotate-90"
+              )}
             />
           </Button>
         </Show>

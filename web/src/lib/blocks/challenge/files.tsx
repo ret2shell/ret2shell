@@ -62,7 +62,7 @@ export default function (_props: {
   }
   return (
     <div class="flex flex-row min-h-full">
-      <ul class="w-1/5 min-w-48 flex flex-col flex-shrink-0 space-y-2 p-3 lg:p-6 sticky top-0 self-start">
+      <ul class="w-1/5 min-w-48 flex flex-col shrink-0 space-y-2 p-3 lg:p-6 sticky top-0 self-start">
         <li class="w-full">
           <Button
             ghost={folder() !== "static"}
@@ -106,7 +106,7 @@ export default function (_props: {
       <Divider direction="vertical" />
       <div class="flex-1 flex flex-col w-0 space-y-2 p-3 lg:p-6">
         <header class="h-12 border-b border-b-layer-content/15 flex flex-row items-center space-x-2 font-bold">
-          <span class="icon-[fluent--folder-zip-20-regular] w-5 h-5 flex-shrink-0" />
+          <span class="icon-[fluent--folder-zip-20-regular] w-5 h-5 shrink-0" />
           <span class="flex-1 text-start">{t("game.challenge.uploadFiles")}</span>
           <UploadButton
             size="sm"
@@ -128,10 +128,10 @@ export default function (_props: {
           <For each={challengeStore.adminFiles}>
             {(file) => (
               <div class="min-h-12 py-1 border-b border-b-layer-content/10 flex items-center space-x-2 overflow-hidden">
-                <span class="icon-[fluent--folder-zip-20-regular] w-5 h-5 text-primary flex-shrink-0" />
+                <span class="icon-[fluent--folder-zip-20-regular] w-5 h-5 text-primary shrink-0" />
                 <span class="font-bold flex-1 text-start truncate">{file.file}</span>
                 <DownloadButton
-                  class="m-1 flex-shrink-0"
+                  class="m-1 shrink-0"
                   size="sm"
                   file={file.file}
                   icon="icon-[fluent--arrow-download-20-regular]"

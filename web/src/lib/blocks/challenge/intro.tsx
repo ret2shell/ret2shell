@@ -19,6 +19,7 @@ import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { passiveSupport } from "passive-events-support/src/utils";
 import { For, Match, Show, Switch, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
 import DownloadButton from "../download-button";
+import clsx from "clsx";
 
 passiveSupport({
   events: ["mousewheel", "wheel"],
@@ -155,7 +156,10 @@ export default function (props: { inGame?: boolean }) {
               </span>
               <Show when={props.inGame}>
                 <span
-                  class={`font-bold flex flex-row space-x-2 items-center ${challengeStore.status?.solved ? "text-success" : "text-warning"}`.trim()}
+                  class={clsx(
+                    "font-bold flex flex-row space-x-2 items-center",
+                    challengeStore.status?.solved ? "text-success" : "text-warning"
+                  )}
                 >
                   <span
                     class={
@@ -243,11 +247,18 @@ export default function (props: { inGame?: boolean }) {
                   <TimeProgress
                     class="absolute bottom-0 left-0 right-0"
                     startAt={instance()!.created_at}
-                    endAt={instance()!.created_at.plus({ hours: instance()!.renew_count + 1 })}
+                    endAt={instance()!.created_at.plus({
+                      hours: instance()!.renew_count + 1,
+                    })}
                   />
                 </Show>
                 <h3 class="font-bold flex space-x-2 items-center flex-1">
-                  <span class={`icon-[fluent--play-20-regular] w-5 h-5 ${instance() ? "text-success" : ""}`.trim()} />
+                  <span
+                    class={clsx(
+                      "icon-[fluent--play-20-regular] w-5 h-5",
+                      instance()?.state === "Running" && "text-success"
+                    )}
+                  />
                   <Switch fallback={<span class="opacity-80 flex-1 truncate">{t("game.challenge.envNotStart")}</span>}>
                     <Match when={instance()?.state === "Running"}>
                       <span class="flex-1 truncate">
@@ -304,7 +315,9 @@ export default function (props: { inGame?: boolean }) {
                   >
                     <Match when={instance()}>
                       <Timer
-                        end={instance()!.created_at.plus({ hours: instance()!.renew_count + 1 })}
+                        end={instance()!.created_at.plus({
+                          hours: instance()!.renew_count + 1,
+                        })}
                         onTimeout={() => {
                           setTimeout(() => {
                             maintainInstances();

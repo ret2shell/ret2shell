@@ -215,6 +215,7 @@
       "currentEnv": "當前配置",
       "addEnvSuccess": "添加題目環境配置成功",
       "addEnvFailed": "添加題目環境配置失敗",
+      "pullSecret": "鏡像倉庫密鑰名稱（請預先配置k8s）",
       "toggleEnvInternetSuccess": "調整網絡配置成功",
       "toggleEnvInternetFailed": "調整網絡配置失敗",
       "deleteEnvImageSuccess": "移除題目環境配置成功",
@@ -302,6 +303,12 @@
       "awardRate3": "三血獎勵分數比例",
       "statistics": {
         "title": "統計數據"
+      },
+      "delete": {
+        "title": "刪除比賽",
+        "tips": "確定要刪除這個比賽嗎？刪除後不可恢復，相關數據將被清除。",
+        "tips1": "請特別注意，刪除比賽前需要清空比賽中所有的題目，有題目存在時無法刪除比賽。",
+        "tips2": "如果決定刪除比賽，請在下方輸入比賽名稱 {{name}}"
       },
       "teams": {
         "title": "參賽隊伍",
@@ -875,6 +882,17 @@
         "confirmPassword": "再次輸入新密碼",
         "confirmPasswordMismatch": "兩次輸入的密碼不一致",
         "success": "修改成功，請重新登錄"
+      },
+      "verify": {
+        "notVerified": "你的賬戶郵箱尚未通過驗證，功能受限",
+        "resend": "重新發送驗證郵件",
+        "resendFailed": "郵件發送失敗",
+        "resendSuccess": "驗證郵件已重新發送至郵箱，請查收",
+        "title": "驗證郵箱",
+        "verifyBroken": "驗證鏈接存在問題，請確保郵件鏈接正確",
+        "verifyFailed": "驗證失敗",
+        "verifySuccess": "驗證成功",
+        "verifying": "正在驗證你的郵箱"
       }
     },
     "logout": "退出登錄",
@@ -890,7 +908,8 @@
       "nicknameRequired": "請填寫暱稱",
       "nicknameMinLength": "暱稱最短2個字符",
       "nicknameMaxLength": "暱稱最長32個字符",
-      "nicknamePlaceholder": "暱稱",
+      "nickname": "暱稱",
+      "nicknamePlaceholder": "暱稱（不建議填真名哦）",
       "emailRequired": "請填寫郵箱",
       "emailInvalid": "郵箱格式不正確",
       "passwordRequired": "請填寫密碼",
@@ -898,83 +917,18 @@
       "passwordTooWeak": "密碼在8-40字符之間，至少包含一個大寫字母、一個小寫字母、一個數字和一個特殊字符",
       "emailPlaceholder": "郵箱",
       "passwordPlaceholder": "密碼",
+      "oauthRegisterTips": "看起來你在此之前沒有註冊用戶…… 沒關係！現在註冊將直接綁定到你的第三方認證賬戶 {{key}} 中，下次你就可以直接使用第三方統一身份認證登錄了。",
       "success": "註冊成功，歡迎來到 CTF 的世界！"
     },
     "oauth": {
       "select": "使用統一身份認證登錄",
       "title": "第三方認證",
-      "xdu": {
-        "title": "西電統一身份認證"
-      },
-      "xmu": {
-        "title": "廈門大學統一身份認證"
-      },
       "failedToLogin": "登錄失敗",
       "failedToBind": "綁定失敗",
       "notBind": "未綁定",
       "bind": "綁定",
       "unbind": "解綁",
-      "failedToUnbind": "解綁失敗",
-      "nwnu": {
-        "title": "西北師範大學統一身份認證"
-      },
-      "t": {
-        "title": "塔里木大學統一身份認證"
-      },
-      "taru": {
-        "title": "塔里木大學統一身份認證"
-      },
-      "jiangnan": {
-        "title": "江南大學郵件身份認證"
-      },
-      "hduEmail": {
-        "title": "杭州電子科技大學郵件身份驗證"
-      },
-      "xduCas": {
-        "title": "西安電子科技大學統一身份認證"
-      },
-      "xmuCas": {
-        "title": "廈門大學統一身份認證"
-      },
-      "jiangnan_email": {
-        "title": "江南大學郵件身份認證"
-      },
-      "cumt_email": {
-        "title": "中國礦業大學郵件身份認證"
-      },
-      "hdu_email": {
-        "title": "杭州電子科技大學郵件身份認證"
-      },
-      "xmu_cas": {
-        "title": "廈門大學統一身份認證"
-      },
-      "xdu_cas": {
-        "title": "西安電子科技大學統一身份認證"
-      },
-      "uestc_email": {
-        "title": "電子科技大學郵件身份認證"
-      },
-      "seu_email": {
-        "title": "東南大學郵件身份認證"
-      },
-      "fudan_email": {
-        "title": "復旦大學郵件身份認證"
-      },
-      "jlu_email": {
-        "title": "吉林大學郵件身份認證"
-      },
-      "bit_email": {
-        "title": "北京理工大學郵件身份認證"
-      },
-      "tzc_email": {
-        "title": "台州學院郵件身份認證"
-      },
-      "cppu_email": {
-        "title": "中國人民警察大學郵件身份認證"
-      },
-      "ncu_email": {
-        "title": "南昌大學郵件身份認證"
-      }
+      "failedToUnbind": "解綁失敗"
     },
     "institute": {
       "none": "無從屬組織機構"
@@ -1006,17 +960,7 @@
       "confirm": "重置"
     },
     "emailNotVerified": "你的賬戶郵箱尚未通過驗證，功能受限",
-    "verify": {
-      "title": "驗證郵箱",
-      "notVerified": "你的賬戶郵箱尚未通過驗證，功能受限",
-      "resend": "重新發送驗證郵件",
-      "verifying": "正在驗證你的郵箱",
-      "verifyFailed": "驗證失敗",
-      "verifySuccess": "驗證成功",
-      "verifyBroken": "驗證鏈接存在問題，請確保郵件鏈接正確",
-      "resendSuccess": "驗證郵件已重新發送至郵箱，請查收",
-      "resendFailed": "郵件發送失敗"
-    }
+    "verify": {}
   },
   "instance": {
     "disconnected": "WSRX 未連接",

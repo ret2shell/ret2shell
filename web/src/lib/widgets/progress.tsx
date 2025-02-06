@@ -1,4 +1,5 @@
 import { Progress, type ProgressRootProps } from "@ark-ui/solid";
+import clsx from "clsx";
 
 import { createMemo } from "solid-js";
 
@@ -21,13 +22,12 @@ export default function (props: ProgressRootProps & ProgressProps) {
     <Progress.Root {...props} value={value()}>
       <Progress.Track class="progress-track">
         <Progress.Range
-          class="progress-range"
-          classList={{
+          class={clsx("progress-range", {
             "progress-range-success": !props.static && p() > 60,
             "progress-range-warning": !props.static && p() > 30 && p() <= 60,
             "progress-range-error": !props.static && p() <= 30,
             "progress-range-primary": props.static,
-          }}
+          })}
         />
       </Progress.Track>
     </Progress.Root>

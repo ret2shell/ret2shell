@@ -7,6 +7,7 @@ import { humanFileSize } from "../utils/size";
 import Progress from "../widgets/progress";
 import { handleHttpError } from "@api";
 import { t } from "@storage/theme";
+import clsx from "clsx";
 
 export default function DownloadButton(
   props: ButtonProps & {
@@ -49,7 +50,7 @@ export default function DownloadButton(
     <Button
       {...btnProps}
       square={btnProps.square && !downloading() && !downloadComplete()}
-      class={`relative ${btnProps.class}`.trim()}
+      class={clsx("relative", btnProps.class)}
       loading={downloading()}
       onClick={handleDownload}
       disabled={downloading()}

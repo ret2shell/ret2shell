@@ -111,6 +111,8 @@ pub async fn extract_user_info(
     original: Some(token_str.to_owned()),
   };
 
+  debug!("extracted token: {token:?}");
+
   req.extensions_mut().insert(token_tracker.clone());
   req.extensions_mut().insert(token.clone());
 

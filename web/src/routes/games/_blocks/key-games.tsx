@@ -23,6 +23,7 @@ import { DateTime } from "luxon";
 import { For, Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
 import CreateGame from "./create";
 import { handleHttpError } from "@api";
+import clsx from "clsx";
 
 export default function () {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -109,20 +110,24 @@ export default function () {
           {(game) => (
             <Link
               ghost
-              class={`w-4/5 ${selectedGameId() === game.id && !showCreate() ? "btn-active" : ""}`.trim()}
+              class={clsx("w-4/5", selectedGameId() === game.id && !showCreate() && "btn-active")}
               justify="start"
               href={`/games?selected=${game.id}`}
             >
-              {/* icon-[fluent--flag-20-regular] icon-[fluent--flag-20-filled] */}
               <span
-                class={`icon-[fluent--flag-20-${
-                  selectedGameId() === game.id && !showCreate() ? "filled" : "regular"
-                }] w-5 h-5 ${selectedGameId() === game.id && !showCreate() ? "text-primary" : "opacity-60"}`}
+                class={clsx(
+                  selectedGameId() === game.id && !showCreate()
+                    ? "icon-[fluent--flag-20-filled]"
+                    : "icon-[fluent--flag-20-regular]",
+                  "w-5 h-5",
+                  selectedGameId() === game.id && !showCreate() ? "text-primary" : "opacity-60"
+                )}
               />
               <span
-                class={`flex-1 text-start truncate ${
+                class={clsx(
+                  "flex-1 text-start truncate",
                   selectedGameId() === game.id && !showCreate() ? "font-bold" : "font-normal opacity-60"
-                }`}
+                )}
               >
                 {game.name}
               </span>
@@ -133,13 +138,14 @@ export default function () {
                 <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning mx-2" />
               </Show>
               <div
-                class={`w-2 h-2 rounded-full ${
+                class={clsx(
+                  "w-2 h-2 rounded-full",
                   DateTime.now() < game.start_at
                     ? "bg-info"
                     : DateTime.now() > game.end_at
                       ? "bg-warning"
                       : "bg-success"
-                }`}
+                )}
               />
             </Link>
           )}
@@ -188,29 +194,34 @@ export default function () {
               {(game) => (
                 <Link
                   ghost
-                  class={`${selectedGameId() === game.id ? "btn-active" : ""}`.trim()}
+                  class={clsx(selectedGameId() === game.id && "btn-active")}
                   justify="start"
                   href={`/games?selected=${game.id}`}
                 >
-                  {/* icon-[fluent--flag-20-regular] icon-[fluent--flag-20-filled] */}
                   <span
-                    class={`icon-[fluent--flag-20-${
-                      selectedGameId() === game.id ? "filled" : "regular"
-                    }] w-5 h-5 ${selectedGameId() === game.id ? "text-primary" : "opacity-60"}`}
+                    class={clsx(
+                      selectedGameId() === game.id ? "icon-[fluent--flag-20-filled]" : "icon-[fluent--flag-20-regular]",
+                      "w-5 h-5",
+                      selectedGameId() === game.id ? "text-primary" : "opacity-60"
+                    )}
                   />
                   <span
-                    class={`flex-1 text-start ${selectedGameId() === game.id ? "font-bold" : "font-normal opacity-60"}`}
+                    class={clsx(
+                      "flex-1 text-start",
+                      selectedGameId() === game.id ? "font-bold" : "font-normal opacity-60"
+                    )}
                   >
                     {game.name}
                   </span>
                   <div
-                    class={`w-2 h-2 rounded-full ${
+                    class={clsx(
+                      "w-2 h-2 rounded-full",
                       DateTime.now() < game.start_at
                         ? "bg-info"
                         : DateTime.now() > game.end_at
                           ? "bg-warning"
                           : "bg-success"
-                    }`}
+                    )}
                   />
                 </Link>
               )}
@@ -238,7 +249,7 @@ export default function () {
                     >
                       <Picture src={blurredBgDark} class="w-full h-full" />
                     </Show>
-                    <div class="w-full h-full absolute top-0 left-0 bg-layer/70 backdrop-blur flex items-center justify-center">
+                    <div class="w-full h-full absolute top-0 left-0 bg-layer/70 backdrop-blur-sm flex items-center justify-center">
                       <LogoAnimate height="h-1/3" class="grayscale" />
                     </div>
                   </>

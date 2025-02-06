@@ -361,7 +361,7 @@ fn filter_and_order(
 }
 
 pub async fn count<C>(
-  db: &C, with_banned: bool, institute_id: Option<i64>, game_id: Option<i64>,
+  db: &C, with_banned: bool, institute_id: Option<i64>, game_id: Option<i64>, in_game: bool,
 ) -> Result<u64, DbErr>
 where
   C: ConnectionTrait, {
@@ -380,6 +380,9 @@ where
         super::submission::Relation::Challenge.def(),
       )
       .filter(super::challenge::Column::GameId.eq(game_id));
+    if in_game {
+      sql = sql.filter(super::submission::Column::TeamId.is_not_null());
+    }
   }
   sql.distinct_on([Column::Id]).count(db).await
 }

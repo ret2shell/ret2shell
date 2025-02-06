@@ -7,6 +7,7 @@ import { fullTheme, t } from "@storage/theme";
 import Button from "@widgets/button";
 import Divider from "@widgets/divider";
 import Link from "@widgets/link";
+import clsx from "clsx";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
@@ -174,7 +175,9 @@ export default function Playgrounds() {
                 <Show when={item.hidden}>
                   <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning mx-2" />
                 </Show>
-                <div class={`w-2 h-2 rounded-full ${item.archive_at > DateTime.now() ? "bg-error" : "bg-success"}`} />
+                <div
+                  class={clsx("w-2 h-2 rounded-full", item.archive_at > DateTime.now() ? "bg-error" : "bg-success")}
+                />
               </Link>
             )}
           </For>

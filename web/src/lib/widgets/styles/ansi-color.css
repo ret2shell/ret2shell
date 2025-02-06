@@ -1,0 +1,127 @@
+.ansi-black-fg {
+  @apply text-layer-content/40;
+}
+
+.ansi-red-fg {
+  @apply text-error;
+}
+
+.ansi-green-fg {
+  @apply text-success;
+}
+
+.ansi-yellow-fg {
+  @apply text-warning;
+}
+
+.ansi-blue-fg {
+  @apply text-primary;
+}
+
+.ansi-magenta-fg {
+  @apply text-violet-600;
+}
+
+.ansi-cyan-fg {
+  @apply text-primary;
+}
+
+.ansi-white-fg {
+  @apply text-layer-content;
+}
+
+.ansi-bright-black-fg {
+  @apply text-layer-content/20;
+}
+
+.ansi-bright-red-fg {
+  @apply text-error;
+}
+
+.ansi-bright-green-fg {
+  @apply text-success;
+}
+
+.ansi-bright-yellow-fg {
+  @apply text-warning;
+}
+
+.ansi-bright-blue-fg {
+  @apply text-primary;
+}
+
+.ansi-bright-magenta-fg {
+  @apply text-violet-600;
+}
+
+.ansi-bright-cyan-fg {
+  @apply text-primary;
+}
+
+.ansi-bright-white-fg {
+  @apply text-layer-content;
+}
+
+.ansi-black-bg {
+  @apply bg-layer-content/20;
+}
+
+.ansi-red-bg {
+  @apply bg-error;
+}
+
+.ansi-green-bg {
+  @apply bg-success;
+}
+
+.ansi-yellow-bg {
+  @apply bg-warning;
+}
+
+.ansi-blue-bg {
+  @apply bg-primary;
+}
+
+.ansi-magenta-bg {
+  @apply bg-violet-600;
+}
+
+.ansi-cyan-bg {
+  @apply bg-primary;
+}
+
+.ansi-white-bg {
+  @apply bg-layer-content/80;
+}
+
+.ansi-bright-black-bg {
+  @apply bg-layer-content/40;
+}
+
+.ansi-bright-red-bg {
+  @apply bg-error;
+}
+
+.ansi-bright-green-bg {
+  @apply bg-success;
+}
+
+.ansi-bright-yellow-bg {
+  @apply bg-warning;
+}
+
+.ansi-bright-blue-bg {
+  @apply bg-primary;
+}
+
+.ansi-bright-magenta-bg {
+  @apply bg-violet-600;
+}
+
+.ansi-bright-cyan-bg {
+  @apply bg-primary;
+}
+
+.ansi-bright-white-bg {
+  @apply bg-layer-content;
+}

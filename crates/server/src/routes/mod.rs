@@ -1,4 +1,4 @@
-use std::{net::IpAddr, time::Duration};
+use std::{net::IpAddr, sync::Arc, time::Duration};
 
 use axum::{
   body::Body,
@@ -10,7 +10,8 @@ use axum::{
   Router,
 };
 use r2s_config::server;
-use tower::{buffer::BufferLayer, limit::RateLimitLayer, ServiceBuilder};
+use tower::{buffer::BufferLayer, ServiceBuilder};
+use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
 use tower_http::{
   cors::{Any, CorsLayer},
   trace::TraceLayer,
@@ -22,7 +23,7 @@ use crate::{
     self,
     auth::extract_user_info,
     codec,
-    forwarded::{ip_record, ip_record_worker},
+    forwarded::{ip_record, ip_record_worker, ProxiedIpExtractor},
   },
   traits::GlobalState,
 };
@@ -91,7 +92,7 @@ pub async fn initialize(
 }
 
 fn construct_router(state: &GlobalState) -> Router<GlobalState> {
-  Router::new()
+  let route = Router::new()
     .nest("/account", account::router(state))
     .nest("/bulletin", bulletin::router(state))
     .nest("/calendar", calendar::router(state))
@@ -106,27 +107,47 @@ fn construct_router(state: &GlobalState) -> Router<GlobalState> {
     .nest("/traffic", traffic::router(state))
     .route("/ping", get(ping))
     .route_layer(from_fn_with_state(state.clone(), ip_record))
-    .route_layer(from_fn_with_state(state.clone(), extract_user_info))
-    .layer(
-      ServiceBuilder::new()
-        .layer(HandleErrorLayer::new(|err: tower::BoxError| async move {
-          (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            format!("unhandled error: {}", err),
-          )
-        }))
-        .layer(BufferLayer::new(1024))
-        .layer(RateLimitLayer::new(
-          state
-            .clone()
-            .config
-            .server
-            .unwrap_or_default()
-            .api_rate_limit
-            .unwrap_or(48) as u64,
-          Duration::from_secs(5),
-        )),
-    )
+    .route_layer(from_fn_with_state(state.clone(), extract_user_info));
+
+  let route = if let Some(config) = state.config.server.clone().unwrap_or_default().rate_limit {
+    let governor_conf = Arc::new(
+      GovernorConfigBuilder::default()
+        .per_millisecond(config.burst_restore_rate.unwrap_or(500))
+        .burst_size(config.burst_limit.unwrap_or(32))
+        .key_extractor(ProxiedIpExtractor)
+        .use_headers()
+        .finish()
+        .unwrap(),
+    );
+
+    let governor_limiter = governor_conf.limiter().clone();
+    let interval = Duration::from_secs(60);
+    // a separate background task to clean up
+    tokio::spawn(async move {
+      loop {
+        tokio::time::sleep(interval).await;
+        debug!("rate limiting storage size: {}", governor_limiter.len());
+        governor_limiter.retain_recent();
+      }
+    });
+
+    route.layer(GovernorLayer {
+      config: governor_conf,
+    })
+  } else {
+    route
+  };
+
+  route.layer(
+    ServiceBuilder::new()
+      .layer(HandleErrorLayer::new(|err: tower::BoxError| async move {
+        (
+          StatusCode::INTERNAL_SERVER_ERROR,
+          format!("unhandled error: {}", err),
+        )
+      }))
+      .layer(BufferLayer::new(1024)),
+  )
 }
 
 async fn ping() -> impl IntoResponse {

@@ -7,9 +7,10 @@
 ```json
 {
   "devops": {
-    "event_type": "cluster_overloaded", // "cluster_overloaded" | "cluster_recovered"，保证不会有其他值
-    "running": 100, // 正在运行的容器数量
-    "pending": 20, // 队列中等待运行的容器数量
+    "event_type": "cluster_overloaded", // "cluster_overloaded" | "cluster_recovered" | "server_panic"，保证不会有其他值
+    "running": 100, // number | null, 正在运行的容器数量
+    "pending": 20, // number | null, 队列中等待运行的容器数量
+    "message": "xxxx" // string | null, 原因描述
   }
 }
 ```

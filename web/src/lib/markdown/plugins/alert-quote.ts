@@ -19,7 +19,8 @@ export function remarkAlertQuote(options: Readonly<AlertBlockquoteOptions>) {
           const textNode = firstChild.children[0];
           if (textNode.type !== "text") return;
           // find the `[!identifier]` phrase at the first line of blockquote
-          const firstline = textNode.value.slice(0, textNode.value.indexOf("\n"));
+          const _lfpos = textNode.value.indexOf("\n");
+          const firstline = _lfpos > 0 ? textNode.value.slice(0, _lfpos) : textNode.value;
           const match = firstline.match(/^\[!(.+)\]\s*(.*)$/im);
           if (!match) return;
           const identifier = match[1];

@@ -10,6 +10,7 @@ import { t } from "@storage/theme";
 import Divider from "@widgets/divider";
 import Link from "@widgets/link";
 import Pagination from "@widgets/pagination";
+import clsx from "clsx";
 import { For, Match, Show, Switch, createEffect, createSignal, untrack } from "solid-js";
 
 export default function () {
@@ -53,11 +54,14 @@ export default function () {
             {(article) => (
               <>
                 <Link ghost justify="start" href={`/bulletin/${article.id}`} class="overflow-hidden relative">
-                  {/* icon-[fluent--megaphone-20-regular] icon-[fluent--megaphone-20-filled] */}
                   <span
-                    class={`icon-[fluent--megaphone-20-${
-                      article.weight >= 1 ? "filled" : "regular"
-                    }] w-5 h-5 text-${article.weight >= 1 ? "primary" : "layer-content"}`}
+                    class={clsx(
+                      article.weight >= 1 ? "text-primary" : "text-layer-content",
+                      article.weight >= 1
+                        ? "icon-[fluent--megaphone-20-filled]"
+                        : "icon-[fluent--megaphone-20-regular]",
+                      "w-5 h-5"
+                    )}
                   />
                   <span class="flex-1 text-start truncate font-normal">{article.title}</span>
                   <span class="opacity-60">{article.created_at.toFormat("yyyy-MM-dd")}</span>

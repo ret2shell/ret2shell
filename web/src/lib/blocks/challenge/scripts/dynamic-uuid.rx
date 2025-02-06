@@ -9,11 +9,11 @@ const WITH_HYPHEN = true;
 /// whether the flag uuid is case sensitive
 const CASE_SENSITIVE  = true;
 /// the key to initialize the flag encryptor
-const ENCRYPT_KEY = "Ave_mujica";
-/// the flag prefix, maybe the game name, `flag` means the flag will be `flag{...}`
+const ENCRYPT_KEY = "%RANDSTR(24)%";
+/// the flag prefix, the game name for example, `flag` means the flag will be `flag{...}`
 const PREFIX = "flag";
 /// the flag hash key, used to generate the uuid content
-const HASH_KEY = "Yes you are right but you should watch BanG Dream! It's MyGO!!!!!";
+const HASH_KEY = "%RANDSTR(32)%";
 
 /// Check flag submitted by user.
 ///
@@ -59,7 +59,7 @@ pub async fn check(bucket, user, team, submission) {
     if dec_id != id {
       return Ok((false, "Incorrect!", Some(#{
         peer_team: dec_id,
-        reason: `team ${team.id}:'${team.name}' may cheated with team ${dec_id}`
+        reason: `team ${id}:'${team.name.unwrap()}' may cheated with team ${dec_id}`
       })));
     }
   }
@@ -70,8 +70,8 @@ pub async fn check(bucket, user, team, submission) {
 /// Provides the environment variables when user starts the challenge container.
 ///
 /// NOTE: the flag content generation has random data injected every time you
-/// call `audit::encode_uuid`. The examiners only validate the stegano data in the
-/// flag content.
+/// call `audit::encode_uuid`. The examiners only validate the stegano data in
+/// the flag content.
 ///
 /// * bucket: the challenge `ret2api::bucket::Bucket` object
 /// * user: { id: number, account: string, institute_id: number }

@@ -33,6 +33,7 @@ export default function (_props: {
 }) {
   const [hints, setHints] = createSignal([] as Hint[]);
   const [extras, setExtras] = createSignal([] as Extra[]);
+  const [unlocking, setUnlocking] = createSignal(false);
   const lorem = new LoremIpsum({
     wordsPerSentence: {
       max: 8,
@@ -106,12 +107,14 @@ export default function (_props: {
   }
 
   async function handleUnlockHint(id: number) {
+    setUnlocking(true);
     try {
       await unlockChallengeHint(gameStore.current!.id, challengeStore.current!.id, id);
       refreshHint();
     } catch (err) {
       handleHttpError(err as Error, t("game.challenge.unlockHintFailed")!);
     }
+    setUnlocking(false);
   }
   return (
     <div class="flex flex-col p-3 lg:p-6">
@@ -119,14 +122,14 @@ export default function (_props: {
         each={hints()}
         fallback={
           <div class="px-2 min-h-12 py-1 border-b border-b-layer-content/10 flex items-center space-x-2">
-            <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary flex-shrink-0" />
+            <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary shrink-0" />
             <span class="font-bold opacity-60">{t("game.challenge.noHints")}</span>
           </div>
         }
       >
         {(hint) => (
           <div class="px-2 min-h-12 py-1 border-b border-b-layer-content/10 flex items-center space-x-2">
-            <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary flex-shrink-0" />
+            <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary shrink-0" />
             <Show
               when={!_props.inGame || isGameAdmin() || hint.cost === 0 || extras().find((e) => e.hint_id === hint.id)}
               fallback={
@@ -149,7 +152,13 @@ export default function (_props: {
                           cost: hint.cost,
                         })}
                       </span>
-                      <Button size="sm" level="error" onClick={() => handleUnlockHint(hint.id)}>
+                      <Button
+                        size="sm"
+                        level="error"
+                        onClick={() => handleUnlockHint(hint.id)}
+                        disabled={unlocking()}
+                        loading={unlocking()}
+                      >
                         {t("platform.yes")}
                       </Button>
                     </Card>
@@ -181,7 +190,7 @@ export default function (_props: {
       </For>
       <Show when={isGameAdmin()}>
         <Form onSubmit={onSubmit} class="px-2 min-h-12 border-b border-b-layer-content/10 flex items-center space-x-2">
-          <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary flex-shrink-0" />
+          <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary shrink-0" />
           <Field name="content" validate={[required(t("game.challenge.hintRequired")!)]}>
             {(field, props) => (
               <Input

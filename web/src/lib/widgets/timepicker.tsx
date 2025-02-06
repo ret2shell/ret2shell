@@ -8,6 +8,7 @@ import Button from "./button";
 import Card from "./card";
 import Divider from "./divider";
 import Input from "./input";
+import clsx from "clsx";
 
 type TimePickerPropsRange =
   | {
@@ -415,7 +416,7 @@ export default function TimePicker(props: TimerPickerProps & ComponentProps<"div
     }
   });
   return (
-    <div class={`flex flex-col ${props.class}`.trim()}>
+    <div class={clsx("flex flex-col", props.class)}>
       <input class="hidden" type="number" value={props.value} name={props.name} />
       <Show when={props.range}>
         <input

@@ -49,7 +49,7 @@ export default function (props: { children?: JSX.Element }) {
     if (accountStore.token && !accountStore.permissions.includes(Permission.Verified)) {
       addToast({
         level: "warning",
-        description: t("account.emailNotVerified")!,
+        description: t("account.settings.verify.notVerified")!,
         accept: () => {
           navigate("/account/settings");
         },

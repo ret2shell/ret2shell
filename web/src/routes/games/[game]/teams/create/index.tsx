@@ -15,6 +15,7 @@ import Dialog from "@widgets/dialog";
 import Input from "@widgets/input";
 import Link from "@widgets/link";
 import Popover from "@widgets/popover";
+import clsx from "clsx";
 import { Show, createEffect, createSignal, untrack } from "solid-js";
 
 type TeamCreateForm = {
@@ -78,7 +79,7 @@ export default function () {
           class="w-full max-w-xl"
           contentClass="p-6 flex flex-col md:flex-row space-y-2 space-x-0 md:space-x-6 md:space-y-0"
         >
-          <Form onSubmit={onSubmit} class="md:w-0 flex-1 flex-shrink-0 flex flex-col space-y-2">
+          <Form onSubmit={onSubmit} class="md:w-0 flex-1 shrink-0 flex flex-col space-y-2">
             <h2 class="font-bold text-center">{t("game.team.create.title")}</h2>
             <Field
               name="name"
@@ -121,7 +122,10 @@ export default function () {
                         <Card contentClass="p-2 flex flex-col space-y-2">
                           <Button ghost size="sm" justify="start" type="button" onClick={() => setGenerator("hacker")}>
                             <span
-                              class={`icon-[fluent--diversity-20-regular] w-5 h-5 ${generator() === "hacker" ? "text-primary" : ""}`.trim()}
+                              class={clsx(
+                                "icon-[fluent--diversity-20-regular] w-5 h-5",
+                                generator() === "hacker" && "text-primary"
+                              )}
                             />
                             <span>Hacker Names</span>
                           </Button>
@@ -133,7 +137,10 @@ export default function () {
                             onClick={() => setGenerator("chuunibyou")}
                           >
                             <span
-                              class={`icon-[fluent--diversity-20-regular] w-5 h-5 ${generator() === "chuunibyou" ? "text-primary" : ""}`.trim()}
+                              class={clsx(
+                                "icon-[fluent--diversity-20-regular] w-5 h-5",
+                                generator() === "chuunibyou" && "text-primary"
+                              )}
                             />
                             <span>{t("game.team.create.chuunibyouGenerator")}</span>
                           </Button>

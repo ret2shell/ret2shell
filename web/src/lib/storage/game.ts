@@ -167,3 +167,18 @@ export function gameParticipateState() {
   }
   return [true, ""];
 }
+
+// find the last one
+export function currentTimelinePeriod() {
+  const len = gameStore.current?.timeline_presets?.length;
+  const sortedTimeline = gameStore.current?.timeline_presets?.sort(
+    (a, b) => a.start_at.toMillis() - b.start_at.toMillis()
+  );
+  if (!len) return null;
+  for (let i = len; i > 0; i--) {
+    const period = sortedTimeline![i - 1];
+    if (period.start_at < DateTime.now() && period.end_at > DateTime.now()) {
+      return period;
+    }
+  }
+}

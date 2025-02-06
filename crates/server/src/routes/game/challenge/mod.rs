@@ -384,6 +384,8 @@ async fn up_challenge(
     "challenge {}:'{}' is published by user {}:'{}' ({})",
     challenge.id, challenge.name, token.id, token.account, token.nickname
   );
+
+  cache.at("challenge").del(challenge.id).await.ok();
   let event = EventContainer {
     game_id: challenge.game_id,
     event: Event::Challenge(ChallengeEvent {
@@ -397,7 +399,6 @@ async fn up_challenge(
       },
     }),
   };
-  cache.at("challenge").del(challenge.id).await.ok();
   queue.publish("event", event).await.ok();
   Ok(Json(challenge))
 }
@@ -420,6 +421,7 @@ async fn down_challenge(
     "challenge {}:'{}' is withdraw by user {}:'{}' ({})",
     challenge.id, challenge.name, token.id, token.account, token.nickname
   );
+  cache.at("challenge").del(challenge.id).await.ok();
   let event = EventContainer {
     game_id: challenge.game_id,
     event: Event::Challenge(ChallengeEvent {
@@ -433,7 +435,6 @@ async fn down_challenge(
       },
     }),
   };
-  cache.at("challenge").del(challenge.id).await.ok();
   queue.publish("event", event).await.ok();
   Ok(Json(challenge))
 }

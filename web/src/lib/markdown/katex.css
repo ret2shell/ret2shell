@@ -1,0 +1,4 @@
+.katex,
+.katex * {
+  text-indent: 0 !important;
+}

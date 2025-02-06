@@ -21,6 +21,7 @@ import { passiveSupport } from "passive-events-support/src/utils";
 import { type JSX, type Ref, createEffect, on, onCleanup, onMount } from "solid-js";
 import cyberDark from "./styles/echarts/cyber-dark.json";
 import cyberLight from "./styles/echarts/cyber-light.json";
+import clsx from "clsx";
 
 use([
   LabelLayout,
@@ -202,7 +203,7 @@ export default function Chart(props: EChartsBaseProps) {
     <div
       id={id}
       style={props.style}
-      class={`w-full h-full ${props.class}`.trim()}
+      class={clsx("w-full h-full", props.class)}
       ref={mergeRefs(props.ref, (el) => {
         chartElement = el;
       })}

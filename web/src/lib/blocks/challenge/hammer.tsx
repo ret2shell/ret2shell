@@ -17,6 +17,7 @@ import Button from "@widgets/button";
 import Card from "@widgets/card";
 import { EditorBare } from "@widgets/editor";
 import Link from "@widgets/link";
+import clsx from "clsx";
 // import Popover from "@widgets/popover";
 import type { DateTime } from "luxon";
 // import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
@@ -172,10 +173,10 @@ export default function (props: {
           when={!isGameAdmin()}
           fallback={
             <div class="self-start flex-row max-w-[calc(100%-4rem)] flex items-center">
-              <A class="w-10 h-10 flex-shrink-0 self-start mt-2" href="/magic/sakana">
+              <A class="w-10 h-10 shrink-0 self-start mt-2" href="/magic/sakana">
                 <Avatar class="w-full h-full" src={platformAvatar} fallback="Ciallo" />
               </A>
-              <div class="w-4 flex-shrink-0" />
+              <div class="w-4 shrink-0" />
               <div class="flex flex-col space-y-1">
                 <header class="label">Ciallo～(∠・ω&lt; )⌒☆</header>
                 <Card contentClass="p-2">
@@ -187,10 +188,10 @@ export default function (props: {
           }
         >
           <div class="self-start flex-row max-w-[calc(100%-4rem)] flex items-center">
-            <A class="w-10 h-10 flex-shrink-0 self-start mt-2" href="/magic/sakana">
+            <A class="w-10 h-10 shrink-0 self-start mt-2" href="/magic/sakana">
               <Avatar class="w-full h-full" src={platformAvatar} fallback="Ciallo" />
             </A>
-            <div class="w-4 flex-shrink-0" />
+            <div class="w-4 shrink-0" />
             <div class="flex flex-col space-y-1">
               <header class="label">Ciallo～(∠・ω&lt; )⌒☆</header>
               <Card contentClass="p-2">
@@ -200,10 +201,10 @@ export default function (props: {
             </div>
           </div>
           <div class="self-start flex-row max-w-[calc(100%-4rem)] flex items-center">
-            <A class="w-10 h-10 flex-shrink-0 self-start mt-2" href="/magic/sakana">
+            <A class="w-10 h-10 shrink-0 self-start mt-2" href="/magic/sakana">
               <Avatar class="w-full h-full" src={platformAvatar} fallback="Ciallo" />
             </A>
-            <div class="w-4 flex-shrink-0" />
+            <div class="w-4 shrink-0" />
             <div class="flex flex-col space-y-1 items-start">
               <header class="label">Ciallo～(∠・ω&lt; )⌒☆</header>
               <Card contentClass="p-2">
@@ -239,21 +240,25 @@ export default function (props: {
           <For each={chats()}>
             {(chat, index) => (
               <div
-                class={`fade-group-up ${chat.user_id !== accountStore.id ? "self-start flex-row" : "self-end flex-row-reverse"} w-[calc(100%-4rem)] flex items-center`}
+                class={clsx(
+                  "fade-group-up",
+                  chat.user_id !== accountStore.id ? "self-start flex-row" : "self-end flex-row-reverse",
+                  "w-[calc(100%-4rem)] flex items-center"
+                )}
               >
                 <Show
                   when={index() === 0 || chats().at(index() - 1)?.user_id !== chat.user_id}
-                  fallback={<div class="w-10 h-10 flex-shrink-0 self-start" />}
+                  fallback={<div class="w-10 h-10 shrink-0 self-start" />}
                 >
                   <Show
                     when={chat.id !== 0}
                     fallback={
-                      <A class="w-10 h-10 flex-shrink-0 self-start mt-2" href="/magic/sakana">
+                      <A class="w-10 h-10 shrink-0 self-start mt-2" href="/magic/sakana">
                         <Avatar class="w-full h-full" src={platformAvatar} fallback="Ciallo" />
                       </A>
                     }
                   >
-                    <A class="w-10 h-10 flex-shrink-0 self-start mt-2" href={`/users/${chat.user_id}`}>
+                    <A class="w-10 h-10 shrink-0 self-start mt-2" href={`/users/${chat.user_id}`}>
                       <Avatar
                         class="w-full h-full"
                         src={chat.avatar ? mediaPath(chat.avatar) : undefined}
@@ -262,9 +267,12 @@ export default function (props: {
                     </A>
                   </Show>
                 </Show>
-                <div class="w-4 flex-shrink-0" />
+                <div class="w-4 shrink-0" />
                 <div
-                  class={`flex-1 w-0 flex flex-col ${chat.user_id !== accountStore.id ? "items-start" : "items-end"}`}
+                  class={clsx(
+                    chat.user_id !== accountStore.id ? "items-start" : "items-end",
+                    "flex-1 w-0 flex flex-col"
+                  )}
                 >
                   <Show when={index() === 0 || chats().at(index() - 1)?.user_id !== chat.user_id}>
                     <header class="label space-x-2 py-1">
@@ -280,10 +288,20 @@ export default function (props: {
                     </header>
                   </Show>
                   <div
-                    class={`peer flex max-w-full ${chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse"}`}
+                    class={clsx(
+                      chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse",
+                      "peer flex max-w-full"
+                    )}
                   >
-                    <Card contentClass="p-2">
+                    <Card
+                      contentClass={clsx(
+                        chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse",
+                        "flex p-2"
+                      )}
+                    >
                       <Article content={chat.content} noExtraPaddings compact extra />
+                      <div class="w-2" />
+                      <span class="text-xs opacity-60 self-end">{chat.created_at.toFormat("HH:mm")}</span>
                     </Card>
                     <div class="self-end flex items-end">
                       <span
@@ -307,7 +325,7 @@ export default function (props: {
       <div class="sticky bottom-0 flex flex-col space-y-2 p-3 border-t border-t-layer-content/5 backdrop-blur">
         <div class="flex flex-row items-center h-8 space-x-2">
           <span class="hidden lg:flex items-center space-x-2">
-            <span class={`w-2 h-2 rounded-full ${availableMsg() <= 0 ? "bg-error" : "bg-success"}`} />
+            <span class={clsx("w-2 h-2 rounded-full", availableMsg() <= 0 ? "bg-error" : "bg-success")} />
             <span class="opacity-60">
               {availableMsg() <= 0
                 ? t("game.challenge.hammerInputAlreadySend")
@@ -352,7 +370,7 @@ export default function (props: {
           </Button>
         </div>
         <EditorBare
-          class={`rounded-lg ${editorExpanded() ? "h-64" : "h-16"}`}
+          class={clsx("rounded-lg", editorExpanded() ? "h-64" : "h-16")}
           value={chat()}
           placeholder={t("game.challenge.hammerInput")}
           lang="markdown"

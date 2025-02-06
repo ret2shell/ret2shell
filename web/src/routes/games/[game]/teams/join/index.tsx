@@ -65,7 +65,7 @@ export default function () {
           class="w-full max-w-xl"
           contentClass="p-6 flex flex-col md:flex-row space-y-2 space-x-0 md:space-x-6 md:space-y-0"
         >
-          <Form onSubmit={onSubmit} class="md:w-0 flex-1 flex-shrink-0 flex flex-col space-y-2">
+          <Form onSubmit={onSubmit} class="md:w-0 flex-1 shrink-0 flex flex-col space-y-2">
             <h2 class="font-bold text-center">{t("game.team.join.title")}</h2>
             <Field name="token" validate={[required(t("game.team.join.tokenRequired")!)]}>
               {(field, props) => (

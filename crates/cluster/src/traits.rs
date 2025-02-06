@@ -54,4 +54,6 @@ pub enum ClusterError {
   FromUtf8Error(#[from] std::string::FromUtf8Error),
   #[error("script error: {0}")]
   ScriptError(String),
+  #[error("Traffic port-mapping not found: {0}")]
+  TrafficMapperNotFound(String),
 }

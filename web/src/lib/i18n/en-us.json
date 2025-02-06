@@ -85,11 +85,11 @@
     "failedToFetchGames": "failed to fetch game list",
     "gameNotArchived": "game not archived",
     "briefRequired": "brief required",
-    "briefPlaceholder": "practice area brief",
+    "briefPlaceholder": "playground brief",
     "create": "create",
     "nameRequired": "name required",
-    "namePlaceholder": "practice area name",
-    "createSuccess": "practice area {{name}} created successfully",
+    "namePlaceholder": "playground name",
+    "createSuccess": "playground {{name}} created successfully",
     "openForever": "open forever",
     "challenge": {
       "welcome": "Playground Introduction"
@@ -233,6 +233,7 @@
       "fetchEnvImagesFailed": "failed to fetch image repository",
       "envContainerName": "Container Name",
       "envContainerNameRequired": "Please fill in the container name",
+      "pullSecret": "Pull Secret",
       "envContainerTag": "Container Image",
       "envContainerTagRequired": "Please select the container image",
       "envContainerTagVersion": "Image Version",
@@ -313,12 +314,24 @@
       "hammerHowto": "How to use Markdown?",
       "hammerSend": "Send",
       "hammerLastMessage": "You can still send {{last}} messages",
-      "hideSolved": "Hide solved challenges"
+      "hideSolved": "Hide solved challenges",
+      "archived": "Archived",
+      "archivedTips": "This question has been archived and will no longer be scored.",
+      "envContainerStorage": "Storage Limit",
+      "envContainerStorageRequired": "Please fill in the storage limit.",
+      "hideArchived": "Hide archived challenges",
+      "notReleased": "The challenge has not been released yet, and the players cannot see this challenge.",
+      "periodTips": "Time-limited challenge, only scores are counted for solving within the current time period.",
+      "releasePeriod": "Release period",
+      "releasePeriodPlaceholder": "The challenges are not visible before release, and challenges that are archived do not count towards the score. If left blank, it is valid for all time periods...",
+      "releaseTips": "Countdown to Topic Release",
+      "showAll": "Show all"
     },
     "scoreboard": {
       "title": "Scoreboard",
       "selectInstitute": "Select Organization...",
-      "fetchError": "failed to fetch leaderboard"
+      "fetchError": "failed to fetch scoreboard",
+      "currentPeriod": "This week"
     },
     "writeup": {
       "title": "Solution"
@@ -356,16 +369,14 @@
         "hidden": "Hidden"
       },
       "events": {
-        "title": "Event Board"
+        "title": "Event Board",
+        "fetchDevicesFailed": "Failed to retrieve device list",
+        "linkedDevices": "Connected devices",
+        "noDevicesLinked": "No connected devices.",
+        "tips1": "Connect to the following WebSocket address to access the platform event API subscription. You can find the integration method for the event API here:",
+        "tips2": "Please note that the Event API only authenticates through a Token. Be cautious to prevent this link from being leaked."
       },
-      "automate": {
-        "title": "Event Push",
-        "tips1": "Connect to the following WebSocket address to subscribe to the platform event API. You can find the event API's interface methods here:",
-        "tips2": "Please note, the event API is authenticated via Token, be cautious not to expose this link.",
-        "linkedDevices": "Connected Devices",
-        "noDevicesLinked": "No Devices Connected",
-        "fetchDevicesFailed": "failed to fetch device list"
-      },
+      "automate": {},
       "edit": {
         "title": "Edit Information"
       },
@@ -412,11 +423,42 @@
         "notSolved": "incorrect",
         "needReview": "awaiting review",
         "misjudged": "misjudged",
-        "confirmed": "confirmed"
+        "confirmed": "confirmed",
+        "title": "Event Kanban"
+      },
+      "captures": {
+        "title": "Container Traffic"
+      },
+      "delete": {
+        "tips": "Are you sure you want to delete this game? Once deleted, it cannot be recovered, and related data will be cleared.",
+        "tips1": "Please pay special attention: before deleting a game, you must delete all the challenges in the game manually. The game cannot be deleted if there are still challenges present.",
+        "tips2": "If you decide to delete the game, please enter the game name {{name}} below.",
+        "title": "Delete the game"
+      },
+      "git": {
+        "title": "Challenge Repository"
+      },
+      "timeline": {
+        "deleteTips": "Are you sure you want to delete this time slot? Deleting it will not affect the existing question's time slot control.",
+        "endAtRequired": "Please select the end time.",
+        "labelPlaceholder": "Time Period Name",
+        "labelRequired": "Please fill in the time period name.",
+        "noTimeline": "No time slot",
+        "startAtRequired": "Please select the start time.",
+        "startEndTime": "Start and end time",
+        "title": "Time Slot Management"
+      },
+      "traffic": {
+        "deleteTips": "Are you sure you want to delete the routing script? After deletion, the platform default script / WSRX will be used.",
+        "multiNodeDirectScript": "Multi-node direct connection",
+        "nodeSelector": "Node Load",
+        "selectPresetScripts": "Select Preset Script...",
+        "singleNodeDirectScript": "Single-node direct connection",
+        "title": "Environmental Routing"
       }
     },
     "introduction": {
-      "title": "Game Must Know",
+      "title": "Introduction",
       "empty": "The organizer is lazy, nothing is written",
       "fetchFailed": "failed to fetch game introduction",
       "updateFailed": "failed to update game introduction"
@@ -490,7 +532,9 @@
         "pending": "Pending",
         "hidden": "Hidden",
         "passed": "Normal"
-      }
+      },
+      "bannedTips1": "It seems someone is doing something bad...",
+      "bannedTips2": "Your team has been banned by the administrator for violating game rules and is unable to continue participating. Previous results have also been invalidated. If you have any questions or need to appeal, please contact the administrator."
     },
     "accessPolicy": {
       "open": "Open Game"
@@ -703,7 +747,25 @@
       "nameRequired": "Please enter the organization name",
       "provider": "Third-Party Authenticator",
       "providerNeeded": "Please select a third-party authenticator, leave blank for manual...",
-      "token": "Manage Key"
+      "token": "Manage Key",
+      "emailScript": "Email suffix verification",
+      "oauth2AuthCodeScript": "OAuth2 Authorization Code Mode",
+      "providerIdentifier": "Validator Identifier",
+      "providerIdentifierMaxLength": "Validator identifier can be up to 32 characters.",
+      "providerIdentifierMinLength": "Validator identifier must be at least 2 characters.",
+      "providerIdentifierPattern": "Validator identifiers can only consist of lowercase letters, numbers, and underscores.",
+      "providerIdentifierRequired": "Please enter the validator identifier.",
+      "providerName": "Validator Name",
+      "providerNameRequired": "Please enter the validator name.",
+      "providerPortal": "Validator portal address (leave blank to disable login function)",
+      "providerPortalInvalid": "Validator portal address is invalid.",
+      "providerScript": "Validator Script",
+      "providerScriptRequired": "Please enter the validator script",
+      "selectPresetScripts": "Select Preset Script...",
+      "yaleCasScript": "Edu CAS Login"
+    },
+    "traffic": {
+      "title": "Container Routing"
     }
   },
   "theme": {
@@ -763,29 +825,9 @@
     "contactTips": "Platform software support email"
   },
   "account": {
-    "deleteAccountTitle": "Warning! Account Deactivation is Irreversible!",
-    "deleteAccountTipsTitle1": "Please confirm that your account is not really deleted, but is placed in a deactivated and irrecoverable state, the following operations will be executed:",
-    "deleteAccountTips1": "Please confirm that your account is not really deleted, but is placed in a deactivated and irrecoverable state, the following operations will be executed:",
-    "deleteAccountTipsList1": "Your account will be renamed to [DELETED]_<hash>;",
-    "deleteAccountTipsList2": "Your account will be stripped of all permissions and prevented from logging in, nor can it be recovered via email; the email can be used to register another account;",
-    "deleteAccountTipsList3": "Account privacy information will be removed, but publicly published content will be retained;",
-    "deleteAccountTipsList4": "Competition scores, data, etc. bound to the account will be retained, but no information will be provided to prove it is yours.",
-    "deleteAccountTips2": "Please read and confirm the above content carefully! If you really do decide to deactivate your account, please enter your full username {{name}} below to confirm:",
-    "deleteAccountTips3": "Please note, due to the deletion of identity verification-related private information, even if you contact management/operations staff, they will be unable to recover the deactivated account, please think carefully before proceeding.",
-    "bye": "Goodbye",
-    "deleteAccountFailed": "failed to deactivate account",
     "logout": "Logout",
     "box": "User Details",
-    "resendVerifyEmail": "Resend Verification Email",
-    "verifyingEmail": "Verifying Your Email",
-    "emailVerified": "succeeded to verify email",
-    "emailVerifyBroken": "Verification link has issues, please ensure the email link is correct",
-    "emailVerifyFailed": "failed to verify email",
-    "resendVerifyEmailSuccess": "Verification email has been resent to your inbox, please check",
-    "resendVerifyEmailFailed": "failed to send email",
-    "verifyEmail": "Verify Email",
     "emailNotVerified": "Your account email is not verified, functionality is limited",
-    "canNotDeleteWhenGameInProgress": "To prevent fraudulent behavior, your account cannot be deleted while you are participating in an ongoing game.",
     "login": {
       "title": "Login",
       "accountPlaceholder": "Username/Email",
@@ -825,7 +867,19 @@
         "title": "Organization"
       },
       "delete": {
-        "title": "Delete Route"
+        "title": "Delete Account",
+        "bye": "Goodbye",
+        "canNotDeleteWhenGameInProgress": "To prevent cheating, you cannot delete your account while participating in an ongoing competition.",
+        "failed": "Account deactivation failed",
+        "tips1": "Please be aware that your account has not actually been deleted, but rather placed in a deactivated and unrecoverable state. The following actions will be executed:",
+        "tips2": "Please carefully read and confirm the above content! If you are truly certain that you want to deactivate your account, please enter your full username {{name}} below to confirm:",
+        "tips3": "Please note that due to the removal of authentication-related privacy information, even if you contact the management/operations personnel, it will not be possible to restore a deactivated account. Please think twice before proceeding.",
+        "tipsList1": "Your account will be renamed to [DELETED]_<hash>;",
+        "tipsList2": "Your account will have all permissions removed and be banned from logging in. You will not be able to recover it via email, but the email can be used to register another account.",
+        "tipsList3": "Account privacy information will be removed, but publicly posted content will remain.",
+        "tipsList4": "The competition results and data associated with the account will be retained, but no information can be provided to prove that it is yours.",
+        "tipsTitle1": "Please be aware that your account has not actually been deleted, but rather placed in a state of deletion and cannot be restored. The following actions will be executed:",
+        "topWarning": "Warning! Account deactivation is irreversible!"
       },
       "password": {
         "title": "Change Password",
@@ -837,6 +891,17 @@
         "confirmPassword": "Confirm New Password",
         "confirmPasswordMismatch": "The two passwords entered do not match",
         "success": "Password change succeeded, please log in again"
+      },
+      "verify": {
+        "notVerified": "Your account email has not been verified, and functionality is limited.",
+        "resend": "Resend verification email",
+        "resendFailed": "Email sending failed",
+        "resendSuccess": "The verification email has been resent to your mailbox, please check.",
+        "title": "Verify Email",
+        "verifyBroken": "The verification link has an issue, please ensure the email link is correct.",
+        "verifyFailed": "Verification failed",
+        "verifySuccess": "Verification successful",
+        "verifying": "Verifying your email"
       }
     },
     "register": {
@@ -858,7 +923,9 @@
       "passwordTooWeak": "Password must be between 8-40 characters and include at least one uppercase letter, one lowercase letter, one number, and one special character",
       "emailPlaceholder": "Email",
       "passwordPlaceholder": "Password",
-      "success": "Registration succeeded, welcome to the world of CTF!"
+      "success": "Registration succeeded, welcome to the world of CTF!",
+      "nickname": "Nickname",
+      "oauthRegisterTips": "It seems you haven't registered a user account before... No problem! Registering now will directly link to your third-party authentication account {{key}}, and next time you can log in directly using the third-party unified identity authentication."
     },
     "oauth": {
       "failedToLogin": "failed to login",
@@ -867,72 +934,8 @@
       "bind": "bind",
       "unbind": "unbind",
       "failedToUnbind": "failed to unbind",
-      "xdu": {
-        "title": "Western Union Identity Verification"
-      },
-      "xmu": {
-        "title": "Xiamen University Unified Identity Authentication"
-      },
-      "nwnu": {
-        "title": "Northwestern Polytechnical University Unified Identity Authentication"
-      },
-      "t": {
-        "title": "Taliwood University Unified Identity Verification"
-      },
-      "taru": {
-        "title": "Taliwood University Unified Identity Authentication"
-      },
-      "jiangnan": {
-        "title": "South China University Email Identity Verification"
-      },
-      "hduEmail": {
-        "title": "Hangzhou Dianzi University Email Verification"
-      },
-      "xduCas": {
-        "title": "Xi'an University of Electronic Science and Technology Unified Identity Authentication"
-      },
-      "xmuCas": {
-        "title": "Xiamen University Unified Identity Authentication"
-      },
-      "jiangnan_email": {
-        "title": "South China University of Technology Email Identity Verification"
-      },
-      "cumt_email": {
-        "title": "China University of Mining and Technology Email Identity Verification"
-      },
-      "hdu_email": {
-        "title": "Hangzhou Dianzi University Email Identity Verification"
-      },
-      "xmu_cas": {
-        "title": "Xiamen University Unified Identity Authentication"
-      },
-      "xdu_cas": {
-        "title": "Xi'an University of Electronic Science and Technology Unified Identity Authentication"
-      },
-      "uestc_email": {
-        "title": "Electronic Science and Technology University Email Identity Verification"
-      },
-      "seu_email": {
-        "title": "Southeast University Email Identity Verification"
-      },
-      "fudan_email": {
-        "title": "Retro University Email Identity Verification"
-      },
-      "jlu_email": {
-        "title": "Jilin University Email Identity Verification"
-      },
-      "bit_email": {
-        "title": "Beijing Institute of Technology Email Identity Verification"
-      },
-      "tzc_email": {
-        "title": "Taiwan University Email Identity Verification"
-      },
-      "cppu_email": {
-        "title": "Chinese People's Police University Email Identity Verification"
-      },
-      "ncu_email": {
-        "title": "Nanchang University Email Identity Verification"
-      }
+      "select": "Log in using unified identity authentication.",
+      "title": "Third-party certification"
     },
     "institute": {
       "none": "No Organization"
@@ -987,8 +990,14 @@
     "fetchFailed": "Failed to Fetch Challenge Environment"
   },
   "magic": {
-    "illustration": "Illustration",
-    "source": "Source"
+    "about": {
+      "title": "About"
+    },
+    "sakana": {
+      "illustration": "Illustration",
+      "source": "Source",
+      "title": "Easter egg!"
+    }
   },
   "captcha": {
     "loading": "Loading...",

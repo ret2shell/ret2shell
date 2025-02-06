@@ -218,14 +218,32 @@ async fn submission_worker_exec(
 ) -> Result<submission::Model, ResponseError> {
   // stage 1: get all necessary data
   let txn = db.conn.begin().await?;
+
   let challenge = challenge::get(&txn, submission.challenge_id).await?;
   let challenge = if let Some(challenge) = challenge {
     challenge
   } else {
     return Err(ResponseError::BadRequest("challenge not found".to_owned()));
   };
+  let prev_submitted = submission::count(
+    &txn,
+    true,
+    Some(challenge.game_id),
+    Some(challenge.id),
+    submission.team_id,
+    None,
+    None,
+    true,
+  )
+  .await?
+    > 0;
+
   let team = if let Some(team_id) = submission.team_id {
-    team::get(&txn, team_id).await?
+    if !prev_submitted {
+      team::get(&txn, team_id).await?
+    } else {
+      None
+    }
   } else {
     None
   };

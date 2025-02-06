@@ -5,6 +5,7 @@
 use std::collections::HashMap;
 
 use once_cell::sync::Lazy;
+use rand::Rng;
 
 static ALTER_CHAR_TABLE: Lazy<HashMap<u8, Vec<u8>>> = Lazy::new(|| {
   let mut map = HashMap::new();
@@ -45,7 +46,7 @@ pub fn leet_str(s: impl AsRef<str>) -> String {
   let mut result = String::new();
   for c in s.as_ref().bytes() {
     if let Some(alter) = ALTER_CHAR_TABLE.get(&c) {
-      let idx = rand::random::<usize>() % alter.len();
+      let idx = rand::rng().random::<u32>() as usize % alter.len();
       result.push(alter[idx] as char);
     } else {
       result.push(c as char);

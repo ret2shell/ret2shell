@@ -6,6 +6,7 @@ import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Divider from "@widgets/divider";
 import LoadingTips from "@widgets/loading-tips";
+import clsx from "clsx";
 import type { Node } from "kubernetes-types/core/v1";
 import { DateTime } from "luxon";
 import { For, Match, Show, Switch, createSignal, onMount } from "solid-js";
@@ -109,13 +110,13 @@ export default function () {
                   onClick={() => setShownNode(node)}
                 >
                   <span
-                    class={`${
+                    class={clsx(
                       node.metadata?.labels?.["node-role.kubernetes.io/master"] === "true"
                         ? "icon-[fluent--brain-circuit-20-regular]"
-                        : "icon-[fluent--production-20-regular]"
-                    } w-8 h-8 ${
+                        : "icon-[fluent--production-20-regular]",
+                      "w-8 h-8",
                       shownNode()?.metadata?.name === node.metadata?.name ? "text-primary-content" : "text-success"
-                    }`}
+                    )}
                   />
                   <div class="flex flex-col justify-center items-start min-w-fit">
                     <span class="font-bold">{node.metadata?.name}</span>
@@ -163,7 +164,6 @@ export default function () {
                     {([key, value]) => (
                       <tr class="border-b border-b-layer-content/10">
                         <td class="font-bold opacity-60 p-2">{`${
-                          /* @ts-expect-error key is dynamic */
                           t(`admin.cluster.data.nodeInfo.${key}`) as string
                         }`}</td>
                         <td class="p-2">{value}</td>

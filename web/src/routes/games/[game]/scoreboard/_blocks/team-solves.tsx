@@ -38,13 +38,7 @@ export default function TeamSolves(props: {
       <header class="border-b border-b-layer-content/10 flex flex-col">
         <div class="flex flex-row items-center self-end space-x-6 h-24 sticky right-3 lg:right-6">
           <Show when={gameStore.current?.logo} fallback={<LogoAnimate width={80} height={80} />}>
-            <img
-              class="flex-shrink-0"
-              src={mediaPath(gameStore.current!.logo!)}
-              width={80}
-              height={80}
-              alt="Logo Broken"
-            />
+            <img class="shrink-0" src={mediaPath(gameStore.current!.logo!)} width={80} height={80} alt="Logo Broken" />
           </Show>
           <h1 class="text-3xl font-bold">{gameStore.current?.name}</h1>
         </div>

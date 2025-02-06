@@ -17,7 +17,8 @@ use r2s_migrator::Database;
 use r2s_queue::Queue;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
-use tracing::{error, warn};
+use tower_governor::{key_extractor::KeyExtractor, GovernorError};
+use tracing::{debug, error, warn};
 
 use super::auth::Token;
 use crate::traits::ResponseError;
@@ -61,7 +62,7 @@ fn maybe_forwarded(headers: &HeaderMap) -> Option<IpAddr> {
 }
 
 /// Looks in `ConnectInfo` extension
-fn maybe_connect_info<B: Send>(req: &Request<B>) -> Option<IpAddr> {
+fn maybe_connect_info<B>(req: &Request<B>) -> Option<IpAddr> {
   req
     .extensions()
     .get::<ConnectInfo<SocketAddr>>()
@@ -291,7 +292,7 @@ impl FromStr for ForwardedHeaderValue {
 ///
 /// In some cases, the `x-forwarded-for` header may not set, the IP record will
 /// be localhost, so please make sure the reverse proxy is configured correctly.
-pub fn get_client_ip(request: &Request) -> Option<IpAddr> {
+pub fn get_client_ip<B>(request: &Request<B>) -> Option<IpAddr> {
   let headers = request.headers();
   maybe_x_forwarded_for(headers)
     .or_else(|| maybe_x_real_ip(headers))
@@ -318,6 +319,7 @@ pub async fn ip_record(
       return Ok(next.run(req).await);
     }
   };
+  debug!("Client IP address: {}", ip);
   queue
     .publish(
       "ip-record",
@@ -327,6 +329,7 @@ pub async fn ip_record(
       },
     )
     .await?;
+  debug!("IP record message published");
   Ok(next.run(req).await)
 }
 
@@ -341,13 +344,25 @@ async fn ip_record_worker_exec(message: jetstream::Message, db: &Database) -> an
 pub async fn ip_record_worker(mut messages: Stream, db: Database) {
   while let Some(message) = messages.next().await {
     if let Ok(message) = message {
+      message.ack().await.ok();
       ip_record_worker_exec(message.clone(), &db)
         .await
         .map_err(|e| error!("Failed to process message: {:?}", e))
         .ok();
-      message.ack().await.ok();
     } else {
       error!("Failed to receive message from nats: {:?}", message);
     }
+  }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Eq, PartialEq)]
+pub struct ProxiedIpExtractor;
+
+impl KeyExtractor for ProxiedIpExtractor {
+  type Key = String;
+
+  fn extract<B>(&self, req: &Request<B>) -> Result<Self::Key, GovernorError> {
+    let ip = get_client_ip(req).ok_or(GovernorError::UnableToExtractKey)?;
+    Ok(ip.to_string())
   }
 }

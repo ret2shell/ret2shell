@@ -2,6 +2,7 @@ import { Popover } from "@ark-ui/solid";
 import { type ComponentProps, type JSX, createSignal, splitProps } from "solid-js";
 import { Portal } from "solid-js/web";
 import type { ButtonProps } from "./button";
+import clsx from "clsx";
 export default function (
   props: {
     children?: JSX.Element;
@@ -23,26 +24,6 @@ export default function (
   const [popoverProps, nativeProps] = splitProps(_1, ["children", "btnContent", "popContentClass"]);
   const [opened, setOpened] = createSignal(false);
 
-  const classList = () => {
-    return {
-      btn: true,
-      // btn-primary btn-info btn-success btn-warning btn-error
-      [`btn-${buttonProps.level}`]: !!buttonProps.level,
-      // btn-sm btn-md
-      [`btn-${buttonProps.size || "md"}`]: true,
-      "btn-ghost": buttonProps.ghost && !opened(),
-      "btn-bold": buttonProps.bold,
-      // justify-start justify-center justify-end
-      [`justify-${buttonProps.justify || "center"}`]: true,
-      uppercase: buttonProps.uppercase,
-      disabled: nativeProps.disabled,
-      "btn-square": buttonProps.square,
-    };
-  };
-  const mergedClass = () =>
-    Object.keys(classList())
-      .filter((key) => classList()[key])
-      .join(" ");
   return (
     <Popover.Root
       autoFocus={false}
@@ -52,14 +33,29 @@ export default function (
     >
       <Popover.Trigger
         {...nativeProps}
-        class={`${mergedClass()} ${nativeProps.class}`.trim()}
+        class={clsx(
+          "btn",
+          // btn-primary btn-info btn-success btn-warning btn-error
+          !!buttonProps.level && `btn-${buttonProps.level}`,
+          // btn-sm btn-md
+          `btn-${buttonProps.size || "md"}`,
+          buttonProps.ghost && !opened() && "btn-ghost",
+          buttonProps.bold && "btn-bold",
+          // justify-start justify-center justify-end
+          `justify-${buttonProps.justify || "center"}`,
+          buttonProps.uppercase && "uppercase",
+          nativeProps.disabled && "btn-disabled",
+          buttonProps.square && "btn-square",
+          nativeProps.class,
+          nativeProps.classList
+        )}
         title={nativeProps.title}
       >
         {props.btnContent}
       </Popover.Trigger>
       <Portal>
         <Popover.Positioner>
-          <Popover.Content class={`popover ${popoverProps.popContentClass}`.trim()}>
+          <Popover.Content class={clsx("popover", popoverProps.popContentClass)}>
             {popoverProps.children}
           </Popover.Content>
         </Popover.Positioner>

@@ -8,9 +8,9 @@ use ret2api::regex;
 const ENABLE_REGEX = false;
 /// case sensitive
 const CASE_SENSITIVE = true;
-/// the flag prefix, maybe the game name, `flag` means the flag will be `flag{...}`
+/// the flag prefix, the game name for example, `flag` means the flag will be `flag{...}`
 const PREFIX = "flag";
-/// the flag template name, used to generate the correct flag content, and
+/// the flag template (readable recommended), used to generate the correct flag content
 /// if regex enabled, the template is like `^you_.+_impact$`
 const TEMPLATE = "you_said_right_but_you_should_play_genshin_impact";
 

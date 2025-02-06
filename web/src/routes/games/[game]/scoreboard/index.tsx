@@ -17,6 +17,7 @@ import TeamDetails from "./_blocks/team-details";
 import TeamRanks from "./_blocks/team-ranks";
 import TeamSolves from "./_blocks/team-solves";
 import { handleHttpError } from "@api";
+import clsx from "clsx";
 
 function ChartOperations(props: {
   onRefresh?: () => void;
@@ -210,15 +211,17 @@ export default function () {
         <div ref={autoPageSizeWatcher!} class="fixed h-[calc(100vh-24rem)]" />
         <Show when={topTeams().length > 0}>
           <div
-            class={`xl:sticky w-full top-0 left-0 ${
+            class={clsx(
+              "xl:sticky w-full top-0 left-0",
               showChallengeDetail()
-                ? "xl:w-[20vw] backdrop-blur border-r border-r-layer-content/10"
+                ? "xl:w-[20vw] backdrop-blur-sm border-r border-r-layer-content/10"
                 : showLargePanel()
                   ? "xl:w-[75vw] justify-center"
-                  : "xl:w-[40vw]"
-            } transition-size duration-500 p-3 lg:p-6 flex flex-col space-y-2 flex-shrink-0`}
+                  : "xl:w-[40vw]",
+              "transition-[height,width] duration-500 p-3 lg:p-6 flex flex-col space-y-2 shrink-0"
+            )}
           >
-            <Card class="relative" contentClass={`p-2 ${showChallengeDetail() ? "h-48" : "aspect-video"}`}>
+            <Card class="relative" contentClass={clsx("p-2", showChallengeDetail() ? "h-48" : "aspect-video")}>
               <Chart
                 option={{
                   grid: {

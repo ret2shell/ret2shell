@@ -43,7 +43,7 @@ export default function () {
   const [avatarUploading, setAvatarUploading] = createSignal(false);
   let avatarInput: HTMLInputElement;
   function handleSelectAvatar() {
-    avatarInput.click();
+    avatarInput!.click();
   }
   function handleSelectedAvatar(event: Event) {
     if (
@@ -80,11 +80,11 @@ export default function () {
       await resendEmail();
       addToast({
         level: "success",
-        description: t("account.verify.resendSuccess")!,
+        description: t("account.settings.verify.resendSuccess")!,
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as Error, t("account.verify.resendFailed")!);
+      handleHttpError(err as Error, t("account.settings.verify.resendFailed")!);
     }
   }
   async function onSubmit(result: UserForm) {
@@ -208,7 +208,7 @@ export default function () {
               <span class="icon-[fluent--warning-20-filled] w-5 h-5 text-warning" />
               <span class="flex-1 text-start">{t("account.settings.info.emailNotVerified")}</span>
               <Button size="sm" type="button" onClick={handleResendVerifyEmail}>
-                <span>{t("account.verify.resend")}</span>
+                <span>{t("account.settings.verify.resend")}</span>
               </Button>
             </Card>
           </Show>

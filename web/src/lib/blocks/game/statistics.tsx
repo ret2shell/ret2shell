@@ -14,9 +14,7 @@ import Select from "@widgets/select";
 import XLSX from "@e965/xlsx";
 import { handleHttpError } from "@api";
 
-export default function GameStatistics(props: {
-  inGame?: boolean;
-}) {
+export default function GameStatistics(props: { inGame?: boolean }) {
   const [loading, setLoading] = createSignal(false);
   const [selectedInstituteId, setSelectedInstituteId] = createSignal<number | null>(null);
   const [stats, setStats] = createSignal(
@@ -93,7 +91,9 @@ export default function GameStatistics(props: {
           selectedInstituteId() ?? undefined
         );
         // save as json
-        const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+        const blob = new Blob([JSON.stringify(data)], {
+          type: "application/json",
+        });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
@@ -128,7 +128,9 @@ export default function GameStatistics(props: {
     const challengeStatsHeader = ["Challenge", "Submissions", "Solves"];
     const challengeStatsSheet = XLSX.utils.aoa_to_sheet([challengeStatsHeader]);
     const challengeStatsArr = challengeStats().map((v) => [v.name, v.submissions, v.solves]);
-    XLSX.utils.sheet_add_aoa(challengeStatsSheet, challengeStatsArr, { origin: "A2" });
+    XLSX.utils.sheet_add_aoa(challengeStatsSheet, challengeStatsArr, {
+      origin: "A2",
+    });
     XLSX.utils.book_append_sheet(workbook, challengeStatsSheet, "Challenge Stats");
 
     const scoreboardHeader = [
@@ -269,7 +271,7 @@ export default function GameStatistics(props: {
               <Show when={!loading() && stats()} fallback={<Spin width={24} height={24} />}>
                 <span class="font-bold text-3xl text-warning">{stats()?.total_submissions}</span>
               </Show>
-              <span class="opacity-60">SUBMISSIONS</span>
+              <span class="opacity-60">SUBMITS</span>
             </div>
           </div>
           <div class="xl:flex-1 flex flex-col space-y-2 lg:space-y-4">
@@ -586,7 +588,7 @@ export default function GameStatistics(props: {
                       data: Object.entries(stats()!.institute_teams)
                         .map(([_, v]) => v)
                         .concat(
-                          stats()!.total_players - Object.values(stats()!.institute_teams).reduce((a, b) => a + b, 0)
+                          stats()!.total_teams - Object.values(stats()!.institute_teams).reduce((a, b) => a + b, 0)
                         ),
                       barMaxWidth: 64,
                     },

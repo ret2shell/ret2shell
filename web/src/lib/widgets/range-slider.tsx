@@ -1,4 +1,5 @@
 import { Slider, type SliderRootProps } from "@ark-ui/solid";
+import clsx from "clsx";
 import { splitProps } from "solid-js";
 
 export type SliderProps = {
@@ -10,7 +11,7 @@ export default function (props: SliderRootProps & SliderProps) {
   return (
     <Slider.Root
       {...others}
-      class={`slider ${props.class ?? ""} ${others.orientation === "vertical" ? "slider-vertical" : ""}`.trim()}
+      class={clsx("slider", others.orientation === "vertical" && "slider-vertical", others.class)}
     >
       <div class="label slider-label">
         <Slider.Label>{sliderProps.label}</Slider.Label>

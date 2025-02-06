@@ -1,9 +1,0 @@
-{
-  "plugins": {
-    "postcss-import": {},
-    "tailwindcss": {
-      "config": "./tailwind.config.mts"
-    },
-    "autoprefixer": {}
-  }
-}

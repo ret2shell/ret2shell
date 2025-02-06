@@ -74,7 +74,7 @@ export default function () {
                   <span class="flex-1 opacity-60 truncate" title={device.client}>
                     {device.client}
                   </span>
-                  <span class="flex-shrink-0">{device.connected_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
+                  <span class="shrink-0">{device.connected_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
                 </div>
               </>
             )}

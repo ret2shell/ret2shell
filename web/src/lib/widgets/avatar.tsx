@@ -1,5 +1,6 @@
 import { Avatar } from "@ark-ui/solid";
 import Spin from "@assets/animates/spin";
+import clsx from "clsx";
 import { type JSX, Show, createSignal, splitProps } from "solid-js";
 
 export type AvatarProps = {
@@ -16,7 +17,7 @@ export default function (props: AvatarProps) {
   const [children, root] = splitProps(_1, ["children"]);
   const [imageLoading, setImageLoading] = createSignal(true);
   return (
-    <Avatar.Root class={`avatar ${root.class}`.trim()}>
+    <Avatar.Root class={clsx("avatar", root.class)}>
       <Avatar.Fallback class="avatar-fallback">
         {avatarFunctionProps.fallback?.slice(0, 2).toUpperCase()}
       </Avatar.Fallback>

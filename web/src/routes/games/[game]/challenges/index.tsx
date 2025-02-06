@@ -25,6 +25,7 @@ import { challengeStore, refreshChallengeAssets, refreshChallenges, setChallenge
 import Button from "@widgets/button";
 import { Transition } from "solid-transition-group";
 import { handleHttpError } from "@api";
+import clsx from "clsx";
 
 export default function () {
   const navigate = useNavigate();
@@ -173,11 +174,13 @@ export default function () {
             }}
             type="button"
           >
-            {/* icon-[fluent--code-20-regular] icon-[fluent--dismiss-20-regular] rotate-90 rotate-0 */}
             <span
-              class={`transition-transform rotate-${showLeftSidebar() ? "90" : "0"} icon-[fluent--${
-                showLeftSidebar() ? "dismiss" : "code"
-              }-20-regular] w-5 h-5`}
+              class={clsx(
+                "transition-transform",
+                showLeftSidebar() && "rotate-90",
+                showLeftSidebar() ? "icon-[fluent--dismiss-20-regular]" : "icon-[fluent--code-20-regular]",
+                "w-5 h-5"
+              )}
             />
           </Button>
         </Show>
@@ -193,11 +196,13 @@ export default function () {
             }}
             type="button"
           >
-            {/* icon-[fluent--alert-20-regular] icon-[fluent--dismiss-20-regular] rotate-90 rotate-0 */}
             <span
-              class={`transition-transform rotate-${showRightSidebar() ? "90" : "0"} icon-[fluent--${
-                showRightSidebar() ? "dismiss" : "alert"
-              }-20-regular] w-5 h-5`}
+              class={clsx(
+                "transition-transform",
+                showRightSidebar() && "rotate-90",
+                showRightSidebar() ? "icon-[fluent--dismiss-20-regular]" : "icon-[fluent--alert-20-regular]",
+                "w-5 h-5"
+              )}
             />
           </Button>
         </Show>

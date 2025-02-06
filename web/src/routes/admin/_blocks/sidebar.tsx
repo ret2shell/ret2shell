@@ -6,7 +6,7 @@ import Link from "@widgets/link";
 
 export default function SideBar() {
   return (
-    <ul class="flex-shrink-0 flex flex-col space-y-2 p-3 lg:p-6">
+    <ul class="shrink-0 flex flex-col space-y-2 p-3 lg:p-6">
       <li class="w-full">
         <Link
           activeMatch="exact"

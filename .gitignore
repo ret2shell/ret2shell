@@ -1,19 +1,27 @@
-target
-.DS_Store
-node_modules
-build
-/package
-.env.*
-!.env.example
-dist/
+
+.DS_Store/
+node_modules/
+build/
+/package/
 debug/
-Cargo.lock
-Cargo.dup
-pnpm-lock.yaml
+*.bak
+
+# Rust / Cargo
 **/*.rs.bk
+Cargo.dup
+target/
+
+# Web build
+dist/
+
 data/*
 !data/.gitkeep
 
+# environment file
+.env.*
+!.env.example
+
+# configuration files
 /config/config.toml
 /config/license
 /config/*.bin

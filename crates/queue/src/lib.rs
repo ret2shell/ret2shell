@@ -48,11 +48,15 @@ impl Queue {
       .get_or_create_stream(async_nats::jetstream::stream::Config {
         name: subject.clone(),
         max_messages: 10_000,
+        consumer_limits: Some(async_nats::jetstream::stream::ConsumerLimits {
+          inactive_threshold: Duration::from_secs(60),
+          max_ack_pending: 3,
+        }),
         ..Default::default()
       })
       .await?;
 
-    let subscriber = stream
+    let consumer = stream
       .get_or_create_consumer(
         &subject.clone(),
         async_nats::jetstream::consumer::pull::Config {
@@ -61,9 +65,9 @@ impl Queue {
         },
       )
       .await?;
-    let messages = subscriber
+    let messages = consumer
       .stream()
-      .max_messages_per_batch(10)
+      .max_messages_per_batch(3)
       .messages()
       .await?;
     Ok(messages)

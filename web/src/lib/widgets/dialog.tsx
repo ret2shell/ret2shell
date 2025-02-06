@@ -4,11 +4,16 @@ import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { type ComponentProps, type JSX, splitProps } from "solid-js";
 import { Portal } from "solid-js/web";
 import type { ButtonProps } from "./button";
+import clsx from "clsx";
 
 export default function (
   props: DialogRootProps &
     ButtonProps &
-    ComponentProps<"button"> & { btnContent: JSX.Element; children: JSX.Element; stretched?: boolean }
+    ComponentProps<"button"> & {
+      btnContent: JSX.Element;
+      children: JSX.Element;
+      stretched?: boolean;
+    }
 ) {
   const [buttonProps, _1] = splitProps(props, [
     "level",
@@ -46,35 +51,37 @@ export default function (
     "unmountOnExit",
   ]);
   const [contents, nativeProps] = splitProps(_2, ["btnContent", "children", "stretched"]);
-  const classList = () => {
-    return {
-      btn: true,
-      // btn-primary btn-info btn-success btn-warning btn-error
-      [`btn-${buttonProps.level}`]: !!buttonProps.level,
-      // btn-sm btn-md
-      [`btn-${buttonProps.size || "md"}`]: true,
-      "btn-ghost": buttonProps.ghost,
-      "btn-bold": buttonProps.bold,
-      // justify-start justify-center justify-end
-      [`justify-${buttonProps.justify || "center"}`]: true,
-      uppercase: buttonProps.uppercase,
-      "btn-square": buttonProps.square,
-    };
-  };
-  const mergedClass = () =>
-    Object.keys(classList())
-      .filter((key) => classList()[key])
-      .join(" ");
   return (
     <Dialog.Root {...dialogRootProps} lazyMount unmountOnExit>
-      <Dialog.Trigger {...nativeProps} class={`${mergedClass()} ${nativeProps.class}`.trim()} title={nativeProps.title}>
+      <Dialog.Trigger
+        {...nativeProps}
+        class={clsx(
+          "btn",
+          // btn-primary btn-info btn-success btn-warning btn-error
+          !!buttonProps.level && `btn-${buttonProps.level}`,
+          // btn-sm btn-md btn-xs
+          buttonProps.ghost && "btn-ghost",
+          buttonProps.bold && "btn-bold",
+          // justify-start justify-center justify-end
+          (buttonProps.justify && `justify-${buttonProps.justify}`) ?? "justify-center",
+          (buttonProps.size && `btn-${buttonProps.size}`) ?? "btn-md",
+          buttonProps.uppercase && "uppercase",
+          buttonProps.square && "btn-square",
+          nativeProps.disabled && "btn-disabled",
+          nativeProps.class
+        )}
+        title={nativeProps.title}
+      >
         {contents.btnContent}
       </Dialog.Trigger>
       <Portal>
-        <Dialog.Backdrop class="dialog-backdrop fixed backdrop-blur bg-layer/60 top-0 left-0 w-screen h-screen" />
+        <Dialog.Backdrop class="dialog-backdrop fixed backdrop-blur-sm bg-layer/60 top-0 left-0 w-screen h-screen" />
         <Dialog.Positioner class="fixed top-0 left-0 w-screen h-screen flex items-center justify-center">
           <Dialog.Content
-            class={`dialog-content card relative max-h-[calc(100vh-2rem)] ${contents.stretched ? "w-full max-w-5xl mx-4" : ""}`.trim()}
+            class={clsx(
+              "dialog-content card relative max-h-[calc(100vh-2rem)]",
+              contents.stretched && "w-full max-w-5xl mx-4"
+            )}
           >
             <OverlayScrollbarsComponent
               options={{

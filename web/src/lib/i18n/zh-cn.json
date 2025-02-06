@@ -215,6 +215,7 @@
       "currentEnv": "当前配置",
       "addEnvSuccess": "添加题目环境配置成功",
       "addEnvFailed": "添加题目环境配置失败",
+      "pullSecret": "镜像仓库密钥名称（请预先配置k8s）",
       "toggleEnvInternetSuccess": "调整网络配置成功",
       "toggleEnvInternetFailed": "调整网络配置失败",
       "deleteEnvImageSuccess": "移除题目环境配置成功",
@@ -302,6 +303,12 @@
       "awardRate3": "三血奖励分数比例",
       "statistics": {
         "title": "统计数据"
+      },
+      "delete": {
+        "title": "删除比赛",
+        "tips": "确定要删除这个比赛吗？删除后不可恢复，相关数据将被清除。",
+        "tips1": "请特别注意，删除比赛前需要清空比赛中所有的题目，有题目存在时无法删除比赛。",
+        "tips2": "如果决定删除比赛，请在下方输入比赛名称 {{name}}"
       },
       "teams": {
         "title": "参赛队伍",
@@ -875,6 +882,17 @@
         "confirmPassword": "再次输入新密码",
         "confirmPasswordMismatch": "两次输入的密码不一致",
         "success": "修改成功，请重新登录"
+      },
+      "verify": {
+        "notVerified": "你的账户邮箱尚未通过验证，功能受限",
+        "resend": "重新发送验证邮件",
+        "resendFailed": "邮件发送失败",
+        "resendSuccess": "验证邮件已重新发送至邮箱，请查收",
+        "title": "验证邮箱",
+        "verifyBroken": "验证链接存在问题，请确保邮件链接正确",
+        "verifyFailed": "验证失败",
+        "verifySuccess": "验证成功",
+        "verifying": "正在验证你的邮箱"
       }
     },
     "logout": "退出登录",
@@ -905,78 +923,12 @@
     "oauth": {
       "select": "使用统一身份认证登录",
       "title": "第三方认证",
-      "xdu": {
-        "title": "西电统一身份认证"
-      },
-      "xmu": {
-        "title": "厦门大学统一身份认证"
-      },
       "failedToLogin": "登录失败",
       "failedToBind": "绑定失败",
       "notBind": "未绑定",
       "bind": "绑定",
       "unbind": "解绑",
-      "failedToUnbind": "解绑失败",
-      "nwnu": {
-        "title": "西北师范大学统一身份认证"
-      },
-      "t": {
-        "title": "塔里木大学统一身份认证"
-      },
-      "taru": {
-        "title": "塔里木大学统一身份认证"
-      },
-      "jiangnan": {
-        "title": "江南大学邮件身份认证"
-      },
-      "hduEmail": {
-        "title": "杭州电子科技大学邮件身份验证"
-      },
-      "xduCas": {
-        "title": "西安电子科技大学统一身份认证"
-      },
-      "xmuCas": {
-        "title": "厦门大学统一身份认证"
-      },
-      "jiangnan_email": {
-        "title": "江南大学邮件身份认证"
-      },
-      "cumt_email": {
-        "title": "中国矿业大学邮件身份认证"
-      },
-      "hdu_email": {
-        "title": "杭州电子科技大学邮件身份认证"
-      },
-      "xmu_cas": {
-        "title": "厦门大学统一身份认证"
-      },
-      "xdu_cas": {
-        "title": "西安电子科技大学统一身份认证"
-      },
-      "uestc_email": {
-        "title": "电子科技大学邮件身份认证"
-      },
-      "seu_email": {
-        "title": "东南大学邮件身份认证"
-      },
-      "fudan_email": {
-        "title": "复旦大学邮件身份认证"
-      },
-      "jlu_email": {
-        "title": "吉林大学邮件身份认证"
-      },
-      "bit_email": {
-        "title": "北京理工大学邮件身份认证"
-      },
-      "tzc_email": {
-        "title": "台州学院邮件身份认证"
-      },
-      "cppu_email": {
-        "title": "中国人民警察大学邮件身份认证"
-      },
-      "ncu_email": {
-        "title": "南昌大学邮件身份认证"
-      }
+      "failedToUnbind": "解绑失败"
     },
     "institute": {
       "none": "无从属组织机构"
@@ -1008,17 +960,7 @@
       "confirm": "重置"
     },
     "emailNotVerified": "你的账户邮箱尚未通过验证，功能受限",
-    "verify": {
-      "title": "验证邮箱",
-      "notVerified": "你的账户邮箱尚未通过验证，功能受限",
-      "resend": "重新发送验证邮件",
-      "verifying": "正在验证你的邮箱",
-      "verifyFailed": "验证失败",
-      "verifySuccess": "验证成功",
-      "verifyBroken": "验证链接存在问题，请确保邮件链接正确",
-      "resendSuccess": "验证邮件已重新发送至邮箱，请查收",
-      "resendFailed": "邮件发送失败"
-    }
+    "verify": {}
   },
   "instance": {
     "disconnected": "WSRX 未连接",

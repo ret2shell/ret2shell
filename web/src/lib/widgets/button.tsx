@@ -1,5 +1,6 @@
 import Spin from "@assets/animates/spin";
-import { type ComponentProps, type JSX, Show, createMemo, splitProps } from "solid-js";
+import clsx from "clsx";
+import { type ComponentProps, type JSX, Show, splitProps } from "solid-js";
 
 export type ButtonProps = ComponentProps<"button"> & {
   level?: "primary" | "info" | "success" | "warning" | "error" | null;
@@ -24,32 +25,29 @@ export default function (props: ButtonProps & { children?: JSX.Element }) {
     "square",
   ]);
   const [children, nativeProps] = splitProps(_1, ["children"]);
-  const classList = createMemo(() => {
-    return {
-      btn: true,
-      // btn-primary btn-info btn-success btn-warning btn-error
-      [`btn-${buttonProps.level}`]: !!buttonProps.level,
-      // btn-sm btn-md
-      [`btn-${buttonProps.size || "md"}`]: true,
-      "btn-ghost": buttonProps.ghost,
-      "btn-bold": buttonProps.bold,
-      // justify-start justify-center justify-end
-      [`justify-${buttonProps.justify || "center"}`]: true,
-      uppercase: buttonProps.uppercase,
-      "btn-disabled": nativeProps.disabled,
-      "btn-square": buttonProps.square,
-    };
-  });
-  const className = createMemo(() => {
-    return Object.keys(classList())
-      .filter((key) => classList()[key])
-      .join(" ");
-  });
 
   const size = buttonProps.size === "sm" ? 16 : 20;
 
   return (
-    <button {...nativeProps} class={`${className()} ${nativeProps.class}`.trim()}>
+    <button
+      {...nativeProps}
+      class={clsx(
+        "btn",
+        // btn-primary btn-info btn-success btn-warning btn-error
+        !!buttonProps.level && `btn-${buttonProps.level}`,
+        // btn-sm btn-md btn-xs
+        buttonProps.ghost && "btn-ghost",
+        buttonProps.bold && "btn-bold",
+        // justify-start justify-center justify-end
+        (buttonProps.justify && `justify-${buttonProps.justify}`) ?? "justify-center",
+        (buttonProps.size && `btn-${buttonProps.size}`) ?? "btn-md",
+        buttonProps.uppercase && "uppercase",
+        buttonProps.square && "btn-square",
+        nativeProps.disabled && "btn-disabled",
+        nativeProps.class,
+        nativeProps.classList
+      )}
+    >
       <Show when={props.loading}>
         <Spin width={size} height={size} />
       </Show>

@@ -1,0 +1,142 @@
+# * Auditor config, for team name auditing.
+[auditor]
+# ? the sensitive word list file path
+sensitive_word_list = '/etc/ret2shell/sensitive_word_list.txt'
+
+# * Authentication config, recommended to replace the signing_key with a random string, such as UUID/nanoid.
+[auth]
+# ? the buffer time for token re-distribution
+buffer_time  = 21600
+# ? the token will expire after this time
+expires_time = 86400
+# ? the key to sign the token
+signing_key  = 'K3yInD3v3l0pm3nt' # ! REPLACE IT
+
+[auth.oauth_keys] # ! currently cannot remove
+
+# * Bucket config, for game/challenge file storage.
+[bucket]
+path = '/var/lib/ret2shell/bucket'
+
+# * Cache config
+[cache]
+# ? url format:
+# ? - redis://username:password@foo.com:6379/1
+# ? - rediss://username:password@foo.com:6379/1
+# ? - redis-cluster://username:password@foo.com:30001?node=bar.com:30002&node=baz.com:30003
+# ? - redis-sentinel://username:password@foo.com:6379/1?sentinelServiceName=fakename&node=foo.com:30001&node=bar.com:30002
+url = 'redis://cache:6379'
+
+# * Captcha config
+[captcha]
+enabled    = true
+difficulty = 4
+validator  = 'pow' # none | image | pow | recaptcha_v3 | h_captcha
+
+# * Cluster config
+[cluster]
+enabled           = true
+# ? The following 3 settings are used for specifying the k8s cluster to start challenges.
+# ? If you want to specify the kubernetes configuration manually, set `auto_infer` and `try_default` to `false`.
+# ? The default behavior is to infer the k8s configuration from the environment at this machine.
+auto_infer        = false
+try_default       = false
+# ! Put kubeconfig.yaml into the mounting path, or mount by yourself in the docker-compose file.
+kube_config_path  = "/etc/ret2shell/kubeconfig.yaml"
+# ? Default node selector (tag ret.sh.cn/workload) for challenges, could be specified in each game, set empty to all.
+node_selector     = ""
+
+# ! currently not working
+enable_capture    = true
+capture_directory = "/var/cache/ret2shell/captures"
+cleanup_interval  = 60                              # ? in seconds
+
+# ! deprecated, please use runtime config in the admin panel.
+# traffic          = "pub async fn expose(node, service) { Ok(()) }"
+
+# ? Integrated registry.
+# ? If enabled, other registries are not supported, but the images in the registry could be searched.
+[cluster.registry]
+enabled  = true
+# ! Please ensure that `external` could be visited by the k8s cluster.
+external = "localhost:5000" # ? used for k8s pulling.
+insecure = false
+server   = "registry:5000"  # ? used for platform pushing
+# username =
+# password =
+
+# * Database config
+[database]
+host     = 'database'
+port     = 5432
+ssl_mode = 'disable'               # disable, allow, prefer, require, verify-ca, verify-full
+user     = 'ret2shell'
+password = 'P@ssw02dInD3v3l0pm3nt' # ! REPLACE IT
+db       = 'ret2shell'
+
+# * Email config, used for sending emails
+# ! REPLACE THEM TO FIT YOUR OWN NEEDS
+[email]
+enabled  = false
+host     = 'smtp.example.com'
+password = 'P@ssw0rdInD3v3l0pm3nt'
+port     = 587
+sender   = 'Ret2Shell'
+tls      = 'starttls'              #  'none' | 'tls' | 'starttls'
+username = 'dev@ret.sh.cn'
+
+# * Logging config
+[logging]
+compress   = true
+directory  = '/var/log/ret2shell'
+files_kept = 3
+level      = 'info,tower_http=info,sqlx=warn'
+
+# * Media config, for user-uploaded files
+[media]
+anti_theft = true
+limit      = 100                        # one user could upload per week
+path       = '/var/lib/ret2shell/media'
+
+# * Queue config
+[queue]
+host = 'message_queue'
+port = 4222
+# ? `token` has higher priority than `user` and `password`, only one auth method will be used.
+# token = 'T0k3nInD3v3l0pm3nt'
+# ? `user` and `password` must be both valid, whether it will be ignored.
+# user = 'ret2shell'
+# password = 'P@ssw0rdInD3v3l0pm3nt'
+# ping_interval = 5
+# tls = false
+
+# * Server config
+[server]
+host            = '0.0.0.0'
+port            = 8080
+api_base_path   = '/api'
+cors_origins    = '*'
+external_domain = 'ctf.ret.sh.cn' # ! REPLACE IT
+external_https  = true
+
+# ? Rate limit use Generic cell rate algorithm.
+# ? https://en.wikipedia.org/wiki/Generic_cell_rate_algorithm
+[server.rate_limit]
+burst_limit        = 32
+burst_restore_rate = 500 # ? in milliseconds
+
+# ? Following settings could be changed at web admin panel.
+# ? Configuration in database will overwrite the following settings.
+# name         = 'Ret2Shell'
+# footer_info  = 'Ret 2 Shell'
+# footer_url   = 'https://github.com/ret2shell/ret2shell'
+# subject_info = 'Fight for all the beauty in the world.'
+# subject_url  = 'https://ret.sh.cn/'
+# record       = '豫ICP备xxxxxxxx号-1'                     # ? China ICP record
+# hide_maker   = false
+
+# ? Integrated static server.
+# ? It's recommended to use external high-performance static server like nginx/apache.
+[server.frontend]
+serve_type = 'static'        # static | proxy
+path       = '/var/www/html'

@@ -72,7 +72,11 @@ impl MigrationTrait for Migration {
               .from(Game::Table, Game::IntroductionId)
               .to(Article::Table, Article::Id)
               .on_update(ForeignKeyAction::Cascade)
-              .on_delete(ForeignKeyAction::Cascade),
+              // NOTE: on previous migrations, the action is cascade, that's not intuitive
+              //       we should set it to set null instead
+              //       this changes do not apply to existing data automatically
+              //       but it's safe.
+              .on_delete(ForeignKeyAction::SetNull),
           )
           .col(
             ColumnDef::new(Game::StartAt)

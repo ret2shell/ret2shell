@@ -45,8 +45,8 @@ pub async fn initialize(
   }
   let file_appender = file_appender.build(Path::new(&directory).canonicalize()?)?;
 
-  let (non_blocking_file, _file_guard) = non_blocking(file_appender);
-  let (non_blocking_console, _console_guard) = non_blocking(std::io::stdout());
+  let (non_blocking_file, file_guard) = non_blocking(file_appender);
+  let (non_blocking_console, console_guard) = non_blocking(std::io::stdout());
   let file_log_layer = Layer::new()
     .with_writer(non_blocking_file)
     .with_ansi(false)
@@ -70,5 +70,5 @@ pub async fn initialize(
     .with(console_log_layer)
     .init();
 
-  Ok((_console_guard, _file_guard))
+  Ok((console_guard, file_guard))
 }

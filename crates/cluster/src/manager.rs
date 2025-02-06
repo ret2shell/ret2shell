@@ -6,9 +6,9 @@ use futures_io::AsyncBufRead;
 use k8s_openapi::{
   api::{
     core::v1::{
-      Capabilities, ConfigMap, Container, ContainerPort, EnvVar, Namespace, Node, Pod,
-      PodSecurityContext, PodSpec, PodStatus, ResourceRequirements, SecurityContext, Service,
-      Sysctl,
+      Capabilities, ConfigMap, Container, ContainerPort, EnvVar, LocalObjectReference, Namespace,
+      Node, Pod, PodSecurityContext, PodSpec, PodStatus, ResourceRequirements, SecurityContext,
+      Service, Sysctl,
     },
     networking::v1::NetworkPolicy,
   },
@@ -21,7 +21,7 @@ use kube::{
 };
 use r2s_config::cluster::{ChallengeEnv, Config};
 use tokio_util::codec::Framed;
-use tracing::{debug, error, warn};
+use tracing::{debug, error, info, warn};
 
 use super::traits::ClusterError;
 use crate::{registry::Registry, traffic::TrafficMapper};
@@ -320,7 +320,7 @@ impl Cluster {
       };
       match self.check_outdated_pod(&pod).await {
         Ok(true) => {
-          debug!("Deleting outdated pod: {}", pod.name().unwrap());
+          info!("Deleting outdated pod: {}", pod.name().unwrap());
           api
             .delete(
               &pod.name().unwrap(),
@@ -403,7 +403,6 @@ impl Cluster {
         drop: Some(vec!["NET_BIND_SERVICE".to_owned()]),
         ..Default::default()
       }),
-
       ..Default::default()
     };
     let pod_security_context = PodSecurityContext {
@@ -425,6 +424,9 @@ impl Cluster {
           .restricted
           .is_some_and(|r| r)
           .then_some(pod_security_context),
+        image_pull_secrets: env_config
+          .pull_secret
+          .map(|secret| vec![LocalObjectReference { name: secret }]),
         containers: env_config
           .images
           .iter()
@@ -452,11 +454,15 @@ impl Cluster {
             }),
             resources: Some(ResourceRequirements {
               requests: Some(
-                [("cpu", "10m".to_owned()), ("memory", "32Mi".to_owned())]
-                  .iter()
-                  .cloned()
-                  .map(|(k, v)| (k.to_owned(), Quantity(v)))
-                  .collect(),
+                [
+                  ("cpu", "10m".to_owned()),
+                  ("memory", "32Mi".to_owned()),
+                  ("ephemeral-storage", "64Mi".to_owned()),
+                ]
+                .iter()
+                .cloned()
+                .map(|(k, v)| (k.to_owned(), Quantity(v)))
+                .collect(),
               ),
               limits: Some(
                 [
@@ -526,8 +532,13 @@ impl Cluster {
       }),
       ..Default::default()
     };
-    self.create_service(service).await?;
-    Ok(())
+    match self.create_service(service).await {
+      Ok(_) => Ok(()),
+      Err(err) => {
+        self.delete_pod(&pod_name).await?;
+        Err(err)
+      }
+    }
   }
 
   pub async fn get_challenge_env(&self, challenge_id: i64) -> Result<Vec<Pod>, ClusterError> {
@@ -581,6 +592,18 @@ impl Cluster {
     let pod = pod
       .first()
       .ok_or(ClusterError::PodNotFound(token.to_owned()))?;
+    if !pod.spec.clone().is_some_and(|spec| {
+      spec.containers.iter().any(|c| {
+        c.ports
+          .iter()
+          .any(|p| p.iter().any(|p| p.container_port == (port as i32)))
+      })
+    }) {
+      return Err(ClusterError::TrafficMapperNotFound(format!(
+        "port: {}",
+        port
+      )));
+    }
     let client = check_enabled!(self.client)?;
     let api: Api<Pod> = Api::namespaced(client, &with_namespace!(&self.namespace, "wsrx link")?);
     let mut pf = api.portforward(&pod.name().unwrap(), &[port]).await?;

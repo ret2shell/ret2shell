@@ -7,6 +7,7 @@ import { colorPalette, themeStore } from "../storage/theme";
 import { Shell } from "./shell";
 import "@xterm/xterm/css/xterm.css";
 import { challengeStore } from "@storage/challenge";
+import clsx from "clsx";
 
 export default function (props: ComponentProps<"div">) {
   let terminal: HTMLDivElement;
@@ -102,7 +103,7 @@ export default function (props: ComponentProps<"div">) {
   });
 
   return (
-    <div {...props} class={`flex-1 relative overflow-hidden h-full backdrop-blur p-3 lg:p-6 ${props.class}`.trim()}>
+    <div {...props} class={clsx("flex-1 relative overflow-hidden h-full backdrop-blur-sm p-3 lg:p-6", props.class)}>
       <div class="w-full h-full overflow-hidden" ref={terminal!} id="terminal" />
     </div>
   );

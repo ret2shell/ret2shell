@@ -4,6 +4,7 @@ import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Popover from "@widgets/popover";
 import Toast from "@widgets/toast";
+import clsx from "clsx";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show } from "solid-js";
 
@@ -49,11 +50,12 @@ export default function NotificationBox() {
     <Popover
       btnContent={
         <span
-          class={`${
+          class={clsx(
             toastStore.toasts.length > 0
               ? "icon-[fluent--alert-badge-20-filled] text-primary"
-              : "icon-[fluent--alert-20-regular]"
-          } w-5 h-5`}
+              : "icon-[fluent--alert-20-regular]",
+            "w-5 h-5"
+          )}
         />
       }
       square

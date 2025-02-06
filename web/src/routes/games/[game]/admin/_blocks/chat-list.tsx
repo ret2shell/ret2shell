@@ -93,7 +93,7 @@ export default function ChatList() {
   });
   return (
     <div class="w-full h-full overflow-hidden flex flex-col">
-      <div class="h-16 flex flex-row px-4 space-x-2 items-center backdrop-blur border-b border-b-layer-content/10">
+      <div class="h-16 flex flex-row px-4 space-x-2 items-center backdrop-blur-sm border-b border-b-layer-content/10">
         <span class="icon-[fluent--chat-20-regular] w-5 h-5" />
         <span>
           <span class="font-bold">Rx</span>
@@ -129,7 +129,7 @@ export default function ChatList() {
                     ghost={!(teamId() === session.team_id && challengeId() === session.challenge_id)}
                     class="flex-row space-x-2 items-center h-auto py-2 !px-3 fade-group-right"
                   >
-                    <div class="w-10 h-10 aspect-square flex-shrink-0 relative">
+                    <div class="w-10 h-10 aspect-square shrink-0 relative">
                       <Avatar class="w-full h-full" src={undefined} fallback={session.team_name} />
                       <div class="absolute -right-1 -bottom-1 w-2 h-2">
                         <Show when={!session.checked && !session.is_admin}>

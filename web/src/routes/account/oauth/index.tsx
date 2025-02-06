@@ -11,6 +11,7 @@ import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import LoadingTips from "@widgets/loading-tips";
+import clsx from "clsx";
 import { createSignal, onMount } from "solid-js";
 
 export default function () {
@@ -92,24 +93,13 @@ export default function () {
           <LogoAnimate
             width={128}
             height={128}
-            class={`transition-all duration-700 ${animate() ? "" : "translate-x-16 opacity-0"} `}
+            class={clsx("transition-all duration-700", !animate() && "translate-x-16 opacity-0")}
           />
-          {/* <span class={`transition-all duration-700 ${ animate() ? "opacity-60" : "translate-x-8 opacity-0" } `}>-*-</span> */}
-          {/* <img */}
-          {/*   src={xdsecMascotHappy} */}
-          {/*   alt="Broken" */}
-          {/*   class={`w-24 h-24 animate-bounce transition-all duration-700 ${ animate() ? "" : "translate-y-6 opacity-0" } `} */}
-          {/* /> */}
-          {/* <span class={`transition-all duration-700 ${ animate() ? "opacity-60" : "-translate-x-8 opacity-0" } `}> */}
-          {/*   -*- */}
-          {/* </span> */}
-          <span class={`text-2xl font-bold transition-all duration-700 ${animate() ? "opacity-100" : "opacity-0"} `}>
-            +
-          </span>
+          <span class={clsx("text-2xl font-bold transition-all duration-700", !animate() && "opacity-0")}>+</span>
           <img
             src={brand()}
             alt="Brand"
-            class={`w-32 h-32 transition-all duration-700 ${animate() ? "" : "-translate-x-16 opacity-0"} `}
+            class={clsx("w-32 h-32 transition-all duration-700", !animate() && "-translate-x-16 opacity-0")}
           />
         </div>
         <LoadingTips />

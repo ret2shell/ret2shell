@@ -8,6 +8,7 @@ import Button from "@widgets/button";
 import IconCheckbox from "@widgets/icon-checkbox";
 import Input from "@widgets/input";
 import TimePicker from "@widgets/timepicker";
+import clsx from "clsx";
 import { DateTime } from "luxon";
 import { createSignal } from "solid-js";
 
@@ -172,7 +173,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
                 <Button
                   type="button"
                   square
-                  class={`!rounded-r-none ${field.value === 1 ? "text-primary" : ""}`.trim()}
+                  class={clsx("!rounded-r-none", field.value === 1 && "text-primary")}
                   onClick={() => {
                     setValue(form, "weight", 1);
                   }}
@@ -182,7 +183,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
                 <Button
                   type="button"
                   square
-                  class={`!rounded-none ${field.value === 2 ? "text-primary" : ""}`.trim()}
+                  class={clsx("!rounded-none", field.value === 2 && "text-primary")}
                   onClick={() => {
                     setValue(form, "weight", 2);
                   }}
@@ -192,7 +193,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
                 <Button
                   type="button"
                   square
-                  class={`!rounded-l-none ${field.value === 3 ? "text-primary" : ""}`.trim()}
+                  class={clsx("!rounded-l-none", field.value === 3 && "text-primary")}
                   onClick={() => {
                     setValue(form, "weight", 3);
                   }}

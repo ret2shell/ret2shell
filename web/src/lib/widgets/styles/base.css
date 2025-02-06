@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+@import "./article.css";
+@import "./avatar.css";
+@import "./button.css";
+@import "./card.css";
+@import "./checkbox.css";
+@import "./dialog.css";
+@import "./divider.css";
+@import "./icon-checkbox.css";
+@import "./input.css";
+@import "./label.css";
+@import "./popover.css";
+@import "./progress.css";
+@import "./select.css";
+@import "./skeleton.css";
+@import "./slider.css";
+@import "./splitter.css";
+@import "./tag.css";
+
+@import "./editor.css";
+@import "./scrollbar.css";
+@import "./effect.css";
+@import "./ansi-color.css";
+
+@import "./logo-animate.css";
+@import "./too-narrow.css";
+@import "./reverier.css";
+@import "./background.css";
+@import "./darkmode-button.css";
+@import "./sidebar-layout.css";
+
+@config "../../../../tailwind.config.mts";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --font-display:
+    "JetBrains Mono", "Menlo", "-apple-system", "Noto Sans",
+    "Helvetica Neue", "Helvetica", "Nimbus Sans L", "Arial", "Liberation Sans",
+    "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Source Han Sans SC",
+    "Source Han Sans CN", "Microsoft YaHei", "Consolas", "Courier", "monospace";
+  --font-sans:
+    "JetBrains Mono", "Menlo", "-apple-system", "Noto Sans",
+    "Helvetica Neue", "Helvetica", "Nimbus Sans L", "Arial", "Liberation Sans",
+    "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Source Han Sans SC",
+    "Source Han Sans CN", "Microsoft YaHei", "Consolas", "Courier", "monospace";
+  --font-serif:
+    "JetBrains Mono", "Menlo", "-apple-system", "Noto Sans",
+    "Helvetica Neue", "Helvetica", "Nimbus Sans L", "Arial", "Liberation Sans",
+    "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Source Han Sans SC",
+    "Source Han Sans CN", "Microsoft YaHei", "Consolas", "Courier", "monospace";
+  --font-body:
+    "JetBrains Mono", "Menlo", "-apple-system", "Noto Sans",
+    "Helvetica Neue", "Helvetica", "Nimbus Sans L", "Arial", "Liberation Sans",
+    "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Source Han Sans SC",
+    "Source Han Sans CN", "Microsoft YaHei", "Consolas", "Courier", "monospace";
+  --font-mono:
+    "JetBrains Mono", "Menlo", "-apple-system", "Noto Sans",
+    "Helvetica Neue", "Helvetica", "Nimbus Sans L", "Arial", "Liberation Sans",
+    "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Source Han Sans SC",
+    "Source Han Sans CN", "Microsoft YaHei", "Consolas", "Courier", "monospace";
+}
+
+:root {
+  --private-color-primary: oklch(0.64 0.17 248);
+  --private-color-primary-content: black;
+  --private-color-error: oklch(0.64 0.17 24);
+  --private-color-error-content: black;
+  --private-color-warning: oklch(0.64 0.17 48);
+  --private-color-warning-content: black;
+  --private-color-success: oklch(0.64 0.17 150);
+  --private-color-success-content: black;
+  --private-color-info: oklch(0.64 0.17 248);
+  --private-color-info-content: black;
+}
+
+[data-theme="cyber-light"] {
+  --private-color-layer: oklch(0.96 0.015 248);
+  --private-color-layer-content: black;
+}
+
+[data-theme="cyber-dark"] {
+  --private-color-layer: oklch(0.18 0 248);
+  --private-color-layer-content: white;
+}
+
+@theme inline {
+  --color-transparent: transparent;
+  --color-primary: var(--private-color-primary);
+  --color-primary-content: var(--private-color-primary-content);
+  --color-error: var(--private-color-error);
+  --color-error-content: var(--private-color-error-content);
+  --color-warning: var(--private-color-warning);
+  --color-warning-content: var(--private-color-warning-content);
+  --color-success: var(--private-color-success);
+  --color-success-content: var(--private-color-success-content);
+  --color-info: var(--private-color-info);
+  --color-info-content: var(--private-color-info-content);
+  --color-layer: var(--private-color-layer);
+  --color-layer-content: var(--private-color-layer-content);
+}
+
+/* Disable scrollbar */
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  forced-color-adjust: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* Device specific */
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+/** Hide input[type=number] arrows */
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Terminal-like selection color */
+::selection {
+  @apply bg-layer-content text-layer;
+}
+
+html,
+body {
+  @apply min-h-full min-w-full m-0 p-0;
+  @apply bg-layer text-layer-content;
+}
+
+.root {
+  @apply min-h-full min-w-full m-0 p-0;
+}
+
+[hidden] {
+  @apply hidden;
+}
+
+.os-scrollbar {
+  pointer-events: auto;
+  visibility: visible !important;
+}

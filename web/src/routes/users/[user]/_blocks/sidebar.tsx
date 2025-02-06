@@ -6,6 +6,7 @@ import { fullTheme, t } from "@storage/theme";
 import Avatar from "@widgets/avatar";
 import Divider from "@widgets/divider";
 import Tag from "@widgets/tag";
+import clsx from "clsx";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show } from "solid-js";
 
@@ -25,7 +26,7 @@ export default function (props: { user: User | null; loading?: boolean }) {
         <div class="flex flex-col min-h-full space-y-2 p-3 lg:p-6">
           <div class="flex flex-row space-x-4 lg:space-x-6 p-2 lg:p-4 items-center">
             <Avatar
-              class="w-12 h-12 flex-shrink-0"
+              class="w-12 h-12 shrink-0"
               src={(props.user?.avatar && mediaPath(props.user?.avatar)) || undefined}
               fallback={props.user?.nickname}
               loading={props.loading}
@@ -43,7 +44,7 @@ export default function (props: { user: User | null; loading?: boolean }) {
           <div class="flex flex-row space-x-2 items-center px-2 py-2">
             <span class="icon-[fluent--mail-20-regular] w-5 h-5" />
             <a
-              class={`font-bold ${props.user?.email ? "hover:underline" : "blur pointer-events-none"}`.trim()}
+              class={clsx("font-bold", props.user?.email ? "hover:underline" : "blur pointer-events-none")}
               href={`mailto:${props.user?.email}`}
             >
               {props.user?.email ?? "fake.email@ret.sh.cn"}
@@ -74,7 +75,9 @@ export default function (props: { user: User | null; loading?: boolean }) {
           </Show>
           <div class="h-12 flex items-center justify-center">
             <span class="opacity-60">
-              {t("user.registeredAt", { time: props.user?.registered_at.toFormat("yyyy-MM-dd") || "UNKNOWN" })}
+              {t("user.registeredAt", {
+                time: props.user?.registered_at.toFormat("yyyy-MM-dd") || "UNKNOWN",
+              })}
             </span>
           </div>
         </div>

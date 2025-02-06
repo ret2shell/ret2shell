@@ -15,6 +15,7 @@
         "*.scss": "tailwindcss",
         "*.rx": "rune"
     },
+    "biome.enabled": true,
     "rust-analyzer.showUnlinkedFileNotification": false,
     "javascript.format.enable": false,
     "typescript.format.enable": false,
@@ -22,6 +23,8 @@
     "editor.codeActionsOnSave": {
         "source.organizeImports.biome": "explicit"
     },
+    "i18n-ally.localesPaths": ["web/src/lib/i18n"],
+    "i18n-ally.keystyle": "nested",
     "[rust]": {
         "editor.defaultFormatter": "rust-lang.rust-analyzer"
     },
@@ -31,12 +34,10 @@
     "[sass]": {
         "editor.defaultFormatter": "syler.sass-indented"
     },
-    "i18n-ally.localesPaths": ["web/src/lib/i18n"],
-    "i18n-ally.keystyle": "nested",
     "[typescript]": {
         "editor.defaultFormatter": "biomejs.biome"
     },
     "[typescriptreact]": {
         "editor.defaultFormatter": "biomejs.biome"
-    }
+    },
 }

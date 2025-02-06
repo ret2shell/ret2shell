@@ -6,6 +6,7 @@ import { fullTheme, t } from "@storage/theme";
 import Button from "@widgets/button";
 import Divider from "@widgets/divider";
 import Link from "@widgets/link";
+import clsx from "clsx";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
 import { TransitionGroup } from "solid-transition-group";
@@ -25,18 +26,26 @@ export default function Tabs(props: {
   function appendChallengeHistory(challenge: Challenge) {
     if (challengeHistory().find((c) => c.id === challenge.id)) {
       setTimeout(() => {
-        document
-          .getElementById(`challenge-${challenge.id}`)
-          ?.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+        document.getElementById(`challenge-${challenge.id}`)?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "center",
+        });
       }, 100);
       return;
     }
     setChallengeHistory([...challengeHistory(), { id: challenge.id, name: challenge.name }]);
     setTimeout(() => {
-      document
-        .getElementById(`challenge-${challenge.id}`)
-        ?.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+      document.getElementById(`challenge-${challenge.id}`)?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "center",
+      });
     }, 100);
+  }
+  function closeChallengeTab(challengeId: number) {
+    if (challengeId === selectedChallengeId()) setSearchParams({ challenge: null });
+    setChallengeHistory([...challengeHistory().filter((s) => s.id !== challengeId)]);
   }
   createEffect(() => {
     if (challengeStore.current) {
@@ -47,7 +56,7 @@ export default function Tabs(props: {
   });
   return (
     <OverlayScrollbarsComponent
-      class="w-full h-16 backdrop-blur border-b border-b-layer-content/10 relative"
+      class="w-full h-16 backdrop-blur-sm border-b border-b-layer-content/10 relative"
       options={{
         scrollbars: {
           theme: `os-theme-${fullTheme()}`,
@@ -141,27 +150,36 @@ export default function Tabs(props: {
           <For each={challengeHistory()}>
             {(challenge) => (
               <div class="fade-group-dive-left flex flex-row">
-                <Link
-                  href={`${props.baseUrl}?challenge=${challenge.id}`}
-                  onClick={() => setSearchParams({ challenge: challenge.id })}
+                <Button
+                  // href={`${props.baseUrl}?challenge=${challenge.id}`}
+                  onClick={() => {
+                    setSearchParams({ challenge: challenge.id });
+                  }}
+                  onMouseUp={(e) => {
+                    if (e.button === 1) closeChallengeTab(challenge.id);
+                  }}
                   id={`challenge-${challenge.id}`}
-                  active={challenge.id === selectedChallengeId() && inCreate() === false}
+                  // active={challenge.id === selectedChallengeId() && inCreate() === false}
                   ghost
-                  class="max-w-48 rounded-r-none"
+                  class={clsx(
+                    "max-w-48",
+                    "pr-0",
+                    challenge.id === selectedChallengeId() && inCreate() === false && "btn-active"
+                  )}
                 >
                   <span class="icon-[fluent--code-20-regular] w-5 h-5" />
                   <span class="truncate flex-1 text-left">{challenge.name}</span>
-                </Link>
-                <Button
-                  class={`!rounded-l-none ${challenge.id === selectedChallengeId() && inCreate() === false ? "btn-active" : ""}`}
-                  square
-                  ghost
-                  onClick={() => {
-                    if (challenge.id === selectedChallengeId()) setSearchParams({ challenge: null });
-                    setChallengeHistory([...challengeHistory().filter((s) => s.id !== challenge.id)]);
-                  }}
-                >
-                  <span class="icon-[fluent--dismiss-20-regular] w-5 h-5 opacity-60" />
+                  <Button
+                    class="!rounded-l-none"
+                    square
+                    ghost
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      closeChallengeTab(challenge.id);
+                    }}
+                  >
+                    <span class="icon-[fluent--dismiss-20-regular] w-5 h-5 opacity-60" />
+                  </Button>
                 </Button>
               </div>
             )}

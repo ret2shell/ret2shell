@@ -54,7 +54,7 @@ export default function (props: {
   return (
     <div class="min-h-full flex-1 flex flex-col space-y-2 p-3 lg:p-6 items-center">
       <header class="h-12 border-b border-b-layer-content/15 flex flex-row items-center space-x-2 font-bold w-full">
-        <span class="icon-[fluent--book-20-regular] w-5 h-5 flex-shrink-0" />
+        <span class="icon-[fluent--book-20-regular] w-5 h-5 shrink-0" />
         <span class="flex-1 text-start">{t("game.challenge.answer")}</span>
         <Show when={isGameAdmin()}>
           <Show

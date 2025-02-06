@@ -25,6 +25,7 @@ import Settings from "./settings";
 import Statistics from "./statistics";
 import Terminal from "./terminal";
 import { handleHttpError } from "@api";
+import clsx from "clsx";
 
 function BottomPanel(props: {
   onStateChange?: (challenge?: Challenge) => void;
@@ -101,7 +102,7 @@ function BottomPanel(props: {
   return (
     <div class="w-full h-full overflow-hidden flex flex-col">
       <OverlayScrollbarsComponent
-        class="w-full h-16 backdrop-blur border-b border-b-layer-content/10 relative"
+        class="w-full h-16 backdrop-blur-sm border-b border-b-layer-content/10 relative"
         options={{
           scrollbars: {
             theme: `os-theme-${fullTheme()}`,
@@ -113,7 +114,12 @@ function BottomPanel(props: {
         <div class="h-full flex px-2 py-0 items-center space-x-2 min-w-max w-max">
           <Button onClick={props.onExpand} ghost square>
             <span
-              class={`${props.expanded ? "icon-[fluent--chevron-double-down-20-regular]" : "icon-[fluent--chevron-double-up-20-regular]"} w-5 h-5`}
+              class={clsx(
+                props.expanded
+                  ? "icon-[fluent--chevron-double-down-20-regular]"
+                  : "icon-[fluent--chevron-double-up-20-regular]",
+                "w-5 h-5"
+              )}
             />
           </Button>
           <Divider direction="vertical" class="h-8" />

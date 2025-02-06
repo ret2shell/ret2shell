@@ -64,7 +64,7 @@ export default function UserCodeDialog() {
         <div class="w-full min-h-36 flex flex-col items-center justify-center space-y-2">
           <Switch>
             <Match when={!verified()}>
-              <span class="icon-[fluent--person-link-20-regular] w-10 h-10 flex-shrink-0 text-warning" />
+              <span class="icon-[fluent--person-link-20-regular] w-10 h-10 shrink-0 text-warning" />
               <span class="text-warning inline-block align-middle">
                 <span>{t("account.code.verify")}</span>
               </span>
@@ -74,7 +74,7 @@ export default function UserCodeDialog() {
               </A>
             </Match>
             <Match when={!accountStore.warnedCodeGeneration}>
-              <span class="icon-[fluent--warning-20-regular] w-10 h-10 flex-shrink-0 text-warning" />
+              <span class="icon-[fluent--warning-20-regular] w-10 h-10 shrink-0 text-warning" />
               <span class="text-warning">{t("account.code.warn")}</span>
             </Match>
             <Match when={code()}>
@@ -91,7 +91,6 @@ export default function UserCodeDialog() {
         </div>
         <Button
           level="primary"
-          square
           title={t("account.code.refresh")}
           onClick={refreshCode}
           loading={loadingCode()}
