@@ -111,11 +111,11 @@ importers:
         specifier: ^5.0.9
         version: 5.0.9
       overlayscrollbars:
-        specifier: ^2.10.1
-        version: 2.10.1
+        specifier: ^2.11.0
+        version: 2.11.0
       overlayscrollbars-solid:
         specifier: ^0.5.6
-        version: 0.5.6(overlayscrollbars@2.10.1)(solid-js@1.9.4)
+        version: 0.5.6(overlayscrollbars@2.11.0)(solid-js@1.9.4)
       passive-events-support:
         specifier: ^1.1.0
         version: 1.1.0
@@ -1723,8 +1723,8 @@ packages:
       overlayscrollbars: ^2.0.0
       solid-js: ^1.7.0
 
-  overlayscrollbars@2.10.1:
-    resolution: {integrity: sha512-BQoUAaw533ZbqBIE8LzKtsIiOKzB3pkhA6oS2ol+8THB5b2VO91myEXPlKrQqXQRYHG53f/169fFBNrGZ9tzag==}
+  overlayscrollbars@2.11.0:
+    resolution: {integrity: sha512-4le6aI4VzimWPnqKXifqdhjEwTQKiWnuYo8bKuAG0VqISy8h165eGodC1LREshn0YrOe4rJ7ctQ2UlvoIFGjiA==}
 
   parse-numeric-range@1.3.0:
     resolution: {integrity: sha512-twN+njEipszzlMJd4ONUYgSfZPDxgHhT9Ahed5uTigpQn90FggW4SA/AIPq/6a149fTbE9qBEcSwE3FAEp6wQQ==}
@@ -3973,12 +3973,12 @@ snapshots:
       regex: 5.1.1
       regex-recursion: 5.1.1
 
-  overlayscrollbars-solid@0.5.6(overlayscrollbars@2.10.1)(solid-js@1.9.4):
+  overlayscrollbars-solid@0.5.6(overlayscrollbars@2.11.0)(solid-js@1.9.4):
     dependencies:
-      overlayscrollbars: 2.10.1
+      overlayscrollbars: 2.11.0
       solid-js: 1.9.4
 
-  overlayscrollbars@2.10.1: {}
+  overlayscrollbars@2.11.0: {}
 
   parse-numeric-range@1.3.0: {}
 
