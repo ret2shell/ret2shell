@@ -1,0 +1,59 @@
+name: License
+
+on:
+  workflow_dispatch:
+    inputs:
+      issuer:
+        description: 'Issuer'
+        required: true
+        default: 'Developer'
+      website:
+        description: 'Website'
+        required: true
+        default: 'localhost'
+      level:
+        description: 'Level'
+        required: true
+        default: 'enterprise'
+      date:
+        description: 'Date'
+        required: true
+        default: '2035-01-01'
+
+jobs:
+  sign-license:
+    name: Sign to ${{ inputs.website }}
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Sign license to ${{ inputs.website }}
+      id : sign
+      run: |
+        mkdir '${{ runner.temp }}/output'
+        base64 -d <<< '${{ secrets.PRIVKEY_BASE64 }}' > '${{ runner.temp }}/priv.bin'
+        base64 -d <<< '${{ vars.PUBKEY_BASE64 }}' > '${{ runner.temp }}/pub.bin'
+        cargo run --bin r2s-license -- new --ca '${{ runner.temp }}/priv.bin' --path '${{ runner.temp }}/output' --issuer '${{ inputs.issuer }}' --website '${{ inputs.website }}' --level '${{ inputs.level }}' --date '${{ inputs.date }}'
+
+    - name: Export
+      id: export
+      working-directory: '${{ runner.temp }}'
+      run: |
+        short_pubkey_sha256="$(sha256sum 'pub.bin' | cut -d ' ' -f 1 | cut -c 1-8)"
+        sha256sum 'output/license' | cut -d ' ' -f 1 > 'output/license.sha256'
+
+        safe_website="$(echo '${{ inputs.website }}' | sed 's/[^a-zA-Z0-9.-]/_/g')"
+        echo "website=$safe_website" >> "$GITHUB_OUTPUT"
+        echo "pub_hash=$short_pubkey_sha256" >> "$GITHUB_OUTPUT"
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: license_${{ steps.export.outputs.website }}+pub-${{ steps.export.outputs.pub_hash }}
+        path: |
+          output/
+        retention-days: 1

@@ -1,0 +1,70 @@
+name: Server
+
+on:
+  push:
+    paths:
+      - '.github/workflows/server.yml'
+      - '.github/setup-env.sh'
+      - 'crates/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+
+  workflow_dispatch:
+
+jobs:
+  server:
+    name: Build
+    runs-on: [self-hosted, linux, x64]
+    strategy:
+      matrix:
+        target: [x86_64-unknown-linux-musl]
+    env:
+      R2S_GIT_VERSION: unknown
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        # fetch depth 0 to fetch all history for git-restore-mtime-action
+        fetch-depth: 0
+
+    - uses: chetan/git-restore-mtime-action@v2
+
+    - name: Setup environment
+      id: setup-env
+      run: |
+        sudo apt update && sudo apt install -y musl-tools musl-dev clang lld
+        bash .github/setup-env.sh
+
+    - name: Setup rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: ${{ matrix.target }}
+
+    # Still looking for a stable local-cache action. considered `corca-ai/local-cache`.
+    # - name: Cache
+    #   uses: actions/cache@v4
+    #   with:
+    #     path: target/
+    #     key: rustc-${{ runner.os }}-${{ matrix.target }}-${{ steps.setup-env.outputs.cache_v }}
+    #     restore-keys: |
+    #       rustc-${{ runner.os }}-${{ matrix.target }}-
+    #       rustc-${{ runner.os }}-
+
+    - name: Cache Locally
+      id: cache
+      run: |
+        key='rustc-${{ runner.os }}-${{ matrix.target }}-${{ steps.setup-env.outputs.cache_v }}'
+        echo "cache-key=$key" >> $GITHUB_OUTPUT
+
+    - name: Build
+      run: |
+        base64 -d <<< '${{ vars.PUBKEY_BASE64 }}' > config/pub.bin
+        cargo build --bin r2s-server --release --target '${{ matrix.target }}' \
+          --target-dir '/home/runner/.cache/runner/${{ steps.cache.outputs.cache-key }}'
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: r2s-server
+        path: '/home/runner/.cache/runner/${{ steps.cache.outputs.cache-key }}/${{ matrix.target }}/release/r2s-server'
+        retention-days: 1

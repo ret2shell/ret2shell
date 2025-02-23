@@ -1,0 +1,65 @@
+name: Docker
+
+on:
+  workflow_dispatch:
+    inputs:
+      image:
+        description: 'Docker image name and tag'
+        required: false
+        default: ''
+
+jobs:
+  docker:
+    name: Build
+    runs-on: [self-hosted, linux, x64]
+    env:
+      # These environment variables will be set by `setup-env.sh`
+      app_v: unknown
+      commit_sha: unknown
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        # fetch depth 0 to fetch all history for git-restore-mtime-action
+        fetch-depth: 0
+
+    - uses: chetan/git-restore-mtime-action@v2
+
+    # Before this step, we can't use env variables declared in `env` of this job
+    - name: Setup environment
+      id: setup-env
+      run: bash .github/setup-env.sh
+
+    - name: Build Docker
+      id: build
+      run: |
+        base64 -d <<< '${{ vars.PUBKEY_BASE64 }}' > config/pub.bin
+        image="$(echo ${{ inputs.image }} | tr -d '[:space:]')"
+        if [ -z "$image" ]; then
+          image='ret2shell:${{ env.app_v }}'
+        fi
+        echo "image=$image" >> "$GITHUB_OUTPUT"
+
+        docker build \
+          --build-arg "R2S_GIT_VERSION=${{ env.commit_sha }}" \
+          -t "$image" \
+          -f Containerfile .
+
+    - name: Export image
+      id: export
+      run: |
+        image='${{ steps.build.outputs.image }}'
+        output_fn="$(echo "$image" | tr ':' '_').tar"
+        echo "output_fn=$output_fn" >> "$GITHUB_OUTPUT"
+        docker save "$image" -o '${{ runner.temp }}/image.tar'
+        sha256sum '${{ runner.temp }}/image.tar' > '${{ runner.temp }}/image.tar.sha256'
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.export.outputs.output_fn }}
+        path: |
+          ${{ runner.temp }}/image.tar
+          ${{ runner.temp }}/image.tar.sha256
+        compression-level: 9
+        retention-days: 1
