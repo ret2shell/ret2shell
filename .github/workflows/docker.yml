@@ -1,6 +1,12 @@
 name: Docker
 
 on:
+  push:
+    paths:
+      - 'Containerfile'
+      - 'release-image.fish'
+      - 'release-image.sh'
+
   workflow_dispatch:
     inputs:
       image:
@@ -9,7 +15,35 @@ on:
         default: ''
 
 jobs:
+  # Only test the release-image script
+  build:
+    if: github.event_name != 'workflow_dispatch'
+    name: Test (${{ matrix.steps.shell }})
+    runs-on: [self-hosted, linux, x64]
+    strategy:
+      matrix:
+        steps:
+          - shell: fish
+            script: release-image.fish
+          - shell: sh
+            script: release-image.sh
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        # fetch depth 0 to fetch all history for git-restore-mtime-action
+        fetch-depth: 0
+
+    - uses: chetan/git-restore-mtime-action@v2
+
+    - name: Test ${{ matrix.steps.script }}
+      run: |
+        base64 -d <<< '${{ vars.PUBKEY_BASE64 }}' > config/pub.bin
+        ${{ matrix.steps.shell }} '${{ matrix.steps.script }}'
+
+  # Build and export the docker image
   docker:
+    if: github.event_name == 'workflow_dispatch'
     name: Build
     runs-on: [self-hosted, linux, x64]
     env:
