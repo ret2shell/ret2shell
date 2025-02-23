@@ -50,13 +50,13 @@ jobs:
     #       rustc-${{ runner.os }}-${{ matrix.target }}-
     #       rustc-${{ runner.os }}-
 
-    - name: Cache Locally
+    - name: Cache locally
       id: cache
       run: |
         key='rustc-${{ runner.os }}-${{ matrix.target }}-${{ steps.setup-env.outputs.cache_v }}'
         echo "cache-key=$key" >> $GITHUB_OUTPUT
 
-    - name: Build
+    - name: Build on version ${{ env.app_v }}-${{ env.commit_sha }}
       run: |
         base64 -d <<< '${{ vars.PUBKEY_BASE64 }}' > config/pub.bin
         cargo build --bin r2s-server --release --target '${{ matrix.target }}' \

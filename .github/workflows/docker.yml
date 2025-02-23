@@ -30,7 +30,7 @@ jobs:
       id: setup-env
       run: bash .github/setup-env.sh
 
-    - name: Build Docker
+    - name: Build on version ${{ env.app_v }}-${{ env.commit_sha }}
       id: build
       run: |
         base64 -d <<< '${{ vars.PUBKEY_BASE64 }}' > config/pub.bin
@@ -40,6 +40,7 @@ jobs:
         fi
         echo "image=$image" >> "$GITHUB_OUTPUT"
 
+        echo "Building: $image"
         docker build \
           --build-arg "R2S_GIT_VERSION=${{ env.commit_sha }}" \
           -t "$image" \
