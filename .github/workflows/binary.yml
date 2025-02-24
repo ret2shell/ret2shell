@@ -20,6 +20,9 @@ jobs:
         target: [x86_64-unknown-linux-musl]
     env:
       R2S_GIT_VERSION: unknown
+      # These environment variables will be set by `setup-env.sh`
+      commit_sha: unknown
+      app_v: unknown
 
     steps:
     - uses: actions/checkout@v4
@@ -40,22 +43,26 @@ jobs:
       with:
         targets: ${{ matrix.target }}
 
-    # Still looking for a stable local-cache action. considered `corca-ai/local-cache`.
-    # - name: Cache
-    #   uses: actions/cache@v4
-    #   with:
-    #     path: target/
-    #     key: rustc-${{ runner.os }}-${{ matrix.target }}-${{ steps.setup-env.outputs.cache_v }}
-    #     restore-keys: |
-    #       rustc-${{ runner.os }}-${{ matrix.target }}-
-    #       rustc-${{ runner.os }}-
+    - name: Cache cargo
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+        key: cargo-${{ runner.os }}-${{ steps.setup-env.outputs.cache_v }}
+        restore-keys: |
+          cargo-${{ runner.os }}-
 
-    - name: Cache locally
-      id: cache
-      run: |
-        key='rustc-${{ runner.os }}-${{ matrix.target }}-${{ steps.setup-env.outputs.cache_v }}'
-        echo "cache-key=$key" >> $GITHUB_OUTPUT
-        rsync -aP --info=progress2 --exclude='**/.cargo-lock' --exclude='**/*.lock' '/home/runner/.cache/runner/'"$key"/ target/
+    - name: Cache target
+      uses: actions/cache@v4
+      with:
+        path: target/
+        key: rustc-${{ runner.os }}-${{ matrix.target }}-${{ steps.setup-env.outputs.cache_v }}
+        restore-keys: |
+          rustc-${{ runner.os }}-${{ matrix.target }}-
+          rustc-${{ runner.os }}-
 
     - name: Build on version ${{ env.app_v }}-${{ env.commit_sha }}
       run: |
@@ -66,9 +73,6 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: r2s-server
-        path: '/home/runner/.cache/runner/${{ steps.cache.outputs.cache-key }}/${{ matrix.target }}/release/r2s-server'
+        path: target/${{ matrix.target }}/release/r2s-server
         retention-days: 1
 
-    - name: Post Cache locally
-      run: |
-        rsync -aP --info=progress2 --exclude='**/.cargo-lock' --exclude='**/*.lock' target/ '/home/runner/.cache/runner/${{ steps.cache.outputs.cache-key }}'/
