@@ -70,6 +70,7 @@ jobs:
         cargo build --bin r2s-server --release --target '${{ matrix.target }}'
 
     - name: Upload artifact
+      continue-on-error: true
       uses: actions/upload-artifact@v4
       with:
         name: r2s-server

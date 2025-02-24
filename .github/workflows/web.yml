@@ -43,6 +43,7 @@ jobs:
       run: pnpm --prefix web build
 
     - name: Upload artifact
+      continue-on-error: true
       uses: actions/upload-artifact@v4
       with:
         name: web-dist
