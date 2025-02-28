@@ -77,7 +77,7 @@
     "@iconify-json/fluent": "^1.2.14",
     "@iconify-json/fluent-emoji-flat": "^1.2.3",
     "@iconify-json/meteocons": "^1.2.2",
-    "@iconify/tailwind4": "^1.0.3",
+    "@iconify/tailwind4": "^1.0.4",
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.0.9",
     "@types/howler": "^2.2.12",
@@ -89,7 +89,7 @@
     "tslib": "^2.8.1",
     "vite": "^6.2.0",
     "vite-plugin-compression": "^0.5.1",
-    "vite-plugin-solid": "^2.11.5",
+    "vite-plugin-solid": "^2.11.6",
     "vitest": "^3.0.7"
   }
 }
