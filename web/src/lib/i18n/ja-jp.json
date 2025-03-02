@@ -767,8 +767,8 @@
       "hideArchived": "アーカイブされた問題を非表示にする",
       "notReleased": "問題はまだ発表されておらず、選手はこの問題を見ることができません。",
       "periodTips": "タイムリミット問題、現在の時間帯でのみ解答が採点されます。",
-      "releasePeriod": "公開期間",
-      "releasePeriodPlaceholder": "公開前の問題は表示されず、アーカイブ後は採点対象外となります。空白の場合は全期間有効です...",
+      "scoringPeriod": "採点時間帯",
+      "scoringPeriodPlaceholder": "リリース前の問題は表示されず、アーカイブ後は採点対象外となります。空白の場合は全期間有効です...",
       "releaseTips": "問題発表カウントダウン",
       "showAll": "すべて表示する"
     },

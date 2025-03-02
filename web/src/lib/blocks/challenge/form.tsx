@@ -166,8 +166,8 @@ export function FormBare(props: {
               {() => (
                 <>
                   <Select
-                    placeholder={t("game.challenge.releasePeriodPlaceholder")}
-                    label={t("game.challenge.releasePeriod")}
+                    placeholder={t("game.challenge.scoringPeriodPlaceholder")}
+                    label={t("game.challenge.scoringPeriod")}
                     class="flex-1"
                     items={
                       gameStore.current?.timeline_presets?.map((t) => {
