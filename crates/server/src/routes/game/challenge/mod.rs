@@ -393,7 +393,7 @@ async fn up_challenge(
   checker.lint(&challenge_bucket).await?;
   txn.commit().await?;
   info!(
-    "challenge {}:'{}' is published by user {}:'{}' ({})",
+    "challenge {}:'{}' is published (up) by user {}:'{}' ({})",
     challenge.id, challenge.name, token.id, token.account, token.nickname
   );
 
@@ -430,7 +430,7 @@ async fn down_challenge(
   .await?;
   txn.commit().await?;
   info!(
-    "challenge {}:'{}' is withdraw by user {}:'{}' ({})",
+    "challenge {}:'{}' is unpublish (down) by user {}:'{}' ({})",
     challenge.id, challenge.name, token.id, token.account, token.nickname
   );
   cache.at("challenge").del(challenge.id).await.ok();

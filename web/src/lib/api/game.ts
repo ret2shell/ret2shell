@@ -104,11 +104,11 @@ export async function updateChallenge(game_id: number, challenge: Challenge) {
     .json<Challenge>();
 }
 
-export async function publishChallenge(game_id: number, challenge_id: number) {
+export async function upChallenge(game_id: number, challenge_id: number) {
   return await api.post(`${api_root}/game/${game_id}/challenge/${challenge_id}/publish`).json<Challenge>();
 }
 
-export async function withdrawChallenge(game_id: number, challenge_id: number) {
+export async function downChallenge(game_id: number, challenge_id: number) {
   return await api.delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/publish`).json<Challenge>();
 }
 

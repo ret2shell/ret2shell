@@ -1,5 +1,5 @@
 import { handleHttpError } from "@api";
-import { deleteChallenge, publishChallenge, withdrawChallenge } from "@api/game";
+import { deleteChallenge, downChallenge, upChallenge } from "@api/game";
 import type { Challenge } from "@models/challenge";
 import { useSearchParams } from "@solidjs/router";
 import { challengeStore, setChallengeStore } from "@storage/challenge";
@@ -83,7 +83,7 @@ function BottomPanel(props: {
   async function handlePublishChallenge() {
     setPublishing(true);
     try {
-      const resp = await (challengeStore.current?.hidden ? publishChallenge : withdrawChallenge)(
+      const resp = await (challengeStore.current?.hidden ? upChallenge : downChallenge)(
         challengeStore.current!.game_id,
         challengeStore.current!.id
       );
@@ -93,8 +93,8 @@ function BottomPanel(props: {
       handleHttpError(
         err as HTTPError,
         challengeStore.current?.hidden
-          ? t("game.challenge.publishChallengeFailed")!
-          : t("game.challenge.withdrawChallengeFailed")!
+          ? t("game.challenge.upChallengeFailed")!
+          : t("game.challenge.downChallengeFailed")!
       );
     }
 
@@ -184,12 +184,12 @@ function BottomPanel(props: {
                   fallback={
                     <>
                       <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5 text-warning" />
-                      <span class="text-warning">{t("game.challenge.withdraw")}</span>
+                      <span class="text-warning">{t("game.challenge.downChallenge")}</span>
                     </>
                   }
                 >
                   <span class="icon-[fluent--chevron-double-up-20-regular] w-5 h-5 text-success" />
-                  <span class="text-success">{t("game.challenge.publishChallenge")}</span>
+                  <span class="text-success">{t("game.challenge.upChallenge")}</span>
                 </Show>
               }
             >
@@ -198,9 +198,9 @@ function BottomPanel(props: {
                   <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary align-middle" />
                   <Show
                     when={challengeStore.current?.hidden === true}
-                    fallback={<span>{t("game.challenge.withdrawTips")}</span>}
+                    fallback={<span>{t("game.challenge.downChallengeTips")}</span>}
                   >
-                    <span>{t("game.challenge.publishTips")}</span>
+                    <span>{t("game.challenge.upChallengeTips")}</span>
                   </Show>
                 </span>
                 <Button
