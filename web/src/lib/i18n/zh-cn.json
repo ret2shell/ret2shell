@@ -173,7 +173,7 @@
       "unlockHintFailed": "解锁提示失败",
       "checker": "评测",
       "upChallenge": "公开",
-      "upChallengeTips": "确定要公开此题？公开后选手即可在有效时段内解题，公开期间无法修改题目。",
+      "upChallengeTips": "确定要公开此题？公开后选手即可在计分时段及之后解题，公开期间无法修改题目。",
       "upChallengeFailed": "公开题目失败",
       "downChallenge": "隐藏",
       "downChallengeTips": "确定要隐藏此题？隐藏后可以修改题目内容并再次公开。",

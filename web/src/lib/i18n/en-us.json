@@ -212,7 +212,7 @@
       "unlockHintFailed": "failed to unlock hint",
       "checker": "Checker",
       "upChallenge": "Make Public",
-      "upChallengeTips": "Are you sure to make this challenge public? Contestants can solve it during the scoring period. And it's unable to be modified unless you make them invisible again.",
+      "upChallengeTips": "Are you sure to make this challenge public? Contestants can solve it during and after the scoring period. And it's unable to be modified unless you make them invisible again.",
       "upChallengeFailed": "failed to make this challenge public",
       "downChallenge": "Make invisible",
       "downChallengeTips": "Are you sure to make this challenge invisble? you can modify the content and make it public again.",
