@@ -14,7 +14,7 @@
     "lint": "biome lint"
   },
   "dependencies": {
-    "@ark-ui/solid": "^4.10.2",
+    "@ark-ui/solid": "^5.0.0",
     "@e965/xlsx": "^0.20.3",
     "@fontsource/jetbrains-mono": "^5.2.5",
     "@jsdevtools/rehype-toc": "^3.0.2",
