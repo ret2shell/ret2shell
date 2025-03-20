@@ -2,7 +2,7 @@ import { api_root, handleHttpError } from "@api";
 import { getCalmdownStatus } from "@api/cluster";
 import { delayGameSelfEnv, startChallengeEnv, stopGameSelfEnv } from "@api/game";
 import Spin from "@assets/animates/spin";
-import { getWsrxLink, wsrx } from "@lib/wsrx";
+import { WsrxState, getWsrxLink, wsrx } from "@lib/wsrx";
 import { accountStore } from "@storage/account";
 import { challengeStore, refreshStatus } from "@storage/challenge";
 import { fullTheme, t } from "@storage/theme";
@@ -375,49 +375,56 @@ export default function (props: { inGame?: boolean }) {
                 <For each={challengeStore.env?.images}>
                   {(image) => (
                     <Show when={image.port}>
-                      <section class="h-12 border-b border-b-layer-content/15 flex flex-row items-center space-x-2 relative">
-                        <span class="icon-[fluent--cube-20-regular] w-5 h-5 text-info" />
-                        <span class="flex-1 text-start space-x-2">
-                          <span>{image.name}.service</span>
-                          <span>-</span>
-                          <span>{image.description}</span>
-                        </span>
-                        <Tag level="info">
-                          <span>{image.service_type}</span>
-                        </Tag>
-                        <Switch
-                          fallback={
+                      <section
+                        class={clsx(
+                          "min-h-12 border-b border-b-layer-content/15 space-x-2 relative",
+                          "flex flex-row items-center flex-wrap justify-end",
+                          "py-2 gap-y-2"
+                        )}
+                      >
+                        <div class="flex flex-row items-center space-x-2 flex-nowrap whitespace-nowrap text-nowrap">
+                          <span class="icon-[fluent--cube-20-regular] w-5 h-5 text-info" />
+                          <span class="text-start space-x-2">
+                            <span>{image.name}.service</span>
+                            <span>-</span>
+                            <span>{image.description}</span>
+                          </span>
+                          <Tag level="info">
+                            <span>{image.service_type}</span>
+                          </Tag>
+                          <Show when={wsrx.connected() === WsrxState.Connected}>
                             <ClipboardBtn
                               size="sm"
-                              title={image.description!}
+                              icon="icon-[fluent--copy-add-20-regular]"
+                              iconCopied="icon-[fluent--checkmark-circle-20-regular]"
+                              title={t("instance.copyWsrxAddr")}
                               value={getWsrxLink(instance()!.traffic, image.port!)}
-                              label="WebSocket"
+                              label="WSRX"
                             />
-                          }
-                        >
-                          <Match when={instance()?.exposed_ports?.find((v) => v.name === image.name)}>
-                            <ClipboardBtn
-                              size="sm"
-                              title={image.description!}
-                              value={instance()?.exposed_ports?.find((v) => v.name === image.name)?.address}
-                              label={instance()?.exposed_ports?.find((v) => v.name === image.name)?.address}
-                            />
-                          </Match>
-                          <Match when={wsrx.getTrafficLocal(instance()!, image.port!)}>
-                            <ClipboardBtn
-                              size="sm"
-                              title={image.description!}
-                              value={getWsrxLink(instance()!.traffic, image.port!)}
-                              label="WebSocket"
-                            />
-                            <ClipboardBtn
-                              size="sm"
-                              title={image.description!}
-                              value={wsrx.getTrafficLocal(instance()!, image.port!)?.local}
-                              label={wsrx.getTrafficLocal(instance()!, image.port!)?.local}
-                            />
-                          </Match>
-                        </Switch>
+                          </Show>
+                        </div>
+                        <span class="flex-1" />
+                        <Show when={wsrx.connected() === WsrxState.Connected}>
+                          <For each={wsrx.getTrafficLocal(instance()!, image.port!)}>
+                            {(local) => (
+                              <ClipboardBtn
+                                size="sm"
+                                title={t("instance.copyLocalAddr")}
+                                value={local.local}
+                                label={local.local}
+                              />
+                            )}
+                          </For>
+                        </Show>
+                        <Show when={instance()?.exposed_ports?.find((v) => v.name === image.name)}>
+                          <ClipboardBtn
+                            size="sm"
+                            title={t("instance.copyRemoteAddr")}
+                            value={instance()?.exposed_ports?.find((v) => v.name === image.name)?.address}
+                            label={instance()?.exposed_ports?.find((v) => v.name === image.name)?.address}
+                          />
+                        </Show>
+                        <div class="block" />
                       </section>
                     </Show>
                   )}

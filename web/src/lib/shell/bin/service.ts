@@ -1,6 +1,6 @@
 import { delayGameSelfEnv, getChallengeEnv, startChallengeEnv, stopGameSelfEnv } from "@api/game";
 import { deunicode } from "@api/rpc";
-import { getWsrxLink, wsrx } from "@lib/wsrx";
+import { WsrxState, getWsrxLink, wsrx } from "@lib/wsrx";
 import type { Instance } from "@models/instance";
 import { accountStore } from "@storage/account";
 import { challengeStore } from "@storage/challenge";
@@ -157,26 +157,46 @@ export class Service implements Command {
     );
     io.println(`     Active: ${getInstState(inst)}`);
     if (inst) {
-      await wsrx.openAllTraffic();
+      // await wsrx.openAllTraffic();
       await wsrx.refreshTraffic();
+      // wsrx_local.service
+      const inst_wsrx_local = Object.assign(Object.create(inst), {
+        state: {
+          [WsrxState.Disconnected]: "Stopped",
+          [WsrxState.Pending]: "Pending",
+          [WsrxState.Connected]: "Running",
+        }[wsrx.connected()],
+      });
+      io.println(`       ${ansiColors.dim("└─")} wsrx_local.service: ${getInstState(inst_wsrx_local, false)}`);
+      // wsrx address
+      for (const image of challengeStore.env.images) {
+        const locals = wsrx.getTrafficLocal(inst, image.port!);
+        if (locals.length > 0) {
+          io.println(
+            `          ${ansiColors.dim("Connection")}: ${ansiColors.blue(getWsrxLink(inst.traffic, image.port!))} *-> ${image.name}.service`
+          );
+        }
+      }
+      // env routes
       for (const image of challengeStore.env.images) {
         io.println(
           `       ${ansiColors.dim("└─")} ${image.name}.service - ${image.description}: ${getInstState(inst, false)}`
         );
         if (image.port) {
-          const local = wsrx.getTrafficLocal(inst, image.port!);
+          // remote address
           if (inst.exposed_ports?.find((p) => p.name === image.name)) {
             io.println(
               `          ${ansiColors.dim("Connection")}: ${ansiColors.blue(link(`${image.service_type}://${inst.exposed_ports.find((p) => p.name === image.name)?.address}`, `${image.service_type}://${inst.exposed_ports.find((p) => p.name === image.name)?.address}`))}`
             );
-          } else if (local) {
-            io.println(
-              `          ${ansiColors.dim("Connection")}: ${ansiColors.blue(link(`${image.service_type}://${local.local}`, `${image.service_type}://${local.local}`))} *-> wsrx_local.service`
-            );
-          } else {
-            io.println(
-              `          ${ansiColors.dim("Connection")}: ${ansiColors.blue(getWsrxLink(inst.traffic, image.port!))}`
-            );
+          }
+          // local address
+          const locals = wsrx.getTrafficLocal(inst, image.port!);
+          for (const local of locals) {
+            if (local) {
+              io.println(
+                `          ${ansiColors.dim("Connection")}: ${ansiColors.blue(link(`${image.service_type}://${local.local}`, `${image.service_type}://${local.local}`))} *-> wsrx_local.service`
+              );
+            }
           }
         }
       }

@@ -6,9 +6,9 @@ import "overlayscrollbars/overlayscrollbars.css";
 import "@widgets/styles/base.css";
 import { Router } from "@solidjs/router";
 import { fullTheme, initTheme, t } from "@storage/theme";
+import { addToast } from "@storage/toast";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { onMount } from "solid-js";
-import { addToast } from "@storage/toast";
 
 function checkEdition() {
   const compact_edition: string = import.meta.env.VITE_COMPAT_EDITION as string;

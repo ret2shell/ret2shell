@@ -205,7 +205,7 @@ export class Wsrx {
   }
 
   public getTrafficLocal(instance: Instance, port: number) {
-    return this.traffic().find((t) => t.remote === getWsrxLink(instance.traffic, port));
+    return this.traffic().filter((t) => t.remote === getWsrxLink(instance.traffic, port));
   }
 }
 

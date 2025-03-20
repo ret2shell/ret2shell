@@ -1,3 +1,4 @@
+import Spin from "@assets/animates/spin";
 import { WsrxState, wsrx } from "@lib/wsrx";
 import type { Instance } from "@models/instance";
 import { useLocation } from "@solidjs/router";
@@ -17,6 +18,10 @@ import { For, Show, createEffect, createSignal, onCleanup, untrack } from "solid
 
 export function InstanceBoxContent() {
   const [connecting, setConnecting] = createSignal(false);
+  const [refreshingTraffic, setRefreshingTraffic] = createSignal(false);
+  const [deletingAllTraffic, setDeletingAllTraffic] = createSignal(false);
+  const [deletingOutdatedTraffic, setDeletingOutdatedTraffic] = createSignal(false);
+  const [openingAllTraffic, setOpeningAllTraffic] = createSignal(false);
   const [showSettings, setShowSettings] = createSignal(false);
   const location = useLocation();
   function challengeLink(i: Instance) {
@@ -116,9 +121,8 @@ export function InstanceBoxContent() {
           {/* icon-[fluent--settings-20-regular] icon-[fluent--settings-20-filled] */}
           <span
             class={clsx(
-              "icon-[fluent--settings-20-",
-              showSettings() ? "filled" : "regular",
-              "] w-5 h-5",
+              showSettings() ? "icon-[fluent--settings-20-filled]" : "icon-[fluent--settings-20-regular]",
+              "w-5 h-5",
               showSettings() && "text-primary"
             )}
           />
@@ -135,31 +139,118 @@ export function InstanceBoxContent() {
         </Link>
       </Card>
       <Show when={showSettings()}>
-        <Card contentClass="p-2 flex flex-row space-x-2">
-          <Input
-            size="sm"
-            class="flex-1"
-            placeholder="http://127.0.0.1:3307"
-            value={wsrx.apiAddr()}
-            onBlur={(e) => {
-              wsrx.setApiAddr(e.target.value);
-            }}
-          />
-          <Button
-            size="sm"
-            square
-            title={t("instance.defaultApiAddr")}
-            ghost
-            onClick={() => {
-              wsrx.setApiAddr("http://127.0.0.1:3307");
-            }}
-          >
-            <span class="icon-[fluent--arrow-reset-20-regular] w-5 h-5" />
-          </Button>
-          {/* NOTE: Just a placable button, when you click it, the input box will trigger `onBlur` to save it. */}
-          <Button size="sm" square title={t("form.save")} ghost>
-            <span class="icon-[fluent--checkmark-20-regular] w-5 h-5" />
-          </Button>
+        <Card contentClass="p-2 flex flex-col space-y-2">
+          <div class="flex flex-row w-full space-x-2">
+            <Input
+              size="sm"
+              class="flex-1"
+              placeholder="http://127.0.0.1:3307"
+              value={wsrx.apiAddr()}
+              onBlur={(e) => {
+                wsrx.setApiAddr(e.target.value);
+              }}
+            />
+            <Button
+              size="sm"
+              square
+              title={t("instance.defaultApiAddr")}
+              ghost
+              onClick={() => {
+                wsrx.setApiAddr("http://127.0.0.1:3307");
+              }}
+            >
+              <span class="icon-[fluent--arrow-reset-20-regular] w-5 h-5" />
+            </Button>
+            {/* NOTE: Just a placable button, when you click it, the input box will trigger `onBlur` to save it. */}
+            <Button size="sm" square title={t("form.save")} ghost>
+              <span class="icon-[fluent--checkmark-20-regular] w-5 h-5" />
+            </Button>
+          </div>
+          <div class="flex flex-row items-center space-x-2">
+            <span class="flex-1 text-start font-bold px-2">{t("instance.wsrxTrafficConnection")}</span>
+            <Button
+              ghost
+              square
+              size="sm"
+              class="flex"
+              title={t("instance.refreshWsrxTraffic")}
+              onClick={() => {
+                setRefreshingTraffic(true);
+                wsrx.refreshTraffic().finally(() => setRefreshingTraffic(false));
+              }}
+              disabled={refreshingTraffic()}
+            >
+              <Show
+                when={refreshingTraffic()}
+                fallback={<span class="icon-[fluent--arrow-clockwise-20-regular] w-5 h-5" />}
+              >
+                <Spin width={16} height={16} />
+              </Show>
+            </Button>
+            <Button
+              ghost
+              square
+              size="sm"
+              class="flex"
+              title={t("instance.openAllWsrxTraffic")}
+              onClick={() => {
+                setOpeningAllTraffic(true);
+                wsrx
+                  .openAllTraffic()
+                  .then(() => wsrx.refreshTraffic())
+                  .finally(() => setOpeningAllTraffic(false));
+              }}
+              disabled={openingAllTraffic()}
+            >
+              <Show when={openingAllTraffic()} fallback={<span class="icon-[fluent--connector-20-regular] w-5 h-5" />}>
+                <Spin width={16} height={16} />
+              </Show>
+            </Button>
+            <Button
+              ghost
+              square
+              size="sm"
+              class="flex"
+              title={t("instance.deleteOutdatedWsrxTraffic")}
+              onClick={() => {
+                setDeletingOutdatedTraffic(true);
+                wsrx
+                  .deleteOutdatedTraffic()
+                  .then(() => wsrx.refreshTraffic())
+                  .finally(() => setDeletingOutdatedTraffic(false));
+              }}
+              disabled={deletingOutdatedTraffic()}
+            >
+              <Show
+                when={deletingOutdatedTraffic()}
+                fallback={<span class="icon-[fluent--uninstall-app-20-regular] w-5 h-5" />}
+              >
+                <Spin width={16} height={16} />
+              </Show>
+            </Button>
+            <Button
+              ghost
+              square
+              size="sm"
+              class="flex"
+              title={t("instance.deleteAllWsrxTraffic")}
+              onClick={() => {
+                setDeletingAllTraffic(true);
+                wsrx
+                  .deleteAllTraffic()
+                  .then(() => wsrx.refreshTraffic())
+                  .finally(() => setDeletingAllTraffic(false));
+              }}
+              disabled={deletingAllTraffic()}
+            >
+              <Show
+                when={deletingAllTraffic()}
+                fallback={<span class="icon-[fluent--uninstall-app-20-regular] text-warning w-5 h-5" />}
+              >
+                <Spin width={16} height={16} />
+              </Show>
+            </Button>
+          </div>
         </Card>
       </Show>
       <For each={wsrx.instances()}>
@@ -176,7 +267,7 @@ export function InstanceBoxContent() {
                 })}
               />
               <TimeProgress
-                class="absolute bottom-0 left-2 right-2"
+                class="absolute bottom-[calc(var(--spacing)_*_-1)] left-2 right-2"
                 startAt={instance.created_at}
                 endAt={instance.created_at.plus({
                   hours: instance.renew_count + 1,

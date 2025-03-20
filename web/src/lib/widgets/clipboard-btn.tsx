@@ -8,10 +8,11 @@ export default function ClipboardBtn(
     size?: "sm" | "md";
     square?: boolean;
     icon?: string;
+    iconCopied?: string;
     label?: string;
   }
 ) {
-  const [btnProps, others] = splitProps(props, ["size", "square", "icon", "label"]);
+  const [btnProps, others] = splitProps(props, ["size", "square", "icon", "iconCopied", "label"]);
   return (
     <Clipboard.Root {...others}>
       <Clipboard.Control class="w-full flex flex-row space-x-2">
@@ -27,10 +28,14 @@ export default function ClipboardBtn(
           title={others.title ?? t("form.copy")}
         >
           <Clipboard.Indicator
-            class="flex items-center justify-center"
-            copied={<span class="icon-[fluent--checkmark-20-regular] w-5 h-5 text-success" />}
+            class="flex items-center justify-center m-0"
+            copied={
+              <span
+                class={clsx("w-5 h-5 text-success", btnProps.iconCopied ?? "icon-[fluent--checkmark-20-regular]")}
+              />
+            }
           >
-            <span class={btnProps.icon ?? "icon-[fluent--copy-20-regular] w-5 h-5"} />
+            <span class={clsx("w-5 h-5", btnProps.icon ?? "icon-[fluent--copy-20-regular]")} />
           </Clipboard.Indicator>
           <Show when={btnProps.label}>
             <span>{btnProps.label}</span>
