@@ -103,8 +103,9 @@ export default function (_props: {
   function restoreScript() {
     setScript(serverScript);
   }
+  refreshScript();
   createEffect(() => {
-    if (challengeStore.current) {
+    if (!challengeStore.current?.hidden) {
       untrack(refreshScript);
     }
   });
