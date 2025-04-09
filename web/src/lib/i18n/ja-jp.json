@@ -786,7 +786,8 @@
       "scoringPeriod": "採点時間帯",
       "scoringPeriodPlaceholder": "リリース前の問題は表示されず、アーカイブ後は採点対象外となります。空白の場合は全期間有効です...",
       "releaseTips": "問題発表カウントダウン",
-      "showAll": "すべて表示する"
+      "showAll": "すべて表示する",
+      "edit": "問題を編集する"
     },
     "cover": {
       "uploadFailed": "表紙アップロード失敗",

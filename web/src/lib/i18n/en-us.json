@@ -326,7 +326,8 @@
       "scoringPeriod": "Scoring period",
       "scoringPeriodPlaceholder": "The challenge is not visible before release, and that archived does not count towards the score. If left blank, it is valid for all time periods...",
       "releaseTips": "Countdown to Topic Release",
-      "showAll": "Show all"
+      "showAll": "Show all",
+      "edit": "Edit Challenge"
     },
     "scoreboard": {
       "title": "Scoreboard",

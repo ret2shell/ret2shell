@@ -58,10 +58,6 @@ export function FormBare(props: {
 
   return (
     <Form onSubmit={onSubmit} class="flex flex-col w-full max-w-5xl space-y-2 relative">
-      <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
-        <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
-        <span>{t("game.challenge.create")}</span>
-      </h3>
       <Field name="name" validate={[required(t("game.challenge.nameRequired")!)]}>
         {(field, props) => (
           <Input
@@ -245,6 +241,10 @@ export default function (props: {
           defer
         >
           <div class="flex flex-col p-3 lg:p-6 w-full items-center">
+            <h3 class="h-12 w-full max-w-5xl mb-2 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
+              <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
+              <span>{t("game.challenge.create")}</span>
+            </h3>
             <FormBare {...props} />
           </div>
         </OverlayScrollbarsComponent>

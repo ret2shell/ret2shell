@@ -281,7 +281,8 @@
       "hammerLastMessage": "還可發送 {{last}} 條消息",
       "hideSolved": "隱藏已解出題目",
       "scoringPeriod": "計分時段",
-      "scoringPeriodPlaceholder": "發佈前題目不可見，歸檔後題目不計分，留空則全時段有效..."
+      "scoringPeriodPlaceholder": "發佈前題目不可見，歸檔後題目不計分，留空則全時段有效...",
+      "edit": "編輯題目"
     },
     "scoreboard": {
       "title": "積分板",

@@ -5,8 +5,9 @@ import { challengeStore, setChallengeStore } from "@storage/challenge";
 import { gameStore } from "@storage/game";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
+import Button from "@widgets/button";
 import { DateTime } from "luxon";
-import { createSignal } from "solid-js";
+import { createEffect, createSignal } from "solid-js";
 import { type ChallengeForm, FormBare } from "./form";
 
 export default function (props: {
@@ -14,6 +15,22 @@ export default function (props: {
   inGame?: boolean;
 }) {
   const [loading, setLoading] = createSignal(false);
+
+  function cloneDeep<T>(obj: T): T {
+    try {
+      return JSON.parse(JSON.stringify(obj));
+    } catch {
+      return obj;
+    }
+  }
+  const [challengeSource, setChallengeSource] = createSignal<Challenge | null>(cloneDeep(challengeStore.current));
+
+  createEffect(() => {
+    if (!challengeStore.current?.hidden) {
+      setChallengeSource(challengeStore.current);
+    }
+  });
+
   async function handleUpdateChallenge(result: ChallengeForm) {
     setLoading(true);
     const tags = result.tag.split("/").map((t) => {
@@ -44,6 +61,7 @@ export default function (props: {
       const result = await updateChallenge(gameStore.current!.id, challenge);
       props.onStateChange?.(result);
       setChallengeStore({ current: result });
+      setChallengeSource(cloneDeep(result));
       addToast({
         level: "success",
         description: t("form.saveSuccess")!,
@@ -56,9 +74,21 @@ export default function (props: {
   }
   return (
     <div class="flex flex-col p-3 lg:p-6 w-full items-center">
+      <header class="min-h-12 w-full max-w-5xl border-b border-b-layer-content/10 flex flex-row flex-wrap justify-end space-x-2 items-center gap-y-2 py-2 mb-2">
+        <span class="flex flex-row space-x-2 items-center overflow-hidden">
+          <span class="icon-[fluent--settings-20-regular] w-5 h-5 shrink-0" />
+          <span class="font-bold inline-block whitespace-nowrap">{t("game.challenge.edit")}</span>
+        </span>
+        <span class="flex-1" />
+        <span class="flex flex-row justify-end items-center flex-wrap gap-y-2 gap-x-2">
+          <Button size="sm" square onClick={() => setChallengeSource(cloneDeep(challengeStore.current))}>
+            <span class="icon-[fluent--arrow-reset-20-regular] w-5 h-5" />
+          </Button>
+        </span>
+      </header>
       <FormBare
         onDone={handleUpdateChallenge}
-        editSource={challengeStore.current || undefined}
+        editSource={challengeSource() || undefined}
         inGame={props.inGame}
         loading={loading()}
       />

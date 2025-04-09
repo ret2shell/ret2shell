@@ -171,6 +171,7 @@
       "otherChallengeEnvIsRunning": "另一道题目环境正在运行",
       "startEnv": "启动！",
       "create": "创建题目",
+      "edit": "编辑题目",
       "unlockHintFailed": "解锁提示失败",
       "checker": "评测",
       "upChallenge": "公开",
