@@ -16,7 +16,11 @@ export default function (props: {
 }) {
   const [loading, setLoading] = createSignal(false);
 
-  const [challengeSource, setChallengeSource] = createSignal<Challenge | null>(structuredClone(challengeStore.current));
+  function deepClone<T>(o: T): T {
+    return typeof o === "object" && o !== null ? structuredClone({ ...o }) : o;
+  }
+
+  const [challengeSource, setChallengeSource] = createSignal<Challenge | null>(deepClone(challengeStore.current));
 
   createEffect(() => {
     if (!challengeStore.current?.hidden) {
@@ -54,7 +58,7 @@ export default function (props: {
       const result = await updateChallenge(gameStore.current!.id, challenge);
       props.onStateChange?.(result);
       setChallengeStore({ current: result });
-      setChallengeSource(structuredClone(result));
+      setChallengeSource(deepClone(result));
       addToast({
         level: "success",
         description: t("form.saveSuccess")!,
@@ -74,7 +78,7 @@ export default function (props: {
         </span>
         <span class="flex-1" />
         <span class="flex flex-row justify-end items-center flex-wrap gap-y-2 gap-x-2">
-          <Button size="sm" square onClick={() => setChallengeSource(structuredClone(challengeStore.current))}>
+          <Button size="sm" square onClick={() => setChallengeSource(deepClone(challengeStore.current))}>
             <span class="icon-[fluent--arrow-reset-20-regular] w-5 h-5" />
           </Button>
         </span>
