@@ -40,7 +40,7 @@ function InstituteManagement() {
   async function handleChangeInstitute(institute: number, enabled: boolean) {
     if (gameStore.current) {
       setLoading(true);
-      const institutes = JSON.parse(JSON.stringify(gameStore.current.access_policy.institutes));
+      const institutes = structuredClone([...gameStore.current.access_policy.institutes]);
       if (enabled) {
         institutes.push(institute);
       } else {
