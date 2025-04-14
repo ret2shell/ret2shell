@@ -181,8 +181,8 @@ importers:
         specifier: 1.9.4
         version: 1.9.4
       '@iconify-json/fluent':
-        specifier: ^1.2.18
-        version: 1.2.18
+        specifier: ^1.2.19
+        version: 1.2.19
       '@iconify-json/fluent-emoji-flat':
         specifier: ^1.2.3
         version: 1.2.3
@@ -549,8 +549,8 @@ packages:
   '@iconify-json/fluent-emoji-flat@1.2.3':
     resolution: {integrity: sha512-dPvAidr4bQv8Esr77qNyD8V8yhtIDUirAQP6eHGeoqxpYVZTnGQ556NlBs4553cV4fjnK81t6eSBmPGPk+yUeA==}
 
-  '@iconify-json/fluent@1.2.18':
-    resolution: {integrity: sha512-CPSTjs9MI2+U8QXBNw6zyE+jJ7JzTbyWmmgtysjUIGzHln4jdTxSvNttOt73/Bc1BgNQuUiLjj2mh/K0nCfyIg==}
+  '@iconify-json/fluent@1.2.19':
+    resolution: {integrity: sha512-nqmJzoJlreoBpRiCyJOOoAJXNLa1xHj33yrVdijlJHAQ/vSzXm3rMuu18gP3mZkLHGTstgdVUyRguc8MdgaH+w==}
 
   '@iconify-json/meteocons@1.2.2':
     resolution: {integrity: sha512-IYkII3CGvqDAGbLNqIN6bWIz6dKHPvZvPoTq34veKJy0clRRrSwiEQUrK4IOiF8MXPzhRchsVwtH7U/F3clMbw==}
@@ -2478,7 +2478,7 @@ snapshots:
     dependencies:
       '@iconify/types': 2.0.0
 
-  '@iconify-json/fluent@1.2.18':
+  '@iconify-json/fluent@1.2.19':
     dependencies:
       '@iconify/types': 2.0.0
 
