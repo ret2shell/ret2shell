@@ -99,8 +99,8 @@ importers:
         specifier: ^0.16.22
         version: 0.16.22
       ky:
-        specifier: ^1.8.0
-        version: 1.8.0
+        specifier: ^1.8.1
+        version: 1.8.1
       lorem-ipsum:
         specifier: ^2.0.8
         version: 2.0.8
@@ -1514,8 +1514,8 @@ packages:
   kubernetes-types@1.30.0:
     resolution: {integrity: sha512-Dew1okvhM/SQcIa2rcgujNndZwU8VnSapDgdxlYoB84ZlpAD43U6KLAFqYo17ykSFGHNPrg0qry0bP+GJd9v7Q==}
 
-  ky@1.8.0:
-    resolution: {integrity: sha512-DoKGmG27nT8t/1F9gV8vNzggJ3mLAyD49J8tTMWHeZvS8qLc7GlyTieicYtFzvDznMe/q2u38peOjkWc5/pjvw==}
+  ky@1.8.1:
+    resolution: {integrity: sha512-7Bp3TpsE+L+TARSnnDpk3xg8Idi8RwSLdj6CMbNWoOARIrGrbuLGusV0dYwbZOm4bB3jHNxSw8Wk/ByDqJEnDw==}
     engines: {node: '>=18'}
 
   lightningcss-darwin-arm64@1.29.2:
@@ -3688,7 +3688,7 @@ snapshots:
 
   kubernetes-types@1.30.0: {}
 
-  ky@1.8.0: {}
+  ky@1.8.1: {}
 
   lightningcss-darwin-arm64@1.29.2:
     optional: true
