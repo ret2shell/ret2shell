@@ -41,7 +41,7 @@ export default function (
     } catch (err) {
       setCaptcha(null);
       setValue(props.captchaForm, "captcha_id", "");
-      handleHttpError(err as Error, t("captcha.loadFailed")!);
+      handleHttpError(err as Error, t("captcha.errors.fetch.title")!);
     }
     setLoading(false);
   }
@@ -65,7 +65,7 @@ export default function (
             <img
               class="w-20 object-fill"
               src={`data:image/svg+xml;base64,${base64.encode(new TextEncoder().encode(captchaObj.challenge))}`}
-              alt={t("captcha.reload")}
+              alt={t("general.actions.refresh.title")}
             />
           );
         case "pow":
@@ -109,8 +109,8 @@ export default function (
       <input class="hidden" name="captcha_id" value={fieldProps.idFieldValue} />
       <Input
         icon={<span class="icon-[fluent--bot-20-regular] w-5 h-5" />}
-        placeholder={t("captcha.placeholder")}
-        title={t("captcha.placeholder")}
+        placeholder="0xDEADBEEF"
+        title={t("captcha.title")}
         value={fieldProps.answerFieldValue}
         {...inputProps}
         disabled={!manuallyFill()}
@@ -123,7 +123,7 @@ export default function (
             disabled={calculating() || loading()}
             type="button"
           >
-            {loading() ? t("captcha.loading") : captcha() ? getCaptchaContent() : t("captcha.loadFailed")}
+            {loading() ? t("captcha.fetching") : captcha() ? getCaptchaContent() : t("captcha.errors.fetch.title")}
           </Button>
         }
       />

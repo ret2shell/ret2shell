@@ -1,7 +1,7 @@
 import { type Flatten, flatten } from "@solid-primitives/i18n";
 import type rawDict from "./zh-cn.json";
 
-const localeList = ["zh_cn", "en_us", "zh_tw", "ja_jp"] as const;
+const localeList = ["zh_cn", "en_us", "zh_tw", "ja_jp", "de_de", "es-es", "ko_kr", "ru_ru", "fr-fr"] as const;
 export type Locale = (typeof localeList)[number];
 export type RawDict = typeof rawDict;
 export type Dict = Flatten<RawDict>;

@@ -25,7 +25,10 @@ export default function (props: {
       untrack(async () => {
         setLoading(true);
         try {
-          const data = await getChallengeAnswer(challengeStore.current!.game_id, challengeStore.current!.id);
+          const data = await getChallengeAnswer(
+            challengeStore.current!.game_id,
+            challengeStore.current!.id,
+          );
           setAnswer(data);
         } catch (err) {
           handleHttpError(err as Error, t("game.challenge.fetchFailed")!);
@@ -37,10 +40,14 @@ export default function (props: {
   async function handleUpdateAnswer() {
     setSubmitting(true);
     try {
-      await updateChallengeAnswer(challengeStore.current!.game_id, challengeStore.current!.id, answer());
+      await updateChallengeAnswer(
+        challengeStore.current!.game_id,
+        challengeStore.current!.id,
+        answer(),
+      );
       addToast({
         level: "success",
-        description: t("form.saveSuccess")!,
+        description: t("general.actions.save.status.success")!,
         duration: 5000,
       });
       setInEdit(false);
