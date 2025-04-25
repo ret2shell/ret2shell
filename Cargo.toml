@@ -9,7 +9,7 @@ homepage     = "https://ret.sh.cn/"
 publish      = false
 repository   = "https://github.com/ret2shell/ret2shell"
 rust-version = "1.85.0"
-version      = "3.7.0"
+version      = "3.7.1"
 
 [profile.release]
 codegen-units = 1
@@ -151,5 +151,5 @@ version  = "0.99"
 
 [workspace.dependencies.wsrx]
 default-features = false
-features         = ["server"]
-version          = "0.4"
+features         = ["server", "log"]
+version          = "0.5"

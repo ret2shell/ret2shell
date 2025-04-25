@@ -20,7 +20,7 @@ use kube::{
   runtime::reflector::Lookup,
 };
 use r2s_config::cluster::{ChallengeEnv, Config};
-use tokio_util::codec::Framed;
+use tokio_util::{codec::Framed, sync::CancellationToken};
 use tracing::{debug, error, info, warn};
 
 use super::traits::ClusterError;
@@ -671,7 +671,8 @@ impl Cluster {
     if let Some(pfw) = pfw {
       let stream = Framed::new(pfw, wsrx::proxy::MessageCodec::new());
       let ws: wsrx::WrappedWsStream = ws.into();
-      wsrx::proxy::proxy_stream(stream, ws).await?;
+      let cancel_token = CancellationToken::new();
+      wsrx::proxy::proxy_stream(stream, ws, cancel_token).await?;
     }
     Ok(())
   }

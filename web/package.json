@@ -1,6 +1,6 @@
 {
   "name": "ret2shell",
-  "version": "3.7.0",
+  "version": "3.7.1",
   "type": "module",
   "private": true,
   "description": "Ret 2 Shell is a feature-riches CTF challenge platform.",
@@ -30,7 +30,7 @@
     "@solid-primitives/resize-observer": "^2.1.0",
     "@solid-primitives/storage": "^4.3.1",
     "@solidjs/router": "^0.15.3",
-    "@xdsec/wsrx": "^0.4.18",
+    "@xdsec/wsrx": "^0.5.0",
     "@xterm/addon-canvas": "^0.7.0",
     "@xterm/addon-fit": "^0.10.0",
     "@xterm/addon-web-links": "^0.11.0",
@@ -65,7 +65,7 @@
     "remark-rehype": "^11.1.2",
     "sakana-widget": "^2.7.0",
     "shell-quote": "^1.8.2",
-    "shiki": "^3.2.2",
+    "shiki": "^3.3.0",
     "solid-js": "^1.9.5",
     "solid-transition-group": "^0.3.0",
     "strip-ansi": "^7.1.0",
@@ -90,6 +90,6 @@
     "vite": "^6.3.2",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-solid": "^2.11.6",
-    "vitest": "^3.1.1"
+    "vitest": "^3.1.2"
   }
 }

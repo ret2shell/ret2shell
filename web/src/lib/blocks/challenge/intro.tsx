@@ -32,7 +32,7 @@ passiveSupport({
   ],
 });
 
-export default function(props: { inGame?: boolean }) {
+export default function (props: { inGame?: boolean }) {
   const instance = createMemo(() => {
     if (challengeStore.current && challengeStore.env) {
       return wsrx.instances().find((s) => s.challenge_id === challengeStore.current!.id) ?? null;
@@ -460,7 +460,7 @@ export default function(props: { inGame?: boolean }) {
                                           : local.latency > 100
                                             ? "text-warning"
                                             : "text-success")) ??
-                                      "text-error"
+                                        "text-error"
                                     )}
                                   >
                                     {(local.latency ?? -1) < 0 ? "--" : local.latency} ms

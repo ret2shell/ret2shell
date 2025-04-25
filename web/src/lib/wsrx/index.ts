@@ -100,7 +100,7 @@ export class WsrxWrapper {
     if (this.wsrx.getState() === WsrxState.Usable) {
       try {
         await this.wsrx.delete(local);
-      } catch { }
+      } catch {}
     }
   }
 

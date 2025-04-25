@@ -36,7 +36,7 @@ export function InstanceBoxContent() {
   }
 
   async function tryConnect() {
-    await wsrx.connect().catch(() => { });
+    await wsrx.connect().catch(() => {});
   }
 
   async function retryConnect() {

@@ -544,7 +544,7 @@ function InstanceList() {
   );
 }
 
-export default function(_props: {
+export default function (_props: {
   onStateChange?: (challenge?: Challenge) => void;
   inGame?: boolean;
 }) {
@@ -690,9 +690,9 @@ export default function(_props: {
             onOpenChange={(details) => {
               setFormOpen(details.open);
             }}
-          // onClick={() => {
-          //   setFormOpen(true);
-          // }}
+            // onClick={() => {
+            //   setFormOpen(true);
+            // }}
           >
             <CreateForm
               repos={repos()}

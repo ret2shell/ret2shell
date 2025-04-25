@@ -34,7 +34,7 @@ version = "0.7.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "891477e0c6a8957309ee5c45a6368af3ae14bb510732d2684ffa19af310920f9"
 dependencies = [
- "getrandom 0.2.15",
+ "getrandom 0.2.16",
  "once_cell",
  "version_check",
 ]
@@ -46,7 +46,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e89da841a80418a9b391ebaea17f5c112ffaaa96f621d2c285b5174da76b9011"
 dependencies = [
  "cfg-if",
- "getrandom 0.2.15",
+ "getrandom 0.2.16",
  "once_cell",
  "version_check",
  "zerocopy 0.7.35",
@@ -205,9 +205,9 @@ dependencies = [
 
 [[package]]
 name = "async-compression"
-version = "0.4.22"
+version = "0.4.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "59a194f9d963d8099596278594b3107448656ba73831c9d8c783e613ce86da64"
+checksum = "b37fc50485c4f3f736a4fb14199f6d5f5ba008d7f28fe710306c92780f004c07"
 dependencies = [
  "flate2",
  "futures-core",
@@ -341,9 +341,9 @@ dependencies = [
 
 [[package]]
 name = "aws-lc-sys"
-version = "0.28.1"
+version = "0.28.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ddeb19ee86cb16ecfc871e5b0660aff6285760957aaedda6284cf0e790d3769"
+checksum = "bfa9b6986f250236c27e5a204062434a773a13243d2ffc2955f37bdba4c5c6a1"
 dependencies = [
  "bindgen",
  "cc",
@@ -1646,9 +1646,9 @@ dependencies = [
 
 [[package]]
 name = "getrandom"
-version = "0.2.15"
+version = "0.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c4567c8db10ae91089c99af84c68c38da3ec2f087c3f82960bcdbf3656b6f4d7"
+checksum = "335ff9f135e4384c8150d6f27c6daed433577f86b4750418338c01a1a2528592"
 dependencies = [
  "cfg-if",
  "js-sys",
@@ -2668,9 +2668,9 @@ dependencies = [
 
 [[package]]
 name = "libm"
-version = "0.2.11"
+version = "0.2.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8355be11b20d696c8f18f6cc018c4e372165b1fa8126cef092399c9951984ffa"
+checksum = "c9627da5196e5d8ed0b0495e61e518847578da83483c37288316d9b2e03a7f72"
 
 [[package]]
 name = "libsqlite3-sys"
@@ -2901,7 +2901,7 @@ version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a51313c5820b0b02bd422f4b44776fbf47961755c74ce64afc73bfad10226c3"
 dependencies = [
- "getrandom 0.2.15",
+ "getrandom 0.2.16",
 ]
 
 [[package]]
@@ -2919,7 +2919,7 @@ dependencies = [
  "data-encoding",
  "ed25519",
  "ed25519-dalek",
- "getrandom 0.2.15",
+ "getrandom 0.2.16",
  "log",
  "rand 0.8.5",
  "signatory",
@@ -3549,9 +3549,9 @@ dependencies = [
 
 [[package]]
 name = "quinn-proto"
-version = "0.11.10"
+version = "0.11.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b820744eb4dc9b57a3398183639c511b5a26d2ed702cedd3febaa1393caa22cc"
+checksum = "bcbafbbdbb0f638fe3f35f3c56739f77a8a1d070cb25603226c83339b391472b"
 dependencies = [
  "bytes",
  "getrandom 0.3.2",
@@ -3604,7 +3604,7 @@ checksum = "74765f6d916ee2faa39bc8e68e4f3ed8949b48cccdac59983d287a7cb71ce9c5"
 
 [[package]]
 name = "r2s-auditor"
-version = "3.6.2"
+version = "3.7.1"
 dependencies = [
  "aho-corasick",
  "r2s-config",
@@ -3615,7 +3615,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-bucket"
-version = "3.6.2"
+version = "3.7.1"
 dependencies = [
  "chrono",
  "deunicode",
@@ -3634,7 +3634,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-cache"
-version = "3.6.2"
+version = "3.7.1"
 dependencies = [
  "fred",
  "r2s-config",
@@ -3646,7 +3646,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-captcha"
-version = "3.6.2"
+version = "3.7.1"
 dependencies = [
  "async-trait",
  "biosvg",
@@ -3662,7 +3662,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-checker"
-version = "3.6.2"
+version = "3.7.1"
 dependencies = [
  "chrono",
  "r2s-bucket",
@@ -3678,7 +3678,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-cluster"
-version = "3.6.2"
+version = "3.7.1"
 dependencies = [
  "axum",
  "chrono",
@@ -3703,7 +3703,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-config"
-version = "3.6.2"
+version = "3.7.1"
 dependencies = [
  "sea-orm",
  "serde",
@@ -3714,7 +3714,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-database"
-version = "3.6.2"
+version = "3.7.1"
 dependencies = [
  "chrono",
  "num-derive",
@@ -3730,7 +3730,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-email"
-version = "3.6.2"
+version = "3.7.1"
 dependencies = [
  "async-nats",
  "futures",
@@ -3745,7 +3745,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-event"
-version = "3.6.2"
+version = "3.7.1"
 dependencies = [
  "async-nats",
  "axum",
@@ -3761,7 +3761,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-license"
-version = "3.6.2"
+version = "3.7.1"
 dependencies = [
  "chrono",
  "clap",
@@ -3773,7 +3773,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-media"
-version = "3.6.2"
+version = "3.7.1"
 dependencies = [
  "hex",
  "image",
@@ -3790,7 +3790,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-migrator"
-version = "3.6.2"
+version = "3.7.1"
 dependencies = [
  "r2s-config",
  "sea-orm",
@@ -3802,7 +3802,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-oauth"
-version = "3.6.2"
+version = "3.7.1"
 dependencies = [
  "async-trait",
  "chrono",
@@ -3820,7 +3820,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-queue"
-version = "3.6.2"
+version = "3.7.1"
 dependencies = [
  "async-nats",
  "r2s-config",
@@ -3832,7 +3832,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-server"
-version = "3.6.2"
+version = "3.7.1"
 dependencies = [
  "anyhow",
  "argon2",
@@ -3966,7 +3966,7 @@ version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
- "getrandom 0.2.15",
+ "getrandom 0.2.16",
 ]
 
 [[package]]
@@ -4253,7 +4253,7 @@ checksum = "a4689e6c2294d81e88dc6261c768b63bc4fcdb852be6d1352498b114f61383b7"
 dependencies = [
  "cc",
  "cfg-if",
- "getrandom 0.2.15",
+ "getrandom 0.2.16",
  "libc",
  "untrusted",
  "windows-sys 0.52.0",
@@ -6705,9 +6705,9 @@ checksum = "1e9df38ee2d2c3c5948ea468a8406ff0db0b29ae1ffde1bcf20ef305bcc95c51"
 
 [[package]]
 name = "wsrx"
-version = "0.4.5"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "29550ede63dd7296ed0cee7d03cefc54ade50a732e673f706099baaf841bf9f8"
+checksum = "40872a73ce383e2f54374e5f33b185190293bdc4eeafcded5d77f25d58cb0a9c"
 dependencies = [
  "axum",
  "futures-util",
@@ -6715,6 +6715,7 @@ dependencies = [
  "thiserror 2.0.12",
  "tokio",
  "tokio-util",
+ "tracing",
 ]
 
 [[package]]
