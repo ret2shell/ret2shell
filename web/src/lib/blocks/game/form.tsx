@@ -233,9 +233,10 @@ export default function GameEdit(props: {
               inputProps={props}
               name={field.name}
               value={[field.value || 0]}
-              onValueChange={(value) => {
+              onValueChange={(value: { value: [number] }) => {
                 const v = value.value[0] as number;
                 setValues(form, {
+                  award_rate: v,
                   award_rate_1: v,
                   award_rate_2: Math.floor((v * 2) / 3),
                   award_rate_3: Math.floor(v / 3),
@@ -256,6 +257,12 @@ export default function GameEdit(props: {
                 name={field.name}
                 value={[field.value || 0]}
                 class="flex-1"
+                onValueChange={(value: { value: [number] }) => {
+                  const v = value.value[0] as number;
+                  setValues(form, {
+                    award_rate_1: v,
+                  });
+                }}
               />
             )}
           </Field>
@@ -270,6 +277,12 @@ export default function GameEdit(props: {
                 name={field.name}
                 value={[field.value || 0]}
                 class="flex-1"
+                onValueChange={(value: { value: [number] }) => {
+                  const v = value.value[0] as number;
+                  setValues(form, {
+                    award_rate_2: v,
+                  });
+                }}
               />
             )}
           </Field>
@@ -284,6 +297,12 @@ export default function GameEdit(props: {
                 name={field.name}
                 value={[field.value || 0]}
                 class="flex-1"
+                onValueChange={(value: { value: [number] }) => {
+                  const v = value.value[0] as number;
+                  setValues(form, {
+                    award_rate_3: v,
+                  });
+                }}
               />
             )}
           </Field>

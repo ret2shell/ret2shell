@@ -397,6 +397,9 @@ function CreateForm(fnProps: {
               inputProps={props}
               name={field.name}
               value={[field.value || 0.1]}
+              onValueChange={(e: { value: [number] }) => {
+                setValue(form, "cpu", e.value[0]);
+              }}
             />
           )}
         </Field>
@@ -411,7 +414,7 @@ function CreateForm(fnProps: {
                 step={32}
                 name={field.name}
                 value={[Number.parseInt(field.value?.replace("Mi", "") || "32") || 32]}
-                onValueChange={(e) => {
+                onValueChange={(e: { value: [number] }) => {
                   setValue(form, "mem", `${e.value[0]}Mi`);
                 }}
               />
@@ -430,7 +433,7 @@ function CreateForm(fnProps: {
                 step={1}
                 name={field.name}
                 value={[Number.parseInt(field.value?.replace("Gi", "") || "3") || 3]}
-                onValueChange={(e) => {
+                onValueChange={(e: { value: [number] }) => {
                   setValue(form, "storage", `${e.value[0]}Gi`);
                 }}
               />

@@ -64,7 +64,13 @@ export default function () {
         });
         const redirectUrl = location.query.redirect;
         if (redirectUrl) {
-          navigate(redirectUrl as string, { replace: true });
+          const url = Array.isArray(redirectUrl) ? redirectUrl[0] : redirectUrl;
+          if (/^(\w+):\/\//.test(url)) {
+            navigate("/", { replace: true });
+            window.location.replace(url);
+          } else {
+            navigate(url, { replace: true });
+          }
         } else {
           navigate("/", { replace: true });
         }

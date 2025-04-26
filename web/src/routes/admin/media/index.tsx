@@ -103,6 +103,9 @@ export default function () {
                   name={field.name}
                   value={[field.value || 1]}
                   inputProps={props}
+                  onValueChange={(e: { value: [number] }) => {
+                    setValues(form, { [field.name]: e.value[0] });
+                  }}
                 />
               )}
             </Field>
