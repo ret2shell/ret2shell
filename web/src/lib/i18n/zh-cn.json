@@ -149,6 +149,9 @@
       "open": {
         "title": "打开"
       },
+      "compile": {
+        "title": "编译"
+      },
       "next": {
         "title": "下一步"
       },
@@ -476,6 +479,24 @@
         "countdown": "题目发布倒计时"
       }
     },
+    "errors": {
+      "fetchList": {
+        "title": "获取题目列表失败",
+        "message": "请检查网络连接或稍后再试"
+      },
+      "fetchChallenge": {
+        "title": "获取题目失败",
+        "message": "请检查网络连接或稍后再试"
+      },
+      "fetchChallengeStatus": {
+        "title": "获取题目状态失败",
+        "message": "请检查网络连接或稍后再试"
+      },
+      "fetchChallengeFiles": {
+        "title": "获取题目文件失败",
+        "message": "请检查网络连接或稍后再试"
+      }
+    },
     "terminal": {
       "title": "终端"
     },
@@ -497,7 +518,7 @@
           "title": "静态附件",
           "tip": "这里的文件会全部原样提供给比赛选手。"
         },
-        "dynamic": {
+        "mapped": {
           "title": "动态附件",
           "tip": "这里的文件将会以哈希映射的形式为选手分配其中一个，如若需要动态分发多个附件，请打包进压缩包里。"
         },
@@ -509,6 +530,14 @@
       "errors": {
         "fetchFiles": {
           "title": "获取文件失败",
+          "message": "请检查网络连接或稍后再试"
+        },
+        "uploadFiles": {
+          "title": "上传文件失败",
+          "message": "请检查网络连接或稍后再试"
+        },
+        "deleteFiles": {
+          "title": "删除文件失败",
           "message": "请检查网络连接或稍后再试"
         }
       }
@@ -598,6 +627,31 @@
       "errors": {
         "fetchInstances": {
           "title": "获取实例失败",
+          "message": "请检查网络连接或稍后再试"
+        }
+      }
+    },
+    "checker": {
+      "title": "评测",
+      "script": "评测脚本",
+      "preset": {
+        "placeholder": "请选择脚本预设",
+        "simple": {
+          "label": "简单评测"
+        },
+        "leet": {
+          "label": "动态环境评测（Leet）"
+        },
+        "uuid": {
+          "label": "动态环境评测（UUID）"
+        },
+        "mapped": {
+          "label": "动态附件评测"
+        }
+      },
+      "errors": {
+        "fetchCheckerScript": {
+          "title": "获取评测脚本失败",
           "message": "请检查网络连接或稍后再试"
         }
       }
