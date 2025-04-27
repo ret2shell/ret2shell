@@ -58,12 +58,12 @@ export function FormBare(props: {
 
   return (
     <Form onSubmit={onSubmit} class="flex flex-col w-full max-w-5xl space-y-2 relative">
-      <Field name="name" validate={[required(t("game.challenge.nameRequired")!)]}>
+      <Field name="name" validate={[required(t("challenge.form.name.required")!)]}>
         {(field, props) => (
           <Input
             icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
-            title={t("game.challenge.name")}
-            placeholder={t("game.challenge.name")}
+            title={t("challenge.form.name.label")}
+            placeholder={t("challenge.form.name.placeholder")}
             {...props}
             value={field.value}
             error={field.error}
@@ -71,12 +71,12 @@ export function FormBare(props: {
           />
         )}
       </Field>
-      <Field name="tag" validate={[required(t("game.challenge.tagRequired")!)]}>
+      <Field name="tag" validate={[required(t("challenge.form.tag.required")!)]}>
         {(field, props) => (
           <Input
             icon={<span class="icon-[fluent--tag-20-regular] w-5 h-5" />}
-            title={t("game.challenge.tag")}
-            placeholder={t("game.challenge.tagPlaceholder")}
+            title={t("challenge.form.tag.label")}
+            placeholder={t("challenge.form.tag.placeholder")}
             {...props}
             value={field.value}
             error={field.error}
@@ -96,8 +96,8 @@ export function FormBare(props: {
                         <div class="flex flex-col space-y-2 flex-1">
                           <Input
                             icon={<span class="icon-[fluent--chevron-double-up-20-regular] w-5 h-5" />}
-                            title={t("game.challenge.maxScore")}
-                            placeholder={t("game.challenge.maxScore")}
+                            title={t("challenge.form.scoreRule.initial.label")}
+                            placeholder={t("challenge.form.scoreRule.initial.placeholder")}
                             {...initialProps}
                             value={initialField.value}
                             error={initialField.error}
@@ -108,8 +108,8 @@ export function FormBare(props: {
                           />
                           <Input
                             icon={<span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5" />}
-                            title={t("game.challenge.minScore")}
-                            placeholder={t("game.challenge.minScore")}
+                            title={t("challenge.form.scoreRule.minimum.label")}
+                            placeholder={t("challenge.form.scoreRule.minimum.placeholder")}
                             {...minProps}
                             value={minField.value}
                             error={minField.error}
@@ -120,8 +120,8 @@ export function FormBare(props: {
                           />
                           <Input
                             icon={<span class="icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
-                            title={t("game.challenge.scoreDecay")}
-                            placeholder={t("game.challenge.scoreDecay")}
+                            title={t("challenge.form.scoreRule.decay.label")}
+                            placeholder={t("challenge.form.scoreRule.decay.placeholder")}
                             {...decayProps}
                             value={decayField.value}
                             error={decayField.error}
@@ -162,8 +162,8 @@ export function FormBare(props: {
               {() => (
                 <>
                   <Select
-                    placeholder={t("game.challenge.scoringPeriodPlaceholder")}
-                    label={t("game.challenge.scoringPeriod")}
+                    placeholder={t("challenge.form.scoringPeriod.placeholder")}
+                    label={t("challenge.form.scoringPeriod.label")}
                     class="flex-1"
                     items={
                       gameStore.current?.timeline_presets?.map((t) => {
@@ -199,7 +199,7 @@ export function FormBare(props: {
           )}
         </Field>
       </Show>
-      <Field name="content" validate={[required(t("game.challenge.contentRequired")!)]}>
+      <Field name="content" validate={[required(t("challenge.form.content.required")!)]}>
         {(field) => (
           <Editor
             form={form}
@@ -207,7 +207,7 @@ export function FormBare(props: {
             class="h-96"
             lang="markdown"
             placeholder="MARKDOWN"
-            title={t("game.challenge.content")}
+            title={t("challenge.form.content.label")}
             name="content"
             value={field.value}
             error={field.error}
@@ -215,13 +215,13 @@ export function FormBare(props: {
         )}
       </Field>
       <Button type="submit" level="primary" class="!mt-4" loading={props.loading} disabled={props.loading}>
-        {props.editSource ? t("form.save") : t("form.create")}
+        {props.editSource ? t("general.actions.save.title") : t("general.actions.create.title")}
       </Button>
     </Form>
   );
 }
 
-export default function (props: {
+export default function(props: {
   onDone: (challenge: ChallengeForm) => void;
   editSource?: Challenge;
   loading?: boolean;
@@ -243,7 +243,7 @@ export default function (props: {
           <div class="flex flex-col p-3 lg:p-6 w-full items-center">
             <h3 class="h-12 w-full max-w-5xl mb-2 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
               <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
-              <span>{t("game.challenge.create")}</span>
+              <span>{t("general.actions.create.title")}</span>
             </h3>
             <FormBare {...props} />
           </div>

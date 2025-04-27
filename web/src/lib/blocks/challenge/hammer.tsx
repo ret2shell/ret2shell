@@ -37,7 +37,7 @@ function mergeChats(
       user_id: 0,
       user_name: "Ciallo～(∠・ω< )⌒☆",
       avatar: undefined,
-      content: `${t("game.challenge.chatSolvedMessage")} ٩(๑•ω•๑)۶`,
+      content: `${t("challenge.hammer.solved")} ٩(๑•ω•๑)۶`,
       created_at: solvedAt,
       is_admin: true,
       challenge_id: challengeId,
@@ -83,7 +83,7 @@ function mergeChats(
   return [changed, aa.sort((x, y) => x.created_at.toMillis() - y.created_at.toMillis())];
 }
 
-export default function (props: {
+export default function(props: {
   onStateChange?: (challenge?: Challenge) => void;
   onExpand?: () => void;
   expanded?: boolean;
@@ -102,7 +102,7 @@ export default function (props: {
         setChat("");
         refreshChats();
       } catch (err) {
-        handleHttpError(err as Error, t("game.challenge.sendChatError")!);
+        handleHttpError(err as Error, t("challenge.hammer.errors.send.title")!);
       } finally {
         setSending(false);
       }
@@ -120,10 +120,11 @@ export default function (props: {
         const [changed, r] = mergeChats(challengeStore.current.id, gameStore.team?.id ?? 0, chats(), result, s);
         setChats([...r]);
         if (changed) {
+          // @ts-expect-error chatBottomEl is bound by SolidJS after rendered
           setTimeout(() => chatBottomEl?.scrollIntoView({ behavior: "smooth" }), 700);
         }
       } catch (err) {
-        handleHttpError(err as Error, t("game.challenge.fetchSolveError")!);
+        handleHttpError(err as Error, t("challenge.hammer.errors.fetch.title")!);
       }
       setLoading(false);
     }
@@ -145,7 +146,7 @@ export default function (props: {
         const s = resp.find((x) => x.challenge_id === challengeStore.current?.id);
         return s?.created_at ?? null;
       } catch (err) {
-        handleHttpError(err as Error, t("game.challenge.fetchSolveError")!);
+        handleHttpError(err as Error, t("challenge.hammer.errors.fetchSolve.title")!);
       }
       return null;
     }
@@ -163,6 +164,7 @@ export default function (props: {
   const [editorExpanded, setEditorExpanded] = createSignal(false);
 
   onMount(() => {
+    // @ts-expect-error chatBottomEl is bound by SolidJS after rendered
     setTimeout(() => chatBottomEl?.scrollIntoView({ behavior: "smooth" }), 300);
   });
 
@@ -334,8 +336,8 @@ export default function (props: {
               {availableMsg() <= 0
                 ? t("game.challenge.hammerInputAlreadySend")
                 : t("game.challenge.hammerLastMessage", {
-                    last: availableMsg(),
-                  })}
+                  last: availableMsg(),
+                })}
             </span>
           </span>
           <div class="flex-1" />

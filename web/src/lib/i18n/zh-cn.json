@@ -479,6 +479,41 @@
         "countdown": "题目发布倒计时"
       }
     },
+    "form": {
+      "name": {
+        "label": "题目名称",
+        "placeholder": "请输入名称",
+        "required": "名称不能为空"
+      },
+      "tag": {
+        "label": "题目标签",
+        "placeholder": "请输入标签，以 / 分隔，第一个标签将成为分类",
+        "required": "标签不能为空"
+      },
+      "scoreRule": {
+        "initial": {
+          "label": "初始分数",
+          "placeholder": "请输入分数"
+        },
+        "minimum": {
+          "label": "最低分数",
+          "placeholder": "请输入分数"
+        },
+        "decay": {
+          "label": "衰减次数",
+          "placeholder": "请输入衰减次数"
+        }
+      },
+      "scoringPeriod": {
+        "label": "计分周目",
+        "placeholder": "请选择计分周目"
+      },
+      "content": {
+        "label": "题目内容",
+        "placeholder": "请输入内容",
+        "required": "内容不能为空"
+      }
+    },
     "errors": {
       "fetchList": {
         "title": "获取题目列表失败",
@@ -553,6 +588,24 @@
         "invisibleBeforeArchive": {
           "title": "题解不可见",
           "message": "题解在归档前不可见"
+        }
+      }
+    },
+    "hammer": {
+      "solved": "题目已经解决，恭喜！",
+      "adminGoto": "管理员请前往比赛管理面板查看选手反馈消息。",
+      "errors": {
+        "send": {
+          "title": "发送消息失败",
+          "message": "请检查网络连接或稍后再试"
+        },
+        "fetch": {
+          "title": "获取消息历史记录失败",
+          "message": "请检查网络连接或稍后再试"
+        },
+        "fetchSolve": {
+          "title": "获取解题状态失败",
+          "message": "请检查网络连接或稍后再试"
         }
       }
     },
