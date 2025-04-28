@@ -1,1 +1,1133 @@
-{}
+{
+  "captcha": {
+    "calculating": "",
+    "errors": {
+      "fetch": {
+        "message": "",
+        "title": ""
+      }
+    },
+    "fetching": "",
+    "form": {
+      "difficulty": {
+        "label": "",
+        "mustBeNumber": "",
+        "mustBePositiveNumber": "",
+        "placeholder": "",
+        "required": ""
+      },
+      "validator": {
+        "label": "",
+        "placeholder": "",
+        "required": "",
+        "type": {
+          "image": "",
+          "pow": ""
+        }
+      }
+    },
+    "label": "",
+    "title": ""
+  },
+  "challenge": {
+    "actions": {
+      "down": {
+        "message": "",
+        "title": ""
+      },
+      "up": {
+        "message": "",
+        "title": ""
+      }
+    },
+    "answer": {
+      "empty": "",
+      "errors": {
+        "fetchAnswer": {
+          "message": "",
+          "title": ""
+        },
+        "invisibleBeforeArchive": {
+          "message": "",
+          "title": ""
+        }
+      },
+      "title": ""
+    },
+    "checker": {
+      "errors": {
+        "fetchCheckerScript": {
+          "message": "",
+          "title": ""
+        }
+      },
+      "preset": {
+        "leet": {
+          "label": ""
+        },
+        "mapped": {
+          "label": ""
+        },
+        "placeholder": "",
+        "simple": {
+          "label": ""
+        },
+        "uuid": {
+          "label": ""
+        }
+      },
+      "script": "",
+      "title": ""
+    },
+    "empty": "",
+    "enter": "",
+    "errors": {
+      "down": {
+        "title": ""
+      },
+      "fetchChallenge": {
+        "message": "",
+        "title": ""
+      },
+      "fetchChallengeFiles": {
+        "message": "",
+        "title": ""
+      },
+      "fetchChallengeStatus": {
+        "message": "",
+        "title": ""
+      },
+      "fetchList": {
+        "message": "",
+        "title": ""
+      },
+      "up": {
+        "title": ""
+      }
+    },
+    "file": {
+      "empty": "",
+      "errors": {
+        "deleteFiles": {
+          "message": "",
+          "title": ""
+        },
+        "fetchFiles": {
+          "message": "",
+          "title": ""
+        },
+        "uploadFiles": {
+          "message": "",
+          "title": ""
+        }
+      },
+      "title": "",
+      "type": {
+        "checker": {
+          "tip": "",
+          "title": ""
+        },
+        "mapped": {
+          "tip": "",
+          "title": ""
+        },
+        "static": {
+          "tip": "",
+          "title": ""
+        }
+      }
+    },
+    "form": {
+      "content": {
+        "label": "",
+        "placeholder": "",
+        "required": ""
+      },
+      "name": {
+        "label": "",
+        "placeholder": "",
+        "required": ""
+      },
+      "scoreRule": {
+        "decay": {
+          "label": "",
+          "placeholder": ""
+        },
+        "initial": {
+          "label": "",
+          "placeholder": ""
+        },
+        "minimum": {
+          "label": "",
+          "placeholder": ""
+        },
+        "range": {
+          "label": ""
+        }
+      },
+      "scoringPeriod": {
+        "label": "",
+        "placeholder": ""
+      },
+      "tag": {
+        "label": "",
+        "placeholder": "",
+        "required": ""
+      }
+    },
+    "hammer": {
+      "adminGoto": "",
+      "errors": {
+        "fetch": {
+          "message": "",
+          "title": ""
+        },
+        "fetchSolve": {
+          "message": "",
+          "title": ""
+        },
+        "maxMessageLimit": {
+          "title": ""
+        },
+        "send": {
+          "message": "",
+          "title": ""
+        }
+      },
+      "freeMessages": "",
+      "markdownHoto": "",
+      "markdownSupport": "",
+      "role": {
+        "admin": "",
+        "player": ""
+      },
+      "solved": "",
+      "tips": {
+        "0": "",
+        "1": "",
+        "2": ""
+      },
+      "title": ""
+    },
+    "hint": {
+      "empty": "",
+      "errors": {
+        "fetch": {
+          "message": "",
+          "title": ""
+        },
+        "unlock": {
+          "message": "",
+          "title": ""
+        }
+      },
+      "form": {
+        "content": {
+          "label": "",
+          "placeholder": "",
+          "required": ""
+        },
+        "cost": {
+          "label": "",
+          "placeholder": ""
+        }
+      },
+      "title": "",
+      "unlockConfirm": ""
+    },
+    "instance": {
+      "actions": {
+        "addImage": {
+          "message": "",
+          "title": ""
+        },
+        "copy": {
+          "title": ""
+        },
+        "delay": {
+          "title": ""
+        },
+        "start": {
+          "title": ""
+        },
+        "stop": {
+          "title": ""
+        }
+      },
+      "delete": "",
+      "empty": "",
+      "errors": {
+        "calmdown": {
+          "title": ""
+        },
+        "delay": {
+          "message": "",
+          "title": ""
+        },
+        "fetchConfigImages": {
+          "title": ""
+        },
+        "fetchInstances": {
+          "message": "",
+          "title": ""
+        },
+        "fetchRegistry": {
+          "title": ""
+        },
+        "managedByMate": {
+          "title": ""
+        },
+        "noExportedServices": {
+          "message": "",
+          "title": ""
+        },
+        "start": {
+          "message": "",
+          "title": ""
+        },
+        "stop": {
+          "message": "",
+          "title": ""
+        },
+        "toggleNetworkConfig": {
+          "title": ""
+        },
+        "toggleRestrict": {
+          "title": ""
+        }
+      },
+      "image": {
+        "empty": "",
+        "form": {
+          "containerName": {
+            "label": "",
+            "mustBeValidName": "",
+            "placeholder": "",
+            "required": ""
+          },
+          "restrict": {
+            "label": "",
+            "message": "",
+            "placeholder": ""
+          },
+          "service": {
+            "cpu": {
+              "label": "",
+              "required": ""
+            },
+            "description": {
+              "label": "",
+              "placeholder": "",
+              "requiredWhenHavePort": ""
+            },
+            "mem": {
+              "label": "",
+              "required": ""
+            },
+            "port": {
+              "conflict": "",
+              "label": "",
+              "mustBeInRange": "",
+              "mustBeNumber": "",
+              "placeholder": "",
+              "required": ""
+            },
+            "storage": {
+              "label": "",
+              "required": ""
+            },
+            "type": {
+              "items": {
+                "http": "",
+                "tcp": ""
+              },
+              "label": "",
+              "placeholder": "",
+              "requiredWhenHavePort": ""
+            }
+          },
+          "tag": {
+            "label": "",
+            "placeholder": "",
+            "required": ""
+          },
+          "version": {
+            "label": "",
+            "placeholder": ""
+          }
+        },
+        "label": "",
+        "upload": ""
+      },
+      "internet": "",
+      "registrySecret": "",
+      "restrict": "",
+      "runningContainers": "",
+      "status": {
+        "failed": {
+          "title": ""
+        },
+        "idle": {
+          "title": ""
+        },
+        "inUse": {
+          "title": ""
+        },
+        "pending": {
+          "title": ""
+        },
+        "running": {
+          "title": ""
+        }
+      },
+      "title": ""
+    },
+    "list": "",
+    "search": {
+      "archived": "",
+      "hideArchived": "",
+      "hideSolved": "",
+      "placeholder": "",
+      "solved": ""
+    },
+    "settings": {
+      "title": ""
+    },
+    "statistics": {
+      "commits": {
+        "subject": "",
+        "title": ""
+      },
+      "empty": "",
+      "errors": {
+        "fetchStatistics": {
+          "message": "",
+          "title": ""
+        },
+        "fetchSubmission": {
+          "title": ""
+        },
+        "fetchCommitHistory": ""
+      },
+      "solves": {
+        "subject": "",
+        "title": ""
+      },
+      "title": "",
+      "showAll": ""
+    },
+    "status": {
+      "archived": {
+        "message": "",
+        "title": ""
+      },
+      "hidden": {
+        "alert": "",
+        "message": "",
+        "title": ""
+      },
+      "inPeriod": {
+        "countdown": "",
+        "message": "",
+        "title": ""
+      },
+      "solved": {
+        "message": "",
+        "title": ""
+      },
+      "unreleased": {
+        "countdown": "",
+        "message": "",
+        "title": ""
+      }
+    },
+    "tag": {
+      "title": "",
+      "unknown": ""
+    },
+    "terminal": {
+      "title": ""
+    },
+    "title": "",
+    "submission": {
+      "status": {
+        "failed": "",
+        "pending": "",
+        "solved": ""
+      },
+      "submit": ""
+    }
+  },
+  "game": {
+    "admin": {},
+    "archive": "",
+    "archived": "",
+    "end": "",
+    "ended": "",
+    "form": {
+      "archiveAt": {
+        "canNotEarlierThanStart": "",
+        "label": "",
+        "placeholder": "",
+        "required": ""
+      },
+      "awardRate": {
+        "firstBlood": "",
+        "label": "",
+        "mustBeNumber": "",
+        "mustBePositiveNumber": "",
+        "placeholder": "",
+        "required": "",
+        "secondBlood": "",
+        "thirdBlood": ""
+      },
+      "brief": {
+        "label": "",
+        "placeholder": "",
+        "required": ""
+      },
+      "canRegisterAfterStart": {
+        "label": "",
+        "message": "",
+        "placeholder": ""
+      },
+      "enableTeamAudit": {
+        "label": "",
+        "message": "",
+        "placeholder": ""
+      },
+      "endAt": {
+        "canNotEarlierThanStart": "",
+        "label": "",
+        "placeholder": "",
+        "required": ""
+      },
+      "frozen": {
+        "label": "",
+        "message": "",
+        "placeholder": ""
+      },
+      "hidden": {
+        "label": "",
+        "message": "",
+        "placeholder": ""
+      },
+      "misc": {
+        "label": ""
+      },
+      "name": {
+        "label": "",
+        "placeholder": "",
+        "required": ""
+      },
+      "offline": {
+        "label": ""
+      },
+      "registerAt": {
+        "canNotLaterThanEnd": "",
+        "label": "",
+        "placeholder": "",
+        "required": ""
+      },
+      "startAt": {
+        "canNotLaterThanEnd": "",
+        "label": "",
+        "placeholder": "",
+        "required": ""
+      },
+      "teamSize": {
+        "label": "",
+        "mustBeNumber": "",
+        "mustBePositiveNumber": "",
+        "placeholder": "",
+        "required": ""
+      },
+      "title": "",
+      "weight": {
+        "label": ""
+      },
+      "team": {
+        "minimum": "",
+        "maximum": ""
+      }
+    },
+    "introduction": {
+      "empty": "",
+      "errors": {
+        "fetchIntroduction": {
+          "message": "",
+          "title": ""
+        }
+      },
+      "form": {
+        "content": {
+          "label": "",
+          "placeholder": "",
+          "required": ""
+        }
+      },
+      "title": ""
+    },
+    "list": "",
+    "monitor": {
+      "title": "",
+      "empty": "",
+      "errors": {
+        "fetchAudit": {
+          "title": ""
+        },
+        "fetchSubmission": {
+          "title": ""
+        }
+      },
+      "status": {
+        "misjudged": {
+          "title": ""
+        },
+        "pending": {
+          "title": ""
+        },
+        "confirmed": {
+          "title": ""
+        }
+      }
+    },
+    "noGameHosted": "",
+    "noOtherGames": "",
+    "notStarted": "",
+    "otherGames": "",
+    "pending": "",
+    "scoreboard": {
+      "currentPeriod": "",
+      "empty": "",
+      "errors": {
+        "fetchScoreboard": {
+          "message": "",
+          "title": ""
+        }
+      },
+      "selectInstitute": "",
+      "title": ""
+    },
+    "start": "",
+    "started": "",
+    "statistics": {
+      "title": "",
+      "errors": {
+        "fetch": "",
+        "export": ""
+      },
+      "selectInstitute": "",
+      "submission": "",
+      "challengeStats": "",
+      "players": "",
+      "institutePlayers": "",
+      "others": "",
+      "teams": "",
+      "instituteTeams": ""
+    },
+    "timeLasted": "",
+    "title": "",
+    "welcome": "",
+    "writeups": {
+      "empty": "",
+      "title": ""
+    },
+    "administrator": {
+      "errors": {
+        "fetchList": {
+          "title": ""
+        },
+        "noPermission": {
+          "title": ""
+        },
+        "alreadyAdded": {
+          "title": ""
+        }
+      },
+      "title": "",
+      "form": {
+        "search": {
+          "title": "",
+          "placeholder": ""
+        },
+        "confirm": {
+          "message": ""
+        }
+      },
+      "empty": ""
+    },
+    "management": {
+      "gotoChallenges": "",
+      "title": ""
+    },
+    "git": {
+      "title": ""
+    }
+  },
+  "general": {
+    "actions": {
+      "add": {
+        "message": "",
+        "status": {
+          "fail": "",
+          "success": ""
+        },
+        "title": ""
+      },
+      "back": {
+        "title": ""
+      },
+      "cancel": {
+        "title": ""
+      },
+      "close": {
+        "title": ""
+      },
+      "compile": {
+        "title": ""
+      },
+      "confirm": {
+        "message": "",
+        "status": {
+          "fail": "",
+          "success": ""
+        },
+        "title": ""
+      },
+      "copy": {
+        "title": ""
+      },
+      "create": {
+        "message": "",
+        "status": {
+          "fail": "",
+          "success": ""
+        },
+        "title": ""
+      },
+      "cut": {
+        "title": ""
+      },
+      "delete": {
+        "message": "",
+        "status": {
+          "fail": "",
+          "success": ""
+        },
+        "title": ""
+      },
+      "download": {
+        "status": {
+          "fail": "",
+          "pending": "",
+          "success": ""
+        },
+        "title": ""
+      },
+      "edit": {
+        "title": ""
+      },
+      "exit": {
+        "title": ""
+      },
+      "load": {
+        "title": ""
+      },
+      "loadMore": {
+        "title": ""
+      },
+      "next": {
+        "title": ""
+      },
+      "no": {
+        "title": ""
+      },
+      "ok": {
+        "title": ""
+      },
+      "open": {
+        "title": ""
+      },
+      "paste": {
+        "title": ""
+      },
+      "prev": {
+        "title": ""
+      },
+      "refresh": {
+        "status": {
+          "fail": "",
+          "success": ""
+        },
+        "title": ""
+      },
+      "reset": {
+        "message": "",
+        "status": {
+          "fail": "",
+          "success": ""
+        },
+        "title": ""
+      },
+      "save": {
+        "message": "",
+        "status": {
+          "fail": "",
+          "success": ""
+        },
+        "title": ""
+      },
+      "search": {
+        "title": ""
+      },
+      "select": {
+        "title": ""
+      },
+      "selectAll": {
+        "title": ""
+      },
+      "selectNone": {
+        "title": ""
+      },
+      "send": {
+        "message": "",
+        "status": {
+          "fail": "",
+          "success": ""
+        },
+        "title": ""
+      },
+      "update": {
+        "message": "",
+        "status": {
+          "fail": "",
+          "success": ""
+        },
+        "title": ""
+      },
+      "upload": {
+        "status": {
+          "fail": "",
+          "fileTooLarge": "",
+          "fileTooSmall": "",
+          "invalidFileType": "",
+          "pending": "",
+          "success": ""
+        },
+        "title": ""
+      },
+      "yes": {
+        "title": ""
+      }
+    },
+    "loading": {
+      "10": "",
+      "11": "",
+      "12": "",
+      "13": "",
+      "14": "",
+      "15": "",
+      "00": "",
+      "01": "",
+      "02": "",
+      "03": "",
+      "04": "",
+      "05": "",
+      "06": "",
+      "07": "",
+      "08": "",
+      "09": "",
+      "short": ""
+    },
+    "network": {
+      "gotoDocs": "",
+      "status": {
+        "400": {
+          "message": "",
+          "title": ""
+        },
+        "401": {
+          "message": "",
+          "title": ""
+        },
+        "403": {
+          "message": "",
+          "title": ""
+        },
+        "404": {
+          "message": "",
+          "title": ""
+        },
+        "412": {
+          "message": "",
+          "title": ""
+        },
+        "418": {
+          "message": "",
+          "title": ""
+        },
+        "500": {
+          "message": "",
+          "title": ""
+        },
+        "502": {
+          "message": "",
+          "title": ""
+        }
+      },
+      "unknown": {
+        "message": "",
+        "title": ""
+      }
+    }
+  },
+  "platform": {
+    "cookiePolicy": "",
+    "errors": {
+      "maintaining": {
+        "message": "",
+        "title": ""
+      },
+      "notImplemented": {
+        "title": "",
+        "hello": "",
+        "message": ""
+      },
+      "offline": {
+        "message": "",
+        "title": ""
+      },
+      "tooNarrow": {
+        "message": "",
+        "title": ""
+      },
+      "versionMismatch": {
+        "message": "",
+        "title": ""
+      }
+    },
+    "name": "",
+    "notifications": {
+      "clear": "",
+      "empty": "",
+      "title": ""
+    },
+    "subject": "",
+    "theme": {
+      "followSystem": "",
+      "title": ""
+    },
+    "updated": "",
+    "tooNarrow": ""
+  },
+  "training": {
+    "empty": "",
+    "errors": {
+      "fetchArchives": {
+        "message": "",
+        "title": ""
+      },
+      "fetchList": {
+        "message": "",
+        "title": ""
+      },
+      "fetchTraining": {
+        "message": "",
+        "title": ""
+      },
+      "gameNotArchived": {
+        "message": "",
+        "title": ""
+      }
+    },
+    "form": {
+      "brief": {
+        "label": "",
+        "placeholder": "",
+        "required": ""
+      },
+      "name": {
+        "label": "",
+        "placeholder": "",
+        "required": ""
+      }
+    },
+    "list": "",
+    "noArchives": "",
+    "openForever": "",
+    "placeholder": "",
+    "title": ""
+  },
+  "wiki": {
+    "errors": {
+      "fetchArticle": {
+        "message": "",
+        "title": ""
+      },
+      "fetchToc": {
+        "message": "",
+        "title": ""
+      }
+    },
+    "form": {
+      "content": {
+        "label": "",
+        "placeholder": "",
+        "required": ""
+      },
+      "enableComment": {
+        "label": ""
+      },
+      "isDraft": {
+        "label": "",
+        "placeholder": ""
+      },
+      "isPublished": {
+        "label": "",
+        "placeholder": ""
+      },
+      "path": {
+        "label": "",
+        "placeholder": "",
+        "required": ""
+      },
+      "title": {
+        "label": "",
+        "placeholder": "",
+        "required": ""
+      }
+    },
+    "placeholder": "",
+    "title": ""
+  },
+  "wsrx": {
+    "actions": {
+      "copy": {
+        "title": ""
+      },
+      "copyLocal": {
+        "title": ""
+      }
+    },
+    "download": {
+      "message": "",
+      "title": ""
+    },
+    "errors": {
+      "createTunnel": {
+        "message": "",
+        "title": ""
+      },
+      "daemonError": {
+        "message": "",
+        "title": ""
+      },
+      "daemonOffline": {
+        "message": "",
+        "title": ""
+      },
+      "deleteTunnel": {
+        "message": "",
+        "title": ""
+      },
+      "disconnected": {
+        "message": "",
+        "title": ""
+      },
+      "fetchTunnel": {
+        "message": "",
+        "title": ""
+      },
+      "versionMismatch": {
+        "message": "",
+        "title": ""
+      }
+    },
+    "retry": "",
+    "settings": {
+      "address": {
+        "invalid": "",
+        "label": "",
+        "placeholder": "",
+        "required": ""
+      },
+      "title": ""
+    },
+    "status": {
+      "invalid": {
+        "title": ""
+      },
+      "pending": {
+        "title": ""
+      },
+      "usable": {
+        "title": ""
+      }
+    },
+    "title": ""
+  },
+  "user": {
+    "errors": {
+      "fetchList": {
+        "title": ""
+      }
+    }
+  },
+  "account": {
+    "permission": {
+      "basic": "",
+      "verified": "",
+      "calendar": "",
+      "wiki": "",
+      "bulletin": "",
+      "game": "",
+      "host": "",
+      "statistics": "",
+      "devOps": "",
+      "user": ""
+    }
+  },
+  "shell": {
+    "cat": {
+      "man": "",
+      "errors": {
+        "noFileSpecified": {
+          "title": ""
+        },
+        "tooManyFiles": {
+          "title": ""
+        },
+        "fileNotFound": "",
+        "read": ""
+      }
+    },
+    "errors": {
+      "noGameSpecified": {
+        "title": ""
+      },
+      "permissionDenied": ""
+    },
+    "welcome": "",
+    "clear": {
+      "man": ""
+    },
+    "echo": {
+      "man": ""
+    }
+  },
+  "about": {
+    "contact": "",
+    "donate": "",
+    "source": ""
+  },
+  "docs": {
+    "title": ""
+  },
+  "magic": {
+    "about": {
+      "thanks": "",
+      "title": ""
+    }
+  }
+}

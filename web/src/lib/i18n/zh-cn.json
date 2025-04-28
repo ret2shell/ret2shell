@@ -42,6 +42,12 @@
       "gotoDocs": "如果你是运维，可以查看"
     },
     "loading": {
+      "10": "正在使用放大镜与铅笔抢救数据...",
+      "11": "正在将 emacs 和 vim 软链接到 ed...",
+      "12": "正在训练分支预测算法...",
+      "13": "正在命中定时缓存...",
+      "14": "正在执行投机取巧算法...",
+      "15": "正在加入大语言模型幻觉...",
       "short": "加载中...",
       "00": "正在修复宇宙射线引发的比特翻转...",
       "01": "正在试图证明 P != NP...",
@@ -52,13 +58,7 @@
       "06": "正在枚举机器学习网络...",
       "07": "正在导入人工智障...",
       "08": "正在破解 Alice 与 Bob 的 one-time pads...",
-      "09": "正在试图退出 VIM...",
-      "10": "正在使用放大镜与铅笔抢救数据...",
-      "11": "正在将 emacs 和 vim 软链接到 ed...",
-      "12": "正在训练分支预测算法...",
-      "13": "正在命中定时缓存...",
-      "14": "正在执行投机取巧算法...",
-      "15": "正在加入大语言模型幻觉..."
+      "09": "正在试图退出 VIM..."
     },
     "actions": {
       "ok": {
@@ -231,8 +231,9 @@
         "message": "请换宽一点的设备浏览"
       },
       "notImplemented": {
+        "hello": "你好",
         "title": "没写，别急",
-        "messages": "不是哥们，生产队的驴都不敢像你这么歇"
+        "message": "不是哥们，生产队的驴都不敢像你这么歇"
       },
       "offline": {
         "title": "系统离线",
@@ -251,7 +252,8 @@
     "theme": {
       "title": "主题",
       "followSystem": "跟随系统"
-    }
+    },
+    "tooNarrow": "太窄了，请宽一点"
   },
   "wiki": {
     "title": "知识",
@@ -383,15 +385,50 @@
       "empty": "暂无题解"
     },
     "statistics": {
-      "title": "统计数据"
+      "title": "统计数据",
+      "errors": {
+        "fetch": "获取赛事统计信息失败",
+        "export": "导出赛事统计信息失败"
+      },
+      "selectInstitute": "选择组织...",
+      "submission": "提交评测情况",
+      "challengeStats": "解题情况",
+      "players": "选手统计",
+      "institutePlayers": "组织参赛选手统计",
+      "others": "其他",
+      "teams": "队伍统计",
+      "instituteTeams": "组织参赛队伍统计"
     },
     "monitor": {
-      "title": "事件看板"
+      "title": "事件看板",
+      "empty": "没有审计日志",
+      "status": {
+        "pending": {
+          "title": "等待人工复核"
+        },
+        "misjudged": {
+          "title": "误判"
+        },
+        "confirmed": {
+          "title": "属实"
+        }
+      },
+      "errors": {
+        "fetchAudit": {
+          "title": "获取审计日志失败"
+        },
+        "fetchSubmission": {
+          "title": "获取提交记录失败"
+        }
+      }
+    },
+    "git": {
+      "title": "题目仓库"
     },
     "form": {
       "title": "编辑信息",
       "name": {
-        "label": "赛事标题",
+        "label": "赛事名称",
         "placeholder": "请输入标题",
         "required": "标题不能为空"
       },
@@ -469,12 +506,41 @@
         "label": "允许赛事开始后报名",
         "placeholder": "是否允许赛事开始后报名",
         "message": "允许后，选手可以在赛事开始后报名参赛"
+      },
+      "team": {
+        "minimum": "队伍人数不能小于 1",
+        "maximum": "队伍人数不能大于 99"
       }
     },
-    "admin": {
+    "management": {
       "title": "赛事管理",
       "gotoChallenges": "前往题目管理"
-    }
+    },
+    "administrator": {
+      "errors": {
+        "fetchList": {
+          "title": "获取赛事管理员列表失败"
+        },
+        "noPermission": {
+          "title": "无基础权限"
+        },
+        "alreadyAdded": {
+          "title": "已添加"
+        }
+      },
+      "title": "赛事管理员",
+      "form": {
+        "search": {
+          "title": "添加赛事管理员",
+          "placeholder": "搜索用户名或邮箱"
+        },
+        "confirm": {
+          "message": "确认添加 {{name}} 为赛事管理员？"
+        }
+      },
+      "empty": "没有管理员，请联系运维手动添加"
+    },
+    "admin": {}
   },
   "challenge": {
     "title": "题目",
@@ -698,9 +764,18 @@
         }
       }
     },
+    "submission": {
+      "submit": "提交了",
+      "status": {
+        "pending": "队列中",
+        "solved": "正确",
+        "failed": "错误"
+      }
+    },
     "statistics": {
       "title": "统计",
       "empty": "暂无统计数据",
+      "showAll": "显示全部",
       "solves": {
         "title": "解题统计",
         "subject": "谁做了我的题？"
@@ -713,7 +788,11 @@
         "fetchStatistics": {
           "title": "获取统计数据失败",
           "message": "请检查网络连接或稍后再试"
-        }
+        },
+        "fetchSubmission": {
+          "title": "获取题目解题情况失败"
+        },
+        "fetchCommitHistory": "获取题目操作历史失败"
       }
     },
     "instance": {
@@ -986,6 +1065,74 @@
           "pow": "工作量证明"
         }
       }
+    }
+  },
+  "user": {
+    "errors": {
+      "fetchList": {
+        "title": "获取用户列表失败"
+      }
+    }
+  },
+  "account": {
+    "permission": {
+      "basic": "基础",
+      "verified": "已验证",
+      "calendar": "日历发布",
+      "wiki": "知识发布",
+      "bulletin": "公告发布",
+      "game": "比赛管理",
+      "host": "比赛举办",
+      "statistics": "数据统计",
+      "devOps": "平台运维",
+      "user": "用户管理"
+    }
+  },
+  "shell": {
+    "cat": {
+      "man": "查看文件内容。",
+      "errors": {
+        "noFileSpecified": {
+          "title": "没有指定文件。"
+        },
+        "tooManyFiles": {
+          "title": "参数过多！"
+        },
+        "fileNotFound": "没有那个文件或目录。",
+        "read": "读取文件出错。"
+      }
+    },
+    "errors": {
+      "noGameSpecified": {
+        "title": "不在有效的比赛路径中。"
+      },
+      "permissionDenied": "权限不足，拒绝访问。"
+    },
+    "help": {
+      "man": "输出帮助信息。",
+      "commands": "你有如下命令可以使用："
+    },
+    "welcome": "欢迎使用 {{shell}}!",
+    "tip": "在此终端中直接输入符合格式的 {{flag}} 即可提交，你可以输入 {{help}} 来获取更多的使用帮助。",
+    "clear": {
+      "man": "清空终端的输出内容并重新开始。"
+    },
+    "echo": {
+      "man": "原样输出你的任何输入。"
+    }
+  },
+  "about": {
+    "contact": "平台软件支持",
+    "donate": "捐助",
+    "source": "支持"
+  },
+  "docs": {
+    "title": "开发者文档"
+  },
+  "magic": {
+    "about": {
+      "thanks": "感谢使用我的作品",
+      "title": "关于"
     }
   }
 }

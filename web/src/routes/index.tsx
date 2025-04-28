@@ -128,7 +128,7 @@ export default function () {
                     <a
                       href="mailto:support@ret.sh.cn"
                       class="flex-1 btn btn-sm btn-ghost justify-start"
-                      title={t("about.contactTips")}
+                      title={t("about.contact")}
                       target="_blank"
                       rel="noreferrer"
                     >

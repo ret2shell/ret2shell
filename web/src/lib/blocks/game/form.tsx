@@ -23,9 +23,9 @@ export type GameForm = {
   enable_audit?: boolean;
   can_register_after_started?: boolean;
   award_rate?: number;
-  award_rate_1?: number;
-  award_rate_2?: number;
-  award_rate_3?: number;
+  first_blood_award?: number;
+  second_blood_award?: number;
+  third_blood_award?: number;
 };
 
 export default function GameEdit(props: {
@@ -44,9 +44,9 @@ export default function GameEdit(props: {
           end_at: props.editSource!.end_at.toSeconds(),
           register_at: props.editSource!.register_at.toSeconds(),
           archive_at: props.editSource!.archive_at.toSeconds(),
-          award_rate_1: props.editSource!.award_rates?.[0] || props.editSource!.award_rate,
-          award_rate_2: Math.floor(props.editSource!.award_rates?.[1] || (props.editSource!.award_rate * 2) / 3),
-          award_rate_3: Math.floor(props.editSource!.award_rates?.[2] || props.editSource!.award_rate / 3),
+          first_blood_award: props.editSource!.award_rates?.[0] || props.editSource!.award_rate,
+          second_blood_award: Math.floor(props.editSource!.award_rates?.[1] || (props.editSource!.award_rate * 2) / 3),
+          third_blood_award: Math.floor(props.editSource!.award_rates?.[2] || props.editSource!.award_rate / 3),
         });
       });
     }
@@ -55,13 +55,13 @@ export default function GameEdit(props: {
     <Form onSubmit={props.onDone} class="flex flex-col w-full max-w-5xl space-y-2 relative">
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
         <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
-        <span>{t("game.admin.edit.title")}</span>
+        <span>{t("game.form.title")}</span>
       </h3>
-      <Field name="name" validate={[required(t("game.nameRequired")!)]}>
+      <Field name="name" validate={[required(t("game.form.name.required")!)]}>
         {(field, props) => (
           <Input
-            title={t("game.admin.namePlaceholder")}
-            placeholder={t("game.admin.namePlaceholder")}
+            title={t("game.form.name.label")}
+            placeholder={t("game.form.name.placeholder")}
             icon={<span class="icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
             value={field.value}
             error={field.error}
@@ -69,11 +69,11 @@ export default function GameEdit(props: {
           />
         )}
       </Field>
-      <Field name="brief" validate={[required(t("game.briefRequired")!)]}>
+      <Field name="brief" validate={[required(t("game.form.brief.required")!)]}>
         {(field, props) => (
           <Input
-            title={t("game.admin.briefPlaceholder")}
-            placeholder={t("game.admin.briefPlaceholder")}
+            title={t("game.form.brief.label")}
+            placeholder={t("game.form.brief.placeholder")}
             icon={<span class="icon-[fluent--list-20-regular] w-5 h-5" />}
             value={field.value}
             error={field.error}
@@ -82,13 +82,13 @@ export default function GameEdit(props: {
         )}
       </Field>
       <Show when={props.inGame}>
-        <Field name="start_at" type="number" validate={[required(t("game.startAtRequired")!)]}>
+        <Field name="start_at" type="number" validate={[required(t("game.form.startAt.required")!)]}>
           {(startAtField) => (
-            <Field name="end_at" type="number" validate={[required(t("game.endAtRequired")!)]}>
+            <Field name="end_at" type="number" validate={[required(t("game.form.endAt.required")!)]}>
               {(endAtField) => (
-                <Field name="register_at" type="number" validate={[required(t("game.registerAtRequired")!)]}>
+                <Field name="register_at" type="number" validate={[required(t("game.form.registerAt.required")!)]}>
                   {(registerAtField) => (
-                    <Field name="archive_at" type="number" validate={[required(t("game.archiveAtRequired")!)]}>
+                    <Field name="archive_at" type="number" validate={[required(t("game.form.archiveAt.required")!)]}>
                       {(archiveAtField) => (
                         <div class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4">
                           <TimePicker
@@ -96,8 +96,8 @@ export default function GameEdit(props: {
                             form={form}
                             type="time"
                             range
-                            title={t("game.startEndTime")}
-                            placeholder={t("game.startEndTime")}
+                            title={`${t("game.form.startAt.label")} - ${t("game.form.endAt.label")}`}
+                            placeholder="yyyy-mm-dd hh:mm - yyyy-mm-dd hh:mm"
                             name={startAtField.name}
                             value={startAtField.value}
                             nameNext={endAtField.name}
@@ -113,8 +113,8 @@ export default function GameEdit(props: {
                             form={form}
                             type="time"
                             range
-                            title={t("game.registerArchiveTime")}
-                            placeholder={t("game.registerArchiveTime")}
+                            title={`${t("game.form.registerAt.label")} - ${t("game.form.archiveAt.label")}`}
+                            placeholder="yyyy-mm-dd hh:mm - yyyy-mm-dd hh:mm"
                             name={registerAtField.name}
                             value={registerAtField.value}
                             nameNext={archiveAtField.name}
@@ -139,11 +139,11 @@ export default function GameEdit(props: {
           {(field, props) => (
             <Checkbox
               inputProps={props}
-              title={t("game.admin.hidden")}
+              title={t("game.form.hidden.label")}
               checked={field.value ?? false}
               error={field.error}
             >
-              <span class="flex-1 text-start truncate">{t("game.admin.hidden")}</span>
+              <span class="flex-1 text-start truncate">{t("game.form.hidden.label")}</span>
             </Checkbox>
           )}
         </Field>
@@ -152,23 +152,23 @@ export default function GameEdit(props: {
             {(field, props) => (
               <Checkbox
                 inputProps={props}
-                title={t("game.admin.frozen")}
+                title={t("game.form.frozen.label")}
                 checked={field.value ?? false}
                 error={field.error}
               >
-                <span class="flex-1 text-start truncate">{t("game.admin.frozen")}</span>
+                <span class="flex-1 text-start truncate">{t("game.form.frozen.label")}</span>
               </Checkbox>
             )}
           </Field>
           <Field name="offline" type="boolean">
             {(field, props) => (
               <Checkbox
-                title={t("game.admin.offline")}
+                title={t("game.form.offline.label")}
                 inputProps={props}
                 checked={field.value ?? false}
                 error={field.error}
               >
-                <span class="flex-1 text-start truncate">{t("game.admin.offline")}</span>
+                <span class="flex-1 text-start truncate">{t("game.form.offline.label")}</span>
               </Checkbox>
             )}
           </Field>
@@ -181,9 +181,9 @@ export default function GameEdit(props: {
             name="team_size"
             type="number"
             validate={[
-              required(t("game.team.sizeRequired")!),
-              minRange(1, t("game.team.sizeMinExceeded")!),
-              maxRange(99, t("game.team.sizeMaxExceeded")!),
+              required(t("game.form.teamSize.required")!),
+              minRange(1, t("game.form.team.minimum")!),
+              maxRange(99, t("game.form.team.maximum")!),
             ]}
           >
             {(field, props) => (
@@ -192,8 +192,8 @@ export default function GameEdit(props: {
                 value={field.value}
                 error={field.error}
                 class="flex-1"
-                title={t("game.admin.teamSizePlaceholder")}
-                placeholder={t("game.admin.teamSizePlaceholder")!}
+                title={t("game.form.teamSize.label")}
+                placeholder={t("game.form.teamSize.placeholder")!}
                 type="number"
               />
             )}
@@ -201,24 +201,24 @@ export default function GameEdit(props: {
           <Field name="enable_audit" type="boolean">
             {(field, props) => (
               <Checkbox
-                title={t("game.admin.enableAudit")}
+                title={t("game.form.enableTeamAudit.label")}
                 inputProps={props}
                 checked={field.value ?? false}
                 error={field.error}
               >
-                <span class="flex-1 text-start truncate">{t("game.admin.enableAudit")}</span>
+                <span class="flex-1 text-start truncate">{t("game.form.enableTeamAudit.label")}</span>
               </Checkbox>
             )}
           </Field>
           <Field name="can_register_after_started" type="boolean">
             {(field, props) => (
               <Checkbox
-                title={t("game.admin.canRegisterAfterStarted")}
+                title={t("game.form.canRegisterAfterStart.label")}
                 inputProps={props}
                 checked={field.value ?? false}
                 error={field.error}
               >
-                <span class="flex-1 text-start truncate">{t("game.admin.canRegisterAfterStarted")}</span>
+                <span class="flex-1 text-start truncate">{t("game.form.canRegisterAfterStart.label")}</span>
               </Checkbox>
             )}
           </Field>
@@ -226,7 +226,7 @@ export default function GameEdit(props: {
         <Field name="award_rate" type="number">
           {(field, props) => (
             <Slider
-              label={t("game.admin.awardRate")}
+              label={t("game.form.awardRate.label")}
               max={100}
               min={0}
               step={1}
@@ -237,19 +237,19 @@ export default function GameEdit(props: {
                 const v = value.value[0] as number;
                 setValues(form, {
                   award_rate: v,
-                  award_rate_1: v,
-                  award_rate_2: Math.floor((v * 2) / 3),
-                  award_rate_3: Math.floor(v / 3),
+                  first_blood_award: v,
+                  second_blood_award: Math.floor((v * 2) / 3),
+                  third_blood_award: Math.floor(v / 3),
                 });
               }}
             />
           )}
         </Field>
         <div class="flex flex-row items-center space-x-2">
-          <Field name="award_rate_1" type="number">
+          <Field name="first_blood_award" type="number">
             {(field, props) => (
               <Slider
-                label={t("game.admin.awardRate1")}
+                label={t("game.form.awardRate.firstBlood")}
                 max={100}
                 min={0}
                 step={1}
@@ -260,16 +260,16 @@ export default function GameEdit(props: {
                 onValueChange={(value: { value: [number] }) => {
                   const v = value.value[0] as number;
                   setValues(form, {
-                    award_rate_1: v,
+                    first_blood_award: v,
                   });
                 }}
               />
             )}
           </Field>
-          <Field name="award_rate_2" type="number">
+          <Field name="second_blood_award" type="number">
             {(field, props) => (
               <Slider
-                label={t("game.admin.awardRate2")}
+                label={t("game.form.awardRate.secondBlood")}
                 max={100}
                 min={0}
                 step={1}
@@ -280,16 +280,16 @@ export default function GameEdit(props: {
                 onValueChange={(value: { value: [number] }) => {
                   const v = value.value[0] as number;
                   setValues(form, {
-                    award_rate_2: v,
+                    second_blood_award: v,
                   });
                 }}
               />
             )}
           </Field>
-          <Field name="award_rate_3" type="number">
+          <Field name="third_blood_award" type="number">
             {(field, props) => (
               <Slider
-                label={t("game.admin.awardRate3")}
+                label={t("game.form.awardRate.thirdBlood")}
                 max={100}
                 min={0}
                 step={1}
@@ -300,7 +300,7 @@ export default function GameEdit(props: {
                 onValueChange={(value: { value: [number] }) => {
                   const v = value.value[0] as number;
                   setValues(form, {
-                    award_rate_3: v,
+                    third_blood_award: v,
                   });
                 }}
               />

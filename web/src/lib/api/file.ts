@@ -1,11 +1,11 @@
 import { accountStore } from "@storage/account";
-import type { DownloadProgress } from "ky";
+import type { Progress } from "ky";
 import api from ".";
 
 export async function downloadFile(
   url: string,
   searchParams?: { [key: string]: string },
-  onDownloadProgress?: (progress: DownloadProgress) => void
+  onDownloadProgress?: (progress: Progress) => void
 ) {
   return await api
     .get(url, {
@@ -15,7 +15,7 @@ export async function downloadFile(
     .blob();
 }
 
-export async function uploadFile(url: string, file: File[], onUploadProgress?: (progress: DownloadProgress) => void) {
+export async function uploadFile(url: string, file: File[], onUploadProgress?: (progress: Progress) => void) {
   // console.log("uploadFile");
   const formData = new FormData();
   for (const f of file) {

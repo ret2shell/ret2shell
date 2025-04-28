@@ -41,7 +41,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
         try {
           setStats(await getGameStatistics(gameStore.current!.id, props.inGame, selectedInstituteId() ?? undefined));
         } catch (err) {
-          handleHttpError(err as Error, t("game.fetchFailed")!);
+          handleHttpError(err as Error, t("game.statistics.errors.fetch")!);
         }
         setLoading(false);
       });
@@ -101,7 +101,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
         link.click();
         URL.revokeObjectURL(url);
       } catch (err) {
-        handleHttpError(err as Error, t("game.fetchFailed")!);
+        handleHttpError(err as Error, t("game.statistics.errors.export")!);
       }
       setExporting(false);
     }
@@ -202,7 +202,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
           await getGameStatisticsExport(gameStore.current.id, props.inGame, selectedInstituteId() ?? undefined)
         );
       } catch (err) {
-        handleHttpError(err as Error, t("game.fetchFailed")!);
+        handleHttpError(err as Error, t("game.statistics.errors.export")!);
       }
       setExporting(false);
     }
@@ -221,7 +221,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
             <Select
               class="flex-1 max-w-64 min-w-0 w-0"
               size="sm"
-              placeholder={t("game.scoreboard.selectInstitute")}
+              placeholder={t("game.statistics.selectInstitute")}
               items={gameInstitutesSelect()}
               onValueChange={(v) => {
                 setSelectedInstituteId((v.value.at(0) && Number.parseInt(v.value.at(0)!)) || null);
@@ -295,7 +295,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
         </div>
         <div class="flex flex-col space-y-4">
           <div class="flex flex-row items-center">
-            <h2 class="font-bold flex-1 truncate">{t("game.statistics.submissions")}</h2>
+            <h2 class="font-bold flex-1 truncate">{t("game.statistics.submission")}</h2>
           </div>
           <div class="h-64 flex flex-row lg:space-x-4">
             <div class="h-full aspect-square flex items-center justify-center">
@@ -359,7 +359,7 @@ export default function GameStatistics(props: { inGame?: boolean }) {
                     top: "48px",
                   },
                   title: {
-                    text: t("game.statistics.challengeSolveDetails"),
+                    text: t("game.statistics.challengeStats"),
                     right: "center",
                   },
                   tooltip: {

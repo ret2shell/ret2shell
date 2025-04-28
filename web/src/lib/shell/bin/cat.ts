@@ -12,15 +12,15 @@ export class Cat implements Command {
   man = t("shell.cat.man")!;
   func = async (io: Stdio, args: ParseEntry[]) => {
     if (!gameStore.current || !challengeStore.current) {
-      io.error(t("shell.noGameSpecifiedTips")!);
+      io.error(t("shell.errors.noGameSpecified.title")!);
       return 1;
     }
     if (args.length === 0) {
-      io.error(t("shell.cat.noFileSpecified")!);
+      io.error(t("shell.cat.errors.noFileSpecified.title")!);
       return 1;
     }
     if (args.length > 1) {
-      io.error(t("shell.cat.tooManyFiles")!);
+      io.error(t("shell.cat.errors.tooManyFiles.title")!);
       return 1;
     }
     const file = args[0].toString().trim();
@@ -33,24 +33,24 @@ export class Cat implements Command {
         )
       );
       io.info(
-        t("shell.helpTips", {
+        t("shell.tip", {
           flag: ansiColors.red("flag"),
           help: link(ansiColors.green("help"), "rnix://command/help"),
         })!
       );
       io.println("");
     } else if (file.startsWith("checkers/")) {
-      io.error(t("shell.cat.permissionDenied")!);
+      io.error(t("shell.errors.permissionDenied")!);
       return 1;
     } else {
       try {
         if (!challengeStore.files.find((f) => f.file === file)) {
-          io.error(t("shell.cat.fileNotFound")!);
+          io.error(t("shell.cat.errors.fileNotFound")!);
           return 1;
         }
         io.warning("[BINARY DATA]");
       } catch {
-        io.error(t("shell.cat.error")!);
+        io.error(t("shell.cat.errors.read")!);
         return 1;
       }
     }

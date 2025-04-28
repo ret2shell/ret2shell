@@ -27,7 +27,7 @@ export function AuditList() {
       setAudits(resp[0]);
       setTotal(resp[1]);
     } catch (err) {
-      handleHttpError(err as Error, t("game.admin.monitor.fetchFailed")!);
+      handleHttpError(err as Error, t("game.monitor.errors.fetchAudit.title")!);
     }
     setLoading(false);
   }
@@ -88,7 +88,7 @@ export function AuditList() {
                 fallback={
                   <>
                     <span class="icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
-                    <span>{t("game.team.noExtras")}</span>
+                    <span>{t("game.monitor.empty")}</span>
                   </>
                 }
               >
@@ -131,10 +131,10 @@ export function AuditList() {
                 >
                   <span>
                     {audit.state === AuditState.Pending
-                      ? t("game.admin.monitor.needReview")
+                      ? t("game.monitor.status.pending.title")
                       : audit.state === AuditState.Misjudged
-                        ? t("game.admin.monitor.misjudged")
-                        : t("game.admin.monitor.confirmed")}
+                        ? t("game.monitor.status.misjudged.title")
+                        : t("game.monitor.status.confirmed.title")}
                   </span>
                 </Tag>
               </div>
@@ -143,7 +143,7 @@ export function AuditList() {
                   size="sm"
                   ghost
                   square
-                  title={t("game.admin.monitor.misjudged")}
+                  title={t("game.monitor.status.misjudged.title")}
                   level="success"
                   onClick={() => handleMisjudged(audit)}
                 >
@@ -153,7 +153,7 @@ export function AuditList() {
                   size="sm"
                   ghost
                   square
-                  title={t("game.admin.monitor.confirmed")}
+                  title={t("game.monitor.status.confirmed.title")}
                   level="error"
                   onClick={() => handleConfirmed(audit)}
                 >
@@ -196,7 +196,7 @@ export function SubmissionList(props: {
       setSubmissions(resp[0]);
       setTotal(resp[1]);
     } catch (err) {
-      handleHttpError(err as Error, t("game.admin.monitor.fetchFailed")!);
+      handleHttpError(err as Error, t("game.monitor.errors.fetchSubmission.title")!);
     }
     setLoading(false);
   }
@@ -224,7 +224,7 @@ export function SubmissionList(props: {
                 fallback={
                   <>
                     <span class="icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
-                    <span>{t("game.team.noExtras")}</span>
+                    <span>{t("game.monitor.empty")}</span>
                   </>
                 }
               >
@@ -245,8 +245,8 @@ export function SubmissionList(props: {
                     {submission.team_name ?? "wheel"}
                   </A>
                 </Show>
-                <span>{t("game.monitor.submit")}</span>
-                <span class="flex-1 truncate py-1 px-2 rounded-lg bg-layer-content/5" title={submission.content}>
+                <span>{t("challenge.submission.submit")}</span>
+                <span class="flex-1 truncate py-1 px-2 rounded-lg bg-layer-content/5" title={submission.content || ""}>
                   {submission.content}
                 </span>
               </div>
@@ -266,10 +266,10 @@ export function SubmissionList(props: {
                 <Tag level={submission.solved === null ? "info" : submission.solved ? "success" : "warning"}>
                   <span>
                     {submission.solved === null
-                      ? t("game.admin.monitor.pending")
+                      ? t("challenge.submission.status.pending")
                       : submission.solved
-                        ? t("game.admin.monitor.solved")
-                        : t("game.admin.monitor.notSolved")}
+                        ? t("challenge.submission.status.solved")
+                        : t("challenge.submission.status.failed")}
                   </span>
                 </Tag>
                 <span title={submission.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}>

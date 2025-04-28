@@ -8,8 +8,8 @@ export default function () {
   let svgPath2: SVGPathElement;
   onMount(() => {
     setTimeout(() => {
-      svgPath1.classList.remove("draw-line");
-      svgPath2.classList.remove("draw-line");
+      svgPath1!.classList.remove("draw-line");
+      svgPath2!.classList.remove("draw-line");
     }, 3000);
   });
   return (

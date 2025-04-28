@@ -5,7 +5,7 @@ import { humanFileSize } from "@lib/utils/size";
 import { t } from "@storage/theme";
 import Button, { type ButtonProps } from "@widgets/button";
 import Progress from "@widgets/progress";
-import type { DownloadProgress } from "ky";
+import type { Progress as DownloadProgress } from "ky";
 import { Match, Show, Switch, createEffect, createSignal, splitProps, untrack } from "solid-js";
 
 export default function UploadButton(
@@ -23,7 +23,7 @@ export default function UploadButton(
   let hiddenInput: HTMLInputElement;
 
   function handleSelectFile() {
-    hiddenInput.click();
+    hiddenInput!.click();
   }
 
   function handleSelectedFile(event: Event) {
@@ -46,7 +46,7 @@ export default function UploadButton(
       setUploadComplete(true);
       uploadProps.onDone?.();
     } catch (err) {
-      handleHttpError(err as Error, t("form.uploadFailed")!);
+      handleHttpError(err as Error, t("general.actions.upload.status.fail")!);
     }
     setUploading(false);
   }
@@ -82,7 +82,7 @@ export default function UploadButton(
         </Match>
         <Match when={true}>
           <span class="icon-[fluent--folder-open-20-regular] w-5 h-5" />
-          <span>{t("form.selectFile")}</span>
+          <span>{t("general.actions.select.title")}</span>
         </Match>
       </Switch>
       <Show when={uploading()}>

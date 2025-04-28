@@ -207,7 +207,7 @@ export default function () {
               alt="Thanks for using my software"
               class="w-full max-w-3xl object-contain"
             />
-            <p class="opacity-60">{t("platform.thanks")}</p>
+            <p class="opacity-60">{t("magic.about.thanks")}</p>
           </section>
         </div>
       </div>

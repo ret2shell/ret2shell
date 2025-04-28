@@ -121,9 +121,9 @@ export default function () {
         archive_at: gameStore.current?.archive_at ?? DateTime.fromFormat("2077-01-01 10:00", "yyyy-MM-dd HH:mm"),
         register_at: gameStore.current?.register_at ?? DateTime.fromFormat("2002-05-05 10:00", "yyyy-MM-dd HH:mm"),
         award_rates: [
-          result.award_rate_1 ?? result.award_rate ?? 0,
-          result.award_rate_2 ?? ((result.award_rate ?? 0) * 2) / 3,
-          result.award_rate_3 ?? (result.award_rate ?? 0) / 3,
+          result.first_blood_award ?? result.award_rate ?? 0,
+          result.second_blood_award ?? ((result.award_rate ?? 0) * 2) / 3,
+          result.third_blood_award ?? (result.award_rate ?? 0) / 3,
         ],
       });
       setGameStore({ current: resp });

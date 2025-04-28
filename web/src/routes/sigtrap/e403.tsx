@@ -5,7 +5,7 @@ import ErrorSection from "./error";
 export default function () {
   return (
     <>
-      <Title page={t("errors.403")} route="/sigtrap/403" />
+      <Title page={t("general.network.status.403.title")} route="/sigtrap/403" />
       <ErrorSection status={403} />
     </>
   );

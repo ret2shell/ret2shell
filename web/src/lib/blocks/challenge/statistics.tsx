@@ -34,7 +34,7 @@ function StatisticsPanel() {
       setSolves(resp[0]);
       setTotal(resp[1]);
     } catch (err) {
-      handleHttpError(err as Error, t("game.challenge.fetchSolveStatusFailed")!);
+      handleHttpError(err as Error, t("challenge.statistics.errors.fetchSubmission.title")!);
     }
     setLoading(false);
   }
@@ -52,7 +52,7 @@ function StatisticsPanel() {
     <>
       <h3 class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden h-12">
         <span class="icon-[fluent--data-trending-20-regular] w-5 h-5 text-primary" />
-        <span class="flex-1">{t("game.challenge.statistics")}</span>
+        <span class="flex-1">{t("challenge.statistics.title")}</span>
         <Button
           size="sm"
           onClick={() => {
@@ -65,7 +65,7 @@ function StatisticsPanel() {
               onlySolved() ? "icon-[fluent--eye-20-regular] w-5 h-5" : "icon-[fluent--eye-20-regular] w-5 h-5 text-info"
             }
           />
-          <span>{t("game.challenge.showAll")}</span>
+          <span>{t("challenge.statistics.showAll")}</span>
         </Button>
       </h3>
       <Show when={loading()}>
@@ -85,8 +85,8 @@ function StatisticsPanel() {
               <a class="truncate hover:underline" href={`/games/${gameStore.current?.id}/teams/${item.team_id}`}>
                 {item.team_name ?? "wheel"}
               </a>
-              <span>{t("game.monitor.submit")}</span>
-              <span class="flex-1 truncate py-1 px-2 rounded-lg bg-layer-content/5" title={item.content}>
+              <span>{t("challenge.submission.submit")}</span>
+              <span class="flex-1 truncate py-1 px-2 rounded-lg bg-layer-content/5" title={item.content || ""}>
                 {item.content}
               </span>
             </div>
@@ -95,10 +95,10 @@ function StatisticsPanel() {
               <Tag level={item.solved ? "success" : "warning"}>
                 <span>
                   {item.solved === null
-                    ? t("game.admin.monitor.pending")
+                    ? t("challenge.submission.status.pending")
                     : item.solved
-                      ? t("game.admin.monitor.solved")
-                      : t("game.admin.monitor.notSolved")}
+                      ? t("challenge.submission.status.solved")
+                      : t("challenge.submission.status.failed")}
                 </span>
               </Tag>
               <span class="opacity-40" title={item.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}>
@@ -131,7 +131,7 @@ function HistoryPanel() {
         try {
           setHistory(await getChallengeCommitHistory(gameStore.current!.id, challengeStore.current!.id));
         } catch (err) {
-          handleHttpError(err as Error, t("game.challenge.fetchHistoryFailed")!);
+          handleHttpError(err as Error, t("challenge.statistics.errors.fetchCommitHistory")!);
         }
         setLoading(false);
       });
@@ -142,7 +142,7 @@ function HistoryPanel() {
     <>
       <h3 class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden h-12">
         <span class="icon-[fluent--data-trending-20-regular] w-5 h-5 text-primary" />
-        <span>{t("game.challenge.commitHistory")}</span>
+        <span>{t("challenge.statistics.commits.title")}</span>
       </h3>
       <Show when={loading()}>
         <div class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden h-12">
@@ -189,12 +189,12 @@ export default function (_props: {
             ghost={tab() !== "statistics"}
             class="h-auto w-full"
             onClick={() => setTab("statistics")}
-            title={t("game.challenge.statisticsTips")}
+            title={t("challenge.statistics.solves.title")}
           >
             <div class="flex flex-col py-2 items-start w-full">
-              <span>{t("game.challenge.statistics")}</span>
+              <span>{t("challenge.statistics.solves.title")}</span>
               <span class="font-normal opacity-60 w-full text-start truncate">
-                {t("game.challenge.statisticsTips")}
+                {t("challenge.statistics.solves.subject")}
               </span>
             </div>
           </Button>
@@ -204,12 +204,12 @@ export default function (_props: {
             ghost={tab() !== "history"}
             class="h-auto w-full"
             onClick={() => setTab("history")}
-            title={t("game.challenge.commitHistoryTips")}
+            title={t("challenge.statistics.commits.title")}
           >
             <div class="flex flex-col py-2 items-start w-full">
-              <span>{t("game.challenge.commitHistory")}</span>
+              <span>{t("challenge.statistics.commits.title")}</span>
               <span class="font-normal opacity-60 w-full text-start truncate">
-                {t("game.challenge.commitHistoryTips")}
+                {t("challenge.statistics.commits.subject")}
               </span>
             </div>
           </Button>

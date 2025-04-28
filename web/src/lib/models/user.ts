@@ -32,25 +32,25 @@ export type User = {
 export function permissionToString(permission: Permission): string {
   switch (permission) {
     case Permission.Basic:
-      return t("permission.basic")!;
+      return t("account.permission.basic")!;
     case Permission.Verified:
-      return t("permission.verified")!;
+      return t("account.permission.verified")!;
     case Permission.Calendar:
-      return t("permission.calendar")!;
+      return t("account.permission.calendar")!;
     case Permission.Wiki:
-      return t("permission.wiki")!;
+      return t("account.permission.wiki")!;
     case Permission.Bulletin:
-      return t("permission.bulletin")!;
+      return t("account.permission.bulletin")!;
     case Permission.Game:
-      return t("permission.game")!;
+      return t("account.permission.game")!;
     case Permission.Host:
-      return t("permission.host")!;
+      return t("account.permission.host")!;
     case Permission.User:
-      return t("permission.user")!;
+      return t("account.permission.user")!;
     case Permission.Statistics:
-      return t("permission.statistics")!;
+      return t("account.permission.statistics")!;
     case Permission.DevOps:
-      return t("permission.devOps")!;
+      return t("account.permission.devOps")!;
   }
 }
 

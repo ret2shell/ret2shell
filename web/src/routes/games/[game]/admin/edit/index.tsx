@@ -21,9 +21,9 @@ export default function () {
         archive_at: DateTime.fromSeconds(result.archive_at!),
         register_at: DateTime.fromSeconds(result.register_at!),
         award_rates: [
-          result.award_rate_1 ?? result.award_rate ?? 0,
-          result.award_rate_2 ?? ((result.award_rate ?? 0) * 2) / 3,
-          result.award_rate_3 ?? (result.award_rate ?? 0) / 3,
+          result.first_blood_award ?? result.award_rate ?? 0,
+          result.second_blood_award ?? ((result.award_rate ?? 0) * 2) / 3,
+          result.third_blood_award ?? (result.award_rate ?? 0) / 3,
         ],
       });
       setGameStore({ current: game });
@@ -39,7 +39,7 @@ export default function () {
   }
   return (
     <>
-      <Title page={t("game.admin.edit.title")} route={`/games/${gameStore.current?.id}/admin/edit`} />
+      <Title page={t("game.form.title")} route={`/games/${gameStore.current?.id}/admin/edit`} />
       <div class="flex flex-col p-3 lg:p-6 w-full items-center">
         <GameEdit onDone={onSubmit} editSource={gameStore.current || undefined} loading={loading()} inGame />
       </div>

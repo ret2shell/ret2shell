@@ -31,7 +31,7 @@ export default function AdministratorsManagement() {
         try {
           setAdmins(await getGameAdmins(gameStore.current!.id));
         } catch (err) {
-          handleHttpError(err as Error, t("game.admin.administrators.fetchFailed")!);
+          handleHttpError(err as Error, t("game.administrator.errors.fetchList.title")!);
         }
         setLoading(false);
       });
@@ -49,7 +49,7 @@ export default function AdministratorsManagement() {
         try {
           setSearchedUsers((await getUserList(1, 30, "id", adminSearch()))[0]);
         } catch (err) {
-          handleHttpError(err as Error, t("admin.users.fetchFailed")!);
+          handleHttpError(err as Error, t("user.errors.fetchList.title")!);
         }
         setSearching(false);
       });
@@ -62,7 +62,7 @@ export default function AdministratorsManagement() {
       const resp = await updateGameAdmins(gameStore.current!.id, [...gameStore.current!.admins, user.id]);
       setGameStore({ current: resp });
     } catch (err) {
-      handleHttpError(err as Error, t("game.admin.administrators.addFailed")!);
+      handleHttpError(err as Error, t("general.actions.add.status.fail")!);
     }
     setAdding(false);
     setSearching(false);
@@ -78,7 +78,7 @@ export default function AdministratorsManagement() {
       );
       setGameStore({ current: resp });
     } catch (err) {
-      handleHttpError(err as Error, t("game.admin.administrators.deleteFailed")!);
+      handleHttpError(err as Error, t("general.actions.delete.status.fail")!);
     }
     setLoading(false);
   }
@@ -86,7 +86,7 @@ export default function AdministratorsManagement() {
     <>
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
         <span class="icon-[fluent--person-key-20-regular] w-5 h-5" />
-        <span>{t("game.admin.administrators.title")}</span>
+        <span>{t("game.administrator.title")}</span>
       </h3>
       <Show when={loading()}>
         <div class="h-12 flex flex-row items-center border-b border-b-layer-content/10">
@@ -96,8 +96,8 @@ export default function AdministratorsManagement() {
       <ArkPopover.Root autoFocus={false} open={!!adminSearch()} closeOnInteractOutside={false}>
         <ArkPopover.Anchor>
           <Input
-            placeholder={t("game.admin.administrators.addPlaceholder")}
-            title={t("game.admin.administrators.add")}
+            placeholder={t("game.administrator.form.search.placeholder")}
+            title={t("game.administrator.form.search.title")}
             icon={<span class="icon-[fluent--person-key-20-regular] w-5 h-5" />}
             onChange={(e) => setAdminSearch(e.currentTarget.value)}
           />
@@ -124,7 +124,7 @@ export default function AdministratorsManagement() {
                     <Show when={!searching() && adminSearch()}>
                       <div class="h-12 flex items-center font-bold space-x-4 px-2">
                         <span class="icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
-                        <span class="font-bold opacity-60">{t("game.admin.administrators.noAdmins")}</span>
+                        <span class="font-bold opacity-60">{t("game.administrator.empty")}</span>
                       </div>
                     </Show>
                   }
@@ -150,12 +150,12 @@ export default function AdministratorsManagement() {
                           </span>
                           <Show when={!user.permissions.includes(Permission.Game)}>
                             <Tag level="error">
-                              <span>{t("game.admin.administrators.noPermission")}</span>
+                              <span>{t("game.administrator.errors.noPermission.title")}</span>
                             </Tag>
                           </Show>
                           <Show when={gameStore.current?.admins.includes(user.id)}>
                             <Tag level="success">
-                              <span>{t("game.admin.administrators.alreadyAdded")}</span>
+                              <span>{t("game.administrator.errors.alreadyAdded.title")}</span>
                             </Tag>
                           </Show>
                         </>
@@ -176,7 +176,7 @@ export default function AdministratorsManagement() {
                           </div>
                         </div>
                         <Divider class="w-full" />
-                        <p>{t("game.admin.administrators.confirm")}</p>
+                        <p>{t("game.administrator.form.confirm.message", { name: `${user.account}#${user.id.toString(16).padStart(6, '0')}` })}</p>
                         <Button
                           level="info"
                           class="w-full"
