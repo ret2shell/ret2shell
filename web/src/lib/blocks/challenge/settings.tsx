@@ -10,7 +10,7 @@ import { DateTime } from "luxon";
 import { createEffect, createSignal } from "solid-js";
 import { type ChallengeForm, FormBare } from "./form";
 
-export default function (props: {
+export default function(props: {
   onStateChange?: (challenge?: Challenge) => void;
   inGame?: boolean;
 }) {
@@ -72,7 +72,7 @@ export default function (props: {
       <header class="min-h-12 w-full max-w-5xl border-b border-b-layer-content/10 flex flex-row flex-wrap justify-end space-x-2 items-center gap-y-2 py-2 mb-2">
         <span class="flex flex-row space-x-2 items-center overflow-hidden">
           <span class="icon-[fluent--settings-20-regular] w-5 h-5 shrink-0" />
-          <span class="font-bold inline-block whitespace-nowrap">{t("game.challenge.edit")}</span>
+          <span class="font-bold inline-block whitespace-nowrap">{t("general.actions.edit.title")}</span>
         </span>
         <span class="flex-1" />
         <span class="flex flex-row justify-end items-center flex-wrap gap-y-2 gap-x-2">

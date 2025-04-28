@@ -42,6 +42,7 @@
       "gotoDocs": "如果你是运维，可以查看"
     },
     "loading": {
+      "short": "加载中...",
       "00": "正在修复宇宙射线引发的比特翻转...",
       "01": "正在试图证明 P != NP...",
       "02": "正在试图分解 RSA 4096...",
@@ -347,6 +348,7 @@
     "archived": "已归档",
     "archive": "归档",
     "timeLasted": "距离 {{ period }} 还有",
+    "welcome": "欢迎参赛",
     "introduction": {
       "title": "赛事介绍",
       "empty": "主办方很懒，什么也没有写",
@@ -380,7 +382,14 @@
       "title": "题解",
       "empty": "暂无题解"
     },
+    "statistics": {
+      "title": "统计数据"
+    },
+    "monitor": {
+      "title": "事件看板"
+    },
     "form": {
+      "title": "编辑信息",
       "name": {
         "label": "赛事标题",
         "placeholder": "请输入标题",
@@ -470,7 +479,19 @@
   "challenge": {
     "title": "题目",
     "list": "题目列表",
+    "empty": "暂无题目",
     "enter": "攻克挑战",
+    "tag": {
+      "title": "题目标签",
+      "unknown": "未知分类"
+    },
+    "search": {
+      "placeholder": "搜索名称或者标签",
+      "hideSolved": "隐藏已解出题目",
+      "solved": "已解出",
+      "hideArchived": "隐藏已归档题目",
+      "archived": "已归档"
+    },
     "status": {
       "solved": {
         "title": "已解决",
@@ -525,6 +546,9 @@
         "minimum": {
           "label": "最低分数",
           "placeholder": "请输入分数"
+        },
+        "range": {
+          "label": "分数区间"
         },
         "decay": {
           "label": "衰减次数",
@@ -700,6 +724,23 @@
       "restrict": "限制 Root 权限",
       "registrySecret": "仓库密钥（需预先配置资源）",
       "runningContainers": "运行中的环境",
+      "status": {
+        "idle": {
+          "title": "题目可开启在线环境"
+        },
+        "running": {
+          "title": "题目环境已启动"
+        },
+        "pending": {
+          "title": "题目环境启动中，请稍候..."
+        },
+        "failed": {
+          "title": "题目环境启动失败"
+        },
+        "inUse": {
+          "title": "另一道题目的环境正在运行中"
+        }
+      },
       "image": {
         "label": "题目环境镜像",
         "upload": "上传到镜像仓库",
@@ -767,6 +808,18 @@
         "addImage": {
           "title": "添加镜像",
           "message": "添加镜像后，镜像将会被自动拉取到服务器上。"
+        },
+        "start": {
+          "title": "启动！"
+        },
+        "delay": {
+          "title": "延长一小时"
+        },
+        "stop": {
+          "title": "停止环境"
+        },
+        "copy": {
+          "title": "复制题目环境地址"
         }
       },
       "errors": {
@@ -789,6 +842,24 @@
         "noExportedServices": {
           "title": "还未指定外部服务",
           "message": "请为环境添加至少一个服务端口。"
+        },
+        "start": {
+          "title": "启动实例失败",
+          "message": "请检查网络连接或稍后再试"
+        },
+        "stop": {
+          "title": "停止实例失败",
+          "message": "请检查网络连接或稍后再试"
+        },
+        "delay": {
+          "title": "延长实例失败",
+          "message": "请检查网络连接或稍后再试"
+        },
+        "calmdown": {
+          "title": "正在重整货箱"
+        },
+        "managedByMate": {
+          "title": "队友的环境，仅可访问"
         }
       }
     },
@@ -838,6 +909,14 @@
     "download": {
       "title": "下载 WSRX 客户端",
       "message": "请前往 GitHub 下载最新版本的 WSRX"
+    },
+    "actions": {
+      "copy": {
+        "title": "复制 WebSocket 链接"
+      },
+      "copyLocal": {
+        "title": "复制本地地址"
+      }
     },
     "settings": {
       "title": "WSRX 设置",

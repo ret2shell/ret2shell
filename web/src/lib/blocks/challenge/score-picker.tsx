@@ -28,13 +28,13 @@ export default function ScorePicker(props: {
   return (
     <div class={clsx("flex flex-col space-y-1", props.class)}>
       <label class="label" for="scorePicker_NOTPOSSIBLE">
-        {t("game.challenge.scoreRange")}
+        {t("challenge.form.scoreRule.range.label")}
       </label>
       <div class="flex h-56">
         <div class="flex flex-col items-end space-y-2">
           <RangeSlider
             class="flex-1"
-            label={t("game.challenge.scoreRange")}
+            label={t("challenge.form.scoreRule.range.label")}
             max={1500}
             min={0}
             step={50}
@@ -133,7 +133,7 @@ export default function ScorePicker(props: {
           />
           <Slider
             class="flex-1 flex-col-reverse pl-1"
-            label={t("game.challenge.scoreDecay")}
+            label={t("challenge.form.scoreRule.decay.label")}
             max={50}
             min={1}
             step={1}

@@ -40,7 +40,7 @@ export default function ChallengeList(props: {
     }
     const tree = [] as TreeNode[];
     const tags = new Set(
-      challengeStore.challenges.flatMap((c) => c.tag.find((t) => t.primary)?.name ?? t("game.challenge.unknownTag")!)
+      challengeStore.challenges.flatMap((c) => c.tag.find((t) => t.primary)?.name || t("challenge.tag.unknown")!)
     );
     const tagsArray = Array.from(tags).sort((a, b) => a.localeCompare(b));
     for (const tag of tagsArray) {
@@ -119,7 +119,7 @@ export default function ChallengeList(props: {
                 class="bg-layer"
                 size="sm"
                 icon={<span class="icon-[fluent--filter-20-regular] w-5 h-5" />}
-                placeholder={t("game.challenge.filterNameOrLabel")}
+                placeholder={t("challenge.search.placeholder")}
                 onInput={(e) => setSearch(e.currentTarget.value)}
               />
               <Show when={props.inGame}>
@@ -127,7 +127,7 @@ export default function ChallengeList(props: {
                   <Button
                     class="my-1 bg-layer"
                     size="sm"
-                    title={t("game.challenge.hideSolved")}
+                    title={t("challenge.search.hideSolved")}
                     onClick={() => {
                       setHideSolved(!hideSolved());
                     }}
@@ -138,12 +138,12 @@ export default function ChallengeList(props: {
                     >
                       <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
                     </Show>
-                    <span>{t("game.challenge.solved")}</span>
+                    <span>{t("challenge.search.solved")}</span>
                   </Button>
                   <Button
                     class="my-1 bg-layer"
                     size="sm"
-                    title={t("game.challenge.hideArchived")}
+                    title={t("challenge.search.hideArchived")}
                     onClick={() => {
                       setHideArchived(!hideArchived());
                     }}
@@ -154,7 +154,7 @@ export default function ChallengeList(props: {
                     >
                       <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
                     </Show>
-                    <span>{t("game.challenge.archived")}</span>
+                    <span>{t("challenge.search.archived")}</span>
                   </Button>
                 </div>
               </Show>
@@ -163,7 +163,7 @@ export default function ChallengeList(props: {
               fallback={
                 <div class="flex flex-row items-center justify-center space-x-2 opacity-60 p-3">
                   <span class="icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
-                  <span>{t("game.challenge.noChallenges")}</span>
+                  <span>{t("challenge.empty")}</span>
                 </div>
               }
             >
@@ -180,9 +180,9 @@ export default function ChallengeList(props: {
                   highlightPaths={
                     selectedChallengeId()
                       ? [
-                          selectedChallenge()?.tag.find((t) => t.primary)?.name ?? t("game.challenge.unknownTag")!,
-                          selectedChallengeId().toString(),
-                        ]
+                        selectedChallenge()?.tag.find((t) => t.primary)?.name || t("challenge.tag.unknown")!,
+                        selectedChallengeId().toString(),
+                      ]
                       : undefined
                   }
                 />

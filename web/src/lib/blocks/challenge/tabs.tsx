@@ -88,14 +88,14 @@ export default function Tabs(props: {
             >
               <span class="icon-[fluent--home-20-regular] w-5 h-5" />
               <Show when={challengeHistory().length === 0}>
-                <span>{t("game.challenge.welcome")}</span>
+                <span>{t("game.welcome")}</span>
               </Show>
             </Button>
             <Show when={isGameAdmin()}>
               <Show when={!props.inGame}>
                 <Button
                   active={inStatistics()}
-                  title={t("game.admin.statistics.title")}
+                  title={t("game.statistics.title")}
                   square={challengeHistory().length > 0}
                   ghost
                   class="transition-all duration-300 overflow-hidden"
@@ -104,12 +104,12 @@ export default function Tabs(props: {
                 >
                   <span class="icon-[fluent--data-pie-20-regular] w-5 h-5" />
                   <Show when={challengeHistory().length === 0}>
-                    <span>{t("game.admin.statistics.title")}</span>
+                    <span>{t("game.statistics.title")}</span>
                   </Show>
                 </Button>
                 <Button
                   active={inMonitor()}
-                  title={t("game.admin.monitor.title")}
+                  title={t("game.monitor.title")}
                   square={challengeHistory().length > 0}
                   ghost
                   class="transition-all duration-300 overflow-hidden"
@@ -118,12 +118,12 @@ export default function Tabs(props: {
                 >
                   <span class="icon-[fluent--flash-flow-20-regular] w-5 h-5" />
                   <Show when={challengeHistory().length === 0}>
-                    <span>{t("game.admin.monitor.title")}</span>
+                    <span>{t("game.monitor.title")}</span>
                   </Show>
                 </Button>
                 <Button
                   active={inEditGame()}
-                  title={t("game.admin.edit.title")}
+                  title={t("game.form.title")}
                   square={challengeHistory().length > 0}
                   ghost
                   class="transition-all duration-300 overflow-hidden"
@@ -132,13 +132,13 @@ export default function Tabs(props: {
                 >
                   <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
                   <Show when={challengeHistory().length === 0}>
-                    <span>{t("game.admin.edit.title")}</span>
+                    <span>{t("game.form.title")}</span>
                   </Show>
                 </Button>
               </Show>
               <Button
                 active={inCreate()}
-                title={t("game.challenge.create")}
+                title={t("general.actions.create.title")}
                 square={challengeHistory().length > 0}
                 ghost
                 class="transition-all duration-300 overflow-hidden"
@@ -147,7 +147,7 @@ export default function Tabs(props: {
               >
                 <span class="icon-[fluent--add-20-regular] w-5 h-5" />
                 <Show when={challengeHistory().length === 0}>
-                  <span>{t("game.challenge.create")}</span>
+                  <span>{t("general.actions.create.title")}</span>
                 </Show>
               </Button>
             </Show>
@@ -194,7 +194,7 @@ export default function Tabs(props: {
         </TransitionGroup>
         <Show when={props.loading}>
           <Button class="opacity-60" loading ghost>
-            <span>{t("form.loading")}</span>
+            <span>{t("general.loading.short")}</span>
           </Button>
         </Show>
       </div>
