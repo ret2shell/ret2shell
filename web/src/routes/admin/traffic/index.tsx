@@ -73,7 +73,7 @@ export default function Traffic() {
       }
       addToast({
         level: "success",
-        description: t("form.saveSuccess")!,
+        description: t("general.actions.save.status.success")!,
         duration: 5000,
       });
     } catch (err) {
@@ -105,7 +105,7 @@ export default function Traffic() {
       await updateDefaultNodeSelector(nodeSelector());
       addToast({
         level: "success",
-        description: t("form.saveSuccess")!,
+        description: t("general.actions.save.status.success")!,
         duration: 5000,
       });
     } catch (err) {

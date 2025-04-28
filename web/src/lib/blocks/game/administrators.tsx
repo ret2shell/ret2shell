@@ -184,7 +184,7 @@ export default function AdministratorsManagement() {
                           loading={adding()}
                           disabled={adding()}
                         >
-                          {t("form.confirm")}
+                          {t("general.actions.confirm.title")}
                         </Button>
                       </div>
                     </Dialog>
@@ -234,15 +234,15 @@ export default function AdministratorsManagement() {
               >
                 <Card contentClass="p-2 flex flex-row space-x-2 items-center">
                   <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-error" />
-                  <span>{t("game.admin.administrators.warningDelete")}</span>
+                  <span>{t("general.actions.delete.message")}</span>
                   <Button
                     level="error"
                     size="sm"
-                    title={t("form.confirm")}
+                    title={t("general.actions.yes.title")}
                     onClick={() => handleDeleteAdmin(user)}
                     loading={loading()}
                   >
-                    <span>{t("form.confirm")}</span>
+                    <span>{t("general.actions.yes.title")}</span>
                   </Button>
                 </Card>
               </Popover>

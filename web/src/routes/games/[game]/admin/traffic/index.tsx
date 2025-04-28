@@ -59,7 +59,7 @@ export default function Traffic() {
         }
         addToast({
           level: "success",
-          description: t("form.saveSuccess")!,
+          description: t("general.actions.save.status.success")!,
           duration: 5000,
         });
         setGameStore({ current: { ...gameStore.current, traffic: script() } });
@@ -96,7 +96,7 @@ export default function Traffic() {
         await updateGameNodeSelector(gameStore.current.id, nodeSelector());
         addToast({
           level: "success",
-          description: t("form.saveSuccess")!,
+          description: t("general.actions.save.status.success")!,
           duration: 5000,
         });
         setGameStore({

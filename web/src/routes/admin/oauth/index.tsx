@@ -40,7 +40,7 @@ export default function () {
       refreshInstitutes();
       addToast({
         level: "success",
-        description: t("form.saveSuccess")!,
+        description: t("general.actions.save.status.success")!,
         duration: 5000,
       });
     } catch (err) {
@@ -115,7 +115,7 @@ export default function () {
       updateOAuthProvider(result.provider, result);
       addToast({
         level: "success",
-        description: t("form.saveSuccess")!,
+        description: t("general.actions.save.status.success")!,
         duration: 5000,
       });
     } catch (err) {
@@ -203,11 +203,11 @@ export default function () {
                     <Button
                       level="error"
                       size="sm"
-                      title={t("form.confirm")}
+                      title={t("general.actions.confirm.title")}
                       onClick={() => handleDeleteProvider(service)}
                       loading={loading()}
                     >
-                      <span>{t("form.confirm")}</span>
+                      <span>{t("general.actions.confirm.title")}</span>
                     </Button>
                   </Card>
                 </Popover>
@@ -275,11 +275,11 @@ export default function () {
                     <Button
                       level="error"
                       size="sm"
-                      title={t("form.confirm")}
+                      title={t("general.actions.confirm.title")}
                       onClick={() => handleDeleteInstitute(institute)}
                       loading={loading()}
                     >
-                      <span>{t("form.confirm")}</span>
+                      <span>{t("general.actions.confirm.title")}</span>
                     </Button>
                   </Card>
                 </Popover>

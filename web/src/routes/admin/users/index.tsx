@@ -211,7 +211,7 @@ export default function () {
       await updateUser(user);
       addToast({
         level: "success",
-        description: t("form.saveSuccess")!,
+        description: t("general.actions.save.status.success")!,
         duration: 5000,
       });
       setUser(user);

@@ -51,7 +51,7 @@ export function AuditList() {
       refreshAudits();
       addToast({
         level: "success",
-        description: t("form.saveSuccess")!,
+        description: t("general.actions.save.status.success")!,
         duration: 5000,
       });
     } catch (err) {
@@ -68,7 +68,7 @@ export function AuditList() {
       refreshAudits();
       addToast({
         level: "success",
-        description: t("form.saveSuccess")!,
+        description: t("general.actions.save.status.success")!,
         duration: 5000,
       });
     } catch (err) {

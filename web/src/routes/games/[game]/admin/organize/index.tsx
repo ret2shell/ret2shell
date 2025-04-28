@@ -27,7 +27,7 @@ function InstituteManagement() {
         });
         addToast({
           level: "success",
-          description: t("form.saveSuccess")!,
+          description: t("general.actions.save.status.success")!,
           duration: 5000,
         });
         setGameStore({ current: resp });
@@ -56,7 +56,7 @@ function InstituteManagement() {
         });
         addToast({
           level: "success",
-          description: t("form.saveSuccess")!,
+          description: t("general.actions.save.status.success")!,
           duration: 5000,
         });
         setGameStore({ current: resp });
