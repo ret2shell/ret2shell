@@ -55,7 +55,7 @@ export default function Timeline() {
       const game = await updateGame(gameStore.current!.id, payload);
       setGameStore({ current: game });
     } catch (err) {
-      handleHttpError(err as Error, t("form.saveFailed")!);
+      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
     }
   }
 
@@ -77,7 +77,7 @@ export default function Timeline() {
       const game = await updateGame(gameStore.current!.id, payload);
       setGameStore({ current: game });
     } catch (err) {
-      handleHttpError(err as Error, t("form.saveFailed")!);
+      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
     }
     setLoading(false);
   }
@@ -122,7 +122,7 @@ export default function Timeline() {
             )}
           </Field>
           <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
-            {t("form.create")}
+            {t("general.actions.create.title")}
           </Button>
         </Form>
         <div class="flex flex-col flex-1 py-8">

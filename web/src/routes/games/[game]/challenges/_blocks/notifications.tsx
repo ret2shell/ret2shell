@@ -137,7 +137,7 @@ export default function () {
                 <Show when={createFormExpanded()}>
                   <Button class="flex-1" type="submit">
                     <span class="icon-[fluent--add-20-regular] w-5 h-5" />
-                    <span>{t("form.create")}</span>
+                    <span>{t("general.actions.create.title")}</span>
                   </Button>
                 </Show>
                 <Button
@@ -152,7 +152,7 @@ export default function () {
                     <span class="icon-[fluent--chevron-double-up-20-regular] w-5 h-5" />
                   </Show>
                   <Show when={!createFormExpanded()}>
-                    <span>{t("form.create")}</span>
+                    <span>{t("general.actions.create.title")}</span>
                   </Show>
                 </Button>
               </div>
@@ -195,7 +195,7 @@ export default function () {
                       <button
                         class="shrink-0 flex items-center"
                         type="button"
-                        title={t("form.delete")}
+                        title={t("general.actions.delete.title")}
                         onClick={() => onDelete(notification.id)}
                       >
                         <span class="icon-[fluent--delete-20-regular] w-5 h-5" />

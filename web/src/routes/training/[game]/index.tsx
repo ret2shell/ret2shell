@@ -133,7 +133,7 @@ export default function () {
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as HTTPError, t("form.saveFailed")!);
+      handleHttpError(err as HTTPError, t("general.actions.save.status.fail")!);
     }
     setEditing(false);
   }

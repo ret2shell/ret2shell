@@ -77,7 +77,7 @@ export default function Traffic() {
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as Error, t("form.saveFailed")!);
+      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
     }
     setSaving(false);
   }
@@ -90,11 +90,11 @@ export default function Traffic() {
       setScript("");
       addToast({
         level: "success",
-        description: t("form.deleteSuccess")!,
+        description: t("general.actions.delete.status.success")!,
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as Error, t("form.deleteFailed")!);
+      handleHttpError(err as Error, t("general.actions.delete.status.fail")!);
     }
     setSaving(false);
   }
@@ -109,7 +109,7 @@ export default function Traffic() {
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as Error, t("form.saveFailed")!);
+      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
     }
     setSaving(false);
   }
@@ -120,11 +120,11 @@ export default function Traffic() {
       await deleteDefaultNodeSelector();
       addToast({
         level: "success",
-        description: t("form.deleteSuccess")!,
+        description: t("general.actions.delete.status.success")!,
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as Error, t("form.deleteFailed")!);
+      handleHttpError(err as Error, t("general.actions.delete.status.fail")!);
     }
     setSaving(false);
   }
@@ -141,7 +141,7 @@ export default function Traffic() {
             <span class="text-primary">ret.sh.cn/workload = </span>
             <Input size="sm" class="flex-1" value={nodeSelector()} onInput={(e) => setNodeSelector(e.target.value)} />
             <Button size="sm" level="primary" onClick={handleUpdateNodeSelector} loading={saving()}>
-              {t("form.save")}
+              {t("general.actions.save.title")}
             </Button>
             <Show when={config()?.cluster.node_selector}>
               <Popover
@@ -191,7 +191,7 @@ export default function Traffic() {
               }}
             />
             <Button size="sm" level="primary" onClick={handleUpdateTraffic} loading={saving()}>
-              {t("form.save")}
+              {t("general.actions.save.title")}
             </Button>
             <Show when={config()?.cluster.traffic}>
               <Popover

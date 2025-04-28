@@ -89,7 +89,7 @@ export default function InstituteForm(props: {
         )}
       </Field>
       <Button type="submit" level="primary" class="!mt-4" loading={props.loading} disabled={props.loading}>
-        {props.editSource ? t("form.save") : t("form.create")}
+        {props.editSource ? t("general.actions.save.title") : t("general.actions.create.title")}
       </Button>
     </Form>
   );

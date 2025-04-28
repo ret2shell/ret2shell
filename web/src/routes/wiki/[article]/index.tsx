@@ -141,7 +141,7 @@ export default function () {
               type="button"
             >
               <span class="icon-[fluent--delete-20-regular] w-5 h-5" />
-              <span>{t("form.delete")}</span>
+              <span>{t("general.actions.delete.title")}</span>
             </button>
           </Show>
           <button

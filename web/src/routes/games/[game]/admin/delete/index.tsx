@@ -22,12 +22,12 @@ export default function () {
       await deleteGame(gameStore.current.id);
       addToast({
         level: "success",
-        description: t("form.deleteSuccess")!,
+        description: t("general.actions.delete.status.success")!,
         duration: 5000,
       });
       navigate("/games", { replace: true });
     } catch (err) {
-      handleHttpError(err as Error, t("form.deleteFailed")!);
+      handleHttpError(err as Error, t("general.actions.delete.status.fail")!);
     }
     setLoading(false);
   }
@@ -63,7 +63,7 @@ export default function () {
                 loading={loading()}
               >
                 <span class="icon-[fluent--delete-20-regular] w-5 h-5" />
-                <span class="hidden md:inline">{t("form.delete")}</span>
+                <span class="hidden md:inline">{t("general.actions.delete.title")}</span>
               </Button>
             }
             class="flex-1 ml-2"

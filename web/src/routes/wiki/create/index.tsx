@@ -13,7 +13,7 @@ export default function () {
   }
   return (
     <>
-      <Title page={t("form.create")} route="/wiki/create" />
+      <Title page={t("general.actions.create.title")} route="/wiki/create" />
       <div class="flex-1 flex flex-col p-3 lg:p-6">
         <CreateForm onDone={onDone} />
       </div>

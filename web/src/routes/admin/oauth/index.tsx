@@ -44,7 +44,7 @@ export default function () {
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as HTTPError, t("form.saveFailed")!);
+      handleHttpError(err as HTTPError, t("general.actions.save.status.fail")!);
     }
     setLoading(false);
   }
@@ -54,11 +54,11 @@ export default function () {
       await createInstitute(result);
       addToast({
         level: "success",
-        description: t("form.createSuccess")!,
+        description: t("general.actions.create.status.success")!,
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as HTTPError, t("form.createFailed")!);
+      handleHttpError(err as HTTPError, t("general.actions.create.status.fail")!);
     }
     setTimeout(async () => {
       await refreshInstitutes();
@@ -73,11 +73,11 @@ export default function () {
       refreshInstitutes();
       addToast({
         level: "success",
-        description: t("form.deleteSuccess")!,
+        description: t("general.actions.delete.status.success")!,
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as HTTPError, t("form.deleteFailed")!);
+      handleHttpError(err as HTTPError, t("general.actions.delete.status.fail")!);
     }
     setLoading(false);
   }
@@ -96,11 +96,11 @@ export default function () {
       createOAuthProvider(result);
       addToast({
         level: "success",
-        description: t("form.createSuccess")!,
+        description: t("general.actions.create.status.success")!,
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as HTTPError, t("form.createFailed")!);
+      handleHttpError(err as HTTPError, t("general.actions.create.status.fail")!);
     }
     setTimeout(async () => {
       await refreshProviders();
@@ -119,7 +119,7 @@ export default function () {
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as HTTPError, t("form.saveFailed")!);
+      handleHttpError(err as HTTPError, t("general.actions.save.status.fail")!);
     }
     setTimeout(async () => {
       await refreshProviders();
@@ -134,11 +134,11 @@ export default function () {
       deleteOAuthProvider(result.provider);
       addToast({
         level: "success",
-        description: t("form.deleteSuccess")!,
+        description: t("general.actions.delete.status.success")!,
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as HTTPError, t("form.deleteFailed")!);
+      handleHttpError(err as HTTPError, t("general.actions.delete.status.fail")!);
     }
     setTimeout(async () => {
       await refreshProviders();
@@ -159,11 +159,11 @@ export default function () {
             <Dialog
               level="primary"
               size="sm"
-              title={t("form.create")}
+              title={t("general.actions.create.title")}
               btnContent={
                 <>
                   <span class="icon-[fluent--add-20-regular] w-5 h-5" />
-                  <span>{t("form.create")}</span>
+                  <span>{t("general.actions.create.title")}</span>
                 </>
               }
               // onClick={() => setProviderFormOpen(true)}
@@ -194,7 +194,7 @@ export default function () {
                   size="sm"
                   ghost
                   square
-                  title={t("form.delete")}
+                  title={t("general.actions.delete.title")}
                   btnContent={<span class="icon-[fluent--delete-20-regular] w-5 h-5" />}
                 >
                   <Card contentClass="p-2 flex flex-row space-x-2 items-center">
@@ -221,11 +221,11 @@ export default function () {
             <Dialog
               level="primary"
               size="sm"
-              title={t("form.create")}
+              title={t("general.actions.create.title")}
               btnContent={
                 <>
                   <span class="icon-[fluent--add-20-regular] w-5 h-5" />
-                  <span>{t("form.create")}</span>
+                  <span>{t("general.actions.create.title")}</span>
                 </>
               }
               // onClick={() => setInstituteFormOpen(true)}
@@ -266,7 +266,7 @@ export default function () {
                   size="sm"
                   ghost
                   square
-                  title={t("form.delete")}
+                  title={t("general.actions.delete.title")}
                   btnContent={<span class="icon-[fluent--delete-20-regular] w-5 h-5" />}
                 >
                   <Card contentClass="p-2 flex flex-row space-x-2 items-center">

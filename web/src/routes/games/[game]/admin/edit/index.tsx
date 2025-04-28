@@ -33,7 +33,7 @@ export default function () {
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as Error, t("form.saveFailed")!);
+      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
     }
     setLoading(false);
   }

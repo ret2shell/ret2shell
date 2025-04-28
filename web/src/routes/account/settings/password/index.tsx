@@ -33,7 +33,7 @@ export default function () {
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as Error, t("form.saveFailed")!);
+      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
     }
     setLoading(false);
     setTimeout(() => {
@@ -126,7 +126,7 @@ export default function () {
             )}
           </Field>
           <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
-            {t("form.save")}
+            {t("general.actions.save.title")}
           </Button>
         </Form>
       </div>

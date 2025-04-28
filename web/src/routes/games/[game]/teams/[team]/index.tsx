@@ -99,7 +99,7 @@ function AdminManagement(props: {
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as Error, t("form.saveFailed")!);
+      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
     }
     setUpdating(false);
   }
@@ -199,7 +199,7 @@ function AdminManagement(props: {
             )}
           </Field>
           <Button type="submit" level="primary" class="!mt-4" loading={updating()} disabled={updating()}>
-            {t("form.save")}
+            {t("general.actions.save.title")}
           </Button>
         </Form>
       </section>
@@ -264,7 +264,7 @@ function SelfManagement(props: { members: User[] }) {
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as Error, t("form.saveFailed")!);
+      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
     }
     setUpdating(false);
   }
@@ -335,7 +335,7 @@ function SelfManagement(props: { members: User[] }) {
             )}
           </Field>
           <Button type="submit" level="primary" class="!mt-4" loading={updating()} disabled={updating()}>
-            {t("form.save")}
+            {t("general.actions.save.title")}
           </Button>
         </Form>
       </section>
@@ -448,7 +448,7 @@ function ExtraForm(props: { team: Team | null; onDone?: () => void }) {
       <span class="w-8" />
       <Button size="sm" level="primary" type="submit" loading={loading()} disabled={loading()}>
         <span class="icon-[fluent--add-20-regular] w-5 h-5" />
-        <span>{t("form.create")}</span>
+        <span>{t("general.actions.create.title")}</span>
       </Button>
     </Form>
   );

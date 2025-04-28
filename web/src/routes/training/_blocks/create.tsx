@@ -85,7 +85,7 @@ export default function CreatePlayground(props: { onDone: (game: Game) => void }
           )}
         </Field>
         <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
-          {t("form.create")}
+          {t("general.actions.create.title")}
         </Button>
       </Form>
     </div>

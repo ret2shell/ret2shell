@@ -55,7 +55,7 @@ export function AuditList() {
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as Error, t("form.saveFailed")!);
+      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
     }
   }
 
@@ -72,7 +72,7 @@ export function AuditList() {
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as Error, t("form.saveFailed")!);
+      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
     }
   }
   const matches = createBreakpoints(breakpoints);

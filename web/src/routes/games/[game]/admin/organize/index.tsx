@@ -32,7 +32,7 @@ function InstituteManagement() {
         });
         setGameStore({ current: resp });
       } catch (err) {
-        handleHttpError(err as HTTPError, t("form.saveFailed")!);
+        handleHttpError(err as HTTPError, t("general.actions.save.status.fail")!);
       }
       setLoading(false);
     }
@@ -61,7 +61,7 @@ function InstituteManagement() {
         });
         setGameStore({ current: resp });
       } catch (err) {
-        handleHttpError(err as HTTPError, t("form.saveFailed")!);
+        handleHttpError(err as HTTPError, t("general.actions.save.status.fail")!);
       }
       setLoading(false);
     }

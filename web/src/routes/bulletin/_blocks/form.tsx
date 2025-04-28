@@ -63,7 +63,7 @@ export default function (props: {
       });
       props.onDone(resp);
     } catch (err) {
-      handleHttpError(err as HTTPError, props.editSource ? t("form.saveFailed")! : t("form.createFailed")!);
+      handleHttpError(err as HTTPError, props.editSource ? t("general.actions.save.status.fail")! : t("general.actions.create.status.fail")!);
     }
     setLoading(false);
   }
@@ -129,7 +129,7 @@ export default function (props: {
         )}
       </Field>
       <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
-        {props.editSource ? t("form.save") : t("form.create")}
+        {props.editSource ? t("general.actions.save.title") : t("general.actions.create.title")}
       </Button>
     </Form>
   );

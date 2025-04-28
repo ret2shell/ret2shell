@@ -46,7 +46,7 @@ export default function () {
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as HTTPError, t("form.saveFailed")!);
+      handleHttpError(err as HTTPError, t("general.actions.save.status.fail")!);
     }
     setLoading(false);
   }
@@ -347,7 +347,7 @@ export default function () {
             )}
           </Field>
           <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={!config() || loading()}>
-            {t("form.save")}
+            {t("general.actions.save.title")}
           </Button>
         </Form>
       </div>

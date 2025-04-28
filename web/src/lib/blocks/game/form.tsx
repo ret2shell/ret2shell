@@ -309,7 +309,7 @@ export default function GameEdit(props: {
         </div>
       </Show>
       <Button type="submit" level="primary" class="!mt-4" loading={props.loading} disabled={props.loading}>
-        {t("form.save")}
+        {t("general.actions.save.title")}
       </Button>
     </Form>
   );

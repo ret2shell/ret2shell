@@ -131,11 +131,11 @@ export default function (compProps: {
       setDeleteLoading(false);
       addToast({
         level: "success",
-        description: t("form.deleteSuccess")!,
+        description: t("general.actions.delete.status.success")!,
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as Error, t("form.deleteFailed")!);
+      handleHttpError(err as Error, t("general.actions.delete.status.fail")!);
     }
   }
 
@@ -184,7 +184,7 @@ export default function (compProps: {
         <Link href="/admin/users" size="sm">
           {t("form.backToList")}
         </Link>
-        <Popover size="sm" level="error" btnContent={<span>{t("form.delete")}</span>}>
+        <Popover size="sm" level="error" btnContent={<span>{t("general.actions.delete.title")}</span>}>
           <Card contentClass="p-4 flex flex-col space-y-2 items-stretch max-w-lg">
             {/* <span class="icon-[fluent--warning-24-filled] text-error w-6 h-6 md:w-12 md:h-12" /> */}
             <Card level="warning" contentClass="p-2 flex space-x-2 items-center">
@@ -209,7 +209,7 @@ export default function (compProps: {
                   loading={deletLoading()}
                   onClick={handleDeleteUser}
                 >
-                  <span>{t("form.delete")}</span>
+                  <span>{t("general.actions.delete.title")}</span>
                 </Button>
               }
               onInput={(e) => setDeleteConfirmValue(e.currentTarget.value)}
@@ -433,7 +433,7 @@ export default function (compProps: {
           </Field>
         </div>
         <Button type="submit" level="primary" class="!mt-4" loading={compProps.loading} disabled={compProps.loading}>
-          {t("form.save")}
+          {t("general.actions.save.title")}
         </Button>
       </Form>
       <div class="w-full flex flex-col">

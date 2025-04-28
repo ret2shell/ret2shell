@@ -43,7 +43,7 @@ export default function () {
             duration: 5000,
           });
         } else {
-          handleHttpError(err as Error, t("form.createFailed")!);
+          handleHttpError(err as Error, t("general.actions.create.status.fail")!);
           setTimestamp(DateTime.now().toMillis());
         }
       }

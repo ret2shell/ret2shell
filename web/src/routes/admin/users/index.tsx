@@ -216,7 +216,7 @@ export default function () {
       });
       setUser(user);
     } catch (err) {
-      handleHttpError(err as Error, t("form.saveFailed")!);
+      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
     }
     setUpdatingUser(false);
   }

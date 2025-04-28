@@ -225,7 +225,7 @@ export default function () {
                 loading={loading()}
                 disabled={loading() || !gameParticipateState()[0]}
               >
-                {gameParticipateState()[0] ? t("form.create") : gameParticipateState()[1]}
+                {gameParticipateState()[0] ? t("general.actions.create.title") : gameParticipateState()[1]}
               </Button>
               <Show when={(gameStore.current?.team_size || 0) > 1}>
                 <Link href={`/games/${gameStore.current?.id}/teams/join`}>

@@ -101,7 +101,7 @@ export default function ProviderForm(props: {
         setValue(form, "avatar", resp.hash);
         setAvatarSet(true);
       } catch (err) {
-        handleHttpError(err as Error, t("form.saveFailed")!);
+        handleHttpError(err as Error, t("general.actions.save.status.fail")!);
       }
       setAvatarUploading(false);
     }
@@ -275,7 +275,7 @@ export default function ProviderForm(props: {
         </OverlayScrollbarsComponent>
       </Show>
       <Button type="submit" level="primary" class="!mt-4" loading={props.loading} disabled={props.loading}>
-        {props.editSource ? t("form.save") : t("form.create")}
+        {props.editSource ? t("general.actions.save.title") : t("general.actions.create.title")}
       </Button>
     </Form>
   );

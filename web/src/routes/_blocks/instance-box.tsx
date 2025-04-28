@@ -166,7 +166,7 @@ export function InstanceBoxContent() {
             >
               <span class="icon-[fluent--arrow-reset-20-regular] w-5 h-5" />
             </Button>
-            <Button size="sm" square title={t("form.save")} ghost onClick={retryConnect}>
+            <Button size="sm" square title={t("general.actions.save.title")} ghost onClick={retryConnect}>
               <span class="icon-[fluent--checkmark-20-regular] w-5 h-5" />
             </Button>
           </div>

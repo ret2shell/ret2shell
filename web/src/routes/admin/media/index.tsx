@@ -111,7 +111,7 @@ export default function () {
             </Field>
           </div>
           <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={!config() || loading()}>
-            {t("form.save")}
+            {t("general.actions.save.title")}
           </Button>
         </Form>
       </div>

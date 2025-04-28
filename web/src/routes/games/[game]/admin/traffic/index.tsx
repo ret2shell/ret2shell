@@ -64,7 +64,7 @@ export default function Traffic() {
         });
         setGameStore({ current: { ...gameStore.current, traffic: script() } });
       } catch (err) {
-        handleHttpError(err as Error, t("form.saveFailed")!);
+        handleHttpError(err as Error, t("general.actions.save.status.fail")!);
       }
       setSaving(false);
     }
@@ -78,12 +78,12 @@ export default function Traffic() {
         setLint(null);
         addToast({
           level: "success",
-          description: t("form.deleteSuccess")!,
+          description: t("general.actions.delete.status.success")!,
           duration: 5000,
         });
         setGameStore({ current: { ...gameStore.current, traffic: "" } });
       } catch (err) {
-        handleHttpError(err as Error, t("form.deleteFailed")!);
+        handleHttpError(err as Error, t("general.actions.delete.status.fail")!);
       }
       setSaving(false);
     }
@@ -103,7 +103,7 @@ export default function Traffic() {
           current: { ...gameStore.current, node_selector: nodeSelector() },
         });
       } catch (err) {
-        handleHttpError(err as Error, t("form.saveFailed")!);
+        handleHttpError(err as Error, t("general.actions.save.status.fail")!);
       }
       setSaving(false);
     }
@@ -116,12 +116,12 @@ export default function Traffic() {
         await deleteGameNodeSelector(gameStore.current.id);
         addToast({
           level: "success",
-          description: t("form.deleteSuccess")!,
+          description: t("general.actions.delete.status.success")!,
           duration: 5000,
         });
         setGameStore({ current: { ...gameStore.current, node_selector: "" } });
       } catch (err) {
-        handleHttpError(err as Error, t("form.deleteFailed")!);
+        handleHttpError(err as Error, t("general.actions.delete.status.fail")!);
       }
       setSaving(false);
     }
@@ -139,7 +139,7 @@ export default function Traffic() {
             <span class="text-primary">ret.sh.cn/workload = </span>
             <Input size="sm" class="flex-1" value={nodeSelector()} onInput={(e) => setNodeSelector(e.target.value)} />
             <Button size="sm" level="primary" onClick={handleUpdateNodeSelector} loading={saving()}>
-              {t("form.save")}
+              {t("general.actions.save.title")}
             </Button>
             <Show when={gameStore.current?.node_selector}>
               <Popover
@@ -189,7 +189,7 @@ export default function Traffic() {
               }}
             />
             <Button size="sm" level="primary" onClick={handleUpdateTraffic} loading={saving()}>
-              {t("form.save")}
+              {t("general.actions.save.title")}
             </Button>
             <Show when={gameStore.current?.traffic}>
               <Popover

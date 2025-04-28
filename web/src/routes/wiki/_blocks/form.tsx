@@ -66,7 +66,7 @@ export default function (props: {
     try {
       props.onDone(await (props.editSource ? updateWiki(article) : createWiki(article)));
     } catch (err) {
-      handleHttpError(err as Error, props.editSource ? t("form.saveFailed")! : t("form.createFailed")!);
+      handleHttpError(err as Error, props.editSource ? t("general.actions.save.status.fail")! : t("general.actions.create.status.fail")!);
     }
     setLoading(false);
   }
@@ -160,7 +160,7 @@ export default function (props: {
         )}
       </Field>
       <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
-        {props.editSource ? t("form.save") : t("form.create")}
+        {props.editSource ? t("general.actions.save.title") : t("general.actions.create.title")}
       </Button>
     </Form>
   );

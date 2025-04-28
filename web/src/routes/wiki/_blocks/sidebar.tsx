@@ -68,7 +68,7 @@ export default function SideBar() {
           <>
             <Link href={"/wiki/create"} level="primary">
               <span class="icon-[fluent--add-20-regular] w-5 h-5" />
-              <span>{t("form.create")}</span>
+              <span>{t("general.actions.create.title")}</span>
             </Link>
             <Divider class="!mt-6 !mb-4" />
           </>

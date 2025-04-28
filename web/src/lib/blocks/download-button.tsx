@@ -37,7 +37,7 @@ export default function DownloadButton(
       a.click();
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      handleHttpError(err as Error, t("form.saveFailed")!);
+      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
     }
     setDownloading(false);
     setDownloadComplete(true);
