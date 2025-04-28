@@ -64,7 +64,7 @@
         "title": "好的"
       },
       "yes": {
-        "title": "是的"
+        "title": "确定"
       },
       "no": {
         "title": "不行"
@@ -80,9 +80,17 @@
           "fail": "操作失败"
         }
       },
+      "send": {
+        "title": "发送",
+        "message": "你确定要发送吗？",
+        "status": {
+          "success": "发送成功",
+          "fail": "发送失败"
+        }
+      },
       "delete": {
         "title": "删除",
-        "message": "你确定要删除吗？",
+        "message": "你确定要删除吗？我们不卖后悔药！",
         "status": {
           "success": "删除成功",
           "fail": "删除失败"
@@ -135,7 +143,11 @@
         "title": "搜索"
       },
       "refresh": {
-        "title": "刷新"
+        "title": "刷新",
+        "status": {
+          "success": "刷新成功",
+          "fail": "刷新失败"
+        }
       },
       "loadMore": {
         "title": "加载更多"
@@ -477,6 +489,21 @@
         "title": "未发布",
         "message": "题目尚未发布，选手看不到这道题",
         "countdown": "题目发布倒计时"
+      },
+      "hidden": {
+        "title": "已隐藏",
+        "message": "题目已隐藏，仅供管理员测试。",
+        "alert": "请在题目准备好后点击 “公开” 按钮公开题目。平台不会主动更改题目可见性，自动放题功能会使用时间节点与隐藏状态来计算题目的最终可见性。"
+      }
+    },
+    "actions": {
+      "up": {
+        "title": "公开",
+        "message": "确定要公开此题？公开后选手即可在开赛并进入相应周目之后阅览并解题（请确保比赛开始时所有题目都属于公开状态，自动放题功能会根据时间节点来计算选手可见性，不会更改此状态），公开期间无法修改题目。"
+      },
+      "down": {
+        "title": "隐藏",
+        "message": "确定要隐藏此题？隐藏后可以修改题目内容并再次公开，隐藏状态下选手无法阅览并解题，平台不会更改此状态。"
       }
     },
     "form": {
@@ -530,6 +557,12 @@
       "fetchChallengeFiles": {
         "title": "获取题目文件失败",
         "message": "请检查网络连接或稍后再试"
+      },
+      "up": {
+        "title": "公开题目失败"
+      },
+      "down": {
+        "title": "隐藏题目失败"
       }
     },
     "terminal": {
@@ -537,10 +570,26 @@
     },
     "hint": {
       "title": "提示",
-      "empty": "暂无提示",
+      "empty": "出题人还没有发布提示哦，再想想吧",
+      "unlockConfirm": "确定要花费 {{cost}} pts 解锁这条提示吗？",
+      "form": {
+        "content": {
+          "required": "提示内容不能为空",
+          "label": "提示内容",
+          "placeholder": "请输入提示内容"
+        },
+        "cost": {
+          "label": "分数",
+          "placeholder": "分数"
+        }
+      },
       "errors": {
-        "fetchHints": {
+        "fetch": {
           "title": "获取提示失败",
+          "message": "请检查网络连接或稍后再试"
+        },
+        "unlock": {
+          "title": "解锁提示失败",
           "message": "请检查网络连接或稍后再试"
         }
       }
@@ -592,8 +641,21 @@
       }
     },
     "hammer": {
+      "title": "锤子",
       "solved": "题目已经解决，恭喜！",
       "adminGoto": "管理员请前往比赛管理面板查看选手反馈消息。",
+      "tips": {
+        "0": "你在这里发送的消息将会与题目状态一起转发给出题人，出题人可能会在这里回复或者通过其他渠道联系你。",
+        "1": "请注意，在出题人回复之前，你只能发送三条消息，所以请尽量合并发送你的问题。",
+        "2": "日志、代码等过长的消息建议使用网络剪贴板发送，例如："
+      },
+      "role": {
+        "admin": "管理员",
+        "player": "选手"
+      },
+      "freeMessages": "还可以发送 {{last}} 条消息",
+      "markdownHoto": "如何使用 Markdown？",
+      "markdownSupport": "请输入你要反馈的问题，支持 Markdown 语法",
       "errors": {
         "send": {
           "title": "发送消息失败",
@@ -606,6 +668,9 @@
         "fetchSolve": {
           "title": "获取解题状态失败",
           "message": "请检查网络连接或稍后再试"
+        },
+        "maxMessageLimit": {
+          "title": "已经到达消息上限，请等待反馈..."
         }
       }
     },
@@ -630,8 +695,15 @@
     "instance": {
       "title": "实例",
       "empty": "暂无实例",
+      "delete": "删除环境配置后，题目将变回附件类题目。",
+      "internet": "允许容器内访问互联网",
+      "restrict": "限制 Root 权限",
+      "registrySecret": "仓库密钥（需预先配置资源）",
+      "runningContainers": "运行中的环境",
       "image": {
         "label": "题目环境镜像",
+        "upload": "上传到镜像仓库",
+        "empty": "没有镜像配置",
         "form": {
           "containerName": {
             "label": "容器名称",
@@ -662,7 +734,7 @@
             "type": {
               "label": "服务类型",
               "placeholder": "请选择服务类型",
-              "type": {
+              "items": {
                 "tcp": "原始 (TCP)",
                 "http": "HTTP"
               },
@@ -671,16 +743,52 @@
             "port": {
               "label": "服务端口",
               "placeholder": "请输入服务端口",
+              "required": "启用服务时，服务端口不能为空",
               "mustBeNumber": "服务端口必须是数字",
-              "mustBeInRange": "服务端口必须在 1-65535 范围内"
+              "mustBeInRange": "服务端口必须在 1-65535 范围内",
+              "conflict": "服务端口与其他服务端口冲突"
+            },
+            "cpu": {
+              "label": "CPU 限制",
+              "required": "CPU限制不能为空"
+            },
+            "mem": {
+              "label": "内存限制",
+              "required": "内存限制不能为空"
+            },
+            "storage": {
+              "label": "存储限制",
+              "required": "存储限制不能为空"
             }
           }
+        }
+      },
+      "actions": {
+        "addImage": {
+          "title": "添加镜像",
+          "message": "添加镜像后，镜像将会被自动拉取到服务器上。"
         }
       },
       "errors": {
         "fetchInstances": {
           "title": "获取实例失败",
           "message": "请检查网络连接或稍后再试"
+        },
+        "fetchConfigImages": {
+          "title": "获取镜像列表失败"
+        },
+        "fetchRegistry": {
+          "title": "获取镜像仓库失败"
+        },
+        "toggleNetworkConfig": {
+          "title": "更改网络配置失败"
+        },
+        "toggleRestrict": {
+          "title": "更改限制 Root 权限失败"
+        },
+        "noExportedServices": {
+          "title": "还未指定外部服务",
+          "message": "请为环境添加至少一个服务端口。"
         }
       }
     },
@@ -708,6 +816,9 @@
           "message": "请检查网络连接或稍后再试"
         }
       }
+    },
+    "settings": {
+      "title": "设置"
     }
   },
   "wsrx": {

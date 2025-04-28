@@ -182,7 +182,7 @@ export default function(props: {
               <div class="flex flex-col space-y-1">
                 <header class="label">Ciallo～(∠・ω&lt; )⌒☆</header>
                 <Card contentClass="p-2">
-                  <p class="text-wrap">{t("game.admin.hammer.shouldGoto")}</p>
+                  <p class="text-wrap">{t("challenge.hammer.adminGoto")}</p>
                 </Card>
                 <div class="h-3" />
               </div>
@@ -197,7 +197,7 @@ export default function(props: {
             <div class="flex flex-col space-y-1">
               <header class="label">Ciallo～(∠・ω&lt; )⌒☆</header>
               <Card contentClass="p-2">
-                <p class="text-wrap">{t("game.challenge.hammerTips")}</p>
+                <p class="text-wrap">{t("challenge.hammer.tips.0")}</p>
               </Card>
               <div class="h-3" />
             </div>
@@ -211,8 +211,8 @@ export default function(props: {
               <header class="label">Ciallo～(∠・ω&lt; )⌒☆</header>
               <Card contentClass="p-2">
                 <p class="text-wrap inline">
-                  <span>{t("game.challenge.hammerTips2")}</span>
-                  <span>{t("game.challenge.hammerTips3")}</span>
+                  <span>{t("challenge.hammer.tips.1")}</span>
+                  <span>{t("challenge.hammer.tips.2")}</span>
                   <a
                     class="align-middle space-x-1 text-primary hover:underline"
                     href="https://bpa.st"
@@ -281,9 +281,9 @@ export default function(props: {
                       <Show when={chat.user_id !== 0}>
                         <Show
                           when={chat.is_admin}
-                          fallback={<span class="text-info">[{t("game.challenge.chatPlayerRole")}]</span>}
+                          fallback={<span class="text-info">[{t("challenge.hammer.role.player")}]</span>}
                         >
-                          <span class="text-error">[{t("game.challenge.chatAdminRole")}]</span>
+                          <span class="text-error">[{t("challenge.hammer.role.admin")}]</span>
                         </Show>
                       </Show>
                       <A href={`/users/${chat.user_id}`}>{chat.user_name}</A>
@@ -334,8 +334,8 @@ export default function(props: {
             <span class={clsx("w-2 h-2 rounded-full", availableMsg() <= 0 ? "bg-error" : "bg-success")} />
             <span class="opacity-60">
               {availableMsg() <= 0
-                ? t("game.challenge.hammerInputAlreadySend")
-                : t("game.challenge.hammerLastMessage", {
+                ? t("challenge.hammer.errors.maxMessageLimit.title")
+                : t("challenge.hammer.freeMessages", {
                   last: availableMsg(),
                 })}
             </span>
@@ -353,7 +353,7 @@ export default function(props: {
             rel="noreferrer"
           >
             <span class="icon-[fluent--question-circle-20-regular] w-5 h-5" />
-            <span class="hidden lg:inline-block">{t("game.challenge.hammerHowto")}</span>
+            <span class="hidden lg:inline-block">{t("challenge.hammer.markdownHoto")}</span>
           </Link>
           <Button
             size="sm"
@@ -375,13 +375,13 @@ export default function(props: {
             loading={sending()}
           >
             <span class="icon-[fluent--send-20-regular] w-5 h-5" />
-            <span>{t("game.challenge.hammerSend")}</span>
+            <span>{t("general.actions.send.title")}</span>
           </Button>
         </div>
         <EditorBare
           class={clsx("rounded-lg", editorExpanded() ? "h-64" : "h-16")}
           value={chat()}
-          placeholder={t("game.challenge.hammerInput")}
+          placeholder={t("challenge.hammer.markdownSupport")}
           lang="markdown"
           onValueChanged={(v) => setChat(v)}
           commands={[

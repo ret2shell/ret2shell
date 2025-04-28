@@ -28,7 +28,7 @@ type CreateHintForm = {
   cost: number;
 };
 
-export default function (_props: {
+export default function(_props: {
   onStateChange?: (challenge?: Challenge) => void;
   inGame?: boolean;
 }) {
@@ -58,7 +58,7 @@ export default function (_props: {
       await createChallengeHint(challengeStore.current!.game_id, challengeStore.current!.id, hint);
       addToast({
         level: "success",
-        description: t("form.createSuccess")!,
+        description: t("general.actions.create.status.success")!,
         duration: 5000,
       });
       resetForm(form, {
@@ -70,7 +70,7 @@ export default function (_props: {
       refreshHint();
       setPtsInputIconIndex(0);
     } catch (err) {
-      handleHttpError(err as Error, t("form.createFailed")!);
+      handleHttpError(err as Error, t("general.actions.create.status.fail")!);
     }
   }
   async function refreshHint() {
@@ -91,7 +91,7 @@ export default function (_props: {
         setExtras(extras);
       }
     } catch (err) {
-      handleHttpError(err as Error, t("game.challenge.fetchHintFailed")!);
+      handleHttpError(err as Error, t("challenge.hint.errors.fetch.title")!);
     }
     setLoading(false);
   }
@@ -113,7 +113,7 @@ export default function (_props: {
       await deleteChallengeHint(gameStore.current!.id, challengeStore.current!.id, id);
       refreshHint();
     } catch (err) {
-      handleHttpError(err as Error, t("form.deleteFailed")!);
+      handleHttpError(err as Error, t("general.actions.delete.status.fail")!);
     }
   }
 
@@ -123,7 +123,7 @@ export default function (_props: {
       await unlockChallengeHint(gameStore.current!.id, challengeStore.current!.id, id);
       refreshHint();
     } catch (err) {
-      handleHttpError(err as Error, t("game.challenge.unlockHintFailed")!);
+      handleHttpError(err as Error, t("challenge.hint.errors.unlock.title")!);
     }
     setUnlocking(false);
   }
@@ -140,7 +140,7 @@ export default function (_props: {
         fallback={
           <div class="px-2 min-h-12 py-1 border-b border-b-layer-content/10 flex items-center space-x-2">
             <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary shrink-0" />
-            <span class="font-bold opacity-60">{t("game.challenge.noHints")}</span>
+            <span class="font-bold opacity-60">{t("challenge.hint.empty")}</span>
           </div>
         }
       >
@@ -174,7 +174,7 @@ export default function (_props: {
                   >
                     <Card contentClass="p-2 flex flex-row items-center">
                       <span class="px-2">
-                        {t("game.challenge.confirmUnlockHint", {
+                        {t("challenge.hint.unlockConfirm", {
                           cost: hint.cost,
                         })}
                       </span>
@@ -185,7 +185,7 @@ export default function (_props: {
                         disabled={unlocking()}
                         loading={unlocking()}
                       >
-                        {t("platform.yes")}
+                        {t("general.actions.yes.title")}
                       </Button>
                     </Card>
                   </Popover>
@@ -227,7 +227,7 @@ export default function (_props: {
       <Show when={isGameAdmin()}>
         <Form onSubmit={onSubmit} class="px-2 min-h-12 border-b border-b-layer-content/10 flex items-center space-x-2">
           <span class="icon-[fluent--info-20-regular] w-5 h-5 text-primary shrink-0" />
-          <Field name="content" validate={[required(t("game.challenge.hintRequired")!)]}>
+          <Field name="content" validate={[required(t("challenge.hint.form.content.required")!)]}>
             {(field, props) => (
               <Input
                 type="text"
@@ -236,7 +236,7 @@ export default function (_props: {
                 {...props}
                 required
                 noLabel
-                placeholder={t("game.challenge.createHint")}
+                placeholder={t("challenge.hint.form.content.placeholder")}
                 class="flex-1"
                 size="sm"
                 onBlur={(e) => {
@@ -260,7 +260,9 @@ export default function (_props: {
                       setPtsInputIconIndex(ptsInputIconIndex() === 0 ? 1 : 0);
                     }
                     e.currentTarget.value = str;
-                    Object.defineProperty(e.currentTarget, "valueAsNumber", { writable: true });
+                    Object.defineProperty(e.currentTarget, "valueAsNumber", {
+                      writable: true,
+                    });
                     e.currentTarget.valueAsNumber = num || 0;
                     Object.freeze(e.currentTarget.valueAsNumber);
                   };
@@ -277,7 +279,7 @@ export default function (_props: {
                   return props.onInput(e);
                 }}
                 noLabel
-                placeholder={t("game.challenge.createHintCost")}
+                placeholder={t("challenge.hint.form.cost.placeholder")}
                 class="w-32"
                 size="sm"
                 icon={<span class={ptsInputIcon[ptsInputIconIndex()]} />}
@@ -288,7 +290,7 @@ export default function (_props: {
           <span class="w-2" />
           <Button size="sm" level="primary" type="submit" loading={loading()} disabled={loading()}>
             <span class="icon-[fluent--add-20-regular] w-5 h-5" />
-            <span>{t("form.create")}</span>
+            <span>{t("general.actions.add.title")}</span>
           </Button>
         </Form>
       </Show>
