@@ -30,7 +30,7 @@ export class Submit implements Command {
         if (s.solved !== null) {
           io.println("");
           if (s.solved) {
-            io.success(`${t("shell.submit.correct")}: ${s.result}`);
+            io.success(`${t("challenge.submission.status.solved")}: ${s.result}`);
             refreshStatus();
             refreshSolves();
             if (inProgress() && !isGameAdmin()) {
@@ -39,7 +39,7 @@ export class Submit implements Command {
               refreshCurrentChallenge();
             }
           } else {
-            io.error(`${t("shell.submit.incorrect")}: ${s.result}`);
+            io.error(`${t("challenge.submission.status.failed")}: ${s.result}`);
           }
           checked = true;
           break;
@@ -49,12 +49,12 @@ export class Submit implements Command {
         iter--;
       }
       if (!checked) {
-        io.error(`${t("shell.submit.timeout")}`);
+        io.error(`${t("shell.submit.errors.timeout.title")}`);
       }
     } catch (e) {
       if (e instanceof HTTPError) {
         const text = await e.response.text();
-        io.error(`${t("shell.submit.failed")}: ${text}`);
+        io.error(`${t("challenge.submission.errors.submit.title")}: ${text}`);
       }
     }
     return 0;

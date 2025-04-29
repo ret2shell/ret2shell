@@ -40,17 +40,17 @@ export class Cat implements Command {
       );
       io.println("");
     } else if (file.startsWith("checkers/")) {
-      io.error(t("shell.errors.permissionDenied")!);
+      io.error(t("shell.errors.permissionDenied.title")!);
       return 1;
     } else {
       try {
         if (!challengeStore.files.find((f) => f.file === file)) {
-          io.error(t("shell.cat.errors.fileNotFound")!);
+          io.error(t("shell.cat.errors.fileNotFound.title")!);
           return 1;
         }
         io.warning("[BINARY DATA]");
       } catch {
-        io.error(t("shell.cat.errors.read")!);
+        io.error(t("shell.cat.errors.read.title")!);
         return 1;
       }
     }

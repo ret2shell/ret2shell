@@ -13,30 +13,30 @@ export class Ls implements Command {
   func = async (io: Stdio, args: ParseEntry[], _origin: string) => {
     // console.log(args);
     if (!gameStore.current || !challengeStore.current) {
-      io.error(t("shell.noGameSpecifiedTips")!);
+      io.error(t("shell.errors.noGameSpecified.title")!);
       return 1;
     }
     if (args.find((arg) => arg.toString().trim().startsWith("-"))) {
       io.error(
-        `${t("shell.ls.invalidOption", { option: args.find((arg) => arg.toString().trim().startsWith("-"))?.toString() || "" })}`
+        `${t("shell.ls.errors.invalidOption.title", { option: args.find((arg) => arg.toString().trim().startsWith("-"))?.toString() || "" })}`
       );
       return 1;
     }
     if (args.length > 1) {
-      io.error(t("shell.ls.tooManyArgs")!);
+      io.error(t("shell.ls.errors.tooManyArgs.title")!);
       return 1;
     }
     if (args.length > 0) {
       const path = args[0]?.toString().trim() || "";
       if (path.startsWith("/") || path.includes("..")) {
-        io.error(t("shell.ls.invalidPath")!);
+        io.error(t("shell.ls.errors.traversalDetected.title")!);
         return 1;
       }
       if (!path.startsWith("checkers")) {
-        io.error(t("shell.ls.noSuchFileOrDirectory")!);
+        io.error(t("shell.ls.errors.fileNotFound.title")!);
         return 1;
       }
-      io.error(t("shell.ls.permissionDenied")!);
+      io.error(t("shell.errors.permissionDenied.title")!);
       return 1;
     }
     try {
@@ -52,7 +52,7 @@ export class Ls implements Command {
         );
       }
     } catch {
-      io.error(t("shell.ls.error")!);
+      io.error(t("shell.ls.errors.list.title")!);
       return 1;
     }
     return 0;

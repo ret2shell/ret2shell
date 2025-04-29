@@ -88,7 +88,7 @@ export class Shell {
       )
     );
     this.stdio.info(
-      t("shell.helpTips", {
+      t("shell.tip", {
         flag: ansiColors.red("flag"),
         help: link(ansiColors.green("help"), "rnix://command/help"),
       })!

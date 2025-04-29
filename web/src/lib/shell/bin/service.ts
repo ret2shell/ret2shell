@@ -25,17 +25,17 @@ export class Service implements Command {
       delay: this.delay,
     };
     if (args.length !== 1 || !Object.keys(action).includes(args[0].toString().trim())) {
-      io.error(t("shell.service.needAction")!);
+      io.error(t("shell.service.errors.needAction.title")!);
       io.info(t("shell.service.usage")!);
-      io.info(`\t${ansiColors.green(link("start", "rnix://command/service start"))}\t${t("shell.service.startTips")}`);
-      io.info(`\t${ansiColors.green(link("stop", "rnix://command/service stop"))}\t${t("shell.service.stopTips")}`);
+      io.info(`\t${ansiColors.green(link("start", "rnix://command/service start"))}\t${t("shell.service.actions.start.title")}`);
+      io.info(`\t${ansiColors.green(link("stop", "rnix://command/service stop"))}\t${t("shell.service.actions.stop.title")}`);
       io.info(
-        `\t${ansiColors.green(link("restart", "rnix://command/service restart"))}\t${t("shell.service.restartTips")}`
+        `\t${ansiColors.green(link("restart", "rnix://command/service restart"))}\t${t("shell.service.actions.restart.title")}`
       );
       io.info(
-        `\t${ansiColors.green(link("status", "rnix://command/service status"))}\t${t("shell.service.statusTips")}`
+        `\t${ansiColors.green(link("status", "rnix://command/service status"))}\t${t("shell.service.actions.status.title")}`
       );
-      io.info(`\t${ansiColors.green(link("delay", "rnix://command/service delay"))}\t${t("shell.service.delayTips")}`);
+      io.info(`\t${ansiColors.green(link("delay", "rnix://command/service delay"))}\t${t("shell.service.actions.delay.title")}`);
       return 1;
     }
     return action[args[0].toString().trim() as "start" | "stop" | "restart" | "status" | "delay"](io);
@@ -48,9 +48,9 @@ export class Service implements Command {
     } catch (e) {
       if (e instanceof HTTPError) {
         const text = await e.response.text();
-        io.error(`${t("shell.service.error")!}: ${text}`);
+        io.error(`${t("challenge.instance.errors.fetchInstances.title")!}: ${text}`);
       } else {
-        io.error(`${t("shell.service.error")!}: ${e}`);
+        io.error(`${t("challenge.instance.errors.fetchInstances.title")!}: ${e}`);
       }
       return null;
     }
@@ -58,7 +58,7 @@ export class Service implements Command {
 
   async start(io: Stdio) {
     if (!challengeStore.env) {
-      io.error(t("shell.service.noEnv")!);
+      io.error(t("challenge.instance.errors.noConfig.title")!);
       return 1;
     }
     const inst = wsrx.instances().find((instance) => instance.user_id === accountStore.id);
@@ -67,12 +67,12 @@ export class Service implements Command {
         await this.status(io);
         return 0;
       }
-      io.warning(t("shell.service.onlyOneInstancePersist")!);
+      io.warning(t("challenge.instance.errors.singleton.title")!);
       io.info(
-        `${t("shell.service.onlyOneInstancePersistTips")}: ${link(inst.challenge_name!, `rnix://challenge/${inst.challenge_id}`)}`
+        `${t("challenge.instance.errors.singleton.current")}: ${link(inst.challenge_name!, `rnix://challenge/${inst.challenge_id}`)}`
       );
       io.print(
-        `${t("shell.service.onlyOneInstancePersistChoice")!} [${ansiColors.green(link("yes", "rnix://command/yes"))}/${ansiColors.red(link("NO", "rnix://command/no"))}]: `
+        `${t("challenge.instance.errors.singleton.action")!} [${ansiColors.green(link("yes", "rnix://command/yes"))}/${ansiColors.red(link("NO", "rnix://command/no"))}]: `
       );
       const choice = await io.input();
       io.println("");
@@ -82,11 +82,11 @@ export class Service implements Command {
         } catch (e) {
           if (e instanceof HTTPError) {
             const text = await e.response.text();
-            io.error(`${t("shell.service.stopEnvError")!}: ${text}`);
+            io.error(`${t("challenge.instance.errors.stop.title")!}: ${text}`);
           }
         }
       } else {
-        io.warning(t("shell.service.noActionPerformed")!);
+        io.warning(t("challenge.instance.errors.noAction.title")!);
         return 1;
       }
     }
@@ -102,7 +102,7 @@ export class Service implements Command {
     } catch (e) {
       if (e instanceof HTTPError) {
         const text = await e.response.text();
-        io.error(`${t("shell.service.startEnvError")!}: ${text}`);
+        io.error(`${t("challenge.instance.errors.start.title")!}: ${text}`);
       }
     }
     await this.status(io);
@@ -111,7 +111,7 @@ export class Service implements Command {
 
   async stop(io: Stdio) {
     if (!challengeStore.env) {
-      io.error(t("shell.service.noEnv")!);
+      io.error(t("challenge.instance.errors.noConfig.title")!);
       return 1;
     }
     const d_service_name = await deunicode(challengeStore.current!.name);
@@ -125,7 +125,7 @@ export class Service implements Command {
     } catch (e) {
       if (e instanceof HTTPError) {
         const text = await e.response.text();
-        io.error(`${t("shell.service.stopEnvError")!}: ${text}`);
+        io.error(`${t("challenge.instance.errors.stop.title")!}: ${text}`);
       }
     }
     await new Promise((r) => setTimeout(r, 500));
@@ -136,7 +136,7 @@ export class Service implements Command {
 
   async restart(io: Stdio) {
     if (!challengeStore.env) {
-      io.error(t("shell.service.noEnv")!);
+      io.error(t("challenge.instance.errors.noConfig.title")!);
       return 1;
     }
     await this.stop(io);
@@ -147,7 +147,7 @@ export class Service implements Command {
 
   async status(io: Stdio) {
     if (!challengeStore.env) {
-      io.error(t("shell.service.noEnv")!);
+      io.error(t("challenge.instance.errors.noConfig.title")!);
       return 1;
     }
     await wsrx.syncRemote();
@@ -213,7 +213,7 @@ export class Service implements Command {
 
   async delay(io: Stdio) {
     if (!challengeStore.env) {
-      io.error(t("shell.service.noEnv")!);
+      io.error(t("challenge.instance.errors.noConfig.title")!);
       return 1;
     }
     try {
@@ -221,7 +221,7 @@ export class Service implements Command {
     } catch (e) {
       if (e instanceof HTTPError) {
         const text = await e.response.text();
-        io.error(`${t("shell.service.delayError")!}: ${text}`);
+        io.error(`${t("challenge.instance.errors.delay.title")!}: ${text}`);
       }
     }
     await this.status(io);

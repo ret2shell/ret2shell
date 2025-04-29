@@ -294,6 +294,17 @@
         },
         "toggleRestrict": {
           "title": ""
+        },
+        "noConfig": {
+          "title": ""
+        },
+        "singleton": {
+          "title": "",
+          "current": "",
+          "action": ""
+        },
+        "noAction": {
+          "title": ""
         }
       },
       "image": {
@@ -455,7 +466,18 @@
         "pending": "",
         "solved": ""
       },
-      "submit": ""
+      "submit": "",
+      "errors": {
+        "submit": {
+          "title": ""
+        },
+        "fetchSolves": {
+          "title": ""
+        },
+        "fetchSolveStatus": {
+          "title": ""
+        }
+      }
     }
   },
   "game": {
@@ -1098,15 +1120,30 @@
         "tooManyFiles": {
           "title": ""
         },
-        "fileNotFound": "",
-        "read": ""
+        "fileNotFound": {
+          "title": ""
+        },
+        "read": {
+          "title": ""
+        }
       }
     },
     "errors": {
       "noGameSpecified": {
         "title": ""
       },
-      "permissionDenied": ""
+      "permissionDenied": {
+        "title": ""
+      },
+      "noChallengeSpecified": {
+        "title": ""
+      },
+      "traversalDetected": {
+        "title": ""
+      },
+      "commandInvalid": {
+        "title": ""
+      }
     },
     "welcome": "",
     "clear": {
@@ -1114,7 +1151,84 @@
     },
     "echo": {
       "man": ""
-    }
+    },
+    "help": {
+      "commands": "",
+      "man": ""
+    },
+    "ls": {
+      "man": "",
+      "errors": {
+        "invalidOption": {
+          "title": ""
+        },
+        "tooManyArgs": {
+          "title": ""
+        },
+        "traversalDetected": {
+          "title": ""
+        },
+        "fileNotFound": {
+          "title": ""
+        },
+        "list": {
+          "title": ""
+        }
+      }
+    },
+    "tip": "",
+    "service": {
+      "man": "",
+      "errors": {
+        "needAction": {
+          "title": ""
+        }
+      },
+      "usage": "",
+      "actions": {
+        "start": {
+          "title": ""
+        },
+        "stop": {
+          "title": ""
+        },
+        "restart": {
+          "title": ""
+        },
+        "status": {
+          "title": ""
+        },
+        "delay": {
+          "title": ""
+        }
+      },
+      "starting": "",
+      "stopping": ""
+    },
+    "submit": {
+      "man": "",
+      "submitting": "",
+      "waitingForChecking": "",
+      "errors": {
+        "timeout": {
+          "title": ""
+        }
+      }
+    },
+    "wget": {
+      "man": "",
+      "usage": "",
+      "downloading": "",
+      "errors": {
+        "fileNotFound": {
+          "title": ""
+        }
+      }
+    },
+    "whoami": {
+      "man": ""
+    },
+    "commandNotFound": ""
   },
   "about": {
     "contact": "",
@@ -1128,6 +1242,17 @@
     "about": {
       "thanks": "",
       "title": ""
+    }
+  },
+  "team": {
+    "status": {
+      "pending": {
+        "title": "",
+        "message": ""
+      },
+      "banned": {
+        "message": ""
+      }
     }
   }
 }

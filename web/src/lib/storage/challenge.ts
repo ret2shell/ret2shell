@@ -36,7 +36,7 @@ export async function refreshChallenges() {
     const result = await getChallengeList(gameStore.current!.id);
     setChallengeStore({ challenges: result[0] });
   } catch (err) {
-    handleHttpError(err as Error, t("game.challenge.fetchFailed")!);
+    handleHttpError(err as Error, t("challenge.errors.fetchChallenge.title")!);
   }
 }
 
@@ -47,7 +47,7 @@ export async function refreshChallengeAssets() {
       setChallengeStore({ files });
     }
   } catch (err) {
-    handleHttpError(err as Error, t("game.challenge.fetchAssetsFailed")!);
+    handleHttpError(err as Error, t("challenge.file.errors.fetchFiles.title")!);
   }
   try {
     if (challengeStore.current) {
@@ -55,7 +55,7 @@ export async function refreshChallengeAssets() {
       setChallengeStore({ env });
     }
   } catch (err) {
-    handleHttpError(err as Error, t("game.challenge.fetchEnvFailed")!);
+    handleHttpError(err as Error, t("challenge.instance.errors.fetchInstances.title")!);
   }
 }
 
@@ -64,7 +64,7 @@ export async function refreshSolves() {
     if (!gameStore.current) return;
     setChallengeStore({ solves: await getSelfSolves(gameStore.current.id) });
   } catch (err) {
-    handleHttpError(err as Error, t("game.challenge.fetchSolvesFailed")!);
+    handleHttpError(err as Error, t("challenge.submission.errors.fetchSolves.title")!);
   }
 }
 
@@ -76,7 +76,7 @@ export async function refreshStatus() {
     });
   } catch (err) {
     setChallengeStore({ status: null });
-    handleHttpError(err as Error, t("game.challenge.fetchSolveStatusFailed")!);
+    handleHttpError(err as Error, t("challenge.submission.errors.fetchSolveStatus.title")!);
   }
 }
 
@@ -87,6 +87,6 @@ export async function refreshCurrentChallenge() {
     setChallengeStore({ current: resp });
     refreshChallengeAssets();
   } catch (err) {
-    handleHttpError(err as Error, t("game.challenge.fetchChallengeFailed")!);
+    handleHttpError(err as Error, t("challenge.errors.fetchChallenge.title")!);
   }
 }

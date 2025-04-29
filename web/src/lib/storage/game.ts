@@ -43,7 +43,7 @@ export async function refreshSelfTeam() {
       if (team.state === TeamState.Pending) {
         addToast({
           level: "warning",
-          description: t("game.team.pendingTips")!,
+          description: t("team.status.pending.message")!,
           duration: 5000,
         });
       }
@@ -126,12 +126,12 @@ export const canParticipate = () => {
 };
 
 export function canAccessChallenges(): [boolean, string] {
-  if (!accountStore.id) return [false, t("game.team.loginThenBack")!];
+  if (!accountStore.id) return [false, t("general.network.status.401.title")!];
   if (isGameAdmin()) {
     return [true, ""];
   }
   if (gameStore.current?.start_at && gameStore.current.start_at > DateTime.now()) {
-    return [false, t("game.challenge.notStarted")!];
+    return [false, t("game.notStarted")!];
   }
   if (inArchived()) {
     return [true, t("game.ended")!];
@@ -142,12 +142,12 @@ export function canAccessChallenges(): [boolean, string] {
     }
   }
   if (gameStore.team?.state === TeamState.Pending) {
-    return [false, t("game.team.pending")!];
+    return [false, t("team.status.pending.message")!];
   }
   if (gameStore.team?.state === TeamState.Banned) {
-    return [false, t("game.team.banned")!];
+    return [false, t("team.status.banned.message")!];
   }
-  return [false, t("game.team.joinFirst")!];
+  return [false, t("team.status.empty.message")!];
 }
 
 export function isGameAdmin() {

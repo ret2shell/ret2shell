@@ -14,13 +14,11 @@ export class Wget implements Command {
   man = t("shell.wget.man")!;
   func = async (io: Stdio, args: ParseEntry[], _origin: string) => {
     if (!gameStore.current) {
-      io.error(t("shell.noGameSpecified")!);
-      io.info(t("shell.noGameSpecifiedTips")!);
+      io.error(t("shell.errors.noGameSpecified.title")!);
       return 1;
     }
     if (!challengeStore.current) {
-      io.error(t("shell.noChallengeSpecified")!);
-      io.info(t("shell.noChallengeSpecifiedTips")!);
+      io.error(t("shell.errors.noChallengeSpecified.title")!);
       return 1;
     }
     if (args.length !== 1) {
@@ -30,7 +28,7 @@ export class Wget implements Command {
     const file = args[0].toString().trim();
     const found = challengeStore.files.find((f) => f.file === file);
     if (!found) {
-      io.error(t("shell.wget.fileNotFound")!);
+      io.error(t("shell.wget.errors.fileNotFound.title")!);
       return 1;
     }
     try {
@@ -48,7 +46,7 @@ export class Wget implements Command {
         }
       );
       io.println("");
-      io.success(t("shell.wget.success")!);
+      io.success(t("general.actions.download.status.success")!);
       const url = window.URL.createObjectURL(blob as Blob);
       const a = document.createElement("a");
       a.href = url;
@@ -59,11 +57,11 @@ export class Wget implements Command {
       io.println("");
       if (err instanceof HTTPError) {
         const text = await err.response.text();
-        io.error(`${t("shell.wget.failed")}: ${text}`);
+        io.error(`${t("general.actions.download.status.fail")}: ${text}`);
         return 255;
       }
 
-      io.error(`${t("shell.wget.failed")}: ${err}`);
+      io.error(`${t("general.actions.download.status.fail")}: ${err}`);
       return 255;
     }
     return 0;

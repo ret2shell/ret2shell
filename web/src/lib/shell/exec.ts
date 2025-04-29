@@ -24,13 +24,13 @@ export class Exec {
 
     let cmd = args[0];
     if (typeof cmd !== "string") {
-      io.error(t("shell.commandInvalid")!);
+      io.error(t("shell.errors.commandInvalid.title")!);
       return { cmd: "", code: -127 };
     }
     cmd = cmd.trim();
     if (cmd === "") return { cmd, code: 0 };
     if (cmd === "cd") {
-      io.error(t("shell.canNotSwitchDir")!);
+      io.error(t("shell.errors.traversalDetected.title")!);
       return { cmd, code: -127 };
     }
     if (this.commands.has(cmd)) {

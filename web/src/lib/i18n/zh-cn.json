@@ -770,6 +770,17 @@
         "pending": "队列中",
         "solved": "正确",
         "failed": "错误"
+      },
+      "errors": {
+        "submit": {
+          "title": "提交失败"
+        },
+        "fetchSolves": {
+          "title": "获取解题情况失败"
+        },
+        "fetchSolveStatus": {
+          "title": "获取解出状态失败"
+        }
       }
     },
     "statistics": {
@@ -939,6 +950,17 @@
         },
         "managedByMate": {
           "title": "队友的环境，仅可访问"
+        },
+        "noConfig": {
+          "title": "此题不提供在线环境"
+        },
+        "singleton": {
+          "title": "同一时间只能启动一个题目服务。",
+          "current": "当前正在运行的服务",
+          "action": "是否停止其他题目服务并启动当前题目？"
+        },
+        "noAction": {
+          "title": "不会执行任何操作。"
         }
       }
     },
@@ -1098,15 +1120,30 @@
         "tooManyFiles": {
           "title": "参数过多！"
         },
-        "fileNotFound": "没有那个文件或目录。",
-        "read": "读取文件出错。"
+        "fileNotFound": {
+          "title": "没有那个文件或目录。"
+        },
+        "read": {
+          "title": "读取文件出错。"
+        }
       }
     },
     "errors": {
       "noGameSpecified": {
         "title": "不在有效的比赛路径中。"
       },
-      "permissionDenied": "权限不足，拒绝访问。"
+      "permissionDenied": {
+        "title": "权限不足，拒绝访问。"
+      },
+      "noChallengeSpecified": {
+        "title": "不在有效的题目路径中。"
+      },
+      "traversalDetected": {
+        "title": "远程主机拒绝了目录穿越。"
+      },
+      "commandInvalid": {
+        "title": "命令存在语法错误"
+      }
     },
     "help": {
       "man": "输出帮助信息。",
@@ -1119,7 +1156,79 @@
     },
     "echo": {
       "man": "原样输出你的任何输入。"
-    }
+    },
+    "ls": {
+      "man": "列出 <文件>（默认为当前目录）的信息。",
+      "errors": {
+        "invalidOption": {
+          "title": "无效的选项 -- {{option}}"
+        },
+        "tooManyArgs": {
+          "title": "参数过多！"
+        },
+        "traversalDetected": {
+          "title": "远程主机拒绝了目录穿越。"
+        },
+        "fileNotFound": {
+          "title": "没有那个文件或目录。"
+        },
+        "list": {
+          "title": "访问目录出错。"
+        }
+      }
+    },
+    "service": {
+      "man": "管理题目环境服务。",
+      "errors": {
+        "needAction": {
+          "title": "需要指定操作。"
+        }
+      },
+      "usage": "使用方法：",
+      "actions": {
+        "start": {
+          "title": "启动题目环境服务。"
+        },
+        "stop": {
+          "title": "停止题目环境服务，此命令可以在这里停止其他题目的环境服务。"
+        },
+        "restart": {
+          "title": "重启题目环境服务，当你不小心将题目环境破坏时使用这个。"
+        },
+        "status": {
+          "title": "显示题目环境服务状态。"
+        },
+        "delay": {
+          "title": "延长题目环境存在时间，题目环境启动后默认服务时间为一小时，如果你认为时间不够，可以使用此命令延长。"
+        }
+      },
+      "starting": "正在启动 {{service}}...",
+      "stopping": "正在停止 {{service}}..."
+    },
+    "submit": {
+      "man": "向平台提交本题 flag。",
+      "submitting": "正在提交",
+      "waitingForChecking": "已提交，正在等待评测...",
+      "errors": {
+        "timeout": {
+          "title": "当前评测队列过长，请约五分钟后刷新查看评测结果，不要反复提交。"
+        }
+      }
+    },
+    "wget": {
+      "man": "下载指定的文件。",
+      "usage": "使用方法： wget \\\"<文件名>\\\"",
+      "downloading": "下载中",
+      "errors": {
+        "fileNotFound": {
+          "title": "没有那个文件或目录。"
+        }
+      }
+    },
+    "whoami": {
+      "man": "显示与当前的有效用户 ID 相关联的用户名。"
+    },
+    "commandNotFound": "未知命令：{{command}}"
   },
   "about": {
     "contact": "平台软件支持",
@@ -1133,6 +1242,17 @@
     "about": {
       "thanks": "感谢使用我的作品",
       "title": "关于"
+    }
+  },
+  "team": {
+    "status": {
+      "pending": {
+        "title": "待审核",
+        "message": "队伍名称含有敏感词汇，请联系管理员审核"
+      },
+      "banned": {
+        "message": "由于作弊行为，队伍已被封禁"
+      }
     }
   }
 }
