@@ -28,7 +28,7 @@ export default function (props: { user: User | null; loading?: boolean }) {
             <Avatar
               class="w-12 h-12 shrink-0"
               src={(props.user?.avatar && mediaPath(props.user?.avatar)) || undefined}
-              fallback={props.user?.nickname}
+              fallback={props.user?.account}
               loading={props.loading}
             />
             <div class="flex-1 flex flex-col space-y-1 justify-center overflow-hidden">

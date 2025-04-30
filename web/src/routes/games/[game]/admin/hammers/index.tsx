@@ -148,7 +148,10 @@ export default function () {
         ]);
         const [changed, r] = mergeChats(challengeId()!, teamId()!, chats(), result, s);
         setChats([...r]);
-        if (changed) setTimeout(() => chatBottomEl?.scrollIntoView({ behavior: "smooth" }), 700);
+        if (changed)
+          setTimeout(() => {
+            chatBottomEl! && chatBottomEl.scrollIntoView({ behavior: "smooth" });
+          }, 700);
       } catch (err) {
         handleHttpError(err as Error, t("game.challenge.fetchChatError")!);
       }

@@ -142,7 +142,7 @@ export default function () {
                 <Avatar
                   class="w-28 h-28 relative m-2"
                   src={(accountStore.info?.avatar && mediaPath(accountStore.info?.avatar)) || undefined}
-                  fallback={accountStore.info?.nickname}
+                  fallback={accountStore.info?.account}
                 >
                   <Button
                     loading={avatarUploading()}

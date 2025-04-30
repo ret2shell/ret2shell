@@ -81,7 +81,7 @@ export default function ProviderForm(props: {
   }
   let avatarInput: HTMLInputElement;
   function handleSelectAvatar() {
-    avatarInput.click();
+    avatarInput!.click();
   }
   function handleSelectedAvatar(event: Event) {
     if (

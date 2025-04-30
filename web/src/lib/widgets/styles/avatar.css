@@ -1,13 +1,13 @@
 @layer components {
   .avatar {
-    @apply rounded-full overflow-hidden relative outline-2 outline-offset-2 outline-primary;
+    @apply rounded-lg overflow-hidden relative hover:shadow-lg hover:scale-110 transition-all duration-200;
 
     .avatar-img {
       @apply w-full aspect-square object-cover;
     }
 
     .avatar-fallback {
-      @apply w-full aspect-square flex items-center justify-center;
+      @apply w-full aspect-square flex items-center justify-center bg-primary text-primary-content;
     }
   }
 }

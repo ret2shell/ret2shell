@@ -97,7 +97,7 @@ export default function (compProps: {
   const [oauths, setOauthes] = createSignal([] as OAuth[]);
   let avatarInput: HTMLInputElement;
   function handleSelectAvatar() {
-    avatarInput.click();
+    avatarInput!.click();
   }
   function handleSelectedAvatar(event: Event) {
     if (
@@ -295,7 +295,7 @@ export default function (compProps: {
               <Avatar
                 class="w-28 h-28 relative m-2"
                 src={(getValue(form, "avatar") && mediaPath(getValue(form, "avatar")!)) || undefined}
-                fallback={getValue(form, "nickname")}
+                fallback={getValue(form, "account")}
               >
                 <Button
                   loading={avatarUploading()}
