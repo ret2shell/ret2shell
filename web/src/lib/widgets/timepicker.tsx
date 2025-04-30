@@ -287,7 +287,7 @@ function PickerCalendar(props: {
           square
           type="button"
           onClick={() => setYear(year() - 1)}
-          title={t("calendar.jumpToPrevYear")}
+          title={t("calendar.actions.prevYear.title")}
         >
           <span class="icon-[fluent--chevron-double-left-20-regular] w-5 h-5" />
         </Button>
@@ -303,7 +303,7 @@ function PickerCalendar(props: {
               setMonth((month() - 1) as MonthNumbers);
             }
           }}
-          title={t("calendar.jumpToPrevMonth")}
+          title={t("calendar.actions.prevMonth.title")}
         >
           <span class="icon-[fluent--chevron-left-20-regular] w-5 h-5" />
         </Button>
@@ -315,7 +315,7 @@ function PickerCalendar(props: {
             setYear(currentDate.year);
             setMonth(currentDate.month);
           }}
-          title={t("calendar.jumpToToday")}
+          title={t("calendar.actions.today.title")}
         >
           <span>
             {year().toString().padStart(4, "0")}-{month().toString().padStart(2, "0")}
@@ -333,7 +333,7 @@ function PickerCalendar(props: {
               setMonth((month() + 1) as MonthNumbers);
             }
           }}
-          title={t("calendar.jumpToNextMonth")}
+          title={t("calendar.actions.nextMonth.title")}
         >
           <span class="icon-[fluent--chevron-right-20-regular] w-5 h-5" />
         </Button>
@@ -343,7 +343,7 @@ function PickerCalendar(props: {
           type="button"
           square
           onClick={() => setYear(year() + 1)}
-          title={t("calendar.jumpToNextYear")}
+          title={t("calendar.actions.nextYear.title")}
         >
           <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
         </Button>
@@ -433,10 +433,10 @@ export default function TimePicker(props: TimerPickerProps & ComponentProps<"div
         placeholder={props.placeholder}
         error={props.error}
         value={
-          (time()?.toFormat(props.type === "date" ? "yyyy-MM-dd" : "yyyy-MM-dd HH:mm") || t("calendar.startTime")) +
+          (time()?.toFormat(props.type === "date" ? "yyyy-MM-dd" : "yyyy-MM-dd HH:mm") || t("calendar.startAt")) +
           (props.range
             ? ` => ${
-                timeNext()?.toFormat(props.type === "date" ? "yyyy-MM-dd" : "yyyy-MM-dd HH:mm") || t("calendar.endTime")
+                timeNext()?.toFormat(props.type === "date" ? "yyyy-MM-dd" : "yyyy-MM-dd HH:mm") || t("calendar.endAt")
               }`
             : "")
         }

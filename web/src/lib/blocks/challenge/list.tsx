@@ -180,9 +180,9 @@ export default function ChallengeList(props: {
                   highlightPaths={
                     selectedChallengeId()
                       ? [
-                        selectedChallenge()?.tag.find((t) => t.primary)?.name || t("challenge.tag.unknown")!,
-                        selectedChallengeId().toString(),
-                      ]
+                          selectedChallenge()?.tag.find((t) => t.primary)?.name || t("challenge.tag.unknown")!,
+                          selectedChallengeId().toString(),
+                        ]
                       : undefined
                   }
                 />

@@ -254,7 +254,7 @@ function BottomPanel(props: {
   );
 }
 
-export default function(props: {
+export default function (props: {
   onStateChange?: (challenge?: Challenge) => void;
   inGame?: boolean;
   archived: boolean;

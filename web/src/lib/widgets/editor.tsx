@@ -57,7 +57,7 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
         const resp = await uploadMedia(imageFile()!, false);
         editor?.insert(`![${imageFile()!.name}](${mediaPath(resp.hash)})`);
       } catch (err) {
-        handleHttpError(err as Error, t("form.uploadFailed")!);
+        handleHttpError(err as Error, t("general.actions.upload.status.fail")!);
       }
       setUploading(false);
     }
@@ -178,7 +178,7 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
       <Show when={uploading()}>
         <Card class="absolute bottom-2 left-2 right-2" level="info" contentClass="z-50 px-4 p-2 flex items-center">
           <Spin width={20} height={20} />
-          <p>{t("form.uploading")}</p>
+          <p>{t("general.actions.upload.status.inProcess")}</p>
         </Card>
       </Show>
       <Show when={dragging()}>

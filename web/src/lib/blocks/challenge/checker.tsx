@@ -1,8 +1,5 @@
 import { handleHttpError } from "@api";
-import {
-  getChallengeCheckerScript,
-  updateChallengeCheckerScript,
-} from "@api/game";
+import { getChallengeCheckerScript, updateChallengeCheckerScript } from "@api/game";
 import type { Challenge } from "@models/challenge";
 import { challengeStore } from "@storage/challenge";
 import { fullTheme, t } from "@storage/theme";
@@ -13,13 +10,7 @@ import Select from "@widgets/select";
 import Splitter from "@widgets/splitter";
 import { AnsiUp } from "ansi_up";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import {
-  Show,
-  createEffect,
-  createMemo,
-  createSignal,
-  untrack,
-} from "solid-js";
+import { Show, createEffect, createMemo, createSignal, untrack } from "solid-js";
 import dynamicLeetChecker from "./scripts/dynamic-leet.rx";
 import dynamicUuidChecker from "./scripts/dynamic-uuid.rx";
 import mappedChecker from "./scripts/mapped.rx";
@@ -59,49 +50,29 @@ class Tmpl {
   // biome-ignore lint/suspicious/noExplicitAny: everything can income and outcome as string
   private result2str(result: any) {
     if (result === null || typeof result === "undefined") return String(result);
-    if (Object.prototype.hasOwnProperty.call(result, "toString"))
-      return result.toString();
-    if (
-      Object.prototype.hasOwnProperty.call(
-        Object.getPrototypeOf(result),
-        "toString",
-      )
-    )
-      return result.toString();
+    if (Object.prototype.hasOwnProperty.call(result, "toString")) return result.toString();
+    if (Object.prototype.hasOwnProperty.call(Object.getPrototypeOf(result), "toString")) return result.toString();
     return String(result);
   }
 
   // replace tokens in %token% format
   execute(tmpl: string) {
     const reg = /%([a-zA-Z_]\w*)(\((.*?)\))?%/g;
-    return tmpl.replace(
-      reg,
-      (_match, token: string, _callable?: string, _args?: string) => {
-        try {
-          return this.result2str(
-            this.handleToken(
-              token,
-              !!_callable,
-              _args ? JSON.parse(`[${_args}]`) : [],
-            ),
-          );
-        } catch (err) {
-          console.error(err);
-          return _match;
-        }
-      },
-    );
+    return tmpl.replace(reg, (_match, token: string, _callable?: string, _args?: string) => {
+      try {
+        return this.result2str(this.handleToken(token, !!_callable, _args ? JSON.parse(`[${_args}]`) : []));
+      } catch (err) {
+        console.error(err);
+        return _match;
+      }
+    });
   }
 }
 
 const checkerCtx = {
   RANDSTR(n: number) {
-    const alphabet =
-      "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    return Array.from(
-      { length: n },
-      () => alphabet[Math.floor(Math.random() * alphabet.length)],
-    ).join("");
+    const alphabet = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    return Array.from({ length: n }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
   },
 } as const;
 
@@ -121,11 +92,7 @@ export default function (_props: {
   ansi_up.use_classes = true;
   let serverScript = "";
   async function refreshScript() {
-    const resp = await getChallengeCheckerScript(
-      challengeStore.current!.game_id,
-      challengeStore.current!.id,
-      true,
-    );
+    const resp = await getChallengeCheckerScript(challengeStore.current!.game_id, challengeStore.current!.id, true);
     serverScript = resp.script;
     setScript(resp.script);
     setLint(resp.lint ?? null);
@@ -153,11 +120,7 @@ export default function (_props: {
 
   async function handleUpdateScript() {
     try {
-      await updateChallengeCheckerScript(
-        challengeStore.current!.game_id,
-        challengeStore.current!.id,
-        script(),
-      );
+      await updateChallengeCheckerScript(challengeStore.current!.game_id, challengeStore.current!.id, script());
       addToast({
         level: "success",
         description: t("general.actions.save.status.success")!,
@@ -174,9 +137,7 @@ export default function (_props: {
       <header class="min-h-12 border-b border-b-layer-content/10 flex flex-row flex-wrap justify-end space-x-2 items-center gap-y-2 py-2">
         <span class="flex flex-row space-x-2 items-center overflow-hidden">
           <span class="icon-[fluent--code-20-regular] w-5 h-5 shrink-0" />
-          <span class="font-bold inline-block whitespace-nowrap">
-            {t("challenge.checker.script")}
-          </span>
+          <span class="font-bold inline-block whitespace-nowrap">{t("challenge.checker.script")}</span>
           <span class="opacity-60 truncate">checker/main.rx</span>
         </span>
         <span class="flex-1" />

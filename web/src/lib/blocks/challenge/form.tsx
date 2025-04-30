@@ -221,7 +221,7 @@ export function FormBare(props: {
   );
 }
 
-export default function(props: {
+export default function (props: {
   onDone: (challenge: ChallengeForm) => void;
   editSource?: Challenge;
   loading?: boolean;

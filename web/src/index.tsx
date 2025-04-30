@@ -8,7 +8,7 @@ import { Router } from "@solidjs/router";
 import { fullTheme, initTheme, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { onMount } from "solid-js";
+import { ErrorBoundary, onMount } from "solid-js";
 
 function checkEdition() {
   const compact_edition: string = import.meta.env.VITE_COMPAT_EDITION as string;
@@ -54,19 +54,50 @@ render(() => {
     }, 1000);
   });
   return (
-    <OverlayScrollbarsComponent
-      options={{
-        scrollbars: {
-          theme: `os-theme-${fullTheme()}`,
-          autoHide: "scroll",
-        },
-      }}
-      class="relative w-screen h-screen print:h-auto print:overflow-auto"
-      defer
+    <ErrorBoundary
+      fallback={(error, reset) => (
+        <div class="relative w-screen h-screen gap-6 flex items-center justify-center bg-layer">
+          <h1 class="text-2xl flex items-center gap-2">
+            <span class="icon-[fluent-emoji-flat--globe-with-meridians] w-8 h-8" />
+            <span class="icon-[fluent-emoji-flat--collision] w-8 h-8" />
+            <span class="icon-[fluent-emoji-flat--right-arrow] w-8 h-8" />
+            <span class="icon-[fluent-emoji-flat--crying-face] w-8 h-8" />
+            <span class="icon-[fluent-emoji-flat--knocked-out-face] w-8 h-8" />
+          </h1>
+          <h1 class="text-2xl flex items-center gap-2">
+            <span class="icon-[fluent-emoji-flat--thinking-face] w-8 h-8" />
+            <span class="icon-[fluent-emoji-flat--right-arrow] w-8 h-8" />
+            <span class="icon-[fluent-emoji-flat--index-pointing-up] w-8 h-8" />
+            <span class="icon-[fluent-emoji-flat--nerd-face] w-8 h-8" />
+          </h1>
+          <h1 class="text-2xl flex items-center gap-2">
+            <span class="icon-[fluent-emoji-flat--man-bowing] w-8 h-8" />
+            <span class="icon-[fluent-emoji-flat--backhand-index-pointing-right] w-8 h-8" />
+            <button
+              class="icon-[fluent-emoji-flat--repeat-button] w-8 h-8 transition-all hover:bg-layer-content/15"
+              type="button"
+              onClick={reset}
+            />
+            <span class="icon-[fluent-emoji-flat--backhand-index-pointing-left] w-8 h-8" />
+          </h1>
+          <p>{error.message}</p>
+        </div>
+      )}
     >
-      <div class="flex flex-col min-h-full min-w-fit">
-        <Router explicitLinks>{routes}</Router>
-      </div>
-    </OverlayScrollbarsComponent>
+      <OverlayScrollbarsComponent
+        options={{
+          scrollbars: {
+            theme: `os-theme-${fullTheme()}`,
+            autoHide: "scroll",
+          },
+        }}
+        class="relative w-screen h-screen print:h-auto print:overflow-auto"
+        defer
+      >
+        <div class="flex flex-col min-h-full min-w-fit">
+          <Router explicitLinks>{routes}</Router>
+        </div>
+      </OverlayScrollbarsComponent>
+    </ErrorBoundary>
   );
 }, document.getElementById("root") || document.body);

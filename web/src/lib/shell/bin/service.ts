@@ -27,15 +27,21 @@ export class Service implements Command {
     if (args.length !== 1 || !Object.keys(action).includes(args[0].toString().trim())) {
       io.error(t("shell.service.errors.needAction.title")!);
       io.info(t("shell.service.usage")!);
-      io.info(`\t${ansiColors.green(link("start", "rnix://command/service start"))}\t${t("shell.service.actions.start.title")}`);
-      io.info(`\t${ansiColors.green(link("stop", "rnix://command/service stop"))}\t${t("shell.service.actions.stop.title")}`);
+      io.info(
+        `\t${ansiColors.green(link("start", "rnix://command/service start"))}\t${t("shell.service.actions.start.title")}`
+      );
+      io.info(
+        `\t${ansiColors.green(link("stop", "rnix://command/service stop"))}\t${t("shell.service.actions.stop.title")}`
+      );
       io.info(
         `\t${ansiColors.green(link("restart", "rnix://command/service restart"))}\t${t("shell.service.actions.restart.title")}`
       );
       io.info(
         `\t${ansiColors.green(link("status", "rnix://command/service status"))}\t${t("shell.service.actions.status.title")}`
       );
-      io.info(`\t${ansiColors.green(link("delay", "rnix://command/service delay"))}\t${t("shell.service.actions.delay.title")}`);
+      io.info(
+        `\t${ansiColors.green(link("delay", "rnix://command/service delay"))}\t${t("shell.service.actions.delay.title")}`
+      );
       return 1;
     }
     return action[args[0].toString().trim() as "start" | "stop" | "restart" | "status" | "delay"](io);

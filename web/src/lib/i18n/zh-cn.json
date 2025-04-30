@@ -195,6 +195,14 @@
       "exit": {
         "title": "退出"
       },
+      "clear": {
+        "title": "清除",
+        "message": "你确定要清除吗？",
+        "status": {
+          "success": "清除成功",
+          "fail": "清除失败"
+        }
+      },
       "upload": {
         "title": "上传",
         "status": {
@@ -203,7 +211,8 @@
           "fail": "上传失败",
           "invalidFileType": "文件类型不合法",
           "fileTooLarge": "文件过大，最大支持 {{ size }} MB",
-          "fileTooSmall": "文件过小，最小支持 {{ size }} MB"
+          "fileTooSmall": "文件过小，最小支持 {{ size }} MB",
+          "inProcess": "上传中..."
         }
       },
       "download": {
@@ -213,6 +222,9 @@
           "success": "下载成功",
           "fail": "下载失败"
         }
+      },
+      "goto": {
+        "title": "前往"
       }
     }
   },
@@ -242,6 +254,9 @@
       "maintaining": {
         "title": "维护中...",
         "message": "请稍后再试"
+      },
+      "internal": {
+        "title": "服务器内部错误"
       }
     },
     "notifications": {
@@ -253,7 +268,10 @@
       "title": "主题",
       "followSystem": "跟随系统"
     },
-    "tooNarrow": "太窄了，请宽一点"
+    "tooNarrow": "太窄了，请宽一点",
+    "ret2codec": {
+      "title": "替换协议"
+    }
   },
   "wiki": {
     "title": "知识",
@@ -334,6 +352,36 @@
         "required": "简介不能为空"
       }
     }
+  },
+  "calendar": {
+    "day": {
+      "sun": "日",
+      "mon": "一",
+      "tue": "二",
+      "wed": "三",
+      "thu": "四",
+      "fri": "五",
+      "sat": "六"
+    },
+    "actions": {
+      "prevYear": {
+        "title": "上一年"
+      },
+      "prevMonth": {
+        "title": "上一月"
+      },
+      "today": {
+        "title": "转到今天"
+      },
+      "nextMonth": {
+        "title": "下一月"
+      },
+      "nextYear": {
+        "title": "下一年"
+      }
+    },
+    "startAt": "开始时间",
+    "endAt": "结束时间"
   },
   "game": {
     "title": "赛事",
@@ -420,7 +468,8 @@
         "fetchSubmission": {
           "title": "获取提交记录失败"
         }
-      }
+      },
+      "autoRefreshEnabled": "自动刷新已开启"
     },
     "git": {
       "title": "题目仓库"
@@ -512,8 +561,8 @@
         "maximum": "队伍人数不能大于 99"
       }
     },
-    "management": {
-      "title": "赛事管理",
+    "admin": {
+      "title": "管理",
       "gotoChallenges": "前往题目管理"
     },
     "administrator": {
@@ -540,7 +589,8 @@
       },
       "empty": "没有管理员，请联系运维手动添加"
     },
-    "admin": {}
+    "registerNotStarted": "注册暂未开放，少安毋躁",
+    "registerEnded": "报名注册已经结束，请等待比赛归档"
   },
   "challenge": {
     "title": "题目",
@@ -1004,6 +1054,9 @@
       },
       "usable": {
         "title": "WSRX 已连接"
+      },
+      "connecting": {
+        "title": "正在连接..."
       }
     },
     "retry": "重试连接",
@@ -1017,6 +1070,24 @@
       },
       "copyLocal": {
         "title": "复制本地地址"
+      },
+      "retry": {
+        "title": "重试连接"
+      },
+      "resetDefault": {
+        "title": "重置为默认"
+      },
+      "refresh": {
+        "title": "刷新路由"
+      },
+      "openAll": {
+        "title": "打开所有路由"
+      },
+      "deleteAll": {
+        "title": "关闭所有路由"
+      },
+      "deleteOutdated": {
+        "title": "关闭过期路由"
       }
     },
     "settings": {
@@ -1057,7 +1128,9 @@
         "title": "创建 WSRX 映射失败",
         "message": "请检查本地客户端日志"
       }
-    }
+    },
+    "downloadClient": "下载客户端",
+    "tunnels": "连接路由"
   },
   "captcha": {
     "title": "验证码保护",
@@ -1094,7 +1167,14 @@
       "fetchList": {
         "title": "获取用户列表失败"
       }
-    }
+    },
+    "description": {
+      "title": "个人介绍",
+      "empty": "这位神秘的黑客什么也没有留下..."
+    },
+    "joinedGames": "参与赛事",
+    "gameJournal": "作为 {{team}} 成员参与了 {{game}}。",
+    "moreJournal": "生命不息，探索不止……"
   },
   "account": {
     "permission": {
@@ -1108,6 +1188,18 @@
       "statistics": "数据统计",
       "devOps": "平台运维",
       "user": "用户管理"
+    },
+    "login": {
+      "title": "登录"
+    },
+    "settings": {
+      "title": "用户设置"
+    },
+    "logout": "登出",
+    "status": {
+      "unverified": {
+        "message": "你的账户尚未验证，部分功能受限"
+      }
     }
   },
   "shell": {
@@ -1236,12 +1328,19 @@
     "source": "支持"
   },
   "docs": {
-    "title": "开发者文档"
+    "title": "开发者文档",
+    "tip": "回归终端 - 开发者文档",
+    "forVersion": "适用版本"
   },
   "magic": {
     "about": {
       "thanks": "感谢使用我的作品",
       "title": "关于"
+    },
+    "sakana": {
+      "title": "Sakana~",
+      "illustration": "插画",
+      "source": "代码"
     }
   },
   "team": {
@@ -1252,7 +1351,25 @@
       },
       "banned": {
         "message": "由于作弊行为，队伍已被封禁"
+      },
+      "empty": {
+        "message": "还未参赛，请先参赛"
+      }
+    },
+    "errors": {
+      "fetchList": {
+        "title": "获取队伍列表失败"
       }
     }
+  },
+  "notification": {
+    "empty": "没有未读消息",
+    "title": "提示消息"
+  },
+  "bulletin": {
+    "title": "公告"
+  },
+  "admin": {
+    "title": "管理"
   }
 }

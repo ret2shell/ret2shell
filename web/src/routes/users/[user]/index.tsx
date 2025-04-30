@@ -34,7 +34,7 @@ export default function () {
           (await getUserTeams(userId()!)).sort((a, b) => a.last_active_at.toMillis() - b.last_active_at.toMillis())
         );
       } catch (err) {
-        handleHttpError(err as Error, t("user.fetchTeamsFailed")!);
+        handleHttpError(err as Error, t("team.errors.fetchList.title")!);
       }
       setLoading(false);
     });
@@ -50,7 +50,7 @@ export default function () {
           <div class="flex flex-col w-full max-w-5xl">
             <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
               <span class="icon-[fluent--person-20-regular] w-5 h-5" />
-              <span>{t("user.introductionTitle")}</span>
+              <span>{t("user.description.title")}</span>
             </h3>
             <section>
               <Switch>
@@ -58,13 +58,13 @@ export default function () {
                   <LoadingTips />
                 </Match>
                 <Match when={true}>
-                  <Article content={user()?.description || t("user.noDescription")!} />
+                  <Article content={user()?.description || t("user.description.empty")!} />
                 </Match>
               </Switch>
             </section>
             <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
               <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
-              <span>{t("user.joinedGamesTitle")}</span>
+              <span>{t("user.joinedGames")}</span>
             </h3>
             <section class="flex flex-col">
               <For each={teams()}>

@@ -83,7 +83,7 @@ function mergeChats(
   return [changed, aa.sort((x, y) => x.created_at.toMillis() - y.created_at.toMillis())];
 }
 
-export default function(props: {
+export default function (props: {
   onStateChange?: (challenge?: Challenge) => void;
   onExpand?: () => void;
   expanded?: boolean;
@@ -336,8 +336,8 @@ export default function(props: {
               {availableMsg() <= 0
                 ? t("challenge.hammer.errors.maxMessageLimit.title")
                 : t("challenge.hammer.freeMessages", {
-                  last: availableMsg(),
-                })}
+                    last: availableMsg(),
+                  })}
             </span>
           </span>
           <div class="flex-1" />

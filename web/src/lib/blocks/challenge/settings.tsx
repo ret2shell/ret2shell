@@ -10,7 +10,7 @@ import { DateTime } from "luxon";
 import { createEffect, createSignal } from "solid-js";
 import { type ChallengeForm, FormBare } from "./form";
 
-export default function(props: {
+export default function (props: {
   onStateChange?: (challenge?: Challenge) => void;
   inGame?: boolean;
 }) {

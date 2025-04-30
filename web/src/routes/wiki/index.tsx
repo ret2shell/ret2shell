@@ -1,7 +1,7 @@
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 
-export default function() {
+export default function () {
   return (
     <>
       <Title page={t("wiki.title")} route="/wiki" />

@@ -17,9 +17,9 @@ export default function (props: ComponentProps<"div"> & ToastProps) {
   onMount(() => {
     if (props.selfDestroy && toastMsgProps.toast.duration && toastMsgProps.toast.duration > 0) {
       setTimeout(() => {
-        progressRef.classList.remove("w-full");
-        progressRef.style.transitionDuration = `${toastMsgProps.toast.duration}ms`;
-        progressRef.classList.add("w-0");
+        progressRef!.classList.remove("w-full");
+        progressRef!.style.transitionDuration = `${toastMsgProps.toast.duration}ms`;
+        progressRef!.classList.add("w-0");
       }, 100);
       if (!toastMsgProps.toast.duration) return;
       setTimeout(() => {
@@ -71,12 +71,12 @@ export default function (props: ComponentProps<"div"> & ToastProps) {
           <div class="flex flex-row items-center justify-end space-x-2">
             <Show when={toastMsgProps.toast.reject}>
               <Button size="sm" ghost onClick={toastMsgProps.toast.reject}>
-                {toastMsgProps.toast.rejectLabel || t("platform.reject")}
+                {toastMsgProps.toast.rejectLabel || t("general.actions.no.title")}
               </Button>
             </Show>
             <Show when={toastMsgProps.toast.accept}>
               <Button size="sm" level="primary" onClick={toastMsgProps.toast.accept}>
-                {toastMsgProps.toast.acceptLabel || t("platform.accept")}
+                {toastMsgProps.toast.acceptLabel || t("general.actions.ok.title")}
               </Button>
             </Show>
           </div>

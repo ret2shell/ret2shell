@@ -16,7 +16,7 @@ export default function () {
         fallback={
           <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
             <span class="icon-[fluent--dumbbell-20-regular] w-24 h-24" />
-            <span>{t("training.selectPlayground")}</span>
+            <span>{t("training.placeholder")}</span>
           </div>
         }
       >
@@ -25,7 +25,7 @@ export default function () {
             onDone={(resp) => {
               addToast({
                 level: "success",
-                description: t("training.createSuccess", { name: resp.name })!,
+                description: t("general.actions.create.status.success")!,
                 duration: 5000,
               });
               navigate(`/training/${resp.id}`);

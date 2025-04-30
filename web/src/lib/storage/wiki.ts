@@ -16,6 +16,6 @@ export async function refreshWikiToc() {
     resp = resp.sort((a, b) => (a.created_at < b.created_at ? -1 : 1));
     setWikiStore({ toc: resp });
   } catch (err) {
-    handleHttpError(err as HTTPError, t("wiki.fetchTocFailed")!);
+    handleHttpError(err as HTTPError, t("wiki.errors.fetchToc.title")!);
   }
 }

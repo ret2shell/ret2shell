@@ -33,7 +33,7 @@ export class WsrxWrapper {
       if (state === WsrxState.Invalid && this.state() !== WsrxState.Invalid) {
         addToast({
           level: "warning",
-          description: t("instance.wsrxDisconnected")!,
+          description: t("wsrx.errors.disconnected.title")!,
           duration: 10 * 1000,
         });
       }
@@ -72,7 +72,7 @@ export class WsrxWrapper {
         if (err instanceof HTTPError) {
           addToast({
             level: "error",
-            description: `${t("instance.fetchFailed")}: ${await err.response.text()}`,
+            description: `${t("challenge.instance.errors.fetchInstances.title")}: ${await err.response.text()}`,
             duration: 5000,
           });
         }
@@ -88,7 +88,7 @@ export class WsrxWrapper {
         if (err instanceof WsrxError) {
           addToast({
             level: "error",
-            description: `${t("traffic.fetchFailed")}: ${err.message}`,
+            description: `${t("wsrx.errors.fetchTunnel.title")}: ${err.message}`,
             duration: 5000,
           });
         }
@@ -137,7 +137,7 @@ export class WsrxWrapper {
             if (err instanceof WsrxError) {
               addToast({
                 level: "error",
-                description: `${t("traffic.openFailed")}: ${err.message}`,
+                description: `${t("wsrx.errors.createTunnel.title")}: ${err.message}`,
                 duration: 5000,
               });
             }

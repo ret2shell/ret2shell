@@ -19,7 +19,7 @@ export function ThemeBoxContent() {
             setThemeStore({ colorSchemeFollowsSystem: !themeStore.colorSchemeFollowsSystem });
           }}
         >
-          <span class="flex-1 text-start">{t("platform.followSystem")}</span>
+          <span class="flex-1 text-start">{t("platform.theme.followSystem")}</span>
           <Show
             when={themeStore.colorSchemeFollowsSystem}
             fallback={<span class="icon-[fluent--position-forward-20-regular] w-5 h-5 opacity-60" />}
@@ -55,7 +55,7 @@ export function ThemeBoxContent() {
               size="sm"
               ghost
               square
-              title={t("platform.ret2codec")}
+              title={t("platform.ret2codec.title")}
               justify="center"
               onClick={() => {
                 setPlatformStore({ enable_ret2codec: !platformStore.enable_ret2codec });
@@ -82,7 +82,7 @@ export default function DiyBox() {
       square
       ghost
       popContentClass="pt-2"
-      title={t("platform.diyBox")}
+      title={t("platform.theme.title")}
     >
       <ThemeBoxContent />
     </Popover>

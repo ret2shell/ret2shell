@@ -46,7 +46,6 @@ export default function UserBox() {
       }
     >
       <Popover
-        title={t("account.box")}
         btnContent={
           <Avatar
             alt={accountStore.info?.account ?? "USER"}

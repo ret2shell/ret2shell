@@ -63,7 +63,10 @@ export default function (props: {
       });
       props.onDone(resp);
     } catch (err) {
-      handleHttpError(err as HTTPError, props.editSource ? t("general.actions.save.status.fail")! : t("general.actions.create.status.fail")!);
+      handleHttpError(
+        err as HTTPError,
+        props.editSource ? t("general.actions.save.status.fail")! : t("general.actions.create.status.fail")!
+      );
     }
     setLoading(false);
   }

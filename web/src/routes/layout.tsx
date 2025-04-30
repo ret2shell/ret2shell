@@ -25,14 +25,14 @@ function checkCookiePolicy() {
           removeToast(toastId);
         }, 50);
       },
-      acceptLabel: t("platform.ok"),
+      acceptLabel: t("general.actions.ok.title"),
       reject: () => {
         setPlatformStore({ accept_cookies: true });
         setTimeout(() => {
           removeToast(toastId);
         }, 50);
       },
-      rejectLabel: t("platform.yes"),
+      rejectLabel: t("general.actions.yes.title"),
     });
   }
 }
@@ -49,11 +49,11 @@ export default function (props: { children?: JSX.Element }) {
     if (accountStore.token && !accountStore.permissions.includes(Permission.Verified)) {
       addToast({
         level: "warning",
-        description: t("account.settings.verify.notVerified")!,
+        description: t("account.status.unverified.message")!,
         accept: () => {
           navigate("/account/settings");
         },
-        acceptLabel: t("form.goto"),
+        acceptLabel: t("general.actions.goto.title"),
       });
     }
   }
@@ -73,17 +73,17 @@ export default function (props: { children?: JSX.Element }) {
       } else if (err instanceof HTTPError && err.response?.status === 502 && !inDocs()) {
         addToast({
           level: "error",
-          description: `${t("platform.offline")}`,
+          description: `${t("platform.errors.offline.title")}: ${t("platform.errors.offline.message")}`,
         });
         navigate(`/sigtrap/${err.response?.status || 502}`);
       } else if (err instanceof HTTPError && !inDocs()) {
         addToast({
           level: "error",
-          description: `${t("platform.error")}: ${err.response?.statusText || err.message}`,
+          description: `${t("platform.errors.internal.title")}: ${err.response?.statusText || err.message}`,
         });
         navigate(`/sigtrap/${err.response?.status || 500}`);
       } else {
-        handleHttpError(err as Error, t("platform.error")!);
+        handleHttpError(err as Error, t("platform.errors.internal.title")!);
         navigate("/sigtrap/unknown");
       }
       setPlatformStore({ backend_online: false });
@@ -115,10 +115,10 @@ export default function (props: { children?: JSX.Element }) {
       if (!version.startsWith(frontendCompatVersion)) {
         addToast({
           level: "warning",
-          description: t("platform.versionMismatch", {
+          description: `${t("platform.errors.versionMismatch.title")}: ${t("platform.errors.versionMismatch.message", {
             frontend: frontendCompatVersion,
             backend: version,
-          })!,
+          })}`,
         });
       }
       console.log(

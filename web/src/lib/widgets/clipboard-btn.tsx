@@ -26,7 +26,7 @@ export default function ClipboardBtn(
             "flex items-center space-x-2 justify-center",
             others.class
           )}
-          title={others.title ?? t("form.copy")}
+          title={others.title ?? t("general.actions.copy.title")}
         >
           <Clipboard.Indicator
             class="flex items-center justify-center m-0"

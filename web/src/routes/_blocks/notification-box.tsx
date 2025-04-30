@@ -26,14 +26,14 @@ export function NotificationBoxContent() {
             <span class="icon-[fluent--alert-20-regular] w-5 h-5" />
             <Show
               when={toastStore.toasts.length > 0}
-              fallback={<span class="opacity-60">{t("platform.noNotifications")}</span>}
+              fallback={<span class="opacity-60">{t("notification.empty")}</span>}
             >
-              <span>{t("platform.notificationBox")}</span>
+              <span>{t("notification.title")}</span>
             </Show>
           </h2>
           <Show when={toastStore.toasts.length > 0}>
             <Button size="sm" ghost level="info" onClick={() => clearToasts()}>
-              {t("platform.clearNotifications")}
+              {t("general.actions.clear.title")}
             </Button>
           </Show>
         </Card>
@@ -61,7 +61,7 @@ export default function NotificationBox() {
       square
       ghost
       popContentClass="pt-2"
-      title={t("platform.notificationBox")}
+      title={t("notification.title")}
     >
       <NotificationBoxContent />
     </Popover>

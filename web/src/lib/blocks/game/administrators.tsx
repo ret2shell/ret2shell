@@ -176,7 +176,11 @@ export default function AdministratorsManagement() {
                           </div>
                         </div>
                         <Divider class="w-full" />
-                        <p>{t("game.administrator.form.confirm.message", { name: `${user.account}#${user.id.toString(16).padStart(6, '0')}` })}</p>
+                        <p>
+                          {t("game.administrator.form.confirm.message", {
+                            name: `${user.account}#${user.id.toString(16).padStart(6, "0")}`,
+                          })}
+                        </p>
                         <Button
                           level="info"
                           class="w-full"

@@ -113,7 +113,7 @@ function GameNav(props: { size: "sm" | "md" }) {
           title={canAccessChallenges()[1]}
         >
           <span class="icon-[fluent--code-20-regular] w-5 h-5" />
-          <span>{t("game.challenge.title")}</span>
+          <span>{t("challenge.title")}</span>
         </Link>
       </li>
       <li class="nav whitespace-nowrap">
@@ -147,7 +147,7 @@ function GameNav(props: { size: "sm" | "md" }) {
       <li class="nav whitespace-nowrap">
         <Link class="w-full" href={"/games/"} ghost justify="start" size={props.size} level="warning">
           <span class="icon-[fluent--arrow-exit-20-regular] w-5 h-5" />
-          <span>{t("game.exit")}</span>
+          <span>{t("general.actions.exit.title")}</span>
         </Link>
       </li>
     </>
@@ -172,7 +172,7 @@ export default function TitleBar() {
     <>
       <div id="page-top" class="print:hidden" />
       <div class="hidden print:flex flex-row border-b border-b-layer-content/60 w-full">
-        <span>{inDocs() ? t("docs.titleTips") : platformStore.config.name || t("platform.name")}</span>
+        <span>{inDocs() ? t("docs.tip") : platformStore.config.name || t("platform.name")}</span>
         <span class="flex-1" />
         <span>{DateTime.now().toFormat("yyyy-MM-dd HH:mm:ss")}</span>
       </div>
@@ -221,7 +221,7 @@ export default function TitleBar() {
                               (wsrx.state() === WsrxState.Usable ? "text-success" : "text-warning")
                           )}
                         />
-                        <span>{t("instance.box")}</span>
+                        <span>{t("wsrx.title")}</span>
                       </Button>
                     </Show>
                     <li>
@@ -240,7 +240,7 @@ export default function TitleBar() {
                             "w-5 h-5"
                           )}
                         />
-                        <span>{t("platform.notificationBox")}</span>
+                        <span>{t("notification.title")}</span>
                       </Button>
                     </li>
                     <li>
@@ -252,7 +252,7 @@ export default function TitleBar() {
                         onClick={() => setAdditionalMobileBox("diy")}
                       >
                         <span class="icon-[fluent--wand-20-regular] w-5 h-5" />
-                        <span>{t("platform.diyBox")}</span>
+                        <span>{t("platform.theme.title")}</span>
                       </Button>
                     </li>
                   </ul>
@@ -357,7 +357,7 @@ export default function TitleBar() {
                   <Show when={!offlineLoading()}>
                     <span class="icon-[fluent--dismiss-circle-20-filled] w-5 h-5" />
                   </Show>
-                  <span>{t("platform.unavailable")}</span>
+                  <span>{t("platform.errors.offline.title")}</span>
                 </Button>
               }
             >
@@ -369,7 +369,7 @@ export default function TitleBar() {
                   <Show when={!offlineLoading()}>
                     <span class="icon-[fluent--warning-20-filled] w-5 h-5" />
                   </Show>
-                  <span>{t("platform.underMaintenance")}</span>
+                  <span>{t("platform.errors.maintaining.title")}</span>
                 </Button>
               </Match>
             </Switch>

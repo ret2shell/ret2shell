@@ -48,21 +48,21 @@ export function InstanceBoxContent() {
             case WsrxErrorKind.VersionMismatch:
               addToast({
                 level: "error",
-                description: t("instance.wsrxVersionMismatch")!,
+                description: `${t("wsrx.errors.versionMismatch.title")}: ${t("wsrx.errors.versionMismatch.message")}`,
                 duration: 5000,
               });
               break;
             case WsrxErrorKind.DaemonError:
               addToast({
                 level: "error",
-                description: e.message!,
+                description: `${t("wsrx.errors.daemonError.title")}: ${e.message}`,
                 duration: 5000,
               });
               break;
             case WsrxErrorKind.DaemonUnavailable:
               addToast({
                 level: "error",
-                description: t("instance.wsrxDaemonOffline")!,
+                description: `${t("wsrx.errors.daemonOffline.title")}: ${t("wsrx.errors.daemonOffline.message")}`,
                 duration: 5000,
               });
               break;
@@ -86,7 +86,7 @@ export function InstanceBoxContent() {
           class="flex-1"
           justify="start"
           ghost
-          title={t("instance.retryLinkWsrx")}
+          title={t("wsrx.actions.retry.title")}
           size="sm"
           onClick={retryConnect}
         >
@@ -108,21 +108,15 @@ export function InstanceBoxContent() {
             }
           >
             {connecting()
-              ? t("instance.connecting")
+              ? t("wsrx.status.connecting.title")
               : wsrx.state() === WsrxState.Usable
-                ? t("instance.connected")
+                ? t("wsrx.status.usable.title")
                 : wsrx.state() === WsrxState.Pending
-                  ? t("instance.pending")
-                  : t("instance.disconnected")}
+                  ? t("wsrx.status.pending.title")
+                  : t("wsrx.status.invalid.title")}
           </span>
         </Button>
-        <Button
-          ghost={!showSettings()}
-          square
-          title={t("instance.wsrxSettings")}
-          size="sm"
-          onClick={() => setShowSettings(!showSettings())}
-        >
+        <Button ghost={!showSettings()} square size="sm" onClick={() => setShowSettings(!showSettings())}>
           {/* icon-[fluent--settings-20-regular] icon-[fluent--settings-20-filled] */}
           <span
             class={clsx(
@@ -137,7 +131,7 @@ export function InstanceBoxContent() {
           ghost
           square
           target="_blank"
-          title={t("instance.downloadWsrx")}
+          title={t("wsrx.downloadClient")}
           size="sm"
         >
           <span class="icon-[fluent--arrow-download-20-regular] w-5 h-5" />
@@ -158,7 +152,7 @@ export function InstanceBoxContent() {
             <Button
               size="sm"
               square
-              title={t("instance.defaultApiAddr")}
+              title={t("wsrx.actions.resetDefault.title")}
               ghost
               onClick={() => {
                 wsrx.setApiAddr("http://127.0.0.1:3307");
@@ -171,13 +165,13 @@ export function InstanceBoxContent() {
             </Button>
           </div>
           <div class="flex flex-row items-center space-x-2">
-            <span class="flex-1 text-start font-bold px-2">{t("instance.wsrxTrafficConnection")}</span>
+            <span class="flex-1 text-start font-bold px-2">{t("wsrx.tunnels")}</span>
             <Button
               ghost
               square
               size="sm"
               class="flex"
-              title={t("instance.refreshWsrxTraffic")}
+              title={t("wsrx.actions.refresh.title")}
               onClick={() => {
                 setRefreshingTraffic(true);
                 wsrx.syncLocal().finally(() => setRefreshingTraffic(false));
@@ -196,7 +190,7 @@ export function InstanceBoxContent() {
               square
               size="sm"
               class="flex"
-              title={t("instance.openAllWsrxTraffic")}
+              title={t("wsrx.actions.openAll.title")}
               onClick={() => {
                 setOpeningAllTraffic(true);
                 wsrx
@@ -215,7 +209,7 @@ export function InstanceBoxContent() {
               square
               size="sm"
               class="flex"
-              title={t("instance.deleteOutdatedWsrxTraffic")}
+              title={t("wsrx.actions.deleteOutdated.title")}
               onClick={() => {
                 setDeletingOutdatedTraffic(true);
                 wsrx
@@ -237,7 +231,7 @@ export function InstanceBoxContent() {
               square
               size="sm"
               class="flex"
-              title={t("instance.deleteAllWsrxTraffic")}
+              title={t("wsrx.actions.deleteAll.title")}
               onClick={() => {
                 setDeletingAllTraffic(true);
                 wsrx
@@ -288,16 +282,11 @@ export function InstanceBoxContent() {
 export default function InstanceBox() {
   return (
     <Popover
-      btnContent={
-        <>
-          <span class="icon-[fluent--fluid-20-regular] w-5 h-5" />
-          {/* <span class="opacity-60">{t("instance.instanceCount", { count: wsrx.instances.length })}</span> */}
-        </>
-      }
+      btnContent={<span class="icon-[fluent--fluid-20-regular] w-5 h-5" />}
       ghost
       square
       popContentClass="pt-2"
-      title={t("instance.box")}
+      title={t("wsrx.title")}
     >
       <InstanceBoxContent />
     </Popover>

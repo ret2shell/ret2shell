@@ -66,7 +66,10 @@ export default function (props: {
     try {
       props.onDone(await (props.editSource ? updateWiki(article) : createWiki(article)));
     } catch (err) {
-      handleHttpError(err as Error, props.editSource ? t("general.actions.save.status.fail")! : t("general.actions.create.status.fail")!);
+      handleHttpError(
+        err as Error,
+        props.editSource ? t("general.actions.save.status.fail")! : t("general.actions.create.status.fail")!
+      );
     }
     setLoading(false);
   }

@@ -481,7 +481,10 @@
     }
   },
   "game": {
-    "admin": {},
+    "admin": {
+      "gotoChallenges": "",
+      "title": ""
+    },
     "archive": "",
     "archived": "",
     "end": "",
@@ -612,7 +615,8 @@
         "confirmed": {
           "title": ""
         }
-      }
+      },
+      "autoRefreshEnabled": ""
     },
     "noGameHosted": "",
     "noOtherGames": "",
@@ -679,13 +683,12 @@
       },
       "empty": ""
     },
-    "management": {
-      "gotoChallenges": "",
-      "title": ""
-    },
+    "management": {},
     "git": {
       "title": ""
-    }
+    },
+    "registerNotStarted": "",
+    "registerEnded": ""
   },
   "general": {
     "actions": {
@@ -835,11 +838,23 @@
           "fileTooSmall": "",
           "invalidFileType": "",
           "pending": "",
-          "success": ""
+          "success": "",
+          "inProcess": ""
         },
         "title": ""
       },
       "yes": {
+        "title": ""
+      },
+      "clear": {
+        "message": "",
+        "status": {
+          "fail": "",
+          "success": ""
+        },
+        "title": ""
+      },
+      "goto": {
         "title": ""
       }
     },
@@ -927,6 +942,9 @@
       "versionMismatch": {
         "message": "",
         "title": ""
+      },
+      "internal": {
+        "title": ""
       }
     },
     "name": "",
@@ -941,7 +959,10 @@
       "title": ""
     },
     "updated": "",
-    "tooNarrow": ""
+    "tooNarrow": "",
+    "ret2codec": {
+      "title": ""
+    }
   },
   "training": {
     "empty": "",
@@ -1030,6 +1051,24 @@
       },
       "copyLocal": {
         "title": ""
+      },
+      "retry": {
+        "title": ""
+      },
+      "resetDefault": {
+        "title": ""
+      },
+      "refresh": {
+        "title": ""
+      },
+      "openAll": {
+        "title": ""
+      },
+      "deleteAll": {
+        "title": ""
+      },
+      "deleteOutdated": {
+        "title": ""
       }
     },
     "download": {
@@ -1085,16 +1124,28 @@
       },
       "usable": {
         "title": ""
+      },
+      "connecting": {
+        "title": ""
       }
     },
-    "title": ""
+    "title": "",
+    "downloadClient": "",
+    "tunnels": ""
   },
   "user": {
     "errors": {
       "fetchList": {
         "title": ""
       }
-    }
+    },
+    "description": {
+      "title": "",
+      "empty": ""
+    },
+    "joinedGames": "",
+    "gameJournal": "",
+    "moreJournal": ""
   },
   "account": {
     "permission": {
@@ -1108,6 +1159,18 @@
       "statistics": "",
       "devOps": "",
       "user": ""
+    },
+    "login": {
+      "title": ""
+    },
+    "settings": {
+      "title": ""
+    },
+    "logout": "",
+    "status": {
+      "unverified": {
+        "message": ""
+      }
     }
   },
   "shell": {
@@ -1236,12 +1299,19 @@
     "source": ""
   },
   "docs": {
-    "title": ""
+    "title": "",
+    "tip": "",
+    "forVersion": ""
   },
   "magic": {
     "about": {
       "thanks": "",
       "title": ""
+    },
+    "sakana": {
+      "title": "",
+      "illustration": "",
+      "source": ""
     }
   },
   "team": {
@@ -1252,7 +1322,55 @@
       },
       "banned": {
         "message": ""
+      },
+      "empty": {
+        "message": ""
+      }
+    },
+    "errors": {
+      "fetchList": {
+        "title": ""
       }
     }
+  },
+  "calendar": {
+    "day": {
+      "fri": "",
+      "mon": "",
+      "sat": "",
+      "sun": "",
+      "thu": "",
+      "tue": "",
+      "wed": ""
+    },
+    "actions": {
+      "prevYear": {
+        "title": ""
+      },
+      "prevMonth": {
+        "title": ""
+      },
+      "today": {
+        "title": ""
+      },
+      "nextMonth": {
+        "title": ""
+      },
+      "nextYear": {
+        "title": ""
+      }
+    },
+    "startAt": "",
+    "endAt": ""
+  },
+  "notification": {
+    "empty": "",
+    "title": ""
+  },
+  "bulletin": {
+    "title": ""
+  },
+  "admin": {
+    "title": ""
   }
 }
