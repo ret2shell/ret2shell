@@ -17,7 +17,7 @@ export default function SideBar() {
           disabled={!accountStore.permissions.includes(Permission.Statistics)}
         >
           <span class="icon-[fluent--data-pie-20-regular] w-5 h-5" />
-          <span>{t("admin.statistics.title")}</span>
+          <span>{t("platform.statistics.title")}</span>
         </Link>
       </li>
       <li class="w-full">
@@ -33,7 +33,7 @@ export default function SideBar() {
           }
         >
           <span class="icon-[fluent--code-20-regular] w-5 h-5" />
-          <span>{t("admin.logs.title")}</span>
+          <span>{t("platform.logs.title")}</span>
         </Link>
       </li>
       <Divider />
@@ -47,7 +47,7 @@ export default function SideBar() {
           disabled={!accountStore.permissions.includes(Permission.DevOps)}
         >
           <span class="icon-[fluent--edit-20-regular] w-5 h-5" />
-          <span>{t("admin.edit.title")}</span>
+          <span>{t("platform.form.title")}</span>
         </Link>
       </li>
       <li class="w-full">
@@ -60,7 +60,7 @@ export default function SideBar() {
           disabled={!accountStore.permissions.includes(Permission.DevOps)}
         >
           <span class="icon-[fluent--bot-20-regular] w-5 h-5" />
-          <span>{t("admin.captcha.title")}</span>
+          <span>{t("captcha.title")}</span>
         </Link>
       </li>
       <li class="w-full">
@@ -73,7 +73,7 @@ export default function SideBar() {
           disabled={!accountStore.permissions.includes(Permission.DevOps)}
         >
           <span class="icon-[fluent--image-20-regular] w-5 h-5" />
-          <span>{t("admin.media.title")}</span>
+          <span>{t("media.title")}</span>
         </Link>
       </li>
       <li class="w-full">
@@ -86,7 +86,7 @@ export default function SideBar() {
           disabled={!accountStore.permissions.includes(Permission.DevOps)}
         >
           <span class="icon-[fluent--mail-20-regular] w-5 h-5" />
-          <span>{t("admin.email.title")}</span>
+          <span>{t("platform.email.title")}</span>
         </Link>
       </li>
       <Divider />
@@ -102,7 +102,7 @@ export default function SideBar() {
           }
         >
           <span class="icon-[fluent--lock-closed-key-20-regular] w-5 h-5" />
-          <span>{t("admin.oauth.title")}</span>
+          <span>{t("oauth.title")}</span>
         </Link>
       </li>
       <li class="w-full">
@@ -115,7 +115,7 @@ export default function SideBar() {
           disabled={!accountStore.permissions.includes(Permission.User)}
         >
           <span class="icon-[fluent--person-20-regular] w-5 h-5" />
-          <span>{t("admin.users.title")}</span>
+          <span>{t("user.list.title")}</span>
         </Link>
       </li>
       <Divider />
@@ -129,7 +129,7 @@ export default function SideBar() {
           disabled={!accountStore.permissions.includes(Permission.DevOps)}
         >
           <span class="icon-[fluent--flowchart-20-regular] w-5 h-5" />
-          <span>{t("admin.sync.title")}</span>
+          <span>{t("platform.sync.title")}</span>
         </Link>
       </li>
       <li class="w-full">
@@ -142,7 +142,7 @@ export default function SideBar() {
           disabled={!accountStore.permissions.includes(Permission.DevOps)}
         >
           <span class="icon-[fluent--hexagon-three-20-regular] w-5 h-5" />
-          <span>{t("admin.cluster.title")}</span>
+          <span>{t("cluster.title")}</span>
         </Link>
       </li>
       <li class="w-full">
@@ -155,14 +155,14 @@ export default function SideBar() {
           disabled={!accountStore.permissions.includes(Permission.DevOps)}
         >
           <span class="icon-[fluent--airplane-20-regular] w-5 h-5" />
-          <span>{t("admin.traffic.title")}</span>
+          <span>{t("traffic.title")}</span>
         </Link>
       </li>
       <Divider />
       <li class="w-full">
         <Link activeMatch="exact" class="w-full" ghost href="/magic/about" justify="start">
           <span class="icon-[fluent--info-20-regular] w-5 h-5" />
-          <span>{t("admin.about.title")}</span>
+          <span>{t("magic.about.title")}</span>
         </Link>
       </li>
     </ul>

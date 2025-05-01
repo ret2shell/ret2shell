@@ -24,6 +24,10 @@
           "image": "",
           "pow": ""
         }
+      },
+      "answer": {
+        "required": "",
+        "minimumLength": ""
       }
     },
     "label": "",
@@ -688,7 +692,33 @@
       "title": ""
     },
     "registerNotStarted": "",
-    "registerEnded": ""
+    "registerEnded": "",
+    "policies": {
+      "title": ""
+    },
+    "timeline": {
+      "title": ""
+    },
+    "hammer": {
+      "title": ""
+    },
+    "delete": {
+      "title": "",
+      "warning": "",
+      "requirements": "",
+      "confirm": ""
+    },
+    "events": {
+      "title": ""
+    },
+    "organize": {
+      "title": ""
+    },
+    "errors": {
+      "fetch": {
+        "title": ""
+      }
+    }
   },
   "general": {
     "actions": {
@@ -856,6 +886,9 @@
       },
       "goto": {
         "title": ""
+      },
+      "generate": {
+        "title": ""
       }
     },
     "loading": {
@@ -945,6 +978,10 @@
       },
       "internal": {
         "title": ""
+      },
+      "fetchConfig": {
+        "title": "",
+        "notReady": ""
       }
     },
     "name": "",
@@ -961,6 +998,21 @@
     "updated": "",
     "tooNarrow": "",
     "ret2codec": {
+      "title": ""
+    },
+    "sync": {
+      "title": ""
+    },
+    "email": {
+      "title": ""
+    },
+    "form": {
+      "title": ""
+    },
+    "logs": {
+      "title": ""
+    },
+    "statistics": {
       "title": ""
     }
   },
@@ -1145,7 +1197,12 @@
     },
     "joinedGames": "",
     "gameJournal": "",
-    "moreJournal": ""
+    "moreJournal": "",
+    "gotoAdminPanel": "",
+    "list": {
+      "title": ""
+    },
+    "registeredAt": ""
   },
   "account": {
     "permission": {
@@ -1161,16 +1218,209 @@
       "user": ""
     },
     "login": {
-      "title": ""
+      "title": "",
+      "status": {
+        "success": ""
+      },
+      "errors": {
+        "login": {
+          "title": ""
+        }
+      },
+      "form": {
+        "account": {}
+      }
     },
     "settings": {
-      "title": ""
+      "title": "",
+      "delete": {}
     },
     "logout": "",
     "status": {
       "unverified": {
+        "message": "",
+        "action": ""
+      }
+    },
+    "errors": {
+      "fetchCode": {
+        "title": ""
+      }
+    },
+    "code": {
+      "title": "",
+      "status": {
+        "unverified": {
+          "message": "",
+          "action": ""
+        }
+      },
+      "empty": "",
+      "tip": ""
+    },
+    "forgot": {
+      "status": {
+        "success": "",
+        "rateExceeded": ""
+      },
+      "title": "",
+      "form": {
+        "email": {
+          "required": "",
+          "invalid": "",
+          "title": "",
+          "placeholder": ""
+        }
+      }
+    },
+    "oauth": {
+      "errors": {
+        "fetchProvider": {
+          "title": ""
+        },
+        "bind": {
+          "title": ""
+        },
+        "fetchStatus": {
+          "title": ""
+        },
+        "unbind": {
+          "title": ""
+        }
+      },
+      "select": "",
+      "title": "",
+      "notBind": "",
+      "actions": {
+        "bind": {
+          "title": ""
+        },
+        "unbind": {
+          "title": ""
+        }
+      }
+    },
+    "form": {
+      "account": {
+        "minimumLength": "",
+        "placeholder": "",
+        "required": "",
+        "title": "",
+        "maximumLength": "",
+        "invalid": ""
+      },
+      "password": {
+        "required": "",
+        "minimumLength": "",
+        "tooWeak": "",
+        "placeholder": "",
+        "title": "",
+        "confirmRequired": "",
+        "confirmMismatch": "",
+        "confirmTitle": "",
+        "confirmPlaceholder": ""
+      },
+      "nickname": {
+        "required": "",
+        "minLength": "",
+        "maxLength": "",
+        "placeholder": "",
+        "title": ""
+      },
+      "email": {
+        "required": "",
+        "invalid": "",
+        "placeholder": "",
+        "title": ""
+      },
+      "description": {
+        "title": ""
+      },
+      "oldPassword": {
+        "required": "",
+        "title": "",
+        "placeholder": ""
+      }
+    },
+    "register": {
+      "tips": "",
+      "status": {
+        "success": ""
+      },
+      "errors": {
+        "register": {
+          "title": ""
+        }
+      },
+      "title": "",
+      "oauthRegister": ""
+    },
+    "reset": {
+      "errors": {
+        "invalidLink": {
+          "title": ""
+        },
+        "reset": {
+          "title": ""
+        }
+      },
+      "status": {
+        "success": ""
+      },
+      "title": "",
+      "form": {
+        "token": {
+          "required": "",
+          "placeholder": "",
+          "title": ""
+        }
+      }
+    },
+    "info": {
+      "title": ""
+    },
+    "password": {
+      "title": "",
+      "errors": {
+        "change": {
+          "title": ""
+        }
+      }
+    },
+    "delete": {
+      "title": "",
+      "errors": {
+        "delete": {
+          "title": ""
+        }
+      },
+      "topWarning": "",
+      "canNotDeleteWhenGameInProgress": "",
+      "declare": {
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "title": ""
+      },
+      "confirm": "",
+      "thinkTwice": "",
+      "bye": {
+        "title": "",
         "message": ""
       }
+    },
+    "verify": {
+      "errors": {
+        "send": {}
+      },
+      "status": {
+        "success": "",
+        "fail": "",
+        "broken": "",
+        "verifying": ""
+      },
+      "title": ""
     }
   },
   "shell": {
@@ -1301,7 +1551,8 @@
   "docs": {
     "title": "",
     "tip": "",
-    "forVersion": ""
+    "forVersion": "",
+    "intro": ""
   },
   "magic": {
     "about": {
@@ -1331,7 +1582,8 @@
       "fetchList": {
         "title": ""
       }
-    }
+    },
+    "title": ""
   },
   "calendar": {
     "day": {
@@ -1372,5 +1624,29 @@
   },
   "admin": {
     "title": ""
+  },
+  "traffic": {
+    "title": ""
+  },
+  "cluster": {
+    "title": ""
+  },
+  "users": {},
+  "oauth": {
+    "title": ""
+  },
+  "media": {
+    "title": ""
+  },
+  "captures": {
+    "title": ""
+  },
+  "institute": {
+    "errors": {
+      "fetchList": {
+        "title": ""
+      }
+    },
+    "empty": ""
   }
 }

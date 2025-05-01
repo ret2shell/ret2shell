@@ -20,7 +20,7 @@ export default function SideBar() {
           const resp = await getGame(selectedGameId());
           setGameStore({ current: resp });
         } catch (err) {
-          handleHttpError(err as Error, t("game.fetchFailed")!);
+          handleHttpError(err as Error, t("game.errors.fetch.title")!);
           if (err instanceof HTTPError) navigate(`/sigtrap/${err.response.status}`, { replace: true });
           else navigate("/sigtrap/unknown", { replace: true });
         }
@@ -46,7 +46,7 @@ export default function SideBar() {
               <span class="icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning" />
             </Show>
           </Link>
-          <Link square ghost href="/training" title={t("platform.return")}>
+          <Link square ghost href="/training" title={t("general.actions.back.title")}>
             <span class="icon-[fluent--arrow-hook-up-left-20-regular] w-5 h-5 text-warning" />
           </Link>
         </Show>

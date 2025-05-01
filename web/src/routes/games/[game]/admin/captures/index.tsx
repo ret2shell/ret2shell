@@ -6,7 +6,7 @@ import { t } from "@storage/theme";
 export default function Capture() {
   return (
     <>
-      <Title page={t("game.admin.captures.title")} route={`/games/${gameStore.current?.id}/admin/captures`} />
+      <Title page={t("captures.title")} route={`/games/${gameStore.current?.id}/admin/captures`} />
       <div class="flex-1 flex items-center justify-center">
         <NotImplemented />
       </div>

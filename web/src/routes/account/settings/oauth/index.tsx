@@ -29,12 +29,12 @@ export default function () {
     try {
       setInstitutes(await getInstitutes());
     } catch (err) {
-      handleHttpError(err as Error, t("errors.unknown")!);
+      handleHttpError(err as Error, t("institute.errors.fetchList.title")!);
     }
     try {
       setOAuthServices(await getOAuthProviders());
     } catch (err) {
-      handleHttpError(err as Error, t("errors.500")!);
+      handleHttpError(err as Error, t("account.oauth.errors.fetchProvider.title")!);
     }
   });
   async function refreshOAuthStatus() {
@@ -42,7 +42,7 @@ export default function () {
       setSelfOAuthItems(await getOAuthStatus());
     } catch (err) {
       setSelfOAuthItems([]);
-      handleHttpError(err as Error, t("account.settings.oauth.failedToGetOAuthStatus")!);
+      handleHttpError(err as Error, t("account.oauth.errors.fetchStatus.title")!);
     }
   }
   createEffect(() => {
@@ -58,17 +58,17 @@ export default function () {
       await unbindWithOAuth(id);
       refreshOAuthStatus();
     } catch (err) {
-      handleHttpError(err as Error, t("account.oauth.failedToUnbind")!);
+      handleHttpError(err as Error, t("account.oauth.errors.unbind.title")!);
     }
   }
   return (
     <>
-      <Title page={t("account.settings.oauth.title")} route="/account/settings/oauth" />
+      <Title page={t("account.oauth.title")} route="/account/settings/oauth" />
       <div class="flex flex-col p-3 lg:p-6 w-full items-center">
         <div class="flex flex-col w-full max-w-5xl relative">
           <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
             <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
-            <span>{t("account.settings.oauth.title")}</span>
+            <span>{t("account.oauth.title")}</span>
           </h3>
           <For each={oauthServices()}>
             {(service) => (
@@ -88,7 +88,7 @@ export default function () {
                     <>
                       <span class="opacity-60">{t("account.oauth.notBind")}</span>
                       <Link size="sm" href={getOAuthLink(service)}>
-                        {t("account.oauth.bind")}
+                        {t("account.oauth.actions.bind.title")}
                       </Link>
                     </>
                   }
@@ -112,7 +112,7 @@ export default function () {
                     size="sm"
                     onClick={() => handleUnbind(selfOAuthItems().find((v) => v.provider === service.provider)!.id)}
                   >
-                    {t("account.oauth.unbind")}
+                    {t("account.oauth.actions.unbind.title")}
                   </Button>
                 </Show>
               </div>

@@ -30,7 +30,7 @@ export default function () {
   if (!emailPredef || !tokenPredef) {
     addToast({
       level: "error",
-      description: t("account.reset.invalidLink")!,
+      description: t("account.reset.errors.invalidLink.title")!,
       duration: 5000,
     });
     navigate("/sigtrap/403", { replace: true });
@@ -47,12 +47,12 @@ export default function () {
         await resetPassword(data);
         addToast({
           level: "success",
-          description: t("account.reset.success")!,
+          description: t("account.reset.status.success")!,
           duration: 5000,
         });
         navigate("/", { replace: true });
       } catch (err) {
-        handleHttpError(err as Error, t("account.reset.failed")!);
+        handleHttpError(err as Error, t("account.reset.errors.reset.title")!);
         setTimestamp(DateTime.now().toMillis());
       }
       setLoading(false);
@@ -78,14 +78,14 @@ export default function () {
             />
             <Field
               name="email"
-              validate={[required(t("account.register.emailRequired")!), email(t("account.register.emailInvalid")!)]}
+              validate={[required(t("account.form.email.required")!), email(t("account.form.email.invalid")!)]}
             >
               {(field, props) => (
                 <Input
                   icon={<span class="icon-[fluent--mail-20-regular] w-5 h-5" />}
-                  placeholder={t("account.register.emailPlaceholder")}
+                  placeholder={t("account.form.email.placeholder")}
                   disabled
-                  title={t("account.register.emailPlaceholder")}
+                  title={t("account.form.email.title")}
                   autocomplete="email"
                   {...props}
                   value={field.value}
@@ -95,13 +95,13 @@ export default function () {
                 />
               )}
             </Field>
-            <Field name="token" validate={[required(t("account.reset.tokenRequired")!)]}>
+            <Field name="token" validate={[required(t("account.reset.form.token.required")!)]}>
               {(field, props) => (
                 <Input
                   icon={<span class="icon-[fluent--key-20-regular] w-5 h-5" />}
-                  placeholder={t("account.reset.tokenPlaceholder")}
+                  placeholder={t("account.reset.form.token.placeholder")}
                   disabled
-                  title={t("account.reset.tokenPlaceholder")}
+                  title={t("account.reset.form.token.title")}
                   autocomplete="off"
                   {...props}
                   value={field.value}
@@ -114,20 +114,20 @@ export default function () {
             <Field
               name="password"
               validate={[
-                required(t("account.register.passwordRequired")!),
-                minLength(8, t("account.register.passwordMinLength")!),
+                required(t("account.form.password.required")!),
+                minLength(8, t("account.form.password.minimumLength")!),
                 pattern(
                   // biome-ignore lint/correctness/noEmptyCharacterClassInRegex: password allows any characters
                   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,40}$/,
-                  t("account.register.passwordTooWeak")!
+                  t("account.form.password.tooWeak")!
                 ),
               ]}
             >
               {(field, props) => (
                 <Input
                   icon={<span class="icon-[fluent--lock-20-regular] w-5 h-5" />}
-                  placeholder={t("account.register.passwordPlaceholder")}
-                  title={t("account.register.passwordPlaceholder")}
+                  placeholder={t("account.form.password.placeholder")}
+                  title={t("account.form.password.title")}
                   autocomplete="new-password"
                   type="password"
                   {...props}
@@ -142,7 +142,7 @@ export default function () {
               {(idField) => (
                 <Field
                   name="captcha_answer"
-                  validate={[required(t("captcha.required")!), minLength(4, t("captcha.minLength")!)]}
+                  validate={[required(t("captcha.form.answer.required")!), minLength(4, t("captcha.form.answer.minimumLength")!)]}
                 >
                   {(answerField, props) => (
                     <Captcha
@@ -160,7 +160,7 @@ export default function () {
               )}
             </Field>
             <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
-              {t("account.reset.confirm")}
+              {t("general.actions.confirm.title")}
             </Button>
           </Form>
         </Card>

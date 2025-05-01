@@ -24,7 +24,7 @@ export default function () {
     try {
       setOAuthServices(await getOAuthProviders());
     } catch (err) {
-      handleHttpError(err as Error, t("errors.500")!);
+      handleHttpError(err as Error, t("account.oauth.errors.fetchProvider.title")!);
     }
     setTimeout(() => {
       setAnimate(true);
@@ -61,12 +61,12 @@ export default function () {
       navigate("/", { replace: true });
       addToast({
         level: "success",
-        description: t("account.login.success")!,
+        description: t("account.login.status.success")!,
         duration: 5000,
         // img: xdsecMascotHappy,
       });
     } catch (err) {
-      handleHttpError(err as Error, t("account.oauth.failedToLogin")!);
+      handleHttpError(err as Error, t("account.login.errors.login.title")!);
       setTimeout(() => {
         navigate("/account/login", { replace: true });
       });
@@ -78,7 +78,7 @@ export default function () {
       await bindWithOAuth(location.search);
       navigate("/account/settings/oauth", { replace: true });
     } catch (err) {
-      handleHttpError(err as Error, t("account.oauth.failedToBind")!);
+      handleHttpError(err as Error, t("account.oauth.errors.bind.title")!);
       setTimeout(() => {
         navigate("/account/settings/oauth", { replace: true });
       });

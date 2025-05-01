@@ -47,13 +47,13 @@ export default function () {
         }
         addToast({
           level: "success",
-          description: t("account.register.success")!,
+          description: t("account.register.status.success")!,
           duration: 5000,
           // img: xdsecMascotHappy,
         });
         navigate("/", { replace: true });
       } catch (err) {
-        handleHttpError(err as Error, t("errors.unknown")!);
+        handleHttpError(err as Error, t("account.register.errors.register.title")!);
         setTimestamp(DateTime.now().toMillis());
       }
       setLoading(false);
@@ -72,23 +72,23 @@ export default function () {
             <h2 class="font-bold text-center">{t("account.register.title")}</h2>
             <Show when={searchParams.token && searchParams.auth_key}>
               <Card level="info" class="w-full" contentClass="p-2">
-                <p>{t("account.register.oauthRegisterTips", { key: searchParams.auth_key as string })}</p>
+                <p>{t("account.register.oauthRegister", { key: searchParams.auth_key as string })}</p>
               </Card>
             </Show>
             <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
               <Field
                 name="nickname"
                 validate={[
-                  required(t("account.register.nicknameRequired")!),
-                  minLength(2, t("account.register.nicknameMinLength")!),
-                  maxLength(32, t("account.register.nicknameMaxLength")!),
+                  required(t("account.form.nickname.required")!),
+                  minLength(2, t("account.form.nickname.minLength")!),
+                  maxLength(32, t("account.form.nickname.maxLength")!),
                 ]}
               >
                 {(field, props) => (
                   <Input
                     icon={<span class="icon-[fluent--wand-20-regular] w-5 h-5" />}
-                    placeholder={t("account.register.nicknamePlaceholder")}
-                    title={t("account.register.nickname")}
+                    placeholder={t("account.form.nickname.placeholder")}
+                    title={t("account.form.nickname.title")}
                     autocomplete="nickname"
                     {...props}
                     value={field.value}
@@ -108,31 +108,31 @@ export default function () {
               <Field
                 name="account"
                 validate={[
-                  required(t("account.register.accountRequired")!),
-                  minLength(4, t("account.register.accountMinLength")!),
-                  maxLength(32, t("account.register.accountMaxLength")!),
+                  required(t("account.form.account.required")!),
+                  minLength(4, t("account.form.account.minimumLength")!),
+                  maxLength(32, t("account.form.account.maximumLength")!),
                   // only ascii visible characters, no whitespaces
-                  pattern(/^[0-9a-zA-Z_]*$/, t("account.register.accountPattern")!),
+                  pattern(/^[0-9a-zA-Z_]*$/, t("account.form.account.invalid")!),
                 ]}
               >
                 {(field, props) => (
                   <Input
                     icon={<span class="icon-[fluent--person-20-regular] w-5 h-5" />}
-                    placeholder={t("account.register.accountPlaceholder")}
-                    title={t("account.register.accountPlaceholder")}
+                    placeholder={t("account.form.account.placeholder")}
+                    title={t("account.form.account.title")}
                     autocomplete="username"
                     {...props}
                     value={field.value}
                     error={field.error}
                     class="flex-1"
                     required
-                    ref={accountInputRef}
+                    ref={accountInputRef!}
                     extraBtn={
                       <Button
                         class="!rounded-l-none"
                         type="button"
                         onClick={async () => {
-                          if (accountInputRef?.value) {
+                          if (accountInputRef! && accountInputRef.value) {
                             try {
                               setValue(form, "account", await leet(accountInputRef!.value));
                             } catch {}
@@ -148,13 +148,13 @@ export default function () {
             </div>
             <Field
               name="email"
-              validate={[required(t("account.register.emailRequired")!), email(t("account.register.emailInvalid")!)]}
+              validate={[required(t("account.form.email.required")!), email(t("account.form.email.invalid")!)]}
             >
               {(field, props) => (
                 <Input
                   icon={<span class="icon-[fluent--mail-20-regular] w-5 h-5" />}
-                  placeholder={t("account.register.emailPlaceholder")}
-                  title={t("account.register.emailPlaceholder")}
+                  placeholder={t("account.form.email.placeholder")}
+                  title={t("account.form.email.title")}
                   autocomplete="email"
                   {...props}
                   value={field.value}
@@ -168,20 +168,20 @@ export default function () {
               <Field
                 name="password"
                 validate={[
-                  required(t("account.register.passwordRequired")!),
-                  minLength(8, t("account.register.passwordMinLength")!),
+                  required(t("account.form.password.required")!),
+                  minLength(8, t("account.form.password.minimumLength")!),
                   pattern(
                     // biome-ignore lint/correctness/noEmptyCharacterClassInRegex: password allows any characters
                     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,40}$/,
-                    t("account.register.passwordTooWeak")!
+                    t("account.form.password.tooWeak")!
                   ),
                 ]}
               >
                 {(field, props) => (
                   <Input
                     icon={<span class="icon-[fluent--lock-20-regular] w-5 h-5" />}
-                    placeholder={t("account.register.passwordPlaceholder")}
-                    title={t("account.register.passwordPlaceholder")}
+                    placeholder={t("account.form.password.placeholder")}
+                    title={t("account.form.password.title")}
                     autocomplete="new-password"
                     type="password"
                     {...props}
@@ -196,7 +196,7 @@ export default function () {
                 {(idField) => (
                   <Field
                     name="captcha_answer"
-                    validate={[required(t("captcha.required")!), minLength(4, t("captcha.minLength")!)]}
+                    validate={[required(t("captcha.form.answer.required")!), minLength(4, t("captcha.form.answer.minimumLength")!)]}
                   >
                     {(answerField, props) => (
                       <Captcha

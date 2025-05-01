@@ -31,7 +31,7 @@ export default function () {
         await forgotPassword(data);
         addToast({
           level: "success",
-          description: t("account.forgot.success")!,
+          description: t("account.forgot.status.success")!,
           duration: 5000,
         });
         navigate("/", { replace: true });
@@ -39,7 +39,7 @@ export default function () {
         if (err instanceof HTTPError && err.response.status === 429) {
           addToast({
             level: "error",
-            description: t("account.forgot.rateLimit")!,
+            description: t("account.forgot.status.rateExceeded")!,
             duration: 5000,
           });
         } else {
@@ -62,13 +62,13 @@ export default function () {
             <h2 class="font-bold text-center">{t("account.forgot.title")}</h2>
             <Field
               name="email"
-              validate={[required(t("account.register.emailRequired")!), email(t("account.register.emailInvalid")!)]}
+              validate={[required(t("account.forgot.form.email.required")!), email(t("account.forgot.form.email.invalid")!)]}
             >
               {(field, props) => (
                 <Input
                   icon={<span class="icon-[fluent--mail-20-regular] w-5 h-5" />}
-                  placeholder={t("account.register.emailPlaceholder")}
-                  title={t("account.register.emailPlaceholder")}
+                  placeholder={t("account.forgot.form.email.placeholder")}
+                  title={t("account.forgot.form.email.title")}
                   autocomplete="email"
                   {...props}
                   value={field.value}
@@ -82,7 +82,7 @@ export default function () {
               {(idField) => (
                 <Field
                   name="captcha_answer"
-                  validate={[required(t("captcha.required")!), minLength(4, t("captcha.minLength")!)]}
+                  validate={[required(t("captcha.form.answer.required")!), minLength(4, t("captcha.form.answer.required")!)]}
                 >
                   {(answerField, props) => (
                     <Captcha
@@ -100,7 +100,7 @@ export default function () {
               )}
             </Field>
             <Button type="submit" level="primary" class="!mt-4" loading={loading()} disabled={loading()}>
-              {t("account.forgot.sendResetEmail")}
+              {t("general.actions.send.title")}
             </Button>
           </Form>
         </Card>

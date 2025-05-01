@@ -20,7 +20,7 @@ export default function UserCodeDialog() {
         setCode(await getAccountCode());
       } catch (err) {
         setCode(null);
-        handleHttpError(err as Error, t("account.login.failMascotTip")!);
+        handleHttpError(err as Error, t("account.errors.fetchCode.title")!);
       }
       setLoadingCode(false);
     }
@@ -36,7 +36,7 @@ export default function UserCodeDialog() {
       try {
         setCode(await generateAccountCode());
       } catch (err) {
-        handleHttpError(err as Error, t("account.login.failMascotTip")!);
+        handleHttpError(err as Error, t("account.errors.fetchCode.title")!);
       }
       setLoadingCode(false);
     }, 500);
@@ -66,16 +66,16 @@ export default function UserCodeDialog() {
             <Match when={!verified()}>
               <span class="icon-[fluent--person-link-20-regular] w-10 h-10 shrink-0 text-warning" />
               <span class="text-warning inline-block align-middle">
-                <span>{t("account.code.verify")}</span>
+                <span>{t("account.code.status.unverified.message")}</span>
               </span>
               <A href="/account/info" class="flex items-center space-x-2">
                 <span class="icon-[fluent--open-20-regular] w-5 h-5" />
-                <span>{t("account.verifyEmail")}</span>
+                <span>{t("account.code.status.unverified.action")}</span>
               </A>
             </Match>
             <Match when={!accountStore.warnedCodeGeneration}>
               <span class="icon-[fluent--warning-20-regular] w-10 h-10 shrink-0 text-warning" />
-              <span class="text-warning">{t("account.code.warn")}</span>
+              <span class="text-warning">{t("account.code.tip")}</span>
             </Match>
             <Match when={code()}>
               <span class="font-extrabold text-5xl tracking-widest">
@@ -85,13 +85,13 @@ export default function UserCodeDialog() {
             </Match>
             <Match when={true}>
               <span class="icon-[fluent--person-link-20-regular] w-10 h-10 opacity-60" />
-              <span class="opacity-60">{t("account.code.null")}</span>
+              <span class="opacity-60">{t("account.code.empty")}</span>
             </Match>
           </Switch>
         </div>
         <Button
           level="primary"
-          title={t("account.code.refresh")}
+          title={t("general.actions.refresh.title")}
           onClick={refreshCode}
           loading={loadingCode()}
           disabled={loadingCode() || !verified()}
@@ -99,14 +99,14 @@ export default function UserCodeDialog() {
           <Switch>
             <Match when={!accountStore.warnedCodeGeneration}>
               <span class="icon-[fluent--emoji-hand-20-regular] w-5 h-5" />
-              <span class="truncate">{t("account.code.confirmWarn")}</span>
+              <span class="truncate">{t("general.actions.confirm.title")}</span>
             </Match>
             <Match when={loadingCode()}>
-              <span class="truncate">{t("form.loading")}</span>
+              <span class="truncate">{t("general.loading.short")}</span>
             </Match>
             <Match when={true}>
               <span class="icon-[fluent--arrow-clockwise-20-regular] w-5 h-5" />
-              <span class="truncate">{t("account.code.refresh")}</span>
+              <span class="truncate">{t("general.actions.generate.title")} / {t("general.actions.refresh.title")}</span>
             </Match>
           </Switch>
         </Button>

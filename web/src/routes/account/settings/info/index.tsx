@@ -70,7 +70,7 @@ export default function () {
         setValue(form, "avatar", resp.hash);
         setAvatarSet(true);
       } catch (err) {
-        handleHttpError(err as Error, t("account.settings.info.avatarUploadFailed")!);
+        handleHttpError(err as Error, t("general.actions.upload.status.fail")!);
       }
       setAvatarUploading(false);
     }
@@ -80,11 +80,11 @@ export default function () {
       await resendEmail();
       addToast({
         level: "success",
-        description: t("account.settings.verify.resendSuccess")!,
+        description: t("general.actions.send.status.success")!,
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as Error, t("account.settings.verify.resendFailed")!);
+      handleHttpError(err as Error, t("general.actions.send.status.fail")!);
     }
   }
   async function onSubmit(result: UserForm) {
@@ -107,28 +107,28 @@ export default function () {
   }
   return (
     <>
-      <Title page={t("account.settings.info.title")} route="/account/settings/info" />
+      <Title page={t("account.info.title")} route="/account/settings/info" />
       <div class="flex flex-col p-3 lg:p-6 w-full items-center">
         <Form onSubmit={onSubmit} class="flex flex-col w-full max-w-5xl space-y-2 relative">
           <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
             <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
-            <span>{t("account.settings.info.title")}</span>
+            <span>{t("account.info.title")}</span>
           </h3>
           <div class="flex flex-row space-x-4 items-center">
             <div class="flex flex-col space-y-2 flex-1">
               <Input
                 icon={<span class="icon-[fluent--person-20-regular] w-5 h-5" />}
-                title={t("account.settings.info.account")}
-                placeholder={t("account.settings.info.account")}
+                title={t("account.form.account.title")}
+                placeholder={t("account.form.account.placeholder")}
                 value={accountStore.account!}
                 disabled
               />
-              <Field name="nickname" validate={[required(t("account.settings.info.nicknameRequired")!)]}>
+              <Field name="nickname" validate={[required(t("account.form.nickname.required")!)]}>
                 {(field, props) => (
                   <Input
                     icon={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}
-                    title={t("account.settings.info.nickname")}
-                    placeholder={t("account.settings.info.nickname")}
+                    title={t("account.form.nickname.title")}
+                    placeholder={t("account.form.nickname.placeholder")}
                     {...props}
                     value={field.value}
                     error={field.error}
@@ -187,15 +187,16 @@ export default function () {
           <Field
             name="email"
             validate={[
-              required(t("account.settings.info.emailRequired")!),
-              email(t("account.settings.info.emailInvalid")!),
+              required(t("account.form.email.required")!),
+              email(t("account.form.email.invalid")!),
             ]}
           >
             {(field, props) => (
               <Input
                 icon={<span class="icon-[fluent--mail-20-regular] w-5 h-5" />}
-                title={t("account.settings.info.email")}
-                placeholder={t("account.settings.info.email")}
+                title={t("account.form.email.title")}
+                placeholder={t("account.form.email.placeholder")}
+                autocomplete="email"
                 {...props}
                 value={field.value}
                 error={field.error}
@@ -206,9 +207,9 @@ export default function () {
           <Show when={!accountStore.permissions.includes(Permission.Verified)}>
             <Card level="warning" contentClass="p-2 flex flex-row space-x-2 items-center pl-4">
               <span class="icon-[fluent--warning-20-filled] w-5 h-5 text-warning" />
-              <span class="flex-1 text-start">{t("account.settings.info.emailNotVerified")}</span>
+              <span class="flex-1 text-start">{t("account.status.unverified.message")}</span>
               <Button size="sm" type="button" onClick={handleResendVerifyEmail}>
-                <span>{t("account.settings.verify.resend")}</span>
+                <span>{t("account.status.unverified.action")}</span>
               </Button>
             </Card>
           </Show>
@@ -220,7 +221,7 @@ export default function () {
                 class="h-80"
                 lang="markdown"
                 placeholder="MARKDOWN"
-                title={t("account.settings.info.description")}
+                title={t("account.form.description.title")}
                 name="description"
                 value={field.value}
                 error={field.error}

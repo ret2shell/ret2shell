@@ -68,7 +68,7 @@ function UserList() {
       <h3 class="min-h-12 flex flex-wrap justify-end py-2 gap-y-2 items-center border-b border-b-layer-content/10 font-bold space-x-2">
         <div class="flex flex-row items-center space-x-2">
           <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
-          <span class="flex-1 text-start">{t("admin.users.title")}</span>
+          <span class="flex-1 text-start">{t("user.list.title")}</span>
         </div>
         <span class="flex-1" />
         <Select
@@ -226,7 +226,7 @@ export default function () {
   });
   return (
     <>
-      <Title page={t("admin.users.title")} route="/admin/users" />
+      <Title page={t("user.list.title")} route="/admin/users" />
       <div class="flex-1 flex flex-col items-center">
         <Show when={inEdit()} fallback={<UserList />}>
           <Form editSource={user() || undefined} onDone={handleUpdateUser} loading={updatingUser()} />

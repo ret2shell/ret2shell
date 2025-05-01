@@ -41,7 +41,7 @@ export default function (props: {
           <Divider />
           <div class="flex flex-row space-x-2 items-center px-2 py-2">
             <span class="icon-[fluent--hat-graduation-20-regular] w-5 h-5" />
-            <span class="font-bold">{props.team?.institute_name ?? t("game.team.noInstitute")}</span>
+            <span class="font-bold">{props.team?.institute_name ?? t("institute.empty")}</span>
           </div>
           <Divider />
           <Show when={props.loading}>

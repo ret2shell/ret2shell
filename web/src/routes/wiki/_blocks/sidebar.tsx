@@ -82,7 +82,7 @@ export default function SideBar() {
         rel="noopener noreferrer"
       >
         <span class="icon-[fluent--book-20-regular] w-5 h-5" />
-        <span>{t("docs.titleTips")}</span>
+        <span>{t("docs.title")}</span>
         <span class="icon-[fluent--open-20-regular] w-5 h-5 text-primary" />
       </a>
     </OverlayScrollbarsComponent>

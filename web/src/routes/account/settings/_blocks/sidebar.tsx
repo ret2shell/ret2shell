@@ -8,19 +8,19 @@ export default function SideBar() {
       <li class="w-full">
         <Link activeMatch="exact" class="w-full" ghost href="/account/settings/info" justify="start">
           <span class="icon-[fluent--info-20-regular] w-5 h-5" />
-          <span>{t("account.settings.info.title")}</span>
+          <span>{t("account.info.title")}</span>
         </Link>
       </li>
       <li class="w-full">
         <Link activeMatch="exact" class="w-full" ghost href="/account/settings/password" justify="start">
           <span class="icon-[fluent--lock-closed-key-20-regular] w-5 h-5" />
-          <span>{t("account.settings.password.title")}</span>
+          <span>{t("account.password.title")}</span>
         </Link>
       </li>
       <li class="w-full">
         <Link activeMatch="exact" class="w-full" ghost href="/account/settings/oauth" justify="start">
           <span class="icon-[fluent--key-multiple-20-regular] w-5 h-5" />
-          <span>{t("account.settings.oauth.title")}</span>
+          <span>{t("account.oauth.title")}</span>
         </Link>
       </li>
       <Divider />
@@ -34,7 +34,7 @@ export default function SideBar() {
           justify="start"
         >
           <span class="icon-[fluent--person-walking-20-regular] w-5 h-5" />
-          <span>{t("account.settings.delete.title")}</span>
+          <span>{t("account.delete.title")}</span>
         </Link>
       </li>
     </ul>

@@ -225,6 +225,9 @@
       },
       "goto": {
         "title": "前往"
+      },
+      "generate": {
+        "title": "生成"
       }
     }
   },
@@ -257,6 +260,10 @@
       },
       "internal": {
         "title": "服务器内部错误"
+      },
+      "fetchConfig": {
+        "title": "获取平台配置失败",
+        "notReady": "未获取到平台配置"
       }
     },
     "notifications": {
@@ -271,6 +278,21 @@
     "tooNarrow": "太窄了，请宽一点",
     "ret2codec": {
       "title": "替换协议"
+    },
+    "sync": {
+      "title": "资源同步"
+    },
+    "email": {
+      "title": "平台发信邮箱"
+    },
+    "form": {
+      "title": "平台信息"
+    },
+    "logs": {
+      "title": "服务器日志"
+    },
+    "statistics": {
+      "title": "平台统计信息"
     }
   },
   "wiki": {
@@ -590,7 +612,33 @@
       "empty": "没有管理员，请联系运维手动添加"
     },
     "registerNotStarted": "注册暂未开放，少安毋躁",
-    "registerEnded": "报名注册已经结束，请等待比赛归档"
+    "registerEnded": "报名注册已经结束，请等待比赛归档",
+    "policies": {
+      "title": "策略管理"
+    },
+    "timeline": {
+      "title": "时段管理"
+    },
+    "hammer": {
+      "title": "锤子反馈"
+    },
+    "delete": {
+      "title": "删除比赛",
+      "warning": "确定要删除这个比赛吗？删除后不可恢复，相关数据将被清除。",
+      "requirements": "请特别注意，删除比赛前需要清空比赛中所有的题目，有题目存在时无法删除比赛。",
+      "confirm": "如果决定删除比赛，请在下方输入比赛名称 {{name}}"
+    },
+    "events": {
+      "title": "事件推送"
+    },
+    "organize": {
+      "title": "组织管理"
+    },
+    "errors": {
+      "fetch": {
+        "title": "获取赛事失败"
+      }
+    }
   },
   "challenge": {
     "title": "题目",
@@ -1159,10 +1207,17 @@
           "image": "图像识别",
           "pow": "工作量证明"
         }
+      },
+      "answer": {
+        "required": "验证码不能为空",
+        "minimumLength": "验证码过短"
       }
     }
   },
   "user": {
+    "list": {
+      "title": "用户列表"
+    },
     "errors": {
       "fetchList": {
         "title": "获取用户列表失败"
@@ -1174,7 +1229,9 @@
     },
     "joinedGames": "参与赛事",
     "gameJournal": "作为 {{team}} 成员参与了 {{game}}。",
-    "moreJournal": "生命不息，探索不止……"
+    "moreJournal": "生命不息，探索不止……",
+    "gotoAdminPanel": "转至用户管理",
+    "registeredAt": "注册于 {{time}}"
   },
   "account": {
     "permission": {
@@ -1189,8 +1246,58 @@
       "devOps": "平台运维",
       "user": "用户管理"
     },
+    "form": {
+      "account": {
+        "minimumLength": "用户名至少 4 个字符",
+        "required": "用户名不能为空",
+        "placeholder": "请输入用户名",
+        "title": "用户名",
+        "maximumLength": "用户名至多 32 个字符",
+        "invalid": "用户名只能包含大小写字母、数字与下划线"
+      },
+      "password": {
+        "required": "密码不能为空",
+        "minimumLength": "密码至少 8 位",
+        "tooWeak": "密码在 8 - 40 字符之间，至少包含一个大写字母、一个小写字母、一个数字和一个特殊字符",
+        "placeholder": "请输入密码",
+        "title": "密码",
+        "confirmRequired": "确认密码不能为空",
+        "confirmMismatch": "两次密码输入不一致",
+        "confirmTitle": "确认密码",
+        "confirmPlaceholder": "请再次输入密码"
+      },
+      "nickname": {
+        "required": "昵称不能为空",
+        "minLength": "昵称至少 2 个字符",
+        "maxLength": "昵称最多 32 个字符",
+        "placeholder": "请输入昵称（不推荐真名哦）",
+        "title": "昵称"
+      },
+      "email": {
+        "required": "邮箱地址不能为空",
+        "invalid": "邮箱格式错误",
+        "placeholder": "请输入邮箱地址",
+        "title": "邮箱"
+      },
+      "description": {
+        "title": "个人简介"
+      },
+      "oldPassword": {
+        "required": "旧密码不能为空",
+        "title": "旧密码",
+        "placeholder": "请输入旧密码"
+      }
+    },
     "login": {
-      "title": "登录"
+      "title": "登录",
+      "status": {
+        "success": "登录成功，欢迎回来！"
+      },
+      "errors": {
+        "login": {
+          "title": "登录失败"
+        }
+      }
     },
     "settings": {
       "title": "用户设置"
@@ -1198,8 +1305,144 @@
     "logout": "登出",
     "status": {
       "unverified": {
-        "message": "你的账户尚未验证，部分功能受限"
+        "message": "你的账户尚未验证，部分功能受限",
+        "action": "重新发送验证邮件"
       }
+    },
+    "errors": {
+      "fetchCode": {
+        "title": "生成临时识别码失败"
+      }
+    },
+    "code": {
+      "title": "临时用户识别码",
+      "status": {
+        "unverified": {
+          "message": "你的用户账户尚未通过邮箱验证，请验证后再生成识别码。",
+          "action": "前往验证"
+        }
+      },
+      "empty": "没有临时识别码",
+      "tip": "此验证码用于向第三方服务提供你的完整账户信息，包括你的邮箱、组织认证信息等，比赛主办方可能会使用此验证码来确认你的身份。请勿在未知用途的情况下随意提供此验证码！"
+    },
+    "forgot": {
+      "status": {
+        "success": "重置密码的邮件已发送至你的邮箱，请查收。",
+        "rateExceeded": "太快了！如果没收到邮件，请检查你的垃圾箱，30分钟之后才可以重试发送。"
+      },
+      "title": "找回密码",
+      "form": {
+        "email": {
+          "required": "邮箱地址不能为空",
+          "invalid": "邮箱格式错误",
+          "title": "注册时使用的邮箱",
+          "placeholder": "请输入邮箱地址"
+        }
+      }
+    },
+    "oauth": {
+      "errors": {
+        "fetchProvider": {
+          "title": "获取第三方认证服务失败"
+        },
+        "bind": {
+          "title": "绑定第三方账户失败"
+        },
+        "fetchStatus": {
+          "title": "获取第三方认证状态失败"
+        },
+        "unbind": {
+          "title": "解绑第三方认证服务失败"
+        }
+      },
+      "select": "使用统一身份认证登录",
+      "title": "第三方认证服务",
+      "notBind": "未绑定",
+      "actions": {
+        "bind": {
+          "title": "绑定"
+        },
+        "unbind": {
+          "title": "解绑"
+        }
+      }
+    },
+    "register": {
+      "tips": "没有账号？现在注册！",
+      "status": {
+        "success": "注册成功，欢迎来到 CTF 的世界！"
+      },
+      "errors": {
+        "register": {
+          "title": "注册失败"
+        }
+      },
+      "title": "注册",
+      "oauthRegister": "看起来你在此之前没有注册用户…… 没关系！现在注册将直接绑定到你的第三方认证账户 {{key}} 中，下次你就可以直接使用第三方统一身份认证登录了。"
+    },
+    "reset": {
+      "errors": {
+        "invalidLink": {
+          "title": "链接无效，请检查邮箱重置链接是否一致"
+        },
+        "reset": {
+          "title": "重置失败"
+        }
+      },
+      "status": {
+        "success": "重置成功，请使用新密码登录平台"
+      },
+      "title": "重置密码",
+      "form": {
+        "token": {
+          "required": "重置密钥不能为空",
+          "placeholder": "请输入重置密钥",
+          "title": "重置密钥"
+        }
+      }
+    },
+    "info": {
+      "title": "用户信息"
+    },
+    "password": {
+      "title": "修改密码",
+      "errors": {
+        "change": {
+          "title": "更改密码失败"
+        }
+      }
+    },
+    "delete": {
+      "title": "删号跑路",
+      "errors": {
+        "delete": {
+          "title": "删除用户失败"
+        }
+      },
+      "topWarning": "警告！账号停用后不可恢复！",
+      "canNotDeleteWhenGameInProgress": "为了防止作弊行为，当你参加了正在进行中的比赛时，无法删除账户。",
+      "declare": {
+        "1": "你的账户将被重命名为 [DELETED]_<hash>；",
+        "2": "你的账户将被移除所有权限并禁止登录，也不能通过邮箱找回，邮箱可以用于注册另一个账号；",
+        "3": "账户隐私信息将被移除，但是公开发布的内容将保留；",
+        "4": "与账户绑定的竞赛成绩、数据等会留存，但无法提供信息来证明这是你的。",
+        "title": "请明确你的账户并不是真的被删除了，而是被置于停用并无法恢复的状态，以下操作将被执行："
+      },
+      "thinkTwice": "请注意，由于删除了身份验证相关的隐私信息，即使你联系管理/运维人员，也无法恢复被停用的账号，请三思而后行。",
+      "confirm": "请认真阅读并确定上述内容！如果你真的确定要停用账户，请在下方输入你的完整用户名 {{name}} 以确认：",
+      "bye": {
+        "title": "再见",
+        "message": "愿我们在清醒的现实中再会"
+      }
+    },
+    "verify": {
+      "status": {
+        "success": "邮箱验证成功",
+        "fail": "邮箱验证失败",
+        "broken": "验证链接存在问题，请确保邮件链接正确",
+        "verifying": "验证中..."
+      },
+      "title": "验证邮箱"
     }
   },
   "shell": {
@@ -1330,7 +1573,8 @@
   "docs": {
     "title": "开发者文档",
     "tip": "回归终端 - 开发者文档",
-    "forVersion": "适用版本"
+    "forVersion": "适用版本",
+    "intro": "简介"
   },
   "magic": {
     "about": {
@@ -1360,7 +1604,8 @@
       "fetchList": {
         "title": "获取队伍列表失败"
       }
-    }
+    },
+    "title": "参赛队伍"
   },
   "notification": {
     "empty": "没有未读消息",
@@ -1371,5 +1616,28 @@
   },
   "admin": {
     "title": "管理"
+  },
+  "traffic": {
+    "title": "环境路由"
+  },
+  "cluster": {
+    "title": "集群管理"
+  },
+  "oauth": {
+    "title": "第三方认证"
+  },
+  "media": {
+    "title": "媒体存储"
+  },
+  "captures": {
+    "title": "容器流量"
+  },
+  "institute": {
+    "errors": {
+      "fetchList": {
+        "title": "获取组织列表失败"
+      }
+    },
+    "empty": "无组织"
   }
 }

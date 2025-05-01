@@ -18,11 +18,11 @@ export default function () {
       <svg
         viewBox="0 0 960 1080"
         xmlns="http://www.w3.org/2000/svg"
-        class="fixed left-0 bottom-0 h-screen opacity-30 print:hidden"
+        class="fixed left-0 bottom-0 h-screen opacity-10 print:hidden"
       >
         <path
           fill="none"
-          stroke="#0078d6"
+          stroke="#808080"
           stroke-width="2"
           class="draw-line"
           ref={svgPath1!}
@@ -36,7 +36,7 @@ export default function () {
       >
         <path
           fill="none"
-          stroke="#0078d6"
+          stroke="#808080"
           stroke-width="2"
           class="draw-line"
           ref={svgPath2!}

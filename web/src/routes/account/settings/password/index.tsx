@@ -29,7 +29,7 @@ export default function () {
       });
       addToast({
         level: "success",
-        description: t("account.settings.password.success")!,
+        description: t("account.password.errors.change.title")!,
         duration: 5000,
       });
     } catch (err) {
@@ -43,12 +43,12 @@ export default function () {
   }
   return (
     <>
-      <Title page={t("account.settings.password.title")} route="/account/settings/password" />
+      <Title page={t("account.password.title")} route="/account/settings/password" />
       <div class="flex flex-col p-3 lg:p-6 w-full items-center">
         <Form onSubmit={onSubmit} class="flex flex-col w-full max-w-5xl space-y-2 relative">
           <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
             <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
-            <span>{t("account.settings.password.title")}</span>
+            <span>{t("account.password.title")}</span>
           </h3>
           <input
             class="hidden"
@@ -58,12 +58,12 @@ export default function () {
             autocomplete="username"
             disabled
           />
-          <Field name="old_password" validate={[required(t("account.settings.password.oldPasswordRequired")!)]}>
+          <Field name="old_password" validate={[required(t("account.form.oldPassword.required")!)]}>
             {(field, props) => (
               <Input
                 icon={<span class="icon-[fluent--password-20-regular] w-5 h-5" />}
-                title={t("account.settings.password.oldPassword")}
-                placeholder={t("account.settings.password.oldPassword")}
+                title={t("account.form.oldPassword.title")}
+                placeholder={t("account.form.oldPassword.placeholder")}
                 {...props}
                 value={field.value}
                 error={field.error}
@@ -76,20 +76,20 @@ export default function () {
           <Field
             name="new_password"
             validate={[
-              required(t("account.settings.password.newPasswordRequired")!),
-              minLength(8, t("account.register.passwordMinLength")!),
+              required(t("account.form.password.required")!),
+              minLength(8, t("account.form.password.minimumLength")!),
               pattern(
                 // biome-ignore lint/correctness/noEmptyCharacterClassInRegex: password allows any characters
                 /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,40}$/,
-                t("account.register.passwordTooWeak")!
+                t("account.form.password.tooWeak")!
               ),
             ]}
           >
             {(field, props) => (
               <Input
                 icon={<span class="icon-[fluent--password-20-regular] w-5 h-5" />}
-                title={t("account.settings.password.newPassword")}
-                placeholder={t("account.settings.password.newPassword")}
+                title={t("account.form.password.title")}
+                placeholder={t("account.form.password.placeholder")}
                 {...props}
                 value={field.value}
                 error={field.error}
@@ -102,20 +102,20 @@ export default function () {
           <Field
             name="confirm_password"
             validate={[
-              required(t("account.settings.password.confirmPasswordRequired")!),
+              required(t("account.form.password.confirmRequired")!),
               custom((v) => {
                 if (v !== getValue(form, "new_password")) {
                   return false;
                 }
                 return true;
-              }, t("account.settings.password.confirmPasswordMismatch")!),
+              }, t("account.form.password.confirmMismatch")!),
             ]}
           >
             {(field, props) => (
               <Input
                 icon={<span class="icon-[fluent--password-20-regular] w-5 h-5" />}
-                title={t("account.settings.password.confirmPassword")}
-                placeholder={t("account.settings.password.confirmPassword")}
+                title={t("account.form.password.confirmTitle")}
+                placeholder={t("account.form.password.confirmPlaceholder")}
                 {...props}
                 value={field.value}
                 error={field.error}

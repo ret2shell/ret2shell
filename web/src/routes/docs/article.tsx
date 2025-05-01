@@ -69,7 +69,7 @@ export default function () {
             fallback={
               <>
                 <Spin width={32} height={32} />
-                <span>{t("article.loading")}</span>
+                <span>{t("general.loading.short")}</span>
               </>
             }
           >

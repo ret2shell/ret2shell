@@ -26,7 +26,7 @@ export default function () {
         validator: resp.captcha.validator,
       });
     } catch (err) {
-      handleHttpError(err as HTTPError, t("errors.500")!);
+      handleHttpError(err as HTTPError, t("platform.errors.fetchConfig.title")!);
     }
   });
   async function onSubmit(result: CaptchaConfig) {
@@ -34,7 +34,7 @@ export default function () {
     if (!config()) {
       addToast({
         level: "error",
-        description: t("admin.platform.fetchNotReady")!,
+        description: t("platform.errors.fetchConfig.notReady")!,
         duration: 5000,
       });
       return;
@@ -52,11 +52,11 @@ export default function () {
       setConfig(mergedConfig);
       addToast({
         level: "success",
-        description: t("admin.platform.updateSuccess")!,
+        description: t("general.actions.save.status.success")!,
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as HTTPError, t("admin.platform.updateFailed")!);
+      handleHttpError(err as HTTPError, t("general.actions.save.status.fail")!);
     }
     setLoading(false);
   }

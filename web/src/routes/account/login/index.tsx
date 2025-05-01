@@ -44,7 +44,7 @@ export default function () {
     try {
       setOAuthServices(await getOAuthProviders());
     } catch (err) {
-      handleHttpError(err as Error, t("errors.500")!);
+      handleHttpError(err as Error, t("account.oauth.errors.fetchProvider.title")!);
     }
   });
 
@@ -58,7 +58,7 @@ export default function () {
         await login(result);
         addToast({
           level: "success",
-          description: t("account.login.success")!,
+          description: t("account.login.status.success")!,
           duration: 5000,
           // img: xdsecMascotHappy,
         });
@@ -75,7 +75,7 @@ export default function () {
           navigate("/", { replace: true });
         }
       } catch (err) {
-        handleHttpError(err as Error, t("account.login.failMascotTip")!);
+        handleHttpError(err as Error, t("account.login.errors.login.title")!);
         setTimestamp(DateTime.now().toMillis());
         setValue(form, "password", "");
         // setTimeout(() => {
@@ -98,15 +98,15 @@ export default function () {
             <Field
               name="account"
               validate={[
-                required(t("account.login.accountRequired")!),
-                minLength(4, t("account.login.accountMinLength")!),
+                required(t("account.form.account.required")!),
+                minLength(4, t("account.form.account.minimumLength")!),
               ]}
             >
               {(field, props) => (
                 <Input
                   icon={<span class="icon-[fluent--person-20-regular] w-5 h-5" />}
-                  placeholder={t("account.login.accountPlaceholder")}
-                  title={t("account.login.accountPlaceholder")}
+                  placeholder={t("account.form.account.placeholder")}
+                  title={t("account.form.account.title")}
                   autocomplete="username"
                   {...props}
                   value={field.value}
@@ -124,12 +124,12 @@ export default function () {
             <Field
               name="password"
               validate={[
-                required(t("account.login.passwordRequired")!),
-                minLength(8, t("account.login.passwordMinLength")!),
+                required(t("account.form.password.required")!),
+                minLength(8, t("account.form.password.minimumLength")!),
                 pattern(
                   // biome-ignore lint/correctness/noEmptyCharacterClassInRegex: password allows any characters
                   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,40}$/,
-                  t("account.login.passwordTooWeak")!
+                  t("account.form.password.tooWeak")!
                 ),
               ]}
             >
@@ -137,8 +137,8 @@ export default function () {
                 <Input
                   icon={<span class="icon-[fluent--lock-20-regular] w-5 h-5" />}
                   type="password"
-                  placeholder={t("account.login.passwordPlaceholder")}
-                  title={t("account.login.passwordPlaceholder")}
+                  placeholder={t("account.form.password.placeholder")}
+                  title={t("account.form.password.title")}
                   extraLabel={
                     <A href="/account/forgot" class="hover:underline flex items-center space-x-1">
                       <span class="icon-[fluent--question-circle-16-regular] w-4 h-4 text-primary" />
@@ -162,7 +162,7 @@ export default function () {
               {(idField) => (
                 <Field
                   name="captcha_answer"
-                  validate={[required(t("captcha.required")!), minLength(4, t("captcha.minLength")!)]}
+                  validate={[required(t("captcha.form.answer.required")!), minLength(4, t("captcha.form.answer.minimumLength")!)]}
                 >
                   {(answerField, props) => (
                     <Captcha
@@ -187,44 +187,6 @@ export default function () {
           <div class="md:w-0 flex-1 shrink-0 flex flex-col items-center space-y-2">
             <div class="flex-1 flex flex-col items-center justify-center">
               <LogoAnimate class="w-36 h-36 hidden md:inline-block my-6" />
-              {/* <Switch fallback={<LogoAnimate class="w-36 h-36 hidden md:inline-block my-6" />}> */}
-              {/*   <Match when={mascot() === xdsecMascotNormal}> */}
-              {/*     <img */}
-              {/*       src={xdsecMascotNormal} */}
-              {/*       class="w-36 h-36 hidden md:inline-block my-6" */}
-              {/*       alt="Illustrated by hypnotics" */}
-              {/*       title="Illustrated by hypnotics" */}
-              {/*     /> */}
-              {/*     <header>{t("account.login.accountMascotTip")}</header> */}
-              {/*   </Match> */}
-              {/*   <Match when={mascot() === xdsecMascotUnsee}> */}
-              {/*     <img */}
-              {/*       src={xdsecMascotUnsee} */}
-              {/*       class="w-36 h-36 hidden md:inline-block my-6" */}
-              {/*       alt="Illustrated by hypnotics" */}
-              {/*       title="Illustrated by hypnotics" */}
-              {/*     /> */}
-              {/*     <header>{t("account.login.passwordMascotTip")}</header> */}
-              {/*   </Match> */}
-              {/*   <Match when={mascot() === xdsecMascotHappy}> */}
-              {/*     <img */}
-              {/*       src={xdsecMascotHappy} */}
-              {/*       class="w-36 h-36 hidden md:inline-block my-6" */}
-              {/*       alt="Illustrated by hypnotics" */}
-              {/*       title="Illustrated by hypnotics" */}
-              {/*     /> */}
-              {/*     <header>{t("account.login.successMascotTip")}</header> */}
-              {/*   </Match> */}
-              {/*   <Match when={mascot() === xdsecMascotCrying}> */}
-              {/*     <img */}
-              {/*       src={xdsecMascotCrying} */}
-              {/*       class="w-36 h-36 hidden md:inline-block my-6" */}
-              {/*       alt="Illustrated by hypnotics" */}
-              {/*       title="Illustrated by hypnotics" */}
-              {/*     /> */}
-              {/*     <header>{t("account.login.failMascotTip")}</header> */}
-              {/*   </Match> */}
-              {/* </Switch> */}
             </div>
             <Link class="w-full" href="/account/register">
               {t("account.register.tips")}

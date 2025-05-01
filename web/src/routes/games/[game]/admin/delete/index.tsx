@@ -33,24 +33,24 @@ export default function () {
   }
   return (
     <>
-      <Title page={t("game.admin.delete.title")} route={`/games/${gameStore.current?.id}/admin/edit`} />
+      <Title page={t("game.delete.title")} route={`/games/${gameStore.current?.id}/admin/edit`} />
       <div class="flex-1 flex flex-row p-4 lg:p-6 justify-center">
         <div class="flex-1 flex flex-col max-w-5xl space-y-2">
           <div class="pt-4 md:p-12 md:pb-4 flex flex-row md:flex-col items-center justify-center">
             <span class="icon-[fluent--warning-24-filled] text-error w-6 h-6 md:w-24 md:h-24" />
             <h1 class="text-center text-lg font-bold text-error ml-4 md:ml-0 md:mt-4">
-              {t("game.admin.delete.title")}
+              {t("game.delete.title")}
             </h1>
           </div>
           <Divider class="w-full" />
           <article class="article w-full max-w-5xl self-center mt-4">
             <p>
-              <strong>{t("game.admin.delete.tips")}</strong>
+              <strong>{t("game.delete.warning")}</strong>
             </p>
             <p>
-              <strong>{t("game.admin.delete.tips1")}</strong>
+              <strong>{t("game.delete.requirements")}</strong>
             </p>
-            <p class="text-error">{t("game.admin.delete.tips2", { name: gameStore.current?.name || "" })}</p>
+            <p class="text-error">{t("game.delete.confirm", { name: gameStore.current?.name || "" })}</p>
           </article>
           <Divider class="w-full" />
           <Input
