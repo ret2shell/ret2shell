@@ -14,6 +14,7 @@ import Card from "@widgets/card";
 import Chart from "@widgets/chart";
 import Select from "@widgets/select";
 import clsx from "clsx";
+import { DateTime } from "luxon";
 import { Match, Show, Switch, createEffect, createMemo, createSignal, onMount, untrack } from "solid-js";
 import TeamDetails from "./_blocks/team-details";
 import TeamRanks from "./_blocks/team-ranks";
@@ -39,12 +40,22 @@ function ChartOperations(props: {
       icon: "icon-[fluent--hat-graduation-20-regular] w-5 h-5",
     }));
   });
+
+  const breakpoints = {
+    sm: "640px",
+    md: "768px",
+    lg: "1024px",
+    xl: "1280px",
+    "2xl": "1536px",
+  };
+  const matches = createBreakpoints(breakpoints);
+
   return (
     <div class="flex flex-row space-x-2 justify-between overflow-hidden">
       <div class="flex flex-row space-x-2">
         <Button
           square
-          class={props.size === "md" ? "btn-sm lg:btn-md" : "btn-sm"}
+          class={props.size === "md" ? (matches.lg ? "btn-md" : "btn-sm") : "btn-sm"}
           ghost={props.ghost}
           onClick={() => props.onRefresh?.()}
         >
@@ -52,7 +63,7 @@ function ChartOperations(props: {
         </Button>
         <Button
           square
-          class={props.size === "md" ? "btn-sm lg:btn-md" : "btn-sm"}
+          class={props.size === "md" ? (matches.lg ? "btn-md" : "btn-sm") : "btn-sm"}
           ghost={props.ghost}
           onClick={() => props.onExport?.()}
         >
@@ -60,7 +71,7 @@ function ChartOperations(props: {
         </Button>
         <Button
           square
-          class={props.size === "md" ? "btn-sm lg:btn-md" : "btn-sm"}
+          class={props.size === "md" ? (matches.lg ? "btn-md" : "btn-sm") : "btn-sm"}
           ghost={props.ghost}
           onClick={() => props.onShowHiddenTeams?.(!props.showHiddenTeams)}
         >
@@ -101,7 +112,7 @@ export default function () {
   const matches = createBreakpoints(breakpoints);
 
   onMount(async () => {
-    pageHeight = createElementSize(autoPageSizeWatcher);
+    pageHeight = createElementSize(autoPageSizeWatcher!);
   });
   async function getTopTeams() {
     setLoading(true);
@@ -173,8 +184,17 @@ export default function () {
       name: t.name,
       type: "line",
       step: "end",
-      data: t.history
-        .map((h) => [h.changed_at.toMillis(), h.score])
+      data: [[gameStore.current?.start_at.toMillis() ?? Date.now(), 0]]
+        .concat(
+          t.history
+            .filter((h) => {
+              if (gameStore.current && gameStore.current.start_at < DateTime.now()) {
+                return h.changed_at > gameStore.current?.start_at && h.changed_at < gameStore.current?.end_at;
+              }
+              return true;
+            })
+            .map((h) => [h.changed_at.toMillis(), h.score])
+        )
         .concat([[Math.min(Date.now(), gameStore.current?.end_at.toMillis() ?? Date.now()), t.score]]),
     }));
   };

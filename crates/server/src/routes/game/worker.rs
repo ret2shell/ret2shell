@@ -239,11 +239,7 @@ async fn submission_worker_exec(
     > 0;
 
   let team = if let Some(team_id) = submission.team_id {
-    if !prev_submitted {
-      team::get(&txn, team_id).await?
-    } else {
-      None
-    }
+    team::get(&txn, team_id).await?
   } else {
     None
   };
@@ -297,7 +293,7 @@ async fn submission_worker_exec(
   )
   .await?;
 
-  if team.is_none() {
+  if team.is_none() || prev_submitted {
     txn.commit().await?;
     return Ok(submission);
   }

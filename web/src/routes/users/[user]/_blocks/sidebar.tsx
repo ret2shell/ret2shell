@@ -44,7 +44,10 @@ export default function (props: { user: User | null; loading?: boolean }) {
           <div class="flex flex-row space-x-2 items-center px-2 py-2">
             <span class="icon-[fluent--mail-20-regular] w-5 h-5" />
             <a
-              class={clsx("font-bold", props.user?.email ? "hover:underline" : "blur pointer-events-none")}
+              class={clsx(
+                "font-bold truncate flex-1",
+                props.user?.email ? "hover:underline" : "blur pointer-events-none"
+              )}
               href={`mailto:${props.user?.email}`}
             >
               {props.user?.email ?? "fake.email@ret.sh.cn"}

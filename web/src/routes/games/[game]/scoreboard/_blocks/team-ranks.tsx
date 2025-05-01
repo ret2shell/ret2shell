@@ -70,12 +70,16 @@ export default function TeamRanks(props: {
                   </Match>
                 </Switch>
               </span>
-              <A
-                class="flex-1 w-0 font-bold hover:underline truncate"
-                href={`/games/${gameStore.current?.id}/teams/${team.id}`}
-              >
-                {team.name}
-              </A>
+              <div class="flex flex-col flex-1 w-0">
+                <A class="font-bold hover:underline truncate" href={`/games/${gameStore.current?.id}/teams/${team.id}`}>
+                  {team.name}
+                </A>
+                <Show when={team.tag}>
+                  <span class="truncate text-xs flex items-center opacity-60" title={team.tag ?? ""}>
+                    {team.tag}
+                  </span>
+                </Show>
+              </div>
               <span class="flex-1 w-0 flex flex-row items-center space-x-2">
                 <span class="flex-1" />
                 <Show when={team.state === TeamState.Hidden}>
@@ -83,17 +87,17 @@ export default function TeamRanks(props: {
                     <span class="flex-1 truncate">{t("game.team.state.hidden")}</span>
                   </Tag>
                 </Show>
-                <Show when={props.showTime && team.institute_id}>
-                  <Tag level="info">
-                    <span class="flex-1 truncate">
-                      {accountStore.institutes.find((v) => v.id === team.institute_id)?.name}
-                    </span>
-                  </Tag>
-                </Show>
-                <Show when={team.tag}>
-                  <Tag level="success">
-                    <span class="flex-1 truncate">{team.tag}</span>
-                  </Tag>
+                <Show when={props.showTime}>
+                  <div class="flex-1 flex truncate items-center justify-end">
+                    <Show when={team.institute_id} fallback={<span>&nbsp;</span>}>
+                      <span
+                        class="opacity-80 text-primary"
+                        title={accountStore.institutes.find((v) => v.id === team.institute_id)?.name}
+                      >
+                        #{accountStore.institutes.find((v) => v.id === team.institute_id)?.name}
+                      </span>
+                    </Show>
+                  </div>
                 </Show>
               </span>
               <span class={clsx("text-end", currentTimelinePeriod() && props.showTime ? "w-48" : "w-20")}>

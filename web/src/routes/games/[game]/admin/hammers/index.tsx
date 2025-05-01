@@ -8,6 +8,7 @@ import {
 } from "@api/game";
 // import xdsecMascotCiallo from "@assets/imgs/xdsec-mascot-ciallo.webp";
 import platformAvatar from "@assets/imgs/rx.webp";
+import { ChatBlock, mergeChats } from "@blocks/challenge/hammer";
 import { m_chat } from "@lib/i18n/chats";
 // import { stickerSet } from "@assets/stickers";
 import { mediaPath } from "@lib/utils/media";
@@ -15,83 +16,20 @@ import type { Challenge } from "@models/challenge";
 import type { Chat } from "@models/chat";
 import type { Team } from "@models/team";
 import { A, useSearchParams } from "@solidjs/router";
-import { accountStore } from "@storage/account";
 import { gameStore } from "@storage/game";
 import { Title } from "@storage/header";
 import { fullTheme, t, themeStore } from "@storage/theme";
-import Article from "@widgets/article";
-import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
 import { EditorBare } from "@widgets/editor";
 import Link from "@widgets/link";
 import Popover from "@widgets/popover";
 import clsx from "clsx";
-import type { DateTime } from "luxon";
+import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
-import { TransitionGroup } from "solid-transition-group";
 
 const chatConfig = await m_chat(themeStore.locale);
-
-function mergeChats(
-  challengeId: number,
-  teamId: number,
-  a: Chat[],
-  b: Chat[],
-  solvedAt: DateTime | null
-): [boolean, Chat[]] {
-  if (solvedAt) {
-    b.push({
-      id: 0,
-      user_id: 0,
-      user_name: "Ciallo～(∠・ω< )⌒☆",
-      avatar: undefined,
-      content: `${t("game.challenge.chatSolvedMessage")} ٩(๑•ω•๑)۶`,
-      created_at: solvedAt,
-      is_admin: true,
-      challenge_id: challengeId,
-      team_id: teamId,
-      checked: true,
-      game_id: gameStore.current!.id,
-    });
-  }
-  const bb = b.sort((x, y) => x.id - y.id);
-  const aa = a.filter((x) => x.challenge_id === challengeId && x.team_id === teamId).sort((x, y) => x.id - y.id);
-
-  let i = 0;
-  const iLen = aa.length;
-  let j = 0;
-  const jLen = bb.length;
-
-  let changed = false;
-
-  while (i < iLen && j < jLen) {
-    const aChat = aa[i];
-    const bChat = bb[j];
-    if (aChat.id === bChat.id && aChat.checked === bChat.checked) {
-      i++;
-      j++;
-    } else if (aChat.id === bChat.id) {
-      aa[i] = bChat;
-      changed = true;
-      i++;
-      j++;
-    } else if (aChat.id > bChat.id) {
-      aa.push(bChat);
-      changed = true;
-      j++;
-    } else {
-      i++;
-    }
-  }
-  while (j < jLen) {
-    aa.push(bb[j]);
-    changed = true;
-    j++;
-  }
-  return [changed, aa.sort((x, y) => x.created_at.toMillis() - y.created_at.toMillis())];
-}
 
 export default function () {
   const [searchParams, _] = useSearchParams();
@@ -232,137 +170,39 @@ export default function () {
             }
           >
             <div class="flex flex-col min-h-full relative">
-              <div class="flex flex-col flex-1 p-3 lg:p-6 space-y-1">
-                <div class="self-start flex-row w-[calc(100%-4rem)] flex items-center">
-                  <A class="w-10 h-10 shrink-0 self-start mt-2" href="/magic/sakana">
-                    <Avatar class="w-full h-full" src={platformAvatar} fallback="Ciallo" />
-                  </A>
-                  <div class="w-4 shrink-0" />
-                  <div class="flex-1 w-0 flex flex-col space-y-1 items-start">
-                    <header class="label">Ciallo～(∠・ω&lt; )⌒☆</header>
-                    <Card class="max-w-full" contentClass="flex flex-col space-y-2 p-2 max-w-full">
-                      <span>{t("game.challenge.adminHammerTips")}</span>
-                      <div class="flex flex-col space-y-2 max-w-full">
-                        <Link
-                          class="!h-auto p-2"
-                          justify="start"
-                          href={`/games/${gameStore.current?.id}/challenges?challenge=${challengeId()}`}
-                        >
-                          <div class="flex flex-row space-x-2 items-center pr-4 max-w-full w-full">
-                            <span class="icon-[fluent--code-20-filled] w-8 h-8 m-2 shrink-0" />
-                            <div class="flex flex-col items-start flex-1 w-0">
-                              <h3 class="font-bold truncate w-full text-start">{challenge()?.name}</h3>
-                              <p class="opacity-60">{challenge()?.score} pts</p>
-                            </div>
-                          </div>
-                        </Link>
-                        <Link
-                          class="!h-auto p-2"
-                          justify="start"
-                          href={`/games/${gameStore.current?.id}/teams/${teamId()}`}
-                        >
-                          <div class="flex flex-row space-x-2 items-center pr-4 max-w-full w-full">
-                            <span class="icon-[fluent--flag-20-filled] w-8 h-8 m-2 shrink-0" />
-                            <div class="flex flex-col items-start flex-1 w-0">
-                              <h3 class="font-bold truncate w-full text-start">{team()?.name}</h3>
-                              <p class="opacity-60">{team()?.score} pts</p>
-                            </div>
-                          </div>
-                        </Link>
-                      </div>
-                    </Card>
-                    <div class="h-3" />
-                  </div>
-                </div>
-                <TransitionGroup name="fade-group-up">
-                  <For each={chats()}>
-                    {(chat, index) => (
-                      <div
-                        class={clsx(
-                          "fade-group-up",
-                          chat.user_id !== accountStore.id ? "self-start flex-row" : "self-end flex-row-reverse",
-                          "w-[calc(100%-4rem)] flex items-center"
-                        )}
-                      >
-                        <Show
-                          when={chat.id !== 0}
-                          fallback={
-                            <A class="w-10 h-10 shrink-0 self-start mt-2" href="/magic/sakana">
-                              <Avatar class="w-full h-full" src={platformAvatar} fallback="Ciallo" />
-                            </A>
-                          }
-                        >
-                          <Show
-                            when={index() === 0 || chats().at(index() - 1)?.user_id !== chat.user_id}
-                            fallback={<div class="w-10 h-10 shrink-0 self-start" />}
-                          >
-                            <A class="w-10 h-10 shrink-0 self-start mt-2" href={`/users/${chat.user_id}`}>
-                              <Avatar
-                                class="w-full h-full"
-                                src={chat.avatar ? mediaPath(chat.avatar) : undefined}
-                                fallback={chat.user_name}
-                              />
-                            </A>
-                          </Show>
-                        </Show>
-                        <div class="w-4 shrink-0" />
-                        <div
-                          class={clsx(
-                            "flex-1 w-0 flex flex-col",
-                            chat.user_id !== accountStore.id ? "items-start" : "items-end"
-                          )}
-                        >
-                          <Show when={index() === 0 || chats().at(index() - 1)?.user_id !== chat.user_id}>
-                            <header class="label space-x-2 py-1">
-                              <Show when={chat.user_id !== 0}>
-                                <Show
-                                  when={chat.is_admin}
-                                  fallback={<span class="text-info">[{t("game.challenge.chatPlayerRole")}]</span>}
-                                >
-                                  <span class="text-error">[{t("game.challenge.chatAdminRole")}]</span>
-                                </Show>
-                              </Show>
-                              <A href={`/users/${chat.user_id}`}>{chat.user_name}</A>
-                            </header>
-                          </Show>
-                          <div
-                            class={clsx(
-                              "peer flex max-w-full",
-                              chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse"
-                            )}
-                          >
-                            <Card
-                              contentClass={clsx(
-                                "flex p-2",
-                                chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse"
-                              )}
-                            >
-                              <Article content={chat.content} noExtraPaddings compact extra />
-                            </Card>
-                            <div
-                              class={clsx(
-                                "self-end flex items-end",
-                                chat.user_id !== accountStore.id ? "flex-row" : "flex-row-reverse"
-                              )}
-                            >
-                              <span
-                                class={
-                                  chat.checked
-                                    ? "icon-[fluent--circle-20-filled] w-2 h-2 m-1 text-success"
-                                    : "icon-[fluent--circle-20-regular] w-2 h-2 m-1 opacity-40"
-                                }
-                              />
-                              <span class="text-xs opacity-60 self-end">{chat.created_at.toFormat("HH:mm")}</span>
-                            </div>
-                          </div>
-                          <header class="opacity-0 h-0 peer-hover:h-4 peer-hover:opacity-60 text-sm transition-all duration-300">
-                            {chat.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}
-                          </header>
-                        </div>
-                      </div>
-                    )}
-                  </For>
-                </TransitionGroup>
+              <div class="flex flex-col flex-1 p-3 lg:p-6">
+                <ChatBlock
+                  avatar={platformAvatar}
+                  showAvatar
+                  roleLabel=">_<"
+                  link="/magic/sakana"
+                  nameLabel="Ciallo～(∠・ω< )⌒☆"
+                  labelClasses="text-primary"
+                  content={`${t("game.challenge.title")}: [${challenge()?.name}](/games/${gameStore.current?.id}/challenges?challenge=${challengeId()}), ${t("game.team.title")}: [${team()?.name}](/games/${gameStore.current?.id}/teams/${teamId()})`}
+                  sendAt={gameStore.current?.start_at ?? DateTime.now()}
+                  isChecked
+                />
+                <For each={chats()}>
+                  {(chat, index) => (
+                    <ChatBlock
+                      avatar={chat.id === 0 ? platformAvatar : chat.avatar ? mediaPath(chat.avatar) : undefined}
+                      showAvatar={index() === 0 || chats().at(index() - 1)?.user_id !== chat.user_id}
+                      roleLabel={
+                        chat.id === 0
+                          ? ">_<"
+                          : chat.is_admin
+                            ? t("game.challenge.chatAdminRole")!
+                            : t("game.challenge.chatPlayerRole")!
+                      }
+                      link={chat.id === 0 ? "Ciallo～(∠・ω< )⌒☆" : `/users/${chat.user_id}`}
+                      nameLabel={chat.user_name || "Unknown"}
+                      labelClasses={chat.id === 0 ? "text-primary" : chat.is_admin ? "text-success" : "text-warning"}
+                      content={chat.content}
+                      sendAt={chat.created_at}
+                      isChecked={chat.checked}
+                    />
+                  )}
+                </For>
               </div>
               <div class="sticky bottom-0 flex flex-col space-y-2 p-3 border-t border-t-layer-content/5 bg-layer">
                 <div class="flex flex-row items-center h-8 space-x-2">

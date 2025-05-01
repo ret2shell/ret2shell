@@ -23,6 +23,14 @@ article.article-compact {
   blockquote {
     @apply my-3;
   }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply mt-2;
+  }
 }
 
 /* --- Override prose --- */

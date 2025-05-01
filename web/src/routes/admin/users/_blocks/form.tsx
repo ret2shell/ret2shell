@@ -193,7 +193,9 @@ export default function (compProps: {
             </Card>
             <div class="flex flex-col space-x-2">
               <span class="font-bold text-error">
-                {t("admin.users.warningDeleteConfirmTip", { name: `${compProps.editSource?.account}` })}
+                {t("admin.users.warningDeleteConfirmTip", {
+                  name: `${compProps.editSource?.account}`,
+                })}
               </span>
             </div>
             <Input
@@ -301,7 +303,7 @@ export default function (compProps: {
                   loading={avatarUploading()}
                   disabled={avatarUploading()}
                   type="button"
-                  class="opacity-0 hover:opacity-100 !bg-layer/80 absolute !rounded-full top-0 left-0 w-full h-full"
+                  class="opacity-0 hover:opacity-100 !bg-layer/80 absolute top-0 left-0 w-full h-full"
                   onClick={() => {
                     if (avatarSet()) {
                       setAvatarSet(false);

@@ -16,7 +16,6 @@ export default function (props: PaginationRootProps) {
                     "btn",
                     "btn-square",
                     "btn-sm",
-                    "lg:btn-md",
                     "justify-center",
                     page.value === api().page && "btn-primary"
                   )}

@@ -6,11 +6,9 @@ import { gameStore } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
-import Divider from "@widgets/divider";
 import Link from "@widgets/link";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
-import { TransitionGroup } from "solid-transition-group";
 
 function mergeChats(oldSessions: ChatSession[], newSessions: ChatSession[]) {
   const result = oldSessions;
@@ -121,45 +119,41 @@ export default function ChatList() {
           }
         >
           <div class="w-full min-h-full overflow-hidden flex flex-col space-y-2 p-2">
-            <TransitionGroup name="fade-group-right">
-              <For each={sessions()}>
-                {(session) => (
-                  <Link
-                    href={`/games/${gameStore.current?.id}/admin/hammers?challenge=${session.challenge_id}&team=${session.team_id}`}
-                    ghost={!(teamId() === session.team_id && challengeId() === session.challenge_id)}
-                    class="flex-row space-x-2 items-center h-auto py-2 !px-3 fade-group-right"
-                  >
-                    <div class="w-10 h-10 aspect-square shrink-0 relative">
-                      <Avatar class="w-full h-full" src={undefined} fallback={session.team_name} />
-                      <div class="absolute -right-1 -bottom-1 w-2 h-2">
-                        <Show when={!session.checked && !session.is_admin}>
-                          <div class="bg-error rounded-full w-2 h-2" title={t("game.admin.chat.unread")} />
-                        </Show>
-                        <Show when={!session.checked && session.is_admin}>
-                          <div class="bg-info rounded-full w-2 h-2" title={t("game.admin.chat.playerUnread")} />
-                        </Show>
-                        <Show when={session.checked && !session.is_admin}>
-                          <div class="bg-warning rounded-full w-2 h-2" title={t("game.admin.chat.notReply")} />
-                        </Show>
-                      </div>
+            <For each={sessions()}>
+              {(session) => (
+                <Link
+                  href={`/games/${gameStore.current?.id}/admin/hammers?challenge=${session.challenge_id}&team=${session.team_id}`}
+                  ghost={!(teamId() === session.team_id && challengeId() === session.challenge_id)}
+                  class="flex-row items-center h-auto py-2 !px-3 fade-group-right"
+                >
+                  <div class="w-8 h-8 aspect-square shrink-0 relative">
+                    <Avatar class="w-full h-full" src={undefined} fallback={session.team_name} />
+                    <div class="absolute -right-1 -bottom-1 w-2 h-2">
+                      <Show when={!session.checked && !session.is_admin}>
+                        <div class="bg-error rounded-full w-2 h-2" title={t("game.admin.chat.unread")} />
+                      </Show>
+                      <Show when={!session.checked && session.is_admin}>
+                        <div class="bg-info rounded-full w-2 h-2" title={t("game.admin.chat.playerUnread")} />
+                      </Show>
+                      <Show when={session.checked && !session.is_admin}>
+                        <div class="bg-warning rounded-full w-2 h-2" title={t("game.admin.chat.notReply")} />
+                      </Show>
                     </div>
-                    <div class="flex-col flex-1">
-                      <div class="flex flex-row space-x-2 items-center">
-                        <span class="flex-1 truncate font-bold text-start w-0">{session.team_name}</span>
-                        <span class="flex-1 w-0 text-end truncate">{session.challenge_name}</span>
-                      </div>
-                      <Divider />
-                      <div class="flex flex-row space-x-2 items-center overflow-hidden">
-                        <span class="flex-1 w-0 truncate opacity-60 text-start font-normal">
-                          {session.last_message}
-                        </span>
-                        <span class="opacity-60">{session.last_active_at.toFormat("MM-dd HH:mm")}</span>
-                      </div>
+                  </div>
+                  <div class="flex-col flex-1">
+                    <div class="flex flex-row space-x-2 items-center">
+                      <span class="flex-1 truncate font-bold text-start w-0">{session.team_name}</span>
                     </div>
-                  </Link>
-                )}
-              </For>
-            </TransitionGroup>
+                    <div class="flex flex-row space-x-2 items-center overflow-hidden">
+                      <span class="flex-1 w-0 truncate opacity-60 text-start font-normal text-xs">
+                        {session.last_message}
+                      </span>
+                      <span class="opacity-60 text-xs">{session.last_active_at.toFormat("MM-dd HH:mm")}</span>
+                    </div>
+                  </div>
+                </Link>
+              )}
+            </For>
             <Button
               ghost
               onClick={() => {

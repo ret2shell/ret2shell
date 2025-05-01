@@ -28,6 +28,7 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
     "compact",
   ]);
   const [ready, setReady] = createSignal(false);
+  const [rendering, setRendering] = createSignal(false);
   const [markdown, setMarkdown] = createSignal(null as Markdown | null);
   const initMarkdown = async () => {
     const { Markdown } = await import("@lib/markdown");
@@ -59,8 +60,12 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
   }
   createEffect(() => {
     if (articleProps.content) {
-      setReady(false);
       untrack(async () => {
+        while (rendering()) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+        setReady(false);
+        setRendering(true);
         try {
           await render(articleProps.content);
           setReady(true);
@@ -72,6 +77,7 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
             duration: 5000,
           });
         }
+        setRendering(false);
       });
     } else {
       untrack(() => {
