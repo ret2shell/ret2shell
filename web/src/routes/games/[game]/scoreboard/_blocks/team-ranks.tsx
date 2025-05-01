@@ -75,12 +75,12 @@ export default function TeamRanks(props: {
                   {team.name}
                 </A>
                 <Show when={team.tag}>
-                  <span class="truncate text-xs flex items-center opacity-60" title={team.tag ?? ""}>
+                  <span class="truncate text-xs opacity-60" title={team.tag ?? ""}>
                     {team.tag}
                   </span>
                 </Show>
               </div>
-              <span class="flex-1 w-0 flex flex-row items-center space-x-2">
+              <span class={clsx("flex flex-row items-center space-x-2", props.showTime && "flex-1 w-0")}>
                 <span class="flex-1" />
                 <Show when={team.state === TeamState.Hidden}>
                   <Tag level="warning">
@@ -88,10 +88,10 @@ export default function TeamRanks(props: {
                   </Tag>
                 </Show>
                 <Show when={props.showTime}>
-                  <div class="flex-1 flex truncate items-center justify-end">
+                  <div class="flex-1 flex items-center justify-end">
                     <Show when={team.institute_id} fallback={<span>&nbsp;</span>}>
                       <span
-                        class="opacity-80 text-primary"
+                        class="opacity-80 text-primary truncate w-full"
                         title={accountStore.institutes.find((v) => v.id === team.institute_id)?.name}
                       >
                         #{accountStore.institutes.find((v) => v.id === team.institute_id)?.name}
