@@ -77,7 +77,10 @@ export default function () {
               {(idField) => (
                 <Field
                   name="captcha_answer"
-                  validate={[required(t("captcha.form.answer.required")!), minLength(4, t("captcha.form.answer.minimumLength")!)]}
+                  validate={[
+                    required(t("captcha.form.answer.required")!),
+                    minLength(4, t("captcha.form.answer.minimumLength")!),
+                  ]}
                 >
                   {(answerField, props) => (
                     <Captcha
@@ -98,7 +101,12 @@ export default function () {
             <Input
               icon={<span class="icon-[fluent--person-20-regular] w-5 h-5" />}
               extraBtn={
-                <Button title={t("account.delete.bye.message")} class="rounded-l-none text-error" disabled={!canDelete() || loading()} loading={loading()}>
+                <Button
+                  title={t("account.delete.bye.message")}
+                  class="rounded-l-none text-error"
+                  disabled={!canDelete() || loading()}
+                  loading={loading()}
+                >
                   <span class="icon-[fluent--arrow-exit-20-regular] w-5 h-5" />
                   <span class="icon-[fluent--person-walking-20-regular] w-5 h-5" />
                   <span class="hidden md:inline">{t("account.delete.bye.title")}</span>

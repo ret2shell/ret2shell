@@ -106,7 +106,9 @@ export default function UserCodeDialog() {
             </Match>
             <Match when={true}>
               <span class="icon-[fluent--arrow-clockwise-20-regular] w-5 h-5" />
-              <span class="truncate">{t("general.actions.generate.title")} / {t("general.actions.refresh.title")}</span>
+              <span class="truncate">
+                {t("general.actions.generate.title")} / {t("general.actions.refresh.title")}
+              </span>
             </Match>
           </Switch>
         </Button>

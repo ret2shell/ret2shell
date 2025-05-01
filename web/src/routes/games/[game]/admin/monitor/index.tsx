@@ -12,12 +12,12 @@ export default function () {
   const [_, setSearchParams] = useSearchParams();
   return (
     <>
-      <Title page={t("game.admin.monitor.title")} route={`/games/${gameStore.current?.id}/admin/monitor`} />
+      <Title page={t("game.monitor.title")} route={`/games/${gameStore.current?.id}/admin/monitor`} />
       <div class="w-full p-3 lg:p-6 flex flex-col flex-1 relative">
         <h3 class="min-h-12 py-2 gap-y-2 flex flex-wrap justify-end items-center border-b border-b-layer-content/10 font-bold space-x-2 *:whitespace-nowrap">
           <span class="flex flex-row items-center space-x-2">
             <span class="icon-[fluent--flash-flow-20-regular] w-5 h-5" />
-            <span class="flex-1 text-start">{t("game.admin.monitor.title")}</span>
+            <span class="flex-1 text-start">{t("game.monitor.title")}</span>
           </span>
           <span class="flex-1" />
           <Tag level="success">

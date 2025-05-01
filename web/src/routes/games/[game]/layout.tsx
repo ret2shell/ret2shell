@@ -35,7 +35,7 @@ export default function (props: { children?: JSX.Element }) {
         if (err instanceof HTTPError) {
           navigate(`/sigtrap/${err.response.status}`, { replace: true });
         }
-        handleHttpError(err as HTTPError, t("game.fetchFailed")!);
+        handleHttpError(err as HTTPError, t("game.errors.fetch.title")!);
       }
     }
     refreshInstitutes();

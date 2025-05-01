@@ -41,7 +41,7 @@ function TeamDetail(props: {
         <div class="flex flex-row items-center space-x-4">
           <Progress class="flex-1" max={1} min={0} value={solvedChallenges() / (totalChallenges() || 1)} static />
           <span>
-            {solvedChallenges()} / {totalChallenges()} {t("game.challenge.solved")}
+            {solvedChallenges()} / {totalChallenges()} {t("challenge.status.solved.title")}
           </span>
         </div>
       </div>

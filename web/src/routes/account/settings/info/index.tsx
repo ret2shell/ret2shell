@@ -186,10 +186,7 @@ export default function () {
           </div>
           <Field
             name="email"
-            validate={[
-              required(t("account.form.email.required")!),
-              email(t("account.form.email.invalid")!),
-            ]}
+            validate={[required(t("account.form.email.required")!), email(t("account.form.email.invalid")!)]}
           >
             {(field, props) => (
               <Input

@@ -142,7 +142,10 @@ export default function () {
               {(idField) => (
                 <Field
                   name="captcha_answer"
-                  validate={[required(t("captcha.form.answer.required")!), minLength(4, t("captcha.form.answer.minimumLength")!)]}
+                  validate={[
+                    required(t("captcha.form.answer.required")!),
+                    minLength(4, t("captcha.form.answer.minimumLength")!),
+                  ]}
                 >
                   {(answerField, props) => (
                     <Captcha

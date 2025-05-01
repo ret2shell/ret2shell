@@ -47,7 +47,7 @@ export default function TeamRanks(props: {
           <Match when={props.teams.length === 0}>
             <div class="flex-1 flex flex-col space-y-6 items-center justify-center opacity-60">
               <span class="icon-[fluent--data-trending-48-regular] w-12 h-12" />
-              <span>{t("game.team.noTeamParticipated")}</span>
+              <span>{t("team.empty")}</span>
             </div>
           </Match>
         </Switch>
@@ -84,7 +84,7 @@ export default function TeamRanks(props: {
                 <span class="flex-1" />
                 <Show when={team.state === TeamState.Hidden}>
                   <Tag level="warning">
-                    <span class="flex-1 truncate">{t("game.team.state.hidden")}</span>
+                    <span class="flex-1 truncate">{t("team.status.hidden.title")}</span>
                   </Tag>
                 </Show>
                 <Show when={props.showTime}>

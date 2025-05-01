@@ -623,7 +623,9 @@
           "title": ""
         }
       },
-      "autoRefreshEnabled": ""
+      "autoRefreshEnabled": "",
+      "submissions": "",
+      "audits": ""
     },
     "noGameHosted": "",
     "noOtherGames": "",
@@ -1586,6 +1588,9 @@
       },
       "empty": {
         "message": ""
+      },
+      "hidden": {
+        "title": ""
       }
     },
     "errors": {
@@ -1594,7 +1599,8 @@
       }
     },
     "title": "",
-    "coming": ""
+    "coming": "",
+    "empty": ""
   },
   "calendar": {
     "day": {

@@ -491,7 +491,9 @@
           "title": "获取提交记录失败"
         }
       },
-      "autoRefreshEnabled": "自动刷新已开启"
+      "autoRefreshEnabled": "自动刷新已开启",
+      "submissions": "提交记录",
+      "audits": "审计事件"
     },
     "git": {
       "title": "题目仓库"
@@ -1608,6 +1610,9 @@
       },
       "empty": {
         "message": "还未参赛，请先参赛"
+      },
+      "hidden": {
+        "title": "已隐藏"
       }
     },
     "errors": {
@@ -1616,7 +1621,8 @@
       }
     },
     "title": "参赛队伍",
-    "coming": "登场！"
+    "coming": "登场！",
+    "empty": "没有队伍参与"
   },
   "notification": {
     "empty": "没有未读消息",

@@ -62,7 +62,10 @@ export default function () {
             <h2 class="font-bold text-center">{t("account.forgot.title")}</h2>
             <Field
               name="email"
-              validate={[required(t("account.forgot.form.email.required")!), email(t("account.forgot.form.email.invalid")!)]}
+              validate={[
+                required(t("account.forgot.form.email.required")!),
+                email(t("account.forgot.form.email.invalid")!),
+              ]}
             >
               {(field, props) => (
                 <Input
@@ -82,7 +85,10 @@ export default function () {
               {(idField) => (
                 <Field
                   name="captcha_answer"
-                  validate={[required(t("captcha.form.answer.required")!), minLength(4, t("captcha.form.answer.required")!)]}
+                  validate={[
+                    required(t("captcha.form.answer.required")!),
+                    minLength(4, t("captcha.form.answer.required")!),
+                  ]}
                 >
                   {(answerField, props) => (
                     <Captcha
