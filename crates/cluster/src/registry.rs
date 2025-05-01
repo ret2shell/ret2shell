@@ -117,6 +117,9 @@ impl Registry {
       ));
     }
     let tmp_dir = std::env::temp_dir().join("ret2shell");
+    if !tmp_dir.exists() {
+      tokio::fs::create_dir_all(&tmp_dir).await?;
+    }
     let file_path = tmp_dir.join(name);
     let file_parent_dir = file_path
       .parent()
