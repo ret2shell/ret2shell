@@ -14,7 +14,6 @@ import { t } from "@storage/theme";
 import Article from "@widgets/article";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
-import Divider from "@widgets/divider";
 import { EditorBare } from "@widgets/editor";
 import Link from "@widgets/link";
 import clsx from "clsx";
@@ -228,7 +227,7 @@ export default function (props: {
               link="/magic/sakana"
               nameLabel="Ciallo～(∠・ω< )⌒☆"
               labelClasses="text-primary"
-              content={t("game.admin.hammer.shouldGoto")!}
+              content={t("challenge.hammer.adminGoto")!}
               sendAt={gameStore.current!.start_at}
               isChecked
             />
@@ -241,7 +240,7 @@ export default function (props: {
             link="/magic/sakana"
             nameLabel="Ciallo～(∠・ω< )⌒☆"
             labelClasses="text-primary"
-            content={t("game.challenge.hammerTips")!}
+            content={t("challenge.hammer.tips.0")!}
             sendAt={gameStore.current!.start_at}
             isChecked
           />
@@ -251,7 +250,7 @@ export default function (props: {
             link="/magic/sakana"
             nameLabel="Ciallo～(∠・ω< )⌒☆"
             labelClasses="text-primary"
-            content={`${t("game.challenge.hammerTips2")}\n\n${t("game.challenge.hammerTips3")} [bpa.st](https://bpa.st), [0x0.st](https://0x0.st)`}
+            content={`${t("challenge.hammer.tips.1")}\n\n${t("challenge.hammer.tips.2")} [bpa.st](https://bpa.st), [0x0.st](https://0x0.st)`}
             sendAt={gameStore.current!.start_at}
             isChecked
           />
@@ -265,8 +264,8 @@ export default function (props: {
                 chat.id === 0
                   ? ">_<"
                   : chat.is_admin
-                    ? t("game.challenge.chatAdminRole")!
-                    : t("game.challenge.chatPlayerRole")!
+                    ? t("challenge.hammer.role.admin")!
+                    : t("challenge.hammer.role.player")!
               }
               link={chat.id === 0 ? "Ciallo～(∠・ω< )⌒☆" : `/users/${chat.user_id}`}
               nameLabel={chat.user_name || "Unknown"}
