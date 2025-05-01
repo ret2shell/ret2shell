@@ -118,7 +118,7 @@ export default function () {
             <div class="flex flex-col space-y-2 flex-1">
               <Input
                 icon={<span class="icon-[fluent--person-20-regular] w-5 h-5" />}
-                title={t("account.form.account.title")}
+                title={t("account.form.account.label")}
                 placeholder={t("account.form.account.placeholder")}
                 value={accountStore.account!}
                 disabled
@@ -127,7 +127,7 @@ export default function () {
                 {(field, props) => (
                   <Input
                     icon={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}
-                    title={t("account.form.nickname.title")}
+                    title={t("account.form.nickname.label")}
                     placeholder={t("account.form.nickname.placeholder")}
                     {...props}
                     value={field.value}
@@ -194,7 +194,7 @@ export default function () {
             {(field, props) => (
               <Input
                 icon={<span class="icon-[fluent--mail-20-regular] w-5 h-5" />}
-                title={t("account.form.email.title")}
+                title={t("account.form.email.label")}
                 placeholder={t("account.form.email.placeholder")}
                 autocomplete="email"
                 {...props}
@@ -221,7 +221,7 @@ export default function () {
                 class="h-80"
                 lang="markdown"
                 placeholder="MARKDOWN"
-                title={t("account.form.description.title")}
+                title={t("account.form.description.label")}
                 name="description"
                 value={field.value}
                 error={field.error}

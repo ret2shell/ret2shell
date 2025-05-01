@@ -86,7 +86,7 @@ export default function () {
     try {
       setOAuthServices(await getOAuthProviders());
     } catch (err) {
-      handleHttpError(err as Error, t("errors.500")!);
+      handleHttpError(err as Error, t("account.oauth.errors.fetchProvider.title")!);
     }
   }
 

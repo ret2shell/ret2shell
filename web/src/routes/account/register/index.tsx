@@ -88,7 +88,7 @@ export default function () {
                   <Input
                     icon={<span class="icon-[fluent--wand-20-regular] w-5 h-5" />}
                     placeholder={t("account.form.nickname.placeholder")}
-                    title={t("account.form.nickname.title")}
+                    title={t("account.form.nickname.label")}
                     autocomplete="nickname"
                     {...props}
                     value={field.value}
@@ -119,7 +119,7 @@ export default function () {
                   <Input
                     icon={<span class="icon-[fluent--person-20-regular] w-5 h-5" />}
                     placeholder={t("account.form.account.placeholder")}
-                    title={t("account.form.account.title")}
+                    title={t("account.form.account.label")}
                     autocomplete="username"
                     {...props}
                     value={field.value}
@@ -154,7 +154,7 @@ export default function () {
                 <Input
                   icon={<span class="icon-[fluent--mail-20-regular] w-5 h-5" />}
                   placeholder={t("account.form.email.placeholder")}
-                  title={t("account.form.email.title")}
+                  title={t("account.form.email.label")}
                   autocomplete="email"
                   {...props}
                   value={field.value}
@@ -181,7 +181,7 @@ export default function () {
                   <Input
                     icon={<span class="icon-[fluent--lock-20-regular] w-5 h-5" />}
                     placeholder={t("account.form.password.placeholder")}
-                    title={t("account.form.password.title")}
+                    title={t("account.form.password.label")}
                     autocomplete="new-password"
                     type="password"
                     {...props}

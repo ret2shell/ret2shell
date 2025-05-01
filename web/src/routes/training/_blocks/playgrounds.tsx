@@ -32,7 +32,7 @@ export default function Playgrounds() {
       setPlaygrounds(playgrounds);
       setPlaygroundTotal(total);
     } catch (err) {
-      handleHttpError(err as Error, t("training.failedToFetchPlaygrounds")!);
+      handleHttpError(err as Error, t("training.errors.fetchList.title")!);
     }
     setLoadingPlaygrounds(false);
   }
@@ -44,7 +44,7 @@ export default function Playgrounds() {
       setGames(games);
       setGameTotal(total);
     } catch (err) {
-      handleHttpError(err as Error, t("training.failedToFetchGames")!);
+      handleHttpError(err as Error, t("training.errors.fetchArchives.title")!);
     }
     setLoadingGames(false);
   }
@@ -108,7 +108,7 @@ export default function Playgrounds() {
             fallback={
               <Button ghost disabled>
                 <span class="icon-[fluent--text-bullet-list-dismiss-20-regular] w-5 h-5" />
-                <span>{t("training.noPlaygrounds")}</span>
+                <span>{t("training.empty")}</span>
               </Button>
             }
           >
@@ -157,7 +157,7 @@ export default function Playgrounds() {
             fallback={
               <Button ghost disabled>
                 <span class="icon-[fluent--text-bullet-list-dismiss-20-regular] w-5 h-5" />
-                <span>{t("training.noArchivedGames")}</span>
+                <span>{t("training.noArchives")}</span>
               </Button>
             }
           >
@@ -168,7 +168,7 @@ export default function Playgrounds() {
                 activeMatch="partial"
                 justify="start"
                 disabled={item.archive_at > DateTime.now()}
-                title={item.archive_at > DateTime.now() ? t("training.gameNotArchived") : item.name}
+                title={item.archive_at > DateTime.now() ? t("training.errors.gameNotArchived.title") : item.name}
               >
                 <span class="icon-[fluent--flag-20-regular] w-5 h-5" />
                 <span class="flex-1 text-start truncate">{item.name}</span>

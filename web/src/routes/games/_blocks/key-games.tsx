@@ -62,7 +62,7 @@ export default function () {
       appendGames(game);
       setTotal(total);
     } catch (err) {
-      handleHttpError(err as Error, t("game.fetchFailed")!);
+      handleHttpError(err as Error, t("game.errors.fetchList.title")!);
     }
     setLoading(false);
   }
@@ -90,7 +90,7 @@ export default function () {
             href="/games?create=true"
           >
             <span class="icon-[fluent--add-20-regular] w-5 h-5 opacity-60" />
-            <span>{t("game.create")}</span>
+            <span>{t("general.actions.create.title")}</span>
           </Link>
         </Show>
         <Divider class="w-4/5" />
@@ -279,7 +279,7 @@ export default function () {
                       : DateTime.now() > (selectedGame()?.end_at || DateTime.now())
                         ? t("game.ended")
                         : t("game.started")
-                    : t("game.unknown")}
+                    : "UNKNOWN"}
                 </span>
               </Tag>
             </Card>

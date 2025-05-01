@@ -21,7 +21,7 @@ export default function (props: { children?: JSX.Element }) {
   ) {
     addToast({
       level: "error",
-      description: t("admin.permissionDenied")!,
+      description: t("general.network.status.403.title")!,
       duration: 5000,
     });
     navigate("/sigtrap/403");

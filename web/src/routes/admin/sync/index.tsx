@@ -5,7 +5,7 @@ import { t } from "@storage/theme";
 export default function () {
   return (
     <>
-      <Title page={t("admin.sync.title")} route="/admin/sync" />
+      <Title page={t("platform.sync.title")} route="/admin/sync" />
       <div class="flex-1 flex items-center justify-center">
         <NotImplemented />
       </div>

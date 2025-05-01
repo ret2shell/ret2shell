@@ -85,7 +85,7 @@ export default function () {
                   icon={<span class="icon-[fluent--mail-20-regular] w-5 h-5" />}
                   placeholder={t("account.form.email.placeholder")}
                   disabled
-                  title={t("account.form.email.title")}
+                  title={t("account.form.email.label")}
                   autocomplete="email"
                   {...props}
                   value={field.value}
@@ -101,7 +101,7 @@ export default function () {
                   icon={<span class="icon-[fluent--key-20-regular] w-5 h-5" />}
                   placeholder={t("account.reset.form.token.placeholder")}
                   disabled
-                  title={t("account.reset.form.token.title")}
+                  title={t("account.reset.form.token.label")}
                   autocomplete="off"
                   {...props}
                   value={field.value}
@@ -127,7 +127,7 @@ export default function () {
                 <Input
                   icon={<span class="icon-[fluent--lock-20-regular] w-5 h-5" />}
                   placeholder={t("account.form.password.placeholder")}
-                  title={t("account.form.password.title")}
+                  title={t("account.form.password.label")}
                   autocomplete="new-password"
                   type="password"
                   {...props}

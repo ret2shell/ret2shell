@@ -637,8 +637,15 @@
     "errors": {
       "fetch": {
         "title": "获取赛事失败"
+      },
+      "fetchList": {
+        "title": "获取比赛列表失败"
       }
-    }
+    },
+    "seeOtherInteresting": "看看别的地方吧",
+    "notArchived": "比赛尚未归档",
+    "canNotParticipate": "无法参与",
+    "adminMode": "管理员模式"
   },
   "challenge": {
     "title": "题目",
@@ -1211,6 +1218,9 @@
       "answer": {
         "required": "验证码不能为空",
         "minimumLength": "验证码过短"
+      },
+      "enabled": {
+        "label": "启用验证码保护"
       }
     }
   },
@@ -1251,41 +1261,47 @@
         "minimumLength": "用户名至少 4 个字符",
         "required": "用户名不能为空",
         "placeholder": "请输入用户名",
-        "title": "用户名",
+        "label": "用户名",
         "maximumLength": "用户名至多 32 个字符",
-        "invalid": "用户名只能包含大小写字母、数字与下划线"
+        "invalid": "用户名只能包含大小写字母、数字与下划线",
+        "title": ""
       },
       "password": {
         "required": "密码不能为空",
         "minimumLength": "密码至少 8 位",
         "tooWeak": "密码在 8 - 40 字符之间，至少包含一个大写字母、一个小写字母、一个数字和一个特殊字符",
         "placeholder": "请输入密码",
-        "title": "密码",
+        "label": "密码",
         "confirmRequired": "确认密码不能为空",
         "confirmMismatch": "两次密码输入不一致",
         "confirmTitle": "确认密码",
-        "confirmPlaceholder": "请再次输入密码"
+        "confirmPlaceholder": "请再次输入密码",
+        "title": ""
       },
       "nickname": {
         "required": "昵称不能为空",
         "minLength": "昵称至少 2 个字符",
         "maxLength": "昵称最多 32 个字符",
         "placeholder": "请输入昵称（不推荐真名哦）",
-        "title": "昵称"
+        "label": "昵称",
+        "title": ""
       },
       "email": {
         "required": "邮箱地址不能为空",
         "invalid": "邮箱格式错误",
         "placeholder": "请输入邮箱地址",
-        "title": "邮箱"
+        "label": "邮箱",
+        "title": ""
       },
       "description": {
-        "title": "个人简介"
+        "label": "个人简介",
+        "title": ""
       },
       "oldPassword": {
         "required": "旧密码不能为空",
-        "title": "旧密码",
-        "placeholder": "请输入旧密码"
+        "label": "旧密码",
+        "placeholder": "请输入旧密码",
+        "title": ""
       }
     },
     "login": {
@@ -1335,8 +1351,9 @@
         "email": {
           "required": "邮箱地址不能为空",
           "invalid": "邮箱格式错误",
-          "title": "注册时使用的邮箱",
-          "placeholder": "请输入邮箱地址"
+          "label": "注册时使用的邮箱",
+          "placeholder": "请输入邮箱地址",
+          "title": ""
         }
       }
     },
@@ -1397,7 +1414,8 @@
         "token": {
           "required": "重置密钥不能为空",
           "placeholder": "请输入重置密钥",
-          "title": "重置密钥"
+          "label": "重置密钥",
+          "title": ""
         }
       }
     },
@@ -1605,14 +1623,21 @@
         "title": "获取队伍列表失败"
       }
     },
-    "title": "参赛队伍"
+    "title": "参赛队伍",
+    "coming": "登场！"
   },
   "notification": {
     "empty": "没有未读消息",
     "title": "提示消息"
   },
   "bulletin": {
-    "title": "公告"
+    "title": "公告",
+    "errors": {
+      "fetchList": {
+        "title": "获取公告列表失败"
+      }
+    },
+    "empty": "没有发布过公告"
   },
   "admin": {
     "title": "管理"

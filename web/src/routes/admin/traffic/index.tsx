@@ -38,7 +38,7 @@ export default function Traffic() {
       const resp = await getPlatformConfig();
       setConfig(resp);
     } catch (err) {
-      handleHttpError(err as Error, t("errors.500")!);
+      handleHttpError(err as Error, t("platform.errors.fetchConfig.title")!);
     }
   });
   const [preset, setPreset] = createSignal(null as PresetTraffic | null);
@@ -130,7 +130,7 @@ export default function Traffic() {
   }
   return (
     <>
-      <Title page={t("admin.traffic.title")} route="/admin/traffic" />
+      <Title page={t("traffic.title")} route="/admin/traffic" />
       <div class="flex-1 flex flex-col items-center p-3 lg:p-6 relative">
         <div class="flex-1 flex flex-col w-full">
           <h2 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">

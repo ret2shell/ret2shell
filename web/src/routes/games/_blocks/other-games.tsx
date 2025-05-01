@@ -35,7 +35,7 @@ export default function () {
       appendGames(games);
       setTotal(total);
     } catch (err) {
-      handleHttpError(err as Error, t("game.fetchFailed")!);
+      handleHttpError(err as Error, t("game.errors.fetchList.title")!);
     }
     setLoading(false);
   }
@@ -75,7 +75,7 @@ export default function () {
                       : DateTime.now() > (game?.end_at || DateTime.now())
                         ? t("game.ended")
                         : t("game.started")
-                    : t("game.unknown")}
+                    : "UNKNOWN"}
                 </span>
               </Tag>
               <button

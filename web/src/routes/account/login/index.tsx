@@ -106,7 +106,7 @@ export default function () {
                 <Input
                   icon={<span class="icon-[fluent--person-20-regular] w-5 h-5" />}
                   placeholder={t("account.form.account.placeholder")}
-                  title={t("account.form.account.title")}
+                  title={t("account.form.account.label")}
                   autocomplete="username"
                   {...props}
                   value={field.value}
@@ -138,7 +138,7 @@ export default function () {
                   icon={<span class="icon-[fluent--lock-20-regular] w-5 h-5" />}
                   type="password"
                   placeholder={t("account.form.password.placeholder")}
-                  title={t("account.form.password.title")}
+                  title={t("account.form.password.label")}
                   extraLabel={
                     <A href="/account/forgot" class="hover:underline flex items-center space-x-1">
                       <span class="icon-[fluent--question-circle-16-regular] w-4 h-4 text-primary" />

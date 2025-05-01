@@ -68,7 +68,7 @@ export default function () {
                 <Input
                   icon={<span class="icon-[fluent--mail-20-regular] w-5 h-5" />}
                   placeholder={t("account.forgot.form.email.placeholder")}
-                  title={t("account.forgot.form.email.title")}
+                  title={t("account.forgot.form.email.label")}
                   autocomplete="email"
                   {...props}
                   value={field.value}

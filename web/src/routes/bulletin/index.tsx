@@ -25,7 +25,7 @@ export default function () {
       setArticles(resp[0]);
       setTotal(resp[1]);
     } catch (err) {
-      handleHttpError(err as Error, t("bulletin.fetchFailed")!);
+      handleHttpError(err as Error, t("bulletin.errors.fetchList.title")!);
     }
     setLoading(false);
   }
@@ -45,7 +45,7 @@ export default function () {
             <Show when={accountStore.permissions.includes(Permission.Bulletin)}>
               <Link size="sm" level="primary" href="/bulletin/create">
                 <span class="icon-[fluent--add-20-regular] w-5 h-5" />
-                <span>{t("bulletin.create")}</span>
+                <span>{t("general.actions.create.title")}</span>
               </Link>
             </Show>
             <Divider class="absolute bottom-0 left-2 right-2" />
@@ -74,7 +74,7 @@ export default function () {
             <Match when={articles().length === 0 && !loading()}>
               <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
                 <span class="icon-[fluent--megaphone-20-regular] w-24 h-24" />
-                <span>{t("bulletin.noMore")}</span>
+                <span>{t("bulletin.empty")}</span>
               </div>
             </Match>
             <Match when={loading()}>

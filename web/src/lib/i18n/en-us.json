@@ -28,6 +28,9 @@
       "answer": {
         "required": "",
         "minimumLength": ""
+      },
+      "enabled": {
+        "label": ""
       }
     },
     "label": "",
@@ -717,8 +720,15 @@
     "errors": {
       "fetch": {
         "title": ""
+      },
+      "fetchList": {
+        "title": ""
       }
-    }
+    },
+    "seeOtherInteresting": "",
+    "notArchived": "",
+    "canNotParticipate": "",
+    "adminMode": ""
   },
   "general": {
     "actions": {
@@ -1269,7 +1279,8 @@
           "required": "",
           "invalid": "",
           "title": "",
-          "placeholder": ""
+          "placeholder": "",
+          "label": ""
         }
       }
     },
@@ -1307,7 +1318,8 @@
         "required": "",
         "title": "",
         "maximumLength": "",
-        "invalid": ""
+        "invalid": "",
+        "label": ""
       },
       "password": {
         "required": "",
@@ -1318,28 +1330,33 @@
         "confirmRequired": "",
         "confirmMismatch": "",
         "confirmTitle": "",
-        "confirmPlaceholder": ""
+        "confirmPlaceholder": "",
+        "label": ""
       },
       "nickname": {
         "required": "",
         "minLength": "",
         "maxLength": "",
         "placeholder": "",
-        "title": ""
+        "title": "",
+        "label": ""
       },
       "email": {
         "required": "",
         "invalid": "",
         "placeholder": "",
-        "title": ""
+        "title": "",
+        "label": ""
       },
       "description": {
-        "title": ""
+        "title": "",
+        "label": ""
       },
       "oldPassword": {
         "required": "",
         "title": "",
-        "placeholder": ""
+        "placeholder": "",
+        "label": ""
       }
     },
     "register": {
@@ -1372,7 +1389,8 @@
         "token": {
           "required": "",
           "placeholder": "",
-          "title": ""
+          "title": "",
+          "label": ""
         }
       }
     },
@@ -1583,7 +1601,8 @@
         "title": ""
       }
     },
-    "title": ""
+    "title": "",
+    "coming": ""
   },
   "calendar": {
     "day": {
@@ -1620,7 +1639,13 @@
     "title": ""
   },
   "bulletin": {
-    "title": ""
+    "title": "",
+    "errors": {
+      "fetchList": {
+        "title": ""
+      }
+    },
+    "empty": ""
   },
   "admin": {
     "title": ""
