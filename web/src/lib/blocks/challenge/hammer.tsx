@@ -250,7 +250,7 @@ export default function (props: {
             link="/magic/sakana"
             nameLabel="Ciallo～(∠・ω< )⌒☆"
             labelClasses="text-primary"
-            content={`${t("challenge.hammer.tips.1")}\n\n${t("challenge.hammer.tips.2")} [bpa.st](https://bpa.st), [0x0.st](https://0x0.st)`}
+            content={`${t("challenge.hammer.tips.1")}\n\n${t("challenge.hammer.tips.2")} [GitHub Gists](https://gist.github.com), [bpa.st](https://bpa.st), [0x0.st](https://0x0.st)`}
             sendAt={gameStore.current!.start_at}
             isChecked
           />
