@@ -1,4 +1,5 @@
 import { type CollectionItem, Select, type SelectRootProps, createListCollection } from "@ark-ui/solid";
+import { createBreakpoints } from "@solid-primitives/media";
 import { fullTheme } from "@storage/theme";
 import clsx from "clsx";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
@@ -44,6 +45,15 @@ export default function (
 
   let selectEl: HTMLSelectElement;
 
+  const breakpoints = {
+    sm: "640px",
+    md: "768px",
+    lg: "1024px",
+    xl: "1280px",
+    "2xl": "1536px",
+  };
+  const matches = createBreakpoints(breakpoints);
+
   // const [, setSelectedItems] = createSignal<SelectItemType[]>([]);
 
   return (
@@ -77,7 +87,7 @@ export default function (
             "gap-0",
             "items-center",
             "w-full",
-            selectProps.size === "sm" ? "btn-sm" : "btn-md",
+            selectProps.size === "sm" ? "btn-sm" : matches.lg ? "btn-md" : "btn-sm",
             selectProps.ghost && "btn-ghost",
             selectProps.error && "border-error",
             selectProps.size === "sm" ? "px-1" : "px-2"
