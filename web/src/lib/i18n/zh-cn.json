@@ -1263,8 +1263,7 @@
         "placeholder": "请输入用户名",
         "label": "用户名",
         "maximumLength": "用户名至多 32 个字符",
-        "invalid": "用户名只能包含大小写字母、数字与下划线",
-        "title": ""
+        "invalid": "用户名只能包含大小写字母、数字与下划线"
       },
       "password": {
         "required": "密码不能为空",
@@ -1275,33 +1274,28 @@
         "confirmRequired": "确认密码不能为空",
         "confirmMismatch": "两次密码输入不一致",
         "confirmTitle": "确认密码",
-        "confirmPlaceholder": "请再次输入密码",
-        "title": ""
+        "confirmPlaceholder": "请再次输入密码"
       },
       "nickname": {
         "required": "昵称不能为空",
         "minLength": "昵称至少 2 个字符",
         "maxLength": "昵称最多 32 个字符",
         "placeholder": "请输入昵称（不推荐真名哦）",
-        "label": "昵称",
-        "title": ""
+        "label": "昵称"
       },
       "email": {
         "required": "邮箱地址不能为空",
         "invalid": "邮箱格式错误",
         "placeholder": "请输入邮箱地址",
-        "label": "邮箱",
-        "title": ""
+        "label": "邮箱"
       },
       "description": {
-        "label": "个人简介",
-        "title": ""
+        "label": "个人简介"
       },
       "oldPassword": {
         "required": "旧密码不能为空",
         "label": "旧密码",
-        "placeholder": "请输入旧密码",
-        "title": ""
+        "placeholder": "请输入旧密码"
       }
     },
     "login": {
@@ -1352,8 +1346,7 @@
           "required": "邮箱地址不能为空",
           "invalid": "邮箱格式错误",
           "label": "注册时使用的邮箱",
-          "placeholder": "请输入邮箱地址",
-          "title": ""
+          "placeholder": "请输入邮箱地址"
         }
       }
     },
@@ -1414,8 +1407,7 @@
         "token": {
           "required": "重置密钥不能为空",
           "placeholder": "请输入重置密钥",
-          "label": "重置密钥",
-          "title": ""
+          "label": "重置密钥"
         }
       }
     },

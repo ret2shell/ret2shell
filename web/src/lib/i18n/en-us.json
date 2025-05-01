@@ -1278,7 +1278,6 @@
         "email": {
           "required": "",
           "invalid": "",
-          "title": "",
           "placeholder": "",
           "label": ""
         }
@@ -1316,7 +1315,6 @@
         "minimumLength": "",
         "placeholder": "",
         "required": "",
-        "title": "",
         "maximumLength": "",
         "invalid": "",
         "label": ""
@@ -1326,7 +1324,6 @@
         "minimumLength": "",
         "tooWeak": "",
         "placeholder": "",
-        "title": "",
         "confirmRequired": "",
         "confirmMismatch": "",
         "confirmTitle": "",
@@ -1338,23 +1335,19 @@
         "minLength": "",
         "maxLength": "",
         "placeholder": "",
-        "title": "",
         "label": ""
       },
       "email": {
         "required": "",
         "invalid": "",
         "placeholder": "",
-        "title": "",
         "label": ""
       },
       "description": {
-        "title": "",
         "label": ""
       },
       "oldPassword": {
         "required": "",
-        "title": "",
         "placeholder": "",
         "label": ""
       }
@@ -1389,7 +1382,6 @@
         "token": {
           "required": "",
           "placeholder": "",
-          "title": "",
           "label": ""
         }
       }
