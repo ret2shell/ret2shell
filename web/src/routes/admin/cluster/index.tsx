@@ -43,14 +43,14 @@ export default function () {
       const resp = await getClusterNodes();
       setClusterNodes(resp.items);
     } catch (err) {
-      handleHttpError(err as Error, t("admin.cluster.failedToFetchNodes")!);
+      handleHttpError(err as Error, t("cluster.errors.fetchNodes.title")!);
     }
   });
 
   const [shownNode, setShownNode] = createSignal(null as Node | null);
   return (
     <>
-      <Title page={t("admin.cluster.title")} route="/admin/cluster" />
+      <Title page={t("cluster.title")} route="/admin/cluster" />
       <div class="flex-1 flex flex-col p-3 lg:p-6">
         <div class="h-32 lg:h-48 flex flex-row items-center">
           <div class="h-full aspect-square flex items-center justify-center">
@@ -67,16 +67,16 @@ export default function () {
             </Switch>
           </div>
           <h1 class="flex flex-col justify-center space-y-2">
-            <span class="text-3xl lg:text-5xl font-bold">{t("admin.cluster.title")}</span>
+            <span class="text-3xl lg:text-5xl font-bold">{t("cluster.title")}</span>
             <Switch>
               <Match when={loading()}>
                 <LoadingTips />
               </Match>
               <Match when={available()}>
-                <span class="text-info">{t("admin.cluster.available")}</span>
+                <span class="text-info">{t("cluster.status.available.title")}</span>
               </Match>
               <Match when={true}>
-                <span class="text-warning">{t("admin.cluster.unavailable")}</span>
+                <span class="text-warning">{t("cluster.status.unavailable.title")}</span>
               </Match>
             </Switch>
           </h1>
@@ -132,7 +132,7 @@ export default function () {
             fallback={
               <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
                 <span class="icon-[fluent--organization-20-regular] w-24 h-24" />
-                <span>{t("admin.cluster.selectNode")}</span>
+                <span>{t("cluster.selectNode")}</span>
               </div>
             }
           >
@@ -145,26 +145,26 @@ export default function () {
                   {DateTime.fromISO(shownNode()!.metadata!.creationTimestamp!).toFormat("yyyy-MM-dd HH:mm:ss")}
                 </span>
               </span>
-              <Button size="sm" square title={t("admin.cluster.refreshNode")}>
+              <Button size="sm" square title={t("cluster.actions.refreshNode.title")}>
                 <span class="icon-[fluent--arrow-clockwise-20-regular] w-5 h-5" />
               </Button>
-              <Button size="sm" square title={t("admin.cluster.updateNode")}>
+              <Button size="sm" square title={t("cluster.actions.updateNode.title")}>
                 <span class="icon-[fluent--arrow-circle-up-20-regular] w-5 h-5" />
               </Button>
-              <Button size="sm" square level="error" title={t("admin.cluster.disconnectNode")}>
+              <Button size="sm" square level="error" title={t("cluster.actions.disconnectNode.title")}>
                 <span class="icon-[fluent--stop-20-regular] w-5 h-5" />
               </Button>
             </div>
             <Divider />
             <div class="p-3 lg:p-6 flex flex-col">
-              <h3 class="text-center font-bold">{t("admin.cluster.nodeInfo")}</h3>
+              <h3 class="text-center font-bold">{t("cluster.nodeInfo.title")}</h3>
               <table>
                 <tbody>
                   <For each={Object.entries(shownNode()!.status!.nodeInfo!)}>
                     {([key, value]) => (
                       <tr class="border-b border-b-layer-content/10">
                         <td class="font-bold opacity-60 p-2">{`${
-                          t(`admin.cluster.data.nodeInfo.${key}`) as string
+                          t(`cluster.nodeInfo.${key}`) as string
                         }`}</td>
                         <td class="p-2">{value}</td>
                       </tr>
@@ -190,7 +190,7 @@ export default function () {
               </table>
             </div>
             <div class="flex flex-col">
-              <h3 class="text-center font-bold">{t("admin.cluster.nodeResources")}</h3>
+              <h3 class="text-center font-bold">{t("cluster.nodeResources.title")}</h3>
               <div class="flex flex-col lg:flex-row p-3 lg:p-6">
                 <table class="flex-1">
                   <tbody>

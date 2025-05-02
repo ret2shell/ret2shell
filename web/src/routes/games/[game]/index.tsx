@@ -41,12 +41,11 @@ function BannedWarning() {
     <Show when={!close()}>
       <div class="bg-error/60 backdrop-blur-sm fixed top-16 left-0 right-0 bottom-0 flex flex-col space-y-8 items-center justify-center">
         <span class="icon-[fluent--warning-20-filled] w-12 h-12" />
-        <span class="font-bold text-2xl">{t("game.team.banned")}</span>
-        <span>{t("game.team.bannedTips1")}</span>
-        <span>{t("game.team.bannedTips2")}</span>
+        <span class="font-bold text-2xl">{t("team.status.banned.title")}</span>
+        <span>{t("team.status.banned.message")}</span>
         <Button level="error" onClick={() => setClose(true)}>
           <span class="icon-[fluent--emoji-sad-20-regular] w-5 h-5" />
-          <span>{t("platform.ok")}</span>
+          <span>{t("general.actions.back.title")}</span>
         </Button>
       </div>
     </Show>
@@ -106,7 +105,7 @@ export default function () {
             const resp = await getGameIntroduction(gameStore.current.id);
             setIntroduction(resp);
           } catch (err) {
-            handleHttpError(err as Error, t("game.introduction.fetchFailed")!);
+            handleHttpError(err as Error, t("game.errors.fetchIntroduction.title")!);
           }
           setLoading(false);
         }
@@ -119,7 +118,7 @@ export default function () {
   const [coverFile, setCoverFile] = createSignal(null as File | null);
   const [coverUploading, setCoverUploading] = createSignal(false);
   function handleSelectCover() {
-    coverInput.click();
+    coverInput!.click();
   }
   function handleSelectedCover(event: Event) {
     if (
@@ -150,12 +149,12 @@ export default function () {
           setGameStore({ current: game });
           addToast({
             level: "success",
-            description: t("game.cover.uploaded")!,
+            description: t("general.actions.upload.status.success")!,
             duration: 5000,
           });
         }
       } catch (err) {
-        handleHttpError(err as Error, t("game.cover.uploadFailed")!);
+        handleHttpError(err as Error, t("general.actions.upload.status.fail")!);
       }
       setCoverUploading(false);
       setCoverFile(null);
@@ -167,7 +166,7 @@ export default function () {
   const [logoUploading, setLogoUploading] = createSignal(false);
   let logoInput: HTMLInputElement;
   function handleSelectLogo() {
-    logoInput.click();
+    logoInput!.click();
   }
   function handleSelectedLogo(event: Event) {
     if (
@@ -198,12 +197,12 @@ export default function () {
           setGameStore({ current: game });
           addToast({
             level: "success",
-            description: t("game.logo.uploaded")!,
+            description: t("general.actions.upload.status.success")!,
             duration: 5000,
           });
         }
       } catch (err) {
-        handleHttpError(err as Error, t("game.logo.uploadFailed")!);
+        handleHttpError(err as Error, t("general.actions.upload.status.fail")!);
       }
       setLogoUploading(false);
       setLogoFile(null);
@@ -217,7 +216,7 @@ export default function () {
       setIntroduction(resp);
       setSearchParams({ edit: null });
     } catch (err) {
-      handleHttpError(err as Error, t("game.introduction.updateFailed")!);
+      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
     }
   }
 
@@ -284,7 +283,7 @@ export default function () {
           </Card>
           <div class="flex flex-col space-y-2 items-center py-4 lg:py-8 print:hidden">
             <Show when={showTimer()} fallback={<span class="text-3xl font-bold text-warning">{t("game.ended")}</span>}>
-              <h3 class="text-xl font-bold opacity-60">{t("game.timerTips", { period: period() })}</h3>
+              <h3 class="text-xl font-bold opacity-60">{t("game.timeLast", { period: period() })}</h3>
               <p class="text-3xl font-bold">
                 <Timer end={timeEnd()} hasHours />
               </p>
@@ -295,10 +294,10 @@ export default function () {
               <Tag level="info" class="m-2">
                 <Show
                   when={gameStore.current?.team_size && gameStore.current.team_size > 1}
-                  fallback={<span>{t("game.team.solo")}</span>}
+                  fallback={<span>{t("team.solo")}</span>}
                 >
                   <span>
-                    {t("game.team.collab", {
+                    {t("team.collab", {
                       size: gameStore.current?.team_size || 0,
                     })}
                   </span>
@@ -322,12 +321,12 @@ export default function () {
               </Show>
               <Show when={gameStore.current?.hidden}>
                 <Tag level="warning" class="m-2">
-                  <span>{t("game.hidden")}</span>
+                  <span>{t("game.form.hidden.label")}</span>
                 </Tag>
               </Show>
               <Show when={gameStore.current?.frozen}>
                 <Tag level="warning" class="m-2">
-                  <span>{t("game.frozen")}</span>
+                  <span>{t("game.form.frozen.label")}</span>
                 </Tag>
               </Show>
             </div>
@@ -347,7 +346,7 @@ export default function () {
                 <p class="flex-row flex-wrap hidden lg:flex space-x-2 px-2 opacity-60">
                   <span>{stringifyState(gameStore.team?.state || TeamState.Pending)}</span>
                   <span class="opacity-60 text-primary">-</span>
-                  <span>{gameStore.team?.institute_name || t("account.institute.none")}</span>
+                  <span>{gameStore.team?.institute_name || t("institute.empty")}</span>
                 </p>
               </div>
               <p class="flex flex-col items-start justify-center font-bold">
@@ -392,19 +391,19 @@ export default function () {
                   <span class="icon-[fluent--people-team-20-regular] w-5 h-5" />
                   <Switch>
                     <Match when={inArchived()}>
-                      <span class="flex-1 text-start">{t("game.archivedGotoTraining")}</span>
+                      <span class="flex-1 text-start">{t("game.gotoTraining")}</span>
                     </Match>
                     <Match when={gameStore.current?.start_at && gameStore.current.start_at > DateTime.now()}>
-                      <span class="flex-1 text-start">{t("game.challenge.notStarted")}</span>
+                      <span class="flex-1 text-start">{t("game.notStarted")}</span>
                     </Match>
                     <Match when={gameStore.team?.state === TeamState.Pending}>
-                      <span class="flex-1 text-start">{t("game.team.pending")}</span>
+                      <span class="flex-1 text-start">{t("team.status.pending.placeholder")}</span>
                     </Match>
                     <Match when={gameStore.team?.state === TeamState.Banned}>
-                      <span class="flex-1 text-start">{t("game.team.banned")}</span>
+                      <span class="flex-1 text-start">{t("team.status.banned.title")}</span>
                     </Match>
                     <Match when={true}>
-                      <span class="flex-1 text-start">{t("game.challenge.enter")}</span>
+                      <span class="flex-1 text-start">{t("game.enterChallenge")}</span>
                     </Match>
                   </Switch>
                   <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
@@ -420,7 +419,7 @@ export default function () {
                   justify="start"
                 >
                   <span class="icon-[fluent--code-20-filled] w-5 h-5" />
-                  <span class="flex-1 text-start">{t("game.admin.manageChallenges")}</span>
+                  <span class="flex-1 text-start">{t("game.manageChallenges")}</span>
                   <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
                 </Link>
               </Match>
@@ -436,7 +435,7 @@ export default function () {
                     when={canParticipate()}
                     fallback={<span class="flex-1 text-start">{t("game.canNotParticipate")}</span>}
                   >
-                    <span class="flex-1 text-start">{t("game.team.create.title")}</span>
+                    <span class="flex-1 text-start">{t("team.create.title")}</span>
                   </Show>
                   <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
                 </Link>
@@ -448,7 +447,7 @@ export default function () {
                   level="warning"
                 >
                   <span class="icon-[fluent--person-20-regular] w-5 h-5" />
-                  <span class="flex-1 text-start">{t("game.team.loginThenBack")}</span>
+                  <span class="flex-1 text-start">{t("game.loginThenBack")}</span>
                   <span class="icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
                 </Link>
               </Match>

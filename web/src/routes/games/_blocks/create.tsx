@@ -61,11 +61,12 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
       node_selector: null,
       traffic: null,
       bucket: null,
+      archive_policy: { challenge: { show_answer: false, show_hints: false } },
     };
     try {
       props.onDone(await createGame(req));
     } catch (err) {
-      handleHttpError(err as Error, t("game.createFailed")!);
+      handleHttpError(err as Error, t("general.actions.create.status.fail")!);
     }
     setLoading(false);
   }
@@ -73,15 +74,15 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
     <Form onSubmit={onSubmit} class="flex flex-col self-center w-full max-w-5xl space-y-2">
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
         <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
-        <span>{t("game.admin.edit.title")}</span>
+        <span>{t("game.form.title")}</span>
       </h3>
       <div class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4">
-        <Field name="name" validate={[required(t("game.nameRequired")!)]}>
+        <Field name="name" validate={[required(t("game.form.name.required")!)]}>
           {(field, props) => (
             <Input
               icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
-              placeholder={t("game.namePlaceholder")}
-              title={t("game.namePlaceholder")}
+              placeholder={t("game.form.name.placeholder")!}
+              title={t("game.form.name.label")!}
               {...props}
               value={field.value}
               error={field.error}
@@ -94,16 +95,16 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
           name="team_size"
           type="number"
           validate={[
-            required(t("game.team.sizeRequired")!),
-            minRange(1, t("game.team.sizeMinExceeded")!),
-            maxRange(99, t("game.team.sizeMaxExceeded")!),
+            required(t("game.form.teamSize.required")!),
+            minRange(1, t("game.form.teamSize.minimum")!),
+            maxRange(99, t("game.form.teamSize.maximum")!),
           ]}
         >
           {(field, props) => (
             <Input
               icon={<span class="icon-[fluent--person-20-regular] w-5 h-5" />}
-              placeholder={t("game.teamSizePlaceholder")}
-              title={t("game.teamSizePlaceholder")}
+              placeholder={t("game.form.teamSize.placeholder")!}
+              title={t("game.form.teamSize.label")!}
               {...props}
               value={field.value}
               type="number"
@@ -122,7 +123,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
               {(field, props) => (
                 <IconCheckbox
                   class="!rounded-r-none"
-                  title={t("game.canRegisterAfterStarted")}
+                  title={t("game.form.canRegisterAfterStart.label")}
                   uncheckedIcon="icon-[fluent--accessibility-checkmark-20-regular]"
                   checkedIcon="icon-[fluent--accessibility-checkmark-20-filled]"
                   inputProps={props}
@@ -136,7 +137,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
               {(field, props) => (
                 <IconCheckbox
                   class="!rounded-none"
-                  title={t("game.offline")}
+                  title={t("game.form.offline.label")}
                   uncheckedIcon="icon-[fluent--wifi-off-20-regular]"
                   checkedIcon="icon-[fluent--wifi-off-20-filled]"
                   inputProps={props}
@@ -150,7 +151,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
               {(field, props) => (
                 <IconCheckbox
                   class="!rounded-l-none"
-                  title={t("game.enableAudit")}
+                  title={t("game.form.enableTeamAudit.label")}
                   uncheckedIcon="icon-[fluent--people-audience-20-regular]"
                   checkedIcon="icon-[fluent--people-audience-20-filled]"
                   inputProps={props}
@@ -166,7 +167,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
           {(field, props) => (
             <div class="flex flex-col space-y-1">
               <label class="label" for={props.name}>
-                {t("game.weight")}
+                {t("game.form.weight.label")}
                 <input class="hidden" type="number" {...props} value={field.value} />
               </label>
               <div class="flex flex-row">
@@ -205,12 +206,12 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
           )}
         </Field>
       </div>
-      <Field name="brief" validate={[required(t("game.briefRequired")!)]}>
+      <Field name="brief" validate={[required(t("game.form.brief.required")!)]}>
         {(field, props) => (
           <Input
             icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
-            placeholder={t("game.briefPlaceholder")}
-            title={t("game.briefPlaceholder")}
+            placeholder={t("game.form.brief.placeholder")!}
+            title={t("game.form.brief.label")!}
             {...props}
             value={field.value}
             error={field.error}
@@ -219,13 +220,13 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
           />
         )}
       </Field>
-      <Field name="start_at" type="number" validate={[required(t("game.startAtRequired")!)]}>
+      <Field name="start_at" type="number" validate={[required(t("game.form.startAt.required")!)]}>
         {(startAtField) => (
-          <Field name="end_at" type="number" validate={[required(t("game.endAtRequired")!)]}>
+          <Field name="end_at" type="number" validate={[required(t("game.form.endAt.required")!)]}>
             {(endAtField) => (
-              <Field name="register_at" type="number" validate={[required(t("game.registerAtRequired")!)]}>
+              <Field name="register_at" type="number" validate={[required(t("game.form.registerAt.required")!)]}>
                 {(registerAtField) => (
-                  <Field name="archive_at" type="number" validate={[required(t("game.archiveAtRequired")!)]}>
+                  <Field name="archive_at" type="number" validate={[required(t("game.form.archiveAt.required")!)]}>
                     {(archiveAtField) => (
                       <div class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4">
                         <TimePicker
@@ -233,8 +234,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
                           form={form}
                           type="time"
                           range
-                          title={t("game.startEndTime")}
-                          placeholder={t("game.startEndTime")}
+                          title={`${t("game.form.startAt.label")} - ${t("game.form.endAt.label")}`}
                           name={startAtField.name}
                           value={startAtField.value}
                           nameNext={endAtField.name}
@@ -250,8 +250,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
                           form={form}
                           type="time"
                           range
-                          title={t("game.registerArchiveTime")}
-                          placeholder={t("game.registerArchiveTime")}
+                          title={`${t("game.form.registerAt.label")} - ${t("game.form.archiveAt.label")}`}
                           name={registerAtField.name}
                           value={registerAtField.value}
                           nameNext={archiveAtField.name}

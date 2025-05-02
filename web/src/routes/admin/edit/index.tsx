@@ -33,7 +33,7 @@ export default function () {
     if (!config()) {
       addToast({
         level: "error",
-        description: t("admin.platform.fetchNotReady")!,
+        description: t("platform.errors.fetchConfig.title")!,
         duration: 5000,
       });
       return;
@@ -58,11 +58,11 @@ export default function () {
       setPlatformStore({ config: mergedConfig.server });
       addToast({
         level: "success",
-        description: t("admin.platform.updateSuccess")!,
+        description: t("general.actions.save.status.success")!,
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as Error, t("admin.platform.updateFailed")!);
+      handleHttpError(err as Error, t("general.actions.save.status.fail")!);
     }
     setLoading(false);
   }
@@ -81,12 +81,12 @@ export default function () {
         highlight_banner: resp.server.highlight_banner || "",
       });
     } catch (err) {
-      handleHttpError(err as HTTPError, t("errors.500")!);
+      handleHttpError(err as HTTPError, t("platform.errors.fetchConfig.title")!);
     }
   });
   return (
     <>
-      <Title page={t("admin.edit.title")} route="/admin/edit" />
+      <Title page={t("platform.form.title")} route="/admin/edit" />
       <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
         <Form onSubmit={onSubmit} class="w-full max-w-5xl flex flex-col space-y-2">
           <div class="p-6 flex items-center justify-center">
@@ -97,7 +97,7 @@ export default function () {
               <Input
                 icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
                 placeholder={t("platform.name")}
-                title={t("platform.form.nameTitle")}
+                title={t("platform.form.name.label")}
                 {...props}
                 value={field.value}
                 error={field.error}
@@ -108,8 +108,8 @@ export default function () {
             {(field, props) => (
               <Input
                 icon={<span class="icon-[fluent--phone-footer-arrow-down-20-regular] w-5 h-5" />}
-                placeholder={t("platform.form.footerInfoPlaceholder")}
-                title={t("platform.form.footerInfoTitle")}
+                placeholder={t("platform.form.footerInfo.placeholder")}
+                title={t("platform.form.footerInfo.label")}
                 {...props}
                 value={field.value}
                 error={field.error}
@@ -120,8 +120,8 @@ export default function () {
             {(field, props) => (
               <Input
                 icon={<span class="icon-[fluent--link-20-regular] w-5 h-5" />}
-                placeholder={t("platform.form.footerUrlPlaceholder")}
-                title={t("platform.form.footerUrlTitle")}
+                placeholder={t("platform.form.footerUrl.placeholder")}
+                title={t("platform.form.footerUrl.label")}
                 {...props}
                 value={field.value}
                 error={field.error}
@@ -133,7 +133,7 @@ export default function () {
               <Input
                 icon={<span class="icon-[fluent--subtitles-20-regular] w-5 h-5" />}
                 placeholder={t("platform.subject")}
-                title={t("platform.form.subjectInfoTitle")}
+                title={t("platform.form.subjectInfo.label")}
                 {...props}
                 value={field.value}
                 error={field.error}
@@ -145,7 +145,7 @@ export default function () {
               <Input
                 icon={<span class="icon-[fluent--link-20-regular] w-5 h-5" />}
                 placeholder="https://github.com/ret2shell"
-                title={t("platform.form.subjectUrlTitle")}
+                title={t("platform.form.subjectUrl.label")}
                 {...props}
                 value={field.value}
                 error={field.error}
@@ -156,8 +156,8 @@ export default function () {
             {(field, props) => (
               <Input
                 icon={<span class="icon-[fluent--image-20-regular] w-5 h-5" />}
-                placeholder={t("platform.form.highlightBannerPlaceholder")}
-                title={t("platform.form.highlightBannerTitle")}
+                placeholder={t("platform.form.highlightBanner.placeholder")}
+                title={t("platform.form.highlightBanner.label")}
                 {...props}
                 value={field.value}
                 error={field.error}
@@ -170,8 +170,8 @@ export default function () {
                 <Input
                   class="flex-1"
                   icon={<span class="icon-[fluent--record-20-regular] w-5 h-5" />}
-                  placeholder={t("platform.form.recordPlaceholder")}
-                  title={t("platform.form.recordTitle")}
+                  placeholder={t("platform.form.record.placeholder")}
+                  title={t("platform.form.record.label")}
                   {...props}
                   value={field.value}
                   error={field.error}
@@ -187,7 +187,7 @@ export default function () {
                     return false;
                   }
                   return true;
-                }, t("platform.form.hideMakerDisabled")!),
+                }, t("platform.form.hideMaker.disabled")!),
               ]}
             >
               {(field, props) => (
@@ -195,10 +195,10 @@ export default function () {
                   inputProps={props}
                   checked={platformStore.license?.level !== "enterprise" ? false : field.value}
                   error={field.error}
-                  title={t("platform.form.hideMaker")}
+                  title={t("platform.form.hideMaker.label")}
                   disabled={platformStore.license?.level !== "enterprise"}
                 >
-                  <span class="flex-1 text-start">{t("platform.form.hideMaker")}</span>
+                  <span class="flex-1 text-start">{t("platform.form.hideMaker.label")}</span>
                 </Checkbox>
               )}
             </Field>

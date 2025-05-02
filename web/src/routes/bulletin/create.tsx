@@ -16,10 +16,10 @@ export default function () {
   }
   return (
     <>
-      <Title page={`${t("bulletin.create")}${t("bulletin.title")}`} route="/bulletin/create" />
+      <Title page={`${t("general.actions.create.title")} - ${t("bulletin.title")}`} route="/bulletin/create" />
       <h1 class="text-3xl text-center flex flex-row space-x-4 items-center justify-center font-bold mt-8">
         <span>
-          {t("bulletin.create")} - {t("bulletin.title")}
+          {t("general.actions.create.title")} - {t("bulletin.title")}
         </span>
       </h1>
       <div class="flex-1 flex flex-col p-3 lg:p-6 items-center">

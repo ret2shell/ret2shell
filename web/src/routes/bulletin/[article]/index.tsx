@@ -28,7 +28,7 @@ export default function () {
       const resp = await getBulletin(article_id);
       setArticle(resp);
     } catch (err) {
-      handleHttpError(err as Error, t("errors.unknown")!);
+      handleHttpError(err as Error, t("bulletin.errors.fetch.title")!);
       if (err instanceof HTTPError) navigate(`/sigtrap/${err.response.status}`, { replace: true });
       else navigate("/sigtrap/unknown", { replace: true });
     }
@@ -39,7 +39,7 @@ export default function () {
       await deleteBulletin(article_id);
       addToast({
         level: "success",
-        description: t("bulletin.deleteSuccess")!,
+        description: t("general.actions.delete.status.success")!,
         duration: 5000,
       });
     } catch (err) {
@@ -51,7 +51,7 @@ export default function () {
     try {
       setArticle(await getBulletin(article.id));
     } catch (err) {
-      handleHttpError(err as Error, t("errors.unknown")!);
+      handleHttpError(err as Error, t("bulletin.errors.fetch.title")!);
       if (err instanceof HTTPError) navigate(`/sigtrap/${err.response.status}`, { replace: true });
       else navigate("/sigtrap/unknown", { replace: true });
     }
@@ -66,7 +66,7 @@ export default function () {
           fallback={
             <>
               <Spin width={32} height={32} />
-              <span>{t("article.loading")}</span>
+              <span>{t("general.loading.short")}</span>
             </>
           }
         >
@@ -76,9 +76,7 @@ export default function () {
       <div class="flex flex-row items-center justify-center space-x-6 print:space-x-2 opacity-60 flex-wrap py-3">
         <A
           class="hover:underline font-bold flex flex-row space-x-2 items-center"
-          title={t("article.by", {
-            name: article()?.publisher_name || t("article.unknownPublisher")!,
-          })}
+          title={article()?.publisher_name || t("bulletin.unknownPublisher")!}
           href={`/users/${article()?.publisher_id}`}
         >
           <span class="icon-[fluent--person-20-regular] w-5 h-5 print:hidden" />
@@ -87,7 +85,7 @@ export default function () {
         </A>
         <div
           class="font-bold flex flex-row space-x-2 items-center"
-          title={t("article.createdAt", {
+          title={t("bulletin.form.createdAt.label", {
             time: article()?.created_at.toFormat("yyyy-MM-dd HH:mm:ss") || "UNKNOWN",
           })}
         >
@@ -98,7 +96,7 @@ export default function () {
         <Show when={article()?.created_at && article()?.updated_at && article()!.created_at !== article()!.updated_at}>
           <div
             class="font-bold flex flex-row space-x-2 items-center print:hidden"
-            title={t("article.updatedAt", {
+            title={t("bulletin.form.updatedAt.label", {
               time: article()?.updated_at.toFormat("yyyy-MM-dd HH:mm:ss") || "UNKNOWN",
             })}
           >
@@ -112,7 +110,7 @@ export default function () {
             href={`/bulletin/${article()?.id}?edit=true`}
           >
             <span class="icon-[fluent--edit-20-regular] w-5 h-5" />
-            <span>{t("form.edit")}</span>
+            <span>{t("general.actions.edit.title")}</span>
           </A>
           <button
             class="cursor-pointer font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
@@ -129,7 +127,7 @@ export default function () {
           type="button"
         >
           <span class="icon-[fluent--print-20-regular] w-5 h-5" />
-          <span>{t("form.print")}</span>
+          <span>{t("general.actions.print.title")}</span>
         </button>
       </div>
       <Show

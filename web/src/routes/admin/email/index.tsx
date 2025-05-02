@@ -26,7 +26,7 @@ export default function () {
         ...resp.email,
       });
     } catch (err) {
-      handleHttpError(err as HTTPError, t("errors.500")!);
+      handleHttpError(err as HTTPError, t("platform.errors.fetchConfig.title")!);
     }
   });
 
@@ -53,22 +53,22 @@ export default function () {
 
   return (
     <>
-      <Title page={t("admin.email.title")} route="/admin/email" />
+      <Title page={t("platform.email.title")} route="/admin/email" />
       <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
         <Form onSubmit={onSubmit} class="w-full max-w-5xl flex flex-col space-y-2">
           <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
             <span class="icon-[fluent--mail-20-regular] w-5 h-5" />
-            <span>{t("admin.email.title")}</span>
+            <span>{t("platform.email.title")}</span>
           </h3>
           <Field name="enabled" type="boolean">
             {(field, props) => (
               <Checkbox
                 inputProps={props}
-                title={t("admin.email.enabled")}
+                title={t("platform.email.form.enabled")}
                 checked={field.value ?? false}
                 error={field.error}
               >
-                <span class="flex-1 text-start">{t("admin.email.enabled")}</span>
+                <span class="flex-1 text-start">{t("platform.email.form.enabled")}</span>
               </Checkbox>
             )}
           </Field>
@@ -81,17 +81,17 @@ export default function () {
                     return false;
                   }
                   return true;
-                }, t("admin.email.tlsRequired")!),
+                }, t("platform.email.form.tls.required")!),
               ]}
             >
               {(field, props) => (
                 <Select
                   name={field.name}
-                  label={t("admin.email.tls")!}
+                  label={t("platform.email.form.tls.label")!}
                   disabled={getValue(form, "enabled") === false}
                   class="flex-1 max-w-64"
                   error={field.error}
-                  placeholder={t("admin.email.tlsRequired")}
+                  placeholder={t("platform.email.form.tls.placeholder")!}
                   items={[
                     {
                       value: "none",
@@ -122,15 +122,15 @@ export default function () {
                     return false;
                   }
                   return true;
-                }, t("admin.email.hostRequired")!),
+                }, t("platform.email.form.host.required")!),
               ]}
             >
               {(field, props) => (
                 <Input
                   class="flex-1"
                   disabled={getValue(form, "enabled") === false}
-                  title={t("admin.email.host")}
-                  placeholder={t("admin.email.host")}
+                  title={t("platform.email.form.host.label")}
+                  placeholder={t("platform.email.form.host.placeholder")!}
                   icon={<span class="icon-[fluent--server-link-20-regular] w-5 h-5" />}
                   value={field.value}
                   error={field.error}
@@ -147,21 +147,21 @@ export default function () {
                     return false;
                   }
                   return true;
-                }, t("admin.email.portRequired")!),
+                }, t("platform.email.form.port.required")!),
                 custom((value) => {
                   if (value && (value < 1 || value > 65535)) {
                     return false;
                   }
                   return true;
-                }, t("admin.email.portRangeNotMatch")!),
+                }, t("platform.email.form.port.invalid")!),
               ]}
             >
               {(field, props) => (
                 <Input
                   type="number"
                   disabled={getValue(form, "enabled") === false}
-                  title={t("admin.email.port")}
-                  placeholder={t("admin.email.port")}
+                  title={t("platform.email.form.port.label")}
+                  placeholder={t("platform.email.form.port.placeholder")!}
                   class="w-36"
                   icon={<span class="icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
                   value={field.value}
@@ -179,15 +179,15 @@ export default function () {
                   return false;
                 }
                 return true;
-              }, t("admin.email.senderRequired")!),
+              }, t("platform.email.form.sender.required")!),
             ]}
           >
             {(field, props) => (
               <Input
                 class="flex-1"
                 disabled={getValue(form, "enabled") === false}
-                title={t("admin.email.sender")}
-                placeholder={t("admin.email.sender")}
+                title={t("platform.email.form.sender.label")}
+                placeholder={t("platform.email.form.sender.placeholder")!}
                 icon={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}
                 value={field.value}
                 error={field.error}
@@ -204,15 +204,15 @@ export default function () {
                     return false;
                   }
                   return true;
-                }, t("admin.email.usernameRequired")!),
+                }, t("platform.email.form.username.required")!),
               ]}
             >
               {(field, props) => (
                 <Input
                   class="flex-1"
                   disabled={getValue(form, "enabled") === false}
-                  title={t("admin.email.username")}
-                  placeholder={t("admin.email.username")}
+                  title={t("platform.email.form.username.label")}
+                  placeholder={t("platform.email.form.username.placeholder")!}
                   icon={<span class="icon-[fluent--mail-20-regular] w-5 h-5" />}
                   value={field.value}
                   error={field.error}
@@ -228,7 +228,7 @@ export default function () {
                     return false;
                   }
                   return true;
-                }, t("admin.email.passwordRequired")!),
+                }, t("platform.email.form.password.required")!),
               ]}
             >
               {(field, props) => (
@@ -236,8 +236,8 @@ export default function () {
                   class="flex-1"
                   disabled={getValue(form, "enabled") === false}
                   type="password"
-                  title={t("admin.email.password")}
-                  placeholder={t("admin.email.password")}
+                  title={t("platform.email.form.password.label")}
+                  placeholder={t("platform.email.form.password.placeholder")!}
                   icon={<span class="icon-[fluent--lock-20-regular] w-5 h-5" />}
                   value={field.value}
                   error={field.error}
@@ -255,15 +255,15 @@ export default function () {
                   return false;
                 }
                 return true;
-              }, t("admin.email.verifyEmailSubjectRequired")!),
+              }, t("platform.email.form.verifyEmailSubject.required")!),
             ]}
           >
             {(field, props) => (
               <Input
                 class="flex-1"
                 disabled={getValue(form, "enabled") === false}
-                title={t("admin.email.verifyEmailSubject")}
-                placeholder={t("admin.email.verifyEmailSubject")}
+                title={t("platform.email.form.verifyEmailSubject.label")}
+                placeholder={t("platform.email.form.verifyEmailSubject.placeholder")!}
                 icon={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}
                 value={field.value ?? undefined}
                 error={field.error}
@@ -279,7 +279,7 @@ export default function () {
                   return false;
                 }
                 return true;
-              }, t("admin.email.verifyEmailBodyRequired")!),
+              }, t("platform.email.form.verifyEmailBody.required")!),
             ]}
           >
             {(field) => (
@@ -289,7 +289,7 @@ export default function () {
                 class="h-80"
                 lang="html"
                 placeholder="xHTML (RFC 2557)"
-                title={t("admin.email.verifyEmailBody")}
+                title={t("platform.email.form.verifyEmailBody.label")}
                 name="verify_email_body"
                 value={field.value ?? undefined}
                 error={field.error}
@@ -305,15 +305,15 @@ export default function () {
                   return false;
                 }
                 return true;
-              }, t("admin.email.resetEmailSubjectRequired")!),
+              }, t("platform.email.form.resetPasswordEmailSubject.required")!),
             ]}
           >
             {(field, props) => (
               <Input
                 class="flex-1"
                 disabled={getValue(form, "enabled") === false}
-                title={t("admin.email.resetEmailSubject")}
-                placeholder={t("admin.email.resetEmailSubject")}
+                title={t("platform.email.form.resetPasswordEmailSubject.label")}
+                placeholder={t("platform.email.form.resetPasswordEmailSubject.placeholder")!}
                 icon={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}
                 value={field.value ?? undefined}
                 error={field.error}
@@ -329,7 +329,7 @@ export default function () {
                   return false;
                 }
                 return true;
-              }, t("admin.email.resetEmailBodyRequired")!),
+              }, t("platform.email.form.resetPasswordEmailBody.required")!),
             ]}
           >
             {(field) => (
@@ -339,7 +339,7 @@ export default function () {
                 class="h-80"
                 lang="html"
                 placeholder="xHTML (RFC 2557)"
-                title={t("admin.email.resetEmailBody")}
+                title={t("platform.email.form.resetPasswordEmailBody.label")}
                 name="reset_password_email_body"
                 value={field.value ?? undefined}
                 error={field.error}

@@ -26,7 +26,7 @@ export default function () {
         anti_theft: resp.media.anti_theft,
       });
     } catch (err) {
-      handleHttpError(err as Error, t("errors.500")!);
+      handleHttpError(err as Error, t("platform.errors.fetchConfig.title")!);
     }
   });
   async function onSubmit(result: MediaConfig) {
@@ -34,7 +34,7 @@ export default function () {
     if (!config()) {
       addToast({
         level: "error",
-        description: t("admin.platform.fetchNotReady")!,
+        description: t("platform.errors.fetchConfig.notReady")!,
         duration: 5000,
       });
       return;
@@ -48,30 +48,30 @@ export default function () {
       setConfig(mergedConfig);
       addToast({
         level: "success",
-        description: t("admin.platform.updateSuccess")!,
+        description: t("general.actions.save.status.success")!,
         duration: 5000,
       });
     } catch (err) {
-      handleHttpError(err as HTTPError, t("admin.platform.updateFailed")!);
+      handleHttpError(err as HTTPError, t("general.actions.save.status.fail")!);
     }
     setLoading(false);
   }
   return (
     <>
-      <Title page={t("admin.media.title")} route="/admin/media" />
+      <Title page={t("media.title")} route="/admin/media" />
       <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
         <Form onSubmit={onSubmit} class="w-full max-w-5xl flex flex-col space-y-2">
           <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
             <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
-            <span>{t("admin.media.title")}</span>
+            <span>{t("media.title")}</span>
           </h3>
           <Field name="path">
             {(field, props) => (
               <Input
                 class="flex-1"
                 disabled
-                title={t("admin.media.path")}
-                placeholder={t("admin.media.path")}
+                title={t("media.form.path.label")!}
+                placeholder={t("media.form.path.placeholder")!}
                 icon={<span class="icon-[fluent--server-link-20-regular] w-5 h-5" />}
                 value={field.value}
                 error={field.error}
@@ -84,11 +84,11 @@ export default function () {
               {(field, props) => (
                 <Checkbox
                   inputProps={props}
-                  title={t("admin.media.antiTheft")}
+                  title={t("media.form.antiTheft.label")!}
                   checked={field.value ?? false}
                   error={field.error}
                 >
-                  <span class="flex-1 text-start">{t("admin.media.antiTheft")}</span>
+                  <span class="flex-1 text-start">{t("media.form.antiTheft.label")}</span>
                 </Checkbox>
               )}
             </Field>
@@ -96,7 +96,7 @@ export default function () {
               {(field, props) => (
                 <Slider
                   class="flex-1"
-                  label={t("admin.media.limit")!}
+                  label={t("media.form.limit.label")!}
                   max={1000}
                   min={10}
                   step={10}

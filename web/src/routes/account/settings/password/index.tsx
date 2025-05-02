@@ -62,7 +62,7 @@ export default function () {
             {(field, props) => (
               <Input
                 icon={<span class="icon-[fluent--password-20-regular] w-5 h-5" />}
-                title={t("account.form.oldPassword.title")}
+                title={t("account.form.oldPassword.label")}
                 placeholder={t("account.form.oldPassword.placeholder")}
                 {...props}
                 value={field.value}
@@ -88,7 +88,7 @@ export default function () {
             {(field, props) => (
               <Input
                 icon={<span class="icon-[fluent--password-20-regular] w-5 h-5" />}
-                title={t("account.form.password.title")}
+                title={t("account.form.password.label")}
                 placeholder={t("account.form.password.placeholder")}
                 {...props}
                 value={field.value}
@@ -114,7 +114,7 @@ export default function () {
             {(field, props) => (
               <Input
                 icon={<span class="icon-[fluent--password-20-regular] w-5 h-5" />}
-                title={t("account.form.password.confirmTitle")}
+                title={t("account.form.password.confirmLabel")}
                 placeholder={t("account.form.password.confirmPlaceholder")}
                 {...props}
                 value={field.value}

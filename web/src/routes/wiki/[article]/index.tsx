@@ -28,7 +28,7 @@ export default function () {
       try {
         setWikiStore({ current: await getWiki(article_id()) });
       } catch (err) {
-        handleHttpError(err as Error, t("errors.unknown")!);
+        handleHttpError(err as Error, t("wiki.errors.fetch.title")!);
         if (err instanceof HTTPError) {
           navigate(`/sigtrap/${err.response.status}`, { replace: true });
         } else {
@@ -47,13 +47,13 @@ export default function () {
       await deleteWiki(article_id());
       addToast({
         level: "success",
-        description: t("wiki.deleteSuccess")!,
+        description: t("general.actions.delete.status.success")!,
         duration: 5000,
       });
       await refreshWikiToc();
       navigate("/wiki", { replace: true });
     } catch (err) {
-      handleHttpError(err as Error, t("errors.unknown")!);
+      handleHttpError(err as Error, t("general.actions.delete.status.fail")!);
     }
   }
 
@@ -62,7 +62,7 @@ export default function () {
       setWikiStore({ current: await getWiki(article.id) });
       await refreshWikiToc();
     } catch (err) {
-      handleHttpError(err as Error, t("errors.unknown")!);
+      handleHttpError(err as Error, t("wiki.errors.fetch.title")!);
       if (err instanceof HTTPError) {
         navigate(`/sigtrap/${err.response.status}`, { replace: true });
       } else {
@@ -81,7 +81,7 @@ export default function () {
             fallback={
               <>
                 <Spin width={32} height={32} />
-                <span>{t("article.loading")}</span>
+                <span>{t("general.loading.short")}</span>
               </>
             }
           >
@@ -91,18 +91,15 @@ export default function () {
         <div class="flex flex-row items-center w-full max-w-5xl justify-start print:justify-center space-x-6 print:space-x-2 opacity-60 flex-wrap py-3">
           <A
             class="hover:underline font-bold flex flex-row space-x-2 items-center"
-            title={t("article.by", {
-              name: wikiStore.current?.publisher_name || t("article.unknownPublisher")!,
-            })}
+            title={wikiStore.current?.publisher_name || t("wiki.unknownPublisher")!}
             href={`/users/${wikiStore.current?.publisher_id}`}
           >
             <span class="icon-[fluent--person-20-regular] w-5 h-5 print:hidden" />
-            <span class="hidden print:inline-block">By</span>
             <span>{wikiStore.current?.publisher_name}</span>
           </A>
           <div
             class="font-bold flex flex-row space-x-2 items-center"
-            title={t("article.createdAt", {
+            title={t("wiki.form.createdAt.label", {
               time: wikiStore.current?.created_at.toFormat("yyyy-MM-dd HH:mm:ss") || "UNKNOWN",
             })}
           >
@@ -119,7 +116,7 @@ export default function () {
           >
             <div
               class="font-bold flex flex-row space-x-2 items-center print:hidden"
-              title={t("article.updatedAt", {
+              title={t("wiki.form.updatedAt.label", {
                 time: wikiStore.current?.updated_at.toFormat("yyyy-MM-dd HH:mm:ss") || "UNKNOWN",
               })}
             >
@@ -133,7 +130,7 @@ export default function () {
               href={`/wiki/${wikiStore.current?.id}?edit=true`}
             >
               <span class="icon-[fluent--edit-20-regular] w-5 h-5" />
-              <span>{t("form.edit")}</span>
+              <span>{t("general.actions.edit.title")}</span>
             </A>
             <button
               class="cursor-pointer font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
@@ -150,7 +147,7 @@ export default function () {
             type="button"
           >
             <span class="icon-[fluent--print-20-regular] w-5 h-5" />
-            <span>{t("form.print")}</span>
+            <span>{t("general.actions.print.title")}</span>
           </button>
         </div>
         <Divider class="w-full max-w-5xl" />

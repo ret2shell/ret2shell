@@ -79,13 +79,13 @@ export default function (compProps: {
           const resp = await getUserIpList(compProps.editSource!.id);
           setIps(resp);
         } catch (err) {
-          handleHttpError(err as Error, t("admin.users.fetchIpAddressesFailed")!);
+          handleHttpError(err as Error, t("user.errors.fetchIpList.title")!);
         }
         try {
           const resp = await getUserOAuthList(compProps.editSource!.id);
           setOauthes(resp);
         } catch (err) {
-          handleHttpError(err as Error, t("admin.users.fetchOAuthsFailed")!);
+          handleHttpError(err as Error, t("user.errors.fetchOAuth.title")!);
         }
       });
     }
@@ -117,7 +117,7 @@ export default function (compProps: {
         setValue(form, "avatar", resp.hash);
         setAvatarSet(true);
       } catch (err) {
-        handleHttpError(err as Error, t("account.settings.info.avatarUploadFailed")!);
+        handleHttpError(err as Error, t("general.actions.upload.status.fail")!);
       }
       setAvatarUploading(false);
     }
@@ -177,23 +177,23 @@ export default function (compProps: {
     <div class="w-full p-3 lg:p-6 flex flex-col flex-1 space-y-2 items-center">
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2 w-full">
         <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
-        <span class="flex-1 text-start">{t("account.settings.info.title")}</span>
+        <span class="flex-1 text-start">{t("user.management.title")}</span>
         <Link href={`/users/${compProps.editSource?.id}`} size="sm">
-          {t("admin.users.goToUserDetailPage")}
+          {t("user.management.goToUserDetailPage")}
         </Link>
         <Link href="/admin/users" size="sm">
-          {t("form.backToList")}
+          {t("general.actions.back.title")}
         </Link>
         <Popover size="sm" level="error" btnContent={<span>{t("general.actions.delete.title")}</span>}>
           <Card contentClass="p-4 flex flex-col space-y-2 items-stretch max-w-lg">
             {/* <span class="icon-[fluent--warning-24-filled] text-error w-6 h-6 md:w-12 md:h-12" /> */}
             <Card level="warning" contentClass="p-2 flex space-x-2 items-center">
               <span class="icon-[fluent--warning-20-filled] w-5 h-5 text-warning shrink-0" />
-              <p class="font-bold">{t("admin.users.warningDelete")}</p>
+              <p class="font-bold">{t("general.actions.delete.message")}</p>
             </Card>
             <div class="flex flex-col space-x-2">
               <span class="font-bold text-error">
-                {t("admin.users.warningDeleteConfirmTip", {
+                {t("user.management.confirmDelete", {
                   name: `${compProps.editSource?.account}`,
                 })}
               </span>
@@ -223,13 +223,13 @@ export default function (compProps: {
         <div class="flex flex-row space-x-4 items-center">
           <div class="flex flex-col space-y-2 flex-1">
             <div class="flex flex-row space-x-2">
-              <Field name="account" validate={[required(t("account.settings.info.accountRequired")!)]}>
+              <Field name="account" validate={[required(t("account.form.account.required")!)]}>
                 {(field, props) => (
                   <Input
                     class="flex-1"
                     icon={<span class="icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
-                    title={t("account.settings.info.account")}
-                    placeholder={t("account.settings.info.account")}
+                    title={t("account.form.account.label")}
+                    placeholder={t("account.form.account.placeholder")}
                     {...props}
                     value={field.value}
                     error={field.error}
@@ -237,13 +237,13 @@ export default function (compProps: {
                   />
                 )}
               </Field>
-              <Field name="nickname" validate={[required(t("account.settings.info.nicknameRequired")!)]}>
+              <Field name="nickname" validate={[required(t("account.form.nickname.required")!)]}>
                 {(field, props) => (
                   <Input
                     class="flex-1"
                     icon={<span class="icon-[fluent--emoji-20-regular] w-5 h-5" />}
-                    title={t("account.settings.info.nickname")}
-                    placeholder={t("account.settings.info.nickname")}
+                    title={t("account.form.nickname.label")}
+                    placeholder={t("account.form.nickname.placeholder")}
                     {...props}
                     value={field.value}
                     error={field.error}
@@ -256,16 +256,16 @@ export default function (compProps: {
               <Field
                 name="email"
                 validate={[
-                  required(t("account.settings.info.emailRequired")!),
-                  email(t("account.settings.info.emailInvalid")!),
+                  required(t("account.form.email.required")!),
+                  email(t("account.form.email.invalid")!),
                 ]}
               >
                 {(field, props) => (
                   <Input
                     class="flex-1 min-w-0"
                     icon={<span class="icon-[fluent--mail-20-regular] w-5 h-5" />}
-                    title={t("account.settings.info.email")}
-                    placeholder={t("account.settings.info.email")}
+                    title={t("account.form.email.label")}
+                    placeholder={t("account.form.email.placeholder")}
                     {...props}
                     value={field.value}
                     error={field.error}
@@ -277,8 +277,8 @@ export default function (compProps: {
                 {(field, props) => (
                   <Select
                     class="flex-1 min-w-0"
-                    label={t("admin.users.institute")}
-                    placeholder={t("admin.users.selectInstitute")}
+                    label={t("account.form.institute.label")}
+                    placeholder={t("account.form.institute.placeholder")}
                     items={institutesSelect()}
                     name={field.name}
                     error={field.error}
@@ -341,7 +341,7 @@ export default function (compProps: {
               class="h-80"
               lang="markdown"
               placeholder="MARKDOWN"
-              title={t("account.settings.info.description")}
+              title={t("account.form.description.label")!}
               name="description"
               value={field.value}
               error={field.error}
@@ -352,14 +352,14 @@ export default function (compProps: {
           <Field name="hidden" type="boolean">
             {(field, props) => (
               <Checkbox class="flex-none m-1" inputProps={props} checked={field.value ?? false} error={field.error}>
-                <span class="flex-1 text-start truncate">{t("admin.users.hidden")}</span>
+                <span class="flex-1 text-start truncate">{t("account.form.hidden.label")}</span>
               </Checkbox>
             )}
           </Field>
           <Field name="banned" type="boolean">
             {(field, props) => (
               <Checkbox class="flex-none m-1" inputProps={props} checked={field.value ?? false} error={field.error}>
-                <span class="flex-1 text-start truncate">{t("admin.users.banned")}</span>
+                <span class="flex-1 text-start truncate">{t("account.form.banned.label")}</span>
               </Checkbox>
             )}
           </Field>
@@ -441,7 +441,7 @@ export default function (compProps: {
       <div class="w-full flex flex-col">
         <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2 w-full">
           <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
-          <span class="flex-1 text-start">{t("admin.users.oauths")}</span>
+          <span class="flex-1 text-start">{t("account.form.oauths.label")}</span>
         </h3>
         <For each={oauths()}>
           {(oauth) => (
@@ -454,7 +454,7 @@ export default function (compProps: {
       </div>
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2 w-full">
         <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
-        <span class="flex-1 text-start">{t("admin.users.ipAddresses")}</span>
+        <span class="flex-1 text-start">{t("account.form.ips.label")}</span>
       </h3>
       <div class="flex flex-row flex-wrap">
         <For each={ips()}>

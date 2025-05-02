@@ -40,7 +40,7 @@ export default function () {
       const resp = await getPlatformLogs();
       setLogFiles((resp as string[]).sort());
     } catch (err) {
-      handleHttpError(err as Error, t("admin.logs.failedToFetchLogsList")!);
+      handleHttpError(err as Error, t("platform.logs.errors.fetchList.title")!);
     }
   });
 
@@ -69,13 +69,13 @@ export default function () {
       const log = JSON.parse(event.data as string) as Log;
       setLogs(logs().concat(log));
       setTimeout(() => {
-        bottomDiv.scrollIntoView({ behavior: "smooth" });
+        bottomDiv!.scrollIntoView({ behavior: "smooth" });
       }, 100);
     };
     ws.onclose = () => {
       addToast({
         level: "error",
-        description: t("admin.logs.socketClosed")!,
+        description: t("platform.logs.errors.socketClosed.title")!,
         duration: 5000,
       });
       setTimeout(() => {
@@ -122,16 +122,16 @@ export default function () {
   let bottomDiv: HTMLDivElement;
   return (
     <>
-      <Title page={t("admin.logs.title")} route="/admin/logs" />
+      <Title page={t("platform.logs.title")} route="/admin/logs" />
       <div class="flex-1 flex flex-col">
         <div class="sticky top-16 h-16 z-20 backdrop-blur-sm border-b border-b-layer-content/10 flex flex-row space-x-4 items-center px-3 lg:px-6">
           <h1 class="flex-1 font-bold flex flex-row space-x-2 items-center">
             <span class="icon-[fluent--code-20-regular] w-5 h-5" />
-            <span>{t("admin.logs.title")}</span>
+            <span>{t("platform.logs.title")}</span>
           </h1>
           <Show when={enableStreamLogs()}>
             <Tag level="success">
-              <span>{t("admin.logs.streamingEnabled")}</span>
+              <span>{t("platform.logs.streamingEnabled")}</span>
             </Tag>
           </Show>
           <Button
@@ -139,7 +139,7 @@ export default function () {
             size="sm"
             level={enableStreamLogs() ? "error" : "info"}
           >
-            <span>{`${enableStreamLogs() ? t("admin.logs.stop")! : t("admin.logs.start")!}`}</span>
+            <span>{`${enableStreamLogs() ? t("general.actions.stop.title")! : t("general.actions.start.title")!}`}</span>
           </Button>
         </div>
         <div class="inline-flex flex-row items-center flex-wrap p-3 lg:p-6 !pb-0">
@@ -210,8 +210,8 @@ export default function () {
           <Show when={logs().length === 0}>
             <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
               <span class="icon-[fluent--code-20-regular] w-24 h-24" />
-              <span>{t("admin.logs.empty")}</span>
-              <span>{t("admin.logs.emptyTips")}</span>
+              <span>{t("platform.logs.notStreaming")}</span>
+              <span>{t("platform.logs.enableStreamWarning")}</span>
             </div>
           </Show>
           <div ref={bottomDiv!} />

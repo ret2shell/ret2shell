@@ -56,7 +56,7 @@ export default function () {
         navigate(`/games/${gameStore.current?.id}`);
       }, 2000);
     } catch (err) {
-      handleHttpError(err as Error, t("game.team.create.failed")!);
+      handleHttpError(err as Error, t("general.actions.create.status.fail")!);
     }
     setLoading(false);
   }
@@ -74,26 +74,26 @@ export default function () {
   const [dialogOpen, setDialogOpen] = createSignal(false);
   return (
     <>
-      <Title page={t("game.team.create.title")} route={`/games/${gameStore.current?.id}/teams/create`} />
+      <Title page={t("team.create.title")} route={`/games/${gameStore.current?.id}/teams/create`} />
       <div class="flex-1 flex flex-col items-center md:justify-center p-3 md:p-6">
         <Card
           class="w-full max-w-xl"
           contentClass="p-6 flex flex-col md:flex-row space-y-2 space-x-0 md:space-x-6 md:space-y-0"
         >
           <Form onSubmit={onSubmit} class="md:w-0 flex-1 shrink-0 flex flex-col space-y-2">
-            <h2 class="font-bold text-center">{t("game.team.create.title")}</h2>
+            <h2 class="font-bold text-center">{t("team.create.title")}</h2>
             <Field
               name="name"
               validate={[
-                required(t("game.team.create.nameRequired")!),
-                maxLength(32, t("game.team.create.nameMaxLength")!),
+                required(t("team.form.name.required")!),
+                maxLength(32, t("team.form.name.maximumLength")!),
               ]}
             >
               {(field, props) => (
                 <Input
                   icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
-                  title={customDisabled() ? t("game.team.create.customDisabled") : t("game.team.create.name")}
-                  placeholder={t("game.team.create.namePlaceholder")}
+                  title={customDisabled() ? t("team.form.name.customDisabled") : t("team.form.name.label")}
+                  placeholder={t("team.form.name.placeholder")}
                   {...props}
                   value={field.value}
                   error={field.error}
@@ -143,7 +143,7 @@ export default function () {
                                 generator() === "chuunibyou" && "text-primary"
                               )}
                             />
-                            <span>{t("game.team.create.chuunibyouGenerator")}</span>
+                            <span>{t("team.form.name.chuunibyouGenerator")}</span>
                           </Button>
                         </Card>
                       </Popover>
@@ -152,19 +152,19 @@ export default function () {
                 />
               )}
             </Field>
-            <Field name="tag" validate={[maxLength(32, t("game.team.create.tagMaxLength")!)]}>
+            <Field name="tag" validate={[maxLength(32, t("team.form.tag.maximumLength")!)]}>
               {(field, props) => (
                 <Input
                   icon={<span class="icon-[fluent--tag-20-regular] w-5 h-5" />}
-                  title={t("game.team.create.tag")}
-                  placeholder={t("game.team.create.tagPlaceholder")}
+                  title={t("team.form.tag.label")}
+                  placeholder={t("team.form.tag.placeholder")}
                   {...props}
                   value={field.value}
                   error={field.error}
                 />
               )}
             </Field>
-            <Field name="accepted" type="boolean" validate={[required(t("game.team.create.acceptedRequired")!)]}>
+            <Field name="accepted" type="boolean" validate={[required(t("team.form.acceptRules.required")!)]}>
               {(field, props) => (
                 <>
                   <input type="checkbox" class="hidden" {...props} checked={field.value} />
@@ -184,12 +184,12 @@ export default function () {
                         >
                           <span class="icon-[fluent--checkmark-circle-20-filled] w-5 h-5 text-primary" />
                         </Show>
-                        <span>{t("game.team.create.acceptRules")}</span>
+                        <span>{t("team.form.acceptRules.label")}</span>
                       </>
                     }
                   >
                     <div class="w-full">
-                      <h2 class="text-center text-3xl font-bold p-4 pb-0">{t("game.team.create.rulesTitle")}</h2>
+                      <h2 class="text-center text-3xl font-bold p-4 pb-0">{t("team.form.acceptRules.title")}</h2>
                       <Article class="self-center" content={content() || ""} noExtraPaddings />
                     </div>
                     <div class="flex space-x-2">
@@ -203,13 +203,13 @@ export default function () {
                         disabled={field.value}
                       >
                         <span>
-                          <Show when={field.value}>{t("game.team.create.accepted")}</Show>
-                          <Show when={!field.value}>{t("game.team.create.accept")}</Show>
+                          <Show when={field.value}>{t("team.form.acceptRules.ok")}</Show>
+                          <Show when={!field.value}>{t("general.actions.yes.title")}</Show>
                         </span>
                       </Button>
                       <Show when={field.value}>
                         <Button level="error" onClick={() => setValue(form, "accepted", false)}>
-                          <span>{t("game.team.create.reject")}</span>
+                          <span>{t("general.actions.no.title")}</span>
                         </Button>
                       </Show>
                     </div>
@@ -229,7 +229,7 @@ export default function () {
               </Button>
               <Show when={(gameStore.current?.team_size || 0) > 1}>
                 <Link href={`/games/${gameStore.current?.id}/teams/join`}>
-                  <span>{t("game.team.join.title")}</span>
+                  <span>{t("team.join.title")}</span>
                   <span class="icon-[fluent--arrow-right-20-regular] w-5 h-5" />
                 </Link>
               </Show>

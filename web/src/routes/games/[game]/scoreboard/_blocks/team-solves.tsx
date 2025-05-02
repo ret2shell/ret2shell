@@ -3,7 +3,6 @@ import { mediaPath } from "@lib/utils/media";
 import type { Challenge } from "@models/challenge";
 import type { Team } from "@models/team";
 import { gameStore } from "@storage/game";
-import { t } from "@storage/theme";
 import { For, Match, Show, Switch, createMemo } from "solid-js";
 
 export default function TeamSolves(props: {
@@ -14,7 +13,7 @@ export default function TeamSolves(props: {
     const tags = new Set(
       props.challenges
         .filter((c) => c.hidden === false)
-        .flatMap((c) => c.tag.find((t) => t.primary)?.name ?? t("game.challenge.unknownTag")!)
+        .flatMap((c) => c.tag.find((t) => t.primary)?.name ?? "UNKNOWN")
     );
     return Array.from(tags);
   });

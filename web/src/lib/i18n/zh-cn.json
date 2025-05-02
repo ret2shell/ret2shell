@@ -48,7 +48,7 @@
       "13": "正在命中定时缓存...",
       "14": "正在执行投机取巧算法...",
       "15": "正在加入大语言模型幻觉...",
-      "short": "加载中...",
+      "short": "少女祈祷中...",
       "00": "正在修复宇宙射线引发的比特翻转...",
       "01": "正在试图证明 P != NP...",
       "02": "正在试图分解 RSA 4096...",
@@ -228,6 +228,18 @@
       },
       "generate": {
         "title": "生成"
+      },
+      "start": {
+        "title": "启动"
+      },
+      "stop": {
+        "title": "停止"
+      },
+      "print": {
+        "title": "打印"
+      },
+      "accept": {
+        "title": "接受"
       }
     }
   },
@@ -283,16 +295,117 @@
       "title": "资源同步"
     },
     "email": {
-      "title": "平台发信邮箱"
+      "title": "平台发信邮箱",
+      "form": {
+        "enabled": "启用邮箱",
+        "tls": {
+          "required": "加密类型不能为空",
+          "label": "加密类型",
+          "placeholder": "请选择加密类型"
+        },
+        "host": {
+          "required": "邮箱服务器不能为空",
+          "label": "邮箱服务器地址",
+          "placeholder": "请输入邮箱服务器地址"
+        },
+        "port": {
+          "required": "邮箱服务器端口不能为空",
+          "invalid": "端口应该在 1-65535 之间",
+          "label": "邮箱服务器端口",
+          "placeholder": "请输入邮箱服务器端口"
+        },
+        "sender": {
+          "required": "发信人名称不能为空",
+          "label": "发信人名称",
+          "placeholder": "请输入发信人名称"
+        },
+        "username": {
+          "required": "发信邮箱不能为空",
+          "label": "发信邮箱",
+          "placeholder": "请填写发信邮箱"
+        },
+        "password": {
+          "required": "邮箱密码不能为空",
+          "label": "邮箱密码",
+          "placeholder": "请填写邮箱密码"
+        },
+        "verifyEmailSubject": {
+          "required": "验证邮件标题不能为空",
+          "label": "验证邮件标题",
+          "placeholder": "请填写验证邮件标题"
+        },
+        "verifyEmailBody": {
+          "required": "验证邮件内容不能为空",
+          "label": "验证邮件内容"
+        },
+        "resetPasswordEmailSubject": {
+          "required": "重置密码邮件标题不能为空",
+          "label": "重置密码邮件标题",
+          "placeholder": "请输入重置密码邮件标题"
+        },
+        "resetPasswordEmailBody": {
+          "required": "重置密码邮件内容不能为空",
+          "label": "重置密码邮件内容"
+        }
+      }
     },
     "form": {
-      "title": "平台信息"
+      "title": "平台信息",
+      "name": {
+        "label": "平台名称"
+      },
+      "footerInfo": {
+        "placeholder": "请输入主页底端信息",
+        "label": "主页底端信息"
+      },
+      "footerUrl": {
+        "placeholder": "请输入主页底端链接",
+        "label": "主页底端链接"
+      },
+      "subjectInfo": {
+        "label": "主页副标题"
+      },
+      "subjectUrl": {
+        "label": "主页副标题链接"
+      },
+      "highlightBanner": {
+        "placeholder": "平台高亮横幅，无通知时请留空",
+        "label": "平台高亮横幅"
+      },
+      "record": {
+        "placeholder": "请输入底部备案号",
+        "label": "中国工信部ICP备案号"
+      },
+      "hideMaker": {
+        "disabled": "你的许可证不允许隐藏此项",
+        "label": "隐藏开发者信息"
+      }
     },
     "logs": {
-      "title": "服务器日志"
+      "title": "服务器日志",
+      "errors": {
+        "fetchList": {
+          "title": "获取日志列表失败"
+        },
+        "socketClosed": {
+          "title": "日志管道已断开，将自动重试连接..."
+        }
+      },
+      "streamingEnabled": "正在实时串流日志...",
+      "notStreaming": "开启日志串流后，日志会显示在这里",
+      "enableStreamWarning": "日志量大时请谨慎开启，仅显示服务器时间的当天日志，其他日志请下载日志文件进行审计"
     },
     "statistics": {
-      "title": "平台统计信息"
+      "title": "平台统计信息",
+      "errors": {
+        "fetch": {
+          "title": "获取平台统计信息失败"
+        }
+      },
+      "instituteUsers": {
+        "title": "组织用户分布情况",
+        "others": "其他"
+      }
     }
   },
   "wiki": {
@@ -324,6 +437,18 @@
       "isPublished": {
         "label": "发布",
         "placeholder": "是否发布"
+      },
+      "createdAt": {
+        "label": "发布于 {{time}}"
+      },
+      "updatedAt": {
+        "label": "更新于 {{time}}"
+      },
+      "draft": {
+        "label": "草稿"
+      },
+      "published": {
+        "label": "发布"
       }
     },
     "errors": {
@@ -334,8 +459,12 @@
       "fetchArticle": {
         "title": "获取文章失败",
         "message": "请检查网络连接或稍后再试"
+      },
+      "fetch": {
+        "title": "获取知识库文章失败"
       }
-    }
+    },
+    "unknownPublisher": "佚名"
   },
   "training": {
     "title": "训练",
@@ -502,8 +631,8 @@
       "title": "编辑信息",
       "name": {
         "label": "赛事名称",
-        "placeholder": "请输入标题",
-        "required": "标题不能为空"
+        "placeholder": "请输入赛事名称",
+        "required": "赛事名称不能为空"
       },
       "brief": {
         "label": "赛事简介",
@@ -568,7 +697,9 @@
         "placeholder": "请输入队伍人数",
         "required": "队伍人数不能为空",
         "mustBeNumber": "队伍人数必须是数字",
-        "mustBePositiveNumber": "队伍人数必须是正数"
+        "mustBePositiveNumber": "队伍人数必须是正数",
+        "minimum": "人数不能少于 1",
+        "maximum": "人数不能多于 99"
       },
       "enableTeamAudit": {
         "label": "启用队伍审核",
@@ -583,6 +714,10 @@
       "team": {
         "minimum": "队伍人数不能小于 1",
         "maximum": "队伍人数不能大于 99"
+      },
+      "introduction": {
+        "label": "比赛介绍",
+        "required": "比赛介绍不能为空"
       }
     },
     "admin": {
@@ -616,13 +751,64 @@
     "registerNotStarted": "注册暂未开放，少安毋躁",
     "registerEnded": "报名注册已经结束，请等待比赛归档",
     "policies": {
-      "title": "策略管理"
+      "title": "策略管理",
+      "form": {
+        "challenge": {
+          "showAnswer": {
+            "label": "允许归档后查看题解"
+          },
+          "showHints": {
+            "label": "允许归档后免费查看提示"
+          }
+        }
+      }
     },
     "timeline": {
-      "title": "时段管理"
+      "title": "时段管理",
+      "form": {
+        "label": {
+          "label": "时段标签",
+          "required": "时段标签不能为空",
+          "placeholder": "请填写时段标签"
+        },
+        "startAt": {
+          "required": "时段开始时间不能为空"
+        },
+        "endAt": {
+          "required": "时段结束时间不能为空"
+        },
+        "startEndTime": {
+          "label": "开始与结束时间",
+          "placeholder": "请选择开始与结束时间"
+        }
+      },
+      "empty": "没有已定义时段",
+      "deleteWarning": "确定要删除这个时段吗？即使删除了也不影响现有题目的时段控制。"
     },
     "hammer": {
-      "title": "锤子反馈"
+      "title": "锤子反馈",
+      "errors": {
+        "fetchSessions": {
+          "title": "获取反馈会话列表失败"
+        },
+        "fetchChats": {
+          "title": ""
+        }
+      },
+      "empty": "还没有反馈",
+      "status": {
+        "adminUnread": {
+          "title": "管理员未读"
+        },
+        "playerUnread": {
+          "title": "选手未读"
+        },
+        "notReply": {
+          "title": "已读不回"
+        }
+      },
+      "placeholder": "请选择会话来查看和回复消息",
+      "newMessages": "出题人在 {{challenge}} 回复了你的消息"
     },
     "delete": {
       "title": "删除比赛",
@@ -631,10 +817,27 @@
       "confirm": "如果决定删除比赛，请在下方输入比赛名称 {{name}}"
     },
     "events": {
-      "title": "事件推送"
+      "title": "事件推送",
+      "errors": {
+        "fetchDevices": {
+          "title": "获取已连接设备失败"
+        }
+      },
+      "howto": "连接下述 WebSocket 地址即可接入平台事件 API 订阅。你可以在这里找到事件 API 的对接方法：",
+      "tokenWarning": "请注意，事件 API 只通过 Token 进行鉴权，谨防此链接泄露。",
+      "regenerateTokenWarning": "确定要重新生成 Token 吗？已连接的设备将失去连接。",
+      "linkedDevices": "已连接的设备",
+      "emptyDevices": "没有已连接的设备"
     },
     "organize": {
-      "title": "组织管理"
+      "title": "组织管理",
+      "actions": {
+        "restrict": {
+          "confirm": "是否阻止以下组织之外的用户参赛？（点击后立即生效！）",
+          "title": "限定此赛事"
+        }
+      },
+      "instituteEnabled": "组织分榜"
     },
     "errors": {
       "fetch": {
@@ -642,12 +845,47 @@
       },
       "fetchList": {
         "title": "获取比赛列表失败"
+      },
+      "regenerateToken": {
+        "title": "生成管理密钥失败"
+      },
+      "fetchIntroduction": {
+        "title": "获取比赛介绍失败"
       }
     },
     "seeOtherInteresting": "看看别的地方吧",
     "notArchived": "比赛尚未归档",
     "canNotParticipate": "无法参与",
-    "adminMode": "管理员模式"
+    "adminMode": "管理员模式",
+    "miscSettings": "杂项设置",
+    "register": "注册",
+    "timeLast": "距离 {{period}} 还有",
+    "accessPolicy": {
+      "open": "开放赛事"
+    },
+    "gotoTraining": "已归档，请前往练习场",
+    "enterChallenge": "攻克挑战！",
+    "manageChallenges": "管理赛事题目",
+    "loginThenBack": "登录后参与",
+    "notification": {
+      "errors": {
+        "fetch": {
+          "title": "获取通知消息失败"
+        }
+      },
+      "form": {
+        "title": {
+          "required": "通知标题不能为空",
+          "placeholder": "请填写通知标题",
+          "label": "通知标题"
+        },
+        "content": {
+          "required": "通知内容不能为空",
+          "label": "通知内容"
+        }
+      },
+      "empty": "没有通知"
+    }
   },
   "challenge": {
     "title": "题目",
@@ -888,7 +1126,9 @@
         "fetchSolveStatus": {
           "title": "获取解出状态失败"
         }
-      }
+      },
+      "title": "提交记录",
+      "total": "总共"
     },
     "statistics": {
       "title": "统计",
@@ -1098,7 +1338,9 @@
     },
     "settings": {
       "title": "设置"
-    }
+    },
+    "inGame": "赛中题目",
+    "total": "所有题目"
   },
   "wsrx": {
     "title": "WebSocket Reflector X",
@@ -1233,6 +1475,15 @@
     "errors": {
       "fetchList": {
         "title": "获取用户列表失败"
+      },
+      "fetchIpList": {
+        "title": "获取用户 IP 地址列表失败"
+      },
+      "fetchOAuth": {
+        "title": "获取用户第三方认证信息失败"
+      },
+      "fetch": {
+        "title": "获取用户信息失败"
       }
     },
     "description": {
@@ -1243,7 +1494,19 @@
     "gameJournal": "作为 {{team}} 成员参与了 {{game}}。",
     "moreJournal": "生命不息，探索不止……",
     "gotoAdminPanel": "转至用户管理",
-    "registeredAt": "注册于 {{time}}"
+    "registeredAt": "注册于 {{time}}",
+    "title": "用户",
+    "total": "所有用户",
+    "status": {
+      "valid": "活跃用户"
+    },
+    "management": {
+      "confirmDelete": "请输入用户名称 {{name}} 来确认删除",
+      "goToUserDetailPage": "转到用户信息页面",
+      "title": "用户管理"
+    },
+    "sortBy": "排序",
+    "filter": "过滤用户名，昵称，邮箱或 IP 地址"
   },
   "account": {
     "permission": {
@@ -1275,8 +1538,8 @@
         "label": "密码",
         "confirmRequired": "确认密码不能为空",
         "confirmMismatch": "两次密码输入不一致",
-        "confirmTitle": "确认密码",
-        "confirmPlaceholder": "请再次输入密码"
+        "confirmPlaceholder": "请再次输入密码",
+        "confirmLabel": "确认密码"
       },
       "nickname": {
         "required": "昵称不能为空",
@@ -1298,6 +1561,25 @@
         "required": "旧密码不能为空",
         "label": "旧密码",
         "placeholder": "请输入旧密码"
+      },
+      "institute": {
+        "label": "所属组织",
+        "placeholder": "请选择所属组织"
+      },
+      "hidden": {
+        "label": "隐藏"
+      },
+      "banned": {
+        "label": "封禁"
+      },
+      "oauths": {
+        "label": "第三方认证信息"
+      },
+      "ips": {
+        "label": "使用过的 IP 地址"
+      },
+      "registeredAt": {
+        "label": "注册时间"
       }
     },
     "login": {
@@ -1603,26 +1885,113 @@
     "status": {
       "pending": {
         "title": "待审核",
-        "message": "队伍名称含有敏感词汇，请联系管理员审核"
+        "message": "队伍名称含有敏感词汇，请联系管理员审核",
+        "placeholder": "队伍待审核"
       },
       "banned": {
-        "message": "由于作弊行为，队伍已被封禁"
+        "message": "由于作弊行为，队伍已被封禁",
+        "title": "已封禁"
       },
       "empty": {
         "message": "还未参赛，请先参赛"
       },
       "hidden": {
         "title": "已隐藏"
+      },
+      "title": "队伍状态",
+      "passed": {
+        "title": "正常"
       }
     },
     "errors": {
       "fetchList": {
         "title": "获取队伍列表失败"
+      },
+      "fetch": {
+        "title": "获取队伍信息失败"
+      },
+      "join": {
+        "title": "加入队伍失败"
+      },
+      "fetchMember": {
+        "title": "获取队伍成员失败"
+      },
+      "fetchSolves": {
+        "title": "获取解题情况失败"
+      },
+      "fetchExtra": {
+        "title": "获取额外分数变动失败"
       }
     },
     "title": "参赛队伍",
     "coming": "登场！",
-    "empty": "没有队伍参与"
+    "empty": "没有队伍参与",
+    "join": {
+      "title": "加入队伍",
+      "form": {
+        "token": {
+          "required": "队伍密钥不能为空",
+          "label": "队伍密钥",
+          "placeholder": "请输入队伍密钥"
+        }
+      }
+    },
+    "create": {
+      "title": "创建队伍"
+    },
+    "solo": "单人赛",
+    "collab": "{{size}} 人组队赛",
+    "list": {
+      "title": "队伍列表",
+      "selectInstitute": "选择组织...",
+      "filter": "过滤队伍名称"
+    },
+    "sortBy": "排序",
+    "form": {
+      "name": {
+        "label": "队伍名称",
+        "required": "队伍名称不能为空",
+        "maximumLength": "名称最长 32 个字符",
+        "customDisabled": "无法更改队名",
+        "placeholder": "请输入队伍名称",
+        "chuunibyouGenerator": "中二病生成器"
+      },
+      "institute": {
+        "label": "所属组织",
+        "placeholder": "请选择所属组织"
+      },
+      "state": {
+        "label": "队伍状态"
+      },
+      "tag": {
+        "maximumLength": "标签文字不能超过 32 个字符",
+        "label": "标签文字",
+        "placeholder": "请输入标签文字"
+      },
+      "acceptRules": {
+        "required": "请同意参赛规则",
+        "label": "同意参赛规则",
+        "title": "参赛规则须知",
+        "ok": "已同意参赛规则"
+      },
+      "extraScore": {
+        "placeholder": "请输入额外分数变动",
+        "required": "额外分数变动不能为空"
+      },
+      "extraReason": {
+        "placeholder": "请输入额外分数变动原因",
+        "required": "额外分数变动原因不能为空"
+      }
+    },
+    "selfManagement": "队伍管理",
+    "token": "队伍密钥",
+    "scoreChart": "得分曲线",
+    "solves": "解题状况",
+    "noSolves": "没有已解出题目",
+    "solvesJournal": "成员 {{user}} 解出了题目 {{challenge}}。",
+    "extras": "额外分数变动",
+    "noExtras": "没有额外分数变动",
+    "extraScore": "额外分数变动"
   },
   "notification": {
     "empty": "没有未读消息",
@@ -1633,24 +2002,138 @@
     "errors": {
       "fetchList": {
         "title": "获取公告列表失败"
+      },
+      "fetch": {
+        "title": "获取公告内容失败"
       }
     },
-    "empty": "没有发布过公告"
+    "empty": "没有发布过公告",
+    "form": {
+      "title": {
+        "required": "标题不能为空",
+        "placeholder": "请输入公告标题",
+        "label": "公告标题"
+      },
+      "enableComment": {
+        "label": "开启评论"
+      },
+      "content": {
+        "required": "请输入公告内容",
+        "label": "公告内容"
+      },
+      "createdAt": {
+        "label": "发布于 {{time}}"
+      },
+      "updatedAt": {
+        "label": "更新于 {{time}}"
+      }
+    },
+    "unknownPublisher": "佚名"
   },
   "admin": {
     "title": "管理"
   },
   "traffic": {
-    "title": "环境路由"
+    "title": "环境路由",
+    "nodeSelector": "节点选择器",
+    "preset": {
+      "title": "脚本预设",
+      "singleNodeDirectScript": "单节点直连",
+      "multiNodeDirectScript": "多节点直连"
+    }
   },
   "cluster": {
-    "title": "集群管理"
+    "title": "集群管理",
+    "status": {
+      "available": {
+        "title": "集群正常运行中"
+      },
+      "unavailable": {
+        "title": "集群离线"
+      }
+    },
+    "nodeInfo": {
+      "title": "节点信息",
+      "architecture": "架构",
+      "bootID": "启动 ID",
+      "containerRuntimeVersion": "容器运行时",
+      "kernelVersion": "内核版本",
+      "machineID": "机器 ID",
+      "operatingSystem": "操作系统",
+      "osImage": "发行版",
+      "systemUUID": "系统 UUID",
+      "kubeletVersion": "Kubelet",
+      "kubeProxyVersion": "Kube Proxy"
+    },
+    "selectNode": "选择节点",
+    "actions": {
+      "refreshNode": {
+        "title": "刷新节点"
+      },
+      "updateNode": {
+        "title": "升级节点"
+      },
+      "disconnectNode": {
+        "title": "断开节点"
+      }
+    },
+    "nodeResources": {
+      "title": "节点资源"
+    },
+    "errors": {
+      "fetchNodes": {
+        "title": "获取集群节点信息失败"
+      }
+    }
   },
   "oauth": {
-    "title": "第三方认证"
+    "title": "第三方认证",
+    "form": {
+      "provider": {
+        "required": "第三方认证标识符不能为空",
+        "label": "第三方认证标识符",
+        "placeholder": "请填写第三方认证标识符",
+        "minimumLength": "标识符最少 2 个字符",
+        "maximumLength": "标识符最多 32 个字符",
+        "invalid": "标识符只能包含小写字符，数字和下划线"
+      },
+      "name": {
+        "required": "第三方认证服务名称不能为空",
+        "label": "第三方认证服务名称",
+        "placeholder": "请填写第三方认证服务名称"
+      },
+      "portal": {
+        "invalid": "认证服务门户地址格式错误",
+        "label": "认证服务门户地址",
+        "placeholder": "请填写认证服务门户地址，留空关闭登录功能（仅验证）"
+      },
+      "script": {
+        "label": "认证服务脚本",
+        "preset": {
+          "placeholder": "选择脚本预设...",
+          "email": "邮箱后缀匹配",
+          "yaleCas": "耶鲁 CAS 认证",
+          "oauth2AuthCode": "OAuth2 认证码模式"
+        },
+        "required": "请输入认证服务脚本"
+      }
+    },
+    "configured": "已配置"
   },
   "media": {
-    "title": "媒体存储"
+    "title": "媒体存储",
+    "form": {
+      "path": {
+        "label": "媒体存储路径",
+        "placeholder": "请填写媒体存储路径"
+      },
+      "antiTheft": {
+        "label": "防盗链"
+      },
+      "limit": {
+        "label": "每周上传限制"
+      }
+    }
   },
   "captures": {
     "title": "容器流量"
@@ -1661,6 +2144,24 @@
         "title": "获取组织列表失败"
       }
     },
-    "empty": "无组织"
+    "empty": "无组织",
+    "form": {
+      "name": {
+        "required": "组织名称不能为空",
+        "label": "组织名称",
+        "placeholder": "请填写组织名称"
+      },
+      "provider": {
+        "label": "第三方身份认证识别符",
+        "placeholder": "请填写第三方认证识别符"
+      },
+      "token": {
+        "label": "管理密钥",
+        "placeholder": "请输入管理密钥"
+      }
+    },
+    "title": "组织管理",
+    "manual": "手动管理",
+    "withOAuth": "使用认证服务"
   }
 }

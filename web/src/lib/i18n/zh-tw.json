@@ -484,8 +484,12 @@
         "fetchSolveStatus": {
           "title": ""
         }
-      }
-    }
+      },
+      "title": "",
+      "total": ""
+    },
+    "inGame": "",
+    "total": ""
   },
   "game": {
     "admin": {
@@ -572,7 +576,9 @@
         "mustBeNumber": "",
         "mustBePositiveNumber": "",
         "placeholder": "",
-        "required": ""
+        "required": "",
+        "minimum": "",
+        "maximum": ""
       },
       "title": "",
       "weight": {
@@ -581,6 +587,10 @@
       "team": {
         "minimum": "",
         "maximum": ""
+      },
+      "introduction": {
+        "label": "",
+        "required": ""
       }
     },
     "introduction": {
@@ -699,13 +709,64 @@
     "registerNotStarted": "",
     "registerEnded": "",
     "policies": {
-      "title": ""
+      "title": "",
+      "form": {
+        "challenge": {
+          "showAnswer": {
+            "label": ""
+          },
+          "showHints": {
+            "label": ""
+          }
+        }
+      }
     },
     "timeline": {
-      "title": ""
+      "title": "",
+      "form": {
+        "label": {
+          "label": "",
+          "required": "",
+          "placeholder": ""
+        },
+        "startAt": {
+          "required": ""
+        },
+        "endAt": {
+          "required": ""
+        },
+        "startEndTime": {
+          "label": "",
+          "placeholder": ""
+        }
+      },
+      "empty": "",
+      "deleteWarning": ""
     },
     "hammer": {
-      "title": ""
+      "title": "",
+      "errors": {
+        "fetchSessions": {
+          "title": ""
+        },
+        "fetchChats": {
+          "title": ""
+        }
+      },
+      "empty": "",
+      "status": {
+        "adminUnread": {
+          "title": ""
+        },
+        "playerUnread": {
+          "title": ""
+        },
+        "notReply": {
+          "title": ""
+        }
+      },
+      "placeholder": "",
+      "newMessages": ""
     },
     "delete": {
       "title": "",
@@ -714,10 +775,27 @@
       "confirm": ""
     },
     "events": {
-      "title": ""
+      "title": "",
+      "errors": {
+        "fetchDevices": {
+          "title": ""
+        }
+      },
+      "howto": "",
+      "tokenWarning": "",
+      "regenerateTokenWarning": "",
+      "linkedDevices": "",
+      "emptyDevices": ""
     },
     "organize": {
-      "title": ""
+      "title": "",
+      "actions": {
+        "restrict": {
+          "confirm": "",
+          "title": ""
+        }
+      },
+      "instituteEnabled": ""
     },
     "errors": {
       "fetch": {
@@ -725,12 +803,47 @@
       },
       "fetchList": {
         "title": ""
+      },
+      "regenerateToken": {
+        "title": ""
+      },
+      "fetchIntroduction": {
+        "title": ""
       }
     },
     "seeOtherInteresting": "",
     "notArchived": "",
     "canNotParticipate": "",
-    "adminMode": ""
+    "adminMode": "",
+    "miscSettings": "",
+    "register": "",
+    "timeLast": "",
+    "accessPolicy": {
+      "open": ""
+    },
+    "gotoTraining": "",
+    "enterChallenge": "",
+    "manageChallenges": "",
+    "loginThenBack": "",
+    "notification": {
+      "errors": {
+        "fetch": {
+          "title": ""
+        }
+      },
+      "form": {
+        "title": {
+          "required": "",
+          "placeholder": "",
+          "label": ""
+        },
+        "content": {
+          "required": "",
+          "label": ""
+        }
+      },
+      "empty": ""
+    }
   },
   "general": {
     "actions": {
@@ -901,6 +1014,18 @@
       },
       "generate": {
         "title": ""
+      },
+      "start": {
+        "title": ""
+      },
+      "stop": {
+        "title": ""
+      },
+      "print": {
+        "title": ""
+      },
+      "accept": {
+        "title": ""
       }
     },
     "loading": {
@@ -1016,16 +1141,117 @@
       "title": ""
     },
     "email": {
-      "title": ""
+      "title": "",
+      "form": {
+        "enabled": "",
+        "tls": {
+          "required": "",
+          "label": "",
+          "placeholder": ""
+        },
+        "host": {
+          "required": "",
+          "label": "",
+          "placeholder": ""
+        },
+        "port": {
+          "required": "",
+          "invalid": "",
+          "label": "",
+          "placeholder": ""
+        },
+        "sender": {
+          "required": "",
+          "label": "",
+          "placeholder": ""
+        },
+        "username": {
+          "required": "",
+          "label": "",
+          "placeholder": ""
+        },
+        "password": {
+          "required": "",
+          "label": "",
+          "placeholder": ""
+        },
+        "verifyEmailSubject": {
+          "required": "",
+          "label": "",
+          "placeholder": ""
+        },
+        "verifyEmailBody": {
+          "required": "",
+          "label": ""
+        },
+        "resetPasswordEmailSubject": {
+          "required": "",
+          "label": "",
+          "placeholder": ""
+        },
+        "resetPasswordEmailBody": {
+          "required": "",
+          "label": ""
+        }
+      }
     },
     "form": {
-      "title": ""
+      "title": "",
+      "name": {
+        "label": ""
+      },
+      "footerInfo": {
+        "placeholder": "",
+        "label": ""
+      },
+      "footerUrl": {
+        "placeholder": "",
+        "label": ""
+      },
+      "subjectInfo": {
+        "label": ""
+      },
+      "subjectUrl": {
+        "label": ""
+      },
+      "highlightBanner": {
+        "placeholder": "",
+        "label": ""
+      },
+      "record": {
+        "placeholder": "",
+        "label": ""
+      },
+      "hideMaker": {
+        "disabled": "",
+        "label": ""
+      }
     },
     "logs": {
-      "title": ""
+      "title": "",
+      "errors": {
+        "fetchList": {
+          "title": ""
+        },
+        "socketClosed": {
+          "title": ""
+        }
+      },
+      "streamingEnabled": "",
+      "notStreaming": "",
+      "enableStreamWarning": ""
     },
     "statistics": {
-      "title": ""
+      "title": "",
+      "errors": {
+        "fetch": {
+          "title": ""
+        }
+      },
+      "instituteUsers": {
+        "title": "",
+        "others": ""
+      }
     }
   },
   "training": {
@@ -1075,6 +1301,9 @@
       "fetchToc": {
         "message": "",
         "title": ""
+      },
+      "fetch": {
+        "title": ""
       }
     },
     "form": {
@@ -1103,10 +1332,23 @@
         "label": "",
         "placeholder": "",
         "required": ""
+      },
+      "createdAt": {
+        "label": ""
+      },
+      "updatedAt": {
+        "label": ""
+      },
+      "draft": {
+        "label": ""
+      },
+      "published": {
+        "label": ""
       }
     },
     "placeholder": "",
-    "title": ""
+    "title": "",
+    "unknownPublisher": ""
   },
   "wsrx": {
     "actions": {
@@ -1201,6 +1443,15 @@
     "errors": {
       "fetchList": {
         "title": ""
+      },
+      "fetchIpList": {
+        "title": ""
+      },
+      "fetchOAuth": {
+        "title": ""
+      },
+      "fetch": {
+        "title": ""
       }
     },
     "description": {
@@ -1214,7 +1465,19 @@
     "list": {
       "title": ""
     },
-    "registeredAt": ""
+    "registeredAt": "",
+    "title": "",
+    "total": "",
+    "status": {
+      "valid": ""
+    },
+    "management": {
+      "confirmDelete": "",
+      "goToUserDetailPage": "",
+      "title": ""
+    },
+    "sortBy": "",
+    "filter": ""
   },
   "account": {
     "permission": {
@@ -1328,9 +1591,9 @@
         "placeholder": "",
         "confirmRequired": "",
         "confirmMismatch": "",
-        "confirmTitle": "",
         "confirmPlaceholder": "",
-        "label": ""
+        "label": "",
+        "confirmLabel": ""
       },
       "nickname": {
         "required": "",
@@ -1351,6 +1614,25 @@
       "oldPassword": {
         "required": "",
         "placeholder": "",
+        "label": ""
+      },
+      "institute": {
+        "label": "",
+        "placeholder": ""
+      },
+      "hidden": {
+        "label": ""
+      },
+      "banned": {
+        "label": ""
+      },
+      "oauths": {
+        "label": ""
+      },
+      "ips": {
+        "label": ""
+      },
+      "registeredAt": {
         "label": ""
       }
     },
@@ -1581,26 +1863,114 @@
     "status": {
       "pending": {
         "title": "",
-        "message": ""
+        "message": "",
+        "placeholder": ""
       },
       "banned": {
-        "message": ""
+        "message": "",
+        "title": ""
       },
       "empty": {
         "message": ""
       },
       "hidden": {
         "title": ""
+      },
+      "title": "",
+      "passed": {
+        "title": ""
       }
     },
     "errors": {
       "fetchList": {
         "title": ""
+      },
+      "fetch": {
+        "title": ""
+      },
+      "join": {
+        "title": ""
+      },
+      "fetchMember": {
+        "title": ""
+      },
+      "fetchSolves": {
+        "title": ""
+      },
+      "fetchExtra": {
+        "title": ""
       }
     },
     "title": "",
     "coming": "",
-    "empty": ""
+    "empty": "",
+    "join": {
+      "title": "",
+      "form": {
+        "token": {
+          "required": "",
+          "label": "",
+          "placeholder": ""
+        },
+        "acceptRules": {}
+      }
+    },
+    "create": {
+      "title": ""
+    },
+    "solo": "",
+    "collab": "",
+    "list": {
+      "title": "",
+      "selectInstitute": "",
+      "filter": ""
+    },
+    "sortBy": "",
+    "form": {
+      "name": {
+        "label": "",
+        "required": "",
+        "maximumLength": "",
+        "customDisabled": "",
+        "placeholder": "",
+        "chuunibyouGenerator": ""
+      },
+      "institute": {
+        "label": "",
+        "placeholder": ""
+      },
+      "state": {
+        "label": ""
+      },
+      "tag": {
+        "maximumLength": "",
+        "label": "",
+        "placeholder": ""
+      },
+      "acceptRules": {
+        "label": "",
+        "ok": "",
+        "required": "",
+        "title": ""
+      },
+      "extraScore": {
+        "placeholder": "",
+        "required": ""
+      },
+      "extraReason": {
+        "placeholder": "",
+        "required": ""
+      }
+    },
+    "selfManagement": "",
+    "token": "",
+    "scoreChart": "",
+    "solves": "",
+    "noSolves": "",
+    "solvesJournal": "",
+    "extras": "",
+    "noExtras": "",
+    "extraScore": ""
   },
   "calendar": {
     "day": {
@@ -1641,25 +2011,139 @@
     "errors": {
       "fetchList": {
         "title": ""
+      },
+      "fetch": {
+        "title": ""
       }
     },
-    "empty": ""
+    "empty": "",
+    "form": {
+      "title": {
+        "required": "",
+        "placeholder": "",
+        "label": ""
+      },
+      "enableComment": {
+        "label": ""
+      },
+      "content": {
+        "required": "",
+        "label": ""
+      },
+      "createdAt": {
+        "label": ""
+      },
+      "updatedAt": {
+        "label": ""
+      }
+    },
+    "unknownPublisher": ""
   },
   "admin": {
     "title": ""
   },
   "traffic": {
-    "title": ""
+    "title": "",
+    "nodeSelector": "",
+    "preset": {
+      "title": "",
+      "singleNodeDirectScript": "",
+      "multiNodeDirectScript": ""
+    }
   },
   "cluster": {
-    "title": ""
+    "title": "",
+    "status": {
+      "available": {
+        "title": ""
+      },
+      "unavailable": {
+        "title": ""
+      }
+    },
+    "nodeInfo": {
+      "title": "",
+      "architecture": "",
+      "bootID": "",
+      "containerRuntimeVersion": "",
+      "kernelVersion": "",
+      "kubeProxyVersion": "",
+      "kubeletVersion": "",
+      "machineID": "",
+      "operatingSystem": "",
+      "osImage": "",
+      "systemUUID": ""
+    },
+    "selectNode": "",
+    "actions": {
+      "refreshNode": {
+        "title": ""
+      },
+      "updateNode": {
+        "title": ""
+      },
+      "disconnectNode": {
+        "title": ""
+      }
+    },
+    "nodeResources": {
+      "title": ""
+    },
+    "errors": {
+      "fetchNodes": {
+        "title": ""
+      }
+    }
   },
   "users": {},
   "oauth": {
-    "title": ""
+    "title": "",
+    "form": {
+      "provider": {
+        "required": "",
+        "label": "",
+        "placeholder": "",
+        "minimumLength": "",
+        "maximumLength": "",
+        "invalid": ""
+      },
+      "name": {
+        "required": "",
+        "label": "",
+        "placeholder": ""
+      },
+      "portal": {
+        "invalid": "",
+        "label": "",
+        "placeholder": ""
+      },
+      "script": {
+        "label": "",
+        "preset": {
+          "placeholder": "",
+          "email": "",
+          "yaleCas": "",
+          "oauth2AuthCode": ""
+        },
+        "required": ""
+      }
+    },
+    "configured": ""
   },
   "media": {
-    "title": ""
+    "title": "",
+    "form": {
+      "path": {
+        "label": "",
+        "placeholder": ""
+      },
+      "antiTheft": {
+        "label": ""
+      },
+      "limit": {
+        "label": ""
+      }
+    }
   },
   "captures": {
     "title": ""
@@ -1670,6 +2154,24 @@
         "title": ""
       }
     },
-    "empty": ""
+    "empty": "",
+    "form": {
+      "name": {
+        "required": "",
+        "label": "",
+        "placeholder": ""
+      },
+      "provider": {
+        "label": "",
+        "placeholder": ""
+      },
+      "token": {
+        "label": "",
+        "placeholder": ""
+      }
+    },
+    "title": "",
+    "manual": "",
+    "withOAuth": ""
   }
 }

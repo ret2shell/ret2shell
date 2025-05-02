@@ -73,7 +73,7 @@ export default function ChatList() {
         const result = mergeChats(sessions(), resp[0]);
         setSessions([...result]);
       } catch (err) {
-        handleHttpError(err as Error, t("game.challenge.fetchChatSessionError")!);
+        handleHttpError(err as Error, t("game.hammer.errors.fetchSessions.title")!);
       }
     }
   }
@@ -114,7 +114,7 @@ export default function ChatList() {
           fallback={
             <div class="w-full min-h-full flex flex-row space-x-2 p-3 lg:p-6 items-center justify-center">
               <span class="icon-[fluent--chat-20-regular] w-5 h-5" />
-              <span class="font-bold">{t("game.admin.chat.noSession")}</span>
+              <span class="font-bold">{t("game.hammer.empty")}</span>
             </div>
           }
         >
@@ -130,13 +130,13 @@ export default function ChatList() {
                     <Avatar class="w-full h-full" src={undefined} fallback={session.team_name} />
                     <div class="absolute -right-1 -bottom-1 w-2 h-2">
                       <Show when={!session.checked && !session.is_admin}>
-                        <div class="bg-error rounded-full w-2 h-2" title={t("game.admin.chat.unread")} />
+                        <div class="bg-error rounded-full w-2 h-2" title={t("game.hammer.status.adminUnread.title")} />
                       </Show>
                       <Show when={!session.checked && session.is_admin}>
-                        <div class="bg-info rounded-full w-2 h-2" title={t("game.admin.chat.playerUnread")} />
+                        <div class="bg-info rounded-full w-2 h-2" title={t("game.hammer.status.playerUnread.title")} />
                       </Show>
                       <Show when={session.checked && !session.is_admin}>
-                        <div class="bg-warning rounded-full w-2 h-2" title={t("game.admin.chat.notReply")} />
+                        <div class="bg-warning rounded-full w-2 h-2" title={t("game.hammer.status.notReply.title")} />
                       </Show>
                     </div>
                   </div>
@@ -162,7 +162,7 @@ export default function ChatList() {
               }}
             >
               <span class="icon-[fluent--chevron-double-down-20-regular] w-5 h-5 opacity-60 hover:opacity-100" />
-              <span>{t("game.admin.chat.loadMore")}</span>
+              <span>{t("general.actions.loadMore.title")}</span>
             </Button>
           </div>
         </Show>

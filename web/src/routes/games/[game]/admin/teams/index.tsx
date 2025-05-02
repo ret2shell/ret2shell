@@ -50,7 +50,7 @@ export default function () {
       setTeams(resp[0]);
       setTotal(resp[1]);
     } catch (err) {
-      handleHttpError(err as Error, t("game.admin.teams.fetchFailed")!);
+      handleHttpError(err as Error, t("team.errors.fetch.title")!);
     }
     setLoading(false);
   }
@@ -62,18 +62,18 @@ export default function () {
   const matches = createBreakpoints(breakpoints);
   return (
     <>
-      <Title page={t("game.admin.teams.title")} route={`/games/${gameStore.current?.id}/admin/teams`} />
+      <Title page={t("team.list.title")} route={`/games/${gameStore.current?.id}/admin/teams`} />
       <div class="w-full p-3 lg:p-6 flex flex-col flex-1 relative">
         <h3 class="min-h-12 flex flex-wrap justify-end py-2 gap-y-2 items-center border-b border-b-layer-content/10 font-bold space-x-2">
           <div class="flex flex-row items-center space-x-2">
             <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
-            <span class="flex-1 text-start">{t("game.admin.teams.title")}</span>
+            <span class="flex-1 text-start">{t("team.list.title")}</span>
           </div>
           <span class="flex-1" />
           <Select
             class="flex-1 max-w-48 min-w-32"
             size="sm"
-            placeholder={t("game.admin.teams.sortBy")}
+            placeholder={t("team.sortBy")}
             items={[
               {
                 value: "id",
@@ -82,17 +82,17 @@ export default function () {
               },
               {
                 value: "name",
-                label: t("game.admin.teams.name")!,
+                label: t("team.form.name.label")!,
                 icon: "icon-[fluent--number-symbol-24-regular] w-5 h-5",
               },
               {
                 value: "institute_id",
-                label: t("game.admin.teams.institute")!,
+                label: t("team.form.institute.label")!,
                 icon: "icon-[fluent--number-symbol-24-regular] w-5 h-5",
               },
               {
                 value: "state",
-                label: t("game.admin.teams.state")!,
+                label: t("team.form.state.label")!,
                 icon: "icon-[fluent--number-symbol-24-regular] w-5 h-5",
               },
             ]}
@@ -105,7 +105,7 @@ export default function () {
           <Select
             class="flex-1 max-w-64 min-w-48"
             size="sm"
-            placeholder={t("game.admin.teams.selectInstitute")}
+            placeholder={t("team.list.selectInstitute")}
             items={institutesSelect()}
             onValueChange={(v) => {
               setSearchParams({ institute: (v.value.at(0) && Number.parseInt(v.value.at(0)!)) || null });
@@ -118,7 +118,7 @@ export default function () {
             size="sm"
             icon={<span class="icon-[fluent--filter-16-regular] w-5 h-5" />}
             value={filter() ?? ""}
-            placeholder={t("game.admin.teams.filterPlaceholder")}
+            placeholder={t("team.list.filter")}
             onChange={(e) => {
               setSearchParams({ filter: e.target.value || undefined, page: null });
               setTimeout(refreshTeams, 100);
@@ -136,7 +136,7 @@ export default function () {
             fallback={
               <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2 opacity-60">
                 <span class="icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />
-                <span>{t("game.team.noExtras")}</span>
+                <span>{t("team.empty")}</span>
               </div>
             }
           >
@@ -164,17 +164,17 @@ export default function () {
                   <Switch>
                     <Match when={team.state === TeamState.Banned}>
                       <Tag class="min-w-16" level="error">
-                        <span class="flex-1 truncate">{t("game.admin.teams.banned")}</span>
+                        <span class="flex-1 truncate">{t("team.status.banned.title")}</span>
                       </Tag>
                     </Match>
                     <Match when={team.state === TeamState.Pending}>
                       <Tag class="min-w-16" level="warning">
-                        <span class="flex-1 truncate">{t("game.admin.teams.pending")}</span>
+                        <span class="flex-1 truncate">{t("team.status.pending.title")}</span>
                       </Tag>
                     </Match>
                     <Match when={team.state === TeamState.Hidden}>
                       <Tag class="min-w-16" level="warning">
-                        <span class="flex-1 truncate">{t("game.admin.teams.hidden")}</span>
+                        <span class="flex-1 truncate">{t("team.status.hidden.title")}</span>
                       </Tag>
                     </Match>
                   </Switch>

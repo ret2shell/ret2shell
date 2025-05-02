@@ -150,12 +150,12 @@ export default function () {
   const [instituteFormOpen, setInstituteFormOpen] = createSignal(false);
   return (
     <>
-      <Title page={t("admin.oauth.title")} route="/admin/oauth" />
+      <Title page={t("oauth.title")} route="/admin/oauth" />
       <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
         <div class="w-full max-w-5xl flex flex-col">
           <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
             <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
-            <span class="flex-1 text-start">{t("admin.oauth.title")}</span>
+            <span class="flex-1 text-start">{t("oauth.title")}</span>
             <Dialog
               level="primary"
               size="sm"
@@ -180,12 +180,12 @@ export default function () {
                 <h4 class="font-bold text-start flex-1">
                   <span>{service.name}</span>
                 </h4>
-                <span class="text-success">{t("admin.oauth.configured")}</span>
+                <span class="text-success">{t("oauth.configured")}</span>
                 <Dialog
                   ghost
                   size="sm"
                   square
-                  title={t("form.edit")}
+                  title={t("general.actions.edit.title")}
                   btnContent={<span class="icon-[fluent--edit-20-regular] w-5 h-5" />}
                 >
                   <ProviderForm editSource={service} onDone={handleUpdateProvider} loading={loading()} />
@@ -199,7 +199,7 @@ export default function () {
                 >
                   <Card contentClass="p-2 flex flex-row space-x-2 items-center">
                     <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-error" />
-                    <span>{t("admin.institute.warningDelete")}</span>
+                    <span>{t("general.actions.delete.message")}</span>
                     <Button
                       level="error"
                       size="sm"
@@ -217,7 +217,7 @@ export default function () {
           <div class="h-36" />
           <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
             <span class="icon-[fluent--hat-graduation-20-regular] w-5 h-5" />
-            <span class="flex-1 text-start">{t("admin.institute.title")}</span>
+            <span class="flex-1 text-start">{t("institute.title")}</span>
             <Dialog
               level="primary"
               size="sm"
@@ -242,17 +242,17 @@ export default function () {
                 <span class="flex-1 text-start">{institute.name}</span>
                 <Show
                   when={institute.provider}
-                  fallback={<span class="text-warning px-2">{t("admin.institute.manual")}</span>}
+                  fallback={<span class="text-warning px-2">{t("institute.manual")}</span>}
                 >
                   <span class="text-success px-2">
-                    {t("admin.institute.withOAuth")}: {institute.provider}
+                    {t("institute.withOAuth")}: {institute.provider}
                   </span>
                 </Show>
                 <Dialog
                   ghost
                   size="sm"
                   square
-                  title={t("form.edit")}
+                  title={t("general.actions.edit.title")}
                   btnContent={<span class="icon-[fluent--edit-20-regular] w-5 h-5" />}
                 >
                   <InstituteForm
@@ -271,7 +271,7 @@ export default function () {
                 >
                   <Card contentClass="p-2 flex flex-row space-x-2 items-center">
                     <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-error" />
-                    <span>{t("admin.institute.warningDelete")}</span>
+                    <span>{t("general.actions.delete.message")}</span>
                     <Button
                       level="error"
                       size="sm"

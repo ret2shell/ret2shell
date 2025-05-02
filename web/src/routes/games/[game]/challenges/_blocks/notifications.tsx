@@ -40,7 +40,7 @@ export default function () {
       await createNotification(gameStore.current!.id, payload);
       addToast({
         level: "success",
-        description: t("game.notification.createSuccess")!,
+        description: t("general.actions.create.status.success")!,
         duration: 5000,
       });
       setValues(form, {
@@ -50,7 +50,7 @@ export default function () {
       setCreateFormExpanded(false);
       refreshNotifications();
     } catch (err) {
-      handleHttpError(err as Error, t("game.notification.createFailed")!);
+      handleHttpError(err as Error, t("general.actions.create.status.fail")!);
     }
   }
   const [loading, setLoading] = createSignal(false);
@@ -59,7 +59,7 @@ export default function () {
     try {
       setNotifications(await getNotifications(gameStore.current!.id));
     } catch (err) {
-      handleHttpError(err as Error, t("game.notification.fetchFailed")!);
+      handleHttpError(err as Error, t("game.notification.errors.fetch.title")!);
     }
     setLoading(false);
   }
@@ -68,12 +68,12 @@ export default function () {
       await deleteNotification(gameStore.current!.id, id);
       addToast({
         level: "success",
-        description: t("game.notification.deleteSuccess")!,
+        description: t("general.actions.delete.status.success")!,
         duration: 5000,
       });
       refreshNotifications();
     } catch (err) {
-      handleHttpError(err as Error, t("game.notification.deleteFailed")!);
+      handleHttpError(err as Error, t("general.actions.delete.status.fail")!);
     }
   }
   createEffect(() => {
@@ -106,11 +106,11 @@ export default function () {
           <Show when={isGameAdmin()}>
             <Form onSubmit={onSubmit} class="flex flex-col space-y-2">
               <Show when={createFormExpanded()}>
-                <Field name="title" validate={[required(t("game.notification.titleRequired")!)]}>
+                <Field name="title" validate={[required(t("game.notification.form.title.required")!)]}>
                   {(field, props) => (
                     <Input
-                      placeholder={t("game.notification.titlePlaceholder")}
-                      title={t("game.notification.titlePlaceholder")}
+                      placeholder={t("game.notification.form.title.placeholder")!}
+                      title={t("game.notification.form.title.label")!}
                       {...props}
                       value={field.value}
                       error={field.error}
@@ -118,14 +118,14 @@ export default function () {
                     />
                   )}
                 </Field>
-                <Field name="content" validate={[required(t("game.notification.contentRequired")!)]}>
+                <Field name="content" validate={[required(t("game.notification.form.content.required")!)]}>
                   {(field) => (
                     <Editor
                       form={form}
                       class="h-48"
                       lang="plaintext"
                       placeholder="PLAINTEXT"
-                      title={t("game.notification.contentPlaceholder")}
+                      title={t("game.notification.form.content.label")!}
                       name="content"
                       value={field.value}
                       error={field.error}
@@ -167,7 +167,7 @@ export default function () {
                   fallback={
                     <>
                       <span class="icon-[fluent--chat-empty-20-regular] w-5 h-5" />
-                      <span>{t("game.noNotifications")}</span>
+                      <span>{t("game.notification.empty")}</span>
                     </>
                   }
                 >

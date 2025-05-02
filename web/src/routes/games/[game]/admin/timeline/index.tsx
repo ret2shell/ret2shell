@@ -83,15 +83,15 @@ export default function Timeline() {
   }
   return (
     <>
-      <Title page={t("game.admin.timeline.title")} route={`/games/${gameStore.current?.id}/admin/timeline`} />
+      <Title page={t("game.timeline.title")} route={`/games/${gameStore.current?.id}/admin/timeline`} />
       <div class="flex flex-col space-y-4 xl:flex-row xl:space-y-0 xl:space-x-4 p-3 lg:p-6 w-full">
         <Form onSubmit={onSubmit} class="flex flex-col space-y-2">
-          <Field name="label" validate={[required(t("game.admin.timeline.labelRequired")!)]}>
+          <Field name="label" validate={[required(t("game.timeline.form.label.required")!)]}>
             {(field, props) => (
               <Input
                 icon={<span class="icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
-                placeholder={t("game.admin.timeline.labelPlaceholder")}
-                title={t("game.admin.timeline.labelPlaceholder")}
+                placeholder={t("game.timeline.form.label.placeholder")!}
+                title={t("game.timeline.form.label.label")!}
                 {...props}
                 value={field.value}
                 error={field.error}
@@ -99,16 +99,16 @@ export default function Timeline() {
               />
             )}
           </Field>
-          <Field name="start_at" type="number" validate={[required(t("game.admin.timeline.startAtRequired")!)]}>
+          <Field name="start_at" type="number" validate={[required(t("game.timeline.form.startAt.required")!)]}>
             {(startAtField) => (
-              <Field name="end_at" type="number" validate={[required(t("game.admin.timeline.endAtRequired")!)]}>
+              <Field name="end_at" type="number" validate={[required(t("game.timeline.form.endAt.required")!)]}>
                 {(endAtField) => (
                   <TimePicker
                     form={form}
                     type="time"
                     range
-                    title={t("game.admin.timeline.startEndTime")}
-                    placeholder={t("game.admin.timeline.startEndTime")}
+                    title={t("game.timeline.form.startEndTime.label")!}
+                    placeholder={t("game.timeline.form.startEndTime.placeholder")!}
                     name={startAtField.name}
                     value={startAtField.value}
                     nameNext={endAtField.name}
@@ -131,7 +131,7 @@ export default function Timeline() {
             fallback={
               <div class="h-full flex flex-col opacity-60 items-center justify-center space-y-8">
                 <span class="icon-[fluent--archive-20-regular] w-24 h-24" />
-                <span>{t("game.admin.timeline.noTimeline")}</span>
+                <span>{t("game.timeline.empty")}</span>
               </div>
             }
           >
@@ -155,7 +155,7 @@ export default function Timeline() {
                     <Card contentClass="p-2 flex flex-col space-x-2 max-w-96">
                       <span class="inline-block space-x-2">
                         <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
-                        <span>{t("game.admin.timeline.deleteTips")}</span>
+                        <span>{t("game.timeline.deleteWarning")}</span>
                       </span>
                       <Button
                         level="primary"
@@ -164,7 +164,7 @@ export default function Timeline() {
                         onClick={() => handleDeleteTimelinePreset(preset)}
                         loading={loading()}
                       >
-                        {t("platform.ok")}
+                        {t("general.actions.yes.title")}
                       </Button>
                     </Card>
                   </Popover>

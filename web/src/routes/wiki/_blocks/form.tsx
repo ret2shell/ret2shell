@@ -75,12 +75,12 @@ export default function (props: {
   }
   return (
     <Form onSubmit={onSubmit} class="flex flex-col space-y-2 self-center w-full max-w-5xl flex-1">
-      <Field name="title" validate={[required(t("wiki.titleRequired")!)]}>
+      <Field name="title" validate={[required(t("wiki.form.title.required")!)]}>
         {(field, props) => (
           <Input
             icon={<span class="icon-[fluent--book-20-regular] w-5 h-5" />}
-            placeholder={t("wiki.titlePlaceholder")}
-            title={t("wiki.titlePlaceholder")}
+            placeholder={t("wiki.form.title.placeholder")!}
+            title={t("wiki.form.title.label")!}
             {...props}
             value={field.value}
             error={field.error}
@@ -90,7 +90,7 @@ export default function (props: {
                 <Field name="enable_comment" type="boolean">
                   {(field, props) => (
                     <IconCheckbox
-                      title={t("wiki.enableComment")}
+                      title={t("wiki.form.enableComment.label")}
                       class="!rounded-none"
                       uncheckedIcon="icon-[fluent--chat-20-regular]"
                       checkedIcon="icon-[fluent--chat-20-filled]"
@@ -104,7 +104,7 @@ export default function (props: {
                 <Field name="draft" type="boolean">
                   {(field, props) => (
                     <IconCheckbox
-                      title={t("wiki.draft")}
+                      title={t("wiki.form.draft.label")}
                       class="!rounded-none"
                       uncheckedIcon="icon-[fluent--edit-20-regular]"
                       checkedIcon="icon-[fluent--edit-20-filled]"
@@ -118,7 +118,7 @@ export default function (props: {
                 <Field name="published" type="boolean">
                   {(field, props) => (
                     <IconCheckbox
-                      title={t("wiki.published")}
+                      title={t("wiki.form.published.label")}
                       class="!rounded-l-none"
                       uncheckedIcon="icon-[fluent--megaphone-loud-20-regular]"
                       checkedIcon="icon-[fluent--megaphone-loud-20-filled]"
@@ -134,12 +134,12 @@ export default function (props: {
           />
         )}
       </Field>
-      <Field name="path" validate={[required(t("wiki.pathRequired")!)]}>
+      <Field name="path" validate={[required(t("wiki.form.path.required")!)]}>
         {(field, props) => (
           <Input
             icon={<span class="icon-[fluent--code-20-regular] w-5 h-5" />}
-            placeholder={t("wiki.pathPlaceholder")}
-            title={t("wiki.pathPlaceholder")}
+            placeholder={t("wiki.form.path.placeholder")!}
+            title={t("wiki.form.path.label")!}
             {...props}
             value={field.value}
             error={field.error}
@@ -147,7 +147,7 @@ export default function (props: {
           />
         )}
       </Field>
-      <Field name="content" validate={[required(t("wiki.contentRequired")!)]}>
+      <Field name="content" validate={[required(t("wiki.form.content.required")!)]}>
         {(field) => (
           <Editor
             form={form}
@@ -155,7 +155,7 @@ export default function (props: {
             class="flex-1"
             lang="markdown"
             placeholder="MARKDOWN"
-            title={t("wiki.contentPlaceholder")}
+            title={t("wiki.form.content.label")!}
             name="content"
             value={field.value}
             error={field.error}

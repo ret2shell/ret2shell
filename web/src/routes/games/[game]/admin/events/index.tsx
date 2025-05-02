@@ -19,7 +19,7 @@ export default function () {
           const devices = await getGameDevices(gameStore.current!.id);
           setLinkedDevices(devices);
         } catch (err) {
-          handleHttpError(err as Error, t("game.admin.events.fetchDevicesFailed")!);
+          handleHttpError(err as Error, t("game.events.errors.fetchDevices.title")!);
         }
       });
     }
@@ -30,23 +30,23 @@ export default function () {
       const resp = await regenerateGameToken(gameStore.current!.id);
       setGameStore({ current: { ...gameStore.current!, token: resp.token } });
     } catch (err) {
-      handleHttpError(err as Error, t("game.admin.events.regenerateTokenFailed")!);
+      handleHttpError(err as Error, t("game.errors.regenerateToken.title")!);
     }
   }
 
   const matches = createBreakpoints(breakpoints);
   return (
     <>
-      <Title page={t("game.admin.events.title")} route={`/games/${gameStore.current?.id}/admin/events`} />
+      <Title page={t("game.events.title")} route={`/games/${gameStore.current?.id}/admin/events`} />
       <div class="flex-1 flex flex-col items-center p-3 lg:p-6 relative">
         <div class="flex-1 flex flex-col w-full max-w-5xl">
           <h2 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
             <span class="icon-[fluent--cloud-flow-20-regular] w-5 h-5" />
-            <span>{t("game.admin.events.title")} API</span>
+            <span>{t("game.events.title")} API</span>
           </h2>
           <Card level="info" class="mt-2" contentClass="py-2 px-4">
             <p class="opacity-60 inline">
-              <span>{t("game.admin.events.tips1")}</span>
+              <span>{t("game.events.howto")}</span>
               <span>&nbsp;</span>
               <a
                 href="/docs/events"
@@ -58,7 +58,7 @@ export default function () {
                 <span class="icon-[fluent--open-16-regular] w-4 h-4 text-primary" />
               </a>
               <span>.&nbsp;</span>
-              <span>{t("game.admin.events.tips2")}</span>
+              <span>{t("game.events.tokenWarning")}</span>
             </p>
           </Card>
           <div class="flex flex-row space-x-2 mt-2">
@@ -70,10 +70,10 @@ export default function () {
               <Card contentClass="p-2 flex flex-col space-y-2 max-w-96">
                 <span class="inline-block space-x-2">
                   <span class="icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
-                  <span>{t("game.admin.events.regenerateTokenTips")}</span>
+                  <span>{t("game.events.regenerateTokenWarning")}</span>
                 </span>
                 <Button level="primary" size="sm" class="self-end" onClick={handleRefreshToken}>
-                  {t("platform.accept")}
+                  {t("general.actions.yes.title")}
                 </Button>
               </Card>
             </Popover>
@@ -81,14 +81,14 @@ export default function () {
           <div class="h-4" />
           <h2 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
             <span class="icon-[fluent--developer-board-lightning-20-regular] w-5 h-5" />
-            <span>{t("game.admin.events.linkedDevices")}</span>
+            <span>{t("game.events.linkedDevices")}</span>
           </h2>
           <For
             each={linkedDevices()}
             fallback={
               <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
                 <span class="icon-[fluent--desktop-20-regular] w-24 h-24" />
-                <span>{t("game.admin.events.noDevicesLinked")}</span>
+                <span>{t("game.events.emptyDevices")}</span>
               </div>
             }
           >

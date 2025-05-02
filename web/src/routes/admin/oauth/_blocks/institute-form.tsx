@@ -43,12 +43,12 @@ export default function InstituteForm(props: {
   }
   return (
     <Form onSubmit={onSubmit} class="flex flex-col w-96 space-y-2 relative">
-      <Field name="name" validate={[required(t("admin.institute.nameRequired")!)]}>
+      <Field name="name" validate={[required(t("institute.form.name.required")!)]}>
         {(field, props) => (
           <Input
             icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
-            title={t("admin.institute.name")}
-            placeholder={t("admin.institute.name")}
+            title={t("institute.form.name.label")}
+            placeholder={t("institute.form.name.placeholder")}
             {...props}
             value={field.value}
             error={field.error}
@@ -60,10 +60,10 @@ export default function InstituteForm(props: {
         {(field, fieldProps) => (
           <Select
             name={field.name}
-            label={t("admin.institute.provider")!}
+            label={t("institute.form.provider.label")!}
             class="flex-1"
             error={field.error}
-            placeholder={t("admin.institute.providerNeeded")}
+            placeholder={t("institute.form.provider.placeholder")!}
             items={props.oauthServices.map((service) => {
               return {
                 value: service.provider,
@@ -80,8 +80,8 @@ export default function InstituteForm(props: {
         {(field, props) => (
           <Input
             icon={<span class="icon-[fluent--key-20-regular] w-5 h-5" />}
-            title={t("admin.institute.token")}
-            placeholder={t("admin.institute.token")}
+            title={t("institute.form.token.label")}
+            placeholder={t("institute.form.token.placeholder")}
             {...props}
             value={field.value}
             error={field.error}

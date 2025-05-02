@@ -68,10 +68,10 @@ function InstituteManagement() {
   }
   return (
     <>
-      <Title page={t("game.admin.organize.title")} route={`/games/${gameStore.current?.id}/admin/organize`} />
+      <Title page={t("game.organize.title")} route={`/games/${gameStore.current?.id}/admin/organize`} />
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
         <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
-        <span>{t("game.admin.organize.title")}</span>
+        <span>{t("game.organize.title")}</span>
       </h3>
       <Show when={loading()}>
         <div class="h-12 flex flex-row items-center border-b border-b-layer-content/10">
@@ -79,17 +79,17 @@ function InstituteManagement() {
         </div>
       </Show>
       <div class="grid grid-cols-fit-xs items-center">
-        <span class="my-2">{t("game.admin.organize.restrictWarning")}</span>
+        <span class="my-2">{t("game.organize.actions.restrict.confirm")}</span>
         <Checkbox
           checked={gameStore.current?.access_policy.restrict}
-          title={t("game.admin.organize.restrict")}
+          title={t("game.organize.actions.restrict.title")}
           onChange={() => handleChangePolicy(!gameStore.current?.access_policy.restrict)}
         >
-          <span class="flex-1 text-start">{t("game.admin.organize.restrict")}</span>
+          <span class="flex-1 text-start">{t("game.organize.actions.restrict.title")}</span>
         </Checkbox>
       </div>
       <div class="flex flex-col space-y-1">
-        <header class="label">{t("game.admin.organize.instituteEnabled")}</header>
+        <header class="label">{t("game.organize.instituteEnabled")}</header>
         <div class="flex flex-row flex-wrap">
           <For each={accountStore.institutes}>
             {(institute) => (

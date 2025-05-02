@@ -110,12 +110,12 @@ export default function ProviderForm(props: {
     <Form onSubmit={onSubmit} class="flex flex-col w-screen max-w-5xl space-y-2 relative">
       <div class="flex flex-row space-x-4 items-end">
         <div class="flex flex-col space-y-2 flex-1">
-          <Field name="name" validate={[required(t("admin.institute.providerNameRequired")!)]}>
+          <Field name="name" validate={[required(t("oauth.form.name.required")!), ]}>
             {(field, props) => (
               <Input
                 icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
-                title={t("admin.institute.providerName")}
-                placeholder={t("admin.institute.providerName")}
+                title={t("oauth.form.name.label")}
+                placeholder={t("oauth.form.name.placeholder")}
                 {...props}
                 value={field.value}
                 error={field.error}
@@ -126,18 +126,18 @@ export default function ProviderForm(props: {
           <Field
             name="provider"
             validate={[
-              required(t("admin.institute.providerIdentifierRequired")!),
-              minLength(2, t("admin.institute.providerIdentifierMinLength")!),
-              maxLength(32, t("admin.institute.providerIdentifierMaxLength")!),
+              required(t("oauth.form.provider.required")!),
+              minLength(2, t("oauth.form.provider.minimumLength")!),
+              maxLength(32, t("oauth.form.provider.maximumLength")!),
               // only ascii visible characters, no whitespaces
-              pattern(/^[0-9a-z_]*$/, t("admin.institute.providerIdentifierPattern")!),
+              pattern(/^[0-9a-z_]*$/, t("oauth.form.provider.invalid")!),
             ]}
           >
             {(field, props) => (
               <Input
                 icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
-                title={t("admin.institute.providerIdentifier")}
-                placeholder={t("admin.institute.providerIdentifier")}
+                title={t("oauth.form.provider.label")}
+                placeholder={t("oauth.form.provider.placeholder")}
                 {...props}
                 value={field.value}
                 error={field.error}
@@ -187,12 +187,12 @@ export default function ProviderForm(props: {
           )}
         </Field>
       </div>
-      <Field name="portal" validate={[url(t("admin.institute.providerPortalInvalid")!)]}>
+      <Field name="portal" validate={[url(t("oauth.form.portal.invalid")!)]}>
         {(field, props) => (
           <Input
             icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
-            title={t("admin.institute.providerPortal")}
-            placeholder={t("admin.institute.providerPortal")}
+            title={t("oauth.form.portal.label")}
+            placeholder={t("oauth.form.portal.placeholder")}
             {...props}
             value={field.value}
             error={field.error}
@@ -202,26 +202,26 @@ export default function ProviderForm(props: {
       </Field>
       <header class="flex items-end">
         <h3 class="font-bold text-sm opacity-60 flex-1 text-start flex space-x-4">
-          <span>{t("admin.institute.providerScript")}</span>
+          <span>{t("oauth.form.script.label")}</span>
           <span>$GLOBAL/oauth.rx</span>
         </h3>
         <Select
           class="w-60 hidden lg:flex"
-          placeholder={t("admin.institute.selectPresetScripts")}
+          placeholder={t("oauth.form.script.preset.placeholder")!}
           size="sm"
           items={[
             {
-              label: t("admin.institute.emailScript")!,
+              label: t("oauth.form.script.preset.email")!,
               value: "email",
               icon: "icon-[fluent--number-symbol-20-regular] w-5 h-5",
             },
             {
-              label: t("admin.institute.yaleCasScript")!,
+              label: t("oauth.form.script.preset.yaleCas")!,
               value: "yale_cas",
               icon: "icon-[fluent--number-symbol-20-regular] w-5 h-5",
             },
             {
-              label: t("admin.institute.oauth2AuthCodeScript")!,
+              label: t("oauth.form.script.preset.oauth2AuthCode")!,
               value: "oauth2_auth_code",
               icon: "icon-[fluent--number-symbol-20-regular] w-5 h-5",
             },
@@ -237,7 +237,7 @@ export default function ProviderForm(props: {
           }}
         />
       </header>
-      <Field name="script" validate={[required(t("admin.institute.providerScriptRequired")!)]}>
+      <Field name="script" validate={[required(t("oauth.form.script.required")!)]}>
         {(field) => (
           <Editor
             form={form}

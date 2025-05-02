@@ -19,14 +19,14 @@ export default function () {
       const resp = await getPlatformStatistics();
       setStatistics(resp);
     } catch (err) {
-      handleHttpError(err as Error, t("admin.statistics.fetchFailed")!);
+      handleHttpError(err as Error, t("platform.statistics.errors.fetch.title")!);
     }
     setLoading(false);
   });
 
   return (
     <>
-      <Title page={t("admin.statistics.title")} route="/admin/statistics" />
+      <Title page={t("platform.statistics.title")} route="/admin/statistics" />
       <div class="flex-1 grid grid-cols-1 md:grid-cols-6 p-3 lg:p-6 gap-3 lg:gap-6">
         <div class="flex md:col-span-6 lg:col-span-3 items-center justify-start space-x-12 px-3 lg:px-6 xl:px-9">
           <LogoAnimate class="m-0 w-16 h-16 md:w-32 md:h-32 xl:w-36 xl:h-36" />
@@ -72,7 +72,7 @@ export default function () {
                               .games.filter((g) => g.host_type === HostType.Game)
                               .reduce((a, b) => a + b.teams, 0)) /
                           statistics()!.games.length,
-                        name: t("admin.statistics.trainings"),
+                        name: t("training.title"),
                         itemStyle: {
                           color: "#0991ed",
                         },
@@ -81,7 +81,7 @@ export default function () {
                         value: statistics()!
                           .games.filter((g) => g.host_type === HostType.Game)
                           .reduce((a, b) => a + b.teams, 0),
-                        name: t("admin.statistics.games"),
+                        name: t("game.title"),
                         itemStyle: {
                           color: "#e05864",
                         },
@@ -90,7 +90,7 @@ export default function () {
                             itemStyle: {
                               color: "#0991ed",
                             },
-                            name: t("admin.statistics.pendingGames"),
+                            name: t("game.pending"),
                             value: statistics()!
                               .games.filter((g) => g.host_type === HostType.Game && g.start_at > DateTime.now())
                               .reduce((a, b) => a + b.teams, 0),
@@ -105,7 +105,7 @@ export default function () {
                             itemStyle: {
                               color: "#17a750",
                             },
-                            name: t("admin.statistics.inProgressGames"),
+                            name: t("game.started"),
                             value: statistics()!
                               .games.filter(
                                 (g) =>
@@ -130,7 +130,7 @@ export default function () {
                             itemStyle: {
                               color: "#808080",
                             },
-                            name: t("admin.statistics.endedGames"),
+                            name: t("game.ended"),
                             value: statistics()!
                               .games.filter((g) => g.host_type === HostType.Game && g.end_at < DateTime.now())
                               .reduce((a, b) => a + b.teams, 0),
@@ -170,14 +170,14 @@ export default function () {
               <span class="font-bold text-3xl text-info">
                 {statistics()?.games.filter((g) => g.host_type === HostType.Training).length}
               </span>
-              <span class="opacity-60">{t("admin.statistics.trainings")}</span>
+              <span class="opacity-60">{t("training.title")}</span>
             </div>
             <div class="flex flex-row space-x-4 items-center flex-1">
               <span class="icon-[fluent--flag-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl text-error">
                 {statistics()?.games.filter((g) => g.host_type === HostType.Game).length}
               </span>
-              <span class="opacity-60">{t("admin.statistics.totalGames")}</span>
+              <span class="opacity-60">{t("game.title")}</span>
             </div>
           </div>
         </div>
@@ -225,16 +225,16 @@ export default function () {
             </Show>
           </div>
           <div class="flex-1 flex flex-col space-y-2 lg:space-y-4">
-            <h3 class="font-bold flex items-center space-x-2">{t("admin.statistics.users")}</h3>
+            <h3 class="font-bold flex items-center space-x-2">{t("user.title")}</h3>
             <div class="flex flex-row space-x-4 items-center flex-1">
               <span class="icon-[fluent--emoji-sparkle-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl text-info">{statistics()?.users.valid}</span>
-              <span class="opacity-60">{t("admin.statistics.validUsers")}</span>
+              <span class="opacity-60">{t("user.status.valid")}</span>
             </div>
             <div class="flex flex-row space-x-4 items-center flex-1">
               <span class="icon-[fluent--person-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl">{statistics()?.users.total}</span>
-              <span class="opacity-60">{t("admin.statistics.totalUsers")}</span>
+              <span class="opacity-60">{t("user.total")}</span>
             </div>
           </div>
         </div>
@@ -288,16 +288,16 @@ export default function () {
             </Show>
           </div>
           <div class="flex-1 flex flex-col space-y-2 lg:space-y-4">
-            <h3 class="font-bold flex items-center space-x-2">{t("admin.statistics.challenges")}</h3>
+            <h3 class="font-bold flex items-center space-x-2">{t("challenge.title")}</h3>
             <div class="flex flex-row space-x-4 items-center flex-1">
               <span class="icon-[fluent--code-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl text-warning">{statistics()?.challenges.in_game}</span>
-              <span class="opacity-60">{t("admin.statistics.inGameChallenges")}</span>
+              <span class="opacity-60">{t("challenge.inGame")}</span>
             </div>
             <div class="flex flex-row space-x-4 items-center flex-1">
               <span class="icon-[fluent--target-edit-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl">{statistics()?.challenges.total}</span>
-              <span class="opacity-60">{t("admin.statistics.totalChallenges")}</span>
+              <span class="opacity-60">{t("challenge.total")}</span>
             </div>
           </div>
         </div>
@@ -351,16 +351,16 @@ export default function () {
             </Show>
           </div>
           <div class="flex-1 flex flex-col space-y-2 lg:space-y-4">
-            <h3 class="font-bold flex items-center space-x-2">{t("admin.statistics.submissions")}</h3>
+            <h3 class="font-bold flex items-center space-x-2">{t("challenge.submission.title")}</h3>
             <div class="flex flex-row space-x-4 items-center flex-1">
               <span class="icon-[fluent--checkmark-starburst-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl text-success">{statistics()?.submissions.solved}</span>
-              <span class="opacity-60">{t("admin.statistics.solvedSubmissions")}</span>
+              <span class="opacity-60">{t("challenge.submission.status.solved")}</span>
             </div>
             <div class="flex flex-row space-x-4 items-center flex-1">
               <span class="icon-[fluent--text-bullet-list-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl">{statistics()?.submissions.total}</span>
-              <span class="opacity-60">{t("admin.statistics.totalSubmissions")}</span>
+              <span class="opacity-60">{t("challenge.submission.total")}</span>
             </div>
           </div>
         </div>
@@ -375,7 +375,7 @@ export default function () {
                   top: "48px",
                 },
                 title: {
-                  text: t("admin.statistics.instituteUsers"),
+                  text: t("platform.statistics.instituteUsers.title")!,
                   right: "center",
                 },
                 tooltip: {
@@ -394,7 +394,7 @@ export default function () {
                   type: "category",
                   data: statistics()!
                     .users.institutes.map((i) => statistics()!.institutes.find((ii) => ii.id === i[0])!.name)
-                    .concat(t("admin.statistics.others")!),
+                    .concat(t("platform.statistics.instituteUsers.others")!),
                 },
                 yAxis: {
                   type: "value",

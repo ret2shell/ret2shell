@@ -32,31 +32,30 @@ export function PoliciesEdit(props: {
     <Form onSubmit={props.onDone} class="flex flex-col w-full max-w-5xl space-y-2 relative">
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
         <span class="icon-[fluent--settings-20-regular] w-5 h-5" />
-        <span>{t("game.admin.policies.challenge.title")}</span>
+        <span>{t("game.policies.title")}</span>
       </h3>
-
       <div class="grid grid-cols-fit-xs max-w-full gap-2">
         <Field name="challenge.show_answer" type="boolean">
           {(field, props) => (
             <Checkbox
-              title={t("game.admin.policies.challenge.showAnswer")}
+              title={t("game.policies.form.challenge.showAnswer.label")}
               inputProps={props}
               checked={field.value}
               error={field.error}
             >
-              <span class="flex-1 text-start truncate">{t("game.admin.policies.challenge.showAnswer")}</span>
+              <span class="flex-1 text-start truncate">{t("game.policies.form.challenge.showAnswer.label")}</span>
             </Checkbox>
           )}
         </Field>
         <Field name="challenge.show_hints" type="boolean">
           {(field, props) => (
             <Checkbox
-              title={t("game.admin.policies.challenge.showHints")}
+              title={t("game.policies.form.challenge.showHints.label")}
               inputProps={props}
               checked={field.value}
               error={field.error}
             >
-              <span class="flex-1 text-start truncate">{t("game.admin.policies.challenge.showHints")}</span>
+              <span class="flex-1 text-start truncate">{t("game.policies.form.challenge.showHints.label")}</span>
             </Checkbox>
           )}
         </Field>
@@ -92,7 +91,7 @@ export default function () {
   }
   return (
     <>
-      <Title page={t("game.admin.policies.title")} route={`/games/${gameStore.current?.id}/admin/polocies`} />
+      <Title page={t("game.policies.title")} route={`/games/${gameStore.current?.id}/admin/polocies`} />
       <div class="flex flex-col p-3 lg:p-6 w-full items-center">
         <PoliciesEdit onDone={onSubmit} editSource={gameStore.current?.archive_policy} loading={loading()} />
       </div>

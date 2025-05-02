@@ -9,7 +9,6 @@ import {
 // import xdsecMascotCiallo from "@assets/imgs/xdsec-mascot-ciallo.webp";
 import platformAvatar from "@assets/imgs/rx.webp";
 import { ChatBlock, mergeChats } from "@blocks/challenge/hammer";
-import { m_chat } from "@lib/i18n/chats";
 // import { stickerSet } from "@assets/stickers";
 import { mediaPath } from "@lib/utils/media";
 import type { Challenge } from "@models/challenge";
@@ -18,18 +17,14 @@ import type { Team } from "@models/team";
 import { A, useSearchParams } from "@solidjs/router";
 import { gameStore } from "@storage/game";
 import { Title } from "@storage/header";
-import { fullTheme, t, themeStore } from "@storage/theme";
+import { fullTheme, t } from "@storage/theme";
 import Button from "@widgets/button";
-import Card from "@widgets/card";
 import { EditorBare } from "@widgets/editor";
 import Link from "@widgets/link";
-import Popover from "@widgets/popover";
 import clsx from "clsx";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
-
-const chatConfig = await m_chat(themeStore.locale);
 
 export default function () {
   const [searchParams, _] = useSearchParams();
@@ -43,7 +38,7 @@ export default function () {
         try {
           setChallenge(await getChallenge(gameStore.current!.id, challengeId()!));
         } catch (err) {
-          handleHttpError(err as Error, t("game.challenge.fetchChallengeFailed")!);
+          handleHttpError(err as Error, t("challenge.errors.fetchChallenge.title")!);
         }
       });
     }
@@ -52,7 +47,7 @@ export default function () {
         try {
           setTeam(await getTeamInfo(gameStore.current!.id, teamId()!));
         } catch (err) {
-          handleHttpError(err as Error, t("game.team.fetchTeamFailed")!);
+          handleHttpError(err as Error, t("team.errors.fetch.title")!);
         }
       });
     }
@@ -68,7 +63,7 @@ export default function () {
       setChat("");
       refreshChats();
     } catch (err) {
-      handleHttpError(err as Error, t("game.challenge.sendChatError")!);
+      handleHttpError(err as Error, t("challenge.hammer.errors.send.title")!);
     }
     setSending(false);
   }
@@ -91,7 +86,7 @@ export default function () {
             chatBottomEl! && chatBottomEl.scrollIntoView({ behavior: "smooth" });
           }, 700);
       } catch (err) {
-        handleHttpError(err as Error, t("game.challenge.fetchChatError")!);
+        handleHttpError(err as Error, t("challenge.hammer.errors.fetch.title")!);
       }
       setLoading(false);
     }
@@ -116,7 +111,7 @@ export default function () {
         const s = resp.find((x) => x.challenge_id === challengeId());
         return s?.created_at ?? null;
       } catch (err) {
-        handleHttpError(err as Error, t("game.challenge.fetchSolveError")!);
+        handleHttpError(err as Error, t("challenge.hammer.errors.fetchSolve.title")!);
       }
       return null;
     }
@@ -128,7 +123,7 @@ export default function () {
   return (
     <>
       <Title
-        page={team() ? `${team()?.name} - ${t("game.admin.hammer.title")}` : t("game.admin.hammer.title")}
+        page={team() ? `${team()?.name} - ${t("game.hammer.title")}` : t("game.hammer.title")}
         route={`/games/${gameStore.current?.id}/admin/hammers`}
       />
       <div class="flex-1 h-[calc(100vh-4rem)] overflow-hidden flex flex-col">
@@ -138,7 +133,7 @@ export default function () {
             class="flex-1 w-0 flex flex-row space-x-2 hover:underline items-center truncate"
             href={`/games/${gameStore.current?.id}/teams/${teamId()}`}
           >
-            {team() ? team()?.name : t("game.admin.chat.title")}
+            {team() ? team()?.name : t("challenge.hammer.title")}
           </A>
           <Show when={challenge()}>
             <A
@@ -165,7 +160,7 @@ export default function () {
             fallback={
               <div class="min-h-full w-full flex flex-col opacity-60 items-center justify-center space-y-8">
                 <span class="icon-[fluent--chat-20-regular] w-24 h-24" />
-                <span class="font-bold">{t("game.admin.chat.selectToShow")}</span>
+                <span class="font-bold">{t("game.hammer.placeholder")}</span>
               </div>
             }
           >
@@ -178,7 +173,7 @@ export default function () {
                   link="/magic/sakana"
                   nameLabel="Ciallo～(∠・ω< )⌒☆"
                   labelClasses="text-primary"
-                  content={`${t("game.challenge.title")}: [${challenge()?.name}](/games/${gameStore.current?.id}/challenges?challenge=${challengeId()}), ${t("game.team.title")}: [${team()?.name}](/games/${gameStore.current?.id}/teams/${teamId()})`}
+                  content={`${t("challenge.title")}: [${challenge()?.name}](/games/${gameStore.current?.id}/challenges?challenge=${challengeId()}), ${t("team.title")}: [${team()?.name}](/games/${gameStore.current?.id}/teams/${teamId()})`}
                   sendAt={gameStore.current?.start_at ?? DateTime.now()}
                   isChecked
                 />
@@ -191,8 +186,8 @@ export default function () {
                         chat.id === 0
                           ? ">_<"
                           : chat.is_admin
-                            ? t("game.challenge.chatAdminRole")!
-                            : t("game.challenge.chatPlayerRole")!
+                            ? t("challenge.hammer.role.admin")!
+                            : t("challenge.hammer.role.player")!
                       }
                       link={chat.id === 0 ? "Ciallo～(∠・ω< )⌒☆" : `/users/${chat.user_id}`}
                       nameLabel={chat.user_name || "Unknown"}
@@ -206,41 +201,6 @@ export default function () {
               </div>
               <div class="sticky bottom-0 flex flex-col space-y-2 p-3 border-t border-t-layer-content/5 backdrop-blur">
                 <div class="flex flex-row items-center h-8 space-x-2">
-                  <Popover size="sm" square ghost btnContent={<span class="icon-[fluent--flash-20-regular] w-5 h-5" />}>
-                    <Card contentClass="p-2">
-                      <OverlayScrollbarsComponent
-                        options={{
-                          scrollbars: {
-                            theme: `os-theme-${fullTheme()}`,
-                            autoHide: "scroll",
-                          },
-                        }}
-                        class="relative w-full h-full print:h-auto print:overflow-auto"
-                        defer
-                      >
-                        <div class="flex flex-col space-y-2">
-                          <For each={chatConfig.quickReplies ?? []}>
-                            {(reply) => (
-                              <Button
-                                size="sm"
-                                justify="start"
-                                ghost
-                                onClick={() => {
-                                  setChat(reply!);
-                                  setTimeout(() => {
-                                    handleSendChat();
-                                  });
-                                }}
-                              >
-                                <span class="icon-[fluent--chat-20-regular] w-5 h-5" />
-                                <span>{reply}</span>
-                              </Button>
-                            )}
-                          </For>
-                        </div>
-                      </OverlayScrollbarsComponent>
-                    </Card>
-                  </Popover>
                   <div class="flex-1" />
                   <Show when={loading()}>
                     <span class="icon-[fluent--arrow-sync-20-regular] w-5 h-5 animate-spin" />
@@ -254,7 +214,7 @@ export default function () {
                     rel="noreferrer"
                   >
                     <span class="icon-[fluent--question-circle-20-regular] w-5 h-5" />
-                    <span class="hidden lg:inline-block">{t("game.challenge.hammerHowto")}</span>
+                    <span class="hidden lg:inline-block">{t("challenge.hammer.markdownHoto")}</span>
                   </Link>
                   <Button
                     size="sm"
@@ -272,7 +232,7 @@ export default function () {
                   </Button>
                   <Button level="primary" size="sm" onClick={handleSendChat} disabled={sending()} loading={sending()}>
                     <span class="icon-[fluent--send-20-regular] w-5 h-5" />
-                    <span>{t("game.challenge.hammerSend")}</span>
+                    <span>{t("general.actions.send.title")}</span>
                   </Button>
                 </div>
                 <EditorBare

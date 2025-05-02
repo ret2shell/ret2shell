@@ -42,7 +42,7 @@ export default function () {
         navigate(`/games/${gameStore.current?.id}`);
       }, 2000);
     } catch (err) {
-      handleHttpError(err as Error, t("game.team.join.failed")!);
+      handleHttpError(err as Error, t("team.errors.join.title")!);
     }
     setLoading(false);
   }
@@ -59,20 +59,20 @@ export default function () {
   const [dialogOpen, setDialogOpen] = createSignal(false);
   return (
     <>
-      <Title page={t("game.team.join.title")} route={`/games/${gameStore.current?.id}/teams/join`} />
+      <Title page={t("team.join.title")} route={`/games/${gameStore.current?.id}/teams/join`} />
       <div class="flex-1 flex flex-col items-center md:justify-center p-3 md:p-6">
         <Card
           class="w-full max-w-xl"
           contentClass="p-6 flex flex-col md:flex-row space-y-2 space-x-0 md:space-x-6 md:space-y-0"
         >
           <Form onSubmit={onSubmit} class="md:w-0 flex-1 shrink-0 flex flex-col space-y-2">
-            <h2 class="font-bold text-center">{t("game.team.join.title")}</h2>
-            <Field name="token" validate={[required(t("game.team.join.tokenRequired")!)]}>
+            <h2 class="font-bold text-center">{t("team.join.title")}</h2>
+            <Field name="token" validate={[required(t("team.join.form.token.required")!)]}>
               {(field, props) => (
                 <Input
                   icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
-                  title={t("game.team.join.token")}
-                  placeholder={t("game.team.join.tokenPlaceholder")}
+                  title={t("team.join.form.token.label")}
+                  placeholder={t("team.join.form.token.placeholder")}
                   {...props}
                   value={field.value}
                   error={field.error}
@@ -80,7 +80,7 @@ export default function () {
                 />
               )}
             </Field>
-            <Field name="accepted" type="boolean" validate={[required(t("game.team.create.acceptedRequired")!)]}>
+            <Field name="accepted" type="boolean" validate={[required(t("team.form.acceptRules.required")!)]}>
               {(field, props) => (
                 <>
                   <input type="checkbox" class="hidden" {...props} checked={field.value} />
@@ -100,12 +100,12 @@ export default function () {
                         >
                           <span class="icon-[fluent--checkmark-circle-20-filled] w-5 h-5 text-primary" />
                         </Show>
-                        <span>{t("game.team.create.acceptRules")}</span>
+                        <span>{t("team.form.acceptRules.label")}</span>
                       </>
                     }
                   >
                     <div class="w-full">
-                      <h2 class="text-center text-3xl font-bold p-4 pb-0">{t("game.team.create.rulesTitle")}</h2>
+                      <h2 class="text-center text-3xl font-bold p-4 pb-0">{t("team.form.acceptRules.title")}</h2>
                       <Article class="self-center" content={content() || ""} noExtraPaddings />
                     </div>
                     <div class="flex space-x-2">
@@ -119,13 +119,13 @@ export default function () {
                         disabled={field.value}
                       >
                         <span>
-                          <Show when={field.value}>{t("game.team.create.accepted")}</Show>
-                          <Show when={!field.value}>{t("game.team.create.accept")}</Show>
+                          <Show when={field.value}>{t("team.form.acceptRules.ok")}</Show>
+                          <Show when={!field.value}>{t("general.actions.accept.title")}</Show>
                         </span>
                       </Button>
                       <Show when={field.value}>
                         <Button level="error" onClick={() => setValue(form, "accepted", false)}>
-                          <span>{t("game.team.create.reject")}</span>
+                          <span>{t("general.actions.no.title")}</span>
                         </Button>
                       </Show>
                     </div>
@@ -141,11 +141,11 @@ export default function () {
                 loading={loading()}
                 disabled={loading() || !gameParticipateState()[0]}
               >
-                {gameParticipateState()[0] ? t("game.team.join.title") : gameParticipateState()[1]}
+                {gameParticipateState()[0] ? t("team.join.title") : gameParticipateState()[1]}
               </Button>
               <Show when={(gameStore.current?.team_size || 0) > 1}>
                 <Link href={`/games/${gameStore.current?.id}/teams/create`}>
-                  <span>{t("game.team.create.title")}</span>
+                  <span>{t("team.create.title")}</span>
                   <span class="icon-[fluent--arrow-right-20-regular] w-5 h-5" />
                 </Link>
               </Show>

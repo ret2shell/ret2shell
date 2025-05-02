@@ -44,7 +44,7 @@ export default function () {
     if (gameStore.current && gameStore.current.archive_at < DateTime.now()) {
       addToast({
         level: "warning",
-        description: t("game.archivedGotoTraining")!,
+        description: t("game.gotoTraining")!,
         duration: 5000,
       });
       navigate(`/games/${gameStore.current.id}`);
@@ -56,7 +56,7 @@ export default function () {
       if (gameStore.current && gameStore.current.start_at > DateTime.now() && !isGameAdmin()) {
         addToast({
           level: "warning",
-          description: t("game.challenge.notStarted")!,
+          description: t("game.notStarted")!,
           duration: 5000,
         });
         navigate(`/games/${gameStore.current.id}`);
@@ -69,7 +69,7 @@ export default function () {
           setChallengeStore({ current: resp });
           refreshChallengeAssets();
         } catch (err) {
-          handleHttpError(err as Error, t("game.challenge.fetchChallengeFailed")!);
+          handleHttpError(err as Error, t("challenge.errors.fetchChallenge.title")!);
           setSearchParams({ challenge: null, create: null });
         }
         setLoadingChallenge(false);
@@ -112,7 +112,7 @@ export default function () {
       });
       refreshChallenges();
     } catch (err) {
-      handleHttpError(err as Error, t("game.challenge.createFailed")!);
+      handleHttpError(err as Error, t("general.actions.create.status.fail")!);
     }
     setCreating(false);
   }
@@ -133,7 +133,7 @@ export default function () {
           }
           const toastId = addToast({
             level: "info",
-            description: `${t("game.challenge.hammerResponse", {
+            description: `${t("game.hammer.newMessages", {
               challenge: challengeStore.challenges.find((v) => v.id === chat.challenge_id)?.name ?? "[DELETED]",
             })}: ${msg}`,
             accept: () => {
@@ -142,12 +142,12 @@ export default function () {
                 removeToast(toastId);
               }, 50);
             },
-            acceptLabel: t("form.goto"),
+            acceptLabel: t("general.actions.goto.title")!,
           });
         }
         prevUnreadChats = unreadChats;
       } catch (err) {
-        handleHttpError(err as Error, t("game.challenge.fetchChatError")!);
+        handleHttpError(err as Error, t("challenge.hammer.errors.fetch.title")!);
       }
     }
   }, 30 * 1000);
@@ -161,7 +161,7 @@ export default function () {
   const [showRightSidebar, setShowRightSidebar] = createSignal(false);
   return (
     <>
-      <Title page={t("game.challenge.title")} route={`/games/${gameStore.current?.id}/challenges`} />
+      <Title page={t("challenge.title")} route={`/games/${gameStore.current?.id}/challenges`} />
       <SidebarLayout
         showLeftBar={showLeftSidebar()}
         leftBar={() => (
@@ -169,7 +169,7 @@ export default function () {
             <div class="border-b border-b-layer-content/10 px-2 h-16 flex items-center justify-center">
               <Link class="w-full" ghost justify="start" href={`/games/${gameStore.current?.id}/challenges`}>
                 <span class="icon-[fluent--flag-20-filled] w-5 h-5 text-primary" />
-                <span>{t("game.challenge.list")}</span>
+                <span>{t("challenge.list")}</span>
               </Link>
             </div>
             <ChallengeList showScore inGame />
