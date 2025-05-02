@@ -329,7 +329,7 @@ export default function (props: {
           </Button>
         </div>
         <EditorBare
-          class={clsx("rounded-lg", editorExpanded() ? "h-64" : "h-16")}
+          class={clsx(editorExpanded() ? "h-64" : "h-16")}
           value={chat()}
           placeholder={t("challenge.hammer.markdownSupport")}
           lang="markdown"

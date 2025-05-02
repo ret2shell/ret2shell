@@ -151,7 +151,7 @@ export default function () {
           </Show>
         </div>
         <OverlayScrollbarsComponent
-          class="w-full flex-1 backdrop-blur-sm relative"
+          class="w-full flex-1 relative"
           options={{
             scrollbars: {
               theme: `os-theme-${fullTheme()}`,
@@ -204,7 +204,7 @@ export default function () {
                   )}
                 </For>
               </div>
-              <div class="sticky bottom-0 flex flex-col space-y-2 p-3 border-t border-t-layer-content/5 bg-layer">
+              <div class="sticky bottom-0 flex flex-col space-y-2 p-3 border-t border-t-layer-content/5 backdrop-blur">
                 <div class="flex flex-row items-center h-8 space-x-2">
                   <Popover size="sm" square ghost btnContent={<span class="icon-[fluent--flash-20-regular] w-5 h-5" />}>
                     <Card contentClass="p-2">
@@ -283,7 +283,7 @@ export default function () {
                       exec: handleSendChat,
                     },
                   ]}
-                  class={clsx("bg-layer rounded-lg", editorExpanded() ? "h-64" : "h-16")}
+                  class={clsx(editorExpanded() ? "h-64" : "h-16")}
                   value={chat()}
                   placeholder="MARKDOWN"
                   lang="markdown"
