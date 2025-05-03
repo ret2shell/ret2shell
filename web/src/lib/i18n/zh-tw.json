@@ -791,9 +791,7 @@
         "fetchSessions": {
           "title": "獲取反饋會話列表失敗"
         },
-        "fetchChats": {
-          "title": ""
-        }
+        "fetchChats": {}
       },
       "empty": "還沒有反饋",
       "status": {

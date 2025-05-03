@@ -749,9 +749,7 @@
         "fetchSessions": {
           "title": ""
         },
-        "fetchChats": {
-          "title": ""
-        }
+        "fetchChats": {}
       },
       "empty": "",
       "status": {
