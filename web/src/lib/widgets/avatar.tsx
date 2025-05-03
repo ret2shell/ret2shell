@@ -18,7 +18,9 @@ export default function (props: AvatarProps) {
   const [imageLoading, setImageLoading] = createSignal(true);
   return (
     <Avatar.Root class={clsx("avatar", root.class)}>
-      <Avatar.Fallback class="avatar-fallback">{avatarFunctionProps.fallback?.[0].toUpperCase()}</Avatar.Fallback>
+      <Avatar.Fallback class="avatar-fallback">
+        {avatarFunctionProps.fallback?.[0]?.toUpperCase() || "#"}
+      </Avatar.Fallback>
       <Avatar.Image
         src={root.src}
         alt={root.alt}
