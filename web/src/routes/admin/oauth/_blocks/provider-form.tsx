@@ -110,7 +110,7 @@ export default function ProviderForm(props: {
     <Form onSubmit={onSubmit} class="flex flex-col w-screen max-w-5xl space-y-2 relative">
       <div class="flex flex-row space-x-4 items-end">
         <div class="flex flex-col space-y-2 flex-1">
-          <Field name="name" validate={[required(t("oauth.form.name.required")!), ]}>
+          <Field name="name" validate={[required(t("oauth.form.name.required")!)]}>
             {(field, props) => (
               <Input
                 icon={<span class="icon-[fluent--flag-20-regular] w-5 h-5" />}
@@ -157,7 +157,7 @@ export default function ProviderForm(props: {
                 loading={avatarUploading()}
                 disabled={avatarUploading()}
                 type="button"
-                class="opacity-0 hover:opacity-100 !bg-layer/80 absolute top-0 left-0 w-full h-full !rounded-full"
+                class="opacity-0 hover:opacity-100 !bg-layer/80 absolute top-0 left-0 w-full h-full"
                 onClick={() => {
                   if (avatarSet()) {
                     setAvatarSet(false);
