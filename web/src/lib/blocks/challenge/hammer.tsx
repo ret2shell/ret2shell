@@ -6,11 +6,12 @@ import platformAvatar from "@assets/imgs/rx.webp";
 import { mediaPath } from "@lib/utils/media";
 import type { Challenge } from "@models/challenge";
 import type { Chat } from "@models/chat";
+import { createBreakpoints } from "@solid-primitives/media";
 import { A } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { challengeStore } from "@storage/challenge";
 import { gameStore, isGameAdmin } from "@storage/game";
-import { t } from "@storage/theme";
+import { breakpoints, t } from "@storage/theme";
 import Article from "@widgets/article";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
@@ -33,16 +34,16 @@ export function ChatBlock(props: {
   sendAt: DateTime;
   isChecked?: boolean;
 }) {
+  const matches = createBreakpoints(breakpoints);
   return (
     <>
-      <div class="self-start flex-row w-[calc(100%-4rem)] flex items-center">
+      <div class={clsx("self-start flex-row flex items-center", matches.lg ? "w-[calc(100%-4rem)]" : "w-full")}>
         <Show when={props.showAvatar} fallback={<div class="w-10 h-10 shrink-0 self-start" />}>
           <A class="w-10 h-10 shrink-0 self-start mt-2" href={props.link}>
             <Avatar class="w-full h-full" src={props.avatar} fallback={props.nameLabel} />
           </A>
         </Show>
         <div class="w-2 shrink-0" />
-
         <div class="flex flex-col space-y-1 bg-transparent hover:bg-layer-content/5 flex-1 p-2 rounded-md group transition-colors duration-300">
           <Show when={props.showAvatar}>
             <header class="label">

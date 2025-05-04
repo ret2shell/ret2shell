@@ -56,11 +56,11 @@ article.article-compact {
   @apply p-0;
 
   & > *:first-child {
-    @apply mt-0 pt-0;
+    @apply mt-0;
   }
 
   & > *:last-child {
-    @apply mb-0 pb-0;
+    @apply mb-0;
   }
 
   :where(pre) {
