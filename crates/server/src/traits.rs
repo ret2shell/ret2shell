@@ -119,6 +119,10 @@ impl IntoResponse for ResponseError {
       ResponseError::PreconditionFailed(summary) => (StatusCode::PRECONDITION_FAILED, summary),
       ResponseError::DatabaseError(e) => match e {
         DbErr::RecordNotFound(s) => (StatusCode::NOT_FOUND, format!("record not found: {s}")),
+        DbErr::Json(_) => (
+          StatusCode::INTERNAL_SERVER_ERROR,
+          "data cruptted".to_owned(),
+        ),
         _ => log_with_resp!(
           StatusCode::INTERNAL_SERVER_ERROR,
           "database internal error".to_owned(),
@@ -135,6 +139,20 @@ impl IntoResponse for ResponseError {
             StatusCode::INTERNAL_SERVER_ERROR,
             "missing cache".to_owned(),
             "cache config is not set yet"
+          )
+        }
+        r2s_cache::CacheError::Redis(_) => {
+          log_with_resp!(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "cache server seems down".to_owned(),
+            "cache server seems down"
+          )
+        }
+        r2s_cache::CacheError::Serde(_) => {
+          log_with_resp!(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "cached data consistency is compromised".to_owned(),
+            "failed to serialize data"
           )
         }
         _ => log_with_resp!(
@@ -196,6 +214,13 @@ impl IntoResponse for ResponseError {
             "bucket is locked by another process"
           )
         }
+        r2s_bucket::BucketError::DataConvertError(e) => {
+          log_with_resp!(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "failed to read string from bucket, data maybe binary".to_owned(),
+            format!("failed to convert data type from bucket: {e:?}")
+          )
+        }
         _ => log_with_resp!(
           StatusCode::INTERNAL_SERVER_ERROR,
           "bucket internal error".to_owned(),
@@ -227,19 +252,23 @@ impl IntoResponse for ResponseError {
         _ => log_with_resp!(
           StatusCode::INTERNAL_SERVER_ERROR,
           "media internal error".to_owned(),
-          e.to_string()
+          format!("media internal error: {e:?}")
         ),
       },
       ResponseError::FileIoError(e) => {
         log_with_resp!(
           StatusCode::INTERNAL_SERVER_ERROR,
           "file io error".to_owned(),
-          e.to_string()
+          format!("failed to read/write file: {e:?}")
         )
       }
       ResponseError::ClusterError(e) => match e {
         r2s_cluster::ClusterError::NeedNamespace(s) => {
-          log_with_resp!(StatusCode::BAD_REQUEST, "need namespace".to_owned(), s)
+          log_with_resp!(
+            StatusCode::BAD_REQUEST,
+            "cluster called without namespace, maybe a bug for ret2shell".to_owned(),
+            s
+          )
         }
         r2s_cluster::ClusterError::ConfigNeeded => {
           log_with_resp!(
@@ -262,10 +291,90 @@ impl IntoResponse for ResponseError {
             s
           )
         }
+        r2s_cluster::ClusterError::AllocError(e) => {
+          log_with_resp!(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "failed to build script engine runtime".to_owned(),
+            format!("failed to build script engine runtime: {e:?}")
+          )
+        }
+        r2s_cluster::ClusterError::BuildError(e) => {
+          log_with_resp!(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "failed to build traffic script unit".to_owned(),
+            format!("failed to build traffic script unit: {e:?}")
+          )
+        }
+        r2s_cluster::ClusterError::CompileError(e) => {
+          log_with_resp!(
+            StatusCode::BAD_REQUEST,
+            "failed to compile traffic script".to_owned(),
+            format!("failed to compile traffic script: {e:?}")
+          )
+        }
+        r2s_cluster::ClusterError::DiagnosticsError(e) => {
+          log_with_resp!(
+            StatusCode::BAD_REQUEST,
+            "failed to generate traffic script diagnostics".to_owned(),
+            format!("failed to generate traffic script diagnostics: {e:?}")
+          )
+        }
+        r2s_cluster::ClusterError::ExecError(e) => {
+          log_with_resp!(
+            StatusCode::BAD_REQUEST,
+            "error occurs in traffic script function".to_owned(),
+            format!("error occurs in traffic script function: {e:?}")
+          )
+        }
+        r2s_cluster::ClusterError::InvalidImageFileType(e) => (
+          StatusCode::BAD_REQUEST,
+          format!("invalid image file type: {e:?}"),
+        ),
+        r2s_cluster::ClusterError::MissingFunction(e) => (
+          StatusCode::PRECONDITION_FAILED,
+          format!("missing traffic script function: {e:?}"),
+        ),
+        r2s_cluster::ClusterError::MissingField(e) => (
+          StatusCode::BAD_REQUEST,
+          format!("missing traffic script function parameters: {e:?}"),
+        ),
+        r2s_cluster::ClusterError::TrafficMapperNotFound(e) => (
+          StatusCode::NOT_FOUND,
+          format!("traffic mapper not found: {e:?}"),
+        ),
+        r2s_cluster::ClusterError::SourceError(e) => log_with_resp!(
+          StatusCode::INTERNAL_SERVER_ERROR,
+          "could not load traffic script".to_owned(),
+          format!("could not load traffic script: {e:?}")
+        ),
+        r2s_cluster::ClusterError::PodNotFound(e) => (
+          StatusCode::NOT_FOUND,
+          format!("requested instance is not found in cluster: {e:?}"),
+        ),
+        r2s_cluster::ClusterError::NetworkError(e) => log_with_resp!(
+          StatusCode::INTERNAL_SERVER_ERROR,
+          "failed to sync with managed registry in cluster".to_owned(),
+          format!("failed to sync with managed registry: {e:?}")
+        ),
+        r2s_cluster::ClusterError::ProxyError(e) => log_with_resp!(
+          StatusCode::INTERNAL_SERVER_ERROR,
+          "failed to proxy traffic through wsrx".to_owned(),
+          format!("failed to proxy traffic through wsrx: {e:?}")
+        ),
+        r2s_cluster::ClusterError::UploadFailed(e) => log_with_resp!(
+          StatusCode::BAD_REQUEST,
+          "failed to upload image into registry".to_owned(),
+          format!("failed to upload image into registry: {e:?}")
+        ),
+        r2s_cluster::ClusterError::ScriptError(e) => log_with_resp!(
+          StatusCode::BAD_REQUEST,
+          "failed to upload image into registry".to_owned(),
+          format!("failed to upload image into registry: {e:?}")
+        ),
         _ => log_with_resp!(
           StatusCode::INTERNAL_SERVER_ERROR,
           "cluster internal error".to_owned(),
-          e.to_string()
+          format!("cluster internal error: {e:?}")
         ),
       },
       ResponseError::OAuthError(e) => match e {
@@ -279,7 +388,7 @@ impl IntoResponse for ResponseError {
         _ => log_with_resp!(
           StatusCode::FORBIDDEN,
           "failed to login with 3rd account".to_owned(),
-          e.to_string()
+          format!("failed to login with 3rd account: {e:?}")
         ),
       },
       ResponseError::CheckerError(e) => match e {
@@ -287,21 +396,71 @@ impl IntoResponse for ResponseError {
           log_with_resp!(
             StatusCode::PRECONDITION_FAILED,
             "missing checker script for challenge".to_owned(),
-            e.to_string()
+            format!("missing checker script for challenge: {e:?}")
           )
         }
         r2s_checker::traits::CheckerError::MissingFunction(e) => {
           log_with_resp!(
             StatusCode::PRECONDITION_FAILED,
-            format!("missing `{e}` function for challenge"),
-            e.to_string()
+            format!("missing function for challenge: {e:?}"),
+            format!("missing function for challenge: {e:?}")
           )
         }
-        r2s_checker::traits::CheckerError::CompileError(_) => {
+        r2s_checker::traits::CheckerError::CompileError(e) => {
           log_with_resp!(
             StatusCode::PRECONDITION_FAILED,
             "failed to compile checker script".to_owned(),
-            "please check the script syntax"
+            format!("failed to compile checker script: {e:?}")
+          )
+        }
+        r2s_checker::traits::CheckerError::AllocError(e) => log_with_resp!(
+          StatusCode::INTERNAL_SERVER_ERROR,
+          "failed to build checker script engine".to_owned(),
+          format!("failed to build checker script engine: {e:?}")
+        ),
+        r2s_checker::traits::CheckerError::ExecError(e) => log_with_resp!(
+          StatusCode::INTERNAL_SERVER_ERROR,
+          "failed to execute checker script".to_owned(),
+          format!("failed to execute checker script: {e:?}")
+        ),
+        r2s_checker::traits::CheckerError::DiagnosticsError(e) => log_with_resp!(
+          StatusCode::INTERNAL_SERVER_ERROR,
+          "failed to generate checker script diagnostics".to_owned(),
+          format!("failed to generate checker script diagnostics: {e:?}")
+        ),
+        r2s_checker::traits::CheckerError::MissingResultField(e) => {
+          log_with_resp!(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "missing values in checker script results".to_owned(),
+            format!("missing values in checker script results: {e:?}")
+          )
+        }
+        r2s_checker::traits::CheckerError::BuildError(e) => {
+          log_with_resp!(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "failed to build checker script unit".to_owned(),
+            format!("failed to build checker script unit: {e:?}")
+          )
+        }
+        r2s_checker::traits::CheckerError::SourceError(e) => {
+          log_with_resp!(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "failed to load checker script source".to_owned(),
+            format!("failed to load checker script source: {e:?}")
+          )
+        }
+        r2s_checker::traits::CheckerError::RuneError(e) => {
+          log_with_resp!(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "error occurs in checker script context, please check server logs".to_owned(),
+            format!("error occurs in checker script context: {e:?}")
+          )
+        }
+        r2s_checker::traits::CheckerError::RuneRuntimeError(e) => {
+          log_with_resp!(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "error occurs in checker script engine, please check server logs".to_owned(),
+            format!("error occurs in checker script engine: {e:?}")
           )
         }
         r2s_checker::traits::CheckerError::ScriptError(_) => (

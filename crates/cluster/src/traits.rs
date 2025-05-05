@@ -26,7 +26,7 @@ pub enum ClusterError {
   JsonError(#[from] serde_json::Error),
   #[error("io error: {0}")]
   IoError(#[from] std::io::Error),
-  #[error("upload failed: {0}")]
+  #[error("upload to registry failed: {0}")]
   UploadFailed(String),
   #[error("renew exceed limit: {0}")]
   PodRenewExceedLimit(String),
