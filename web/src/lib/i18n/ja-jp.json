@@ -1,2139 +1,2139 @@
 {
-  "about": {
-    "contact": "",
-    "donate": "",
-    "source": ""
-  },
-  "account": {
-    "code": {
-      "empty": "",
+  "general": {
+    "network": {
       "status": {
-        "unverified": {
-          "action": "",
-          "message": ""
+        "400": {
+          "title": "リクエストパラメーターエラー",
+          "message": "このexpはちょっと変だね"
+        },
+        "401": {
+          "title": "まずはログインしてください",
+          "message": "ハッカーにも名前が必要だよ"
+        },
+        "403": {
+          "title": "権限が不足しています",
+          "message": "いつかはあなたのためのドアは閉じる"
+        },
+        "404": {
+          "title": "リソースが存在しません",
+          "message": "人生は常に奇妙なことだね"
+        },
+        "412": {
+          "title": "前提条件に問題があります",
+          "message": "何かを忘れていませんか？"
+        },
+        "418": {
+          "title": "私は急須です",
+          "message": "急須でコーヒーを焙じるなんて本当に味が混ざらないの？"
+        },
+        "500": {
+          "title": "サーバー内部エラー",
+          "message": "サーバーが煙を出しています"
+        },
+        "502": {
+          "title": "システムオフライン",
+          "message": "ランダムにオペレーションを祭りに捧げる"
         }
       },
-      "tip": "",
-      "title": ""
+      "unknown": {
+        "title": "不明なエラー",
+        "message": "あなたは虚空に落ちました"
+      },
+      "gotoDocs": "もしオペレーションなら、確認してください"
     },
-    "delete": {
-      "bye": {
-        "message": "",
-        "title": ""
+    "loading": {
+      "10": "拡大鏡と鉛筆を使ってデータを救出中...",
+      "11": "emacsとvimをedにシンボリックリンクしています...",
+      "12": "ブランチ予測アルゴリズムのトレーニング中...",
+      "13": "スケジュールされたキャッシュにヒット中...",
+      "14": "サボりアルゴリズムを実行中...",
+      "15": "大規模言語モデルの幻覚に参加中...",
+      "short": "少女が祈っている...",
+      "00": "宇宙線によるビット反転の修復中...",
+      "01": "P != NP の証明を試みています...",
+      "02": "RSA 4096 の因数分解を試みています...",
+      "03": "0 で割り算しています...",
+      "04": "インターネットからより多くのRAMをダウンロードしています...",
+      "05": "1 と 0 を並べ替えています...",
+      "06": "機械学習ネットワークを列挙しています...",
+      "07": "人工知能をインポートしています...",
+      "08": "アリスとボブのワンタイムパッドを解読しています...",
+      "09": "VIMから退出しようとしています..."
+    },
+    "actions": {
+      "ok": {
+        "title": "良いです"
       },
-      "canNotDeleteWhenGameInProgress": "",
-      "confirm": "",
-      "declare": {
-        "1": "",
-        "2": "",
-        "3": "",
-        "4": "",
-        "title": ""
+      "yes": {
+        "title": "確認"
       },
-      "errors": {
-        "delete": {
-          "title": ""
+      "no": {
+        "title": "無理です"
+      },
+      "cancel": {
+        "title": "キャンセル"
+      },
+      "confirm": {
+        "title": "確認",
+        "message": "続けますか？",
+        "status": {
+          "success": "操作が成功しました",
+          "fail": "操作に失敗しました"
         }
       },
-      "thinkTwice": "",
-      "title": "",
-      "topWarning": ""
-    },
+      "send": {
+        "title": "送信",
+        "message": "本当に送信しますか？",
+        "status": {
+          "success": "送信に成功しました",
+          "fail": "送信に失敗しました"
+        }
+      },
+      "delete": {
+        "title": "削除",
+        "message": "本当に削除しますか？後悔はさせません！",
+        "status": {
+          "success": "削除に成功しました",
+          "fail": "削除に失敗しました"
+        }
+      },
+      "edit": {
+        "title": "編集"
+      },
+      "save": {
+        "title": "保存",
+        "message": "本当に保存しますか？",
+        "status": {
+          "success": "保存に成功しました",
+          "fail": "保存に失敗しました"
+        }
+      },
+      "add": {
+        "title": "追加",
+        "message": "本当に追加しますか？",
+        "status": {
+          "success": "追加に成功しました",
+          "fail": "追加に失敗しました"
+        }
+      },
+      "create": {
+        "title": "作成",
+        "message": "本当に作成しますか？",
+        "status": {
+          "success": "作成に成功しました",
+          "fail": "作成に失敗しました"
+        }
+      },
+      "update": {
+        "title": "更新",
+        "message": "本当に更新しますか？",
+        "status": {
+          "success": "更新に成功しました",
+          "fail": "更新に失敗しました"
+        }
+      },
+      "reset": {
+        "title": "リセット",
+        "message": "本当にリセットしますか？",
+        "status": {
+          "success": "リセットに成功しました",
+          "fail": "リセットに失敗しました"
+        }
+      },
+      "search": {
+        "title": "検索"
+      },
+      "refresh": {
+        "title": "更新",
+        "status": {
+          "success": "更新に成功しました",
+          "fail": "更新に失敗しました"
+        }
+      },
+      "loadMore": {
+        "title": "もっと読み込む"
+      },
+      "load": {
+        "title": "読み込み中"
+      },
+      "close": {
+        "title": "閉じる"
+      },
+      "open": {
+        "title": "開く"
+      },
+      "compile": {
+        "title": "コンパイル"
+      },
+      "next": {
+        "title": "次へ"
+      },
+      "prev": {
+        "title": "前へ"
+      },
+      "back": {
+        "title": "戻る"
+      },
+      "copy": {
+        "title": "コピー"
+      },
+      "paste": {
+        "title": "貼り付け"
+      },
+      "cut": {
+        "title": "切り取り"
+      },
+      "select": {
+        "title": "選択"
+      },
+      "selectAll": {
+        "title": "すべて選択"
+      },
+      "selectNone": {
+        "title": "すべて解除"
+      },
+      "exit": {
+        "title": "終了"
+      },
+      "clear": {
+        "title": "クリア",
+        "message": "本当にクリアしますか？",
+        "status": {
+          "success": "クリアに成功しました",
+          "fail": "クリアに失敗しました"
+        }
+      },
+      "upload": {
+        "title": "アップロード",
+        "status": {
+          "pending": "アップロード中...",
+          "success": "アップロードに成功しました",
+          "fail": "アップロードに失敗しました",
+          "invalidFileType": "ファイルタイプが不正です",
+          "fileTooLarge": "ファイルが大きすぎます、最大{{ size }} MBまでサポートしています",
+          "fileTooSmall": "ファイルが小さすぎます、最小{{ size }} MBまでサポートしています",
+          "inProcess": "アップロード中..."
+        }
+      },
+      "download": {
+        "title": "ダウンロード",
+        "status": {
+          "pending": "ダウンロード中...",
+          "success": "ダウンロードに成功しました",
+          "fail": "ダウンロードに失敗しました"
+        }
+      },
+      "goto": {
+        "title": "移動する"
+      },
+      "generate": {
+        "title": "生成する"
+      },
+      "start": {
+        "title": "開始する"
+      },
+      "stop": {
+        "title": "停止する"
+      },
+      "print": {
+        "title": "印刷する"
+      },
+      "accept": {
+        "title": "受け入れる"
+      }
+    }
+  },
+  "platform": {
+    "name": "端末に戻る",
+    "subject": "戻り先のアドレスに基づいて世界を構築します",
+    "cookiePolicy": "私たちはあなたを追跡するためにどの Cookie も使用していません。",
+    "updated": "端末に戻るには非互換の更新が行われました。このページは更新を適用するために再読み込みされました。再度ログインする必要がありますのでご注意ください。",
     "errors": {
-      "fetchCode": {
-        "title": ""
+      "versionMismatch": {
+        "title": "バージョンが一致しません",
+        "message": "（{{frontend}} != {{backend}}），サーバーが正しく動作していない可能性があります。運用担当者に確認してください。"
+      },
+      "tooNarrow": {
+        "title": "ウィンドウが狭すぎます",
+        "message": "より広いデバイスで表示してください"
+      },
+      "notImplemented": {
+        "hello": "こんにちは",
+        "title": "まだ作成されていません、落ち着いてください",
+        "message": "おい、本物の農場のロバでもそんなに休まないよ"
+      },
+      "offline": {
+        "title": "システムがオフラインです",
+        "message": "ページを更新してください。このエラーが繰り返し発生する場合は、保守担当者に連絡してください。"
+      },
+      "maintaining": {
+        "title": "メンテナンス中...",
+        "message": "しばらくしてからもう一度お試しください"
+      },
+      "internal": {
+        "title": "サーバー内部エラー"
+      },
+      "fetchConfig": {
+        "title": "プラットフォームの構成取得に失敗しました",
+        "notReady": "プラットフォームの構成が取得されませんでした"
       }
     },
-    "forgot": {
+    "notifications": {
+      "title": "通知メッセージ",
+      "clear": "すべての通知をクリア",
+      "empty": "テーマ"
+    },
+    "theme": {
+      "title": "あまりにも狭いです、もう少し広くしてください",
+      "followSystem": "システムに従う"
+    },
+    "ret2codec": {
+      "title": "代替プロトコル"
+    },
+    "sync": {
+      "title": "リソースの同期"
+    },
+    "email": {
+      "title": "プラットフォームメールアドレス",
       "form": {
-        "email": {
-          "invalid": "",
-          "label": "",
-          "placeholder": "",
-          "required": ""
-        }
-      },
-      "status": {
-        "rateExceeded": {
-          "message": ""
+        "enabled": "メールを有効にする",
+        "tls": {
+          "required": "暗号化タイプは空にできません",
+          "label": "暗号化タイプ",
+          "placeholder": "暗号化タイプを選択してください"
         },
-        "success": {
-          "message": ""
+        "host": {
+          "required": "メールサーバーは空にできません",
+          "label": "メールサーバーアドレス",
+          "placeholder": "メールサーバーアドレスを入力してください"
+        },
+        "port": {
+          "required": "メールサーバーポートは空にできません",
+          "invalid": "ポートは1〜65535の間でなければなりません",
+          "label": "メールサーバーポート",
+          "placeholder": "メールサーバーのポートを入力してください"
+        },
+        "sender": {
+          "required": "送信者名は空にできません",
+          "label": "送信者名",
+          "placeholder": "送信者名を入力してください"
+        },
+        "username": {
+          "required": "送信メールアドレスは空にできません",
+          "label": "送信メールアドレス",
+          "placeholder": "送信メールアドレスを入力してください"
+        },
+        "password": {
+          "required": "メールパスワードは空にできません",
+          "label": "メールパスワード",
+          "placeholder": "メールパスワードを入力してください"
+        },
+        "verifyEmailSubject": {
+          "required": "確認メールの件名は空にできません",
+          "label": "確認メールの件名",
+          "placeholder": "確認メールの件名を入力してください"
+        },
+        "verifyEmailBody": {
+          "required": "確認メールの内容は空にできません",
+          "label": "確認メールの内容"
+        },
+        "resetPasswordEmailSubject": {
+          "required": "リセットパスワードメールのタイトルは空にできません",
+          "label": "リセットパスワードメールのタイトル",
+          "placeholder": "リセットパスワードメールのタイトルを入力してください"
+        },
+        "resetPasswordEmailBody": {
+          "required": "リセットパスワードメールの内容は空にできません",
+          "label": "リセットパスワードメールの内容"
+        }
+      }
+    },
+    "form": {
+      "title": "プラットフォーム情報",
+      "name": {
+        "label": "プラットフォーム名"
+      },
+      "footerInfo": {
+        "placeholder": "ホームページのフッター情報を入力してください",
+        "label": "ホームページのフッター情報"
+      },
+      "footerUrl": {
+        "placeholder": "ホームページのフッターのリンクを入力してください",
+        "label": "フッターのリンク"
+      },
+      "subjectInfo": {
+        "label": "ホームのサブタイトル"
+      },
+      "subjectUrl": {
+        "label": "ホームのサブタイトルのリンク"
+      },
+      "highlightBanner": {
+        "placeholder": "プラットフォームのハイライトバナー、通知がない場合は空にしてください",
+        "label": "プラットフォームのハイライトバナー"
+      },
+      "record": {
+        "placeholder": "下部の登録番号を入力してください",
+        "label": "中国工業情報技術省ICP登録番号"
+      },
+      "hideMaker": {
+        "disabled": "あなたのライセンスではこの項目を非表示にすることはできません",
+        "label": "開発者情報を非表示にする"
+      }
+    },
+    "logs": {
+      "title": "サーバーのログ",
+      "errors": {
+        "fetchList": {
+          "title": "ログ一覧の取得に失敗しました"
+        },
+        "socketClosed": {
+          "title": "ログパイプが切断されました。自動的に再接続します..."
         }
       },
-      "title": ""
+      "streamingEnabled": "リアルタイムでログをストリーミングしています...",
+      "notStreaming": "ログストリーミングを有効にすると、ログがここに表示されます",
+      "enableStreamWarning": "大量のログを表示する場合は注意してください。サーバー時間の当日のログのみが表示されます。他のログについては、ログファイルをダウンロードして監査してください"
+    },
+    "statistics": {
+      "title": "プラットフォームの統計情報",
+      "errors": {
+        "fetch": {
+          "title": "プラットフォームの統計情報を取得できませんでした"
+        }
+      },
+      "instituteUsers": {
+        "title": "組織ユーザーの分布状況",
+        "others": "その他"
+      }
+    }
+  },
+  "wiki": {
+    "title": "知識",
+    "placeholder": "何について知りたいですか？",
+    "form": {
+      "title": {
+        "label": "記事タイトル",
+        "placeholder": "タイトルを入力してください",
+        "required": "タイトルは必須です"
+      },
+      "enableComment": {
+        "label": "コメント欄を有効にする"
+      },
+      "content": {
+        "label": "記事内容",
+        "placeholder": "内容を入力してください",
+        "required": "内容は空にできません"
+      },
+      "path": {
+        "label": "パス",
+        "placeholder": "パスを入力してください。/ で区切ってください。例: 「入門ガイド/質問の知恵」",
+        "required": "パスは空にできません"
+      },
+      "createdAt": {
+        "label": "{{time}} に公開"
+      },
+      "updatedAt": {
+        "label": "{{time}} に更新"
+      },
+      "draft": {
+        "label": "ドラフト"
+      },
+      "published": {
+        "label": "公開"
+      }
+    },
+    "errors": {
+      "fetchToc": {
+        "title": "記事の目録インデックスを取得できませんでした"
+      },
+      "fetch": {
+        "title": "知識ベース記事の取得に失敗しました"
+      }
+    },
+    "unknownPublisher": "匿名"
+  },
+  "training": {
+    "title": "トレーニング",
+    "list": "練習場一覧",
+    "empty": "練習場はありません",
+    "noArchives": "アーカイブされた過去の大会はありません",
+    "placeholder": "今日分のトレーニングを始めましょう！",
+    "openForever": "常にオープン",
+    "errors": {
+      "fetchList": {
+        "title": "練習場一覧の取得に失敗しました"
+      },
+      "fetchArchives": {
+        "title": "過去の大会の取得に失敗しました"
+      },
+      "fetchTraining": {
+        "title": "トレーニング場の取得に失敗しました"
+      },
+      "gameNotArchived": {
+        "title": "大会はまだアーカイブされていません",
+        "message": "少し待ってください"
+      }
+    },
+    "form": {
+      "name": {
+        "label": "練習場タイトル",
+        "placeholder": "タイトルを入力してください",
+        "required": "タイトルは必須です"
+      },
+      "brief": {
+        "label": "練習場概要",
+        "placeholder": "概要を入力してください",
+        "required": "概要は必須です"
+      }
+    }
+  },
+  "calendar": {
+    "day": {
+      "sun": "日",
+      "mon": "月",
+      "tue": "火",
+      "wed": "水",
+      "thu": "木",
+      "fri": "五",
+      "sat": "六"
+    },
+    "actions": {
+      "prevYear": {
+        "title": "前年"
+      },
+      "prevMonth": {
+        "title": "先月"
+      },
+      "today": {
+        "title": "今日へ"
+      },
+      "nextMonth": {
+        "title": "来月"
+      },
+      "nextYear": {
+        "title": "来年"
+      }
+    },
+    "startAt": "開始時間",
+    "endAt": "終了時間"
+  },
+  "game": {
+    "title": "大会",
+    "list": "大会一覧",
+    "noGameHosted": "開催された大会はありません",
+    "otherGames": "他の大会",
+    "noOtherGames": "他の大会はありません",
+    "pending": "未着手",
+    "notStarted": "まだ始まっていません、少々お待ちください",
+    "started": "進行中",
+    "start": "開始",
+    "ended": "終了済み",
+    "end": "終了",
+    "archived": "アーカイブ済み",
+    "archive": "アーカイブ",
+    "welcome": "参加をお待ちしています",
+    "introduction": {
+      "title": "大会の紹介",
+      "empty": "主催者がまだ何も書いていません",
+      "form": {
+        "content": {
+          "label": "内容",
+          "placeholder": "内容を入力してください",
+          "required": "内容は必須です"
+        }
+      }
+    },
+    "scoreboard": {
+      "title": "ポイントボード",
+      "empty": "参加チームなし",
+      "selectInstitute": "組織を選択...",
+      "currentPeriod": "今週目",
+      "errors": {
+        "fetchScoreboard": {
+          "title": "ポイントボードを取得できませんでした"
+        }
+      }
+    },
+    "writeups": {
+      "title": "問題解説",
+      "empty": "問題解説なし"
+    },
+    "statistics": {
+      "title": "統計データ",
+      "errors": {
+        "fetch": "大会の統計情報を取得できませんでした",
+        "export": "大会の統計情報をエクスポートできませんでした"
+      },
+      "selectInstitute": "組織を選択...",
+      "submission": "評価結果を提出",
+      "challengeStats": "問題解決状況",
+      "players": "選手統計",
+      "institutePlayers": "組織参加選手統計",
+      "others": "その他",
+      "teams": "チーム統計",
+      "instituteTeams": "組織参加チーム統計"
+    },
+    "monitor": {
+      "title": "イベントダッシュボード",
+      "empty": "監査ログはありません",
+      "status": {
+        "pending": {
+          "title": "人間による再確認を待っています"
+        },
+        "misjudged": {
+          "title": "誤判断"
+        },
+        "confirmed": {
+          "title": "事実です"
+        }
+      },
+      "errors": {
+        "fetchAudit": {
+          "title": "監査ログの取得に失敗しました"
+        },
+        "fetchSubmission": {
+          "title": "提出記録の取得に失敗しました"
+        }
+      },
+      "autoRefreshEnabled": "自動リフレッシュが有効になっています",
+      "submissions": "提出記録",
+      "audits": "監査イベント"
+    },
+    "git": {
+      "title": "問題ライブラリ"
+    },
+    "form": {
+      "title": "編集情報",
+      "name": {
+        "label": "大会名",
+        "placeholder": "大会名を入力してください",
+        "required": "大会名は必須です"
+      },
+      "brief": {
+        "label": "大会概要",
+        "placeholder": "概要を入力してください",
+        "required": "概要は必須です"
+      },
+      "startAt": {
+        "label": "開始時間",
+        "placeholder": "開始時間を選択してください",
+        "required": "開始時間は必須です",
+        "canNotLaterThanEnd": "開始時間は終了時間より遅くできません"
+      },
+      "endAt": {
+        "label": "終了時間",
+        "placeholder": "終了時間を選択してください",
+        "required": "終了時間は空にできません",
+        "canNotEarlierThanStart": "終了時間は開始時間より前にはなりません"
+      },
+      "registerAt": {
+        "label": "登録時間",
+        "placeholder": "登録時間を選択してください",
+        "required": "登録時間は空にできません",
+        "canNotLaterThanEnd": "登録時間は終了時間より後にはなりません"
+      },
+      "archiveAt": {
+        "label": "アーカイブ時間",
+        "placeholder": "アーカイブ時間を選択してください",
+        "required": "アーカイブ時間は空にできません",
+        "canNotEarlierThanStart": "アーカイブ時間は開始時間より前にはなりません"
+      },
+      "weight": {
+        "label": "重み"
+      },
+      "misc": {
+        "label": "その他設定"
+      },
+      "awardRate": {
+        "label": "追加報酬ポイント割合",
+        "firstBlood": "一血報酬スコア割合",
+        "secondBlood": "二血報酬スコア割合",
+        "thirdBlood": "三血報酬スコア割合",
+        "placeholder": "報酬スコア割合を入力してください",
+        "required": "報酬スコア割合は必須です",
+        "mustBeNumber": "報酬スコア割合は数字でなければなりません",
+        "mustBePositiveNumber": "報酬スコア割合は正の数でなければなりません"
+      },
+      "hidden": {
+        "label": "非表示",
+        "placeholder": "非表示にするか",
+        "message": "非表示にすると、管理者以外はその大会を見ることができません"
+      },
+      "frozen": {
+        "label": "凍結",
+        "placeholder": "凍結するか",
+        "message": "凍結後、選手は一時的に問題にアクセスできなくなります"
+      },
+      "offline": {
+        "label": "オフライン大会の特徴を有効にする"
+      },
+      "teamSize": {
+        "label": "チーム人数",
+        "placeholder": "チーム人数を入力してください",
+        "required": "チーム人数は必須です",
+        "mustBeNumber": "チーム人数は数字でなければなりません",
+        "mustBePositiveNumber": "チーム人数は正の数でなければなりません",
+        "minimum": "人数は1未満であってはなりません",
+        "maximum": "人数は99を超えてはなりません"
+      },
+      "enableTeamAudit": {
+        "label": "チーム審査を有効にする",
+        "placeholder": "チーム審査を有効にしますか",
+        "message": "有効にすると、チームは参加する前に審査が必要になります"
+      },
+      "canRegisterAfterStart": {
+        "label": "大会開始後に登録を許可する",
+        "placeholder": "大会開始後に登録を許可するか",
+        "message": "許可すると、選手は大会開始後に登録できます"
+      },
+      "introduction": {
+        "label": "大会紹介",
+        "required": "大会紹介は空にできません"
+      }
+    },
+    "admin": {
+      "title": "管理",
+      "gotoChallenges": "問題管理に移動する"
+    },
+    "administrator": {
+      "errors": {
+        "fetchList": {
+          "title": "大会管理者一覧の取得に失敗しました"
+        },
+        "noPermission": {
+          "title": "基本的な権限がありません"
+        },
+        "alreadyAdded": {
+          "title": "すでに追加されています"
+        }
+      },
+      "title": "大会管理者",
+      "form": {
+        "search": {
+          "title": "大会管理者を追加",
+          "placeholder": "ユーザー名またはメールアドレスを検索"
+        },
+        "confirm": {
+          "message": "{{name}} を大会管理者として追加しますか？"
+        }
+      },
+      "empty": "管理者がいません。運用チームに連絡して手動で追加してください"
+    },
+    "registerNotStarted": "登録はまだ開始されていません、少しお待ちください",
+    "registerEnded": "登録はすでに終了しました。試合のアーカイブを待ってください",
+    "policies": {
+      "title": "ポリシー管理",
+      "form": {
+        "challenge": {
+          "showAnswer": {
+            "label": "アーカイブ後に問題の解答を表示する"
+          },
+          "showHints": {
+            "label": "アーカイブ後に無料でヒントを表示する"
+          }
+        }
+      }
+    },
+    "timeline": {
+      "title": "タイムライン管理",
+      "form": {
+        "label": {
+          "label": "タイムラインラベル",
+          "required": "タイムラインラベルは空にできません",
+          "placeholder": "期間ラベルを入力してください"
+        },
+        "startAt": {
+          "required": "開始時間を入力してください"
+        },
+        "endAt": {
+          "required": "終了時間を入力してください"
+        },
+        "startEndTime": {
+          "label": "開始と終了時間",
+          "placeholder": "開始と終了時間を選択してください"
+        }
+      },
+      "empty": "定義された期間はありません",
+      "deleteWarning": "この期間を削除しますか？削除しても現在の問題の期間制御には影響しません。"
+    },
+    "hammer": {
+      "title": "ハンマーフィードバック",
+      "errors": {
+        "fetchSessions": {
+          "title": "フィードバックセッション一覧の取得に失敗しました"
+        },
+        "fetchChats": {}
+      },
+      "empty": "まだフィードバックはありません",
+      "status": {
+        "adminUnread": {
+          "title": "管理者未読"
+        },
+        "playerUnread": {
+          "title": "選手未読"
+        },
+        "notReply": {
+          "title": "既読無視"
+        }
+      },
+      "placeholder": "メッセージを表示および返信するためのセッションを選択してください",
+      "newMessages": "出題者が {{challenge}} であなたのメッセージに返信しました"
+    },
+    "delete": {
+      "title": "大会を削除",
+      "warning": "この大会を削除しますか？削除後は元に戻せません。関連データはすべて削除されます。",
+      "requirements": "注意してください。大会を削除する前に、大会内のすべての問題をクリアする必要があります。問題が存在する場合は大会を削除できません。",
+      "confirm": "大会を削除する場合、下記に大会名 {{name}} を入力してください"
+    },
+    "events": {
+      "title": "イベント通知",
+      "errors": {
+        "fetchDevices": {
+          "title": "接続デバイスの取得に失敗しました"
+        }
+      },
+      "howto": "次のWebSocketアドレスに接続することで、プラットフォームのイベントAPIサブスクリプションにアクセスできます。イベントAPIの統合方法についてはここから確認できます：",
+      "tokenWarning": "注意してください。イベントAPIはトークンのみで認証されます。このリンクの漏洩に十分注意してください。",
+      "regenerateTokenWarning": "トークンを再生成してもよろしいですか？すでに接続されているデバイスは接続を失います。",
+      "linkedDevices": "接続されたデバイス",
+      "emptyDevices": "接続されたデバイスはありません"
+    },
+    "organize": {
+      "title": "組織管理",
+      "actions": {
+        "restrict": {
+          "confirm": "以下の組織以外のユーザーを参加させないようしますか？（クリック後、即座に有効になります！）",
+          "title": "この大会を限定する"
+        }
+      },
+      "instituteEnabled": "組織ランキング"
+    },
+    "errors": {
+      "fetch": {
+        "title": "大会の取得に失敗しました"
+      },
+      "fetchList": {
+        "title": "大会リストの取得に失敗しました"
+      },
+      "regenerateToken": {
+        "title": "管理キーの生成に失敗しました"
+      },
+      "fetchIntroduction": {
+        "title": "試合の紹介を取得できませんでした"
+      }
+    },
+    "seeOtherInteresting": "他の場所を見てみましょう",
+    "notArchived": "試合はまだアーカイブされていません",
+    "canNotParticipate": "参加できません",
+    "adminMode": "管理者モード",
+    "miscSettings": "その他設定",
+    "register": "登録",
+    "timeLast": "{{period}} あと",
+    "accessPolicy": {
+      "open": "オープン大会"
+    },
+    "gotoTraining": "アーカイブ済み、練習場へ移動してください",
+    "enterChallenge": "チャレンジを突破せよ！",
+    "manageChallenges": "大会問題の管理",
+    "loginThenBack": "ログインして参加してください",
+    "notification": {
+      "errors": {
+        "fetch": {
+          "title": "通知メッセージの取得に失敗しました"
+        }
+      },
+      "form": {
+        "title": {
+          "required": "通知タイトルは空にできません",
+          "placeholder": "通知タイトルを入力してください",
+          "label": "通知タイトル"
+        },
+        "content": {
+          "required": "通知内容は空にできません",
+          "label": "通知内容"
+        }
+      },
+      "empty": "通知はありません"
+    }
+  },
+  "challenge": {
+    "title": "問題",
+    "list": "問題一覧",
+    "empty": "問題がありません",
+    "tag": {
+      "title": "問題のタグ",
+      "unknown": "未知のカテゴリ"
+    },
+    "search": {
+      "placeholder": "名前またはタグで検索",
+      "hideSolved": "解決済みの問題を非表示",
+      "solved": "解決済み",
+      "hideArchived": "アーカイブ済みの問題を非表示",
+      "archived": "アーカイブ済み"
+    },
+    "status": {
+      "solved": {
+        "title": "解決済み",
+        "message": "おめでとうございます、フラグを取得しました！"
+      },
+      "archived": {
+        "title": "アーカイブ済み",
+        "message": "アーカイブ後は問題を解いても点数が付与されません"
+      },
+      "inPeriod": {
+        "title": "進行中",
+        "message": "タイムリミット付きの問題で、現在の週目でのみ点数が付与されます",
+        "countdown": "問題のアーカイブカウントダウン"
+      },
+      "unreleased": {
+        "title": "未公開",
+        "message": "問題はまだ公開されていません。選手はこの問題を見ることができません",
+        "countdown": "問題の公開カウントダウン"
+      },
+      "hidden": {
+        "title": "非表示",
+        "message": "問題は非表示にされています。管理者のテスト用です。",
+        "alert": "問題が準備ができたら、「公開」ボタンをクリックしてください。プラットフォームは問題の可視性を自動的に変更しません。自動公開機能は、タイムノードと非表示状態を使用して、問題の最終的な可視性を計算します。"
+      }
+    },
+    "actions": {
+      "up": {
+        "title": "公開",
+        "message": "この問題を公開しますか？公開すると、選手は開催後、該当するラウンドに参加した後に問題を閲覧および解答できます（コンテスト開始時にすべての問題が公開状態になっていることを確認してください。自動掲題機能はタイムラインに従って選手の可視性を計算しますが、この状態を変更しません）。公開中は問題を編集できません。"
+      },
+      "down": {
+        "title": "非表示",
+        "message": "この問題を非表示にしますか？非表示にすると、問題の内容を編集して再度公開できます。非表示の間、選手は問題を閲覧および解答できません。プラットフォームはこの状態を変更しません。"
+      }
+    },
+    "form": {
+      "name": {
+        "label": "問題名",
+        "placeholder": "名前を入力してください",
+        "required": "名前は必須です"
+      },
+      "tag": {
+        "label": "問題タグ",
+        "placeholder": "タグを入力してください。/ で区切ってください。最初のタグがカテゴリになります",
+        "required": "タグは必須です"
+      },
+      "scoreRule": {
+        "initial": {
+          "label": "初期スコア",
+          "placeholder": "スコアを入力してください"
+        },
+        "minimum": {
+          "label": "最低スコア",
+          "placeholder": "スコアを入力してください"
+        },
+        "range": {
+          "label": "スコア範囲"
+        },
+        "decay": {
+          "label": "減衰回数",
+          "placeholder": "減衰回数を入力してください"
+        }
+      },
+      "scoringPeriod": {
+        "label": "スコア計算サイクル",
+        "placeholder": "スコア計算サイクルを選択してください"
+      },
+      "content": {
+        "label": "問題内容",
+        "placeholder": "内容を入力してください",
+        "required": "内容は空にできません"
+      }
+    },
+    "errors": {
+      "fetchList": {
+        "title": "問題リストの取得に失敗しました"
+      },
+      "fetch": {
+        "title": "問題の取得に失敗しました"
+      },
+      "up": {
+        "title": "チャレンジを公開できませんでした"
+      },
+      "down": {
+        "title": "チャレンジを非表示にできませんでした"
+      }
+    },
+    "terminal": {
+      "title": "ターミナル"
+    },
+    "hint": {
+      "title": "ヒント",
+      "empty": "出題者があなたにヒントをまだ公開していません。もう少し考えてみてください。",
+      "unlockConfirm": "{{cost}} pts を使ってこのヒントを解除しますか？",
+      "form": {
+        "content": {
+          "required": "ヒントの内容は空にできません",
+          "label": "ヒントの内容",
+          "placeholder": "ヒントの内容を入力してください"
+        },
+        "cost": {
+          "label": "スコア",
+          "placeholder": "スコア"
+        }
+      },
+      "errors": {
+        "fetch": {
+          "title": "ヒントの取得に失敗しました"
+        },
+        "unlock": {
+          "title": "ヒントのアンロックに失敗しました"
+        }
+      }
+    },
+    "file": {
+      "title": "添付ファイル",
+      "empty": "添付ファイルはありません",
+      "type": {
+        "static": {
+          "title": "静的添付ファイル",
+          "tip": "この場所にあるファイルはすべて、コンテスト参加者にそのまま提供されます。"
+        },
+        "mapped": {
+          "title": "動的添付ファイル",
+          "tip": "このファイルはハッシュマップ形式で参加者に割り当てられます。複数の添付ファイルを動的に割り当てる必要がある場合は、圧縮ファイルにパッケージ化してください。"
+        },
+        "checker": {
+          "title": "評価ファイル",
+          "tip": "このファイルは評価に使用され、参加者がアクセスすることは一切ありません。"
+        }
+      },
+      "errors": {
+        "fetchFiles": {
+          "title": "ファイルの取得に失敗しました"
+        },
+        "uploadFiles": {
+          "title": "ファイルのアップロードに失敗しました"
+        },
+        "deleteFiles": {
+          "title": "ファイルの削除に失敗しました"
+        }
+      }
+    },
+    "answer": {
+      "title": "問題解説",
+      "empty": "現在、問題解説はありません",
+      "errors": {
+        "fetchAnswer": {
+          "title": "問題の解説を取得できませんでした"
+        },
+        "invisibleBeforeArchive": {
+          "title": "解説が表示されません",
+          "message": "アーカイブ前に解説は表示されません"
+        }
+      }
+    },
+    "hammer": {
+      "title": "ハンマー",
+      "solved": "問題は解決しました。おめでとうございます！",
+      "adminGoto": "管理者は、コンテスト管理パネルに移動して選手からのフィードバックメッセージを確認してください。",
+      "tips": {
+        "0": "ここに送信するメッセージは、問題の状態とともに作問者に転送されます。作問者はここに返信するか、他の方法であなたに連絡するかもしれません。",
+        "1": "作問者の返信があるまで、あなたは3つのメッセージしか送信できません。そのため、できるだけ一度に多くの質問をまとめることをお勧めします。",
+        "2": "ログやコードなど長いメッセージは、ネットワーククリップボードを使用して送信することをお勧めします。例えば："
+      },
+      "role": {
+        "admin": "管理者",
+        "player": "選手"
+      },
+      "freeMessages": "あと {{last}} 件のメッセージを送信できます",
+      "markdownHoto": "Markdown はどのように使用しますか？",
+      "markdownSupport": "フィードバックする問題を入力してください。Markdown の構文がサポートされています",
+      "errors": {
+        "send": {
+          "title": "メッセージの送信に失敗しました"
+        },
+        "fetch": {
+          "title": "メッセージの履歴取得に失敗しました"
+        },
+        "fetchSolve": {
+          "title": "解決状態の取得に失敗しました"
+        },
+        "maxMessageLimit": {
+          "title": "メッセージ上限に達しました。フィードバックを待ってください..."
+        }
+      }
+    },
+    "submission": {
+      "submit": "提出しました",
+      "status": {
+        "pending": {
+          "title": "キューにあります"
+        },
+        "solved": {
+          "title": "正しい"
+        },
+        "failed": {
+          "title": "エラー"
+        }
+      },
+      "errors": {
+        "submit": {
+          "title": "提出に失敗しました"
+        },
+        "fetchSolves": {
+          "title": "解き方を取得できませんでした"
+        },
+        "fetchSolveStatus": {
+          "title": "解いた状態を取得できませんでした"
+        }
+      },
+      "title": "提出記録",
+      "total": "合計"
+    },
+    "statistics": {
+      "title": "統計",
+      "empty": "統計データはありません",
+      "showAll": "すべて表示",
+      "solves": {
+        "title": "解き方の統計",
+        "subject": "誰が私の問題を解きましたか？"
+      },
+      "commits": {
+        "title": "操作履歴",
+        "subject": "誰が私の問題を弄ったのか？"
+      },
+      "errors": {
+        "fetchStatistics": {
+          "title": "統計データの取得に失敗しました"
+        },
+        "fetchSubmission": {
+          "title": "問題の解答状況の取得に失敗しました"
+        },
+        "fetchCommitHistory": "問題の操作履歴の取得に失敗しました"
+      }
+    },
+    "instance": {
+      "title": "インスタンス",
+      "empty": "インスタンスはありません",
+      "delete": "環境設定を削除すると、問題は添付ファイル形式の問題に戻ります。",
+      "internet": "コンテナ内からインターネットへのアクセスを許可する",
+      "restrict": "Root権限の制限",
+      "registrySecret": "リポジトリシークレット（事前にリソースを構成する必要があります）",
+      "runningContainers": "実行中の環境",
+      "status": {
+        "idle": {
+          "title": "問題はオンライン環境を起動できます"
+        },
+        "running": {
+          "title": "問題の環境が起動しました"
+        },
+        "pending": {
+          "title": "問題の環境を起動中です、お待ちください..."
+        },
+        "failed": {
+          "title": "問題の環境の起動に失敗しました"
+        },
+        "inUse": {
+          "title": "別の問題の環境が実行中です"
+        }
+      },
+      "image": {
+        "label": "問題の環境イメージ",
+        "upload": "イメージリポジトリにアップロード",
+        "empty": "イメージが設定されていません",
+        "form": {
+          "containerName": {
+            "label": "コンテナ名",
+            "placeholder": "コンテナ名を入力してください",
+            "required": "コンテナ名は必須です",
+            "mustBeValidName": "コンテナ名は小文字のアルファベット、数字、アンダースコアの組み合わせでなければならず、小文字のアルファベットで始まる必要があります"
+          },
+          "tag": {
+            "label": "イメージタグ",
+            "placeholder": "イメージタグを入力してください",
+            "required": "イメージタグは空にできません"
+          },
+          "version": {
+            "label": "イメージバージョン",
+            "placeholder": "イメージバージョンを入力してください"
+          },
+          "restrict": {
+            "label": "Root権限の制限",
+            "placeholder": "Root権限を制限しますか",
+            "message": "制限すると、コンテナ内の非rootユーザーは特権ポートや他のコンテナから昇格する機能を使用できなくなります"
+          },
+          "service": {
+            "description": {
+              "label": "サービスの説明",
+              "placeholder": "サービスの説明を入力してください。ポートを開けない場合は空にできます",
+              "requiredWhenHavePort": "サービスのポートを入力した場合、サービスの説明は空にできません"
+            },
+            "type": {
+              "label": "サービスタイプ",
+              "placeholder": "サービスタイプを選択してください",
+              "items": {
+                "tcp": "オリジナル (TCP)",
+                "http": "HTTP"
+              },
+              "requiredWhenHavePort": "サービスのポートを入力した場合、サービスタイプは空にできません"
+            },
+            "port": {
+              "label": "サービスのポート",
+              "placeholder": "サービスのポートを入力してください",
+              "required": "サービスを有効にする際、サービスのポートは空にできません",
+              "mustBeNumber": "サーバーポートは数字でなければなりません",
+              "mustBeInRange": "サーバーポートは 1-65535 の範囲内である必要があります",
+              "conflict": "サーバーポートが他のサーバーポートと衝突しています"
+            },
+            "cpu": {
+              "label": "CPU 制限",
+              "required": "CPU 制限は空にできません"
+            },
+            "mem": {
+              "label": "メモリ制限",
+              "required": "メモリ制限は空にできません"
+            },
+            "storage": {
+              "label": "ストレージ制限",
+              "required": "ストレージ制限は空にできません"
+            }
+          }
+        }
+      },
+      "actions": {
+        "addImage": {
+          "title": "イメージを追加",
+          "message": "イメージを追加した後、イメージは自動的にサーバーにプルされます。"
+        },
+        "start": {
+          "title": "スタート！"
+        },
+        "delay": {
+          "title": "1時間延長"
+        },
+        "stop": {
+          "title": "環境を停止"
+        },
+        "copy": {
+          "title": "問題環境のアドレスをコピー"
+        }
+      },
+      "errors": {
+        "fetchInstances": {
+          "title": "インスタンスの取得に失敗しました"
+        },
+        "fetchConfigImages": {
+          "title": "イメージリストの取得に失敗しました"
+        },
+        "fetchRegistry": {
+          "title": "イメージリポジトリの取得に失敗しました"
+        },
+        "toggleNetworkConfig": {
+          "title": "ネットワーク設定の変更に失敗しました"
+        },
+        "toggleRestrict": {
+          "title": "制限Root権限の変更に失敗しました"
+        },
+        "noExportedServices": {
+          "title": "外部サービスがまだ指定されていません",
+          "message": "環境に少なくとも1つのサービスポートを追加してください。"
+        },
+        "start": {
+          "title": "インスタンスの起動に失敗しました"
+        },
+        "stop": {
+          "title": "インスタンスの停止に失敗しました"
+        },
+        "delay": {
+          "title": "インスタンスの延長に失敗しました"
+        },
+        "calmdown": {
+          "title": "コンテナの再構築中です"
+        },
+        "managedByMate": {
+          "title": "チームメイトの環境、アクセスのみ可能です"
+        },
+        "noConfig": {
+          "title": "この問題にはオンライン環境は提供されていません"
+        },
+        "singleton": {
+          "title": "同時に1つの問題サービスのみを起動できます。",
+          "current": "現在実行中のサービス",
+          "action": "他の問題サービスを停止して、現在の問題を起動しますか？"
+        },
+        "noAction": {
+          "title": "何も実行されません。"
+        }
+      }
+    },
+    "checker": {
+      "title": "評価",
+      "script": "評価スクリプト",
+      "preset": {
+        "placeholder": "スクリプトプリセットを選択してください",
+        "simple": {
+          "label": "シンプルな評価"
+        },
+        "leet": {
+          "label": "ダイナミック環境評価（Leet）"
+        },
+        "uuid": {
+          "label": "ダイナミック環境評価（UUID）"
+        },
+        "mapped": {
+          "label": "ダイナミック添付ファイル評価"
+        }
+      },
+      "errors": {
+        "fetchCheckerScript": {
+          "title": "評価スクリプトの取得に失敗しました"
+        }
+      }
+    },
+    "settings": {
+      "title": "設定"
+    },
+    "inGame": "ゲーム中の問題",
+    "total": "すべての問題"
+  },
+  "wsrx": {
+    "title": "WebSocket Reflector X",
+    "status": {
+      "invalid": {
+        "title": "WSRX 未接続"
+      },
+      "pending": {
+        "title": "ローカル認証を待機中"
+      },
+      "usable": {
+        "title": "WSRX 接続済み"
+      },
+      "connecting": {
+        "title": "接続中..."
+      }
+    },
+    "retry": "接続を再試行",
+    "download": {
+      "title": "WSRX クライアントをダウンロード",
+      "message": "最新バージョンの WSRX を GitHub からダウンロードしてください"
+    },
+    "actions": {
+      "copy": {
+        "title": "WebSocket リンクをコピー"
+      },
+      "copyLocal": {
+        "title": "ローカルアドレスをコピー"
+      },
+      "retry": {
+        "title": "接続を再試行"
+      },
+      "resetDefault": {
+        "title": "デフォルトにリセット"
+      },
+      "refresh": {
+        "title": "ルーティングを更新"
+      },
+      "openAll": {
+        "title": "すべてのルーティングを開く"
+      },
+      "deleteAll": {
+        "title": "すべてのルーティングを閉じる"
+      },
+      "deleteOutdated": {
+        "title": "期限切れのルーティングを削除"
+      }
+    },
+    "settings": {
+      "title": "WSRX 設定",
+      "address": {
+        "label": "WSRX コントロールアドレス",
+        "placeholder": "WSRX コントロールアドレスを入力してください",
+        "required": "WSRX コントロールアドレスは必須です",
+        "invalid": "WSRX コントロールアドレスが無効です"
+      }
+    },
+    "errors": {
+      "versionMismatch": {
+        "title": "WSRX バージョンが古いです",
+        "message": "プラットフォーム統合を使用するには最新バージョンに更新してください"
+      },
+      "daemonOffline": {
+        "title": "WSRX デーモンがオフラインです",
+        "message": "デスクトップクライアントが起動している場合は、プラットフォーム設定のWSRXコントロールアドレスが正しいか確認してください"
+      },
+      "disconnected": {
+        "title": "WSRX デーモンが切断されました",
+        "message": "ローカルクライアントの状態を確認してください"
+      },
+      "daemonError": {
+        "title": "WSRX デーモンエラー",
+        "message": "ローカルクライアントの状態を確認してください"
+      },
+      "fetchTunnel": {
+        "title": "WSRX マッピングリストの取得に失敗しました",
+        "message": "ローカルクライアントのログを確認してください"
+      },
+      "deleteTunnel": {
+        "title": "WSRX マッピングの削除に失敗しました",
+        "message": "ローカルクライアントのログを確認してください"
+      },
+      "createTunnel": {
+        "title": "WSRXマッピングの作成に失敗しました",
+        "message": "ローカルクライアントのログを確認してください"
+      }
+    },
+    "downloadClient": "クライアントをダウンロード",
+    "tunnels": "接続ルート"
+  },
+  "captcha": {
+    "title": "CAPTCHA保護",
+    "label": "CAPTCHA",
+    "calculating": "計算中...",
+    "fetching": "取得中...",
+    "errors": {
+      "fetch": {
+        "title": "CAPTCHAの取得に失敗しました"
+      }
+    },
+    "form": {
+      "difficulty": {
+        "label": "難易度",
+        "placeholder": "CAPTCHAの難易度を入力してください",
+        "required": "CAPTCHAの難易度は必須です",
+        "mustBeNumber": "CAPTCHAの難易度は数字である必要があります",
+        "mustBePositiveNumber": "CAPTCHAの難易度は正の数でなければなりません"
+      },
+      "validator": {
+        "label": "検証者",
+        "placeholder": "CAPTCHAの検証者を選択してください",
+        "required": "CAPTCHAの検証者は空にできません",
+        "type": {
+          "image": "画像認識",
+          "pow": "作業量証明"
+        }
+      },
+      "answer": {
+        "required": "CAPTCHAは空にできません",
+        "minimumLength": "CAPTCHAが短すぎます"
+      },
+      "enabled": {
+        "label": "CAPTCHA保護を有効にする"
+      }
+    }
+  },
+  "user": {
+    "list": {
+      "title": "ユーザー一覧"
+    },
+    "errors": {
+      "fetchList": {
+        "title": "ユーザー一覧の取得に失敗しました"
+      },
+      "fetchIpList": {
+        "title": "ユーザーIPアドレス一覧の取得に失敗しました"
+      },
+      "fetchOAuth": {
+        "title": "ユーザーのサードパーティ認証情報の取得に失敗しました"
+      },
+      "fetch": {
+        "title": "ユーザー情報の取得に失敗しました"
+      }
+    },
+    "description": {
+      "title": "個人紹介",
+      "empty": "この謎めいたハッカーは何かを残していなかった..."
+    },
+    "joinedGames": "大会に参加",
+    "gameJournal": "{{team}}のメンバーとして{{game}}に参加しました。",
+    "moreJournal": "命ある限り、探求を止めない……",
+    "gotoAdminPanel": "ユーザー管理へ移動",
+    "registeredAt": "{{time}}に登録",
+    "title": "ユーザー",
+    "total": "すべてのユーザー",
+    "status": {
+      "valid": {
+        "title": "アクティブユーザー"
+      },
+      "deleted": {
+        "title": "無効なユーザー"
+      }
+    },
+    "management": {
+      "confirmDelete": "ユーザー名 {{name}} を入力して削除を確認してください",
+      "goToUserDetailPage": "ユーザー情報ページに移動",
+      "title": "ユーザー管理"
+    },
+    "sortBy": "並び順",
+    "filter": "ユーザー名、表示名、メールアドレス、またはIPアドレスでフィルタリング"
+  },
+  "account": {
+    "permission": {
+      "basic": "ベース",
+      "verified": "検証済み",
+      "calendar": "カレンダー公開",
+      "wiki": "知識公開",
+      "bulletin": "公告公開",
+      "game": "大会管理",
+      "host": "大会開催",
+      "statistics": "データ統計",
+      "devOps": "プラットフォーム運用",
+      "user": "ユーザー管理"
     },
     "form": {
       "account": {
-        "invalid": "",
-        "label": "",
-        "maximumLength": "",
-        "minimumLength": "",
-        "placeholder": "",
-        "required": ""
-      },
-      "banned": {
-        "label": ""
-      },
-      "description": {
-        "label": ""
-      },
-      "email": {
-        "invalid": "",
-        "label": "",
-        "placeholder": "",
-        "required": ""
-      },
-      "hidden": {
-        "label": ""
-      },
-      "institute": {
-        "label": "",
-        "placeholder": ""
-      },
-      "ips": {
-        "label": ""
-      },
-      "nickname": {
-        "label": "",
-        "maxLength": "",
-        "minLength": "",
-        "placeholder": "",
-        "required": ""
-      },
-      "oauths": {
-        "label": ""
-      },
-      "oldPassword": {
-        "label": "",
-        "placeholder": "",
-        "required": ""
+        "minimumLength": "ユーザー名は少なくとも 4 文字以上です",
+        "required": "ユーザー名は空にできません",
+        "placeholder": "ユーザー名を入力してください",
+        "label": "ユーザー名",
+        "maximumLength": "ユーザー名は最大 32 文字までです",
+        "invalid": "ユーザー名は大文字と小文字のアルファベット、数字、およびアンダースコアのみを含めることができます"
       },
       "password": {
-        "confirmLabel": "",
-        "confirmMismatch": "",
-        "confirmPlaceholder": "",
-        "confirmRequired": "",
-        "label": "",
-        "minimumLength": "",
-        "placeholder": "",
-        "required": "",
-        "tooWeak": ""
+        "required": "パスワードは空にできません",
+        "minimumLength": "パスワードは少なくとも 8 文字以上でなければなりません",
+        "tooWeak": "パスワードは 8 〜 40 文字で、少なくとも大文字 1 文字、小文字 1 文字、数字 1 桁、特殊文字 1 文字を含む必要があります",
+        "placeholder": "パスワードを入力してください",
+        "label": "パスワード",
+        "confirmRequired": "確認用パスワードは空にできません",
+        "confirmMismatch": "パスワードが一致しません",
+        "confirmPlaceholder": "もう一度パスワードを入力してください",
+        "confirmLabel": "確認用パスワード"
+      },
+      "nickname": {
+        "required": "ニックネームは空にできません",
+        "minLength": "ニックネームは少なくとも 2 文字以上でなければなりません",
+        "maxLength": "ニックネームは最大32文字までです",
+        "placeholder": "ニックネームを入力してください（実名は推奨されていません）",
+        "label": "ニックネーム"
+      },
+      "email": {
+        "required": "メールアドレスは必須です",
+        "invalid": "メールアドレスの形式が正しくありません",
+        "placeholder": "メールアドレスを入力してください",
+        "label": "メール"
+      },
+      "description": {
+        "label": "自己紹介"
+      },
+      "oldPassword": {
+        "required": "古いパスワードは必須です",
+        "label": "古いパスワード",
+        "placeholder": "古いパスワードを入力してください"
+      },
+      "institute": {
+        "label": "所属組織",
+        "placeholder": "所属組織を選択してください"
+      },
+      "hidden": {
+        "label": "非表示"
+      },
+      "banned": {
+        "label": "ブロック"
+      },
+      "oauths": {
+        "label": "サードパーティ認証情報"
+      },
+      "ips": {
+        "label": "使用済みのIPアドレス"
       },
       "registeredAt": {
-        "label": ""
+        "label": "登録日時"
       }
     },
-    "info": {
-      "title": ""
-    },
     "login": {
+      "title": "ログイン",
+      "status": {
+        "success": {
+          "message": "ログインに成功しました。戻ってきましょう！"
+        }
+      },
       "errors": {
         "login": {
-          "title": ""
+          "title": "ログイン失敗"
+        }
+      }
+    },
+    "settings": {
+      "title": "ユーザー設定"
+    },
+    "logout": "ログアウト",
+    "status": {
+      "unverified": {
+        "message": "あなたのアカウントはまだ検証されていません。一部の機能が制限されています。",
+        "action": "検証メールを再送信する"
+      }
+    },
+    "errors": {
+      "fetchCode": {
+        "title": "一時的な識別コードの生成に失敗しました"
+      }
+    },
+    "code": {
+      "title": "一時的なユーザー識別コード",
+      "status": {
+        "unverified": {
+          "message": "あなたのユーザー アカウントはまだメールアドレスで確認されていません。認証後に認識コードを生成してください。",
+          "action": "認証に進む"
         }
       },
+      "empty": "一時的な認識コードはありません",
+      "tip": "この認証コードは、あなたの完全なアカウント情報を第3者サービスに提供するために使用されます。これにはメールアドレスや組織認証情報などが含まれます。大会主催者はこの認証コードを使用してあなたの身元を確認する場合があります。用途が不明な場合は、この認証コードを随意に提供しないでください！"
+    },
+    "forgot": {
       "status": {
         "success": {
-          "message": ""
+          "message": "パスワードをリセットするメールがあなたのメールアドレスに送信されました。確認してください。"
+        },
+        "rateExceeded": {
+          "message": "太快了！如果没收到邮件，请检查你的垃圾箱，30分钟之后才可以重试发送。"
         }
       },
-      "title": ""
+      "title": "パスワードを忘れました",
+      "form": {
+        "email": {
+          "required": "メールアドレスは空にできません",
+          "invalid": "メールアドレスの形式が正しくありません",
+          "label": "登録時に使用したメールアドレス",
+          "placeholder": "メールアドレスを入力してください"
+        }
+      }
     },
-    "logout": "",
     "oauth": {
-      "actions": {
-        "bind": {
-          "title": ""
-        },
-        "unbind": {
-          "title": ""
-        }
-      },
       "errors": {
-        "bind": {
-          "title": ""
-        },
         "fetchProvider": {
-          "title": ""
+          "title": "サードパーティ認証サービスの取得に失敗しました"
+        },
+        "bind": {
+          "title": "サードパーティアカウントのバインディングに失敗しました"
         },
         "fetchStatus": {
-          "title": ""
+          "title": "サードパーティ認証ステータスの取得に失敗しました"
         },
         "unbind": {
-          "title": ""
+          "title": "サードパーティ認証サービスのアンバインディングに失敗しました"
         }
       },
-      "notBind": "",
-      "select": "",
-      "title": ""
-    },
-    "password": {
-      "errors": {
-        "change": {
-          "title": ""
+      "select": "統一身分認証でログインする",
+      "title": "サードパーティ認証サービス",
+      "notBind": "バインドされていません",
+      "actions": {
+        "bind": {
+          "title": "バインド"
+        },
+        "unbind": {
+          "title": "アンバインド"
         }
-      },
-      "title": ""
-    },
-    "permission": {
-      "basic": "",
-      "bulletin": "",
-      "calendar": "",
-      "devOps": "",
-      "game": "",
-      "host": "",
-      "statistics": "",
-      "user": "",
-      "verified": "",
-      "wiki": ""
+      }
     },
     "register": {
-      "errors": {
-        "register": {
-          "title": ""
-        }
-      },
-      "oauthRegister": "",
+      "tips": "アカウントをお持ちではありませんか？今すぐ登録！",
       "status": {
         "success": {
-          "message": ""
+          "message": "登録に成功しました。CTFの世界へようこそ！"
         }
       },
-      "tips": "",
-      "title": ""
+      "errors": {
+        "register": {
+          "title": "登録に失敗しました"
+        }
+      },
+      "title": "登録",
+      "oauthRegister": "以前にユーザーを登録していないようです…… いいえ、大丈夫です！今すぐ登録すると、あなたのサードパーティ認証アカウント {{key}} に直接バインドされます。次回からはサードパーティ統一ID認証で直接ログインできます。"
     },
     "reset": {
       "errors": {
         "invalidLink": {
-          "title": ""
+          "title": "リンクが無効です。メールのリセットリンクが一致しているか確認してください"
         },
         "reset": {
-          "title": ""
-        }
-      },
-      "form": {
-        "token": {
-          "label": "",
-          "placeholder": "",
-          "required": ""
+          "title": "リセットに失敗しました"
         }
       },
       "status": {
         "success": {
-          "message": ""
+          "message": "重置成功，请使用新密码登录平台"
         }
       },
-      "title": ""
+      "title": "パスワードの再設定",
+      "form": {
+        "token": {
+          "required": "リセットキーは空にできません",
+          "placeholder": "リセットキーを入力してください",
+          "label": "リセットキー"
+        }
+      }
     },
-    "settings": {
-      "title": ""
+    "info": {
+      "title": "ユーザー情報"
     },
-    "status": {
-      "unverified": {
-        "action": "",
-        "message": ""
+    "password": {
+      "title": "パスワードを変更する",
+      "errors": {
+        "change": {
+          "title": "パスワードの変更に失敗しました"
+        }
+      }
+    },
+    "delete": {
+      "title": "アカウントを削除する",
+      "errors": {
+        "delete": {
+          "title": "ユーザーの削除に失敗しました"
+        }
+      },
+      "topWarning": "警告！アカウントが無効になると復元できません！",
+      "canNotDeleteWhenGameInProgress": "不正行為を防ぐために、進行中の試合に参加している場合、アカウントを削除することはできません。",
+      "declare": {
+        "1": "あなたのアカウントは [DELETED]_<hash> に再名前付けされます；",
+        "2": "アカウントのすべての権限が削除され、ログインが禁止され、メールアドレスで復元することはできません。メールアドレスは別のアカウントを登録するために使用できます；",
+        "3": "アカウントのプライバシー情報は削除されますが、公開されたコンテンツは保持されます；",
+        "4": "アカウントに関連付けられたコンテストの成績やデータなどは残りますが、それがあなたのものであることを証明する情報は提供されません。",
+        "title": "あなたのアカウントは本当に削除されているわけではなく、無効化され復元不可能な状態になります。以下の操作が実行されます："
+      },
+      "thinkTwice": "ご注意ください。認証に関連するプライバシー情報を削除したため、管理者/運用担当者に連絡しても無効化されたアカウントを復元することはできません。よって、この操作を行う前に慎重に検討してください。",
+      "confirm": "上記の内容をよくお読みになり、確認してください！本当にアカウントを無効化したい場合は、下記に入力欄にあなたの完全なユーザー名 {{name}} を入力して確認してください：",
+      "bye": {
+        "title": "さようなら",
+        "message": "現実の中で再会できると願っています"
       }
     },
     "verify": {
-      "errors": {
-        "verify": {
-          "title": ""
-        }
-      },
       "status": {
-        "broken": {
-          "title": ""
-        },
         "success": {
-          "title": ""
+          "title": "メール検証に成功しました"
+        },
+        "broken": {
+          "title": "リンクに問題があります。メールのリンクが正しいことを確認してください"
         },
         "verifying": {
-          "title": ""
+          "title": "検証中..."
         }
       },
-      "title": ""
+      "errors": {
+        "verify": {
+          "title": "メール検証に失敗しました"
+        }
+      },
+      "title": "メールアドレスを検証する"
     }
-  },
-  "admin": {
-    "title": ""
-  },
-  "bulletin": {
-    "empty": "",
-    "errors": {
-      "fetch": {
-        "title": ""
-      },
-      "fetchList": {
-        "title": ""
-      }
-    },
-    "form": {
-      "content": {
-        "label": "",
-        "required": ""
-      },
-      "createdAt": {
-        "label": ""
-      },
-      "enableComment": {
-        "label": ""
-      },
-      "title": {
-        "label": "",
-        "placeholder": "",
-        "required": ""
-      },
-      "updatedAt": {
-        "label": ""
-      }
-    },
-    "title": "",
-    "unknownPublisher": ""
-  },
-  "calendar": {
-    "actions": {
-      "nextMonth": {
-        "title": ""
-      },
-      "nextYear": {
-        "title": ""
-      },
-      "prevMonth": {
-        "title": ""
-      },
-      "prevYear": {
-        "title": ""
-      },
-      "today": {
-        "title": ""
-      }
-    },
-    "day": {
-      "fri": "",
-      "mon": "",
-      "sat": "",
-      "sun": "",
-      "thu": "",
-      "tue": "",
-      "wed": ""
-    },
-    "endAt": "",
-    "startAt": ""
-  },
-  "captcha": {
-    "calculating": "",
-    "errors": {
-      "fetch": {
-        "title": ""
-      }
-    },
-    "fetching": "",
-    "form": {
-      "answer": {
-        "minimumLength": "",
-        "required": ""
-      },
-      "difficulty": {
-        "label": "",
-        "mustBeNumber": "",
-        "mustBePositiveNumber": "",
-        "placeholder": "",
-        "required": ""
-      },
-      "enabled": {
-        "label": ""
-      },
-      "validator": {
-        "label": "",
-        "placeholder": "",
-        "required": "",
-        "type": {
-          "image": "",
-          "pow": ""
-        }
-      }
-    },
-    "label": "",
-    "title": ""
-  },
-  "captures": {
-    "title": ""
-  },
-  "challenge": {
-    "actions": {
-      "down": {
-        "message": "",
-        "title": ""
-      },
-      "up": {
-        "message": "",
-        "title": ""
-      }
-    },
-    "answer": {
-      "empty": "",
-      "errors": {
-        "fetchAnswer": {
-          "title": ""
-        },
-        "invisibleBeforeArchive": {
-          "message": "",
-          "title": ""
-        }
-      },
-      "title": ""
-    },
-    "checker": {
-      "errors": {
-        "fetchCheckerScript": {
-          "title": ""
-        }
-      },
-      "preset": {
-        "leet": {
-          "label": ""
-        },
-        "mapped": {
-          "label": ""
-        },
-        "placeholder": "",
-        "simple": {
-          "label": ""
-        },
-        "uuid": {
-          "label": ""
-        }
-      },
-      "script": "",
-      "title": ""
-    },
-    "empty": "",
-    "errors": {
-      "down": {
-        "title": ""
-      },
-      "fetch": {
-        "title": ""
-      },
-      "fetchList": {
-        "title": ""
-      },
-      "up": {
-        "title": ""
-      }
-    },
-    "file": {
-      "empty": "",
-      "errors": {
-        "deleteFiles": {
-          "title": ""
-        },
-        "fetchFiles": {
-          "title": ""
-        },
-        "uploadFiles": {
-          "title": ""
-        }
-      },
-      "title": "",
-      "type": {
-        "checker": {
-          "tip": "",
-          "title": ""
-        },
-        "mapped": {
-          "tip": "",
-          "title": ""
-        },
-        "static": {
-          "tip": "",
-          "title": ""
-        }
-      }
-    },
-    "form": {
-      "content": {
-        "label": "",
-        "placeholder": "",
-        "required": ""
-      },
-      "name": {
-        "label": "",
-        "placeholder": "",
-        "required": ""
-      },
-      "scoreRule": {
-        "decay": {
-          "label": "",
-          "placeholder": ""
-        },
-        "initial": {
-          "label": "",
-          "placeholder": ""
-        },
-        "minimum": {
-          "label": "",
-          "placeholder": ""
-        },
-        "range": {
-          "label": ""
-        }
-      },
-      "scoringPeriod": {
-        "label": "",
-        "placeholder": ""
-      },
-      "tag": {
-        "label": "",
-        "placeholder": "",
-        "required": ""
-      }
-    },
-    "hammer": {
-      "adminGoto": "",
-      "errors": {
-        "fetch": {
-          "title": ""
-        },
-        "fetchSolve": {
-          "title": ""
-        },
-        "maxMessageLimit": {
-          "title": ""
-        },
-        "send": {
-          "title": ""
-        }
-      },
-      "freeMessages": "",
-      "markdownHoto": "",
-      "markdownSupport": "",
-      "role": {
-        "admin": "",
-        "player": ""
-      },
-      "solved": "",
-      "tips": {
-        "0": "",
-        "1": "",
-        "2": ""
-      },
-      "title": ""
-    },
-    "hint": {
-      "empty": "",
-      "errors": {
-        "fetch": {
-          "title": ""
-        },
-        "unlock": {
-          "title": ""
-        }
-      },
-      "form": {
-        "content": {
-          "label": "",
-          "placeholder": "",
-          "required": ""
-        },
-        "cost": {
-          "label": "",
-          "placeholder": ""
-        }
-      },
-      "title": "",
-      "unlockConfirm": ""
-    },
-    "inGame": "",
-    "instance": {
-      "actions": {
-        "addImage": {
-          "message": "",
-          "title": ""
-        },
-        "copy": {
-          "title": ""
-        },
-        "delay": {
-          "title": ""
-        },
-        "start": {
-          "title": ""
-        },
-        "stop": {
-          "title": ""
-        }
-      },
-      "delete": "",
-      "empty": "",
-      "errors": {
-        "calmdown": {
-          "title": ""
-        },
-        "delay": {
-          "title": ""
-        },
-        "fetchConfigImages": {
-          "title": ""
-        },
-        "fetchInstances": {
-          "title": ""
-        },
-        "fetchRegistry": {
-          "title": ""
-        },
-        "managedByMate": {
-          "title": ""
-        },
-        "noAction": {
-          "title": ""
-        },
-        "noConfig": {
-          "title": ""
-        },
-        "noExportedServices": {
-          "message": "",
-          "title": ""
-        },
-        "singleton": {
-          "action": "",
-          "current": "",
-          "title": ""
-        },
-        "start": {
-          "title": ""
-        },
-        "stop": {
-          "title": ""
-        },
-        "toggleNetworkConfig": {
-          "title": ""
-        },
-        "toggleRestrict": {
-          "title": ""
-        }
-      },
-      "image": {
-        "empty": "",
-        "form": {
-          "containerName": {
-            "label": "",
-            "mustBeValidName": "",
-            "placeholder": "",
-            "required": ""
-          },
-          "restrict": {
-            "label": "",
-            "message": "",
-            "placeholder": ""
-          },
-          "service": {
-            "cpu": {
-              "label": "",
-              "required": ""
-            },
-            "description": {
-              "label": "",
-              "placeholder": "",
-              "requiredWhenHavePort": ""
-            },
-            "mem": {
-              "label": "",
-              "required": ""
-            },
-            "port": {
-              "conflict": "",
-              "label": "",
-              "mustBeInRange": "",
-              "mustBeNumber": "",
-              "placeholder": "",
-              "required": ""
-            },
-            "storage": {
-              "label": "",
-              "required": ""
-            },
-            "type": {
-              "items": {
-                "http": "",
-                "tcp": ""
-              },
-              "label": "",
-              "placeholder": "",
-              "requiredWhenHavePort": ""
-            }
-          },
-          "tag": {
-            "label": "",
-            "placeholder": "",
-            "required": ""
-          },
-          "version": {
-            "label": "",
-            "placeholder": ""
-          }
-        },
-        "label": "",
-        "upload": ""
-      },
-      "internet": "",
-      "registrySecret": "",
-      "restrict": "",
-      "runningContainers": "",
-      "status": {
-        "failed": {
-          "title": ""
-        },
-        "idle": {
-          "title": ""
-        },
-        "inUse": {
-          "title": ""
-        },
-        "pending": {
-          "title": ""
-        },
-        "running": {
-          "title": ""
-        }
-      },
-      "title": ""
-    },
-    "list": "",
-    "search": {
-      "archived": "",
-      "hideArchived": "",
-      "hideSolved": "",
-      "placeholder": "",
-      "solved": ""
-    },
-    "settings": {
-      "title": ""
-    },
-    "statistics": {
-      "commits": {
-        "subject": "",
-        "title": ""
-      },
-      "empty": "",
-      "errors": {
-        "fetchCommitHistory": "",
-        "fetchStatistics": {
-          "title": ""
-        },
-        "fetchSubmission": {
-          "title": ""
-        }
-      },
-      "showAll": "",
-      "solves": {
-        "subject": "",
-        "title": ""
-      },
-      "title": ""
-    },
-    "status": {
-      "archived": {
-        "message": "",
-        "title": ""
-      },
-      "hidden": {
-        "alert": "",
-        "message": "",
-        "title": ""
-      },
-      "inPeriod": {
-        "countdown": "",
-        "message": "",
-        "title": ""
-      },
-      "solved": {
-        "message": "",
-        "title": ""
-      },
-      "unreleased": {
-        "countdown": "",
-        "message": "",
-        "title": ""
-      }
-    },
-    "submission": {
-      "errors": {
-        "fetchSolveStatus": {
-          "title": ""
-        },
-        "fetchSolves": {
-          "title": ""
-        },
-        "submit": {
-          "title": ""
-        }
-      },
-      "status": {
-        "failed": {
-          "title": ""
-        },
-        "pending": {
-          "title": ""
-        },
-        "solved": {
-          "title": ""
-        }
-      },
-      "submit": "",
-      "title": "",
-      "total": ""
-    },
-    "tag": {
-      "title": "",
-      "unknown": ""
-    },
-    "terminal": {
-      "title": ""
-    },
-    "title": "",
-    "total": ""
-  },
-  "cluster": {
-    "actions": {
-      "disconnectNode": {
-        "title": ""
-      },
-      "refreshNode": {
-        "title": ""
-      },
-      "updateNode": {
-        "title": ""
-      }
-    },
-    "errors": {
-      "fetchNodes": {
-        "title": ""
-      }
-    },
-    "nodeInfo": {
-      "architecture": "",
-      "bootID": "",
-      "containerRuntimeVersion": "",
-      "kernelVersion": "",
-      "kubeProxyVersion": "",
-      "kubeletVersion": "",
-      "machineID": "",
-      "operatingSystem": "",
-      "osImage": "",
-      "systemUUID": "",
-      "title": ""
-    },
-    "nodeResources": {
-      "title": ""
-    },
-    "selectNode": "",
-    "status": {
-      "available": {
-        "title": ""
-      },
-      "unavailable": {
-        "title": ""
-      }
-    },
-    "title": ""
-  },
-  "docs": {
-    "forVersion": "",
-    "intro": "",
-    "tip": "",
-    "title": ""
-  },
-  "game": {
-    "accessPolicy": {
-      "open": ""
-    },
-    "admin": {
-      "gotoChallenges": "",
-      "title": ""
-    },
-    "adminMode": "",
-    "administrator": {
-      "empty": "",
-      "errors": {
-        "alreadyAdded": {
-          "title": ""
-        },
-        "fetchList": {
-          "title": ""
-        },
-        "noPermission": {
-          "title": ""
-        }
-      },
-      "form": {
-        "confirm": {
-          "message": ""
-        },
-        "search": {
-          "placeholder": "",
-          "title": ""
-        }
-      },
-      "title": ""
-    },
-    "archive": "",
-    "archived": "",
-    "canNotParticipate": "",
-    "delete": {
-      "confirm": "",
-      "requirements": "",
-      "title": "",
-      "warning": ""
-    },
-    "end": "",
-    "ended": "",
-    "enterChallenge": "",
-    "errors": {
-      "fetch": {
-        "title": ""
-      },
-      "fetchIntroduction": {
-        "title": ""
-      },
-      "fetchList": {
-        "title": ""
-      },
-      "regenerateToken": {
-        "title": ""
-      }
-    },
-    "events": {
-      "emptyDevices": "",
-      "errors": {
-        "fetchDevices": {
-          "title": ""
-        }
-      },
-      "howto": "",
-      "linkedDevices": "",
-      "regenerateTokenWarning": "",
-      "title": "",
-      "tokenWarning": ""
-    },
-    "form": {
-      "archiveAt": {
-        "canNotEarlierThanStart": "",
-        "label": "",
-        "placeholder": "",
-        "required": ""
-      },
-      "awardRate": {
-        "firstBlood": "",
-        "label": "",
-        "mustBeNumber": "",
-        "mustBePositiveNumber": "",
-        "placeholder": "",
-        "required": "",
-        "secondBlood": "",
-        "thirdBlood": ""
-      },
-      "brief": {
-        "label": "",
-        "placeholder": "",
-        "required": ""
-      },
-      "canRegisterAfterStart": {
-        "label": "",
-        "message": "",
-        "placeholder": ""
-      },
-      "enableTeamAudit": {
-        "label": "",
-        "message": "",
-        "placeholder": ""
-      },
-      "endAt": {
-        "canNotEarlierThanStart": "",
-        "label": "",
-        "placeholder": "",
-        "required": ""
-      },
-      "frozen": {
-        "label": "",
-        "message": "",
-        "placeholder": ""
-      },
-      "hidden": {
-        "label": "",
-        "message": "",
-        "placeholder": ""
-      },
-      "introduction": {
-        "label": "",
-        "required": ""
-      },
-      "misc": {
-        "label": ""
-      },
-      "name": {
-        "label": "",
-        "placeholder": "",
-        "required": ""
-      },
-      "offline": {
-        "label": ""
-      },
-      "registerAt": {
-        "canNotLaterThanEnd": "",
-        "label": "",
-        "placeholder": "",
-        "required": ""
-      },
-      "startAt": {
-        "canNotLaterThanEnd": "",
-        "label": "",
-        "placeholder": "",
-        "required": ""
-      },
-      "team": {},
-      "teamSize": {
-        "label": "",
-        "maximum": "",
-        "minimum": "",
-        "mustBeNumber": "",
-        "mustBePositiveNumber": "",
-        "placeholder": "",
-        "required": ""
-      },
-      "title": "",
-      "weight": {
-        "label": ""
-      }
-    },
-    "git": {
-      "title": ""
-    },
-    "gotoTraining": "",
-    "hammer": {
-      "empty": "",
-      "errors": {
-        "fetchSessions": {
-          "title": ""
-        }
-      },
-      "newMessages": "",
-      "placeholder": "",
-      "status": {
-        "adminUnread": {
-          "title": ""
-        },
-        "notReply": {
-          "title": ""
-        },
-        "playerUnread": {
-          "title": ""
-        }
-      },
-      "title": ""
-    },
-    "introduction": {
-      "empty": "",
-      "form": {
-        "content": {
-          "label": "",
-          "placeholder": "",
-          "required": ""
-        }
-      },
-      "title": ""
-    },
-    "list": "",
-    "loginThenBack": "",
-    "manageChallenges": "",
-    "miscSettings": "",
-    "monitor": {
-      "audits": "",
-      "autoRefreshEnabled": "",
-      "empty": "",
-      "errors": {
-        "fetchAudit": {
-          "title": ""
-        },
-        "fetchSubmission": {
-          "title": ""
-        }
-      },
-      "status": {
-        "confirmed": {
-          "title": ""
-        },
-        "misjudged": {
-          "title": ""
-        },
-        "pending": {
-          "title": ""
-        }
-      },
-      "submissions": "",
-      "title": ""
-    },
-    "noGameHosted": "",
-    "noOtherGames": "",
-    "notArchived": "",
-    "notStarted": "",
-    "notification": {
-      "empty": "",
-      "errors": {
-        "fetch": {
-          "title": ""
-        }
-      },
-      "form": {
-        "content": {
-          "label": "",
-          "required": ""
-        },
-        "title": {
-          "label": "",
-          "placeholder": "",
-          "required": ""
-        }
-      }
-    },
-    "organize": {
-      "actions": {
-        "restrict": {
-          "confirm": "",
-          "title": ""
-        }
-      },
-      "instituteEnabled": "",
-      "title": ""
-    },
-    "otherGames": "",
-    "pending": "",
-    "policies": {
-      "form": {
-        "challenge": {
-          "showAnswer": {
-            "label": ""
-          },
-          "showHints": {
-            "label": ""
-          }
-        }
-      },
-      "title": ""
-    },
-    "register": "",
-    "registerEnded": "",
-    "registerNotStarted": "",
-    "scoreboard": {
-      "currentPeriod": "",
-      "empty": "",
-      "errors": {
-        "fetchScoreboard": {
-          "title": ""
-        }
-      },
-      "selectInstitute": "",
-      "title": ""
-    },
-    "seeOtherInteresting": "",
-    "start": "",
-    "started": "",
-    "statistics": {
-      "challengeStats": "",
-      "errors": {
-        "export": "",
-        "fetch": ""
-      },
-      "institutePlayers": "",
-      "instituteTeams": "",
-      "others": "",
-      "players": "",
-      "selectInstitute": "",
-      "submission": "",
-      "teams": "",
-      "title": ""
-    },
-    "timeLast": "",
-    "timeline": {
-      "deleteWarning": "",
-      "empty": "",
-      "form": {
-        "endAt": {
-          "required": ""
-        },
-        "label": {
-          "label": "",
-          "placeholder": "",
-          "required": ""
-        },
-        "startAt": {
-          "required": ""
-        },
-        "startEndTime": {
-          "label": "",
-          "placeholder": ""
-        }
-      },
-      "title": ""
-    },
-    "title": "",
-    "welcome": "",
-    "writeups": {
-      "empty": "",
-      "title": ""
-    }
-  },
-  "general": {
-    "actions": {
-      "accept": {
-        "title": ""
-      },
-      "add": {
-        "message": "",
-        "status": {
-          "fail": "",
-          "success": ""
-        },
-        "title": ""
-      },
-      "back": {
-        "title": ""
-      },
-      "cancel": {
-        "title": ""
-      },
-      "clear": {
-        "message": "",
-        "status": {
-          "fail": "",
-          "success": ""
-        },
-        "title": ""
-      },
-      "close": {
-        "title": ""
-      },
-      "compile": {
-        "title": ""
-      },
-      "confirm": {
-        "message": "",
-        "status": {
-          "fail": "",
-          "success": ""
-        },
-        "title": ""
-      },
-      "copy": {
-        "title": ""
-      },
-      "create": {
-        "message": "",
-        "status": {
-          "fail": "",
-          "success": ""
-        },
-        "title": ""
-      },
-      "cut": {
-        "title": ""
-      },
-      "delete": {
-        "message": "",
-        "status": {
-          "fail": "",
-          "success": ""
-        },
-        "title": ""
-      },
-      "download": {
-        "status": {
-          "fail": "",
-          "pending": "",
-          "success": ""
-        },
-        "title": ""
-      },
-      "edit": {
-        "title": ""
-      },
-      "exit": {
-        "title": ""
-      },
-      "generate": {
-        "title": ""
-      },
-      "goto": {
-        "title": ""
-      },
-      "load": {
-        "title": ""
-      },
-      "loadMore": {
-        "title": ""
-      },
-      "next": {
-        "title": ""
-      },
-      "no": {
-        "title": ""
-      },
-      "ok": {
-        "title": ""
-      },
-      "open": {
-        "title": ""
-      },
-      "paste": {
-        "title": ""
-      },
-      "prev": {
-        "title": ""
-      },
-      "print": {
-        "title": ""
-      },
-      "refresh": {
-        "status": {
-          "fail": "",
-          "success": ""
-        },
-        "title": ""
-      },
-      "reset": {
-        "message": "",
-        "status": {
-          "fail": "",
-          "success": ""
-        },
-        "title": ""
-      },
-      "save": {
-        "message": "",
-        "status": {
-          "fail": "",
-          "success": ""
-        },
-        "title": ""
-      },
-      "search": {
-        "title": ""
-      },
-      "select": {
-        "title": ""
-      },
-      "selectAll": {
-        "title": ""
-      },
-      "selectNone": {
-        "title": ""
-      },
-      "send": {
-        "message": "",
-        "status": {
-          "fail": "",
-          "success": ""
-        },
-        "title": ""
-      },
-      "start": {
-        "title": ""
-      },
-      "stop": {
-        "title": ""
-      },
-      "update": {
-        "message": "",
-        "status": {
-          "fail": "",
-          "success": ""
-        },
-        "title": ""
-      },
-      "upload": {
-        "status": {
-          "fail": "",
-          "fileTooLarge": "",
-          "fileTooSmall": "",
-          "inProcess": "",
-          "invalidFileType": "",
-          "pending": "",
-          "success": ""
-        },
-        "title": ""
-      },
-      "yes": {
-        "title": ""
-      }
-    },
-    "loading": {
-      "10": "",
-      "11": "",
-      "12": "",
-      "13": "",
-      "14": "",
-      "15": "",
-      "00": "",
-      "01": "",
-      "02": "",
-      "03": "",
-      "04": "",
-      "05": "",
-      "06": "",
-      "07": "",
-      "08": "",
-      "09": "",
-      "short": ""
-    },
-    "network": {
-      "gotoDocs": "",
-      "status": {
-        "400": {
-          "message": "",
-          "title": ""
-        },
-        "401": {
-          "message": "",
-          "title": ""
-        },
-        "403": {
-          "message": "",
-          "title": ""
-        },
-        "404": {
-          "message": "",
-          "title": ""
-        },
-        "412": {
-          "message": "",
-          "title": ""
-        },
-        "418": {
-          "message": "",
-          "title": ""
-        },
-        "500": {
-          "message": "",
-          "title": ""
-        },
-        "502": {
-          "message": "",
-          "title": ""
-        }
-      },
-      "unknown": {
-        "message": "",
-        "title": ""
-      }
-    }
-  },
-  "institute": {
-    "empty": "",
-    "errors": {
-      "fetchList": {
-        "title": ""
-      }
-    },
-    "form": {
-      "name": {
-        "label": "",
-        "placeholder": "",
-        "required": ""
-      },
-      "provider": {
-        "label": "",
-        "placeholder": ""
-      },
-      "token": {
-        "label": "",
-        "placeholder": ""
-      }
-    },
-    "manual": "",
-    "title": "",
-    "withOAuth": ""
-  },
-  "magic": {
-    "about": {
-      "thanks": "",
-      "title": ""
-    },
-    "sakana": {
-      "illustration": "",
-      "source": "",
-      "title": ""
-    }
-  },
-  "media": {
-    "form": {
-      "antiTheft": {
-        "label": ""
-      },
-      "limit": {
-        "label": ""
-      },
-      "path": {
-        "label": "",
-        "placeholder": ""
-      }
-    },
-    "title": ""
-  },
-  "notification": {
-    "empty": "",
-    "title": ""
-  },
-  "oauth": {
-    "configured": "",
-    "form": {
-      "name": {
-        "label": "",
-        "placeholder": "",
-        "required": ""
-      },
-      "portal": {
-        "invalid": "",
-        "label": "",
-        "placeholder": ""
-      },
-      "provider": {
-        "invalid": "",
-        "label": "",
-        "maximumLength": "",
-        "minimumLength": "",
-        "placeholder": "",
-        "required": ""
-      },
-      "script": {
-        "label": "",
-        "preset": {
-          "email": "",
-          "oauth2AuthCode": "",
-          "placeholder": "",
-          "yaleCas": ""
-        },
-        "required": ""
-      }
-    },
-    "title": ""
-  },
-  "platform": {
-    "cookiePolicy": "",
-    "email": {
-      "form": {
-        "enabled": "",
-        "host": {
-          "label": "",
-          "placeholder": "",
-          "required": ""
-        },
-        "password": {
-          "label": "",
-          "placeholder": "",
-          "required": ""
-        },
-        "port": {
-          "invalid": "",
-          "label": "",
-          "placeholder": "",
-          "required": ""
-        },
-        "resetPasswordEmailBody": {
-          "label": "",
-          "required": ""
-        },
-        "resetPasswordEmailSubject": {
-          "label": "",
-          "placeholder": "",
-          "required": ""
-        },
-        "sender": {
-          "label": "",
-          "placeholder": "",
-          "required": ""
-        },
-        "tls": {
-          "label": "",
-          "placeholder": "",
-          "required": ""
-        },
-        "username": {
-          "label": "",
-          "placeholder": "",
-          "required": ""
-        },
-        "verifyEmailBody": {
-          "label": "",
-          "required": ""
-        },
-        "verifyEmailSubject": {
-          "label": "",
-          "placeholder": "",
-          "required": ""
-        }
-      },
-      "title": ""
-    },
-    "errors": {
-      "fetchConfig": {
-        "notReady": "",
-        "title": ""
-      },
-      "internal": {
-        "title": ""
-      },
-      "maintaining": {
-        "message": "",
-        "title": ""
-      },
-      "notImplemented": {
-        "hello": "",
-        "message": "",
-        "title": ""
-      },
-      "offline": {
-        "message": "",
-        "title": ""
-      },
-      "tooNarrow": {
-        "message": "",
-        "title": ""
-      },
-      "versionMismatch": {
-        "message": "",
-        "title": ""
-      }
-    },
-    "form": {
-      "footerInfo": {
-        "label": "",
-        "placeholder": ""
-      },
-      "footerUrl": {
-        "label": "",
-        "placeholder": ""
-      },
-      "hideMaker": {
-        "disabled": "",
-        "label": ""
-      },
-      "highlightBanner": {
-        "label": "",
-        "placeholder": ""
-      },
-      "name": {
-        "label": ""
-      },
-      "record": {
-        "label": "",
-        "placeholder": ""
-      },
-      "subjectInfo": {
-        "label": ""
-      },
-      "subjectUrl": {
-        "label": ""
-      },
-      "title": ""
-    },
-    "logs": {
-      "enableStreamWarning": "",
-      "errors": {
-        "fetchList": {
-          "title": ""
-        },
-        "socketClosed": {
-          "title": ""
-        }
-      },
-      "notStreaming": "",
-      "streamingEnabled": "",
-      "title": ""
-    },
-    "name": "",
-    "notifications": {
-      "clear": "",
-      "empty": "",
-      "title": ""
-    },
-    "ret2codec": {
-      "title": ""
-    },
-    "statistics": {
-      "errors": {
-        "fetch": {
-          "title": ""
-        }
-      },
-      "instituteUsers": {
-        "others": "",
-        "title": ""
-      },
-      "title": ""
-    },
-    "subject": "",
-    "sync": {
-      "title": ""
-    },
-    "theme": {
-      "followSystem": "",
-      "title": ""
-    },
-    "updated": ""
   },
   "shell": {
     "cat": {
+      "man": "ファイルの内容を表示します。",
       "errors": {
-        "fileNotFound": {
-          "title": ""
-        },
         "noFileSpecified": {
-          "title": ""
-        },
-        "read": {
-          "title": ""
+          "title": "ファイルが指定されていません。"
         },
         "tooManyFiles": {
-          "title": ""
+          "title": "パラメータが多すぎます！"
+        },
+        "fileNotFound": {
+          "title": "そのファイルやディレクトリは存在しません。"
+        },
+        "read": {
+          "title": "ファイルの読み込みに失敗しました。"
         }
-      },
-      "man": ""
-    },
-    "clear": {
-      "man": ""
-    },
-    "commandNotFound": "",
-    "echo": {
-      "man": ""
+      }
     },
     "errors": {
-      "commandInvalid": {
-        "title": ""
-      },
-      "noChallengeSpecified": {
-        "title": ""
-      },
       "noGameSpecified": {
-        "title": ""
+        "title": "有効なゲームパスにありません。"
       },
       "permissionDenied": {
-        "title": ""
+        "title": "アクセス権が不足しています。"
+      },
+      "noChallengeSpecified": {
+        "title": "有効な問題パスにありません。"
       },
       "traversalDetected": {
-        "title": ""
+        "title": "リモートホストがディレクトリトラバーサルを拒否しました。"
+      },
+      "commandInvalid": {
+        "title": "コマンドに構文エラーがあります"
       }
     },
     "help": {
-      "commands": "",
-      "man": ""
+      "man": "ヘルプ情報を出力します。",
+      "commands": "以下のコマンドを使用できます："
+    },
+    "welcome": "{{shell}}をご利用いただきありがとうございます！",
+    "tip": "この端末に形式に合った {{flag}} を直接入力すると提出できます。より多くの使用方法を取得するには、{{help}} を入力してください。",
+    "clear": {
+      "man": "端末の出力内容をクリアして再び開始します。"
+    },
+    "echo": {
+      "man": "あなたの入力をそのまま出力します。"
     },
     "ls": {
+      "man": "<ファイル>（デフォルトは現在のディレクトリ）の情報を一覧表示します。",
       "errors": {
-        "fileNotFound": {
-          "title": ""
-        },
         "invalidOption": {
-          "title": ""
-        },
-        "list": {
-          "title": ""
+          "title": "無効なオプション -- {{option}}"
         },
         "tooManyArgs": {
-          "title": ""
+          "title": "パラメータが多すぎます！"
         },
         "traversalDetected": {
-          "title": ""
+          "title": "リモートホストがディレクトリトラバーサルを拒否しました。"
+        },
+        "fileNotFound": {
+          "title": "そのファイルやディレクトリは存在しません。"
+        },
+        "list": {
+          "title": "ディレクトリへのアクセスにエラーが発生しました。"
         }
-      },
-      "man": ""
+      }
     },
     "service": {
-      "actions": {
-        "delay": {
-          "title": ""
-        },
-        "restart": {
-          "title": ""
-        },
-        "start": {
-          "title": ""
-        },
-        "status": {
-          "title": ""
-        },
-        "stop": {
-          "title": ""
-        }
-      },
+      "man": "問題環境サービスを管理します。",
       "errors": {
         "needAction": {
-          "title": ""
+          "title": "操作を指定してください。"
         }
       },
-      "man": "",
-      "starting": "",
-      "stopping": "",
-      "usage": ""
+      "usage": "使用方法：",
+      "actions": {
+        "start": {
+          "title": "問題環境サービスを起動します。"
+        },
+        "stop": {
+          "title": "問題環境サービスを停止します。このコマンドは他の問題の環境サービスをここで停止できます。"
+        },
+        "restart": {
+          "title": "問題環境サービスを再起動します。問題環境を間違って破損させたときに使用してください。"
+        },
+        "status": {
+          "title": "問題環境サービスの状態を表示します。"
+        },
+        "delay": {
+          "title": "問題環境の存在時間を延長します。問題環境を起動した後、デフォルトで1時間のサービス時間が設定されています。時間が足りないと感じたら、このコマンドを使用してください。"
+        }
+      },
+      "starting": "{{service}}を起動中...",
+      "stopping": "{{service}}を停止中..."
     },
     "submit": {
+      "man": "この問題のflagをプラットフォームに提出します。",
+      "submitting": "提出中...",
+      "waitingForChecking": "提出しました。評価を待っています...",
       "errors": {
         "timeout": {
-          "title": ""
+          "title": "現在、評価キューが長すぎます。5分後に更新して評価結果を確認してください。繰り返し送信しないでください。"
         }
-      },
-      "man": "",
-      "submitting": "",
-      "waitingForChecking": ""
+      }
     },
-    "tip": "",
-    "welcome": "",
     "wget": {
-      "downloading": "",
+      "man": "指定されたファイルをダウンロードします。",
+      "usage": "使用方法: wget \"<ファイル名>\"",
+      "downloading": "ダウンロード中",
       "errors": {
         "fileNotFound": {
-          "title": ""
+          "title": "そのファイルやディレクトリは存在しません。"
         }
-      },
-      "man": "",
-      "usage": ""
+      }
     },
     "whoami": {
-      "man": ""
+      "man": "現在の有効なユーザーIDに関連するユーザー名を表示します。"
+    },
+    "commandNotFound": "未知のコマンド: {{command}}"
+  },
+  "about": {
+    "contact": "プラットフォームソフトウェアサポート",
+    "donate": "寄付",
+    "source": "サポート"
+  },
+  "docs": {
+    "title": "開発者ドキュメント",
+    "tip": "ターミナルに戻る - 開発者ドキュメント",
+    "forVersion": "対応バージョン",
+    "intro": "概要"
+  },
+  "magic": {
+    "about": {
+      "thanks": "私の作品を使用していただきありがとうございます",
+      "title": "について"
+    },
+    "sakana": {
+      "title": "サカナ~",
+      "illustration": "イラスト",
+      "source": "コード"
     }
   },
   "team": {
-    "collab": "",
-    "coming": "",
-    "create": {
-      "title": ""
-    },
-    "empty": "",
-    "errors": {
-      "fetch": {
-        "title": ""
-      },
-      "fetchExtra": {
-        "title": ""
-      },
-      "fetchList": {
-        "title": ""
-      },
-      "fetchMember": {
-        "title": ""
-      },
-      "fetchSolves": {
-        "title": ""
-      },
-      "join": {
-        "title": ""
-      }
-    },
-    "extras": "",
-    "form": {
-      "acceptRules": {
-        "label": "",
-        "ok": "",
-        "required": "",
-        "title": ""
-      },
-      "extraReason": {
-        "placeholder": "",
-        "required": ""
-      },
-      "extraScore": {
-        "placeholder": "",
-        "required": ""
-      },
-      "institute": {
-        "label": "",
-        "placeholder": ""
-      },
-      "name": {
-        "chuunibyouGenerator": "",
-        "customDisabled": "",
-        "label": "",
-        "maximumLength": "",
-        "placeholder": "",
-        "required": ""
-      },
-      "state": {
-        "label": ""
-      },
-      "tag": {
-        "label": "",
-        "maximumLength": "",
-        "placeholder": ""
-      }
-    },
-    "join": {
-      "form": {
-        "token": {
-          "label": "",
-          "placeholder": "",
-          "required": ""
-        }
-      },
-      "title": ""
-    },
-    "list": {
-      "filter": "",
-      "selectInstitute": "",
-      "title": ""
-    },
-    "noExtras": "",
-    "noSolves": "",
-    "scoreChart": "",
-    "selfManagement": "",
-    "solo": "",
-    "solves": "",
-    "solvesJournal": "",
-    "sortBy": "",
     "status": {
+      "pending": {
+        "title": "承認待ち",
+        "message": "チーム名にセンシティブなキーワードが含まれています。管理者に承認を依頼してください",
+        "placeholder": "チームは承認待ちです"
+      },
       "banned": {
-        "message": "",
-        "title": ""
+        "message": "不正行為のため、チームはブロックされました",
+        "title": "ブロック済み"
       },
       "empty": {
-        "message": ""
+        "message": "まだ参加していないため、まず参加してください"
       },
       "hidden": {
-        "title": ""
+        "title": "非表示済み"
       },
+      "title": "チームの状態",
       "passed": {
-        "title": ""
-      },
-      "pending": {
-        "message": "",
-        "placeholder": "",
-        "title": ""
-      },
-      "title": ""
+        "title": "正常"
+      }
     },
-    "title": "",
-    "token": ""
-  },
-  "traffic": {
-    "nodeSelector": "",
-    "preset": {
-      "multiNodeDirectScript": "",
-      "singleNodeDirectScript": "",
-      "title": ""
-    },
-    "title": ""
-  },
-  "training": {
-    "empty": "",
     "errors": {
-      "fetchArchives": {
-        "title": ""
-      },
       "fetchList": {
-        "title": ""
+        "title": "チーム一覧の取得に失敗しました"
       },
-      "fetchTraining": {
-        "title": ""
-      },
-      "gameNotArchived": {
-        "message": "",
-        "title": ""
-      }
-    },
-    "form": {
-      "brief": {
-        "label": "",
-        "placeholder": "",
-        "required": ""
-      },
-      "name": {
-        "label": "",
-        "placeholder": "",
-        "required": ""
-      }
-    },
-    "list": "",
-    "noArchives": "",
-    "openForever": "",
-    "placeholder": "",
-    "title": ""
-  },
-  "user": {
-    "description": {
-      "empty": "",
-      "title": ""
-    },
-    "errors": {
       "fetch": {
-        "title": ""
+        "title": "チーム情報の取得に失敗しました"
       },
-      "fetchIpList": {
-        "title": ""
+      "join": {
+        "title": "チームへの参加に失敗しました"
       },
-      "fetchList": {
-        "title": ""
+      "fetchMember": {
+        "title": "チームメンバーの取得に失敗しました"
       },
-      "fetchOAuth": {
-        "title": ""
+      "fetchSolves": {
+        "title": "問題解決状況の取得に失敗しました"
+      },
+      "fetchExtra": {
+        "title": "追加スコア変動の取得に失敗しました"
       }
     },
-    "filter": "",
-    "gameJournal": "",
-    "gotoAdminPanel": "",
-    "joinedGames": "",
+    "title": "参加チーム",
+    "coming": "登場！",
+    "empty": "チームはありません",
+    "join": {
+      "title": "チームに参加",
+      "form": {
+        "token": {
+          "required": "チームキーは空にできません",
+          "label": "チームキー",
+          "placeholder": "チームキーを入力してください"
+        }
+      }
+    },
+    "create": {
+      "title": "チームを作成"
+    },
+    "solo": "シングル戦",
+    "collab": "{{size}} 人チーム戦",
     "list": {
-      "title": ""
+      "title": "チーム一覧",
+      "selectInstitute": "組織を選択...",
+      "filter": "チーム名でフィルター"
     },
-    "management": {
-      "confirmDelete": "",
-      "goToUserDetailPage": "",
-      "title": ""
-    },
-    "moreJournal": "",
-    "registeredAt": "",
-    "sortBy": "",
-    "status": {
-      "deleted": {
-        "title": ""
-      },
-      "valid": {
-        "title": ""
-      }
-    },
-    "title": "",
-    "total": ""
-  },
-  "wiki": {
-    "errors": {
-      "fetch": {
-        "title": ""
-      },
-      "fetchToc": {
-        "title": ""
-      }
-    },
+    "sortBy": "並び順",
     "form": {
-      "content": {
-        "label": "",
-        "placeholder": "",
-        "required": ""
+      "name": {
+        "label": "チーム名",
+        "required": "チーム名を入力してください",
+        "maximumLength": "最大 32 文字まで",
+        "customDisabled": "チーム名は変更できません",
+        "placeholder": "チーム名を入力してください",
+        "chuunibyouGenerator": "中二病ジェネレーター"
       },
-      "createdAt": {
-        "label": ""
+      "institute": {
+        "label": "所属組織",
+        "placeholder": "所属組織を選択してください"
       },
-      "draft": {
-        "label": ""
+      "state": {
+        "label": "チーム状態"
+      },
+      "tag": {
+        "maximumLength": "タグ文字は32文字を超えてはなりません",
+        "label": "タグ文字",
+        "placeholder": "タグ文字を入力してください"
+      },
+      "acceptRules": {
+        "required": "参加規則に同意してください",
+        "label": "参加規則に同意",
+        "title": "参加規則の注意事項",
+        "ok": "参加規則に同意しました"
+      },
+      "extraScore": {
+        "placeholder": "追加スコア変動を入力してください",
+        "required": "追加スコア変動は空にできません"
+      },
+      "extraReason": {
+        "placeholder": "追加スコア変動の理由を入力してください",
+        "required": "追加スコア変動の理由は空にできません"
+      }
+    },
+    "selfManagement": "チーム管理",
+    "token": "チームのシークレット",
+    "scoreChart": "スコア曲線",
+    "solves": "問題の解決状況",
+    "noSolves": "解かれた問題はありません",
+    "solvesJournal": "{{user}} さんが {{challenge}} を解決しました。",
+    "extras": "追加スコアの変動",
+    "noExtras": "追加スコアの変動はありません"
+  },
+  "notification": {
+    "empty": "未読メッセージはありません",
+    "title": "ヒントメッセージ"
+  },
+  "bulletin": {
+    "title": "公告",
+    "errors": {
+      "fetchList": {
+        "title": "公告リストの取得に失敗しました"
+      },
+      "fetch": {
+        "title": "公告内容の取得に失敗しました"
+      }
+    },
+    "empty": "公告はまだありません",
+    "form": {
+      "title": {
+        "required": "タイトルは空にできません",
+        "placeholder": "公告タイトルを入力してください",
+        "label": "公告タイトル"
       },
       "enableComment": {
-        "label": ""
+        "label": "コメントを有効にする"
       },
-      "path": {
-        "label": "",
-        "placeholder": "",
-        "required": ""
+      "content": {
+        "required": "公告内容を入力してください",
+        "label": "公告内容"
       },
-      "published": {
-        "label": ""
-      },
-      "title": {
-        "label": "",
-        "placeholder": "",
-        "required": ""
+      "createdAt": {
+        "label": "{{time}} に公開"
       },
       "updatedAt": {
-        "label": ""
+        "label": "{{time}} に更新"
       }
     },
-    "placeholder": "",
-    "title": "",
-    "unknownPublisher": ""
+    "unknownPublisher": "匿名"
   },
-  "wsrx": {
-    "actions": {
-      "copy": {
-        "title": ""
-      },
-      "copyLocal": {
-        "title": ""
-      },
-      "deleteAll": {
-        "title": ""
-      },
-      "deleteOutdated": {
-        "title": ""
-      },
-      "openAll": {
-        "title": ""
-      },
-      "refresh": {
-        "title": ""
-      },
-      "resetDefault": {
-        "title": ""
-      },
-      "retry": {
-        "title": ""
-      }
-    },
-    "download": {
-      "message": "",
-      "title": ""
-    },
-    "downloadClient": "",
-    "errors": {
-      "createTunnel": {
-        "message": "",
-        "title": ""
-      },
-      "daemonError": {
-        "message": "",
-        "title": ""
-      },
-      "daemonOffline": {
-        "message": "",
-        "title": ""
-      },
-      "deleteTunnel": {
-        "message": "",
-        "title": ""
-      },
-      "disconnected": {
-        "message": "",
-        "title": ""
-      },
-      "fetchTunnel": {
-        "message": "",
-        "title": ""
-      },
-      "versionMismatch": {
-        "message": "",
-        "title": ""
-      }
-    },
-    "retry": "",
-    "settings": {
-      "address": {
-        "invalid": "",
-        "label": "",
-        "placeholder": "",
-        "required": ""
-      },
-      "title": ""
-    },
+  "admin": {
+    "title": "管理"
+  },
+  "traffic": {
+    "title": "環境ルーティング",
+    "nodeSelector": "ノードセレクター",
+    "preset": {
+      "title": "スクリプトプリセット",
+      "singleNodeDirectScript": "単一ノード直結",
+      "multiNodeDirectScript": "マルチノード直結"
+    }
+  },
+  "cluster": {
+    "title": "クラスタ管理",
     "status": {
-      "connecting": {
-        "title": ""
+      "available": {
+        "title": "クラスタは正常に動作中です"
       },
-      "invalid": {
-        "title": ""
-      },
-      "pending": {
-        "title": ""
-      },
-      "usable": {
-        "title": ""
+      "unavailable": {
+        "title": "クラスタがオフライン"
       }
     },
-    "title": "",
-    "tunnels": ""
+    "nodeInfo": {
+      "title": "ノード情報",
+      "architecture": "アーキテクチャ",
+      "bootID": "起動 ID",
+      "containerRuntimeVersion": "コンテナランタイム",
+      "kernelVersion": "カーネルバージョン",
+      "machineID": "マシン ID",
+      "operatingSystem": "オペレーティングシステム",
+      "osImage": "リリース版",
+      "systemUUID": "システム UUID",
+      "kubeletVersion": "Kubelet",
+      "kubeProxyVersion": "Kube Proxy"
+    },
+    "selectNode": "ノードを選択",
+    "actions": {
+      "refreshNode": {
+        "title": "ノードを更新"
+      },
+      "updateNode": {
+        "title": "ノードをアップグレード"
+      },
+      "disconnectNode": {
+        "title": "ノードを切断"
+      }
+    },
+    "nodeResources": {
+      "title": "ノードリソース"
+    },
+    "errors": {
+      "fetchNodes": {
+        "title": "クラスターノード情報の取得に失敗しました"
+      }
+    }
+  },
+  "oauth": {
+    "title": "サードパーティ認証",
+    "form": {
+      "provider": {
+        "required": "サードパーティ認証識別子は空にできません",
+        "label": "サードパーティ認証識別子",
+        "placeholder": "サードパーティ認証識別子を入力してください",
+        "minimumLength": "識別子は少なくとも 2 文字以上である必要があります",
+        "maximumLength": "識別子は最大で 32 文字までです",
+        "invalid": "識別子には小文字、数字、アンダースコアのみが使用できます"
+      },
+      "name": {
+        "required": "サードパーティ認証サービス名は空にできません",
+        "label": "サードパーティ認証サービス名",
+        "placeholder": "サードパーティ認証サービス名を入力してください"
+      },
+      "portal": {
+        "invalid": "認証サービスポータルアドレスの形式が正しくありません",
+        "label": "認証サービスポータルアドレス",
+        "placeholder": "認証サービスポータルアドレスを入力してください。空にするとログイン機能が無効になります（検証のみ）"
+      },
+      "script": {
+        "label": "認証サービススクリプト",
+        "preset": {
+          "placeholder": "スクリプトプリセットを選択...",
+          "email": "メールアドレスの接尾辞一致",
+          "yaleCas": "ユールCAS認証",
+          "oauth2AuthCode": "OAuth2認証コードモード"
+        },
+        "required": "認証サービススクリプトを入力してください"
+      }
+    },
+    "configured": "設定済み"
+  },
+  "media": {
+    "title": "メディアストレージ",
+    "form": {
+      "path": {
+        "label": "メディアストレージのパス",
+        "placeholder": "メディアストレージのパスを入力してください"
+      },
+      "antiTheft": {
+        "label": "盗難防止リンク"
+      },
+      "limit": {
+        "label": "週次アップロード制限"
+      }
+    }
+  },
+  "captures": {
+    "title": "コンテナトラフィック"
+  },
+  "institute": {
+    "errors": {
+      "fetchList": {
+        "title": "組織一覧の取得に失敗しました"
+      }
+    },
+    "empty": "組織なし",
+    "form": {
+      "name": {
+        "required": "組織名は必須です",
+        "label": "組織名",
+        "placeholder": "組織名を入力してください"
+      },
+      "provider": {
+        "label": "サードパーティ認証識別子",
+        "placeholder": "サードパーティ認証識別子を入力してください"
+      },
+      "token": {
+        "label": "管理キー",
+        "placeholder": "管理キーを入力してください"
+      }
+    },
+    "title": "組織管理",
+    "manual": "手動管理",
+    "withOAuth": "認証サービスを使用"
   }
 }
