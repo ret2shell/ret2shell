@@ -182,8 +182,8 @@ export default function GameEdit(props: {
             type="number"
             validate={[
               required(t("game.form.teamSize.required")!),
-              minRange(1, t("game.form.team.minimum")!),
-              maxRange(99, t("game.form.team.maximum")!),
+              minRange(1, t("game.form.teamSize.minimum")!),
+              maxRange(99, t("game.form.teamSize.maximum")!),
             ]}
           >
             {(field, props) => (

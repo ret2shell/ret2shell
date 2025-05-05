@@ -409,7 +409,6 @@
       "title": ""
     },
     "empty": "",
-    "enter": "",
     "errors": {
       "down": {
         "title": ""
@@ -993,10 +992,7 @@
         "placeholder": "",
         "required": ""
       },
-      "team": {
-        "maximum": "",
-        "minimum": ""
-      },
+      "team": {},
       "teamSize": {
         "label": "",
         "maximum": "",
@@ -1159,7 +1155,6 @@
       "title": ""
     },
     "timeLast": "",
-    "timeLasted": "",
     "timeline": {
       "deleteWarning": "",
       "empty": "",
@@ -1834,7 +1829,6 @@
         "title": ""
       }
     },
-    "extraScore": "",
     "extras": "",
     "form": {
       "acceptRules": {

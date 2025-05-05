@@ -531,7 +531,6 @@
     "end": "结束",
     "archived": "已归档",
     "archive": "归档",
-    "timeLasted": "距离 {{ period }} 还有",
     "welcome": "欢迎参赛",
     "introduction": {
       "title": "赛事介绍",
@@ -686,10 +685,6 @@
         "label": "允许赛事开始后报名",
         "placeholder": "是否允许赛事开始后报名",
         "message": "允许后，选手可以在赛事开始后报名参赛"
-      },
-      "team": {
-        "minimum": "队伍人数不能小于 1",
-        "maximum": "队伍人数不能大于 99"
       },
       "introduction": {
         "label": "比赛介绍",
@@ -865,7 +860,6 @@
     "title": "题目",
     "list": "题目列表",
     "empty": "暂无题目",
-    "enter": "攻克挑战",
     "tag": {
       "title": "题目标签",
       "unknown": "未知分类"
@@ -1969,8 +1963,7 @@
     "noSolves": "没有已解出题目",
     "solvesJournal": "成员 {{user}} 解出了题目 {{challenge}}。",
     "extras": "额外分数变动",
-    "noExtras": "没有额外分数变动",
-    "extraScore": "额外分数变动"
+    "noExtras": "没有额外分数变动"
   },
   "notification": {
     "empty": "没有未读提示消息",

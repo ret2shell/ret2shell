@@ -531,7 +531,6 @@
     "end": "結束",
     "archived": "已歸檔",
     "archive": "歸檔",
-    "timeLasted": "距離 {{ period }} 還有",
     "welcome": "歡迎參賽",
     "introduction": {
       "title": "賽事介紹",
@@ -687,10 +686,7 @@
         "placeholder": "是否允許賽事開始後報名",
         "message": "允許後，選手可以在賽事開始後報名參賽"
       },
-      "team": {
-        "minimum": "隊伍人數不能小於 1",
-        "maximum": "隊伍人數不能大於 99"
-      },
+      "team": {},
       "introduction": {
         "label": "比賽介紹",
         "required": "比賽介紹不能為空"
@@ -865,7 +861,6 @@
     "title": "題目",
     "list": "題目列表",
     "empty": "暫無題目",
-    "enter": "攻克挑戰",
     "tag": {
       "title": "題目標籤",
       "unknown": "未知分類"
@@ -1969,8 +1964,7 @@
     "noSolves": "沒有已解出題目",
     "solvesJournal": "成員 {{user}} 解出了題目 {{challenge}}。",
     "extras": "額外分數變動",
-    "noExtras": "沒有額外分數變動",
-    "extraScore": "額外分數變動"
+    "noExtras": "沒有額外分數變動"
   },
   "notification": {
     "empty": "沒有未讀提示消息",
