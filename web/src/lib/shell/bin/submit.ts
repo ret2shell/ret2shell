@@ -30,7 +30,7 @@ export class Submit implements Command {
         if (s.solved !== null) {
           io.println("");
           if (s.solved) {
-            io.success(`${t("challenge.submission.status.solved")}: ${s.result}`);
+            io.success(`${t("challenge.submission.status.solved.title")}: ${s.result}`);
             refreshStatus();
             refreshSolves();
             if (inProgress() && !isGameAdmin()) {
@@ -39,7 +39,7 @@ export class Submit implements Command {
               refreshCurrentChallenge();
             }
           } else {
-            io.error(`${t("challenge.submission.status.failed")}: ${s.result}`);
+            io.error(`${t("challenge.submission.status.failed.title")}: ${s.result}`);
           }
           checked = true;
           break;

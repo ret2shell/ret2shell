@@ -44,7 +44,7 @@ export default function CreatePlayground(props: { onDone: (game: Game) => void }
       archive_policy: { challenge: { show_answer: false, show_hints: false } },
       timeline_presets: [],
       award_rate: 0,
-      award_rates: [0,0,0],
+      award_rates: [0, 0, 0],
       node_selector: null,
       traffic: null,
       bucket: null,

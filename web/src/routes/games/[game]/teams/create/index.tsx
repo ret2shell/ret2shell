@@ -84,10 +84,7 @@ export default function () {
             <h2 class="font-bold text-center">{t("team.create.title")}</h2>
             <Field
               name="name"
-              validate={[
-                required(t("team.form.name.required")!),
-                maxLength(32, t("team.form.name.maximumLength")!),
-              ]}
+              validate={[required(t("team.form.name.required")!), maxLength(32, t("team.form.name.maximumLength")!)]}
             >
               {(field, props) => (
                 <Input

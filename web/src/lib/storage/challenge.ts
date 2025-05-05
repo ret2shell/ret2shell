@@ -36,7 +36,7 @@ export async function refreshChallenges() {
     const result = await getChallengeList(gameStore.current!.id);
     setChallengeStore({ challenges: result[0] });
   } catch (err) {
-    handleHttpError(err as Error, t("challenge.errors.fetchChallenge.title")!);
+    handleHttpError(err as Error, t("challenge.errors.fetch.title")!);
   }
 }
 
@@ -87,6 +87,6 @@ export async function refreshCurrentChallenge() {
     setChallengeStore({ current: resp });
     refreshChallengeAssets();
   } catch (err) {
-    handleHttpError(err as Error, t("challenge.errors.fetchChallenge.title")!);
+    handleHttpError(err as Error, t("challenge.errors.fetch.title")!);
   }
 }

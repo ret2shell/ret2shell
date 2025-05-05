@@ -69,7 +69,7 @@ export default function () {
           setChallengeStore({ current: resp });
           refreshChallengeAssets();
         } catch (err) {
-          handleHttpError(err as Error, t("challenge.errors.fetchChallenge.title")!);
+          handleHttpError(err as Error, t("challenge.errors.fetch.title")!);
           setSearchParams({ challenge: null, create: null });
         }
         setLoadingChallenge(false);

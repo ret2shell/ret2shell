@@ -1,20 +1,348 @@
 {
+  "about": {
+    "contact": "",
+    "donate": "",
+    "source": ""
+  },
+  "account": {
+    "code": {
+      "empty": "",
+      "status": {
+        "unverified": {
+          "action": "",
+          "message": ""
+        }
+      },
+      "tip": "",
+      "title": ""
+    },
+    "delete": {
+      "bye": {
+        "message": "",
+        "title": ""
+      },
+      "canNotDeleteWhenGameInProgress": "",
+      "confirm": "",
+      "declare": {
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "title": ""
+      },
+      "errors": {
+        "delete": {
+          "title": ""
+        }
+      },
+      "thinkTwice": "",
+      "title": "",
+      "topWarning": ""
+    },
+    "errors": {
+      "fetchCode": {
+        "title": ""
+      }
+    },
+    "forgot": {
+      "form": {
+        "email": {
+          "invalid": "",
+          "label": "",
+          "placeholder": "",
+          "required": ""
+        }
+      },
+      "status": {
+        "rateExceeded": {
+          "message": ""
+        },
+        "success": {
+          "message": ""
+        }
+      },
+      "title": ""
+    },
+    "form": {
+      "account": {
+        "invalid": "",
+        "label": "",
+        "maximumLength": "",
+        "minimumLength": "",
+        "placeholder": "",
+        "required": ""
+      },
+      "banned": {
+        "label": ""
+      },
+      "description": {
+        "label": ""
+      },
+      "email": {
+        "invalid": "",
+        "label": "",
+        "placeholder": "",
+        "required": ""
+      },
+      "hidden": {
+        "label": ""
+      },
+      "institute": {
+        "label": "",
+        "placeholder": ""
+      },
+      "ips": {
+        "label": ""
+      },
+      "nickname": {
+        "label": "",
+        "maxLength": "",
+        "minLength": "",
+        "placeholder": "",
+        "required": ""
+      },
+      "oauths": {
+        "label": ""
+      },
+      "oldPassword": {
+        "label": "",
+        "placeholder": "",
+        "required": ""
+      },
+      "password": {
+        "confirmLabel": "",
+        "confirmMismatch": "",
+        "confirmPlaceholder": "",
+        "confirmRequired": "",
+        "label": "",
+        "minimumLength": "",
+        "placeholder": "",
+        "required": "",
+        "tooWeak": ""
+      },
+      "registeredAt": {
+        "label": ""
+      }
+    },
+    "info": {
+      "title": ""
+    },
+    "login": {
+      "errors": {
+        "login": {
+          "title": ""
+        }
+      },
+      "status": {
+        "success": {
+          "message": ""
+        }
+      },
+      "title": ""
+    },
+    "logout": "",
+    "oauth": {
+      "actions": {
+        "bind": {
+          "title": ""
+        },
+        "unbind": {
+          "title": ""
+        }
+      },
+      "errors": {
+        "bind": {
+          "title": ""
+        },
+        "fetchProvider": {
+          "title": ""
+        },
+        "fetchStatus": {
+          "title": ""
+        },
+        "unbind": {
+          "title": ""
+        }
+      },
+      "notBind": "",
+      "select": "",
+      "title": ""
+    },
+    "password": {
+      "errors": {
+        "change": {
+          "title": ""
+        }
+      },
+      "title": ""
+    },
+    "permission": {
+      "basic": "",
+      "bulletin": "",
+      "calendar": "",
+      "devOps": "",
+      "game": "",
+      "host": "",
+      "statistics": "",
+      "user": "",
+      "verified": "",
+      "wiki": ""
+    },
+    "register": {
+      "errors": {
+        "register": {
+          "title": ""
+        }
+      },
+      "oauthRegister": "",
+      "status": {
+        "success": {
+          "message": ""
+        }
+      },
+      "tips": "",
+      "title": ""
+    },
+    "reset": {
+      "errors": {
+        "invalidLink": {
+          "title": ""
+        },
+        "reset": {
+          "title": ""
+        }
+      },
+      "form": {
+        "token": {
+          "label": "",
+          "placeholder": "",
+          "required": ""
+        }
+      },
+      "status": {
+        "success": {
+          "message": ""
+        }
+      },
+      "title": ""
+    },
+    "settings": {
+      "title": ""
+    },
+    "status": {
+      "unverified": {
+        "action": "",
+        "message": ""
+      }
+    },
+    "verify": {
+      "errors": {
+        "verify": {
+          "title": ""
+        }
+      },
+      "status": {
+        "broken": {
+          "title": ""
+        },
+        "success": {
+          "title": ""
+        },
+        "verifying": {
+          "title": ""
+        }
+      },
+      "title": ""
+    }
+  },
+  "admin": {
+    "title": ""
+  },
+  "bulletin": {
+    "empty": "",
+    "errors": {
+      "fetch": {
+        "title": ""
+      },
+      "fetchList": {
+        "title": ""
+      }
+    },
+    "form": {
+      "content": {
+        "label": "",
+        "required": ""
+      },
+      "createdAt": {
+        "label": ""
+      },
+      "enableComment": {
+        "label": ""
+      },
+      "title": {
+        "label": "",
+        "placeholder": "",
+        "required": ""
+      },
+      "updatedAt": {
+        "label": ""
+      }
+    },
+    "title": "",
+    "unknownPublisher": ""
+  },
+  "calendar": {
+    "actions": {
+      "nextMonth": {
+        "title": ""
+      },
+      "nextYear": {
+        "title": ""
+      },
+      "prevMonth": {
+        "title": ""
+      },
+      "prevYear": {
+        "title": ""
+      },
+      "today": {
+        "title": ""
+      }
+    },
+    "day": {
+      "fri": "",
+      "mon": "",
+      "sat": "",
+      "sun": "",
+      "thu": "",
+      "tue": "",
+      "wed": ""
+    },
+    "endAt": "",
+    "startAt": ""
+  },
   "captcha": {
     "calculating": "",
     "errors": {
       "fetch": {
-        "message": "",
         "title": ""
       }
     },
     "fetching": "",
     "form": {
+      "answer": {
+        "minimumLength": "",
+        "required": ""
+      },
       "difficulty": {
         "label": "",
         "mustBeNumber": "",
         "mustBePositiveNumber": "",
         "placeholder": "",
         "required": ""
+      },
+      "enabled": {
+        "label": ""
       },
       "validator": {
         "label": "",
@@ -24,16 +352,12 @@
           "image": "",
           "pow": ""
         }
-      },
-      "answer": {
-        "required": "",
-        "minimumLength": ""
-      },
-      "enabled": {
-        "label": ""
       }
     },
     "label": "",
+    "title": ""
+  },
+  "captures": {
     "title": ""
   },
   "challenge": {
@@ -51,7 +375,6 @@
       "empty": "",
       "errors": {
         "fetchAnswer": {
-          "message": "",
           "title": ""
         },
         "invisibleBeforeArchive": {
@@ -64,7 +387,6 @@
     "checker": {
       "errors": {
         "fetchCheckerScript": {
-          "message": "",
           "title": ""
         }
       },
@@ -92,20 +414,10 @@
       "down": {
         "title": ""
       },
-      "fetchChallenge": {
-        "message": "",
-        "title": ""
-      },
-      "fetchChallengeFiles": {
-        "message": "",
-        "title": ""
-      },
-      "fetchChallengeStatus": {
-        "message": "",
+      "fetch": {
         "title": ""
       },
       "fetchList": {
-        "message": "",
         "title": ""
       },
       "up": {
@@ -116,15 +428,12 @@
       "empty": "",
       "errors": {
         "deleteFiles": {
-          "message": "",
           "title": ""
         },
         "fetchFiles": {
-          "message": "",
           "title": ""
         },
         "uploadFiles": {
-          "message": "",
           "title": ""
         }
       },
@@ -186,18 +495,15 @@
       "adminGoto": "",
       "errors": {
         "fetch": {
-          "message": "",
           "title": ""
         },
         "fetchSolve": {
-          "message": "",
           "title": ""
         },
         "maxMessageLimit": {
           "title": ""
         },
         "send": {
-          "message": "",
           "title": ""
         }
       },
@@ -220,11 +526,9 @@
       "empty": "",
       "errors": {
         "fetch": {
-          "message": "",
           "title": ""
         },
         "unlock": {
-          "message": "",
           "title": ""
         }
       },
@@ -242,6 +546,7 @@
       "title": "",
       "unlockConfirm": ""
     },
+    "inGame": "",
     "instance": {
       "actions": {
         "addImage": {
@@ -268,14 +573,12 @@
           "title": ""
         },
         "delay": {
-          "message": "",
           "title": ""
         },
         "fetchConfigImages": {
           "title": ""
         },
         "fetchInstances": {
-          "message": "",
           "title": ""
         },
         "fetchRegistry": {
@@ -284,33 +587,31 @@
         "managedByMate": {
           "title": ""
         },
+        "noAction": {
+          "title": ""
+        },
+        "noConfig": {
+          "title": ""
+        },
         "noExportedServices": {
           "message": "",
           "title": ""
         },
+        "singleton": {
+          "action": "",
+          "current": "",
+          "title": ""
+        },
         "start": {
-          "message": "",
           "title": ""
         },
         "stop": {
-          "message": "",
           "title": ""
         },
         "toggleNetworkConfig": {
           "title": ""
         },
         "toggleRestrict": {
-          "title": ""
-        },
-        "noConfig": {
-          "title": ""
-        },
-        "singleton": {
-          "title": "",
-          "current": "",
-          "action": ""
-        },
-        "noAction": {
           "title": ""
         }
       },
@@ -418,21 +719,20 @@
       },
       "empty": "",
       "errors": {
+        "fetchCommitHistory": "",
         "fetchStatistics": {
-          "message": "",
           "title": ""
         },
         "fetchSubmission": {
           "title": ""
-        },
-        "fetchCommitHistory": ""
+        }
       },
+      "showAll": "",
       "solves": {
         "subject": "",
         "title": ""
       },
-      "title": "",
-      "showAll": ""
+      "title": ""
     },
     "status": {
       "archived": {
@@ -459,6 +759,33 @@
         "title": ""
       }
     },
+    "submission": {
+      "errors": {
+        "fetchSolveStatus": {
+          "title": ""
+        },
+        "fetchSolves": {
+          "title": ""
+        },
+        "submit": {
+          "title": ""
+        }
+      },
+      "status": {
+        "failed": {
+          "title": ""
+        },
+        "pending": {
+          "title": ""
+        },
+        "solved": {
+          "title": ""
+        }
+      },
+      "submit": "",
+      "title": "",
+      "total": ""
+    },
     "tag": {
       "title": "",
       "unknown": ""
@@ -467,39 +794,130 @@
       "title": ""
     },
     "title": "",
-    "submission": {
-      "status": {
-        "failed": "",
-        "pending": "",
-        "solved": ""
-      },
-      "submit": "",
-      "errors": {
-        "submit": {
-          "title": ""
-        },
-        "fetchSolves": {
-          "title": ""
-        },
-        "fetchSolveStatus": {
-          "title": ""
-        }
-      },
-      "title": "",
-      "total": ""
-    },
-    "inGame": "",
     "total": ""
   },
+  "cluster": {
+    "actions": {
+      "disconnectNode": {
+        "title": ""
+      },
+      "refreshNode": {
+        "title": ""
+      },
+      "updateNode": {
+        "title": ""
+      }
+    },
+    "errors": {
+      "fetchNodes": {
+        "title": ""
+      }
+    },
+    "nodeInfo": {
+      "architecture": "",
+      "bootID": "",
+      "containerRuntimeVersion": "",
+      "kernelVersion": "",
+      "kubeProxyVersion": "",
+      "kubeletVersion": "",
+      "machineID": "",
+      "operatingSystem": "",
+      "osImage": "",
+      "systemUUID": "",
+      "title": ""
+    },
+    "nodeResources": {
+      "title": ""
+    },
+    "selectNode": "",
+    "status": {
+      "available": {
+        "title": ""
+      },
+      "unavailable": {
+        "title": ""
+      }
+    },
+    "title": ""
+  },
+  "docs": {
+    "forVersion": "",
+    "intro": "",
+    "tip": "",
+    "title": ""
+  },
   "game": {
+    "accessPolicy": {
+      "open": ""
+    },
     "admin": {
       "gotoChallenges": "",
       "title": ""
     },
+    "adminMode": "",
+    "administrator": {
+      "empty": "",
+      "errors": {
+        "alreadyAdded": {
+          "title": ""
+        },
+        "fetchList": {
+          "title": ""
+        },
+        "noPermission": {
+          "title": ""
+        }
+      },
+      "form": {
+        "confirm": {
+          "message": ""
+        },
+        "search": {
+          "placeholder": "",
+          "title": ""
+        }
+      },
+      "title": ""
+    },
     "archive": "",
     "archived": "",
+    "canNotParticipate": "",
+    "delete": {
+      "confirm": "",
+      "requirements": "",
+      "title": "",
+      "warning": ""
+    },
     "end": "",
     "ended": "",
+    "enterChallenge": "",
+    "errors": {
+      "fetch": {
+        "title": ""
+      },
+      "fetchIntroduction": {
+        "title": ""
+      },
+      "fetchList": {
+        "title": ""
+      },
+      "regenerateToken": {
+        "title": ""
+      }
+    },
+    "events": {
+      "emptyDevices": "",
+      "errors": {
+        "fetchDevices": {
+          "title": ""
+        }
+      },
+      "howto": "",
+      "linkedDevices": "",
+      "regenerateTokenWarning": "",
+      "title": "",
+      "tokenWarning": ""
+    },
     "form": {
       "archiveAt": {
         "canNotEarlierThanStart": "",
@@ -548,6 +966,10 @@
         "message": "",
         "placeholder": ""
       },
+      "introduction": {
+        "label": "",
+        "required": ""
+      },
       "misc": {
         "label": ""
       },
@@ -571,36 +993,52 @@
         "placeholder": "",
         "required": ""
       },
+      "team": {
+        "maximum": "",
+        "minimum": ""
+      },
       "teamSize": {
         "label": "",
+        "maximum": "",
+        "minimum": "",
         "mustBeNumber": "",
         "mustBePositiveNumber": "",
         "placeholder": "",
-        "required": "",
-        "minimum": "",
-        "maximum": ""
+        "required": ""
       },
       "title": "",
       "weight": {
         "label": ""
-      },
-      "team": {
-        "minimum": "",
-        "maximum": ""
-      },
-      "introduction": {
-        "label": "",
-        "required": ""
       }
     },
-    "introduction": {
+    "git": {
+      "title": ""
+    },
+    "gotoTraining": "",
+    "hammer": {
       "empty": "",
       "errors": {
-        "fetchIntroduction": {
-          "message": "",
+        "fetchSessions": {
           "title": ""
         }
       },
+      "newMessages": "",
+      "placeholder": "",
+      "status": {
+        "adminUnread": {
+          "title": ""
+        },
+        "notReply": {
+          "title": ""
+        },
+        "playerUnread": {
+          "title": ""
+        }
+      },
+      "title": ""
+    },
+    "introduction": {
+      "empty": "",
       "form": {
         "content": {
           "label": "",
@@ -611,8 +1049,12 @@
       "title": ""
     },
     "list": "",
+    "loginThenBack": "",
+    "manageChallenges": "",
+    "miscSettings": "",
     "monitor": {
-      "title": "",
+      "audits": "",
+      "autoRefreshEnabled": "",
       "empty": "",
       "errors": {
         "fetchAudit": {
@@ -623,93 +1065,55 @@
         }
       },
       "status": {
+        "confirmed": {
+          "title": ""
+        },
         "misjudged": {
           "title": ""
         },
         "pending": {
           "title": ""
-        },
-        "confirmed": {
-          "title": ""
         }
       },
-      "autoRefreshEnabled": "",
       "submissions": "",
-      "audits": ""
+      "title": ""
     },
     "noGameHosted": "",
     "noOtherGames": "",
+    "notArchived": "",
     "notStarted": "",
+    "notification": {
+      "empty": "",
+      "errors": {
+        "fetch": {
+          "title": ""
+        }
+      },
+      "form": {
+        "content": {
+          "label": "",
+          "required": ""
+        },
+        "title": {
+          "label": "",
+          "placeholder": "",
+          "required": ""
+        }
+      }
+    },
+    "organize": {
+      "actions": {
+        "restrict": {
+          "confirm": "",
+          "title": ""
+        }
+      },
+      "instituteEnabled": "",
+      "title": ""
+    },
     "otherGames": "",
     "pending": "",
-    "scoreboard": {
-      "currentPeriod": "",
-      "empty": "",
-      "errors": {
-        "fetchScoreboard": {
-          "message": "",
-          "title": ""
-        }
-      },
-      "selectInstitute": "",
-      "title": ""
-    },
-    "start": "",
-    "started": "",
-    "statistics": {
-      "title": "",
-      "errors": {
-        "fetch": "",
-        "export": ""
-      },
-      "selectInstitute": "",
-      "submission": "",
-      "challengeStats": "",
-      "players": "",
-      "institutePlayers": "",
-      "others": "",
-      "teams": "",
-      "instituteTeams": ""
-    },
-    "timeLasted": "",
-    "title": "",
-    "welcome": "",
-    "writeups": {
-      "empty": "",
-      "title": ""
-    },
-    "administrator": {
-      "errors": {
-        "fetchList": {
-          "title": ""
-        },
-        "noPermission": {
-          "title": ""
-        },
-        "alreadyAdded": {
-          "title": ""
-        }
-      },
-      "title": "",
-      "form": {
-        "search": {
-          "title": "",
-          "placeholder": ""
-        },
-        "confirm": {
-          "message": ""
-        }
-      },
-      "empty": ""
-    },
-    "management": {},
-    "git": {
-      "title": ""
-    },
-    "registerNotStarted": "",
-    "registerEnded": "",
     "policies": {
-      "title": "",
       "form": {
         "challenge": {
           "showAnswer": {
@@ -719,20 +1123,56 @@
             "label": ""
           }
         }
-      }
+      },
+      "title": ""
     },
+    "register": "",
+    "registerEnded": "",
+    "registerNotStarted": "",
+    "scoreboard": {
+      "currentPeriod": "",
+      "empty": "",
+      "errors": {
+        "fetchScoreboard": {
+          "title": ""
+        }
+      },
+      "selectInstitute": "",
+      "title": ""
+    },
+    "seeOtherInteresting": "",
+    "start": "",
+    "started": "",
+    "statistics": {
+      "challengeStats": "",
+      "errors": {
+        "export": "",
+        "fetch": ""
+      },
+      "institutePlayers": "",
+      "instituteTeams": "",
+      "others": "",
+      "players": "",
+      "selectInstitute": "",
+      "submission": "",
+      "teams": "",
+      "title": ""
+    },
+    "timeLast": "",
+    "timeLasted": "",
     "timeline": {
-      "title": "",
+      "deleteWarning": "",
+      "empty": "",
       "form": {
-        "label": {
-          "label": "",
-          "required": "",
-          "placeholder": ""
-        },
-        "startAt": {
+        "endAt": {
           "required": ""
         },
-        "endAt": {
+        "label": {
+          "label": "",
+          "placeholder": "",
+          "required": ""
+        },
+        "startAt": {
           "required": ""
         },
         "startEndTime": {
@@ -740,111 +1180,20 @@
           "placeholder": ""
         }
       },
+      "title": ""
+    },
+    "title": "",
+    "welcome": "",
+    "writeups": {
       "empty": "",
-      "deleteWarning": ""
-    },
-    "hammer": {
-      "title": "",
-      "errors": {
-        "fetchSessions": {
-          "title": ""
-        },
-        "fetchChats": {}
-      },
-      "empty": "",
-      "status": {
-        "adminUnread": {
-          "title": ""
-        },
-        "playerUnread": {
-          "title": ""
-        },
-        "notReply": {
-          "title": ""
-        }
-      },
-      "placeholder": "",
-      "newMessages": ""
-    },
-    "delete": {
-      "title": "",
-      "warning": "",
-      "requirements": "",
-      "confirm": ""
-    },
-    "events": {
-      "title": "",
-      "errors": {
-        "fetchDevices": {
-          "title": ""
-        }
-      },
-      "howto": "",
-      "tokenWarning": "",
-      "regenerateTokenWarning": "",
-      "linkedDevices": "",
-      "emptyDevices": ""
-    },
-    "organize": {
-      "title": "",
-      "actions": {
-        "restrict": {
-          "confirm": "",
-          "title": ""
-        }
-      },
-      "instituteEnabled": ""
-    },
-    "errors": {
-      "fetch": {
-        "title": ""
-      },
-      "fetchList": {
-        "title": ""
-      },
-      "regenerateToken": {
-        "title": ""
-      },
-      "fetchIntroduction": {
-        "title": ""
-      }
-    },
-    "seeOtherInteresting": "",
-    "notArchived": "",
-    "canNotParticipate": "",
-    "adminMode": "",
-    "miscSettings": "",
-    "register": "",
-    "timeLast": "",
-    "accessPolicy": {
-      "open": ""
-    },
-    "gotoTraining": "",
-    "enterChallenge": "",
-    "manageChallenges": "",
-    "loginThenBack": "",
-    "notification": {
-      "errors": {
-        "fetch": {
-          "title": ""
-        }
-      },
-      "form": {
-        "title": {
-          "required": "",
-          "placeholder": "",
-          "label": ""
-        },
-        "content": {
-          "required": "",
-          "label": ""
-        }
-      },
-      "empty": ""
+      "title": ""
     }
   },
   "general": {
     "actions": {
+      "accept": {
+        "title": ""
+      },
       "add": {
         "message": "",
         "status": {
@@ -857,6 +1206,14 @@
         "title": ""
       },
       "cancel": {
+        "title": ""
+      },
+      "clear": {
+        "message": "",
+        "status": {
+          "fail": "",
+          "success": ""
+        },
         "title": ""
       },
       "close": {
@@ -909,6 +1266,12 @@
       "exit": {
         "title": ""
       },
+      "generate": {
+        "title": ""
+      },
+      "goto": {
+        "title": ""
+      },
       "load": {
         "title": ""
       },
@@ -931,6 +1294,9 @@
         "title": ""
       },
       "prev": {
+        "title": ""
+      },
+      "print": {
         "title": ""
       },
       "refresh": {
@@ -976,6 +1342,12 @@
         },
         "title": ""
       },
+      "start": {
+        "title": ""
+      },
+      "stop": {
+        "title": ""
+      },
       "update": {
         "message": "",
         "status": {
@@ -989,40 +1361,14 @@
           "fail": "",
           "fileTooLarge": "",
           "fileTooSmall": "",
+          "inProcess": "",
           "invalidFileType": "",
           "pending": "",
-          "success": "",
-          "inProcess": ""
-        },
-        "title": ""
-      },
-      "yes": {
-        "title": ""
-      },
-      "clear": {
-        "message": "",
-        "status": {
-          "fail": "",
           "success": ""
         },
         "title": ""
       },
-      "goto": {
-        "title": ""
-      },
-      "generate": {
-        "title": ""
-      },
-      "start": {
-        "title": ""
-      },
-      "stop": {
-        "title": ""
-      },
-      "print": {
-        "title": ""
-      },
-      "accept": {
+      "yes": {
         "title": ""
       }
     },
@@ -1087,17 +1433,169 @@
       }
     }
   },
+  "institute": {
+    "empty": "",
+    "errors": {
+      "fetchList": {
+        "title": ""
+      }
+    },
+    "form": {
+      "name": {
+        "label": "",
+        "placeholder": "",
+        "required": ""
+      },
+      "provider": {
+        "label": "",
+        "placeholder": ""
+      },
+      "token": {
+        "label": "",
+        "placeholder": ""
+      }
+    },
+    "manual": "",
+    "title": "",
+    "withOAuth": ""
+  },
+  "magic": {
+    "about": {
+      "thanks": "",
+      "title": ""
+    },
+    "sakana": {
+      "illustration": "",
+      "source": "",
+      "title": ""
+    }
+  },
+  "media": {
+    "form": {
+      "antiTheft": {
+        "label": ""
+      },
+      "limit": {
+        "label": ""
+      },
+      "path": {
+        "label": "",
+        "placeholder": ""
+      }
+    },
+    "title": ""
+  },
+  "notification": {
+    "empty": "",
+    "title": ""
+  },
+  "oauth": {
+    "configured": "",
+    "form": {
+      "name": {
+        "label": "",
+        "placeholder": "",
+        "required": ""
+      },
+      "portal": {
+        "invalid": "",
+        "label": "",
+        "placeholder": ""
+      },
+      "provider": {
+        "invalid": "",
+        "label": "",
+        "maximumLength": "",
+        "minimumLength": "",
+        "placeholder": "",
+        "required": ""
+      },
+      "script": {
+        "label": "",
+        "preset": {
+          "email": "",
+          "oauth2AuthCode": "",
+          "placeholder": "",
+          "yaleCas": ""
+        },
+        "required": ""
+      }
+    },
+    "title": ""
+  },
   "platform": {
     "cookiePolicy": "",
+    "email": {
+      "form": {
+        "enabled": "",
+        "host": {
+          "label": "",
+          "placeholder": "",
+          "required": ""
+        },
+        "password": {
+          "label": "",
+          "placeholder": "",
+          "required": ""
+        },
+        "port": {
+          "invalid": "",
+          "label": "",
+          "placeholder": "",
+          "required": ""
+        },
+        "resetPasswordEmailBody": {
+          "label": "",
+          "required": ""
+        },
+        "resetPasswordEmailSubject": {
+          "label": "",
+          "placeholder": "",
+          "required": ""
+        },
+        "sender": {
+          "label": "",
+          "placeholder": "",
+          "required": ""
+        },
+        "tls": {
+          "label": "",
+          "placeholder": "",
+          "required": ""
+        },
+        "username": {
+          "label": "",
+          "placeholder": "",
+          "required": ""
+        },
+        "verifyEmailBody": {
+          "label": "",
+          "required": ""
+        },
+        "verifyEmailSubject": {
+          "label": "",
+          "placeholder": "",
+          "required": ""
+        }
+      },
+      "title": ""
+    },
     "errors": {
+      "fetchConfig": {
+        "notReady": "",
+        "title": ""
+      },
+      "internal": {
+        "title": ""
+      },
       "maintaining": {
         "message": "",
         "title": ""
       },
       "notImplemented": {
-        "title": "",
         "hello": "",
-        "message": ""
+        "message": "",
+        "title": ""
       },
       "offline": {
         "message": "",
@@ -1110,101 +1608,31 @@
       "versionMismatch": {
         "message": "",
         "title": ""
-      },
-      "internal": {
-        "title": ""
-      },
-      "fetchConfig": {
-        "title": "",
-        "notReady": ""
-      }
-    },
-    "name": "",
-    "notifications": {
-      "clear": "",
-      "empty": "",
-      "title": ""
-    },
-    "subject": "",
-    "theme": {
-      "followSystem": "",
-      "title": ""
-    },
-    "updated": "",
-    "tooNarrow": "",
-    "ret2codec": {
-      "title": ""
-    },
-    "sync": {
-      "title": ""
-    },
-    "email": {
-      "title": "",
-      "form": {
-        "enabled": "",
-        "tls": {
-          "required": "",
-          "label": "",
-          "placeholder": ""
-        },
-        "host": {
-          "required": "",
-          "label": "",
-          "placeholder": ""
-        },
-        "port": {
-          "required": "",
-          "invalid": "",
-          "label": "",
-          "placeholder": ""
-        },
-        "sender": {
-          "required": "",
-          "label": "",
-          "placeholder": ""
-        },
-        "username": {
-          "required": "",
-          "label": "",
-          "placeholder": ""
-        },
-        "password": {
-          "required": "",
-          "label": "",
-          "placeholder": ""
-        },
-        "verifyEmailSubject": {
-          "required": "",
-          "label": "",
-          "placeholder": ""
-        },
-        "verifyEmailBody": {
-          "required": "",
-          "label": ""
-        },
-        "resetPasswordEmailSubject": {
-          "required": "",
-          "label": "",
-          "placeholder": ""
-        },
-        "resetPasswordEmailBody": {
-          "required": "",
-          "label": ""
-        }
       }
     },
     "form": {
-      "title": "",
+      "footerInfo": {
+        "label": "",
+        "placeholder": ""
+      },
+      "footerUrl": {
+        "label": "",
+        "placeholder": ""
+      },
+      "hideMaker": {
+        "disabled": "",
+        "label": ""
+      },
+      "highlightBanner": {
+        "label": "",
+        "placeholder": ""
+      },
       "name": {
         "label": ""
       },
-      "footerInfo": {
-        "placeholder": "",
-        "label": ""
-      },
-      "footerUrl": {
-        "placeholder": "",
-        "label": ""
+      "record": {
+        "label": "",
+        "placeholder": ""
       },
       "subjectInfo": {
         "label": ""
@@ -1212,21 +1640,10 @@
       "subjectUrl": {
         "label": ""
       },
-      "highlightBanner": {
-        "placeholder": "",
-        "label": ""
-      },
-      "record": {
-        "placeholder": "",
-        "label": ""
-      },
-      "hideMaker": {
-        "disabled": "",
-        "label": ""
-      }
+      "title": ""
     },
     "logs": {
-      "title": "",
+      "enableStreamWarning": "",
       "errors": {
         "fetchList": {
           "title": ""
@@ -1235,36 +1652,292 @@
           "title": ""
         }
       },
-      "streamingEnabled": "",
       "notStreaming": "",
-      "enableStreamWarning": ""
+      "streamingEnabled": "",
+      "title": ""
+    },
+    "name": "",
+    "notifications": {
+      "clear": "",
+      "empty": "",
+      "title": ""
+    },
+    "ret2codec": {
+      "title": ""
     },
     "statistics": {
-      "title": "",
       "errors": {
         "fetch": {
           "title": ""
         }
       },
       "instituteUsers": {
-        "title": "",
-        "others": ""
+        "others": "",
+        "title": ""
+      },
+      "title": ""
+    },
+    "subject": "",
+    "sync": {
+      "title": ""
+    },
+    "theme": {
+      "followSystem": "",
+      "title": ""
+    },
+    "updated": ""
+  },
+  "shell": {
+    "cat": {
+      "errors": {
+        "fileNotFound": {
+          "title": ""
+        },
+        "noFileSpecified": {
+          "title": ""
+        },
+        "read": {
+          "title": ""
+        },
+        "tooManyFiles": {
+          "title": ""
+        }
+      },
+      "man": ""
+    },
+    "clear": {
+      "man": ""
+    },
+    "commandNotFound": "",
+    "echo": {
+      "man": ""
+    },
+    "errors": {
+      "commandInvalid": {
+        "title": ""
+      },
+      "noChallengeSpecified": {
+        "title": ""
+      },
+      "noGameSpecified": {
+        "title": ""
+      },
+      "permissionDenied": {
+        "title": ""
+      },
+      "traversalDetected": {
+        "title": ""
       }
+    },
+    "help": {
+      "commands": "",
+      "man": ""
+    },
+    "ls": {
+      "errors": {
+        "fileNotFound": {
+          "title": ""
+        },
+        "invalidOption": {
+          "title": ""
+        },
+        "list": {
+          "title": ""
+        },
+        "tooManyArgs": {
+          "title": ""
+        },
+        "traversalDetected": {
+          "title": ""
+        }
+      },
+      "man": ""
+    },
+    "service": {
+      "actions": {
+        "delay": {
+          "title": ""
+        },
+        "restart": {
+          "title": ""
+        },
+        "start": {
+          "title": ""
+        },
+        "status": {
+          "title": ""
+        },
+        "stop": {
+          "title": ""
+        }
+      },
+      "errors": {
+        "needAction": {
+          "title": ""
+        }
+      },
+      "man": "",
+      "starting": "",
+      "stopping": "",
+      "usage": ""
+    },
+    "submit": {
+      "errors": {
+        "timeout": {
+          "title": ""
+        }
+      },
+      "man": "",
+      "submitting": "",
+      "waitingForChecking": ""
+    },
+    "tip": "",
+    "welcome": "",
+    "wget": {
+      "downloading": "",
+      "errors": {
+        "fileNotFound": {
+          "title": ""
+        }
+      },
+      "man": "",
+      "usage": ""
+    },
+    "whoami": {
+      "man": ""
     }
+  },
+  "team": {
+    "collab": "",
+    "coming": "",
+    "create": {
+      "title": ""
+    },
+    "empty": "",
+    "errors": {
+      "fetch": {
+        "title": ""
+      },
+      "fetchExtra": {
+        "title": ""
+      },
+      "fetchList": {
+        "title": ""
+      },
+      "fetchMember": {
+        "title": ""
+      },
+      "fetchSolves": {
+        "title": ""
+      },
+      "join": {
+        "title": ""
+      }
+    },
+    "extraScore": "",
+    "extras": "",
+    "form": {
+      "acceptRules": {
+        "label": "",
+        "ok": "",
+        "required": "",
+        "title": ""
+      },
+      "extraReason": {
+        "placeholder": "",
+        "required": ""
+      },
+      "extraScore": {
+        "placeholder": "",
+        "required": ""
+      },
+      "institute": {
+        "label": "",
+        "placeholder": ""
+      },
+      "name": {
+        "chuunibyouGenerator": "",
+        "customDisabled": "",
+        "label": "",
+        "maximumLength": "",
+        "placeholder": "",
+        "required": ""
+      },
+      "state": {
+        "label": ""
+      },
+      "tag": {
+        "label": "",
+        "maximumLength": "",
+        "placeholder": ""
+      }
+    },
+    "join": {
+      "form": {
+        "token": {
+          "label": "",
+          "placeholder": "",
+          "required": ""
+        }
+      },
+      "title": ""
+    },
+    "list": {
+      "filter": "",
+      "selectInstitute": "",
+      "title": ""
+    },
+    "noExtras": "",
+    "noSolves": "",
+    "scoreChart": "",
+    "selfManagement": "",
+    "solo": "",
+    "solves": "",
+    "solvesJournal": "",
+    "sortBy": "",
+    "status": {
+      "banned": {
+        "message": "",
+        "title": ""
+      },
+      "empty": {
+        "message": ""
+      },
+      "hidden": {
+        "title": ""
+      },
+      "passed": {
+        "title": ""
+      },
+      "pending": {
+        "message": "",
+        "placeholder": "",
+        "title": ""
+      },
+      "title": ""
+    },
+    "title": "",
+    "token": ""
+  },
+  "traffic": {
+    "nodeSelector": "",
+    "preset": {
+      "multiNodeDirectScript": "",
+      "singleNodeDirectScript": "",
+      "title": ""
+    },
+    "title": ""
   },
   "training": {
     "empty": "",
     "errors": {
       "fetchArchives": {
-        "message": "",
         "title": ""
       },
       "fetchList": {
-        "message": "",
         "title": ""
       },
       "fetchTraining": {
-        "message": "",
         "title": ""
       },
       "gameNotArchived": {
@@ -1290,17 +1963,57 @@
     "placeholder": "",
     "title": ""
   },
+  "user": {
+    "description": {
+      "empty": "",
+      "title": ""
+    },
+    "errors": {
+      "fetch": {
+        "title": ""
+      },
+      "fetchIpList": {
+        "title": ""
+      },
+      "fetchList": {
+        "title": ""
+      },
+      "fetchOAuth": {
+        "title": ""
+      }
+    },
+    "filter": "",
+    "gameJournal": "",
+    "gotoAdminPanel": "",
+    "joinedGames": "",
+    "list": {
+      "title": ""
+    },
+    "management": {
+      "confirmDelete": "",
+      "goToUserDetailPage": "",
+      "title": ""
+    },
+    "moreJournal": "",
+    "registeredAt": "",
+    "sortBy": "",
+    "status": {
+      "deleted": {
+        "title": ""
+      },
+      "valid": {
+        "title": ""
+      }
+    },
+    "title": "",
+    "total": ""
+  },
   "wiki": {
     "errors": {
-      "fetchArticle": {
-        "message": "",
+      "fetch": {
         "title": ""
       },
       "fetchToc": {
-        "message": "",
-        "title": ""
-      },
-      "fetch": {
         "title": ""
       }
     },
@@ -1310,37 +2023,29 @@
         "placeholder": "",
         "required": ""
       },
-      "enableComment": {
+      "createdAt": {
         "label": ""
       },
-      "isDraft": {
-        "label": "",
-        "placeholder": ""
+      "draft": {
+        "label": ""
       },
-      "isPublished": {
-        "label": "",
-        "placeholder": ""
+      "enableComment": {
+        "label": ""
       },
       "path": {
         "label": "",
         "placeholder": "",
         "required": ""
       },
+      "published": {
+        "label": ""
+      },
       "title": {
         "label": "",
         "placeholder": "",
         "required": ""
       },
-      "createdAt": {
-        "label": ""
-      },
       "updatedAt": {
-        "label": ""
-      },
-      "draft": {
-        "label": ""
-      },
-      "published": {
         "label": ""
       }
     },
@@ -1356,22 +2061,22 @@
       "copyLocal": {
         "title": ""
       },
-      "retry": {
+      "deleteAll": {
         "title": ""
       },
-      "resetDefault": {
-        "title": ""
-      },
-      "refresh": {
+      "deleteOutdated": {
         "title": ""
       },
       "openAll": {
         "title": ""
       },
-      "deleteAll": {
+      "refresh": {
         "title": ""
       },
-      "deleteOutdated": {
+      "resetDefault": {
+        "title": ""
+      },
+      "retry": {
         "title": ""
       }
     },
@@ -1379,6 +2084,7 @@
       "message": "",
       "title": ""
     },
+    "downloadClient": "",
     "errors": {
       "createTunnel": {
         "message": "",
@@ -1420,6 +2126,9 @@
       "title": ""
     },
     "status": {
+      "connecting": {
+        "title": ""
+      },
       "invalid": {
         "title": ""
       },
@@ -1428,748 +2137,9 @@
       },
       "usable": {
         "title": ""
-      },
-      "connecting": {
-        "title": ""
       }
     },
     "title": "",
-    "downloadClient": "",
     "tunnels": ""
-  },
-  "user": {
-    "errors": {
-      "fetchList": {
-        "title": ""
-      },
-      "fetchIpList": {
-        "title": ""
-      },
-      "fetchOAuth": {
-        "title": ""
-      },
-      "fetch": {
-        "title": ""
-      }
-    },
-    "description": {
-      "title": "",
-      "empty": ""
-    },
-    "joinedGames": "",
-    "gameJournal": "",
-    "moreJournal": "",
-    "gotoAdminPanel": "",
-    "list": {
-      "title": ""
-    },
-    "registeredAt": "",
-    "title": "",
-    "total": "",
-    "status": {
-      "valid": ""
-    },
-    "management": {
-      "confirmDelete": "",
-      "goToUserDetailPage": "",
-      "title": ""
-    },
-    "sortBy": "",
-    "filter": ""
-  },
-  "account": {
-    "permission": {
-      "basic": "",
-      "verified": "",
-      "calendar": "",
-      "wiki": "",
-      "bulletin": "",
-      "game": "",
-      "host": "",
-      "statistics": "",
-      "devOps": "",
-      "user": ""
-    },
-    "login": {
-      "title": "",
-      "status": {
-        "success": ""
-      },
-      "errors": {
-        "login": {
-          "title": ""
-        }
-      },
-      "form": {
-        "account": {}
-      }
-    },
-    "settings": {
-      "title": "",
-      "delete": {}
-    },
-    "logout": "",
-    "status": {
-      "unverified": {
-        "message": "",
-        "action": ""
-      }
-    },
-    "errors": {
-      "fetchCode": {
-        "title": ""
-      }
-    },
-    "code": {
-      "title": "",
-      "status": {
-        "unverified": {
-          "message": "",
-          "action": ""
-        }
-      },
-      "empty": "",
-      "tip": ""
-    },
-    "forgot": {
-      "status": {
-        "success": "",
-        "rateExceeded": ""
-      },
-      "title": "",
-      "form": {
-        "email": {
-          "required": "",
-          "invalid": "",
-          "placeholder": "",
-          "label": ""
-        }
-      }
-    },
-    "oauth": {
-      "errors": {
-        "fetchProvider": {
-          "title": ""
-        },
-        "bind": {
-          "title": ""
-        },
-        "fetchStatus": {
-          "title": ""
-        },
-        "unbind": {
-          "title": ""
-        }
-      },
-      "select": "",
-      "title": "",
-      "notBind": "",
-      "actions": {
-        "bind": {
-          "title": ""
-        },
-        "unbind": {
-          "title": ""
-        }
-      }
-    },
-    "form": {
-      "account": {
-        "minimumLength": "",
-        "placeholder": "",
-        "required": "",
-        "maximumLength": "",
-        "invalid": "",
-        "label": ""
-      },
-      "password": {
-        "required": "",
-        "minimumLength": "",
-        "tooWeak": "",
-        "placeholder": "",
-        "confirmRequired": "",
-        "confirmMismatch": "",
-        "confirmPlaceholder": "",
-        "label": "",
-        "confirmLabel": ""
-      },
-      "nickname": {
-        "required": "",
-        "minLength": "",
-        "maxLength": "",
-        "placeholder": "",
-        "label": ""
-      },
-      "email": {
-        "required": "",
-        "invalid": "",
-        "placeholder": "",
-        "label": ""
-      },
-      "description": {
-        "label": ""
-      },
-      "oldPassword": {
-        "required": "",
-        "placeholder": "",
-        "label": ""
-      },
-      "institute": {
-        "label": "",
-        "placeholder": ""
-      },
-      "hidden": {
-        "label": ""
-      },
-      "banned": {
-        "label": ""
-      },
-      "oauths": {
-        "label": ""
-      },
-      "ips": {
-        "label": ""
-      },
-      "registeredAt": {
-        "label": ""
-      }
-    },
-    "register": {
-      "tips": "",
-      "status": {
-        "success": ""
-      },
-      "errors": {
-        "register": {
-          "title": ""
-        }
-      },
-      "title": "",
-      "oauthRegister": ""
-    },
-    "reset": {
-      "errors": {
-        "invalidLink": {
-          "title": ""
-        },
-        "reset": {
-          "title": ""
-        }
-      },
-      "status": {
-        "success": ""
-      },
-      "title": "",
-      "form": {
-        "token": {
-          "required": "",
-          "placeholder": "",
-          "label": ""
-        }
-      }
-    },
-    "info": {
-      "title": ""
-    },
-    "password": {
-      "title": "",
-      "errors": {
-        "change": {
-          "title": ""
-        }
-      }
-    },
-    "delete": {
-      "title": "",
-      "errors": {
-        "delete": {
-          "title": ""
-        }
-      },
-      "topWarning": "",
-      "canNotDeleteWhenGameInProgress": "",
-      "declare": {
-        "1": "",
-        "2": "",
-        "3": "",
-        "4": "",
-        "title": ""
-      },
-      "confirm": "",
-      "thinkTwice": "",
-      "bye": {
-        "title": "",
-        "message": ""
-      }
-    },
-    "verify": {
-      "errors": {
-        "send": {}
-      },
-      "status": {
-        "success": "",
-        "fail": "",
-        "broken": "",
-        "verifying": ""
-      },
-      "title": ""
-    }
-  },
-  "shell": {
-    "cat": {
-      "man": "",
-      "errors": {
-        "noFileSpecified": {
-          "title": ""
-        },
-        "tooManyFiles": {
-          "title": ""
-        },
-        "fileNotFound": {
-          "title": ""
-        },
-        "read": {
-          "title": ""
-        }
-      }
-    },
-    "errors": {
-      "noGameSpecified": {
-        "title": ""
-      },
-      "permissionDenied": {
-        "title": ""
-      },
-      "noChallengeSpecified": {
-        "title": ""
-      },
-      "traversalDetected": {
-        "title": ""
-      },
-      "commandInvalid": {
-        "title": ""
-      }
-    },
-    "welcome": "",
-    "clear": {
-      "man": ""
-    },
-    "echo": {
-      "man": ""
-    },
-    "help": {
-      "commands": "",
-      "man": ""
-    },
-    "ls": {
-      "man": "",
-      "errors": {
-        "invalidOption": {
-          "title": ""
-        },
-        "tooManyArgs": {
-          "title": ""
-        },
-        "traversalDetected": {
-          "title": ""
-        },
-        "fileNotFound": {
-          "title": ""
-        },
-        "list": {
-          "title": ""
-        }
-      }
-    },
-    "tip": "",
-    "service": {
-      "man": "",
-      "errors": {
-        "needAction": {
-          "title": ""
-        }
-      },
-      "usage": "",
-      "actions": {
-        "start": {
-          "title": ""
-        },
-        "stop": {
-          "title": ""
-        },
-        "restart": {
-          "title": ""
-        },
-        "status": {
-          "title": ""
-        },
-        "delay": {
-          "title": ""
-        }
-      },
-      "starting": "",
-      "stopping": ""
-    },
-    "submit": {
-      "man": "",
-      "submitting": "",
-      "waitingForChecking": "",
-      "errors": {
-        "timeout": {
-          "title": ""
-        }
-      }
-    },
-    "wget": {
-      "man": "",
-      "usage": "",
-      "downloading": "",
-      "errors": {
-        "fileNotFound": {
-          "title": ""
-        }
-      }
-    },
-    "whoami": {
-      "man": ""
-    },
-    "commandNotFound": ""
-  },
-  "about": {
-    "contact": "",
-    "donate": "",
-    "source": ""
-  },
-  "docs": {
-    "title": "",
-    "tip": "",
-    "forVersion": "",
-    "intro": ""
-  },
-  "magic": {
-    "about": {
-      "thanks": "",
-      "title": ""
-    },
-    "sakana": {
-      "title": "",
-      "illustration": "",
-      "source": ""
-    }
-  },
-  "team": {
-    "status": {
-      "pending": {
-        "title": "",
-        "message": "",
-        "placeholder": ""
-      },
-      "banned": {
-        "message": "",
-        "title": ""
-      },
-      "empty": {
-        "message": ""
-      },
-      "hidden": {
-        "title": ""
-      },
-      "title": "",
-      "passed": {
-        "title": ""
-      }
-    },
-    "errors": {
-      "fetchList": {
-        "title": ""
-      },
-      "fetch": {
-        "title": ""
-      },
-      "join": {
-        "title": ""
-      },
-      "fetchMember": {
-        "title": ""
-      },
-      "fetchSolves": {
-        "title": ""
-      },
-      "fetchExtra": {
-        "title": ""
-      }
-    },
-    "title": "",
-    "coming": "",
-    "empty": "",
-    "join": {
-      "title": "",
-      "form": {
-        "token": {
-          "required": "",
-          "label": "",
-          "placeholder": ""
-        },
-        "acceptRules": {}
-      }
-    },
-    "create": {
-      "title": ""
-    },
-    "solo": "",
-    "collab": "",
-    "list": {
-      "title": "",
-      "selectInstitute": "",
-      "filter": ""
-    },
-    "sortBy": "",
-    "form": {
-      "name": {
-        "label": "",
-        "required": "",
-        "maximumLength": "",
-        "customDisabled": "",
-        "placeholder": "",
-        "chuunibyouGenerator": ""
-      },
-      "institute": {
-        "label": "",
-        "placeholder": ""
-      },
-      "state": {
-        "label": ""
-      },
-      "tag": {
-        "maximumLength": "",
-        "label": "",
-        "placeholder": ""
-      },
-      "acceptRules": {
-        "label": "",
-        "ok": "",
-        "required": "",
-        "title": ""
-      },
-      "extraScore": {
-        "placeholder": "",
-        "required": ""
-      },
-      "extraReason": {
-        "placeholder": "",
-        "required": ""
-      }
-    },
-    "selfManagement": "",
-    "token": "",
-    "scoreChart": "",
-    "solves": "",
-    "noSolves": "",
-    "solvesJournal": "",
-    "extras": "",
-    "noExtras": "",
-    "extraScore": ""
-  },
-  "calendar": {
-    "day": {
-      "fri": "",
-      "mon": "",
-      "sat": "",
-      "sun": "",
-      "thu": "",
-      "tue": "",
-      "wed": ""
-    },
-    "actions": {
-      "prevYear": {
-        "title": ""
-      },
-      "prevMonth": {
-        "title": ""
-      },
-      "today": {
-        "title": ""
-      },
-      "nextMonth": {
-        "title": ""
-      },
-      "nextYear": {
-        "title": ""
-      }
-    },
-    "startAt": "",
-    "endAt": ""
-  },
-  "notification": {
-    "empty": "",
-    "title": ""
-  },
-  "bulletin": {
-    "title": "",
-    "errors": {
-      "fetchList": {
-        "title": ""
-      },
-      "fetch": {
-        "title": ""
-      }
-    },
-    "empty": "",
-    "form": {
-      "title": {
-        "required": "",
-        "placeholder": "",
-        "label": ""
-      },
-      "enableComment": {
-        "label": ""
-      },
-      "content": {
-        "required": "",
-        "label": ""
-      },
-      "createdAt": {
-        "label": ""
-      },
-      "updatedAt": {
-        "label": ""
-      }
-    },
-    "unknownPublisher": ""
-  },
-  "admin": {
-    "title": ""
-  },
-  "traffic": {
-    "title": "",
-    "nodeSelector": "",
-    "preset": {
-      "title": "",
-      "singleNodeDirectScript": "",
-      "multiNodeDirectScript": ""
-    }
-  },
-  "cluster": {
-    "title": "",
-    "status": {
-      "available": {
-        "title": ""
-      },
-      "unavailable": {
-        "title": ""
-      }
-    },
-    "nodeInfo": {
-      "title": "",
-      "architecture": "",
-      "bootID": "",
-      "containerRuntimeVersion": "",
-      "kernelVersion": "",
-      "kubeProxyVersion": "",
-      "kubeletVersion": "",
-      "machineID": "",
-      "operatingSystem": "",
-      "osImage": "",
-      "systemUUID": ""
-    },
-    "selectNode": "",
-    "actions": {
-      "refreshNode": {
-        "title": ""
-      },
-      "updateNode": {
-        "title": ""
-      },
-      "disconnectNode": {
-        "title": ""
-      }
-    },
-    "nodeResources": {
-      "title": ""
-    },
-    "errors": {
-      "fetchNodes": {
-        "title": ""
-      }
-    }
-  },
-  "users": {},
-  "oauth": {
-    "title": "",
-    "form": {
-      "provider": {
-        "required": "",
-        "label": "",
-        "placeholder": "",
-        "minimumLength": "",
-        "maximumLength": "",
-        "invalid": ""
-      },
-      "name": {
-        "required": "",
-        "label": "",
-        "placeholder": ""
-      },
-      "portal": {
-        "invalid": "",
-        "label": "",
-        "placeholder": ""
-      },
-      "script": {
-        "label": "",
-        "preset": {
-          "placeholder": "",
-          "email": "",
-          "yaleCas": "",
-          "oauth2AuthCode": ""
-        },
-        "required": ""
-      }
-    },
-    "configured": ""
-  },
-  "media": {
-    "title": "",
-    "form": {
-      "path": {
-        "label": "",
-        "placeholder": ""
-      },
-      "antiTheft": {
-        "label": ""
-      },
-      "limit": {
-        "label": ""
-      }
-    }
-  },
-  "captures": {
-    "title": ""
-  },
-  "institute": {
-    "errors": {
-      "fetchList": {
-        "title": ""
-      }
-    },
-    "empty": "",
-    "form": {
-      "name": {
-        "required": "",
-        "label": "",
-        "placeholder": ""
-      },
-      "provider": {
-        "label": "",
-        "placeholder": ""
-      },
-      "token": {
-        "label": "",
-        "placeholder": ""
-      }
-    },
-    "title": "",
-    "manual": "",
-    "withOAuth": ""
   }
 }

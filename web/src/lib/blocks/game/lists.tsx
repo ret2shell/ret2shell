@@ -180,9 +180,7 @@ export function AuditList() {
   );
 }
 
-export function SubmissionList(props: {
-  inGame?: boolean;
-}) {
+export function SubmissionList(props: { inGame?: boolean }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = createMemo(() => (searchParams.page && Number.parseInt(searchParams.page as string)) || 1);
   const pageSize = 15;
@@ -266,10 +264,10 @@ export function SubmissionList(props: {
                 <Tag level={submission.solved === null ? "info" : submission.solved ? "success" : "warning"}>
                   <span>
                     {submission.solved === null
-                      ? t("challenge.submission.status.pending")
+                      ? t("challenge.submission.status.pending.title")
                       : submission.solved
-                        ? t("challenge.submission.status.solved")
-                        : t("challenge.submission.status.failed")}
+                        ? t("challenge.submission.status.solved.title")
+                        : t("challenge.submission.status.failed.title")}
                   </span>
                 </Tag>
                 <span title={submission.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}>

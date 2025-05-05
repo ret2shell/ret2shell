@@ -95,10 +95,10 @@ function StatisticsPanel() {
               <Tag level={item.solved ? "success" : "warning"}>
                 <span>
                   {item.solved === null
-                    ? t("challenge.submission.status.pending")
+                    ? t("challenge.submission.status.pending.title")
                     : item.solved
-                      ? t("challenge.submission.status.solved")
-                      : t("challenge.submission.status.failed")}
+                      ? t("challenge.submission.status.solved.title")
+                      : t("challenge.submission.status.failed.title")}
                 </span>
               </Tag>
               <span class="opacity-40" title={item.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}>

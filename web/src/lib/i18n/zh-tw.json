@@ -4,7 +4,7 @@
       "status": {
         "400": {
           "title": "請求參數錯誤",
-          "message": "這個exp看起來不太對勁"
+          "message": "這個 exp 看起來不太對勁"
         },
         "401": {
           "title": "請先登錄",
@@ -287,7 +287,6 @@
       "title": "主題",
       "followSystem": "跟隨系統"
     },
-    "tooNarrow": "太窄了，請寬一點",
     "ret2codec": {
       "title": "替換協議"
     },
@@ -430,14 +429,6 @@
         "placeholder": "請輸入路徑，以 / 作為分隔符，例如 “入門指南/提問的智慧”",
         "required": "路徑不能為空"
       },
-      "isDraft": {
-        "label": "草稿",
-        "placeholder": "是否草稿"
-      },
-      "isPublished": {
-        "label": "發佈",
-        "placeholder": "是否發佈"
-      },
       "createdAt": {
         "label": "發佈於 {{time}}"
       },
@@ -453,12 +444,7 @@
     },
     "errors": {
       "fetchToc": {
-        "title": "獲取文章目錄索引失敗",
-        "message": "請檢查網絡連接或稍後再試"
-      },
-      "fetchArticle": {
-        "title": "獲取文章失敗",
-        "message": "請檢查網絡連接或稍後再試"
+        "title": "獲取文章目錄索引失敗"
       },
       "fetch": {
         "title": "獲取知識庫文章失敗"
@@ -475,16 +461,13 @@
     "openForever": "永久開放",
     "errors": {
       "fetchList": {
-        "title": "獲取練習場列表失敗",
-        "message": "請檢查網絡連接或稍後再試"
+        "title": "獲取練習場列表失敗"
       },
       "fetchArchives": {
-        "title": "獲取往期賽事失敗",
-        "message": "請檢查網絡連接或稍後再試"
+        "title": "獲取往期賽事失敗"
       },
       "fetchTraining": {
-        "title": "獲取練習場失敗",
-        "message": "請檢查網絡連接或稍後再試"
+        "title": "獲取練習場失敗"
       },
       "gameNotArchived": {
         "title": "比賽尚未歸檔",
@@ -553,12 +536,6 @@
     "introduction": {
       "title": "賽事介紹",
       "empty": "主辦方很懶，什麼也沒有寫",
-      "errors": {
-        "fetchIntroduction": {
-          "title": "獲取賽事介紹失敗",
-          "message": "請檢查網絡連接或稍後再試"
-        }
-      },
       "form": {
         "content": {
           "label": "內容",
@@ -574,8 +551,7 @@
       "currentPeriod": "本週目",
       "errors": {
         "fetchScoreboard": {
-          "title": "獲取積分板失敗",
-          "message": "請檢查網絡連接或稍後再試"
+          "title": "獲取積分板失敗"
         }
       }
     },
@@ -976,20 +952,10 @@
     },
     "errors": {
       "fetchList": {
-        "title": "獲取題目列表失敗",
-        "message": "請檢查網絡連接或稍後再試"
+        "title": "獲取題目列表失敗"
       },
-      "fetchChallenge": {
-        "title": "獲取題目失敗",
-        "message": "請檢查網絡連接或稍後再試"
-      },
-      "fetchChallengeStatus": {
-        "title": "獲取題目狀態失敗",
-        "message": "請檢查網絡連接或稍後再試"
-      },
-      "fetchChallengeFiles": {
-        "title": "獲取題目文件失敗",
-        "message": "請檢查網絡連接或稍後再試"
+      "fetch": {
+        "title": "獲取題目失敗"
       },
       "up": {
         "title": "公開題目失敗"
@@ -1018,12 +984,10 @@
       },
       "errors": {
         "fetch": {
-          "title": "獲取提示失敗",
-          "message": "請檢查網絡連接或稍後再試"
+          "title": "獲取提示失敗"
         },
         "unlock": {
-          "title": "解鎖提示失敗",
-          "message": "請檢查網絡連接或稍後再試"
+          "title": "解鎖提示失敗"
         }
       }
     },
@@ -1046,16 +1010,13 @@
       },
       "errors": {
         "fetchFiles": {
-          "title": "獲取文件失敗",
-          "message": "請檢查網絡連接或稍後再試"
+          "title": "獲取文件失敗"
         },
         "uploadFiles": {
-          "title": "上傳文件失敗",
-          "message": "請檢查網絡連接或稍後再試"
+          "title": "上傳文件失敗"
         },
         "deleteFiles": {
-          "title": "刪除文件失敗",
-          "message": "請檢查網絡連接或稍後再試"
+          "title": "刪除文件失敗"
         }
       }
     },
@@ -1064,8 +1025,7 @@
       "empty": "暫無題解",
       "errors": {
         "fetchAnswer": {
-          "title": "獲取題解失敗",
-          "message": "請檢查網絡連接或稍後再試"
+          "title": "獲取題解失敗"
         },
         "invisibleBeforeArchive": {
           "title": "題解不可見",
@@ -1091,16 +1051,13 @@
       "markdownSupport": "請輸入你要反饋的問題，支持 Markdown 語法",
       "errors": {
         "send": {
-          "title": "發送消息失敗",
-          "message": "請檢查網絡連接或稍後再試"
+          "title": "發送消息失敗"
         },
         "fetch": {
-          "title": "獲取消息歷史記錄失敗",
-          "message": "請檢查網絡連接或稍後再試"
+          "title": "獲取消息歷史記錄失敗"
         },
         "fetchSolve": {
-          "title": "獲取解題狀態失敗",
-          "message": "請檢查網絡連接或稍後再試"
+          "title": "獲取解題狀態失敗"
         },
         "maxMessageLimit": {
           "title": "已經到達消息上限，請等待反饋..."
@@ -1110,9 +1067,15 @@
     "submission": {
       "submit": "提交了",
       "status": {
-        "pending": "隊列中",
-        "solved": "正確",
-        "failed": "錯誤"
+        "pending": {
+          "title": "隊列中"
+        },
+        "solved": {
+          "title": "正確"
+        },
+        "failed": {
+          "title": "錯誤"
+        }
       },
       "errors": {
         "submit": {
@@ -1142,8 +1105,7 @@
       },
       "errors": {
         "fetchStatistics": {
-          "title": "獲取統計數據失敗",
-          "message": "請檢查網絡連接或稍後再試"
+          "title": "獲取統計數據失敗"
         },
         "fetchSubmission": {
           "title": "獲取題目解題情況失敗"
@@ -1259,8 +1221,7 @@
       },
       "errors": {
         "fetchInstances": {
-          "title": "獲取實例失敗",
-          "message": "請檢查網絡連接或稍後再試"
+          "title": "獲取實例失敗"
         },
         "fetchConfigImages": {
           "title": "獲取鏡像列表失敗"
@@ -1279,16 +1240,13 @@
           "message": "請為環境添加至少一個服務端口。"
         },
         "start": {
-          "title": "啟動實例失敗",
-          "message": "請檢查網絡連接或稍後再試"
+          "title": "啟動實例失敗"
         },
         "stop": {
-          "title": "停止實例失敗",
-          "message": "請檢查網絡連接或稍後再試"
+          "title": "停止實例失敗"
         },
         "delay": {
-          "title": "延長實例失敗",
-          "message": "請檢查網絡連接或稍後再試"
+          "title": "延長實例失敗"
         },
         "calmdown": {
           "title": "正在重整貨箱"
@@ -1329,8 +1287,7 @@
       },
       "errors": {
         "fetchCheckerScript": {
-          "title": "獲取評測腳本失敗",
-          "message": "請檢查網絡連接或稍後再試"
+          "title": "獲取評測腳本失敗"
         }
       }
     },
@@ -1436,8 +1393,7 @@
     "fetching": "獲取中...",
     "errors": {
       "fetch": {
-        "title": "獲取驗證碼失敗",
-        "message": "請檢查網絡連接或稍後再試"
+        "title": "獲取驗證碼失敗"
       }
     },
     "form": {
@@ -1496,7 +1452,12 @@
     "title": "用戶",
     "total": "所有用戶",
     "status": {
-      "valid": "活躍用戶"
+      "valid": {
+        "title": "活躍用戶"
+      },
+      "deleted": {
+        "title": "失效用戶"
+      }
     },
     "management": {
       "confirmDelete": "請輸入用戶名稱 {{name}} 來確認刪除",
@@ -1583,7 +1544,9 @@
     "login": {
       "title": "登錄",
       "status": {
-        "success": "登錄成功，歡迎回來！"
+        "success": {
+          "message": "登錄成功，歡迎回來！"
+        }
       },
       "errors": {
         "login": {
@@ -1619,8 +1582,12 @@
     },
     "forgot": {
       "status": {
-        "success": "重置密碼的郵件已發送至你的郵箱，請查收。",
-        "rateExceeded": "太快了！如果沒收到郵件，請檢查你的垃圾箱，30分鐘之後才可以重試發送。"
+        "success": {
+          "message": "重置密碼的郵件已發送至你的郵箱，請查收。"
+        },
+        "rateExceeded": {
+          "message": "太快了！如果沒收到郵件，請檢查你的垃圾箱，30分鐘之後才可以重試發送。"
+        }
       },
       "title": "找回密碼",
       "form": {
@@ -1662,7 +1629,9 @@
     "register": {
       "tips": "沒有賬號？現在註冊！",
       "status": {
-        "success": "註冊成功，歡迎來到 CTF 的世界！"
+        "success": {
+          "message": "註冊成功，歡迎來到 CTF 的世界！"
+        }
       },
       "errors": {
         "register": {
@@ -1682,7 +1651,9 @@
         }
       },
       "status": {
-        "success": "重置成功，請使用新密碼登錄平臺"
+        "success": {
+          "message": "重置成功，請使用新密碼登錄平臺"
+        }
       },
       "title": "重置密碼",
       "form": {
@@ -1729,10 +1700,20 @@
     },
     "verify": {
       "status": {
-        "success": "郵箱驗證成功",
-        "fail": "郵箱驗證失敗",
-        "broken": "驗證鏈接存在問題，請確保郵件鏈接正確",
-        "verifying": "驗證中..."
+        "success": {
+          "title": "郵箱驗證成功"
+        },
+        "broken": {
+          "title": "驗證鏈接存在問題，請確保郵件鏈接正確"
+        },
+        "verifying": {
+          "title": "驗證中..."
+        }
+      },
+      "errors": {
+        "verify": {
+          "title": "郵箱驗證失敗"
+        }
       },
       "title": "驗證郵箱"
     }
@@ -1992,7 +1973,7 @@
     "extraScore": "額外分數變動"
   },
   "notification": {
-    "empty": "沒有未讀消息",
+    "empty": "沒有未讀提示消息",
     "title": "提示消息"
   },
   "bulletin": {
@@ -2005,7 +1986,7 @@
         "title": "獲取公告內容失敗"
       }
     },
-    "empty": "沒有發佈過公告",
+    "empty": "還沒有發佈過公告",
     "form": {
       "title": {
         "required": "標題不能為空",
@@ -2032,7 +2013,7 @@
     "title": "管理"
   },
   "traffic": {
-    "title": "環境路由",
+    "title": "��境路由",
     "nodeSelector": "節點選擇器",
     "preset": {
       "title": "腳本預設",

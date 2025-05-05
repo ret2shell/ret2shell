@@ -4,7 +4,7 @@
       "status": {
         "400": {
           "title": "请求参数错误",
-          "message": "这个exp看起来不太对劲"
+          "message": "这个 exp 看起来不太对劲"
         },
         "401": {
           "title": "请先登录",
@@ -287,7 +287,6 @@
       "title": "主题",
       "followSystem": "跟随系统"
     },
-    "tooNarrow": "太窄了，请宽一点",
     "ret2codec": {
       "title": "替换协议"
     },
@@ -430,14 +429,6 @@
         "placeholder": "请输入路径，以 / 作为分隔符，例如 “入门指南/提问的智慧”",
         "required": "路径不能为空"
       },
-      "isDraft": {
-        "label": "草稿",
-        "placeholder": "是否草稿"
-      },
-      "isPublished": {
-        "label": "发布",
-        "placeholder": "是否发布"
-      },
       "createdAt": {
         "label": "发布于 {{time}}"
       },
@@ -453,12 +444,7 @@
     },
     "errors": {
       "fetchToc": {
-        "title": "获取文章目录索引失败",
-        "message": "请检查网络连接或稍后再试"
-      },
-      "fetchArticle": {
-        "title": "获取文章失败",
-        "message": "请检查网络连接或稍后再试"
+        "title": "获取文章目录索引失败"
       },
       "fetch": {
         "title": "获取知识库文章失败"
@@ -475,16 +461,13 @@
     "openForever": "永久开放",
     "errors": {
       "fetchList": {
-        "title": "获取练习场列表失败",
-        "message": "请检查网络连接或稍后再试"
+        "title": "获取练习场列表失败"
       },
       "fetchArchives": {
-        "title": "获取往期赛事失败",
-        "message": "请检查网络连接或稍后再试"
+        "title": "获取往期赛事失败"
       },
       "fetchTraining": {
-        "title": "获取练习场失败",
-        "message": "请检查网络连接或稍后再试"
+        "title": "获取练习场失败"
       },
       "gameNotArchived": {
         "title": "比赛尚未归档",
@@ -553,12 +536,6 @@
     "introduction": {
       "title": "赛事介绍",
       "empty": "主办方很懒，什么也没有写",
-      "errors": {
-        "fetchIntroduction": {
-          "title": "获取赛事介绍失败",
-          "message": "请检查网络连接或稍后再试"
-        }
-      },
       "form": {
         "content": {
           "label": "内容",
@@ -574,8 +551,7 @@
       "currentPeriod": "本周目",
       "errors": {
         "fetchScoreboard": {
-          "title": "获取积分板失败",
-          "message": "请检查网络连接或稍后再试"
+          "title": "获取积分板失败"
         }
       }
     },
@@ -976,20 +952,10 @@
     },
     "errors": {
       "fetchList": {
-        "title": "获取题目列表失败",
-        "message": "请检查网络连接或稍后再试"
+        "title": "获取题目列表失败"
       },
-      "fetchChallenge": {
-        "title": "获取题目失败",
-        "message": "请检查网络连接或稍后再试"
-      },
-      "fetchChallengeStatus": {
-        "title": "获取题目状态失败",
-        "message": "请检查网络连接或稍后再试"
-      },
-      "fetchChallengeFiles": {
-        "title": "获取题目文件失败",
-        "message": "请检查网络连接或稍后再试"
+      "fetch": {
+        "title": "获取题目失败"
       },
       "up": {
         "title": "公开题目失败"
@@ -1018,12 +984,10 @@
       },
       "errors": {
         "fetch": {
-          "title": "获取提示失败",
-          "message": "请检查网络连接或稍后再试"
+          "title": "获取提示失败"
         },
         "unlock": {
-          "title": "解锁提示失败",
-          "message": "请检查网络连接或稍后再试"
+          "title": "解锁提示失败"
         }
       }
     },
@@ -1046,16 +1010,13 @@
       },
       "errors": {
         "fetchFiles": {
-          "title": "获取文件失败",
-          "message": "请检查网络连接或稍后再试"
+          "title": "获取文件失败"
         },
         "uploadFiles": {
-          "title": "上传文件失败",
-          "message": "请检查网络连接或稍后再试"
+          "title": "上传文件失败"
         },
         "deleteFiles": {
-          "title": "删除文件失败",
-          "message": "请检查网络连接或稍后再试"
+          "title": "删除文件失败"
         }
       }
     },
@@ -1064,8 +1025,7 @@
       "empty": "暂无题解",
       "errors": {
         "fetchAnswer": {
-          "title": "获取题解失败",
-          "message": "请检查网络连接或稍后再试"
+          "title": "获取题解失败"
         },
         "invisibleBeforeArchive": {
           "title": "题解不可见",
@@ -1091,16 +1051,13 @@
       "markdownSupport": "请输入你要反馈的问题，支持 Markdown 语法",
       "errors": {
         "send": {
-          "title": "发送消息失败",
-          "message": "请检查网络连接或稍后再试"
+          "title": "发送消息失败"
         },
         "fetch": {
-          "title": "获取消息历史记录失败",
-          "message": "请检查网络连接或稍后再试"
+          "title": "获取消息历史记录失败"
         },
         "fetchSolve": {
-          "title": "获取解题状态失败",
-          "message": "请检查网络连接或稍后再试"
+          "title": "获取解题状态失败"
         },
         "maxMessageLimit": {
           "title": "已经到达消息上限，请等待反馈..."
@@ -1110,9 +1067,15 @@
     "submission": {
       "submit": "提交了",
       "status": {
-        "pending": "队列中",
-        "solved": "正确",
-        "failed": "错误"
+        "pending": {
+          "title": "队列中"
+        },
+        "solved": {
+          "title": "正确"
+        },
+        "failed": {
+          "title": "错误"
+        }
       },
       "errors": {
         "submit": {
@@ -1142,8 +1105,7 @@
       },
       "errors": {
         "fetchStatistics": {
-          "title": "获取统计数据失败",
-          "message": "请检查网络连接或稍后再试"
+          "title": "获取统计数据失败"
         },
         "fetchSubmission": {
           "title": "获取题目解题情况失败"
@@ -1259,8 +1221,7 @@
       },
       "errors": {
         "fetchInstances": {
-          "title": "获取实例失败",
-          "message": "请检查网络连接或稍后再试"
+          "title": "获取实例失败"
         },
         "fetchConfigImages": {
           "title": "获取镜像列表失败"
@@ -1279,16 +1240,13 @@
           "message": "请为环境添加至少一个服务端口。"
         },
         "start": {
-          "title": "启动实例失败",
-          "message": "请检查网络连接或稍后再试"
+          "title": "启动实例失败"
         },
         "stop": {
-          "title": "停止实例失败",
-          "message": "请检查网络连接或稍后再试"
+          "title": "停止实例失败"
         },
         "delay": {
-          "title": "延长实例失败",
-          "message": "请检查网络连接或稍后再试"
+          "title": "延长实例失败"
         },
         "calmdown": {
           "title": "正在重整货箱"
@@ -1329,8 +1287,7 @@
       },
       "errors": {
         "fetchCheckerScript": {
-          "title": "获取评测脚本失败",
-          "message": "请检查网络连接或稍后再试"
+          "title": "获取评测脚本失败"
         }
       }
     },
@@ -1436,8 +1393,7 @@
     "fetching": "获取中...",
     "errors": {
       "fetch": {
-        "title": "获取验证码失败",
-        "message": "请检查网络连接或稍后再试"
+        "title": "获取验证码失败"
       }
     },
     "form": {
@@ -1496,7 +1452,12 @@
     "title": "用户",
     "total": "所有用户",
     "status": {
-      "valid": "活跃用户"
+      "valid": {
+        "title": "活跃用户"
+      },
+      "deleted": {
+        "title": "失效用户"
+      }
     },
     "management": {
       "confirmDelete": "请输入用户名称 {{name}} 来确认删除",
@@ -1583,7 +1544,9 @@
     "login": {
       "title": "登录",
       "status": {
-        "success": "登录成功，欢迎回来！"
+        "success": {
+          "message": "登录成功，欢迎回来！"
+        }
       },
       "errors": {
         "login": {
@@ -1619,8 +1582,12 @@
     },
     "forgot": {
       "status": {
-        "success": "重置密码的邮件已发送至你的邮箱，请查收。",
-        "rateExceeded": "太快了！如果没收到邮件，请检查你的垃圾箱，30分钟之后才可以重试发送。"
+        "success": {
+          "message": "重置密码的邮件已发送至你的邮箱，请查收。"
+        },
+        "rateExceeded": {
+          "message": "太快了！如果没收到邮件，请检查你的垃圾箱，30分钟之后才可以重试发送。"
+        }
       },
       "title": "找回密码",
       "form": {
@@ -1662,7 +1629,9 @@
     "register": {
       "tips": "没有账号？现在注册！",
       "status": {
-        "success": "注册成功，欢迎来到 CTF 的世界！"
+        "success": {
+          "message": "注册成功，欢迎来到 CTF 的世界！"
+        }
       },
       "errors": {
         "register": {
@@ -1682,7 +1651,9 @@
         }
       },
       "status": {
-        "success": "重置成功，请使用新密码登录平台"
+        "success": {
+          "message": "重置成功，请使用新密码登录平台"
+        }
       },
       "title": "重置密码",
       "form": {
@@ -1729,10 +1700,20 @@
     },
     "verify": {
       "status": {
-        "success": "邮箱验证成功",
-        "fail": "邮箱验证失败",
-        "broken": "验证链接存在问题，请确保邮件链接正确",
-        "verifying": "验证中..."
+        "success": {
+          "title": "邮箱验证成功"
+        },
+        "broken": {
+          "title": "验证链接存在问题，请确保邮件链接正确"
+        },
+        "verifying": {
+          "title": "验证中..."
+        }
+      },
+      "errors": {
+        "verify": {
+          "title": "邮箱验证失败"
+        }
       },
       "title": "验证邮箱"
     }
@@ -1992,7 +1973,7 @@
     "extraScore": "额外分数变动"
   },
   "notification": {
-    "empty": "没有未读消息",
+    "empty": "没有未读提示消息",
     "title": "提示消息"
   },
   "bulletin": {
@@ -2005,7 +1986,7 @@
         "title": "获取公告内容失败"
       }
     },
-    "empty": "没有发布过公告",
+    "empty": "还没有发布过公告",
     "form": {
       "title": {
         "required": "标题不能为空",
@@ -2032,7 +2013,7 @@
     "title": "管理"
   },
   "traffic": {
-    "title": "环境路由",
+    "title": "��境路由",
     "nodeSelector": "节点选择器",
     "preset": {
       "title": "脚本预设",

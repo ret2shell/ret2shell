@@ -255,10 +255,7 @@ export default function (compProps: {
             <div class="flex flex-row space-x-2">
               <Field
                 name="email"
-                validate={[
-                  required(t("account.form.email.required")!),
-                  email(t("account.form.email.invalid")!),
-                ]}
+                validate={[required(t("account.form.email.required")!), email(t("account.form.email.invalid")!)]}
               >
                 {(field, props) => (
                   <Input

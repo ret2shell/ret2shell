@@ -61,7 +61,7 @@ export default function () {
       navigate("/", { replace: true });
       addToast({
         level: "success",
-        description: t("account.login.status.success")!,
+        description: t("account.login.status.success.message")!,
         duration: 5000,
         // img: xdsecMascotHappy,
       });

@@ -47,7 +47,7 @@ export default function () {
         }
         addToast({
           level: "success",
-          description: t("account.register.status.success")!,
+          description: t("account.register.status.success.message")!,
           duration: 5000,
           // img: xdsecMascotHappy,
         });
@@ -72,7 +72,11 @@ export default function () {
             <h2 class="font-bold text-center">{t("account.register.title")}</h2>
             <Show when={searchParams.token && searchParams.auth_key}>
               <Card level="info" class="w-full" contentClass="p-2">
-                <p>{t("account.register.oauthRegister", { key: searchParams.auth_key as string })}</p>
+                <p>
+                  {t("account.register.oauthRegister", {
+                    key: searchParams.auth_key as string,
+                  })}
+                </p>
               </Card>
             </Show>
             <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">

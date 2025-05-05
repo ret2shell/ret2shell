@@ -20,18 +20,18 @@ export default function () {
           await verifyEmail({ email: email()!, token: token()! });
           addToast({
             level: "success",
-            description: t("account.verify.status.success")!,
+            description: t("account.verify.status.success.title")!,
             duration: 5000,
           });
           navigate("/account/settings", { replace: true });
         } catch (err) {
-          handleHttpError(err as HTTPError, t("account.verify.status.fail")!);
+          handleHttpError(err as HTTPError, t("account.verify.errors.verify.title")!);
           navigate("/sigtrap/412", { replace: true });
         }
       } else {
         addToast({
           level: "error",
-          description: t("account.verify.status.broken")!,
+          description: t("account.verify.status.broken.title")!,
           duration: 5000,
         });
         navigate("/sigtrap/418", { replace: true });
@@ -43,7 +43,7 @@ export default function () {
       <Title page={t("account.verify.title")} route="/account/verify" />
       <div class="flex-1 flex flex-row space-x-4 items-center justify-center">
         <Spin />
-        <span class="font-bold text-xl">{t("account.verify.status.verifying")}</span>
+        <span class="font-bold text-xl">{t("account.verify.status.verifying.title")}</span>
       </div>
     </>
   );

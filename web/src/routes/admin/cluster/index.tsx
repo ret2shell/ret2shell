@@ -163,9 +163,7 @@ export default function () {
                   <For each={Object.entries(shownNode()!.status!.nodeInfo!)}>
                     {([key, value]) => (
                       <tr class="border-b border-b-layer-content/10">
-                        <td class="font-bold opacity-60 p-2">{`${
-                          t(`cluster.nodeInfo.${key}`) as string
-                        }`}</td>
+                        <td class="font-bold opacity-60 p-2">{`${t(`cluster.nodeInfo.${key}`) as string}`}</td>
                         <td class="p-2">{value}</td>
                       </tr>
                     )}

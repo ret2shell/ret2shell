@@ -11,9 +11,7 @@ export default function TeamSolves(props: {
 }) {
   const tags = createMemo(() => {
     const tags = new Set(
-      props.challenges
-        .filter((c) => c.hidden === false)
-        .flatMap((c) => c.tag.find((t) => t.primary)?.name ?? "UNKNOWN")
+      props.challenges.filter((c) => c.hidden === false).flatMap((c) => c.tag.find((t) => t.primary)?.name ?? "UNKNOWN")
     );
     return Array.from(tags);
   });

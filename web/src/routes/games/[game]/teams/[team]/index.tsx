@@ -118,10 +118,7 @@ function AdminManagement(props: {
           <div class="flex flex-row space-x-2">
             <Field
               name="name"
-              validate={[
-                required(t("team.form.name.required")!),
-                maxLength(32, t("team.form.name.maximumLength")!),
-              ]}
+              validate={[required(t("team.form.name.required")!), maxLength(32, t("team.form.name.maximumLength")!)]}
             >
               {(field, props) => (
                 <Input
@@ -283,10 +280,7 @@ function SelfManagement(props: { members: User[] }) {
           <div class="flex flex-row space-x-2">
             <Field
               name="name"
-              validate={[
-                required(t("team.form.name.required")!),
-                maxLength(32, t("team.form.name.maximumLength")!),
-              ]}
+              validate={[required(t("team.form.name.required")!), maxLength(32, t("team.form.name.maximumLength")!)]}
             >
               {(field, props) => (
                 <Input
@@ -527,10 +521,7 @@ export default function () {
 
   return (
     <>
-      <Title
-        page={team()?.name ?? t("team.title")}
-        route={`/games/${gameStore.current?.id}/teams/${team()?.id}`}
-      />
+      <Title page={team()?.name ?? t("team.title")} route={`/games/${gameStore.current?.id}/teams/${team()?.id}`} />
       <SidebarLayout
         leftBar={() => <Sidebar team={team()} members={members()} loading={loadingMembers()} />}
         showLeftBar={showSidebar()}

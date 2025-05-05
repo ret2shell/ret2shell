@@ -31,7 +31,7 @@ export default function () {
         await forgotPassword(data);
         addToast({
           level: "success",
-          description: t("account.forgot.status.success")!,
+          description: t("account.forgot.status.success.message")!,
           duration: 5000,
         });
         navigate("/", { replace: true });
@@ -39,7 +39,7 @@ export default function () {
         if (err instanceof HTTPError && err.response.status === 429) {
           addToast({
             level: "error",
-            description: t("account.forgot.status.rateExceeded")!,
+            description: t("account.forgot.status.rateExceeded.message")!,
             duration: 5000,
           });
         } else {

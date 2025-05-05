@@ -38,7 +38,7 @@ export default function () {
         try {
           setChallenge(await getChallenge(gameStore.current!.id, challengeId()!));
         } catch (err) {
-          handleHttpError(err as Error, t("challenge.errors.fetchChallenge.title")!);
+          handleHttpError(err as Error, t("challenge.errors.fetch.title")!);
         }
       });
     }

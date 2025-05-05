@@ -229,7 +229,7 @@ export default function () {
             <div class="flex flex-row space-x-4 items-center flex-1">
               <span class="icon-[fluent--emoji-sparkle-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl text-info">{statistics()?.users.valid}</span>
-              <span class="opacity-60">{t("user.status.valid")}</span>
+              <span class="opacity-60">{t("user.status.valid.title")}</span>
             </div>
             <div class="flex flex-row space-x-4 items-center flex-1">
               <span class="icon-[fluent--person-20-regular] w-8 h-8 opacity-80" />
@@ -355,7 +355,7 @@ export default function () {
             <div class="flex flex-row space-x-4 items-center flex-1">
               <span class="icon-[fluent--checkmark-starburst-20-regular] w-8 h-8 opacity-80" />
               <span class="font-bold text-3xl text-success">{statistics()?.submissions.solved}</span>
-              <span class="opacity-60">{t("challenge.submission.status.solved")}</span>
+              <span class="opacity-60">{t("challenge.submission.status.solved.title")}</span>
             </div>
             <div class="flex flex-row space-x-4 items-center flex-1">
               <span class="icon-[fluent--text-bullet-list-20-regular] w-8 h-8 opacity-80" />

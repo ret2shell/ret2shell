@@ -47,7 +47,7 @@ export default function () {
         await resetPassword(data);
         addToast({
           level: "success",
-          description: t("account.reset.status.success")!,
+          description: t("account.reset.status.success.message")!,
           duration: 5000,
         });
         navigate("/", { replace: true });
