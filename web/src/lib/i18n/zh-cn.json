@@ -2013,7 +2013,7 @@
     "title": "管理"
   },
   "traffic": {
-    "title": "��境路由",
+    "title": "环境路由",
     "nodeSelector": "节点选择器",
     "preset": {
       "title": "脚本预设",
