@@ -8,9 +8,12 @@ article.article {
   p {
     @apply my-4;
   }
+  a {
+    @apply font-normal;
+  }
   figure,
   blockquote {
-    @apply my-6;
+    @apply my-6 font-normal;
   }
 }
 
@@ -19,9 +22,12 @@ article.article-compact {
   p {
     @apply my-2;
   }
+  a {
+    @apply font-normal;
+  }
   figure,
   blockquote {
-    @apply my-3;
+    @apply my-3 font-normal;
   }
   h1,
   h2,
