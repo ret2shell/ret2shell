@@ -256,7 +256,7 @@ export function SubmissionList(props: {
                 <A
                   class="hover:underline flex space-x-2 items-center"
                   href={
-                    props.archived
+                    !props.inGame || props.archived
                       ? `/training/${gameStore.current?.id}?challenge=${submission.challenge_id}`
                       : `/games/${gameStore.current?.id}/challenges?challenge=${submission.challenge_id}`
                   }
