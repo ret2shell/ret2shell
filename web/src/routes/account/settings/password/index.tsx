@@ -32,14 +32,14 @@ export default function () {
         description: t("general.actions.save.status.success")!,
         duration: 5000,
       });
+      setTimeout(() => {
+        resetUser();
+        navigate("/account/login");
+      }, 1000);
     } catch (err) {
       handleHttpError(err as Error, t("general.actions.save.status.fail")!);
     }
     setLoading(false);
-    setTimeout(() => {
-      resetUser();
-      navigate("/account/login");
-    }, 1000);
   }
   return (
     <>
