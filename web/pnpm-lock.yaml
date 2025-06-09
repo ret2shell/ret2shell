@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@ark-ui/solid':
-        specifier: ^5.12.0
-        version: 5.12.0(solid-js@1.9.7)
+        specifier: ^5.13.0
+        version: 5.13.0(solid-js@1.9.7)
       '@e965/xlsx':
         specifier: ^0.20.3
         version: 0.20.3
@@ -244,8 +244,8 @@ packages:
   '@antfu/utils@8.1.1':
     resolution: {integrity: sha512-Mex9nXf9vR6AhcXmMrlz/HVgYYZpVGJ6YlPgwl7UnaFpnshXs6EK/oa5Gpf3CzENMjkvEx2tQtntGnb7UtSTOQ==}
 
-  '@ark-ui/solid@5.12.0':
-    resolution: {integrity: sha512-feEV4BRreNXl49LvyY/jJuZvvkpfU/67sQSJEltBIlCerXEITNG41oSztQYUEspFxWooWZR7d3bul9oDH9U/eA==}
+  '@ark-ui/solid@5.13.0':
+    resolution: {integrity: sha512-8KKfGkVyZ5p1XG+jMOULRJ6lx2aZC7XQkwsuXhel/TIch9c7DWJjSAH7B1GG6PJmkLgLG5VFseusmkUjSt0BjA==}
     peerDependencies:
       solid-js: '>=1.6.0'
 
@@ -2248,7 +2248,7 @@ snapshots:
 
   '@antfu/utils@8.1.1': {}
 
-  '@ark-ui/solid@5.12.0(solid-js@1.9.7)':
+  '@ark-ui/solid@5.13.0(solid-js@1.9.7)':
     dependencies:
       '@internationalized/date': 3.8.1
       '@zag-js/accordion': 1.15.0
