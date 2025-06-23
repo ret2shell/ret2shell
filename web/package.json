@@ -72,7 +72,7 @@
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
+    "@biomejs/biome": "2.0.4",
     "@iconify-json/fluent": "^1.2.25",
     "@iconify-json/fluent-emoji-flat": "^1.2.3",
     "@iconify-json/meteocons": "^1.2.2",
