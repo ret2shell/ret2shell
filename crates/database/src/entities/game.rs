@@ -49,12 +49,15 @@ pub struct AccessPolicy {
   pub sync: i32,
 }
 
-// NOTE: Archive policy
+// NOTE: Policy Structs
 // Each struct must have a default implementation for all their fields.
 // And please add `#[serde(default)]` to each field.
 // It's because that the policy may update its fields in the future, and it's
 // hard to update all this column in the database for all outdated games.
 
+fn default_true() -> bool {
+  true
+}
 /// Archive policy -> Challenge
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct ArchivePolicyChallenge {
@@ -69,6 +72,17 @@ pub struct ArchivePolicyChallenge {
 pub struct ArchivePolicy {
   #[serde(default)]
   pub challenge: ArchivePolicyChallenge,
+}
+
+/// Hammer policy
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
+pub struct HammerPolicy {
+  #[serde(default = "default_true")]
+  pub enabled: bool,
+  #[serde(default)]
+  pub outer_label: Option<String>,
+  #[serde(default)]
+  pub outer_url: Option<String>,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
@@ -88,14 +102,6 @@ pub struct TimelinePreset {
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct TimelinePresets(pub Vec<TimelinePreset>);
-
-#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
-pub struct HammerPolicy {
-  pub enabled: bool,
-  pub outer_label: Option<String>,
-  pub outer_url: Option<String>,
-}
-
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "game")]
 pub struct Model {
@@ -124,6 +130,9 @@ pub struct Model {
   #[sea_orm(column_type = "JsonBinary")]
   #[serde(default = "ArchivePolicy::default")]
   pub archive_policy: ArchivePolicy,
+  #[sea_orm(column_type = "JsonBinary")]
+  #[serde(default = "HammerPolicy::default")]
+  pub hammer_policy: HammerPolicy,
   pub cover: Option<String>,
   pub logo: Option<String>,
   pub enable_audit: bool,
@@ -142,17 +151,6 @@ pub struct Model {
   pub node_selector: Option<String>,
   #[serde(default = "Option::default")]
   pub traffic: Option<String>,
-  #[serde(default = "default_hammer_policy")]
-  #[sea_orm(column_type = "JsonBinary")]
-  pub hammer_policy: HammerPolicy,
-}
-
-fn default_hammer_policy() -> HammerPolicy {
-  HammerPolicy {
-    enabled: true,
-    outer_label: None,
-    outer_url: None,
-  }
 }
 
 impl Model {
