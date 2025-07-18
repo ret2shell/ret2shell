@@ -45,7 +45,7 @@ services:
 
   platform:
     image: ret2shell:latest
-    restart: unless-stopped
+    restart: on-failure:5
     depends_on:
       - database
       - cache
