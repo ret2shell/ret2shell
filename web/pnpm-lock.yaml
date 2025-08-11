@@ -184,11 +184,11 @@ importers:
         specifier: ^1.2.28
         version: 1.2.28
       '@iconify-json/fluent-emoji-flat':
-        specifier: ^1.2.3
-        version: 1.2.3
+        specifier: ^1.2.4
+        version: 1.2.4
       '@iconify-json/meteocons':
         specifier: ^1.2.2
-        version: 1.2.2
+        version: 1.2.3
       '@iconify/tailwind4':
         specifier: ^1.0.6
         version: 1.0.6(tailwindcss@4.1.11)
@@ -553,14 +553,14 @@ packages:
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
 
-  '@iconify-json/fluent-emoji-flat@1.2.3':
-    resolution: {integrity: sha512-dPvAidr4bQv8Esr77qNyD8V8yhtIDUirAQP6eHGeoqxpYVZTnGQ556NlBs4553cV4fjnK81t6eSBmPGPk+yUeA==}
+  '@iconify-json/fluent-emoji-flat@1.2.4':
+    resolution: {integrity: sha512-wCqlNy3K6GpPoID2eYxwRYsCbOmayxxE9fLlQB1NL3SUuQRCp7Shd4PAaWD/wXR610ZTEXXNFhA7BwvG+eaLBw==}
 
   '@iconify-json/fluent@1.2.28':
     resolution: {integrity: sha512-Lnaf38ruWopJv8PdEsK8vXgxKpFSsKED2kI0/575ZXg6XHUMvzSuLlldAVAOEWZmMVPJFC0MXe07Ybnh1ziLvw==}
 
-  '@iconify-json/meteocons@1.2.2':
-    resolution: {integrity: sha512-IYkII3CGvqDAGbLNqIN6bWIz6dKHPvZvPoTq34veKJy0clRRrSwiEQUrK4IOiF8MXPzhRchsVwtH7U/F3clMbw==}
+  '@iconify-json/meteocons@1.2.3':
+    resolution: {integrity: sha512-Da7Vn7x4lntwC9lg9eMTgsGuaqKwSfxU1hXLfG8XSt67XDgzZ/vNWkYhEILrQreMYWfG2Xx/tZsZTQSL9n4MMg==}
 
   '@iconify/tailwind4@1.0.6':
     resolution: {integrity: sha512-43ZXe+bC7CuE2LCgROdqbQeFYJi/J7L/k1UpSy8KDQlWVsWxPzLSWbWhlJx4uRYLOh1NRyw02YlDOgzBOFNd+A==}
@@ -2568,7 +2568,7 @@ snapshots:
 
   '@floating-ui/utils@0.2.10': {}
 
-  '@iconify-json/fluent-emoji-flat@1.2.3':
+  '@iconify-json/fluent-emoji-flat@1.2.4':
     dependencies:
       '@iconify/types': 2.0.0
 
@@ -2576,7 +2576,7 @@ snapshots:
     dependencies:
       '@iconify/types': 2.0.0
 
-  '@iconify-json/meteocons@1.2.2':
+  '@iconify-json/meteocons@1.2.3':
     dependencies:
       '@iconify/types': 2.0.0
 
