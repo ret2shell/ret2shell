@@ -14,7 +14,7 @@
     "lint": "biome lint"
   },
   "dependencies": {
-    "@ark-ui/solid": "^5.24.0",
+    "@ark-ui/solid": "^5.24.1",
     "@e965/xlsx": "^0.20.3",
     "@jsdevtools/rehype-toc": "^3.0.2",
     "@modular-forms/solid": "^0.25.1",
