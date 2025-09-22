@@ -78,7 +78,7 @@
     "@iconify-json/fluent-emoji-flat": "^1.2.5",
     "@iconify-json/meteocons": "^1.2.4",
     "@iconify/tailwind4": "^1.0.6",
-    "@tailwindcss/typography": "^0.5.16",
+    "@tailwindcss/typography": "^0.5.18",
     "@tailwindcss/vite": "^4.1.13",
     "@types/howler": "^2.2.12",
     "@types/luxon": "^3.7.1",
