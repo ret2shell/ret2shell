@@ -35,7 +35,7 @@ RUN pnpm build && \
 FROM alpine:3
 
 # hadolint ignore=DL3018
-RUN apk add --update --no-cache curl git skopeo && \
+RUN apk add --update --no-cache curl git skopeo tini && \
     git config --global user.email platform@ret.sh.cn && \
     git config --global user.name Ret2Shell
 
@@ -51,4 +51,4 @@ RUN mkdir -p \
 HEALTHCHECK --interval=5m --timeout=3s --start-period=10s --retries=1 \
     CMD curl -fsSL http://localhost:8080/api/ping || exit 1
 
-ENTRYPOINT ["/bin/r2s-server"]
+ENTRYPOINT ["/sbin/tini", "--", "/bin/r2s-server"]
