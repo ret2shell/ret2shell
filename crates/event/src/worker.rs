@@ -14,7 +14,7 @@ pub async fn event_pusher(mut messages: Stream, manager: EventManager) {
         if let Err(error) = result {
           error!(?error, "failed to process event message");
         }
-        message.ack().await.ok();
+        message.double_ack().await.ok();
       } else {
         error!(?message, "failed to receive event message from nats");
       }

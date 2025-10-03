@@ -100,7 +100,7 @@ async fn process_message(message: jetstream::Message) -> Result<(), EmailError> 
     );
   }
   message
-    .ack()
+    .double_ack()
     .await
     .inspect_err(|e| error!(error=?e, "failed to drop NATS email message"))
     .ok();

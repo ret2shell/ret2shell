@@ -57,7 +57,7 @@ async fn score_maintenance_worker(queue: Queue, db: Database) {
         })
         .ok();
       if req.is_none() {
-        message.ack().await.ok();
+        message.double_ack().await.ok();
         continue;
       }
       let challenge = serde_json::from_str::<TracedMessage<challenge::Model>>(&req.unwrap())
@@ -68,7 +68,7 @@ async fn score_maintenance_worker(queue: Queue, db: Database) {
       let span = error_span!("request", trace=%challenge.as_ref().map(|c| &c.trace).unwrap_or(&"UNKNOWN".to_owned()));
       let challenge = challenge.map(|c| c.payload);
       if challenge.is_none() {
-        message.ack().await.ok();
+        message.double_ack().await.ok();
         continue;
       }
       let challenge = challenge.unwrap();
@@ -77,7 +77,7 @@ async fn score_maintenance_worker(queue: Queue, db: Database) {
         .await
         .inspect_err(|e| error!(error=?e, "failed to process message"))
         .ok();
-      message.ack().await.ok();
+      message.double_ack().await.ok();
     }
   }
 }
@@ -154,7 +154,7 @@ async fn submission_worker(
         })
         .ok();
       if req.is_none() {
-        message.ack().await.ok();
+        message.double_ack().await.ok();
         continue;
       }
       let submission = serde_json::from_str::<TracedMessage<submission::Model>>(&req.unwrap())
@@ -163,7 +163,7 @@ async fn submission_worker(
         })
         .ok();
       if submission.is_none() {
-        message.ack().await.ok();
+        message.double_ack().await.ok();
         continue;
       }
       let trace = submission.as_ref().unwrap().trace.to_owned();
@@ -207,10 +207,10 @@ async fn submission_worker(
         )
         .await
         .ok();
-        message.ack().await.ok();
+        message.double_ack().await.ok();
         continue;
       }
-      message.ack().await.ok();
+      message.double_ack().await.ok();
     } else {
       error!(error=?message, "failed to receive message from nats");
     }
