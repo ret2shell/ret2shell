@@ -5,7 +5,7 @@ use axum::{
   extract::{Query, State},
   middleware,
   response::{IntoResponse, Response},
-  routing::get,
+  routing::{get, patch},
 };
 use chrono::{DateTime, Utc};
 use futures::future::join_all;
@@ -35,6 +35,10 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     .merge(
       Router::new()
         .route("/config", get(get_config).patch(update_config))
+        .route(
+          "/registrar",
+          patch(update_registrar_script).delete(delete_registrar_script),
+        )
         .route_layer(middleware::from_fn(auth::permission_required_all!(
           Permission::DevOps
         ))),
@@ -67,6 +71,68 @@ async fn update_config(
   let result = config::update(&db.conn, config).await?;
   cache.at("platform").del("config").await?;
   Ok(Json(result))
+}
+
+#[derive(Serialize)]
+struct RegistrarScriptResponse {
+  pub lint: Vec<r2s_engine::DiagnosticMarker>,
+}
+
+#[derive(Deserialize)]
+struct RegistrarScriptRequest {
+  registrar: String,
+}
+
+async fn update_registrar_script(
+  State(ref db): State<Database>, State(ref cache): State<Cache>,
+  Extension(config): Extension<config::Model>, Json(req): Json<RegistrarScriptRequest>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let registrar = r2s_registrar::Registrar;
+  let lint = registrar.lint(&req.registrar).await?;
+  let _ = r2s_database::config::update(
+    &db.conn,
+    r2s_database::config::Model {
+      auth: Some(r2s_config::auth::Config {
+        registrar_script: Some(req.registrar.clone()),
+        ..config.auth.unwrap_or(r2s_config::auth::Config {
+          signing_key: String::new(),
+          buffer_time: 21600,
+          expires_time: 86400,
+          registrar_script: None,
+        })
+      }),
+      ..config
+    },
+  )
+  .await?;
+  registrar.expire("default").await;
+  cache.at("platform").del("config").await?;
+  Ok(Json(RegistrarScriptResponse { lint }))
+}
+
+async fn delete_registrar_script(
+  State(ref db): State<Database>, State(ref cache): State<Cache>,
+  Extension(config): Extension<config::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let _ = r2s_database::config::update(
+    &db.conn,
+    r2s_database::config::Model {
+      auth: Some(r2s_config::auth::Config {
+        registrar_script: None,
+        ..config.auth.unwrap_or(r2s_config::auth::Config {
+          signing_key: String::new(),
+          buffer_time: 21600,
+          expires_time: 86400,
+          registrar_script: None,
+        })
+      }),
+      ..config
+    },
+  )
+  .await?;
+  r2s_registrar::Registrar.expire("default").await;
+  cache.at("platform").del("config").await?;
+  Ok(())
 }
 
 async fn get_platform_info(

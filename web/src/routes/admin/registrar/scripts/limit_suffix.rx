@@ -1,0 +1,10 @@
+//! * registrar example: limit email suffix
+
+pub async fn intercept(info) {
+  // Allow only specific email suffix
+  if !info.email.ends_with("@example.edu") {
+    return Err("Only @example.edu emails are allowed");
+  }
+  Ok(#{})
+}
+

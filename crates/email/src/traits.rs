@@ -31,3 +31,16 @@ pub enum EmailError {
   #[error("address error: {0}")]
   AddressError(#[from] lettre::address::AddressError),
 }
+
+impl EmailError {
+  pub fn can_retry(&self) -> bool {
+    match self {
+      EmailError::MailerError(error) => !error.is_permanent(),
+      EmailError::InvalidEmailTlsConfiguration(_) => false,
+      EmailError::SerdeError(_) => false,
+      EmailError::Utf8Error(_) => false,
+      EmailError::LettreError(error) => matches!(error, lettre::error::Error::Io(_)),
+      EmailError::AddressError(_) => false,
+    }
+  }
+}

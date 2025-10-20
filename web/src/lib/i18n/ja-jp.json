@@ -2064,6 +2064,15 @@
       "multiNodeDirectScript": "マルチノード直結"
     }
   },
+  "registrar": {
+    "title": "レジストラ",
+    "script": "登録スクリプト",
+    "preset": {
+      "title": "スクリプトプリセット",
+      "limitSuffix": "メールのサフィックスを制限",
+      "inviteBySuffix": "メールのサフィックスで所属に自動招待"
+    }
+  },
   "cluster": {
     "title": "クラスタ管理",
     "status": {

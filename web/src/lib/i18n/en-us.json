@@ -2064,6 +2064,15 @@
       "multiNodeDirectScript": "Multi-node direct connection"
     }
   },
+  "registrar": {
+    "title": "Registrar",
+    "script": "Registration script",
+    "preset": {
+      "title": "Script presets",
+      "limitSuffix": "Limit email suffix",
+      "inviteBySuffix": "Invite by email suffix"
+    }
+  },
   "cluster": {
     "title": "Cluster management",
     "status": {

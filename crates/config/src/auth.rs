@@ -23,6 +23,7 @@ pub struct Config {
   pub signing_key: String,
   pub buffer_time: i64,
   pub expires_time: i64,
+  pub registrar_script: Option<String>,
 }
 
 impl Config {
@@ -38,6 +39,12 @@ impl Merge for Option<Config> {
   fn merge(self, other: Self) -> Self {
     // prefers fields in `other`
     match (self, other) {
+      (Some(a), Some(b)) => Some(Config {
+        signing_key: a.signing_key,
+        buffer_time: a.buffer_time,
+        expires_time: a.expires_time,
+        registrar_script: b.registrar_script.or(a.registrar_script),
+      }),
       (Some(a), _) => Some(a),
       (None, Some(b)) => Some(b),
       (None, None) => None,

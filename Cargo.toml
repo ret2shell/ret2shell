@@ -73,22 +73,23 @@ tracing-core       = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 urlencoding        = "2.1"
 
-r2s-auditor  = { version = "3", path = "crates/auditor" }
-r2s-bucket   = { version = "3", path = "crates/bucket" }
-r2s-cache    = { version = "3", path = "crates/cache" }
-r2s-captcha  = { version = "3", path = "crates/captcha" }
-r2s-checker  = { version = "3", path = "crates/checker" }
-r2s-cluster  = { version = "3", path = "crates/cluster" }
-r2s-config   = { version = "3", path = "crates/config" }
-r2s-database = { version = "3", path = "crates/database" }
-r2s-email    = { version = "3", path = "crates/email" }
-r2s-engine   = { version = "3", path = "crates/engine" }
-r2s-event    = { version = "3", path = "crates/event" }
-r2s-license  = { version = "3", path = "crates/license" }
-r2s-media    = { version = "3", path = "crates/media" }
-r2s-migrator = { version = "3", path = "crates/migrator" }
-r2s-oauth    = { version = "3", path = "crates/oauth" }
-r2s-queue    = { version = "3", path = "crates/queue" }
+r2s-auditor   = { version = "3", path = "crates/auditor" }
+r2s-bucket    = { version = "3", path = "crates/bucket" }
+r2s-cache     = { version = "3", path = "crates/cache" }
+r2s-captcha   = { version = "3", path = "crates/captcha" }
+r2s-checker   = { version = "3", path = "crates/checker" }
+r2s-cluster   = { version = "3", path = "crates/cluster" }
+r2s-config    = { version = "3", path = "crates/config" }
+r2s-database  = { version = "3", path = "crates/database" }
+r2s-email     = { version = "3", path = "crates/email" }
+r2s-engine    = { version = "3", path = "crates/engine" }
+r2s-event     = { version = "3", path = "crates/event" }
+r2s-license   = { version = "3", path = "crates/license" }
+r2s-media     = { version = "3", path = "crates/media" }
+r2s-migrator  = { version = "3", path = "crates/migrator" }
+r2s-oauth     = { version = "3", path = "crates/oauth" }
+r2s-queue     = { version = "3", path = "crates/queue" }
+r2s-registrar = { version = "3", path = "crates/registrar" }
 
 [workspace.dependencies.axum]
 features = ["ws", "http2", "tower-log", "tracing", "multipart", "macros"]

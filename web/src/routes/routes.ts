@@ -300,6 +300,10 @@ export const routes = {
           path: "/traffic",
           component: lazy(() => import("./admin/traffic/index")),
         },
+        {
+          path: "/registrar",
+          component: lazy(() => import("./admin/registrar/index")),
+        },
       ],
     },
     {

@@ -39,9 +39,7 @@
         system:
         let
           pkgs = pkgsBySystem.${system};
-          rust = pkgs.rust-bin.stable.latest.default.override {
-            extensions = [ "rust-src" ];
-          };
+          rust = pkgs.rust-bin.nightly.latest.complete;
         in
         {
           default = pkgs.mkShell {

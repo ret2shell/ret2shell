@@ -75,21 +75,34 @@ async fn process_message(message: jetstream::Message) -> Result<(), EmailError> 
   let req = req.payload;
   let mut retry_count = 3;
   while retry_count > 0 {
-    if let Err(err) = send_email_impl(&req.config, &req.email).await {
-      warn!(
-        email = %req.email.email,
-        subject = %req.email.subject,
-        error = ?err,
-        "failed to send email, retrying...",
-      );
-      retry_count -= 1;
-    } else {
-      info!(
-        email = %req.email.email,
-        subject = %req.email.subject,
-        "successfully sent email",
-      );
-      break;
+    match send_email_impl(&req.config, &req.email).await {
+      Ok(_) => {
+        info!(
+          email = %req.email.email,
+          subject = %req.email.subject,
+          "successfully sent email",
+        );
+        break;
+      }
+      Err(error) if !error.can_retry() => {
+        error!(
+          email = %req.email.email,
+          subject = %req.email.subject,
+          error = ?error,
+          "failed to send email, permanent error, dropped.",
+        );
+        break;
+      }
+      Err(error) => {
+        warn!(
+          email = %req.email.email,
+          subject = %req.email.subject,
+          error = ?error,
+          "failed to send email, retrying...",
+        );
+        retry_count -= 1;
+        continue;
+      }
     }
   }
   if retry_count < 0 {

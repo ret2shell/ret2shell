@@ -13,11 +13,12 @@ use r2s_cache::Cache;
 use r2s_config::captcha::ValidatorType;
 use r2s_database::{
   config,
-  user::{self, Permission, Permissions},
+  user::{self, Permission},
 };
 use r2s_migrator::Database;
 use r2s_oauth::OAuth;
 use r2s_queue::Queue;
+use r2s_registrar::RegisterInfo;
 use sea_orm::TransactionTrait;
 use serde::{Deserialize, Serialize};
 use tower_http::request_id::RequestId;
@@ -290,36 +291,32 @@ async fn register_with_oauth_account(
 
   let password = hash_password(&req.password)?;
 
-  let mut permissions = match user::count(&txn, true, None, None, false).await? {
-    0 => Permissions(vec![
-      Permission::Basic,
-      Permission::Verified,
-      Permission::Calendar,
-      Permission::Wiki,
-      Permission::Bulletin,
-      Permission::Game,
-      Permission::Host,
-      Permission::User,
-      Permission::Statistics,
-      Permission::DevOps,
-    ]),
-    _ => Permissions(vec![Permission::Basic]),
+  // Registrar interception
+  let info = RegisterInfo {
+    account: req.account.clone(),
+    nickname: req.nickname.clone(),
+    email: req.email.clone(),
   };
-  if !config.email.as_ref().is_some_and(|c| c.enabled) && permissions.0.len() == 1 {
-    permissions.0.push(Permission::Verified);
-  }
-  let email = req.email.clone();
+  let registrar_result = crate::utility::registrar::intercept(&config.auth, &info).await?;
+  let permissions =
+    crate::utility::registrar::compute_permissions(&txn, &config, &registrar_result).await?;
   let institute = r2s_database::institute::get_by_provider(&txn, &cached_token.provider).await?;
+  let institute_id = crate::utility::registrar::resolve_institute(
+    &txn,
+    institute.clone().map(|i| i.id),
+    &registrar_result,
+  )
+  .await?;
   let new_user = user::Model {
     account: req.account.clone(),
     nickname: req.nickname.clone(),
     password: Some(password),
-    email: Some(req.email),
+    email: Some(req.email.clone()),
     registered_at: Utc::now(),
     permissions,
     hidden: false,
     banned: false,
-    institute_id: institute.clone().map(|i| i.id),
+    institute_id,
     ..Default::default()
   };
   let user = user::create(&txn, new_user).await?;
@@ -337,17 +334,19 @@ async fn register_with_oauth_account(
 
   txn.commit().await?;
 
-  send_email(
-    &cache,
-    &queue,
-    &config,
-    &user.account,
-    &email,
-    EmailType::Verify,
-    &trace.header_value().to_str().unwrap_or("UNKNOWN"),
-  )
-  .await
-  .ok();
+  if !user.permissions.0.contains(&Permission::Verified) {
+    send_email(
+      &cache,
+      &queue,
+      &config,
+      &user.account,
+      &req.email,
+      EmailType::Verify,
+      &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    )
+    .await
+    .ok();
+  }
   info!(
     provider=%cached_token.provider,
     id = user.id,
@@ -415,8 +414,7 @@ async fn bind_oauth_account(
         ("email", user.email.clone().unwrap_or_default()),
       ]
       .iter()
-      .cloned()
-      .map(|(k, v)| (k.to_owned(), v.to_owned()))
+      .map(|(k, v)| (k.to_string(), v.to_string()))
       .collect(),
     )
     .await?;

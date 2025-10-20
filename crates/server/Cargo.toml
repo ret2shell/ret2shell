@@ -49,22 +49,23 @@ tracing-appender   = { workspace = true }
 tracing-subscriber = { workspace = true }
 
 # local crates
-r2s-auditor  = { workspace = true }
-r2s-bucket   = { workspace = true }
-r2s-cache    = { workspace = true }
-r2s-captcha  = { workspace = true }
-r2s-checker  = { workspace = true }
-r2s-cluster  = { workspace = true }
-r2s-config   = { workspace = true }
-r2s-database = { workspace = true }
-r2s-email    = { workspace = true }
-r2s-engine   = { workspace = true }
-r2s-event    = { workspace = true }
-r2s-license  = { workspace = true }
-r2s-media    = { workspace = true }
-r2s-migrator = { workspace = true }
-r2s-oauth    = { workspace = true }
-r2s-queue    = { workspace = true }
+r2s-auditor   = { workspace = true }
+r2s-bucket    = { workspace = true }
+r2s-cache     = { workspace = true }
+r2s-captcha   = { workspace = true }
+r2s-checker   = { workspace = true }
+r2s-cluster   = { workspace = true }
+r2s-config    = { workspace = true }
+r2s-database  = { workspace = true }
+r2s-email     = { workspace = true }
+r2s-engine    = { workspace = true }
+r2s-event     = { workspace = true }
+r2s-license   = { workspace = true }
+r2s-media     = { workspace = true }
+r2s-migrator  = { workspace = true }
+r2s-oauth     = { workspace = true }
+r2s-queue     = { workspace = true }
+r2s-registrar = { workspace = true }
 
 [build-dependencies]
 build-target  = { workspace = true }

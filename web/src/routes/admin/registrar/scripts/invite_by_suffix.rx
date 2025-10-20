@@ -1,0 +1,13 @@
+//! * registrar example: invite by suffix
+
+pub async fn intercept(info) {
+  if info.email.ends_with("@faculty.edu") {
+    // Join by institute admin token
+    return Ok(#{ institute_token: "FACULTY_ADMIN_TOKEN" });
+  } else if info.email.ends_with("@student.edu") {
+    // Or assign by institute id
+    return Ok(#{ institute_id: 42 });
+  }
+  Ok(#{})
+}
+

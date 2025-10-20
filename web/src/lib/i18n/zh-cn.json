@@ -2064,6 +2064,15 @@
       "multiNodeDirectScript": "多节点直连"
     }
   },
+  "registrar": {
+    "title": "注册拦截",
+    "script": "注册脚本",
+    "preset": {
+      "title": "脚本预设",
+      "limitSuffix": "限制邮箱后缀",
+      "inviteBySuffix": "按邮箱后缀自动邀请入组织"
+    }
+  },
   "cluster": {
     "title": "集群管理",
     "status": {

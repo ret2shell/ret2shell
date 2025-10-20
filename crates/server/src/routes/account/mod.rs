@@ -17,6 +17,7 @@ use r2s_database::{
 use r2s_email::{EmailCtx, EmailRequest};
 use r2s_migrator::Database;
 use r2s_queue::Queue;
+use r2s_registrar::RegisterInfo;
 use rand::Rng;
 use sea_orm::TransactionTrait;
 use serde::{Deserialize, Serialize};
@@ -483,34 +484,29 @@ async fn register(
 
   let password = hash_password(&body.password)?;
 
-  let mut permissions = match user::count(&txn, true, None, None, false).await? {
-    0 => Permissions(vec![
-      Permission::Basic,
-      Permission::Verified,
-      Permission::Calendar,
-      Permission::Wiki,
-      Permission::Bulletin,
-      Permission::Game,
-      Permission::Host,
-      Permission::User,
-      Permission::Statistics,
-      Permission::DevOps,
-    ]),
-    _ => Permissions(vec![Permission::Basic]),
+  // Registrar interception
+  let info = RegisterInfo {
+    account: body.account.clone(),
+    nickname: body.nickname.clone(),
+    email: body.email.clone(),
   };
-  if !config.email.as_ref().is_some_and(|c| c.enabled) && permissions.0.len() == 1 {
-    permissions.0.push(Permission::Verified);
-  }
-  let email = body.email.clone();
+  let registrar_result = crate::utility::registrar::intercept(&config.auth, &info).await?;
+
+  let permissions =
+    crate::utility::registrar::compute_permissions(&txn, &config, &registrar_result).await?;
+  // Resolve institute assignment from registrar_result
+  let assigned_institute_id =
+    crate::utility::registrar::resolve_institute(&txn, None, &registrar_result).await?;
   let new_user = user::Model {
     account: body.account.clone(),
     nickname: body.nickname.clone(),
     password: Some(password),
-    email: Some(body.email),
+    email: Some(body.email.clone()),
     registered_at: Utc::now(),
     permissions,
     hidden: false,
     banned: false,
+    institute_id: assigned_institute_id,
     ..Default::default()
   };
 
@@ -518,17 +514,20 @@ async fn register(
 
   txn.commit().await?;
 
-  send_email(
-    &cache,
-    queue,
-    &config,
-    &user.account,
-    &email,
-    EmailType::Verify,
-    &trace.header_value().to_str().unwrap_or("UNKNOWN"),
-  )
-  .await
-  .ok();
+  // send verification email only when not already verified
+  if !user.permissions.0.contains(&Permission::Verified) {
+    send_email(
+      &cache,
+      queue,
+      &config,
+      &user.account,
+      &body.email,
+      EmailType::Verify,
+      &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    )
+    .await
+    .ok();
+  }
   info!(
     id=%user.id,
     account=%user.account,

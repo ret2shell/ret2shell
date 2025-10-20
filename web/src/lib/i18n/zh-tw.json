@@ -2064,6 +2064,15 @@
       "multiNodeDirectScript": "多節點直連"
     }
   },
+  "registrar": {
+    "title": "註冊攔截",
+    "script": "註冊腳本",
+    "preset": {
+      "title": "腳本預設",
+      "limitSuffix": "限制信箱後綴",
+      "inviteBySuffix": "依信箱後綴自動邀請入組織"
+    }
+  },
   "cluster": {
     "title": "集群管理",
     "status": {

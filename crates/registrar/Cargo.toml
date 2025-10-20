@@ -1,0 +1,25 @@
+[package]
+description = "Registration interception via Rune scripts for Ret2Shell"
+name        = "r2s-registrar"
+
+authors      = { workspace = true }
+edition      = { workspace = true }
+homepage     = { workspace = true }
+publish      = { workspace = true }
+repository   = { workspace = true }
+rust-version = { workspace = true }
+version      = { workspace = true }
+
+[dependencies]
+anyhow       = { workspace = true }
+once_cell    = { workspace = true }
+rune         = { workspace = true }
+rune-modules = { workspace = true }
+serde        = { workspace = true }
+serde_json   = { workspace = true }
+thiserror    = { workspace = true }
+
+r2s-engine = { workspace = true }
+
+[lib]
+path = "src/lib.rs"

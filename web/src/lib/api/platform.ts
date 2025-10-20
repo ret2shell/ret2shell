@@ -100,3 +100,13 @@ export async function getPlatformConfig() {
 export async function updatePlatformConfig(config: Config) {
   return await api.patch(`${api_root}/platform/config`, { json: config }).json<Config>();
 }
+
+export async function updateRegistrarScript(registrar: string) {
+  return await api
+    .patch(`${api_root}/platform/registrar`, { json: { registrar } })
+    .json<{ lint: import("@widgets/editor").DiagnosticMarker[] }>();
+}
+
+export async function deleteRegistrarScript() {
+  return await api.delete(`${api_root}/platform/registrar`).json<void>();
+}

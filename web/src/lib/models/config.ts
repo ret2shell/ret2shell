@@ -9,6 +9,7 @@ export type AuthConfig = {
   signing_key: string;
   buffer_time: number;
   expires_time: number;
+  registrar_script?: string | null;
 };
 export type AutomateConfig = {
   enabled: boolean;
@@ -40,6 +41,7 @@ export type ClusterConfig = {
   node_selector: string | null;
   proxy_image: string | null;
   traffic: string | null;
+  // legacy fields supported by backend
   enable_capture: boolean | null;
   capture_directory: string | null;
   registry: RegistryConfig | null;

@@ -4115,6 +4115,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "r2s-registrar"
+version = "3.9.0"
+dependencies = [
+ "anyhow",
+ "once_cell",
+ "r2s-engine",
+ "rune",
+ "rune-modules",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.17",
+]
+
+[[package]]
 name = "r2s-server"
 version = "3.9.0"
 dependencies = [
@@ -4153,6 +4167,7 @@ dependencies = [
  "r2s-migrator",
  "r2s-oauth",
  "r2s-queue",
+ "r2s-registrar",
  "rand 0.9.2",
  "regex",
  "rustc_version",
