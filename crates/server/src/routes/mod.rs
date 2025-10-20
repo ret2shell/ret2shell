@@ -4,6 +4,7 @@ use axum::{
   Router,
   body::Body,
   error_handling::HandleErrorLayer,
+  extract::State,
   http::{HeaderValue, Request, StatusCode},
   middleware::{from_fn, from_fn_with_state},
   response::{IntoResponse, Response},
@@ -27,7 +28,7 @@ use crate::{
     codec,
     forwarded::{MakeRequestNanoId, ProxiedIpExtractor, ip_record, ip_record_worker},
   },
-  traits::GlobalState,
+  traits::{GlobalState, ResponseError},
 };
 
 mod account;
@@ -174,6 +175,14 @@ fn construct_router(state: &GlobalState) -> Router<GlobalState> {
   )
 }
 
-async fn ping() -> impl IntoResponse {
-  "pong"
+async fn ping(State(state): State<GlobalState>) -> Result<impl IntoResponse, ResponseError> {
+  state.db.conn.ping().await?;
+  state.cache.ping().await?;
+  if state.queue.context().client().connection_state() != async_nats::connection::State::Connected {
+    return Err(ResponseError::InternalServerError(
+      "queue not connected".to_owned(),
+    ));
+  }
+
+  Ok("pong")
 }

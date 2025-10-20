@@ -65,6 +65,11 @@ impl Cache {
     }
   }
 
+  pub async fn ping(&self) -> Result<(), CacheError> {
+    self.client.ping::<Option<String>>(None).await?;
+    Ok(())
+  }
+
   pub async fn get<T>(
     &self, key: impl Into<Key> + Send + Display,
   ) -> Result<Option<T>, CacheError>
