@@ -36,7 +36,7 @@ async fn ip_record_worker_exec(message: jetstream::Message, db: &Database) -> an
   let req = req.payload;
   if user::get_ex(&db.conn, req.user_id).await?.is_none() {
     warn!(user_id = req.user_id, "ip record user not found");
-    anyhow::bail!("user {} not found for ip record", req.user_id);
+    return Ok(());
   }
   let model = ip::get_or_create(&db.conn, &req.ip).await?;
   ip::link_user(&db.conn, req.user_id, model.id).await.ok();
