@@ -1,6 +1,5 @@
 use std::{net::IpAddr, sync::Arc};
 
-use async_nats::jetstream::consumer::pull::Stream;
 use axum::{
   body::Bytes,
   extract::ws::{Message, WebSocket},
@@ -11,7 +10,6 @@ use futures::{SinkExt, StreamExt};
 use tokio::sync::{RwLock, broadcast};
 
 pub mod events;
-mod worker;
 pub use events::Event;
 pub mod traits;
 use tracing::{info, warn};
@@ -103,12 +101,6 @@ impl EventManager {
   }
 }
 
-pub async fn initialize(stream: Stream) -> EventManager {
-  let manager = EventManager::new();
-  let future = worker::event_pusher(stream, manager.clone());
-  tokio::spawn(future);
-  let saki = manager.clone();
-  // NOTE: 祥 移動
-  tokio::spawn(async move { saki.cry().await });
-  manager
+pub fn initialize() -> EventManager {
+  EventManager::new()
 }

@@ -46,13 +46,13 @@ use crate::{
     data::{self, extract_team},
   },
   traits::{GlobalState, ResponseError},
+  worker,
 };
 
 mod challenge;
 mod chat;
 mod notification;
 mod team;
-pub mod worker;
 
 // // default_chain!(game.archive_policy.clone(), challenge.show_answer)
 // #[macro_export]
@@ -64,7 +64,7 @@ pub mod worker;
 // }
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
-  tokio::spawn(worker::spawn_game_workers(state.clone()));
+  tokio::spawn(worker::game::spawn_game_workers(state.clone()));
   Router::new()
     .route("/", post(create_game))
     .route_layer(middleware::from_fn(auth::permission_required_all!(

@@ -20,6 +20,7 @@ mod middleware;
 mod routes;
 mod traits;
 mod utility;
+mod worker;
 
 const PUB_KEY: &[u8] = include_bytes!("../../../config/pub.bin");
 include!(concat!(env!("OUT_DIR"), "/constants.rs"));
@@ -82,14 +83,22 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
   let bucket = r2s_bucket::initialize(&config.bucket).await?;
   info!("loading module: < Message Queue >");
   let queue = r2s_queue::initialize(&config.queue).await?;
+  info!("loading module: < Event Manager >");
+  let event = r2s_event::initialize();
+  tokio::spawn({
+    let manager = event.clone();
+    async move { manager.cry().await }
+  });
   info!("loading module: < OAuth >");
   let oauth = r2s_oauth::initialize(&config.auth).await;
   info!("loading module: < Cluster >");
   let cluster = r2s_cluster::initialize(&config.cluster).await?;
   info!("loading module: < Email Worker >");
-  r2s_email::initialize(queue.subscribe("email").await?).await?;
+  worker::email::spawn(queue.subscribe("email").await?, db.clone());
   info!("loading module: < Event Worker >");
-  let event = r2s_event::initialize(queue.subscribe("event").await?).await;
+  worker::event::spawn(queue.subscribe("event").await?, event.clone(), db.clone());
+  info!("loading module: < IP Record Worker >");
+  worker::ip_record::spawn(queue.subscribe("ip-record").await?, db.clone());
   info!("loading module: < Media Storage >");
   let media = r2s_media::initialize(&config.media).await?;
   info!("loading module: < Checker >");

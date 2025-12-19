@@ -26,7 +26,7 @@ use crate::{
     self,
     auth::{create_auth_header_by_user_agent, extract_user_info},
     codec,
-    forwarded::{MakeRequestNanoId, ProxiedIpExtractor, ip_record, ip_record_worker},
+    forwarded::{MakeRequestNanoId, ProxiedIpExtractor, ip_record},
   },
   traits::{GlobalState, ResponseError},
 };
@@ -52,9 +52,6 @@ pub async fn initialize(
   let config = config.ok_or(anyhow::anyhow!("missing server config"))?;
   let api_base_path = &config.api_base_path;
   let cors_origins = &config.cors_origins;
-  let ip_record_stream = state.queue.subscribe("ip-record").await?;
-  let db = state.db.clone();
-  tokio::spawn(async move { ip_record_worker(ip_record_stream, db).await });
   let api_router = construct_router(&state);
   let router = Router::new()
     .nest(api_base_path, api_router)

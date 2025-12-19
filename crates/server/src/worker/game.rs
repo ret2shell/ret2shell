@@ -60,19 +60,31 @@ async fn score_maintenance_worker(queue: Queue, db: Database) {
         message.double_ack().await.ok();
         continue;
       }
-      let challenge = serde_json::from_str::<TracedMessage<challenge::Model>>(&req.unwrap())
-        .inspect_err(|e| {
-          error!(error=?e, "failed to parse message from nats");
-        })
-        .ok();
-      let span = error_span!("request", trace=%challenge.as_ref().map(|c| &c.trace).unwrap_or(&"UNKNOWN".to_owned()));
-      let challenge = challenge.map(|c| c.payload);
-      if challenge.is_none() {
+      let challenge_msg =
+        serde_json::from_str::<TracedMessage<challenge::Model>>(&req.unwrap())
+          .inspect_err(|e| {
+            error!(error=?e, "failed to parse message from nats");
+          })
+          .ok();
+      let span = error_span!(
+        "request",
+        trace=%challenge_msg.as_ref().map(|c| &c.trace).unwrap_or(&"UNKNOWN".to_owned())
+      );
+      let challenge_payload = challenge_msg.map(|c| c.payload);
+      if challenge_payload.is_none() {
         message.double_ack().await.ok();
         continue;
       }
-      let challenge = challenge.unwrap();
-      score_maintenance_worker_exec(db.clone(), challenge.clone())
+      let Some(current_challenge) =
+        challenge::get(&db.conn, challenge_payload.as_ref().unwrap().id)
+          .await
+          .inspect_err(|e| error!(error=?e, "failed to load challenge for scoreboard worker"))
+          .ok()
+      else {
+        message.double_ack().await.ok();
+        continue;
+      };
+      score_maintenance_worker_exec(db.clone(), current_challenge.clone())
         .instrument(span)
         .await
         .inspect_err(|e| error!(error=?e, "failed to process message"))
@@ -157,17 +169,33 @@ async fn submission_worker(
         message.double_ack().await.ok();
         continue;
       }
-      let submission = serde_json::from_str::<TracedMessage<submission::Model>>(&req.unwrap())
+      let submission_msg = serde_json::from_str::<TracedMessage<submission::Model>>(&req.unwrap())
         .inspect_err(|e| {
           error!(error=?e, "failed to parse message from nats");
         })
         .ok();
-      if submission.is_none() {
+      if submission_msg.is_none() {
         message.double_ack().await.ok();
         continue;
       }
-      let trace = submission.as_ref().unwrap().trace.to_owned();
-      let submission = submission.as_ref().unwrap().payload.to_owned();
+      let submission_msg = submission_msg.unwrap();
+      let trace = submission_msg.trace.to_owned();
+      let Some(submission) = submission::get(&db.conn, submission_msg.payload.id)
+        .await
+        .inspect_err(|e| error!(error=?e, "failed to load submission from database"))
+        .ok()
+      else {
+        message.double_ack().await.ok();
+        continue;
+      };
+      if submission.result.is_some() || submission.solved.is_some() {
+        info!(
+          submission_id = submission.id,
+          "submission already processed, skip message"
+        );
+        message.double_ack().await.ok();
+        continue;
+      }
       let span = error_span!(
         "request", trace=%trace,
         "data-submission-id"=%submission.id,
@@ -355,7 +383,7 @@ async fn submission_worker_exec(
             challenge_id: Some(challenge.id),
             score,
             reason: format!(
-              "No.{blood_state} solution for challenge {}#{}",
+              "No.{blood_state} solution for challenge {}:{}",
               challenge.id, challenge.name
             ),
             hint_id: None,

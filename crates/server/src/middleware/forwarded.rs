@@ -3,7 +3,6 @@ use std::{
   str::FromStr,
 };
 
-use async_nats::jetstream::{self, consumer::pull::Stream};
 use axum::{
   Extension,
   extract::{ConnectInfo, Request, State},
@@ -11,10 +10,7 @@ use axum::{
   middleware::Next,
   response::IntoResponse,
 };
-use futures::StreamExt;
-use r2s_database::ip;
-use r2s_migrator::Database;
-use r2s_queue::{Queue, TracedMessage};
+use r2s_queue::Queue;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tower_governor::{GovernorError, key_extractor::KeyExtractor};
@@ -22,7 +18,7 @@ use tower_http::request_id::{MakeRequestId, RequestId};
 use tracing::{Span, debug, error, warn};
 
 use super::auth::Token;
-use crate::traits::ResponseError;
+use crate::{traits::ResponseError, worker::ip_record::IpRecord};
 
 const X_REAL_IP: &str = "x-real-ip";
 const X_FORWARDED_FOR: &str = "x-forwarded-for";
@@ -301,12 +297,6 @@ pub fn get_client_ip<B>(request: &Request<B>) -> Option<IpAddr> {
     .or_else(|| maybe_connect_info(request))
 }
 
-#[derive(Serialize, Deserialize, Clone)]
-pub struct IpRecord {
-  pub ip: String,
-  pub user_id: i64,
-}
-
 pub async fn ip_record(
   State(queue): State<Queue>, Extension(token): Extension<Token>, mut req: Request, next: Next,
 ) -> Result<impl IntoResponse, ResponseError> {
@@ -345,29 +335,6 @@ pub async fn ip_record(
   Span::current().record("from", ip.as_str());
 
   Ok(next.run(req).await)
-}
-
-async fn ip_record_worker_exec(message: jetstream::Message, db: &Database) -> anyhow::Result<()> {
-  let req = String::from_utf8(message.message.payload.to_vec())?;
-  let req = serde_json::from_str::<TracedMessage<IpRecord>>(&req)?;
-  let req = req.payload;
-  let model = ip::get_or_create(&db.conn, &req.ip).await?;
-  ip::link_user(&db.conn, req.user_id, model.id).await.ok();
-  Ok(())
-}
-
-pub async fn ip_record_worker(mut messages: Stream, db: Database) {
-  while let Some(message) = messages.next().await {
-    if let Ok(message) = message {
-      message.double_ack().await.ok();
-      ip_record_worker_exec(message.clone(), &db)
-        .await
-        .map_err(|e| error!(error = ?e, "failed to process message"))
-        .ok();
-    } else {
-      error!(?message, "failed to receive message from nats");
-    }
-  }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Eq, PartialEq)]
