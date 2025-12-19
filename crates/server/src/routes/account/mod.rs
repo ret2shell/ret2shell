@@ -14,7 +14,7 @@ use r2s_database::{
   config, game, institute as institute_db, team,
   user::{self, Permission, Permissions},
 };
-use r2s_email::{EmailCtx, EmailRequest};
+use r2s_email::{EmailCtx, EmailRequest, EmailType as QueueEmailType};
 use r2s_migrator::Database;
 use r2s_queue::Queue;
 use rand::Rng;
@@ -443,7 +443,10 @@ async fn send_email(
     config: config.email.as_ref().unwrap().to_owned(),
     created_at: Utc::now(),
     verified,
-    require_verified: matches!(email_type, EmailType::Reset),
+    email_type: match email_type {
+      EmailType::Verify => QueueEmailType::Verification,
+      EmailType::Reset => QueueEmailType::ResetPassword,
+    },
   };
   queue.publish("email", email_req, trace).await?;
   Ok(())

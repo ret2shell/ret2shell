@@ -3,7 +3,7 @@ use chrono::{Duration, Utc};
 use futures::StreamExt;
 use r2s_config::email;
 use r2s_database::config;
-use r2s_email::{EmailError, EmailRequest};
+use r2s_email::{EmailError, EmailRequest, EmailType};
 use r2s_migrator::Database;
 use r2s_queue::TracedMessage;
 use tracing::{debug, error, error_span, info, warn};
@@ -60,7 +60,13 @@ async fn process_message(message: jetstream::Message, db: &Database) -> Result<(
     drop(span_guard);
     return Ok(());
   }
-  if req.require_verified && !req.verified {
+  if matches!(req.email_type, EmailType::Verification) && req.verified {
+    warn!("verification email for verified account, dropping");
+    message.double_ack().await.ok();
+    drop(span_guard);
+    return Ok(());
+  }
+  if matches!(req.email_type, EmailType::ResetPassword) && !req.verified {
     warn!("email message requires verified account but is unverified, dropping");
     message.double_ack().await.ok();
     drop(span_guard);
