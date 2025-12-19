@@ -19,11 +19,11 @@ pub fn spawn(messages: Stream, db: Database) {
 async fn ip_record_worker(mut messages: Stream, db: Database) {
   while let Some(message) = messages.next().await {
     if let Ok(message) = message {
-      message.double_ack().await.ok();
       ip_record_worker_exec(message.clone(), &db)
         .await
         .map_err(|e| error!(error = ?e, "failed to process message"))
         .ok();
+      message.double_ack().await.ok();
     } else {
       error!(?message, "failed to receive message from nats");
     }
@@ -35,8 +35,8 @@ async fn ip_record_worker_exec(message: jetstream::Message, db: &Database) -> an
   let req = serde_json::from_str::<TracedMessage<IpRecord>>(&req)?;
   let req = req.payload;
   if user::get_ex(&db.conn, req.user_id).await?.is_none() {
-    warn!(user_id = req.user_id, "skip ip record for missing user");
-    return Ok(());
+    warn!(user_id = req.user_id, "ip record user not found");
+    anyhow::bail!("user {} not found for ip record", req.user_id);
   }
   let model = ip::get_or_create(&db.conn, &req.ip).await?;
   ip::link_user(&db.conn, req.user_id, model.id).await.ok();
