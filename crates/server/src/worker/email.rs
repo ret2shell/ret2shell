@@ -79,7 +79,7 @@ async fn process_message(message: jetstream::Message, db: &Database) -> Result<(
       break;
     }
   }
-  if retry_count < 0 {
+  if retry_count == 0 {
     error!(
       email = %req.email.email,
       subject = %req.email.subject,
