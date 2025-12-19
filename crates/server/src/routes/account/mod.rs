@@ -378,6 +378,9 @@ async fn send_email(
   cache: &Cache, queue: &Queue, config: &config::Model, account: &str, email: &str,
   email_type: EmailType, trace: impl AsRef<str>, verified: bool,
 ) -> Result<(), ResponseError> {
+  if matches!(email_type, EmailType::Verify) && verified {
+    return Ok(());
+  }
   let email_config = match config.email.clone() {
     Some(email::Config { enabled: false, .. }) => {
       return Ok(());
