@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc, serde::ts_seconds};
 use r2s_config::email;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -14,6 +15,10 @@ pub struct EmailCtx {
 pub struct EmailRequest {
   pub email: EmailCtx,
   pub config: email::Config,
+  #[serde(with = "ts_seconds")]
+  pub created_at: DateTime<Utc>,
+  pub verified: bool,
+  pub require_verified: bool,
 }
 
 #[derive(Error, Debug)]

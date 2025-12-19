@@ -1,4 +1,5 @@
 use async_nats::jetstream::{self, consumer::pull::Stream};
+use chrono::{Duration, Utc};
 use futures::StreamExt;
 use r2s_config::email;
 use r2s_database::config;
@@ -53,6 +54,18 @@ async fn process_message(message: jetstream::Message, db: &Database) -> Result<(
   let span = error_span!("request", trace=%req.trace);
   let span_guard = span.enter();
   let mut req = req.payload;
+  if Utc::now().signed_duration_since(req.created_at) > Duration::hours(1) {
+    warn!("email message expired, dropping");
+    message.double_ack().await.ok();
+    drop(span_guard);
+    return Ok(());
+  }
+  if req.require_verified && !req.verified {
+    warn!("email message requires verified account but is unverified, dropping");
+    message.double_ack().await.ok();
+    drop(span_guard);
+    return Ok(());
+  }
   let Some(config) = resolve_email_config(db).await else {
     warn!("email config missing or disabled, dropping message");
     message.double_ack().await.ok();

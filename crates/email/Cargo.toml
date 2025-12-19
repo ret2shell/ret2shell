@@ -19,6 +19,7 @@ serde_json = { workspace = true }
 thiserror  = { workspace = true }
 tokio      = { workspace = true }
 tracing    = { workspace = true }
+chrono     = { workspace = true }
 
 r2s-config = { workspace = true }
 r2s-queue  = { workspace = true }

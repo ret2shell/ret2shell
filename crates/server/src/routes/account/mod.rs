@@ -376,7 +376,7 @@ enum EmailType {
 
 async fn send_email(
   cache: &Cache, queue: &Queue, config: &config::Model, account: &str, email: &str,
-  email_type: EmailType, trace: impl AsRef<str>,
+  email_type: EmailType, trace: impl AsRef<str>, verified: bool,
 ) -> Result<(), ResponseError> {
   let email_config = match config.email.clone() {
     Some(email::Config { enabled: false, .. }) => {
@@ -438,6 +438,9 @@ async fn send_email(
     },
     // unwrap is safe here because we have checked the config in the previous if statement
     config: config.email.as_ref().unwrap().to_owned(),
+    created_at: Utc::now(),
+    verified,
+    require_verified: matches!(email_type, EmailType::Reset),
   };
   queue.publish("email", email_req, trace).await?;
   Ok(())
@@ -526,6 +529,7 @@ async fn register(
     &email,
     EmailType::Verify,
     &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    user.permissions.0.contains(&Permission::Verified),
   )
   .await
   .ok();
@@ -623,6 +627,7 @@ async fn resend_verify_email(
     &email,
     EmailType::Verify,
     &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    user.permissions.0.contains(&Permission::Verified),
   )
   .await?;
   Ok(StatusCode::OK)
@@ -669,6 +674,7 @@ async fn forgot_password(
     &body.email,
     EmailType::Reset,
     &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    user.permissions.0.contains(&Permission::Verified),
   )
   .await?;
   Ok(StatusCode::OK)
