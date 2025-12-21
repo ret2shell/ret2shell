@@ -12,12 +12,7 @@ import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { createEffect, createMemo, createSignal, For, Show, untrack } from "solid-js";
 import { TransitionGroup } from "solid-transition-group";
 
-export default function Tabs(props: {
-  training?: boolean;
-  archived?: boolean;
-  gameId: number;
-  challengeId?: number;
-}) {
+export default function Tabs(props: { training?: boolean; archived?: boolean; gameId: number; challengeId?: number }) {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const game = useGame({ id: () => props.gameId });

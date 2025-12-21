@@ -44,7 +44,7 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
       mem_req: "32Mi",
       storage: "1024Mi",
       storage_req: "64Mi",
-    }
+    },
   });
   const [searchedRepo, setSearchedRepo] = createSignal("");
   const [selected, setSelected] = createSignal(false);

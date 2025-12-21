@@ -19,7 +19,14 @@ export default function DownloadButton(
     searchParams?: { [key: string]: string };
   }
 ) {
-  const [downloadProps, btnProps] = splitProps(props, ["icon", "file", "url", "searchParams", "withFileName", "displayName"]);
+  const [downloadProps, btnProps] = splitProps(props, [
+    "icon",
+    "file",
+    "url",
+    "searchParams",
+    "withFileName",
+    "displayName",
+  ]);
   const [downloading, setDownloading] = createSignal(false);
   const [downloadComplete, setDownloadComplete] = createSignal(false);
   const [progress, setProgress] = createSignal(null as DownloadProgress | null);

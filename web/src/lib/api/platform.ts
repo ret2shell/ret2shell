@@ -12,17 +12,26 @@ export async function getPlatformInfo() {
   return await api.get(`${api_root}/platform/info`).json<ServerConfig>();
 }
 
-export function usePlatformInfo({ enabled, onError }: { enabled?: () => boolean; onError?: (err: Error) => boolean }={}) {
-  return useQuery(() => ({
-    queryKey: ["platform", "info"],
-    queryFn: getPlatformInfo,
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      return onError?.(err) ?? false;
-    },
-    // biome-ignore lint/suspicious/noExplicitAny: this function is matched
-    persister: persister.persisterFn as any,
-  }), () => inflyClient);
+export function usePlatformInfo({
+  enabled,
+  onError,
+}: {
+  enabled?: () => boolean;
+  onError?: (err: Error) => boolean;
+} = {}) {
+  return useQuery(
+    () => ({
+      queryKey: ["platform", "info"],
+      queryFn: getPlatformInfo,
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        return onError?.(err) ?? false;
+      },
+      // biome-ignore lint/suspicious/noExplicitAny: this function is matched
+      persister: persister.persisterFn as any,
+    }),
+    () => inflyClient
+  );
 }
 
 export async function getAuthConfig() {
@@ -34,14 +43,17 @@ export async function getVersion() {
 }
 
 export function useVersion({ enabled, onError }: { enabled?: () => boolean; onError?: (err: Error) => boolean }) {
-  return useQuery(() => ({
-    queryKey: ["platform", "version"],
-    queryFn: getVersion,
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: ["platform", "version"],
+      queryFn: getVersion,
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export type PlatformStatistics = {
@@ -83,15 +95,18 @@ export function usePlatformStatistics({
   enabled?: () => boolean;
   onError?: (err: Error) => boolean;
 } = {}) {
-  return useQuery(() => ({
-    queryKey: ["platform", "statistics"],
-    queryFn: getPlatformStatistics,
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("platform.statistics.errors.fetch.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: ["platform", "statistics"],
+      queryFn: getPlatformStatistics,
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("platform.statistics.errors.fetch.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function getPlatformLogs() {
@@ -105,15 +120,18 @@ export function usePlatformLogs({
   enabled?: () => boolean;
   onError?: (err: Error) => boolean;
 } = {}) {
-  return useQuery(() => ({
-    queryKey: ["platform", "logs"],
-    queryFn: async () => (await getPlatformLogs()).sort((a, b) => b.localeCompare(a)),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("platform.logs.errors.fetchList.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: ["platform", "logs"],
+      queryFn: async () => (await getPlatformLogs()).sort((a, b) => b.localeCompare(a)),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("platform.logs.errors.fetchList.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export type Log = {
@@ -175,18 +193,21 @@ export function useQueryPlatformLog({
     req().account,
     req().query,
   ]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () =>
-      (await queryPlatformLog(req())).sort((a, b) => {
-        return DateTime.fromISO(a._time).toMillis() - DateTime.fromISO(b._time).toMillis();
-      }),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("platform.logs.errors.fetchLogs.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () =>
+        (await queryPlatformLog(req())).sort((a, b) => {
+          return DateTime.fromISO(a._time).toMillis() - DateTime.fromISO(b._time).toMillis();
+        }),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("platform.logs.errors.fetchLogs.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export type PlatformLicense = {
@@ -207,14 +228,17 @@ export function usePlatformLicense({
   enabled?: () => boolean;
   onError?: (err: Error) => boolean;
 }) {
-  return useQuery(() => ({
-    queryKey: ["platform", "license"],
-    queryFn: async () => await getPlatformLicense(),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: ["platform", "license"],
+      queryFn: async () => await getPlatformLicense(),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function getPlatformConfig() {
@@ -228,15 +252,18 @@ export function usePlatformConfig({
   enabled?: () => boolean;
   onError?: (err: Error) => boolean;
 } = {}) {
-  return useQuery(() => ({
-    queryKey: ["platform", "config"],
-    queryFn: async () => await getPlatformConfig(),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("platform.errors.fetchConfig.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: ["platform", "config"],
+      queryFn: async () => await getPlatformConfig(),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("platform.errors.fetchConfig.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function updatePlatformConfig(config: Config) {
@@ -244,12 +271,12 @@ export async function updatePlatformConfig(config: Config) {
 }
 
 export function useUpdatePlatformConfigMutation(
-  props: {  onSuccess?: (config: Config) => void; onError?: (err: Error) => void } = {}
+  props: { onSuccess?: (config: Config) => void; onError?: (err: Error) => void } = {}
 ) {
   return useMutation(() => ({
     mutationFn: (config: Config) => updatePlatformConfig(config),
     onSuccess: (data: Config) => {
-       toastSuccess(t("general.actions.save.status.success"));
+      toastSuccess(t("general.actions.save.status.success"));
       props.onSuccess?.(data);
     },
     onError: (err: Error) => {

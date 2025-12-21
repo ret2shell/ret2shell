@@ -28,7 +28,7 @@ export default function () {
     initialValues: {
       email: emailPredef as string,
       token: tokenPredef as string,
-    }
+    },
   });
   const navigate = useNavigate();
   if (!emailPredef || !tokenPredef) {

@@ -42,7 +42,7 @@ export default function (
     })
   );
   let selectEl!: HTMLSelectElement;
-  console.log(JSON.stringify(props));
+  // console.log(JSON.stringify(props));
 
   return (
     <Select.Root

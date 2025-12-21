@@ -87,10 +87,7 @@ export class Service implements Command {
       io.error(t("challenge.instance.errors.noConfig.title"));
       return 1;
     }
-    if (
-      instances &&
-      instances.length > (isGameInProgress(envVars.game) ? (envVars.game?.team_size ?? 1) : 1)
-    ) {
+    if (instances && instances.length > (isGameInProgress(envVars.game) ? (envVars.game?.team_size ?? 1) : 1)) {
       if (instances?.find((v) => v.challenge_id === envVars.challenge.id)) {
         await this.status(io, envVars);
         return 0;

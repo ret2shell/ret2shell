@@ -39,15 +39,18 @@ export function useChallenges({
 }) {
   const keys = createMemo(() => ["game", game_id(), "challenge", "list", page?.() ?? 1, page_size?.() ?? 200]);
   console.log(keys());
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getChallengeList(game_id(), page?.() ?? 1, page_size?.() ?? 200),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("challenge.errors.fetchList.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getChallengeList(game_id(), page?.() ?? 1, page_size?.() ?? 200),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("challenge.errors.fetchList.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function getChallenge(game_id: number, challenge_id: number) {
@@ -67,15 +70,18 @@ export function useChallenge({
 }) {
   const keys = createMemo(() => ["game", game_id(), "challenge", challenge_id()]);
 
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getChallenge(game_id(), challenge_id()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("challenge.errors.fetch.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getChallenge(game_id(), challenge_id()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("challenge.errors.fetch.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function createChallenge(game_id: number, challenge: Challenge) {
@@ -194,15 +200,18 @@ export function useChallengeHints({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "challenge", challenge_id(), "hints"]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getChallengeHint(game_id(), challenge_id()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("challenge.hint.errors.fetch.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getChallengeHint(game_id(), challenge_id()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("challenge.hint.errors.fetch.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function unlockChallengeHint(game_id: number, challenge_id: number, hint_id: number) {
@@ -324,15 +333,18 @@ export function useChallengeAttachments({
     folder?.(),
     all?.() ? "all" : "limited",
   ]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getChallengeAttachments(game_id(), challenge_id(), all?.(), folder?.()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("challenge.file.errors.fetchFiles.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getChallengeAttachments(game_id(), challenge_id(), all?.(), folder?.()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("challenge.file.errors.fetchFiles.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function deleteChallengeAttachment(
@@ -388,15 +400,18 @@ export function useChallengeEnv({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "challenge", challenge_id(), "env"]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getChallengeEnv(game_id(), challenge_id()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("challenge.instance.errors.fetchInstances.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getChallengeEnv(game_id(), challenge_id()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("challenge.instance.errors.fetchInstances.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function getChallengeInstance(game_id: number, challenge_id: number) {
@@ -415,15 +430,18 @@ export function useChallengeInstance({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "challenge", challenge_id(), "instances"]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getChallengeInstance(game_id(), challenge_id()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("challenge.instance.errors.fetchInstances.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getChallengeInstance(game_id(), challenge_id()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("challenge.instance.errors.fetchInstances.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function updateChallengeEnv(game_id: number, challenge_id: number, env: ChallengeEnv) {
@@ -494,15 +512,18 @@ export function useChallengeCheckerScript({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "challenge", challenge_id(), "checkerScript"]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getChallengeCheckerScript(game_id(), challenge_id(), true),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("challenge.checker.errors.fetchScript.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getChallengeCheckerScript(game_id(), challenge_id(), true),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("challenge.checker.errors.fetchScript.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function updateChallengeCheckerScript(game_id: number, challenge_id: number, content: string) {
@@ -580,16 +601,19 @@ export function useChallengeSubmissions({
     page?.() ?? 1,
     page_size?.() ?? 15,
   ]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () =>
-      await getChallengeSubmission(game_id(), challenge_id(), page?.() ?? 1, page_size?.() ?? 15, !!only_solved?.()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("challenge.statistics.errors.fetchSubmission.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () =>
+        await getChallengeSubmission(game_id(), challenge_id(), page?.() ?? 1, page_size?.() ?? 15, !!only_solved?.()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("challenge.statistics.errors.fetchSubmission.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function startChallengeInstance(game_id: number, challenge_id: number) {
@@ -662,15 +686,18 @@ export function useChallengeCommitHistory({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "challenge", challenge_id(), "commitHistory"]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getChallengeCommitHistory(game_id(), challenge_id()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("challenge.statistics.errors.fetchCommitHistory"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getChallengeCommitHistory(game_id(), challenge_id()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("challenge.statistics.errors.fetchCommitHistory"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function getChallengeSolveStatus(game_id: number, challenge_id: number) {
@@ -692,15 +719,18 @@ export function useChallengeSolveStatus({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "challenge", challenge_id(), "solveStatus"]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getChallengeSolveStatus(game_id(), challenge_id()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("challenge.submission.errors.fetchSolveStatus.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getChallengeSolveStatus(game_id(), challenge_id()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("challenge.submission.errors.fetchSolveStatus.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function getChallengeAnswer(game_id: number, challenge_id: number) {
@@ -719,15 +749,18 @@ export function useChallengeAnswer({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "challenge", challenge_id(), "answer"]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getChallengeAnswer(game_id(), challenge_id()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("challenge.answer.errors.fetchAnswer.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getChallengeAnswer(game_id(), challenge_id()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("challenge.answer.errors.fetchAnswer.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function updateChallengeAnswer(game_id: number, challenge_id: number, answer: string) {

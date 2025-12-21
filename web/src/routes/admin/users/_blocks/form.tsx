@@ -94,8 +94,8 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
   const [avatarFile, setAvatarFile] = createSignal(null as File | null);
   const [avatarSet, setAvatarSet] = createSignal(false);
   const [avatarUploading, setAvatarUploading] = createSignal(false);
-  const ips = useUserIpList({ id: () => compProps.editSource!.id, enabled: () => !!compProps.editSource });
-  const oauths = useUserOAuthList({ id: () => compProps.editSource!.id, enabled: () => !!compProps.editSource });
+  const ips = useUserIpList({ id: () => compProps.editSource?.id || 0, enabled: () => !!compProps.editSource });
+  const oauths = useUserOAuthList({ id: () => compProps.editSource?.id || 0, enabled: () => !!compProps.editSource });
   const institutes = useInstitutes();
 
   let avatarInput: HTMLInputElement;

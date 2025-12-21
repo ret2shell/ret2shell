@@ -465,7 +465,12 @@ export default function () {
               <IntroForm onDone={onUpdateIntroduction} />
             </Match>
             <Match when={introduction.data && !introduction.isLoading}>
-              <Article class="self-center" content={introduction.data?.content || ''} extra={true} headingAnchors={true} />
+              <Article
+                class="self-center"
+                content={introduction.data?.content || ""}
+                extra={true}
+                headingAnchors={true}
+              />
             </Match>
             <Match when={introduction.isLoading}>
               <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">

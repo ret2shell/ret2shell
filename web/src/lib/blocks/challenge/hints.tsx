@@ -89,7 +89,7 @@ export default function (props: ChallengeWidgetProps) {
   const [form, { Form, Field }] = createForm<CreateHintForm>({
     initialValues: {
       cost: 0,
-    }
+    },
   });
 
   const plus_or_minus = (n: number) => `${n < 0 ? "- " : n > 0 ? "+ " : ""}${Math.abs(n)}`;

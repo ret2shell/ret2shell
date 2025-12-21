@@ -45,7 +45,7 @@ export default function ProviderForm(props: {
   loading?: boolean;
 }) {
   const oauthProvider = useOAuthProvider({
-    service: () => props.editSource!.provider,
+    service: () => props.editSource?.provider || '',
     enabled: () => !!props.editSource,
   });
   const [form, { Form, Field }] = createForm<FormType>({

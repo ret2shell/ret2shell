@@ -42,7 +42,7 @@ export default function UserBox() {
 
   const handleLogout = () => {
     logoutMutation.mutate();
-  }
+  };
 
   return (
     <Show
@@ -88,7 +88,14 @@ export default function UserBox() {
                 <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
                 <span>{t("account.settings.title")}</span>
               </Link>
-              <Button ghost size="sm" square title={t("account.logout")} onClick={handleLogout} loading={logoutMutation.isPending}>
+              <Button
+                ghost
+                size="sm"
+                square
+                title={t("account.logout")}
+                onClick={handleLogout}
+                loading={logoutMutation.isPending}
+              >
                 <Show when={!logoutMutation.isPending}>
                   <span class="shrink-0 icon-[fluent--sign-out-20-regular] w-5 h-5 text-error" />
                 </Show>

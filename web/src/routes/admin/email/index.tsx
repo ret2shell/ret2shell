@@ -16,7 +16,7 @@ export default function () {
   const [form, { Form, Field }] = createForm<EmailConfig>({
     initialValues: {
       ...config.data?.email,
-    }
+    },
   });
   const mutation = useUpdatePlatformConfigMutation({
     onSuccess: () => {

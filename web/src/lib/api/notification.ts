@@ -18,15 +18,18 @@ export function useNotifications({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "notifications"]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getNotifications(game_id()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("game.notification.errors.fetch.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getNotifications(game_id()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("game.notification.errors.fetch.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function createNotification(game_id: number, notification: Notification) {
@@ -34,13 +37,13 @@ export async function createNotification(game_id: number, notification: Notifica
 }
 
 export function useCreateNotificationMutation(
-  props: {  onSuccess?: (notification: Notification) => void; onError?: (err: Error) => void } = {}
+  props: { onSuccess?: (notification: Notification) => void; onError?: (err: Error) => void } = {}
 ) {
   return useMutation(() => ({
     mutationFn: (data: { game_id: number; notification: Notification }) =>
       createNotification(data.game_id, data.notification),
     onSuccess: (data: Notification) => {
-       toastSuccess(t("general.actions.create.status.success"));
+      toastSuccess(t("general.actions.create.status.success"));
       props.onSuccess?.(data);
     },
     onError: (err: Error) => {
@@ -54,13 +57,11 @@ export async function deleteNotification(game_id: number, id: number) {
   return await api.delete(`${api_root}/game/${game_id}/notification/${id}`).json<null>();
 }
 
-export function useDeleteNotificationMutation(
-  props: {  onSuccess?: () => void; onError?: (err: Error) => void } = {}
-) {
+export function useDeleteNotificationMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
   return useMutation(() => ({
     mutationFn: (data: { game_id: number; id: number }) => deleteNotification(data.game_id, data.id),
     onSuccess: () => {
-       toastSuccess(t("general.actions.delete.status.success"));
+      toastSuccess(t("general.actions.delete.status.success"));
       props.onSuccess?.();
     },
     onError: (err: Error) => {

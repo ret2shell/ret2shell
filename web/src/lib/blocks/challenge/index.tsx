@@ -1,3 +1,4 @@
+import { inflyClient } from "@api";
 import {
   useChallenge,
   useDeleteChallengeMutation,
@@ -67,15 +68,28 @@ function BottomPanel(props: ChallengeWidgetProps) {
     challenge_id: () => props.challengeId,
   });
 
+  const refetchData = () => {
+    challenge.refetch();
+    inflyClient.invalidateQueries({
+      queryKey: ["game", props.gameId, "challenge", "list", 1, 200],
+    });
+  };
+
   const deleteMutation = useDeleteChallengeMutation({
     onSuccess: () => {
       setSearchParams({ challenge: null });
+      inflyClient.invalidateQueries({
+        queryKey: ["game", props.gameId, "challenge", "list", 1, 200],
+      });
     },
   });
 
-  const upMutation = useUpChallengeMutation();
-  const downMutation = useDownChallengeMutation();
-
+  const upMutation = useUpChallengeMutation({
+    onSuccess: refetchData,
+  });
+  const downMutation = useDownChallengeMutation({
+    onSuccess: refetchData,
+  });
   const [challengeStateWarningDialogOpen, setChallengeStateWarningDialogOpen] = createSignal(false);
 
   return (

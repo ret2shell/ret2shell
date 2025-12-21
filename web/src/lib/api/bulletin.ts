@@ -30,15 +30,18 @@ export function useBulletins({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["bulletin", "list", page(), page_size()]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getBulletinList(page() ?? 1, page_size() ?? 15),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("bulletin.errors.fetchList.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getBulletinList(page() ?? 1, page_size() ?? 15),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("bulletin.errors.fetchList.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function getBulletin(id: number) {
@@ -55,15 +58,18 @@ export function useBulletin({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["bulletin", id()]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getBulletin(id()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("bulletin.errors.fetch.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getBulletin(id()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("bulletin.errors.fetch.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function createBulletin(article: Article) {
@@ -110,9 +116,7 @@ export async function deleteBulletin(id: number) {
   return await api.delete(`${api_root}/bulletin/${id}`).json();
 }
 
-export function useDeleteBulletinMutation(
-  props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}
-) {
+export function useDeleteBulletinMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
   return useMutation(() => ({
     mutationFn: ({ id }: { id: number }) => deleteBulletin(id),
     onSuccess: () => {

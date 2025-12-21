@@ -26,16 +26,19 @@ export function useCaptcha({
   enabled?: () => boolean;
   onError?: (err: Error) => void;
 } = {}) {
-  return useQuery(() => ({
-    queryKey: ["account", "captcha", timestamp],
-    queryFn: async () => await getCaptcha(),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("captcha.errors.fetch.title"));
-      onError?.(err);
-      return false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: ["account", "captcha", timestamp],
+      queryFn: async () => await getCaptcha(),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("captcha.errors.fetch.title"));
+        onError?.(err);
+        return false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export type RegisterRequest = {
@@ -226,12 +229,15 @@ export async function getProfile() {
 }
 
 export function useAccountProfile(props: { enabled?: () => boolean; onError?: (err: Error) => boolean } = {}) {
-  return useQuery(() => ({
-    queryKey: ["account", "profile"],
-    queryFn: async () => await getProfile(),
-    enabled: props.enabled?.(),
-    throwOnError: (err: Error) => props.onError?.(err) ?? false,
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: ["account", "profile"],
+      queryFn: async () => await getProfile(),
+      enabled: props.enabled?.(),
+      throwOnError: (err: Error) => props.onError?.(err) ?? false,
+    }),
+    () => inflyClient
+  );
 }
 
 export async function changeProfile(req: User) {
@@ -287,15 +293,18 @@ export async function getInstitutes() {
 }
 
 export function useInstitutes(props: { enabled?: () => boolean; onError?: (err: Error) => boolean } = {}) {
-  return useQuery(() => ({
-    queryKey: ["account", "institute"],
+  return useQuery(
+    () => ({
+      queryKey: ["account", "institute"],
       queryFn: getInstitutes,
       enabled: props.enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("institute.errors.fetchList.title"));
-      return props.onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("institute.errors.fetchList.title"));
+        return props.onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function getAccountCode() {
@@ -303,15 +312,18 @@ export async function getAccountCode() {
 }
 
 export function useAccountCode(props: { enabled?: () => boolean; onError?: (err: Error) => boolean }) {
-  return useQuery(() => ({
-    queryKey: ["account", "code"],
-    queryFn: getAccountCode,
-    enabled: props.enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("account.errors.fetchCode.title"));
-      return props.onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: ["account", "code"],
+      queryFn: getAccountCode,
+      enabled: props.enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("account.errors.fetchCode.title"));
+        return props.onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function generateAccountCode() {
@@ -356,15 +368,18 @@ export async function getOAuthProviders() {
 }
 
 export function useOAuthProviders(props: { enabled?: () => boolean; onError?: (err: Error) => boolean } = {}) {
-  return useQuery(() => ({
-    queryKey: ["account", "oauth", "providers"],
-    queryFn: getOAuthProviders,
-    enabled: props.enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("account.oauth.errors.fetchProvider.title"));
-      return props.onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: ["account", "oauth", "providers"],
+      queryFn: getOAuthProviders,
+      enabled: props.enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("account.oauth.errors.fetchProvider.title"));
+        return props.onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function getOAuthProvider(service: string) {
@@ -385,15 +400,18 @@ export function useOAuthProvider({
   const keys = createMemo(() =>
     service ? ["account", "oauth", "provider", service()] : ["account", "oauth", "provider", "unknown"]
   );
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getOAuthProvider(service?.() ?? "unknown"),
-    enabled: enabled?.() ?? false,
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("account.oauth.errors.fetchProvider.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getOAuthProvider(service?.() ?? "unknown"),
+      enabled: enabled?.() ?? false,
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("account.oauth.errors.fetchProvider.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function updateOAuthProvider(service: string, req: OAuthProvider) {
@@ -606,15 +624,18 @@ export function useOAuthStatus({
   enabled?: () => boolean;
   onError?: (err: Error) => boolean;
 } = {}) {
-  return useQuery(() => ({
-    queryKey: ["account", "oauth", "status"],
-    queryFn: async () => await getOAuthStatus(),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("account.oauth.errors.fetchStatus.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: ["account", "oauth", "status"],
+      queryFn: async () => await getOAuthStatus(),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("account.oauth.errors.fetchStatus.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function updateInstitute(req: Institute) {

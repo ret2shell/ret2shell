@@ -14,14 +14,7 @@ import {
 } from "@api/team";
 import SidebarLayout from "@blocks/sidebar-layout";
 import type { Team } from "@models/team";
-import {
-  clearError,
-  createForm,
-  maxLength,
-  required,
-  reset as resetForm,
-  setValues,
-} from "@modular-forms/solid";
+import { clearError, createForm, maxLength, required, reset as resetForm, setValues } from "@modular-forms/solid";
 import { createBreakpoints } from "@solid-primitives/media";
 import { A, useNavigate, useParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
@@ -263,7 +256,6 @@ type TeamSelfUpdateForm = {
 };
 
 function SelfManagement(props: { gameId: number; onDone?: (team: Team) => void; onLeft?: () => void }) {
-
   const game = useGame({ id: () => props.gameId, enabled: () => !!props.gameId });
   const institutes = useInstitutes();
   const team = useSelfTeam({ game_id: () => props.gameId });
@@ -272,13 +264,13 @@ function SelfManagement(props: { gameId: number; onDone?: (team: Team) => void; 
     team_id: () => team.data?.id || 0,
     enabled: () => !!team.data,
   });
-    const [form, { Form, Field }] = createForm<TeamSelfUpdateForm>({
-      initialValues: {
-          name: team.data?.name,
-          tag: team.data?.tag || "",
-          institute_id: team.data?.institute_id?.toString() || "0",
-      }
-    });
+  const [form, { Form, Field }] = createForm<TeamSelfUpdateForm>({
+    initialValues: {
+      name: team.data?.name,
+      tag: team.data?.tag || "",
+      institute_id: team.data?.institute_id?.toString() || "0",
+    },
+  });
   createEffect(() => {
     if (team.data) {
       untrack(() => {

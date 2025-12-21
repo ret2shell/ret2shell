@@ -21,7 +21,7 @@ export default function InstituteForm(props: {
   const oauthProviders = useOAuthProviders();
   const [form, { Form, Field }] = createForm<FormType>({
     initialValues: {
-      name: props.editSource!.name,
+      name: props.editSource?.name,
       provider: props.editSource?.provider || undefined,
       token: props.editSource?.token || undefined,
     },
@@ -30,7 +30,7 @@ export default function InstituteForm(props: {
     if (props.editSource) {
       untrack(() => {
         setValues(form, {
-          name: props.editSource!.name,
+          name: props.editSource?.name,
           provider: props.editSource?.provider || undefined,
           token: props.editSource?.token || undefined,
         });

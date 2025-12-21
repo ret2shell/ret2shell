@@ -47,15 +47,18 @@ export function useGames({
   onError?: (err: Error) => boolean;
 } = {}) {
   const keys = createMemo(() => ["game", "list", host_type?.(), weight?.(), page?.(), page_size?.()]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getGames(page?.() ?? 1, page_size?.() ?? 15, host_type?.(), weight?.()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("game.errors.fetchList.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getGames(page?.() ?? 1, page_size?.() ?? 15, host_type?.(), weight?.()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("game.errors.fetchList.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function getGame(id: number) {
@@ -72,15 +75,18 @@ export function useGame({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", id()]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getGame(id()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("game.errors.fetch.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getGame(id()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("game.errors.fetch.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function createGame(game: Game) {
@@ -155,16 +161,19 @@ export function useGameIntroduction({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", id(), "introduction"]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getGameIntroduction(id()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      if (err instanceof HTTPError && err.response.status === 404) return onError?.(err) ?? false;
-      handleHttpError(err, t("game.errors.fetchIntroduction.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getGameIntroduction(id()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        if (err instanceof HTTPError && err.response.status === 404) return onError?.(err) ?? false;
+        handleHttpError(err, t("game.errors.fetchIntroduction.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function updateGameIntroduction(id: number, article: Article) {
@@ -235,16 +244,19 @@ export function useGameScoreboard({
     page?.(),
     page_size?.(),
   ]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () =>
-      await getGameScoreboard(id(), page?.() ?? 1, page_size?.() ?? 15, with_hidden?.(), institute_id?.()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("game.scoreboard.errors.fetchScoreboard.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () =>
+        await getGameScoreboard(id(), page?.() ?? 1, page_size?.() ?? 15, with_hidden?.(), institute_id?.()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("game.scoreboard.errors.fetchScoreboard.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export type EventDeviceInfo = {
@@ -267,15 +279,18 @@ export function useGameDevices({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "devices"]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getGameDevices(game_id()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("game.events.errors.fetchDevices.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getGameDevices(game_id()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("game.events.errors.fetchDevices.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function regenerateGameToken(game_id: number) {
@@ -313,15 +328,18 @@ export function useGameAdmins({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "admins"]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getGameAdmins(game_id()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("game.administrator.errors.fetchList.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getGameAdmins(game_id()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("game.administrator.errors.fetchList.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function updateGameAdmins(game_id: number, admins: number[]) {
@@ -357,16 +375,19 @@ export function useGameInstances({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "instances"]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getGameInstances(game_id()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      if (err instanceof HTTPError && err.response.status === 404) return onError?.(err) ?? false;
-      handleHttpError(err, t("challenge.instance.errors.fetchInstances.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getGameInstances(game_id()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        if (err instanceof HTTPError && err.response.status === 404) return onError?.(err) ?? false;
+        handleHttpError(err, t("challenge.instance.errors.fetchInstances.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function submitFlag(game_id: number, challenge_id: number, flag: string) {
@@ -382,15 +403,18 @@ export async function submitFlag(game_id: number, challenge_id: number, flag: st
 export function useSubmitFlagMutation(
   props: { onSuccess?: (submission: Submission) => void; onError?: (err: Error) => void } = {}
 ) {
-  return useMutation(() => ({
-    mutationFn: (params: { game_id: number; challenge_id: number; flag: string }) =>
-      submitFlag(params.game_id, params.challenge_id, params.flag),
-    onSuccess: (data: Submission) => props.onSuccess?.(data),
-    onError: (err: Error) => {
-      handleHttpError(err, t("challenge.submission.errors.submit.title"));
-      props.onError?.(err);
-    },
-  }), () => inflyClient);
+  return useMutation(
+    () => ({
+      mutationFn: (params: { game_id: number; challenge_id: number; flag: string }) =>
+        submitFlag(params.game_id, params.challenge_id, params.flag),
+      onSuccess: (data: Submission) => props.onSuccess?.(data),
+      onError: (err: Error) => {
+        handleHttpError(err, t("challenge.submission.errors.submit.title"));
+        props.onError?.(err);
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function checkSubmissionStatus(game_id: number, challenge_id: number, submission_id: number) {
@@ -417,15 +441,18 @@ export function useSelfSolves({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "selfSolves"]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getSelfSolves(game_id()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("challenge.submission.errors.fetchSolves.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getSelfSolves(game_id()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("challenge.submission.errors.fetchSolves.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function getGameAdminChatSessions(
@@ -471,16 +498,19 @@ export function useGameAdminChatSessions({
     page?.(),
     page_size?.(),
   ]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () =>
-      await getGameAdminChatSessions(game_id(), challenge_id?.(), page?.() ?? 1, page_size?.() ?? 15),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("game.hammer.errors.fetchSessions.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () =>
+        await getGameAdminChatSessions(game_id(), challenge_id?.(), page?.() ?? 1, page_size?.() ?? 15),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("game.hammer.errors.fetchSessions.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function getGameAdminChatMessages(game_id: number, challenge_id: number, team_id: number) {
@@ -508,15 +538,18 @@ export function useGameAdminChatMessages({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "chat", "adminSession", challenge_id(), team_id()]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getGameAdminChatMessages(game_id(), challenge_id(), team_id()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("challenge.hammer.errors.fetch.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getGameAdminChatMessages(game_id(), challenge_id(), team_id()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("challenge.hammer.errors.fetch.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function sendGameAdminChatMessage(
@@ -570,15 +603,18 @@ export function useGamePlayerChatMessages({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "chat", "playerMessages", challenge_id()]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getGamePlayerChatMessages(game_id(), challenge_id()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("challenge.hammer.errors.fetch.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getGamePlayerChatMessages(game_id(), challenge_id()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("challenge.hammer.errors.fetch.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function sendGamePlayerChatMessage(game_id: number, challenge_id: number, content: string) {
@@ -621,15 +657,18 @@ export function useCheckUnreadMessages({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "chat", "unreadMessages"]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await checkUnreadMessages(game_id()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("challenge.hammer.errors.fetch.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await checkUnreadMessages(game_id()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("challenge.hammer.errors.fetch.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function getGameSubmissions(game_id: number, page?: number, page_size?: number) {
@@ -659,15 +698,18 @@ export function useGameSubmissions({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "submissions", page?.(), page_size?.()]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getGameSubmissions(game_id(), page?.() ?? 1, page_size?.() ?? 15),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("game.monitor.errors.fetchSubmission.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getGameSubmissions(game_id(), page?.() ?? 1, page_size?.() ?? 15),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("game.monitor.errors.fetchSubmission.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function getGameAuditLogs(game_id: number, page?: number, page_size?: number) {
@@ -697,15 +739,18 @@ export function useGameAuditLogs({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "audits", page?.(), page_size?.()]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getGameAuditLogs(game_id(), page?.() ?? 1, page_size?.() ?? 15),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("game.monitor.errors.fetchAudit.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getGameAuditLogs(game_id(), page?.() ?? 1, page_size?.() ?? 15),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("game.monitor.errors.fetchAudit.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function updateGameAuditLog(game_id: number, audit_id: number, audit: Audit) {
@@ -772,15 +817,18 @@ export function useGameStatistics({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "statistics", institute?.(), training?.()]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getGameStatistics(game_id(), training?.(), institute?.()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("game.statistics.errors.fetch"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getGameStatistics(game_id(), training?.(), institute?.()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("game.statistics.errors.fetch"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export type GameStatisticsExport = {
@@ -816,15 +864,18 @@ export function useGameStatisticsExport({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "statistics", "export", institute?.(), training?.()]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getGameStatisticsExport(game_id(), training?.(), institute?.()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("game.statistics.errors.export"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getGameStatisticsExport(game_id(), training?.(), institute?.()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("game.statistics.errors.export"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function getRegistryConfig(game_id: number) {
@@ -841,15 +892,18 @@ export function useRegistryConfig({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "registry", "config"]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getRegistryConfig(game_id()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("challenge.instance.errors.fetchRegistry.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getRegistryConfig(game_id()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("challenge.instance.errors.fetchRegistry.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function getRegistryRepositories(game_id: number) {
@@ -866,15 +920,18 @@ export function useRegistryRepositories({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "registry", "repositories"]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getRegistryRepositories(game_id()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("challenge.instance.errors.fetchRegistry.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getRegistryRepositories(game_id()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("challenge.instance.errors.fetchRegistry.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function refreshRegistry(game_id: number) {
@@ -910,15 +967,18 @@ export function useRegistryImageTags({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "registry", "tags", repo()]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getRegistryImageTags(game_id(), repo()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("challenge.instance.errors.fetchConfigImages.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getRegistryImageTags(game_id(), repo()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("challenge.instance.errors.fetchConfigImages.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function updateGameTraffic(game_id: number, traffic: string) {
@@ -1036,13 +1096,16 @@ export function useGameRepo({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["game", game_id(), "repo", path()]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getGameRepo(game_id(), path()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("game.git.errors.fetchRepo.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getGameRepo(game_id(), path()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("game.git.errors.fetchRepo.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }

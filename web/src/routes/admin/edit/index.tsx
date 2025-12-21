@@ -26,7 +26,7 @@ export default function () {
   const config = usePlatformConfig();
   const [form, { Form, Field }] = createForm<PlatformConfigForm>({
     initialValues: {
-      ...JSON.parse(JSON.stringify(config.data?.server)),
+      ...JSON.parse(JSON.stringify(config.data?.server || {})),
     },
   });
   const mutation = useUpdatePlatformConfigMutation({

@@ -61,8 +61,9 @@ export default function (props: { children?: JSX.Element }) {
 
   onMount(async () => {
     try {
-      loadVersion();
+      await loadVersion();
     } catch (err) {
+      console.log(err);
       if (err instanceof HTTPError && err.response?.status === 503) {
         setPlatformStore({ under_maintenance: true });
         if (!inDocs()) navigate("/");
@@ -147,6 +148,7 @@ export default function (props: { children?: JSX.Element }) {
         setPlatformStore({ under_maintenance: true, backend_online: false });
         if (!inDocs()) navigate("/");
       }
+      throw err;
     }
   }
 

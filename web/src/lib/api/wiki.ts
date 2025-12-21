@@ -9,15 +9,18 @@ export async function getWikiTree() {
 }
 
 export function useWikiTree({ enabled, onError }: { enabled?: () => boolean; onError?: (err: Error) => boolean }) {
-  return useQuery(() => ({
-    queryKey: ["wiki", "tree"],
-    queryFn: getWikiTree,
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("wiki.errors.fetchToc.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: ["wiki", "tree"],
+      queryFn: getWikiTree,
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("wiki.errors.fetchToc.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function getWiki(id: number) {
@@ -34,15 +37,18 @@ export function useWiki({
   onError?: (err: Error) => boolean;
 }) {
   const keys = createMemo(() => ["wiki", id()]);
-  return useQuery(() => ({
-    queryKey: keys(),
-    queryFn: async () => await getWiki(id()),
-    enabled: enabled?.(),
-    throwOnError: (err: Error) => {
-      handleHttpError(err, t("wiki.errors.fetch.title"));
-      return onError?.(err) ?? false;
-    },
-  }), () => inflyClient);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getWiki(id()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("wiki.errors.fetch.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
 }
 
 export async function createWiki(article: Article) {
@@ -87,13 +93,11 @@ export async function deleteWiki(id: number) {
   return await api.delete(`${api_root}/wiki/${id}`).json();
 }
 
-export function useDeleteWikiMutation(
-  props: {  onSuccess?: () => void; onError?: (err: Error) => void } = {}
-) {
+export function useDeleteWikiMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
   return useMutation(() => ({
     mutationFn: ({ id }: { id: number }) => deleteWiki(id),
     onSuccess: () => {
-       toastSuccess(t("general.actions.delete.status.success"));
+      toastSuccess(t("general.actions.delete.status.success"));
       props.onSuccess?.();
     },
     onError: (err: Error) => {
