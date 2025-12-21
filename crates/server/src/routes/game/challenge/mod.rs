@@ -984,7 +984,7 @@ async fn unlock_hint(
       "team unlocked hint",
     );
     tokio::spawn(async move {
-      worker::update_team_state(&db, team).await.ok();
+      worker::game::update_team_state(&db, team).await.ok();
     });
     Ok(Json(extra))
   } else {

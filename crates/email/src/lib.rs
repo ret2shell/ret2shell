@@ -1,5 +1,5 @@
 mod traits;
-pub use traits::{EmailCtx, EmailError, EmailRequest};
+pub use traits::{EmailCtx, EmailError, EmailRequest, EmailType};
 
 use lettre::{
   AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor,

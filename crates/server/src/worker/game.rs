@@ -75,7 +75,7 @@ async fn score_maintenance_worker(queue: Queue, db: Database) {
         message.double_ack().await.ok();
         continue;
       }
-      let Some(current_challenge) =
+      let Some(Some(current_challenge)) =
         challenge::get(&db.conn, challenge_payload.as_ref().unwrap().id)
           .await
           .inspect_err(|e| error!(error=?e, "failed to load challenge for scoreboard worker"))
@@ -180,7 +180,7 @@ async fn submission_worker(
       }
       let submission_msg = submission_msg.unwrap();
       let trace = submission_msg.trace.to_owned();
-      let Some(submission) = submission::get(&db.conn, submission_msg.payload.id)
+      let Some(Some(submission)) = submission::get(&db.conn, submission_msg.payload.id)
         .await
         .inspect_err(|e| error!(error=?e, "failed to load submission from database"))
         .ok()

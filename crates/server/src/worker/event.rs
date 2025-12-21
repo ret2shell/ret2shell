@@ -4,11 +4,12 @@ use r2s_database::game;
 use r2s_event::{
   EventManager,
   events::EventContainer,
-  traits::EventError,
 };
 use r2s_migrator::Database;
 use r2s_queue::TracedMessage;
 use tracing::{error, warn};
+
+use crate::traits::ResponseError;
 
 pub fn spawn(messages: Stream, manager: EventManager, db: Database) {
   tokio::spawn(event_pusher(messages, manager, db));
@@ -43,7 +44,7 @@ async fn event_pusher(mut messages: Stream, manager: EventManager, db: Database)
 
 async fn push_event(
   message: Message, manager: EventManager, db: &Database,
-) -> Result<(), EventError> {
+) -> Result<(), ResponseError> {
   let payload = String::from_utf8(message.message.payload.to_vec())?;
   let event = serde_json::from_str::<TracedMessage<EventContainer>>(&payload)?;
   if game::get(&db.conn, event.payload.game_id)

@@ -2,11 +2,11 @@ use async_nats::jetstream::{self, consumer::pull::Stream};
 use chrono::{Duration, Utc};
 use futures::StreamExt;
 use r2s_config::email;
-use r2s_database::config;
+use r2s_database::{config, user};
 use r2s_email::{EmailError, EmailRequest, EmailType};
 use r2s_migrator::Database;
 use r2s_queue::TracedMessage;
-use tracing::{debug, error, error_span, info, warn};
+use tracing::{error, error_span, info, warn};
 
 pub fn spawn(messages: Stream, db: Database) {
   tokio::spawn(email_worker(messages, db));
@@ -60,18 +60,16 @@ async fn process_message(message: jetstream::Message, db: &Database) -> Result<(
     drop(span_guard);
     return Ok(());
   }
-  if matches!(req.email_type, EmailType::Verification) && req.verified {
+  if matches!(req.email_type, EmailType::Verify)
+    && let Ok(Some(user)) = user::get_by_account_or_email(&db.conn, &req.email.email).await
+    && user.permissions.0.contains(&user::Permission::Verified)
+  {
     warn!("verification email for verified account, dropping");
     message.double_ack().await.ok();
     drop(span_guard);
     return Ok(());
   }
-  if matches!(req.email_type, EmailType::ResetPassword) && !req.verified {
-    warn!("email message requires verified account but is unverified, dropping");
-    message.double_ack().await.ok();
-    drop(span_guard);
-    return Ok(());
-  }
+
   let Some(config) = resolve_email_config(db).await else {
     warn!("email config missing or disabled, dropping message");
     message.double_ack().await.ok();

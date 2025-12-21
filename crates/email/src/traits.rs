@@ -3,12 +3,6 @@ use r2s_config::email;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub enum EmailType {
-  Verification,
-  ResetPassword,
-}
-
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct EmailCtx {
   pub name: String,
@@ -18,12 +12,18 @@ pub struct EmailCtx {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
+pub enum EmailType {
+  Verify,
+  Reset,
+}
+
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct EmailRequest {
   pub email: EmailCtx,
   pub config: email::Config,
   #[serde(with = "ts_seconds")]
   pub created_at: DateTime<Utc>,
-  pub verified: bool,
   pub email_type: EmailType,
 }
 

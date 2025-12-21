@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tower_governor::{GovernorError, key_extractor::KeyExtractor};
 use tower_http::request_id::{MakeRequestId, RequestId};
-use tracing::{Span, debug, error, warn};
+use tracing::{Span, debug, warn};
 
 use super::auth::Token;
 use crate::{traits::ResponseError, worker::ip_record::IpRecord};

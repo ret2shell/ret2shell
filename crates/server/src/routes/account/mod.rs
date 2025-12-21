@@ -14,7 +14,8 @@ use r2s_database::{
   config, game, institute as institute_db, team,
   user::{self, Permission, Permissions},
 };
-use r2s_email::{EmailCtx, EmailRequest, EmailType as QueueEmailType};
+use r2s_email::EmailType;
+use r2s_email::{EmailCtx, EmailRequest};
 use r2s_migrator::Database;
 use r2s_queue::Queue;
 use rand::Rng;
@@ -369,18 +370,11 @@ async fn login(
   }
 }
 
-enum EmailType {
-  Verify,
-  Reset,
-}
 
 async fn send_email(
   cache: &Cache, queue: &Queue, config: &config::Model, account: &str, email: &str,
-  email_type: EmailType, trace: impl AsRef<str>, verified: bool,
+  email_type: EmailType, trace: impl AsRef<str>,
 ) -> Result<(), ResponseError> {
-  if matches!(email_type, EmailType::Verify) && verified {
-    return Ok(());
-  }
   let email_config = match config.email.clone() {
     Some(email::Config { enabled: false, .. }) => {
       return Ok(());
@@ -442,11 +436,7 @@ async fn send_email(
     // unwrap is safe here because we have checked the config in the previous if statement
     config: config.email.as_ref().unwrap().to_owned(),
     created_at: Utc::now(),
-    verified,
-    email_type: match email_type {
-      EmailType::Verify => QueueEmailType::Verification,
-      EmailType::Reset => QueueEmailType::ResetPassword,
-    },
+    email_type,
   };
   queue.publish("email", email_req, trace).await?;
   Ok(())
@@ -535,7 +525,6 @@ async fn register(
     &email,
     EmailType::Verify,
     &trace.header_value().to_str().unwrap_or("UNKNOWN"),
-    user.permissions.0.contains(&Permission::Verified),
   )
   .await
   .ok();
@@ -633,7 +622,6 @@ async fn resend_verify_email(
     &email,
     EmailType::Verify,
     &trace.header_value().to_str().unwrap_or("UNKNOWN"),
-    user.permissions.0.contains(&Permission::Verified),
   )
   .await?;
   Ok(StatusCode::OK)
@@ -680,7 +668,6 @@ async fn forgot_password(
     &body.email,
     EmailType::Reset,
     &trace.header_value().to_str().unwrap_or("UNKNOWN"),
-    user.permissions.0.contains(&Permission::Verified),
   )
   .await?;
   Ok(StatusCode::OK)
