@@ -181,9 +181,9 @@ struct GameDocPath {
 
 fn parse_game_doc(doc: &str) -> Result<GameDoc, ResponseError> {
   match doc.to_lowercase().as_str() {
-    "intro" | "introduction" => Ok(GameDoc::Intro),
-    "train" | "training" => Ok(GameDoc::Train),
-    "rules" | "rule" => Ok(GameDoc::Rules),
+    "intro" => Ok(GameDoc::Intro),
+    "train" => Ok(GameDoc::Train),
+    "rules" => Ok(GameDoc::Rules),
     _ => Err(ResponseError::BadRequest(
       "invalid document type, valid types: intro, train, rules".to_string(),
     )),

@@ -166,7 +166,10 @@ export default function () {
                 </div>
               </Match>
               <Match when={!trainingDoc.data && !trainingDoc.isLoading}>
-                <Intro />
+                <div class="flex-1 flex flex-col items-center justify-center space-y-4 opacity-60">
+                  <span class="shrink-0 icon-[fluent--thumb-dislike-20-regular] w-16 h-16" />
+                  <span>{t("game.introduction.empty")}</span>
+                </div>
               </Match>
             </Switch>
           }

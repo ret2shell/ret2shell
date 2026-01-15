@@ -43,6 +43,10 @@ pub enum GameDoc {
 }
 
 impl GameDoc {
+  pub const fn all() -> [GameDoc; 3] {
+    [GameDoc::Intro, GameDoc::Train, GameDoc::Rules]
+  }
+
   pub fn file_name(&self) -> &'static str {
     match self {
       GameDoc::Intro => "INTRO.md",
@@ -117,7 +121,7 @@ impl GameBucket {
     )
     .await?;
     write(game_path.join(".gitignore"), ".lock").await?;
-    for doc in [GameDoc::Intro, GameDoc::Train, GameDoc::Rules] {
+    for doc in GameDoc::all() {
       write(game_path.join(doc.file_name()), doc.default_content()).await?;
     }
     git
