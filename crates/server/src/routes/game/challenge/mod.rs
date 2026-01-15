@@ -1309,6 +1309,7 @@ async fn cleanup_traffic_for_instance(cache: Cache, pods: Vec<Pod>) {
 }
 
 const DELAY_THRESHOLDS: [i64; 3] = [30, 15, 10];
+const SECONDS_PER_HOUR: i64 = 3600;
 
 fn delay_threshold_minutes(renew_count: i32) -> i64 {
   match renew_count {
@@ -1322,7 +1323,7 @@ fn ensure_delay_window(pods: &[Pod]) -> Result<(), ResponseError> {
   for pod in pods {
     let renew_count: i32 = get_pod_field!(pod, annotations, "ret.sh.cn/renew")
       .parse()
-      .map_err(|_| ResponseError::Gone("renew count not found".to_owned()))?;
+      .map_err(|_| ResponseError::Gone("invalid renew count format".to_owned()))?;
     let created_at = pod
       .metadata
       .creation_timestamp
@@ -1332,7 +1333,8 @@ fn ensure_delay_window(pods: &[Pod]) -> Result<(), ResponseError> {
       ))?
       .0
       .as_second();
-    let remaining = created_at + 3600 * (renew_count + 1) as i64 - Utc::now().timestamp();
+    let remaining =
+      created_at + SECONDS_PER_HOUR * (renew_count + 1) as i64 - Utc::now().timestamp();
     let threshold = delay_threshold_minutes(renew_count) * 60;
     if remaining > threshold {
       return Err(ResponseError::PreconditionFailed(format!(
@@ -1365,6 +1367,17 @@ async fn stop_challenge_instances(
   Ok(())
 }
 
+async fn fetch_pods_by_label(
+  cluster: &Cluster, selector: String,
+) -> Result<Option<Vec<Pod>>, ResponseError> {
+  let pods = cluster.get_pods_by_label(&selector).await?;
+  if pods.is_empty() {
+    Ok(None)
+  } else {
+    Ok(Some(pods))
+  }
+}
+
 #[cfg(test)]
 mod tests {
   use super::delay_threshold_minutes;
@@ -1388,13 +1401,15 @@ async fn delay_challenge_instance(
   let cluster = cluster.at(CHALLENGE_NS);
 
   if let Some(team) = team {
-    let pods = cluster
-      .get_pods_by_label(&format!(
+    if let Some(pods) = fetch_pods_by_label(
+      &cluster,
+      format!(
         "ret.sh.cn/challenge={},ret.sh.cn/team={}",
         challenge.id, team.id
-      ))
-      .await?;
-    if !pods.is_empty() {
+      ),
+    )
+    .await?
+    {
       ensure_delay_window(&pods)?;
 
       info!("delaying challenge env");
@@ -1409,23 +1424,24 @@ async fn delay_challenge_instance(
     }
   }
 
-  let pods = cluster
-    .get_pods_by_label(&format!(
+  if let Some(pods) = fetch_pods_by_label(
+    &cluster,
+    format!(
       "ret.sh.cn/challenge={},ret.sh.cn/user={}",
       challenge.id, token.id
-    ))
-    .await?;
-  if pods.is_empty() {
-    return Ok(());
-  }
-  ensure_delay_window(&pods)?;
+    ),
+  )
+  .await?
+  {
+    ensure_delay_window(&pods)?;
 
-  info!("delaying challenge env");
-  let pods = cluster
-    .delay_challenge_env_by_user(challenge.id, token.id)
-    .await?;
-  if !pods.is_empty() {
-    tokio::spawn(cleanup_traffic_for_instance(cache.clone(), pods));
+    info!("delaying challenge env");
+    let pods = cluster
+      .delay_challenge_env_by_user(challenge.id, token.id)
+      .await?;
+    if !pods.is_empty() {
+      tokio::spawn(cleanup_traffic_for_instance(cache.clone(), pods));
+    }
   }
 
   Ok(())
