@@ -119,10 +119,10 @@ config:
     enable_capture = {{ .Values.cluster.enableCapture }}
 
     [cluster.registry]
-    enabled  = {{ .Values.cluster.registry.enabled }}
+    enabled = {{ .Values.cluster.registry.enabled }}
     external = '{{ include "ret2shell.registryExternal" . }}'
     insecure = {{ .Values.cluster.registry.insecure }}
-    server   = '{{ include "ret2shell.registryServer" . }}'
+    server = '{{ include "ret2shell.registryServer" . }}'
 
     [database]
     db       = '{{ .Values.database.name }}'

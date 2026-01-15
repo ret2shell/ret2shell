@@ -25,11 +25,11 @@ spec:
     -
       {{- if .matches }}
       matches:
-{{ toYaml .matches | nindent 8 }}
+{{- toYaml .matches | nindent 8 }}
       {{- end }}
       {{- if .filters }}
       filters:
-{{ toYaml .filters | nindent 8 }}
+{{- toYaml .filters | nindent 8 }}
       {{- end }}
       backendRefs:
         - name: {{ $fullName }}
