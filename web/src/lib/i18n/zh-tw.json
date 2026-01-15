@@ -742,6 +742,13 @@
         "message": "如果不啟用錘子反饋，平臺將根據此處名稱引導選手前往外部反饋系統。"
       }
     },
+    "docs": {
+      "introduction": "賽事介紹",
+      "training": "訓練介紹",
+      "rules": "比賽規則",
+      "trainingRequired": "訓練介紹不能為空",
+      "rulesRequired": "比賽規則不能為空"
+    },
     "admin": {
       "title": "管理",
       "gotoChallenges": "前往題目管理"

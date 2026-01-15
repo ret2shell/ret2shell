@@ -15,7 +15,7 @@ use axum::{
 use chrono::{DateTime, Utc, serde::ts_seconds};
 use futures::TryStreamExt;
 use nanoid::nanoid;
-use r2s_bucket::{Bucket, git::to_pkt_line};
+use r2s_bucket::{Bucket, game::GameDoc, git::to_pkt_line};
 use r2s_cache::Cache;
 use r2s_cluster::{CHALLENGE_NS, Cluster, ClusterError, Pod, traffic::MappedPort};
 use r2s_config::GlobalConfig;
@@ -116,6 +116,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .route("/device", get(get_connected_devices))
         .route("/token", post(regenerate_game_token))
         .route("/introduction", patch(update_game_intro))
+        .route("/doc/{doc}", patch(update_game_doc))
         .route("/submission", get(get_submissions))
         .nest(
           "/audit",
@@ -141,6 +142,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .nest("/team", team::router(state))
         .nest("/notification", notification::router(state))
         .nest("/chat", chat::router(state))
+        .route("/doc/{doc}", get(get_game_doc))
         .route("/introduction", get(get_game_intro))
         .route("/", get(get_game))
         .route_layer(middleware::from_fn_with_state(
@@ -170,6 +172,94 @@ macro_rules! get_game_bucket_mut {
       )
       .await?
   }};
+}
+
+#[derive(Deserialize)]
+struct GameDocPath {
+  doc: String,
+}
+
+fn parse_game_doc(doc: &str) -> Result<GameDoc, ResponseError> {
+  match doc.to_lowercase().as_str() {
+    "intro" | "introduction" => Ok(GameDoc::Intro),
+    "train" | "training" => Ok(GameDoc::Train),
+    "rules" | "rule" => Ok(GameDoc::Rules),
+    _ => Err(ResponseError::BadRequest(
+      "invalid document type".to_string(),
+    )),
+  }
+}
+
+fn cache_key_for_doc(game_id: i64, doc: GameDoc) -> String {
+  format!("{game_id}:{}", doc.file_name())
+}
+
+fn article_from_content(doc: GameDoc, content: String) -> article::Model {
+  let now = Utc::now();
+  article::Model {
+    id: 0,
+    created_at: now,
+    updated_at: now,
+    title: doc.file_name().to_owned(),
+    path: article::ArticlePath(vec![]),
+    content: Some(content),
+    publisher_id: 0,
+    access_policy: article::AccessPolicy::Game,
+    enable_comment: false,
+    weight: 0,
+    draft: false,
+    published: true,
+  }
+}
+
+async fn load_game_doc(
+  cache: &Cache, bucket: &Bucket, game: &game::Model, doc: GameDoc,
+) -> Result<article::Model, ResponseError> {
+  let cache = cache.at("game-doc");
+  let cache_key = cache_key_for_doc(game.id, doc);
+  if let Some(cached) = cache.get::<article::Model>(&cache_key).await? {
+    return Ok(cached);
+  }
+  let game_bucket = bucket
+    .at(
+      game
+        .bucket
+        .clone()
+        .ok_or(ResponseError::PreconditionFailed(
+          "game bucket not found".to_owned(),
+        ))?,
+    )
+    .await?;
+  let mut content = game_bucket.doc(doc).await?;
+  if content.trim().is_empty() {
+    content = doc.default_content().to_owned();
+  }
+  let article = article_from_content(doc, content);
+  cache.set_ex(&cache_key, &article, 600).await?;
+  Ok(article)
+}
+
+async fn update_game_doc_impl(
+  cache: &Cache, bucket: &Bucket, game: &game::Model, token: &Token, doc: GameDoc,
+  content: Option<String>,
+) -> Result<article::Model, ResponseError> {
+  let game_bucket = get_game_bucket_mut!(bucket, game);
+  game_bucket
+    .set_doc(doc, &content.unwrap_or_default())
+    .await?;
+  game_bucket
+    .commit(
+      format!(":memo: update {}", doc.file_name()),
+      &token.account,
+      format!("{}@private.ret.sh.cn", token.account),
+    )
+    .await?;
+  cache
+    .at("game-doc")
+    .del(cache_key_for_doc(game.id, doc))
+    .await
+    .ok();
+  load_game_doc(cache, bucket, game, doc).await
 }
 
 #[derive(Deserialize)]
@@ -349,71 +439,40 @@ async fn delete_game(
 }
 
 async fn get_game_intro(
-  State(ref db): State<Database>, Extension(game): Extension<game::Model>,
+  State(ref cache): State<Cache>, State(ref bucket): State<Bucket>,
+  Extension(game): Extension<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  if let Some(intro_id) = game.introduction_id {
-    let intro = article::get_ex(&db.conn, intro_id).await?;
-    Ok(Json(intro))
-  } else {
-    Err(ResponseError::NotFound("introduction not found".to_owned()))
-  }
+  let intro = load_game_doc(cache, bucket, &game, GameDoc::Intro).await?;
+  Ok(Json(intro))
 }
 
 async fn update_game_intro(
-  State(ref db): State<Database>, State(ref cache): State<Cache>, State(ref bucket): State<Bucket>,
+  State(ref cache): State<Cache>, State(ref bucket): State<Bucket>,
   Extension(game): Extension<game::Model>, Extension(token): Extension<Token>,
   Json(model): Json<article::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  let txn = db.conn.begin().await?;
-  let result = if let Some(intro_id) = game.introduction_id {
-    article::update(
-      &txn,
-      intro_id,
-      article::Model {
-        id: intro_id,
-        publisher_id: token.id,
-        ..model
-      },
-    )
-    .await?
-  } else {
-    let model = article::create(
-      &txn,
-      article::Model {
-        id: 0,
-        publisher_id: token.id,
-        ..model
-      },
-    )
-    .await?;
-    game::update(
-      &txn,
-      game::Model {
-        id: game.id,
-        introduction_id: Some(model.id),
-        ..game.clone()
-      },
-    )
-    .await?;
-    cache.at("game").del(game.id).await?;
-    model
-  };
+  let updated =
+    update_game_doc_impl(cache, bucket, &game, &token, GameDoc::Intro, model.content).await?;
+  Ok(Json(updated))
+}
 
-  let game_bucket = get_game_bucket_mut!(bucket, game);
-  game_bucket
-    .set_introduction(&result.clone().content.unwrap_or("NO CONTENT".into()))
-    .await?;
-  game_bucket
-    .commit(
-      ":memo: update README.md",
-      &token.account,
-      format!("{}@private.ret.sh.cn", token.account),
-    )
-    .await?;
-  txn.commit().await?;
-  info!("created introduction for game");
-
+async fn get_game_doc(
+  State(ref cache): State<Cache>, State(ref bucket): State<Bucket>,
+  Extension(game): Extension<game::Model>, Path(path): Path<GameDocPath>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let doc = parse_game_doc(&path.doc)?;
+  let result = load_game_doc(cache, bucket, &game, doc).await?;
   Ok(Json(result))
+}
+
+async fn update_game_doc(
+  State(ref cache): State<Cache>, State(ref bucket): State<Bucket>,
+  Extension(game): Extension<game::Model>, Extension(token): Extension<Token>,
+  Path(path): Path<GameDocPath>, Json(model): Json<article::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let doc = parse_game_doc(&path.doc)?;
+  let updated = update_game_doc_impl(cache, bucket, &game, &token, doc, model.content).await?;
+  Ok(Json(updated))
 }
 
 #[derive(Serialize, Clone, Deserialize)]

@@ -1,6 +1,12 @@
 import { handleHttpError } from "@api";
 import { useInstitutes } from "@api/account";
-import { useGame, useGameIntroduction, useUpdateGameIntroductionMutation, useUpdateGameMutation } from "@api/game";
+import {
+  type GameDocType,
+  useGame,
+  useGameDoc,
+  useUpdateGameDocMutation,
+  useUpdateGameMutation,
+} from "@api/game";
 import { uploadMedia } from "@api/media";
 import { useSelfTeam, useTeamRank } from "@api/team";
 import LogoAnimate from "@assets/animates/logo-animate";
@@ -100,10 +106,57 @@ export default function () {
 
   onCleanup(() => clearInterval(updateTimer));
 
-  const introduction = useGameIntroduction({
+  const [docTab, setDocTab] = createSignal<GameDocType>("intro");
+  const introduction = useGameDoc({
     id: gameId,
+    doc: () => "intro",
     enabled: () => gameId() > 0,
   });
+  const trainingDoc = useGameDoc({
+    id: gameId,
+    doc: () => "train",
+    enabled: () => gameId() > 0 && docTab() === "train",
+  });
+  const rulesDoc = useGameDoc({
+    id: gameId,
+    doc: () => "rules",
+    enabled: () => gameId() > 0 && docTab() === "rules",
+  });
+  const docQuery = () => {
+    switch (docTab()) {
+      case "train":
+        return trainingDoc;
+      case "rules":
+        return rulesDoc;
+      default:
+        return introduction;
+    }
+  };
+  const docLabel = () => {
+    switch (docTab()) {
+      case "train":
+        return t("game.docs.training");
+      case "rules":
+        return t("game.docs.rules");
+      default:
+        return t("game.docs.introduction");
+    }
+  };
+  const docRequired = () => {
+    switch (docTab()) {
+      case "train":
+        return t("game.docs.trainingRequired");
+      case "rules":
+        return t("game.docs.rulesRequired");
+      default:
+        return t("game.form.introduction.required");
+    }
+  };
+  const docTabs = [
+    { key: "intro" as GameDocType, label: t("game.docs.introduction") },
+    { key: "train" as GameDocType, label: t("game.docs.training") },
+    { key: "rules" as GameDocType, label: t("game.docs.rules") },
+  ];
 
   let coverInput: HTMLInputElement;
   const [coverSet, setCoverSet] = createSignal(false);
@@ -200,22 +253,48 @@ export default function () {
     }
   }
 
-  async function onUpdateIntroduction(result: ArticleModel) {
-    updateIntroductionMutation.mutate({ id: gameId(), article: result });
-  }
-
   const updateGameMutation = useUpdateGameMutation({
     onSuccess: () => {
       void game.refetch();
     },
   });
-  const updateIntroductionMutation = useUpdateGameIntroductionMutation({
+  const updateIntroductionMutation = useUpdateGameDocMutation({
+    doc: () => "intro",
     onSuccess: () => {
       setSearchParams({ edit: null });
       void game.refetch();
       void introduction.refetch();
     },
   });
+  const updateTrainingMutation = useUpdateGameDocMutation({
+    doc: () => "train",
+    onSuccess: () => {
+      setSearchParams({ edit: null });
+      void game.refetch();
+      void trainingDoc.refetch();
+    },
+  });
+  const updateRulesMutation = useUpdateGameDocMutation({
+    doc: () => "rules",
+    onSuccess: () => {
+      setSearchParams({ edit: null });
+      void game.refetch();
+      void rulesDoc.refetch();
+    },
+  });
+  const docMutation = () => {
+    switch (docTab()) {
+      case "train":
+        return updateTrainingMutation;
+      case "rules":
+        return updateRulesMutation;
+      default:
+        return updateIntroductionMutation;
+    }
+  };
+  async function onUpdateDoc(result: ArticleModel) {
+    docMutation().mutate({ id: gameId(), article: result });
+  }
 
   const selfTeam = useSelfTeam({
     game_id: gameId,
@@ -459,20 +538,37 @@ export default function () {
           </div>
         </div>
         <div class="flex-1 flex flex-col space-y-2 p-3 lg:p-6">
-          <h1 class="text-center text-3xl font-bold mt-4 lg:mt-8">{t("game.introduction.title")}</h1>
+          <div class="flex flex-col items-center space-y-3 mt-4 lg:mt-8">
+            <h1 class="text-center text-3xl font-bold">{docLabel()}</h1>
+            <div class="flex flex-row space-x-2">
+              <For each={docTabs}>
+                {(tab) => (
+                  <Button
+                    type="button"
+                    size="sm"
+                    level={docTab() === tab.key ? "primary" : "secondary"}
+                    onClick={() => setDocTab(tab.key)}
+                  >
+                    {tab.label}
+                  </Button>
+                )}
+              </For>
+            </div>
+          </div>
           <Switch>
             <Match when={inEdit()}>
-              <IntroForm onDone={onUpdateIntroduction} />
-            </Match>
-            <Match when={introduction.data && !introduction.isLoading}>
-              <Article
-                class="self-center"
-                content={introduction.data?.content || ""}
-                extra={true}
-                headingAnchors={true}
+              <IntroForm
+                article={() => docQuery().data}
+                onDone={onUpdateDoc}
+                label={docLabel()}
+                requiredMessage={docRequired()}
+                gameName={() => game.data?.name}
               />
             </Match>
-            <Match when={introduction.isLoading}>
+            <Match when={docQuery().data && !docQuery().isLoading}>
+              <Article class="self-center" content={docQuery().data?.content || ""} extra headingAnchors />
+            </Match>
+            <Match when={docQuery().isLoading}>
               <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
                 <Spin width={32} height={32} />
                 <span>{randomTips()}</span>

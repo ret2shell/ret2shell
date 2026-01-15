@@ -1,5 +1,5 @@
 import { useChallenge, useChallenges, useCreateChallengeMutation } from "@api/challenge";
-import { useGame, useUpdateGameMutation } from "@api/game";
+import { useGame, useGameDoc, useUpdateGameMutation } from "@api/game";
 import Challenge from "@blocks/challenge";
 import Form, { type ChallengeForm } from "@blocks/challenge/form";
 import Tabs from "@blocks/challenge/tabs";
@@ -14,6 +14,7 @@ import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
 import { fullTheme, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
+import Article from "@widgets/article";
 import LoadingTips from "@widgets/loading-tips";
 import Tag from "@widgets/tag";
 import { DateTime } from "luxon";
@@ -49,6 +50,11 @@ export default function () {
   const inMonitor = createMemo(() => searchParams.monitor === "true");
 
   const game = useGame({ id: () => gameId(), enabled: () => gameId() > 0 });
+  const trainingDoc = useGameDoc({
+    id: () => gameId(),
+    doc: () => "train",
+    enabled: () => gameId() > 0,
+  });
   const challenge = useChallenge({
     game_id: () => gameId(),
     challenge_id: () => selectedChallengeId() || 0,
@@ -131,7 +137,40 @@ export default function () {
       <Title page={game.data?.name} route={`/training/${gameId()}`} />
       <div class="flex-1 flex flex-col w-0">
         <Tabs training gameId={gameId()} challengeId={selectedChallengeId() ?? 0} />
-        <Switch fallback={<Intro />}>
+        <Switch
+          fallback={
+            <Switch>
+              <Match when={trainingDoc.data && !trainingDoc.isLoading}>
+                <div class="flex-1 w-full relative">
+                  <div class="absolute top-0 left-0 w-full h-full overflow-hidden">
+                    <OverlayScrollbarsComponent
+                      options={{
+                        scrollbars: {
+                          theme: `os-theme-${fullTheme()}`,
+                          autoHide: "scroll",
+                        },
+                      }}
+                      class="relative w-full h-full print:h-auto print:overflow-auto"
+                      defer
+                    >
+                      <div class="flex flex-col">
+                        <Article class="self-center" content={trainingDoc.data?.content || ""} />
+                      </div>
+                    </OverlayScrollbarsComponent>
+                  </div>
+                </div>
+              </Match>
+              <Match when={trainingDoc.isLoading}>
+                <div class="flex-1 flex flex-row space-x-2 items-center justify-center">
+                  <LoadingTips />
+                </div>
+              </Match>
+              <Match when={true}>
+                <Intro />
+              </Match>
+            </Switch>
+          }
+        >
           <Match when={inEdit()}>
             <div class="flex-1 w-full relative">
               <div class="absolute top-0 left-0 w-full h-full overflow-hidden">

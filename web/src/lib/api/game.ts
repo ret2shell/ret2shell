@@ -16,6 +16,8 @@ import type { DateTime } from "luxon";
 import { createMemo } from "solid-js";
 import api, { api_root, handleHttpError, inflyClient, toastSuccess } from ".";
 
+export type GameDocType = "intro" | "train" | "rules";
+
 export async function getGames(page?: number, page_size?: number, host_type?: HostType, weight?: number) {
   return (
     await api.get(`${api_root}/game`, {
@@ -147,24 +149,26 @@ export function useDeleteGameMutation(props: { onSuccess?: () => void; onError?:
   }));
 }
 
-export async function getGameIntroduction(id: number) {
-  return await api.get(`${api_root}/game/${id}/introduction`).json<Article>();
+export async function getGameDoc(id: number, doc: GameDocType) {
+  return await api.get(`${api_root}/game/${id}/doc/${doc}`).json<Article>();
 }
 
-export function useGameIntroduction({
+export function useGameDoc({
   id,
+  doc,
   enabled,
   onError,
 }: {
   id: () => number;
+  doc: () => GameDocType;
   enabled?: () => boolean;
   onError?: (err: Error) => boolean;
 }) {
-  const keys = createMemo(() => ["game", id(), "introduction"]);
+  const keys = createMemo(() => ["game", id(), "doc", doc()]);
   return useQuery(
     () => ({
       queryKey: keys(),
-      queryFn: async () => await getGameIntroduction(id()),
+      queryFn: async () => await getGameDoc(id(), doc()),
       enabled: enabled?.(),
       throwOnError: (err: Error) => {
         if (err instanceof HTTPError && err.response.status === 404) return onError?.(err) ?? false;
@@ -176,15 +180,17 @@ export function useGameIntroduction({
   );
 }
 
-export async function updateGameIntroduction(id: number, article: Article) {
-  return await api.patch(`${api_root}/game/${id}/introduction`, { json: article }).json<Article>();
+export async function updateGameDoc(id: number, doc: GameDocType, article: Article) {
+  return await api.patch(`${api_root}/game/${id}/doc/${doc}`, { json: article }).json<Article>();
 }
 
-export function useUpdateGameIntroductionMutation(
-  props: { onSuccess?: (article: Article) => void; onError?: (err: Error) => void } = {}
+export function useUpdateGameDocMutation(
+  props: { doc: () => GameDocType; onSuccess?: (article: Article) => void; onError?: (err: Error) => void } = {
+    doc: () => "intro",
+  }
 ) {
   return useMutation(() => ({
-    mutationFn: (params: { id: number; article: Article }) => updateGameIntroduction(params.id, params.article),
+    mutationFn: (params: { id: number; article: Article }) => updateGameDoc(params.id, props.doc(), params.article),
     onSuccess: (data: Article) => {
       props.onSuccess?.(data);
     },
@@ -193,6 +199,33 @@ export function useUpdateGameIntroductionMutation(
       props.onError?.(err);
     },
   }));
+}
+
+// compatibility wrappers
+export async function getGameIntroduction(id: number) {
+  return await getGameDoc(id, "intro");
+}
+
+export function useGameIntroduction({
+  id,
+  enabled,
+  onError,
+}: {
+  id: () => number;
+  enabled?: () => boolean;
+  onError?: (err: Error) => boolean;
+}) {
+  return useGameDoc({ id, doc: () => "intro", enabled, onError });
+}
+
+export async function updateGameIntroduction(id: number, article: Article) {
+  return await updateGameDoc(id, "intro", article);
+}
+
+export function useUpdateGameIntroductionMutation(
+  props: { onSuccess?: (article: Article) => void; onError?: (err: Error) => void } = {}
+) {
+  return useUpdateGameDocMutation({ doc: () => "intro", ...props });
 }
 
 export async function getGameScoreboard(

@@ -742,6 +742,13 @@
         "message": "如果不启用锤子反馈，平台将根据此处名称引导选手前往外部反馈系统。"
       }
     },
+    "docs": {
+      "introduction": "赛事介绍",
+      "training": "训练介绍",
+      "rules": "比赛规则",
+      "trainingRequired": "训练介绍不能为空",
+      "rulesRequired": "比赛规则不能为空"
+    },
     "admin": {
       "title": "管理",
       "gotoChallenges": "前往题目管理"

@@ -742,6 +742,13 @@
         "message": "If the hammer feedback is not enabled, the platform will guide the player to the external feedback system based on the label here."
       }
     },
+    "docs": {
+      "introduction": "Game introduction",
+      "training": "Training introduction",
+      "rules": "Game rules",
+      "trainingRequired": "Training introduction cannot be empty",
+      "rulesRequired": "Game rules cannot be empty"
+    },
     "admin": {
       "title": "Management",
       "gotoChallenges": "Go to challenge management"

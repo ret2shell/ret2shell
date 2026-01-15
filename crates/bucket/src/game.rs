@@ -27,12 +27,37 @@ pub struct GameBucket {
 #[repr(i32)]
 pub enum HostType {
   CTFTraining = 0,
-  CTFGame     = 1,
+  CTFGame = 1,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AccessPolicy {
   pub sync: i32,
+}
+
+#[derive(Clone, Copy, Debug)]
+pub enum GameDoc {
+  Intro,
+  Train,
+  Rules,
+}
+
+impl GameDoc {
+  pub fn file_name(&self) -> &'static str {
+    match self {
+      GameDoc::Intro => "INTRO.md",
+      GameDoc::Train => "TRAIN.md",
+      GameDoc::Rules => "RULES.md",
+    }
+  }
+
+  pub fn default_content(&self) -> &'static str {
+    match self {
+      GameDoc::Intro => "# Introduction\n\nWelcome to the game!",
+      GameDoc::Train => "# Training\n\nTraining materials will be provided here.",
+      GameDoc::Rules => "# Rules\n\nPlease follow the game rules.",
+    }
+  }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -92,6 +117,9 @@ impl GameBucket {
     )
     .await?;
     write(game_path.join(".gitignore"), ".lock").await?;
+    for doc in [GameDoc::Intro, GameDoc::Train, GameDoc::Rules] {
+      write(game_path.join(doc.file_name()), doc.default_content()).await?;
+    }
     git
       .take_shot(
         ":tada: game created",
@@ -165,8 +193,24 @@ impl GameBucket {
     if !self.locked {
       return Err(BucketError::NeedLocking);
     }
-    write(self.path.join("README.md"), introduction.to_string()).await?;
+    self.set_doc(GameDoc::Intro, introduction).await?;
     Ok(())
+  }
+
+  pub async fn set_doc(&self, doc: GameDoc, content: &str) -> Result<(), BucketError> {
+    if !self.locked {
+      return Err(BucketError::NeedLocking);
+    }
+    write(self.path.join(doc.file_name()), content.to_string()).await?;
+    Ok(())
+  }
+
+  pub async fn doc(&self, doc: GameDoc) -> Result<String, BucketError> {
+    let path = self.path.join(doc.file_name());
+    if !path.exists() {
+      return Ok(String::new());
+    }
+    Ok(read_to_string(path).await?)
   }
 
   pub async fn config(&self) -> Result<GameConfig, BucketError> {
