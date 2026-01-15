@@ -1292,7 +1292,7 @@ async fn start_challenge_instance(
   }
 }
 
-async fn cleanup_traffic_for_instance(cache: Cache, pods: Vec<Pod>) {
+async fn cleanup_traffic_for_instance(cache: &Cache, pods: Vec<Pod>) {
   for pod in pods {
     if let Ok(instance) = pod.try_into() {
       if let Err(err) = cache.at("traffic").del(instance.traffic).await {
@@ -1315,7 +1315,13 @@ fn delay_threshold_minutes(renew_count: i32) -> i64 {
 
 fn ensure_delay_window(pods: &[Pod]) -> Result<(), ResponseError> {
   for pod in pods {
-    let renew_raw = get_pod_field!(pod, annotations, "ret.sh.cn/renew");
+    let renew_raw = pod
+      .metadata
+      .annotations
+      .as_ref()
+      .and_then(|a| a.get("ret.sh.cn/renew"))
+      .cloned()
+      .ok_or_else(|| ResponseError::Gone("renew annotation missing".to_owned()))?;
     let renew_count: i32 = renew_raw
       .parse()
       .map_err(|_| ResponseError::Gone(format!("invalid renew count format: {renew_raw}")))?;
@@ -1353,7 +1359,7 @@ async fn stop_challenge_instances(
   {
     Ok(pods) => {
       if !pods.is_empty() {
-        tokio::spawn(cleanup_traffic_for_instance(cache.clone(), pods));
+        cleanup_traffic_for_instance(cache, pods).await;
       }
     }
     Err(ClusterError::ClusterDisabled) => {}
@@ -1413,7 +1419,7 @@ async fn delay_challenge_instance(
         .delay_challenge_env_by_team(challenge.id, team.id)
         .await?;
       if !pods.is_empty() {
-        tokio::spawn(cleanup_traffic_for_instance(cache.clone(), pods));
+        cleanup_traffic_for_instance(&cache, pods).await;
       }
 
       return Ok(());
@@ -1436,7 +1442,7 @@ async fn delay_challenge_instance(
       .delay_challenge_env_by_user(challenge.id, token.id)
       .await?;
     if !pods.is_empty() {
-      tokio::spawn(cleanup_traffic_for_instance(cache.clone(), pods));
+      cleanup_traffic_for_instance(&cache, pods).await;
     }
   }
 
@@ -1460,7 +1466,7 @@ async fn stop_challenge_instance(
     Vec::new()
   };
   if !pods.is_empty() {
-    tokio::spawn(cleanup_traffic_for_instance(cache.clone(), pods));
+    cleanup_traffic_for_instance(&cache, pods).await;
 
     return Ok(());
   }
@@ -1472,7 +1478,7 @@ async fn stop_challenge_instance(
     .await?;
 
   if !pods.is_empty() {
-    tokio::spawn(cleanup_traffic_for_instance(cache.clone(), pods));
+    cleanup_traffic_for_instance(&cache, pods).await;
   }
 
   Ok(())

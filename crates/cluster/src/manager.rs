@@ -715,9 +715,11 @@ impl Cluster {
     for pod in pods.iter() {
       if let Some(name) = pod.metadata.name.as_ref() {
         if let Err(err) = self.delete_pod(name).await {
+          warn!(pod=?name, error=?err, "failed to delete pod");
           first_err.get_or_insert(err);
         }
         if let Err(err) = self.delete_service(name).await {
+          warn!(service=?name, error=?err, "failed to delete service");
           first_err.get_or_insert(err);
         }
       }
