@@ -77,7 +77,8 @@ function TimePickerButton(props: {
   function scrollToSelected(container: HTMLDivElement | undefined, selector: string) {
     const target = container?.querySelector(selector);
     if (!target || !container || !(target instanceof HTMLElement)) return;
-    target.scrollIntoView({ block: "center", behavior: "smooth" });
+    const desiredTop = target.offsetTop - container.clientHeight / 2 + target.clientHeight / 2;
+    container.scrollTo({ top: desiredTop, behavior: "smooth" });
   }
 
   createEffect(() => {
@@ -98,7 +99,15 @@ function TimePickerButton(props: {
           disabled={props.disabled}
           onClick={() => {
             if (props.type === "time") {
+              if (props.range && props.value && !props.valueNext) {
+                setHour(props.value.hour);
+                setMinute(props.value.minute);
+              }
               setTimePickerOpened(true);
+              queueMicrotask(() => {
+                scrollToSelected(hourColumnRef, `[data-hour="${Number(hour())}"]`);
+                scrollToSelected(minuteColumnRef, `[data-minute="${Number(minute())}"]`);
+              });
             } else {
               props.onDone(props.date);
             }
