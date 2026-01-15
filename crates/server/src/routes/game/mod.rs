@@ -185,7 +185,7 @@ fn parse_game_doc(doc: &str) -> Result<GameDoc, ResponseError> {
     "train" | "training" => Ok(GameDoc::Train),
     "rules" | "rule" => Ok(GameDoc::Rules),
     _ => Err(ResponseError::BadRequest(
-      "invalid document type".to_string(),
+      "invalid document type, valid types: intro, train, rules".to_string(),
     )),
   }
 }

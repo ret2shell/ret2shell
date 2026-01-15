@@ -165,7 +165,7 @@ export default function () {
                   <LoadingTips />
                 </div>
               </Match>
-              <Match when={true}>
+              <Match when={!trainingDoc.data && !trainingDoc.isLoading}>
                 <Intro />
               </Match>
             </Switch>

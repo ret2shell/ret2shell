@@ -208,7 +208,7 @@ impl GameBucket {
   pub async fn doc(&self, doc: GameDoc) -> Result<String, BucketError> {
     let path = self.path.join(doc.file_name());
     if !path.exists() {
-      return Ok(String::new());
+      return Ok(doc.default_content().to_owned());
     }
     Ok(read_to_string(path).await?)
   }
