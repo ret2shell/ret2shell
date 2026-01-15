@@ -66,6 +66,14 @@ function TimePickerButton(props: {
   let lastHourWheel = 0;
   let lastMinuteWheel = 0;
 
+  function changeHour(delta: number) {
+    setHour((hour() + delta + 24) % 24);
+  }
+
+  function changeMinute(delta: number) {
+    setMinute((minute() + delta + 60) % 60);
+  }
+
   function scrollToSelected(container: HTMLDivElement | undefined, selector: string) {
     const target = container?.querySelector(selector);
     if (!target || !container || !(target instanceof HTMLElement)) return;
@@ -124,11 +132,27 @@ function TimePickerButton(props: {
               <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
                 <div
                   class="relative w-24"
+                  role="spinbutton"
+                  aria-label="hour"
+                  aria-valuemin="0"
+                  aria-valuemax="23"
+                  aria-valuenow={hour()}
+                  tabIndex={0}
                   onWheel={(event) => {
+                    event.preventDefault();
                     const now = Date.now();
                     if (now - lastHourWheel < 50) return;
                     lastHourWheel = now;
-                    setHour((hour() + (event.deltaY > 0 ? 1 : -1) + 24) % 24);
+                    changeHour(event.deltaY > 0 ? 1 : -1);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "ArrowUp") {
+                      event.preventDefault();
+                      changeHour(-1);
+                    } else if (event.key === "ArrowDown") {
+                      event.preventDefault();
+                      changeHour(1);
+                    }
                   }}
                 >
                   <div class="pointer-events-none absolute left-0 right-0 top-1/2 -translate-y-1/2 rounded-md border border-primary/30 bg-primary/10 h-10 shadow-sm" />
@@ -158,11 +182,27 @@ function TimePickerButton(props: {
                 <div class="text-lg font-bold text-layer-content/60">:</div>
                 <div
                   class="relative w-24"
+                  role="spinbutton"
+                  aria-label="minute"
+                  aria-valuemin="0"
+                  aria-valuemax="59"
+                  aria-valuenow={minute()}
+                  tabIndex={0}
                   onWheel={(event) => {
+                    event.preventDefault();
                     const now = Date.now();
                     if (now - lastMinuteWheel < 50) return;
                     lastMinuteWheel = now;
-                    setMinute((minute() + (event.deltaY > 0 ? 1 : -1) + 60) % 60);
+                    changeMinute(event.deltaY > 0 ? 1 : -1);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "ArrowUp") {
+                      event.preventDefault();
+                      changeMinute(-1);
+                    } else if (event.key === "ArrowDown") {
+                      event.preventDefault();
+                      changeMinute(1);
+                    }
                   }}
                 >
                   <div class="pointer-events-none absolute left-0 right-0 top-1/2 -translate-y-1/2 rounded-md border border-primary/30 bg-primary/10 h-10 shadow-sm" />
