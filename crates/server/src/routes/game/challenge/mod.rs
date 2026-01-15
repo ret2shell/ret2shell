@@ -1295,8 +1295,9 @@ async fn start_challenge_instance(
 async fn cleanup_traffic_for_instance(cache: &Cache, pods: Vec<Pod>) {
   for pod in pods {
     if let Ok(instance) = pod.try_into() {
-      if let Err(err) = cache.at("traffic").del(instance.traffic).await {
-        warn!(error=?err, "failed to cleanup traffic cache");
+      let traffic = instance.traffic;
+      if let Err(err) = cache.at("traffic").del(traffic).await {
+        warn!(traffic=%traffic, error=?err, "failed to cleanup traffic cache");
       }
     }
   }
@@ -1325,6 +1326,9 @@ fn ensure_delay_window(pods: &[Pod]) -> Result<(), ResponseError> {
     let renew_count: i32 = renew_raw
       .parse()
       .map_err(|_| ResponseError::Gone(format!("invalid renew count format: {renew_raw}")))?;
+    if renew_count < 0 {
+      return Err(ResponseError::Gone("invalid renew count value".to_owned()));
+    }
     let created_at = pod
       .metadata
       .creation_timestamp

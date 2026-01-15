@@ -711,21 +711,17 @@ impl Cluster {
 
   pub async fn stop_challenge_env(&self, challenge_id: i64) -> Result<Vec<Pod>, ClusterError> {
     let pods = self.get_challenge_env(challenge_id).await?;
-    let mut first_err = None;
     for pod in pods.iter() {
       if let Some(name) = pod.metadata.name.as_ref() {
         if let Err(err) = self.delete_pod(name).await {
           warn!(pod=?name, error=?err, "failed to delete pod");
-          first_err.get_or_insert(err);
+          return Err(err);
         }
         if let Err(err) = self.delete_service(name).await {
           warn!(service=?name, error=?err, "failed to delete service");
-          first_err.get_or_insert(err);
+          return Err(err);
         }
       }
-    }
-    if let Some(err) = first_err {
-      return Err(err);
     }
     Ok(pods)
   }
