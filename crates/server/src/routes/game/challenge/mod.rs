@@ -1295,7 +1295,9 @@ async fn start_challenge_instance(
 async fn cleanup_traffic_for_instance(cache: Cache, pods: Vec<Pod>) {
   for pod in pods {
     if let Ok(instance) = pod.try_into() {
-      cache.at("traffic").del(instance.traffic).await.ok();
+      if let Err(err) = cache.at("traffic").del(instance.traffic).await {
+        warn!(error=?err, "failed to cleanup traffic cache");
+      }
     }
   }
 }
@@ -1313,9 +1315,10 @@ fn delay_threshold_minutes(renew_count: i32) -> i64 {
 
 fn ensure_delay_window(pods: &[Pod]) -> Result<(), ResponseError> {
   for pod in pods {
-    let renew_count: i32 = get_pod_field!(pod, annotations, "ret.sh.cn/renew")
+    let renew_raw = get_pod_field!(pod, annotations, "ret.sh.cn/renew");
+    let renew_count: i32 = renew_raw
       .parse()
-      .map_err(|_| ResponseError::Gone("invalid renew count format".to_owned()))?;
+      .map_err(|_| ResponseError::Gone(format!("invalid renew count format: {renew_raw}")))?;
     let created_at = pod
       .metadata
       .creation_timestamp
@@ -1327,11 +1330,12 @@ fn ensure_delay_window(pods: &[Pod]) -> Result<(), ResponseError> {
       .as_second();
     let remaining =
       created_at + SECONDS_PER_HOUR * (renew_count + 1) as i64 - Utc::now().timestamp();
-    let threshold = delay_threshold_minutes(renew_count) * 60;
+    let threshold_minutes = delay_threshold_minutes(renew_count);
+    let threshold = threshold_minutes * 60;
     if remaining > threshold {
       return Err(ResponseError::PreconditionFailed(format!(
         "you can only delay the instance when remaining time is less than {} minutes",
-        delay_threshold_minutes(renew_count),
+        threshold_minutes,
       )));
     }
   }
