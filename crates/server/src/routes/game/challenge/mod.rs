@@ -1293,18 +1293,10 @@ async fn start_challenge_instance(
 }
 
 async fn cleanup_traffic_for_instance(cache: Cache, pods: Vec<Pod>) {
-  if !pods.is_empty() {
-    tokio::spawn(async move {
-      for pod in pods {
-        let instance: Option<Instance> = pod.try_into().ok();
-        if instance.is_none() {
-          continue;
-        }
-        let instance = instance.unwrap();
-        let traffic = instance.traffic;
-        cache.at("traffic").del(traffic).await.ok();
-      }
-    });
+  for pod in pods {
+    if let Ok(instance) = pod.try_into() {
+      cache.at("traffic").del(instance.traffic).await.ok();
+    }
   }
 }
 
