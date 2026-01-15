@@ -29,6 +29,8 @@ All bundled services can be disabled to use external endpoints:
 --set dockerRegistry.enabled=false --set cluster.registry.server=registry.example.com
 ```
 
+> **Note:** Provide your own values for `auth.signingKey`, `database.password`, and `postgresql.auth.password` before any production deployment.
+
 By default the chart mounts:
 
 - `/etc/ret2shell/config.toml` from the rendered ConfigMap

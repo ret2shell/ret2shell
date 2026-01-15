@@ -192,14 +192,14 @@ sensitiveWords:
 auth:
   bufferTime: 21600
   expiresTime: 86400
-  signingKey: "K3yInD3v3l0pm3nt"
+  signingKey: "change-me"
 
 database:
   host: ""
   port: 5432
   name: ret2shell
   user: ret2shell
-  password: "P@ssw02dInD3v3l0pm3nt"
+  password: "change-me"
   sslMode: disable
 
 cache:
@@ -255,7 +255,7 @@ cluster:
   enabled: true
   autoInfer: true
   tryDefault: false
-  kubeConfigPath: "~/.kube/config"
+  kubeConfigPath: "/etc/ret2shell/kubeconfig"
   nodeSelector: ""
   captureDirectory: "/var/lib/ret2shell/data/captures"
   enableCapture: true
@@ -264,12 +264,15 @@ cluster:
     external: ""
     insecure: false
     server: ""
+  kubeConfigSecret:
+    name: ""
+    key: kubeconfig
 
 postgresql:
   enabled: true
   auth:
     username: ret2shell
-    password: "P@ssw02dInD3v3l0pm3nt"
+    password: "change-me"
     database: ret2shell
   primary:
     persistence:

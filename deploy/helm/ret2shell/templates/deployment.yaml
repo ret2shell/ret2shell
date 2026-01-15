@@ -51,6 +51,12 @@ spec:
               mountPath: /etc/ret2shell/license
               subPath: license
               readOnly: true
+            {{- if .Values.cluster.kubeConfigSecret.name }}
+            - name: kubeconfig
+              mountPath: {{ .Values.cluster.kubeConfigPath }}
+              subPath: kubeconfig
+              readOnly: true
+            {{- end }}
             - name: sensitive-words
               mountPath: /etc/ret2shell/sensitive_word_list.txt
               subPath: sensitive_word_list.txt
@@ -101,6 +107,14 @@ spec:
         - name: license
           secret:
             secretName: {{ default (printf "%s-license" (include "ret2shell.fullname" .)) .Values.license.existingSecret }}
+        {{- if .Values.cluster.kubeConfigSecret.name }}
+        - name: kubeconfig
+          secret:
+            secretName: {{ .Values.cluster.kubeConfigSecret.name }}
+            items:
+              - key: {{ .Values.cluster.kubeConfigSecret.key }}
+                path: kubeconfig
+        {{- end }}
         {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
