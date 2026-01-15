@@ -58,6 +58,7 @@ export default function DownloadButton(
   return (
     <Button
       {...btnProps}
+      title={btnProps.title ?? downloadProps.displayName ?? downloadProps.file ?? t("general.actions.download.title")}
       square={btnProps.square && !downloading() && !downloadComplete()}
       class={clsx("relative", btnProps.class)}
       loading={downloading()}

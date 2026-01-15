@@ -10,6 +10,7 @@ export default function () {
       ref={wrapper!}
       data-color-scheme={themeStore.colorScheme}
       class="darkmode-wrapper"
+      title={t("platform.theme.title")}
       onClick={() => {
         setColorScheme(themeStore.colorScheme === "dark" ? "light" : "dark");
       }}

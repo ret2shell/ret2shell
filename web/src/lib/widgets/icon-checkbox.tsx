@@ -1,4 +1,5 @@
 import { Checkbox, type CheckboxRootProps, Popover } from "@ark-ui/solid";
+import { t } from "@storage/theme";
 import clsx from "clsx";
 import { type JSX, splitProps } from "solid-js";
 import { Portal } from "solid-js/web";
@@ -24,6 +25,12 @@ export default function (
       <Popover.Anchor class="flex flex-col">
         <Checkbox.Root
           {...rest}
+          title={
+            rest.title ??
+            checkboxProps.inputProps?.title ??
+            checkboxProps.inputProps?.["aria-label"] ??
+            t("general.actions.select.title")
+          }
           class={clsx(
             "btn",
             "btn-md",

@@ -1,5 +1,5 @@
 import { Dialog, type DialogRootProps } from "@ark-ui/solid";
-import { fullTheme } from "@storage/theme";
+import { fullTheme, t } from "@storage/theme";
 import clsx from "clsx";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { type ComponentProps, type JSX, splitProps } from "solid-js";
@@ -95,7 +95,10 @@ export default function (
             >
               <div class="card-content p-3 lg:p-6">{contents.children}</div>
             </OverlayScrollbarsComponent>
-            <Dialog.CloseTrigger class="btn btn-sm btn-square flex items-center justify-center btn-ghost absolute right-2 top-2">
+            <Dialog.CloseTrigger
+              class="btn btn-sm btn-square flex items-center justify-center btn-ghost absolute right-2 top-2"
+              title={t("general.actions.close.title")}
+            >
               <span class="shrink-0 icon-[fluent--dismiss-20-regular] w-5 h-5" />
             </Dialog.CloseTrigger>
           </Dialog.Content>

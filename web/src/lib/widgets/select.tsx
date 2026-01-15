@@ -1,5 +1,5 @@
 import { type CollectionItem, createListCollection, Select, type SelectRootProps } from "@ark-ui/solid";
-import { fullTheme } from "@storage/theme";
+import { fullTheme, t } from "@storage/theme";
 import clsx from "clsx";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { type ComponentProps, createMemo, Index, Show, splitProps } from "solid-js";
@@ -103,6 +103,7 @@ export default function (
               "btn btn-square btn-ghost items-center justify-center",
               selectProps.size === "sm" ? "btn-xs" : "btn-sm"
             )}
+            title={t("general.actions.select.title")}
           >
             <span class="shrink-0 icon-[fluent--chevron-double-down-20-regular] w-5 h-5" />
           </Select.Indicator>
@@ -111,6 +112,7 @@ export default function (
               "btn btn-square btn-ghost items-center justify-center",
               selectProps.size === "sm" ? "btn-xs" : "btn-sm"
             )}
+            title={t("general.actions.clear.title")}
           >
             <span class="shrink-0 icon-[fluent--dismiss-circle-20-regular] w-5 h-5" />
           </Select.ClearTrigger>
