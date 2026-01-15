@@ -63,10 +63,12 @@ function TimePickerButton(props: {
   const [minute, setMinute] = createSignal(props.date.minute);
   let hourColumnRef: HTMLDivElement | undefined;
   let minuteColumnRef: HTMLDivElement | undefined;
+  let lastHourWheel = 0;
+  let lastMinuteWheel = 0;
 
   function scrollToSelected(container: HTMLDivElement | undefined, selector: string) {
-    const target = container?.querySelector(selector) as HTMLElement | undefined;
-    if (!target || !container) return;
+    const target = container?.querySelector(selector);
+    if (!target || !container || !(target instanceof HTMLElement)) return;
     target.scrollIntoView({ block: "center", behavior: "smooth" });
   }
 
@@ -123,6 +125,9 @@ function TimePickerButton(props: {
                 <div
                   class="relative w-24"
                   onWheel={(event) => {
+                    const now = Date.now();
+                    if (now - lastHourWheel < 50) return;
+                    lastHourWheel = now;
                     setHour((hour() + (event.deltaY > 0 ? 1 : -1) + 24) % 24);
                   }}
                 >
@@ -154,6 +159,9 @@ function TimePickerButton(props: {
                 <div
                   class="relative w-24"
                   onWheel={(event) => {
+                    const now = Date.now();
+                    if (now - lastMinuteWheel < 50) return;
+                    lastMinuteWheel = now;
                     setMinute((minute() + (event.deltaY > 0 ? 1 : -1) + 60) % 60);
                   }}
                 >
@@ -425,45 +433,45 @@ function PickerCalendar(props: {
               !!(previewStart && previewEnd && dayStart >= previewStart && dayStart <= previewEnd);
             const previewEdge =
               !!previewStart && !!previewEnd && (dayStart.equals(previewStart) || dayStart.equals(previewEnd));
-          return (
-            <TimePickerButton
-              active={isSingleSelected || inSelectedRange || undefined}
-              disabled={!canChoose(day)}
-              date={day}
-              current={day.month === month()}
-              type={props.type}
-              previewActive={inPreviewRange}
-              previewEdge={previewEdge}
-              onHover={(hovered) => {
-                if (props.range && props.value && !props.valueNext) {
-                  setHoverDate(hovered.startOf("day"));
-                }
-              }}
-              onHoverEnd={() => {
-                if (props.range && props.value && !props.valueNext) {
-                  setHoverDate(null);
-                }
-              }}
-              onDone={(date) => {
-                if (props.range && props.value && props.valueNext) {
-                  props.setValue(null);
-                  props.setValueNext(null);
-                } else if (!props.range && props.value) {
-                  props.setValue(null);
-                }
-                if (props.range && props.value) {
-                  if (date < props.value) {
-                    props.setValueNext(props.value);
-                    props.setValue(date);
-                  } else {
-                    props.setValueNext(date);
+            return (
+              <TimePickerButton
+                active={isSingleSelected || inSelectedRange || undefined}
+                disabled={!canChoose(day)}
+                date={day}
+                current={day.month === month()}
+                type={props.type}
+                previewActive={inPreviewRange}
+                previewEdge={previewEdge}
+                onHover={(hovered) => {
+                  if (props.range && props.value && !props.valueNext) {
+                    setHoverDate(hovered.startOf("day"));
                   }
-                } else {
-                  props.setValue(date);
-                }
-              }}
-            />
-          );
+                }}
+                onHoverEnd={() => {
+                  if (props.range && props.value && !props.valueNext) {
+                    setHoverDate(null);
+                  }
+                }}
+                onDone={(date) => {
+                  if (props.range && props.value && props.valueNext) {
+                    props.setValue(null);
+                    props.setValueNext(null);
+                  } else if (!props.range && props.value) {
+                    props.setValue(null);
+                  }
+                  if (props.range && props.value) {
+                    if (date < props.value) {
+                      props.setValueNext(props.value);
+                      props.setValue(date);
+                    } else {
+                      props.setValueNext(date);
+                    }
+                  } else {
+                    props.setValue(date);
+                  }
+                }}
+              />
+            );
           });
         })()}
       </div>
