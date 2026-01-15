@@ -114,6 +114,7 @@ config:
     auto_infer = {{ .Values.cluster.autoInfer }}
     try_default = {{ .Values.cluster.tryDefault }}
     node_selector = '{{ .Values.cluster.nodeSelector }}'
+    kube_config_path = '{{ .Values.cluster.kubeConfigPath }}'
     capture_directory = '{{ .Values.cluster.captureDirectory }}'
     enable_capture = {{ .Values.cluster.enableCapture }}
 
@@ -254,6 +255,7 @@ cluster:
   enabled: true
   autoInfer: true
   tryDefault: false
+  kubeConfigPath: "~/.kube/config"
   nodeSelector: ""
   captureDirectory: "/var/lib/ret2shell/data/captures"
   enableCapture: true
