@@ -1,0 +1,26 @@
+{{- if not .Values.config.existingConfigMap }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ret2shell.fullname" . }}-config
+  labels:
+    {{- include "ret2shell.labels" . | nindent 4 }}
+data:
+  config.toml: |
+{{- tpl .Values.config.content . | nindent 4 }}
+{{- end }}
+
+{{- if not .Values.sensitiveWords.existingConfigMap }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ret2shell.fullname" . }}-sensitive
+  labels:
+    {{- include "ret2shell.labels" . | nindent 4 }}
+data:
+  sensitive_word_list.txt: |
+    {{- range .Values.sensitiveWords.words }}
+    {{ . }}
+    {{- end }}
+{{- end }}

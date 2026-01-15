@@ -1,0 +1,11 @@
+{{- if not .Values.license.existingSecret }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "ret2shell.fullname" . }}-license
+  labels:
+    {{- include "ret2shell.labels" . | nindent 4 }}
+type: Opaque
+stringData:
+  license: {{ .Values.license.value | quote }}
+{{- end }}

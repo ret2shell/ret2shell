@@ -1,0 +1,308 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/ret2shell/ret2shell
+  pullPolicy: IfNotPresent
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+httpRoute:
+  enabled: false
+  annotations: {}
+  parentRefs: []
+  hostnames: []
+  rules: []
+
+resources: {}
+
+livenessProbe:
+  httpGet:
+    path: /api/ping
+    port: http
+
+readinessProbe:
+  httpGet:
+    path: /api/ping
+    port: http
+
+startupProbe:
+  httpGet:
+    path: /api/ping
+    port: http
+  failureThreshold: 30
+  periodSeconds: 10
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+
+volumes: []
+volumeMounts: []
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+persistence:
+  enabled: true
+  storageClass: ""
+  size: 10Gi
+  accessModes:
+    - ReadWriteOnce
+
+config:
+  existingConfigMap: ""
+  content: |
+    [auditor]
+    sensitive_word_list = '/etc/ret2shell/sensitive_word_list.txt'
+
+    [auth]
+    buffer_time = {{ .Values.auth.bufferTime }}
+    expires_time = {{ .Values.auth.expiresTime }}
+    signing_key = '{{ .Values.auth.signingKey }}'
+
+    [bucket]
+    path = '{{ .Values.bucket.path }}'
+
+    [cache]
+    url = '{{ include "ret2shell.cacheUrl" . }}'
+
+    [captcha]
+    difficulty = {{ .Values.captcha.difficulty }}
+    enabled = {{ .Values.captcha.enabled }}
+    validator = '{{ .Values.captcha.validator }}'
+
+    [cluster]
+    enabled = {{ .Values.cluster.enabled }}
+    auto_infer = {{ .Values.cluster.autoInfer }}
+    try_default = {{ .Values.cluster.tryDefault }}
+    node_selector = '{{ .Values.cluster.nodeSelector }}'
+    capture_directory = '{{ .Values.cluster.captureDirectory }}'
+    enable_capture = {{ .Values.cluster.enableCapture }}
+
+    [cluster.registry]
+    enabled  = {{ .Values.cluster.registry.enabled }}
+    external = '{{ include "ret2shell.registryExternal" . }}'
+    insecure = {{ .Values.cluster.registry.insecure }}
+    server   = '{{ include "ret2shell.registryServer" . }}'
+
+    [database]
+    db       = '{{ .Values.database.name }}'
+    host     = '{{ include "ret2shell.databaseHost" . }}'
+    password = '{{ .Values.database.password }}'
+    port     = {{ .Values.database.port }}
+    ssl_mode = '{{ .Values.database.sslMode }}'
+    user     = '{{ .Values.database.user }}'
+
+    [email]
+    enabled  = {{ .Values.email.enabled }}
+    host     = '{{ .Values.email.host }}'
+    password = '{{ .Values.email.password }}'
+    port     = {{ .Values.email.port }}
+    sender   = '{{ .Values.email.sender }}'
+    tls      = '{{ .Values.email.tls }}'
+    username = '{{ .Values.email.username }}'
+
+    [logging]
+    compress   = {{ .Values.logging.compress }}
+    directory  = '{{ .Values.logging.directory }}'
+    files_kept = {{ .Values.logging.filesKept }}
+    level      = '{{ .Values.logging.level }}'
+    victoria   = '{{ include "ret2shell.victoriaLogsUrl" . }}'
+
+    [media]
+    anti_theft = {{ .Values.media.antiTheft }}
+    limit      = {{ .Values.media.limit }}
+    path       = '{{ .Values.media.path }}'
+
+    [queue]
+    host = '{{ include "ret2shell.queueHost" . }}'
+    port = {{ .Values.queue.port }}
+    {{ if .Values.queue.token }}
+    token = '{{ .Values.queue.token }}'
+    {{ end }}
+    {{ if and .Values.queue.user .Values.queue.password }}
+    user = '{{ .Values.queue.user }}'
+    password = '{{ .Values.queue.password }}'
+    {{ end }}
+
+    [server]
+    api_base_path   = '{{ .Values.server.apiBasePath }}'
+    cors_origins    = '{{ .Values.server.corsOrigins }}'
+    external_domain = '{{ .Values.server.externalDomain }}'
+    external_https  = {{ .Values.server.externalHttps }}
+    host            = '0.0.0.0'
+    port            = {{ .Values.service.port }}
+
+    [server.rate_limit]
+    burst_limit        = {{ .Values.server.rateLimit.burstLimit }}
+    burst_restore_rate = {{ .Values.server.rateLimit.restoreRate }}
+
+    [server.frontend]
+    path       = '/var/www/html'
+    serve_type = 'static'
+
+license:
+  existingSecret: ""
+  value: ""
+
+sensitiveWords:
+  existingConfigMap: ""
+  words:
+    - sensitive
+
+auth:
+  bufferTime: 21600
+  expiresTime: 86400
+  signingKey: "K3yInD3v3l0pm3nt"
+
+database:
+  host: ""
+  port: 5432
+  name: ret2shell
+  user: ret2shell
+  password: "P@ssw02dInD3v3l0pm3nt"
+  sslMode: disable
+
+cache:
+  url: ""
+  port: 6379
+
+queue:
+  host: ""
+  port: 4222
+  token: ""
+  user: ""
+  password: ""
+
+logging:
+  directory: /var/lib/ret2shell/log
+  compress: true
+  filesKept: 3
+  level: "info,tower_http=info,sqlx=warn"
+  victoriaUrl: ""
+
+server:
+  apiBasePath: /api
+  corsOrigins: "*"
+  externalDomain: dev.ret.sh.cn
+  externalHttps: true
+  rateLimit:
+    burstLimit: 32
+    restoreRate: 500
+
+bucket:
+  path: /var/lib/ret2shell/data/bucket
+
+media:
+  path: /var/lib/ret2shell/data/media
+  limit: 100
+  antiTheft: true
+
+captcha:
+  difficulty: 4
+  enabled: true
+  validator: pow
+
+email:
+  enabled: false
+  host: smtp.example.com
+  password: "P@ssw0rdInD3v3l0pm3nt"
+  port: 587
+  sender: Ret2Shell
+  tls: starttls
+  username: dev@ret.sh.cn
+
+cluster:
+  enabled: true
+  autoInfer: true
+  tryDefault: false
+  nodeSelector: ""
+  captureDirectory: "/var/lib/ret2shell/data/captures"
+  enableCapture: true
+  registry:
+    enabled: true
+    external: ""
+    insecure: false
+    server: ""
+
+postgresql:
+  enabled: true
+  auth:
+    username: ret2shell
+    password: "P@ssw02dInD3v3l0pm3nt"
+    database: ret2shell
+  primary:
+    persistence:
+      enabled: true
+      size: 8Gi
+
+valkey:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: true
+      size: 4Gi
+
+nats:
+  enabled: true
+  nats:
+    port: 4222
+  jetstream:
+    enabled: true
+  config:
+    cluster:
+      enabled: false
+
+victoriaLogs:
+  enabled: true
+  server:
+    persistentVolume:
+      enabled: true
+      size: 10Gi
+
+dockerRegistry:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 5Gi
