@@ -18,7 +18,7 @@ use r2s_bucket::{
 };
 use r2s_cache::Cache;
 use r2s_checker::Checker;
-use r2s_cluster::{CHALLENGE_NS, Cluster, Pod};
+use r2s_cluster::{CHALLENGE_NS, Cluster, ClusterError, Pod};
 use r2s_config::cluster::ChallengeEnv;
 use r2s_database::{
   challenge, config, extra,
@@ -440,8 +440,8 @@ async fn up_challenge(
 
 async fn down_challenge(
   State(ref db): State<Database>, State(cache): State<Cache>, State(ref queue): State<Queue>,
-  Extension(token): Extension<Token>, Extension(challenge): Extension<challenge::Model>,
-  Extension(trace): Extension<RequestId>,
+  State(ref cluster): State<Cluster>, Extension(token): Extension<Token>,
+  Extension(challenge): Extension<challenge::Model>, Extension(trace): Extension<RequestId>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let txn = db.conn.begin().await?;
   let challenge = challenge::update(
@@ -455,6 +455,7 @@ async fn down_challenge(
   txn.commit().await?;
   info!("challenge is maken invisible (down) by user");
   cache.at("challenge").del(challenge.id).await.ok();
+  stop_challenge_instances(&cache, cluster, challenge.id).await?;
   let event = EventContainer {
     game_id: challenge.game_id,
     event: Event::Challenge(ChallengeEvent {
@@ -481,8 +482,8 @@ async fn down_challenge(
 
 async fn delete_challenge(
   State(ref db): State<Database>, State(cache): State<Cache>, State(bucket): State<Bucket>,
-  Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
-  Extension(challenge): Extension<challenge::Model>,
+  State(cluster): State<Cluster>, Extension(token): Extension<Token>,
+  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let txn = db.conn.begin().await?;
   challenge::delete(&txn, challenge.id).await?;
@@ -518,6 +519,7 @@ async fn delete_challenge(
   // }
   txn.commit().await?;
   cache.at("challenge").del(challenge.id).await.ok();
+  stop_challenge_instances(&cache, &cluster, challenge.id).await?;
 
   Ok(())
 }
@@ -1306,6 +1308,76 @@ async fn cleanup_traffic_for_instance(cache: Cache, pods: Vec<Pod>) {
   }
 }
 
+const DELAY_THRESHOLDS: [i64; 3] = [30, 15, 10];
+
+fn delay_threshold_minutes(renew_count: i32) -> i64 {
+  match renew_count {
+    0 => DELAY_THRESHOLDS[0],
+    1 => DELAY_THRESHOLDS[1],
+    _ => DELAY_THRESHOLDS[2],
+  }
+}
+
+fn ensure_delay_window(pods: &[Pod]) -> Result<(), ResponseError> {
+  for pod in pods {
+    let renew_count: i32 = get_pod_field!(pod, annotations, "ret.sh.cn/renew")
+      .parse()
+      .map_err(|_| ResponseError::Gone("renew count not found".to_owned()))?;
+    let created_at = pod
+      .metadata
+      .creation_timestamp
+      .clone()
+      .ok_or(ResponseError::Gone(
+        "pod creation time not found".to_owned(),
+      ))?
+      .0
+      .as_second();
+    let remaining = created_at + 3600 * (renew_count + 1) as i64 - Utc::now().timestamp();
+    let threshold = delay_threshold_minutes(renew_count) * 60;
+    if remaining > threshold {
+      return Err(ResponseError::PreconditionFailed(format!(
+        "you can only delay the instance when remaining time is less than {} minutes",
+        delay_threshold_minutes(renew_count),
+      )));
+    }
+  }
+
+  Ok(())
+}
+
+async fn stop_challenge_instances(
+  cache: &Cache, cluster: &Cluster, challenge_id: i64,
+) -> Result<(), ResponseError> {
+  match cluster
+    .at(CHALLENGE_NS)
+    .stop_challenge_env(challenge_id)
+    .await
+  {
+    Ok(pods) => {
+      if !pods.is_empty() {
+        tokio::spawn(cleanup_traffic_for_instance(cache.clone(), pods));
+      }
+    }
+    Err(ClusterError::ClusterDisabled) => {}
+    Err(err) => return Err(err.into()),
+  }
+
+  Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+  use super::delay_threshold_minutes;
+
+  #[test]
+  fn delay_threshold_respects_renew_count() {
+    assert_eq!(delay_threshold_minutes(0), 30);
+    assert_eq!(delay_threshold_minutes(1), 15);
+    assert_eq!(delay_threshold_minutes(2), 10);
+    assert_eq!(delay_threshold_minutes(5), 10);
+  }
+}
+
 async fn delay_challenge_instance(
   State(cache): State<Cache>, State(ref cluster): State<Cluster>,
   Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
@@ -1313,23 +1385,43 @@ async fn delay_challenge_instance(
 ) -> Result<impl IntoResponse, ResponseError> {
   let team = extract_team!(game, team_ext, token);
 
-  let pods = if let Some(team) = team {
-    info!("delaying challenge env");
-    cluster
-      .at(CHALLENGE_NS)
-      .delay_challenge_env_by_team(challenge.id, team.id)
-      .await?
-  } else {
-    Vec::new()
-  };
-  if !pods.is_empty() {
-    tokio::spawn(cleanup_traffic_for_instance(cache.clone(), pods));
+  let cluster = cluster.at(CHALLENGE_NS);
+
+  if let Some(team) = team {
+    let pods = cluster
+      .get_pods_by_label(&format!(
+        "ret.sh.cn/challenge={},ret.sh.cn/team={}",
+        challenge.id, team.id
+      ))
+      .await?;
+    if !pods.is_empty() {
+      ensure_delay_window(&pods)?;
+
+      info!("delaying challenge env");
+      let pods = cluster
+        .delay_challenge_env_by_team(challenge.id, team.id)
+        .await?;
+      if !pods.is_empty() {
+        tokio::spawn(cleanup_traffic_for_instance(cache.clone(), pods));
+      }
+
+      return Ok(());
+    }
+  }
+
+  let pods = cluster
+    .get_pods_by_label(&format!(
+      "ret.sh.cn/challenge={},ret.sh.cn/user={}",
+      challenge.id, token.id
+    ))
+    .await?;
+  if pods.is_empty() {
     return Ok(());
   }
+  ensure_delay_window(&pods)?;
 
   info!("delaying challenge env");
   let pods = cluster
-    .at(CHALLENGE_NS)
     .delay_challenge_env_by_user(challenge.id, token.id)
     .await?;
   if !pods.is_empty() {

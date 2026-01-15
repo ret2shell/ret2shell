@@ -709,6 +709,17 @@ impl Cluster {
     Ok(pod)
   }
 
+  pub async fn stop_challenge_env(&self, challenge_id: i64) -> Result<Vec<Pod>, ClusterError> {
+    let pods = self.get_challenge_env(challenge_id).await?;
+    for pod in pods.iter() {
+      if let Some(name) = pod.metadata.name.as_ref() {
+        self.delete_pod(name).await?;
+        self.delete_service(name).await?;
+      }
+    }
+    Ok(pods)
+  }
+
   pub async fn wsrx_link(&self, token: &str, port: u16, ws: WebSocket) -> Result<(), ClusterError> {
     let pod = self
       .get_pods_by_label(&format!("ret.sh.cn/traffic={token}"))
