@@ -72,11 +72,11 @@ function TimePickerButton(props: {
 
   createEffect(() => {
     if (!timePickerOpened()) return;
-    scrollToSelected(hourColumnRef, `[data-hour="${hour()}"]`);
+    scrollToSelected(hourColumnRef, `[data-hour="${Number(hour())}"]`);
   });
   createEffect(() => {
     if (!timePickerOpened()) return;
-    scrollToSelected(minuteColumnRef, `[data-minute="${minute()}"]`);
+    scrollToSelected(minuteColumnRef, `[data-minute="${Number(minute())}"]`);
   });
   return (
     <Popover.Root autoFocus={false} open={timePickerOpened()} onInteractOutside={() => setTimePickerOpened(false)}>
@@ -123,7 +123,6 @@ function TimePickerButton(props: {
                 <div
                   class="relative w-24"
                   onWheel={(event) => {
-                    event.preventDefault();
                     setHour((hour() + (event.deltaY > 0 ? 1 : -1) + 24) % 24);
                   }}
                 >
@@ -155,7 +154,6 @@ function TimePickerButton(props: {
                 <div
                   class="relative w-24"
                   onWheel={(event) => {
-                    event.preventDefault();
                     setMinute((minute() + (event.deltaY > 0 ? 1 : -1) + 60) % 60);
                   }}
                 >
@@ -401,8 +399,7 @@ function PickerCalendar(props: {
           </div>
         ))}
         {/* then, render the days use square button */}
-        {currentMonthDays().map((day) => {
-          const dayStart = day.startOf("day");
+        {(() => {
           const rangeStart =
             props.value && props.valueNext
               ? DateTime.min(props.value.startOf("day"), props.valueNext.startOf("day"))
@@ -411,8 +408,6 @@ function PickerCalendar(props: {
             props.value && props.valueNext
               ? DateTime.max(props.value.startOf("day"), props.valueNext.startOf("day"))
               : null;
-          const isSingleSelected = !!(props.value && dayStart.equals(props.value.startOf("day")));
-          const inSelectedRange = !!(rangeStart && rangeEnd && dayStart >= rangeStart && dayStart <= rangeEnd);
           const hover = hoverDate();
           const previewStart =
             props.range && props.value && !props.valueNext && hover
@@ -422,9 +417,14 @@ function PickerCalendar(props: {
             props.range && props.value && !props.valueNext && hover
               ? DateTime.max(props.value.startOf("day"), hover.startOf("day"))
               : null;
-          const inPreviewRange = !!(previewStart && previewEnd && dayStart >= previewStart && dayStart <= previewEnd);
-          const previewEdge =
-            !!previewStart && !!previewEnd && (dayStart.equals(previewStart) || dayStart.equals(previewEnd));
+          return currentMonthDays().map((day) => {
+            const dayStart = day.startOf("day");
+            const isSingleSelected = !!(props.value && dayStart.equals(props.value.startOf("day")));
+            const inSelectedRange = !!(rangeStart && rangeEnd && dayStart >= rangeStart && dayStart <= rangeEnd);
+            const inPreviewRange =
+              !!(previewStart && previewEnd && dayStart >= previewStart && dayStart <= previewEnd);
+            const previewEdge =
+              !!previewStart && !!previewEnd && (dayStart.equals(previewStart) || dayStart.equals(previewEnd));
           return (
             <TimePickerButton
               active={isSingleSelected || inSelectedRange || undefined}
@@ -464,7 +464,8 @@ function PickerCalendar(props: {
               }}
             />
           );
-        })}
+          });
+        })()}
       </div>
     </>
   );
