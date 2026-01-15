@@ -10,6 +10,9 @@ import Card from "./card";
 import Divider from "./divider";
 import Input from "./input";
 
+const HOURS = Array.from({ length: 24 }, (_, index) => index);
+const MINUTES = Array.from({ length: 60 }, (_, index) => index);
+
 type TimePickerPropsRange =
   | {
       range: false;
@@ -43,6 +46,10 @@ function TimePickerButton(props: {
   type: "time" | "date";
   disabled?: boolean;
   onDone: (date: DateTime) => void;
+  previewActive?: boolean;
+  previewEdge?: boolean;
+  onHover?: (date: DateTime) => void;
+  onHoverEnd?: () => void;
 }) {
   let currentDate = DateTime.now();
   currentDate = currentDate.set({
@@ -54,11 +61,28 @@ function TimePickerButton(props: {
   const [timePickerOpened, setTimePickerOpened] = createSignal(false);
   const [hour, setHour] = createSignal(props.date.hour);
   const [minute, setMinute] = createSignal(props.date.minute);
+  let hourColumnRef: HTMLDivElement | undefined;
+  let minuteColumnRef: HTMLDivElement | undefined;
+
+  function scrollToSelected(container: HTMLDivElement | undefined, selector: string) {
+    const target = container?.querySelector(selector) as HTMLElement | undefined;
+    if (!target || !container) return;
+    target.scrollIntoView({ block: "center", behavior: "smooth" });
+  }
+
+  createEffect(() => {
+    if (!timePickerOpened()) return;
+    scrollToSelected(hourColumnRef, `[data-hour="${hour()}"]`);
+  });
+  createEffect(() => {
+    if (!timePickerOpened()) return;
+    scrollToSelected(minuteColumnRef, `[data-minute="${minute()}"]`);
+  });
   return (
     <Popover.Root autoFocus={false} open={timePickerOpened()} onInteractOutside={() => setTimePickerOpened(false)}>
       <Popover.Anchor>
         <Button
-          ghost={!props.active && !timePickerOpened()}
+          ghost={!props.active && !props.previewActive && !timePickerOpened()}
           square
           class="relative"
           disabled={props.disabled}
@@ -70,6 +94,16 @@ function TimePickerButton(props: {
             }
           }}
           type="button"
+          onMouseEnter={() => {
+            if (!props.disabled) props.onHover?.(props.date);
+          }}
+          onMouseLeave={() => {
+            if (!props.disabled) props.onHoverEnd?.();
+          }}
+          classList={{
+            "btn-active": props.previewActive && !props.active,
+            "ring-2 ring-primary": props.previewEdge,
+          }}
         >
           <span
             classList={{
@@ -85,66 +119,69 @@ function TimePickerButton(props: {
         <Popover.Positioner>
           <Popover.Content class="card">
             <div class="card-content p-2 flex flex-col space-y-2">
-              <div class="flex flex-row space-x-2">
-                <div class="flex flex-col space-y-2">
-                  <Button
-                    square
-                    ghost
-                    type="button"
-                    size="sm"
-                    onClick={() => {
-                      setHour((hour() - 1 + 24) % 24);
-                    }}
+              <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+                <div
+                  class="relative w-24"
+                  onWheel={(event) => {
+                    event.preventDefault();
+                    setHour((hour() + (event.deltaY > 0 ? 1 : -1) + 24) % 24);
+                  }}
+                >
+                  <div class="pointer-events-none absolute left-0 right-0 top-1/2 -translate-y-1/2 rounded-md border border-primary/30 bg-primary/10 h-10 shadow-sm" />
+                  <div
+                    ref={hourColumnRef}
+                    class="max-h-48 overflow-y-auto scroll-smooth snap-y snap-mandatory pr-1 space-y-1"
                   >
-                    <span class="shrink-0 icon-[fluent--chevron-up-20-regular] w-5 h-5" />
-                  </Button>
-                  <Button square ghost type="button" size="sm">
-                    {hour().toString().padStart(2, "0")}
-                  </Button>
-                  <Button
-                    square
-                    ghost
-                    type="button"
-                    size="sm"
-                    onClick={() => {
-                      setHour((hour() + 1) % 24);
-                    }}
-                  >
-                    <span class="shrink-0 icon-[fluent--chevron-down-20-regular] w-5 h-5" />
-                  </Button>
+                    {HOURS.map((item) => (
+                      <button
+                        type="button"
+                        data-hour={item}
+                        class={clsx(
+                          "w-full py-2 rounded-md text-center transition-all duration-150 snap-center",
+                          "bg-layer-content/5 text-layer-content/80 hover:bg-layer-content/10"
+                        )}
+                        classList={{
+                          "bg-primary text-primary-content shadow-md": hour() === item,
+                          "font-bold": hour() === item,
+                        }}
+                        onClick={() => setHour(item)}
+                      >
+                        {item.toString().padStart(2, "0")}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div class="flex flex-col space-y-2">
-                  <Button
-                    square
-                    ghost
-                    type="button"
-                    size="sm"
-                    onClick={() => {
-                      if (minute() < 10) {
-                        setHour((hour() - 1 + 24) % 24);
-                      }
-                      setMinute((minute() - 10 + 60) % 60);
-                    }}
+                <div class="text-lg font-bold text-layer-content/60">:</div>
+                <div
+                  class="relative w-24"
+                  onWheel={(event) => {
+                    event.preventDefault();
+                    setMinute((minute() + (event.deltaY > 0 ? 1 : -1) + 60) % 60);
+                  }}
+                >
+                  <div class="pointer-events-none absolute left-0 right-0 top-1/2 -translate-y-1/2 rounded-md border border-primary/30 bg-primary/10 h-10 shadow-sm" />
+                  <div
+                    ref={minuteColumnRef}
+                    class="max-h-48 overflow-y-auto scroll-smooth snap-y snap-mandatory pr-1 space-y-1"
                   >
-                    <span class="shrink-0 icon-[fluent--chevron-up-20-regular] w-5 h-5" />
-                  </Button>
-                  <Button square ghost type="button" size="sm">
-                    {minute().toString().padStart(2, "0")}
-                  </Button>
-                  <Button
-                    square
-                    ghost
-                    type="button"
-                    size="sm"
-                    onClick={() => {
-                      if (minute() >= 50) {
-                        setHour((hour() + 1) % 24);
-                      }
-                      setMinute((minute() + 10) % 60);
-                    }}
-                  >
-                    <span class="shrink-0 icon-[fluent--chevron-down-20-regular] w-5 h-5" />
-                  </Button>
+                    {MINUTES.map((item) => (
+                      <button
+                        type="button"
+                        data-minute={item}
+                        class={clsx(
+                          "w-full py-2 rounded-md text-center transition-all duration-150 snap-center",
+                          "bg-layer-content/5 text-layer-content/80 hover:bg-layer-content/10"
+                        )}
+                        classList={{
+                          "bg-primary text-primary-content shadow-md": minute() === item,
+                          "font-bold": minute() === item,
+                        }}
+                        onClick={() => setMinute(item)}
+                      >
+                        {item.toString().padStart(2, "0")}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
               <Button
@@ -195,6 +232,13 @@ function PickerCalendar(props: {
   });
   const [year, setYear] = createSignal(currentDate.year);
   const [month, setMonth] = createSignal(currentDate.month);
+  const [hoverDate, setHoverDate] = createSignal<DateTime | null>(null);
+
+  createEffect(() => {
+    if (!props.range || props.valueNext || !props.value) {
+      setHoverDate(null);
+    }
+  });
 
   function convertWeekKey(weekKey: number) {
     switch (weekKey) {
@@ -357,40 +401,70 @@ function PickerCalendar(props: {
           </div>
         ))}
         {/* then, render the days use square button */}
-        {currentMonthDays().map((day) => (
-          <TimePickerButton
-            active={
-              (props.value && day.startOf("day").equals(props.value.startOf("day"))) ||
-              (props.value &&
-                props.valueNext &&
-                day.startOf("day") >= props.value.startOf("day") &&
-                day <= props.valueNext.startOf("day")) ||
-              undefined
-            }
-            disabled={!canChoose(day)}
-            date={day}
-            current={day.month === month()}
-            type={props.type}
-            onDone={(date) => {
-              if (props.range && props.value && props.valueNext) {
-                props.setValue(null);
-                props.setValueNext(null);
-              } else if (!props.range && props.value) {
-                props.setValue(null);
-              }
-              if (props.range && props.value) {
-                if (date < props.value) {
-                  props.setValueNext(props.value);
-                  props.setValue(date);
-                } else {
-                  props.setValueNext(date);
+        {currentMonthDays().map((day) => {
+          const dayStart = day.startOf("day");
+          const rangeStart =
+            props.value && props.valueNext
+              ? DateTime.min(props.value.startOf("day"), props.valueNext.startOf("day"))
+              : null;
+          const rangeEnd =
+            props.value && props.valueNext
+              ? DateTime.max(props.value.startOf("day"), props.valueNext.startOf("day"))
+              : null;
+          const isSingleSelected = !!(props.value && dayStart.equals(props.value.startOf("day")));
+          const inSelectedRange = !!(rangeStart && rangeEnd && dayStart >= rangeStart && dayStart <= rangeEnd);
+          const hover = hoverDate();
+          const previewStart =
+            props.range && props.value && !props.valueNext && hover
+              ? DateTime.min(props.value.startOf("day"), hover.startOf("day"))
+              : null;
+          const previewEnd =
+            props.range && props.value && !props.valueNext && hover
+              ? DateTime.max(props.value.startOf("day"), hover.startOf("day"))
+              : null;
+          const inPreviewRange = !!(previewStart && previewEnd && dayStart >= previewStart && dayStart <= previewEnd);
+          const previewEdge =
+            !!previewStart && !!previewEnd && (dayStart.equals(previewStart) || dayStart.equals(previewEnd));
+          return (
+            <TimePickerButton
+              active={isSingleSelected || inSelectedRange || undefined}
+              disabled={!canChoose(day)}
+              date={day}
+              current={day.month === month()}
+              type={props.type}
+              previewActive={inPreviewRange}
+              previewEdge={previewEdge}
+              onHover={(hovered) => {
+                if (props.range && props.value && !props.valueNext) {
+                  setHoverDate(hovered.startOf("day"));
                 }
-              } else {
-                props.setValue(date);
-              }
-            }}
-          />
-        ))}
+              }}
+              onHoverEnd={() => {
+                if (props.range && props.value && !props.valueNext) {
+                  setHoverDate(null);
+                }
+              }}
+              onDone={(date) => {
+                if (props.range && props.value && props.valueNext) {
+                  props.setValue(null);
+                  props.setValueNext(null);
+                } else if (!props.range && props.value) {
+                  props.setValue(null);
+                }
+                if (props.range && props.value) {
+                  if (date < props.value) {
+                    props.setValueNext(props.value);
+                    props.setValue(date);
+                  } else {
+                    props.setValueNext(date);
+                  }
+                } else {
+                  props.setValue(date);
+                }
+              }}
+            />
+          );
+        })}
       </div>
     </>
   );
