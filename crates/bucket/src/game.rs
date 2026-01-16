@@ -49,7 +49,7 @@ impl GameDoc {
 
   pub fn file_name(&self) -> &'static str {
     match self {
-      GameDoc::Intro => "INTRO.md",
+      GameDoc::Intro => "README.md",
       GameDoc::Train => "TRAIN.md",
       GameDoc::Rules => "RULES.md",
     }

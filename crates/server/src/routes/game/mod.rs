@@ -181,7 +181,7 @@ struct GameDocPath {
 
 fn parse_game_doc(doc: &str) -> Result<GameDoc, ResponseError> {
   match doc.to_lowercase().as_str() {
-    "intro" => Ok(GameDoc::Intro),
+    "intro" | "readme" => Ok(GameDoc::Intro),
     "train" => Ok(GameDoc::Train),
     "rules" => Ok(GameDoc::Rules),
     _ => Err(ResponseError::BadRequest(

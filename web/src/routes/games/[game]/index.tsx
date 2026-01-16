@@ -1,10 +1,11 @@
 import { handleHttpError } from "@api";
 import { useInstitutes } from "@api/account";
 import {
-  type GameDocType,
   useGame,
   useGameDoc,
+  useGameIntroduction,
   useUpdateGameDocMutation,
+  useUpdateGameIntroductionMutation,
   useUpdateGameMutation,
 } from "@api/game";
 import { uploadMedia } from "@api/media";
@@ -106,57 +107,15 @@ export default function () {
 
   onCleanup(() => clearInterval(updateTimer));
 
-  const [docTab, setDocTab] = createSignal<GameDocType>("intro");
-  const introduction = useGameDoc({
+  const introduction = useGameIntroduction({
     id: gameId,
-    doc: () => "intro",
     enabled: () => gameId() > 0,
-  });
-  const trainingDoc = useGameDoc({
-    id: gameId,
-    doc: () => "train",
-    enabled: () => gameId() > 0 && docTab() === "train",
   });
   const rulesDoc = useGameDoc({
     id: gameId,
     doc: () => "rules",
-    enabled: () => gameId() > 0 && docTab() === "rules",
+    enabled: () => gameId() > 0,
   });
-  const docQuery = () => {
-    switch (docTab()) {
-      case "train":
-        return trainingDoc;
-      case "rules":
-        return rulesDoc;
-      default:
-        return introduction;
-    }
-  };
-  const docLabel = () => {
-    switch (docTab()) {
-      case "train":
-        return t("game.docs.training");
-      case "rules":
-        return t("game.docs.rules");
-      default:
-        return t("game.docs.introduction");
-    }
-  };
-  const docRequired = () => {
-    switch (docTab()) {
-      case "train":
-        return t("game.docs.trainingRequired");
-      case "rules":
-        return t("game.docs.rulesRequired");
-      default:
-        return t("game.form.introduction.required");
-    }
-  };
-  const docTabs = [
-    { key: "intro" as GameDocType, label: t("game.docs.introduction") },
-    { key: "train" as GameDocType, label: t("game.docs.training") },
-    { key: "rules" as GameDocType, label: t("game.docs.rules") },
-  ];
 
   let coverInput: HTMLInputElement;
   const [coverSet, setCoverSet] = createSignal(false);
@@ -258,20 +217,11 @@ export default function () {
       void game.refetch();
     },
   });
-  const updateIntroductionMutation = useUpdateGameDocMutation({
-    doc: () => "intro",
+  const updateIntroductionMutation = useUpdateGameIntroductionMutation({
     onSuccess: () => {
       setSearchParams({ edit: null });
       void game.refetch();
       void introduction.refetch();
-    },
-  });
-  const updateTrainingMutation = useUpdateGameDocMutation({
-    doc: () => "train",
-    onSuccess: () => {
-      setSearchParams({ edit: null });
-      void game.refetch();
-      void trainingDoc.refetch();
     },
   });
   const updateRulesMutation = useUpdateGameDocMutation({
@@ -282,18 +232,11 @@ export default function () {
       void rulesDoc.refetch();
     },
   });
-  const docMutation = () => {
-    switch (docTab()) {
-      case "train":
-        return updateTrainingMutation;
-      case "rules":
-        return updateRulesMutation;
-      default:
-        return updateIntroductionMutation;
-    }
-  };
-  async function onUpdateDoc(result: ArticleModel) {
-    docMutation().mutate({ id: gameId(), article: result });
+  async function onUpdateIntroduction(result: ArticleModel) {
+    updateIntroductionMutation.mutate({ id: gameId(), article: result });
+  }
+  async function onUpdateRules(result: ArticleModel) {
+    updateRulesMutation.mutate({ id: gameId(), article: result });
   }
 
   const selfTeam = useSelfTeam({
@@ -537,47 +480,62 @@ export default function () {
             </Switch>
           </div>
         </div>
-        <div class="flex-1 flex flex-col space-y-2 p-3 lg:p-6">
+        <div class="flex-1 flex flex-col space-y-6 p-3 lg:p-6">
           <div class="flex flex-col items-center space-y-3 mt-4 lg:mt-8">
-            <h1 class="text-center text-3xl font-bold">{docLabel()}</h1>
-            <div class="flex flex-row space-x-2">
-              <For each={docTabs}>
-                {(tab) => (
-                  <Button
-                    type="button"
-                    size="sm"
-                    level={docTab() === tab.key ? "primary" : "secondary"}
-                    onClick={() => setDocTab(tab.key)}
-                  >
-                    {tab.label}
-                  </Button>
-                )}
-              </For>
-            </div>
+            <h1 class="text-center text-3xl font-bold">{t("game.docs.introduction")}</h1>
           </div>
           <Switch>
             <Match when={inEdit()}>
-              <IntroForm
-                article={() => docQuery().data}
-                onDone={onUpdateDoc}
-                label={docLabel()}
-                requiredMessage={docRequired()}
-                gameName={() => game.data?.name}
-              />
+              <div class="flex flex-col space-y-6">
+                <IntroForm
+                  article={() => introduction.data}
+                  onDone={onUpdateIntroduction}
+                  label={t("game.docs.introduction")}
+                  requiredMessage={t("game.form.introduction.required")}
+                  gameName={() => game.data?.name}
+                />
+                <IntroForm
+                  article={() => rulesDoc.data}
+                  onDone={onUpdateRules}
+                  label={t("game.docs.rules")}
+                  requiredMessage={t("game.docs.rulesRequired")}
+                  gameName={() => game.data?.name}
+                />
+              </div>
             </Match>
-            <Match when={docQuery().data && !docQuery().isLoading}>
-              <Article class="self-center" content={docQuery().data?.content || ""} extra headingAnchors />
+            <Match when={!introduction.isLoading && !rulesDoc.isLoading}>
+              <div class="flex flex-col space-y-6">
+                <Show
+                  when={introduction.data?.content && introduction.data.content.length > 0}
+                  fallback={
+                    <div class="flex flex-col items-center justify-center space-y-4 opacity-60">
+                      <span class="shrink-0 icon-[fluent--thumb-dislike-20-regular] w-16 h-16" />
+                      <span>{t("game.introduction.empty")}</span>
+                    </div>
+                  }
+                >
+                  <Article class="self-center" content={introduction.data?.content || ""} extra headingAnchors />
+                </Show>
+                <div class="flex flex-col space-y-3">
+                  <h2 class="text-2xl font-bold text-center">{t("game.docs.rules")}</h2>
+                  <Show
+                    when={rulesDoc.data?.content && rulesDoc.data.content.length > 0}
+                    fallback={
+                      <div class="flex flex-col items-center justify-center space-y-2 opacity-60">
+                        <span class="shrink-0 icon-[fluent--error-circle-20-regular] w-10 h-10" />
+                        <span>{t("game.introduction.empty")}</span>
+                      </div>
+                    }
+                  >
+                    <Article class="self-center" content={rulesDoc.data?.content || ""} extra headingAnchors />
+                  </Show>
+                </div>
+              </div>
             </Match>
-            <Match when={docQuery().isLoading}>
+            <Match when={introduction.isLoading || rulesDoc.isLoading}>
               <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
                 <Spin width={32} height={32} />
                 <span>{randomTips()}</span>
-              </div>
-            </Match>
-            <Match when={true}>
-              <div class="flex-1 flex flex-col items-center justify-center space-y-8 opacity-60">
-                <span class="shrink-0 icon-[fluent--thumb-dislike-20-regular] w-24 h-24" />
-                <span>{t("game.introduction.empty")}</span>
               </div>
             </Match>
           </Switch>
