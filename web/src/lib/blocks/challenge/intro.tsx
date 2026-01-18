@@ -43,7 +43,7 @@ passiveSupport({
 
 export default function (props: ChallengeWidgetProps) {
   // Tag color mapping with support for both string and regex matching
-  const tagColorMap = new Map<(string | RegExp)[], string>([
+  const tagColorMap = new Map<(string | RegExp)[], "info" | "success" | "warning" | "error" | "layer-content">([
     [[/公网/, "公"], "warning"],
     [["内网"], "success"],
   ]);
@@ -53,12 +53,12 @@ export default function (props: ChallengeWidgetProps) {
       for (const matcher of matchers) {
         if (typeof matcher === "string") {
           if (tagName === matcher) {
-            return level as "info" | "success" | "warning" | "error" | "layer-content";
+            return level;
           }
         } else {
           // RegExp
           if (matcher.test(tagName)) {
-            return level as "info" | "success" | "warning" | "error" | "layer-content";
+            return level;
           }
         }
       }
