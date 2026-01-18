@@ -41,33 +41,31 @@ passiveSupport({
   ],
 });
 
-// Tag color mapping with support for both string and regex matching
-const tagColorMap: Array<{
-  matcher: string | RegExp;
-  level: "info" | "success" | "warning" | "error" | "layer-content";
-}> = [
-  { matcher: /公网/, level: "warning" }, // Check regex first (more specific)
-  { matcher: "公", level: "warning" },
-  { matcher: "内网", level: "success" },
-];
+export default function (props: ChallengeWidgetProps) {
+  // Tag color mapping with support for both string and regex matching
+  const tagColorMap = new Map<(string | RegExp)[], string>([
+    [[/公网/, "公"], "warning"],
+    [["内网"], "success"],
+  ]);
 
-function getTagColor(tagName: string): "info" | "success" | "warning" | "error" | "layer-content" {
-  for (const { matcher, level } of tagColorMap) {
-    if (typeof matcher === "string") {
-      if (tagName === matcher) {
-        return level;
-      }
-    } else {
-      // RegExp
-      if (matcher.test(tagName)) {
-        return level;
+  function getMappedColor(tagName: string): "info" | "success" | "warning" | "error" | "layer-content" {
+    for (const [matchers, level] of tagColorMap) {
+      for (const matcher of matchers) {
+        if (typeof matcher === "string") {
+          if (tagName === matcher) {
+            return level as "info" | "success" | "warning" | "error" | "layer-content";
+          }
+        } else {
+          // RegExp
+          if (matcher.test(tagName)) {
+            return level as "info" | "success" | "warning" | "error" | "layer-content";
+          }
+        }
       }
     }
+    return "info"; // default color
   }
-  return "info"; // default color
-}
 
-export default function (props: ChallengeWidgetProps) {
   const instances = useGameInstances({ game_id: () => props.gameId });
   const instance = createMemo(() => {
     return instances.data?.find((s) => s.challenge_id === props.challengeId) ?? null;
@@ -525,7 +523,7 @@ export default function (props: ChallengeWidgetProps) {
               <div class="flex flex-row-reverse flex-wrap py-2">
                 <For each={challenge.data!.tag}>
                   {(tag) => (
-                    <Tag level={tag.primary ? "success" : getTagColor(tag.name)} class="m-1">
+                    <Tag level={tag.primary ? "success" : getMappedColor(tag.name)} class="m-1">
                       <span>{tag.name}</span>
                     </Tag>
                   )}
