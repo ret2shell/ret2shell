@@ -46,8 +46,8 @@ const tagColorMap: Array<{
   matcher: string | RegExp;
   level: "info" | "success" | "warning" | "error" | "layer-content";
 }> = [
+  { matcher: /公网/, level: "warning" }, // Check regex first (more specific)
   { matcher: "公", level: "warning" },
-  { matcher: /公网/, level: "warning" },
   { matcher: "内网", level: "success" },
 ];
 
