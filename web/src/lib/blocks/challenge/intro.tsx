@@ -41,6 +41,32 @@ passiveSupport({
   ],
 });
 
+// Tag color mapping with support for both string and regex matching
+const tagColorMap: Array<{
+  matcher: string | RegExp;
+  level: "info" | "success" | "warning" | "error" | "layer-content";
+}> = [
+  { matcher: "公", level: "warning" },
+  { matcher: /公网/, level: "warning" },
+  { matcher: "内网", level: "success" },
+];
+
+function getTagColor(tagName: string): "info" | "success" | "warning" | "error" | "layer-content" {
+  for (const { matcher, level } of tagColorMap) {
+    if (typeof matcher === "string") {
+      if (tagName === matcher) {
+        return level;
+      }
+    } else {
+      // RegExp
+      if (matcher.test(tagName)) {
+        return level;
+      }
+    }
+  }
+  return "info"; // default color
+}
+
 export default function (props: ChallengeWidgetProps) {
   const instances = useGameInstances({ game_id: () => props.gameId });
   const instance = createMemo(() => {
@@ -499,7 +525,7 @@ export default function (props: ChallengeWidgetProps) {
               <div class="flex flex-row-reverse flex-wrap py-2">
                 <For each={challenge.data!.tag}>
                   {(tag) => (
-                    <Tag level={tag.primary ? "success" : "info"} class="m-1">
+                    <Tag level={tag.primary ? "success" : getTagColor(tag.name)} class="m-1">
                       <span>{tag.name}</span>
                     </Tag>
                   )}
