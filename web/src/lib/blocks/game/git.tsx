@@ -5,6 +5,7 @@ import Spin from "@assets/animates/spin";
 import type { ObjectInfo } from "@models/git";
 import { A, useSearchParams } from "@solidjs/router";
 import { t } from "@storage/theme";
+import { transformGitmoji } from "@utils/gitmoji";
 import Card from "@widgets/card";
 import Clipboard from "@widgets/clipboard";
 import Divider from "@widgets/divider";
@@ -126,8 +127,21 @@ export default function (props: { gameId: number }) {
                   <Spin width={20} height={20} />
                 </Show>
                 <span class="flex-1 text-start truncate font-normal">{object.path.split("/").slice(-1)[0]}</span>
-                <span class="text-primary opacity-60">{object.commit}</span>
-                <span class="flex-1 text-start truncate opacity-60 font-normal">{object.subject}</span>
+                 <span class="text-primary opacity-60">{object.commit}</span>
+                 {(() => {
+                   const { icon, text } = transformGitmoji(object.subject || "");
+                   return (
+                     <span class="flex-1 text-start truncate opacity-60 font-normal">
+                       <span
+                         class={clsx(
+                           "inline-block mr-1 align-middle w-5 h-5",
+                           icon ? icon : "icon-[fluent--branch-request-20-regular]"
+                         )}
+                       />
+                       <span class="align-middle">{text}</span>
+                     </span>
+                   );
+                 })()}
                 <span class="opacity-60 font-normal">
                   {DateTime.fromSeconds(object.last_modified || 0).toFormat("yyyy-MM-dd HH:mm")}
                 </span>

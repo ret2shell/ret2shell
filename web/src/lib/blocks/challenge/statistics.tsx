@@ -8,6 +8,8 @@ import Pagination from "@widgets/pagination";
 import Tag from "@widgets/tag";
 import { DateTime } from "luxon";
 import { createSignal, For, Match, Show, Switch } from "solid-js";
+import clsx from "clsx";
+import { transformGitmoji } from "@utils/gitmoji";
 import type { ChallengeWidgetProps } from ".";
 
 function StatisticsPanel(props: ChallengeWidgetProps) {
@@ -131,10 +133,22 @@ function HistoryPanel(props: ChallengeWidgetProps) {
       <For each={history.data || []}>
         {(item) => (
           <div class="w-full flex flex-row space-x-2 p-2 items-center border-b border-b-layer-content/10 overflow-hidden h-12">
-            <span class="shrink-0 icon-[fluent--branch-request-20-regular] w-5 h-5 text-primary" />
-            <span class="truncate" title={item.subject}>
-              {item.subject}
-            </span>
+            {(() => {
+              const { icon, text } = transformGitmoji(item.subject);
+              return (
+                <>
+                  <span
+                    class={clsx(
+                      "shrink-0 w-5 h-5",
+                      icon ? icon : "icon-[fluent--branch-request-20-regular] text-primary"
+                    )}
+                  />
+                  <span class="truncate" title={item.subject}>
+                    {text}
+                  </span>
+                </>
+              );
+            })()}
             <span class="flex-1" />
             <span class="font-bold">{item.author.name}</span>
             <span class="font-bold text-primary opacity-40 truncate">{item.abbreviated_commit}</span>
