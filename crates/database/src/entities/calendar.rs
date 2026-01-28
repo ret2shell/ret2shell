@@ -61,7 +61,8 @@ pub async fn get_list<C>(
   db: &C, start_time: DateTime<Utc>, end_time: DateTime<Utc>,
 ) -> Result<Vec<Model>, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   let models = Entity::find()
     .select_only()
     .columns(Column::iter().filter(|c| !matches!(c, Column::Intro)))
@@ -90,13 +91,15 @@ where
 
 pub async fn get<C>(db: &C, id: i64) -> Result<Option<Model>, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   Entity::find_by_id(id).one(db).await
 }
 
 pub async fn get_ex<C>(db: &C, id: i64) -> Result<Option<ExModel>, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   Entity::find_by_id(id)
     .join(JoinType::InnerJoin, Relation::Reporter.def())
     .column_as(super::user::Column::Nickname, "reporter_name")
@@ -107,7 +110,8 @@ where
 
 pub async fn create<C>(db: &C, calendar: Model) -> Result<Model, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   let active_model = ActiveModel {
     id: ActiveValue::NotSet,
     ..calendar.into_active_model().reset_all()
@@ -117,7 +121,8 @@ where
 
 pub async fn update<C>(db: &C, id: i64, calendar: Model) -> Result<Model, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   let active_model = ActiveModel {
     id: ActiveValue::Unchanged(id),
     ..calendar.into_active_model().reset_all()
@@ -127,6 +132,7 @@ where
 
 pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

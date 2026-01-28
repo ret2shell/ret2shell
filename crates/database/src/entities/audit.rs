@@ -29,7 +29,7 @@ use super::{challenge, game, team, user};
 #[sea_orm(rs_type = "i32", db_type = "Integer")]
 pub enum State {
   #[default]
-  Pending   = 0,
+  Pending = 0,
   Misjudged = 1,
   Confirmed = 2,
 }
@@ -135,7 +135,8 @@ pub async fn get_page<C>(
   user_id: Option<i64>, challenge_id: Option<i64>, state: Option<State>,
 ) -> Result<(Vec<Model>, u64), DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   let page_size = page_size.max(1);
   let page = page.max(1);
   let mut sql = Entity::find();
@@ -169,7 +170,8 @@ pub async fn get_page_ex<C>(
   user_id: Option<i64>, challenge_id: Option<i64>, state: Option<State>,
 ) -> Result<(Vec<ExModel>, u64), DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   let page_size = page_size.max(1);
   let page = page.max(1);
   let mut sql = Entity::find()
@@ -210,7 +212,8 @@ pub async fn get_list_ex<C>(
   user_id: Option<i64>, challenge_id: Option<i64>, state: Option<State>,
 ) -> Result<Vec<ExModel>, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   let mut sql = Entity::find()
     .join(JoinType::InnerJoin, Relation::Challenge.def())
     .join(JoinType::LeftJoin, Relation::Team.def())
@@ -243,13 +246,15 @@ where
 
 pub async fn get<C>(db: &C, id: i64) -> Result<Option<Model>, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   Entity::find_by_id(id).one(db).await
 }
 
 pub async fn create<C>(db: &C, model: Model) -> Result<Model, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   let model = ActiveModel {
     id: ActiveValue::NotSet,
     created_at: ActiveValue::Set(Utc::now()),
@@ -260,7 +265,8 @@ where
 
 pub async fn update<C>(db: &C, id: i64, model: Model) -> Result<Model, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   let model = ActiveModel {
     id: ActiveValue::Unchanged(id),
     ..model.into_active_model().reset_all()
@@ -270,6 +276,7 @@ where
 
 pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

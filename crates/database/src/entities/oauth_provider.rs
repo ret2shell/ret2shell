@@ -32,13 +32,15 @@ impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get<C>(db: &C, id: i64) -> Result<Option<Model>, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   Entity::find_by_id(id).one(db).await
 }
 
 pub async fn get_by_provider<C>(db: &C, provider: &str) -> Result<Option<Model>, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   Entity::find()
     .filter(Column::Provider.eq(provider))
     .one(db)
@@ -47,13 +49,15 @@ where
 
 pub async fn get_list<C>(db: &C) -> Result<Vec<Model>, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   Entity::find().all(db).await
 }
 
 pub async fn create<C>(db: &C, oauth: Model) -> Result<Model, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   let oauth = ActiveModel {
     id: ActiveValue::NotSet,
     ..oauth.into_active_model().reset_all()
@@ -63,7 +67,8 @@ where
 
 pub async fn update<C>(db: &C, id: i64, oauth: Model) -> Result<Model, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   let oauth = ActiveModel {
     id: ActiveValue::Unchanged(id),
     ..oauth.into_active_model().reset_all()
@@ -73,6 +78,7 @@ where
 
 pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

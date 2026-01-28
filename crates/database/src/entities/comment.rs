@@ -71,7 +71,8 @@ pub async fn get_page<C>(
   db: &C, page: u64, page_size: u64, article_id: i64,
 ) -> Result<(Vec<Model>, u64), DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   let page_size = page_size.max(1);
   let page = page.max(1);
   let sql = Entity::find().filter(Column::ArticleId.eq(article_id));
@@ -85,7 +86,8 @@ pub async fn get_page_ex<C>(
   db: &C, page: u64, page_size: u64, article_id: i64,
 ) -> Result<(Vec<ExModel>, u64), DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   let page_size = page_size.max(1);
   let page = page.max(1);
   let sql = Entity::find()
@@ -102,7 +104,8 @@ where
 
 pub async fn create<C>(db: &C, comment: Model) -> Result<Model, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   let comment = ActiveModel {
     id: ActiveValue::NotSet,
     created_at: ActiveValue::Set(Utc::now()),
@@ -113,6 +116,7 @@ where
 
 pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

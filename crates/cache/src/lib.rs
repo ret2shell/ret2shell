@@ -70,11 +70,10 @@ impl Cache {
     Ok(())
   }
 
-  pub async fn get<T>(
-    &self, key: impl Into<Key> + Send + Display,
-  ) -> Result<Option<T>, CacheError>
+  pub async fn get<T>(&self, key: impl Into<Key> + Send + Display) -> Result<Option<T>, CacheError>
   where
-    T: for<'de> Deserialize<'de>, {
+    T: for<'de> Deserialize<'de>,
+  {
     let domain_key = with_domain!(self.domain, key);
     let result = self.client.get::<Option<Value>, _>(domain_key).await?;
     match result {
@@ -87,7 +86,8 @@ impl Cache {
     &self, key: impl Into<Key> + Send + Display,
   ) -> Result<Option<T>, CacheError>
   where
-    T: for<'de> Deserialize<'de>, {
+    T: for<'de> Deserialize<'de>,
+  {
     let domain_key = with_domain!(self.domain, key);
     let result = self.client.getdel::<Option<Value>, _>(domain_key).await?;
     match result {
@@ -160,11 +160,10 @@ impl Cache {
     Ok(())
   }
 
-  pub async fn pop<T>(
-    &self, key: impl Into<Key> + Send + Display,
-  ) -> Result<Option<T>, CacheError>
+  pub async fn pop<T>(&self, key: impl Into<Key> + Send + Display) -> Result<Option<T>, CacheError>
   where
-    T: for<'de> Deserialize<'de>, {
+    T: for<'de> Deserialize<'de>,
+  {
     let domain_key = with_domain!(self.domain, key);
     let result = self
       .client

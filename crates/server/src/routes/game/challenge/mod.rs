@@ -370,7 +370,10 @@ async fn update_challenge(
     .await?;
   game_bucket
     .commit(
-      format!(":building_construction: update challenge config {}", challenge.name),
+      format!(
+        ":building_construction: update challenge config {}",
+        challenge.name
+      ),
       &token.account,
       format!("{}@private.ret.sh.cn", token.account),
     )
@@ -857,7 +860,10 @@ async fn delete_challenge_attachment(
   };
   game_bucket
     .commit(
-      format!(":fire: delete file {} for challenge {}", file, challenge.name),
+      format!(
+        ":fire: delete file {} for challenge {}",
+        file, challenge.name
+      ),
       &token.account,
       format!("{}@private.ret.sh.cn", token.account),
     )
@@ -1400,7 +1406,10 @@ async fn update_challenge_env_config(
     .await?;
   game_bucket
     .commit(
-      format!(":building_construction: update env for challenge {}", challenge.name),
+      format!(
+        ":building_construction: update env for challenge {}",
+        challenge.name
+      ),
       &token.account,
       format!("{}@private.ret.sh.cn", token.account),
     )
@@ -1471,7 +1480,10 @@ async fn update_checker_script(
   checker.expire(&challenge_bucket).await;
   game_bucket
     .commit(
-      format!(":building_construction: update checker script for challenge {}", challenge.name),
+      format!(
+        ":building_construction: update checker script for challenge {}",
+        challenge.name
+      ),
       &token.account,
       format!("{}@private.ret.sh.cn", token.account),
     )

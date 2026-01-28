@@ -31,7 +31,7 @@ use crate::team;
 pub enum HostType {
   #[default]
   Training = 0,
-  Game     = 1,
+  Game = 1,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
@@ -236,13 +236,15 @@ impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get<C>(db: &C, game_id: i64) -> Result<Option<Model>, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   Entity::find_by_id(game_id).one(db).await
 }
 
 pub async fn get_by_bucket<C>(db: &C, bucket: &str) -> Result<Option<Model>, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   Entity::find()
     .filter(Column::Bucket.eq(bucket))
     .one(db)
@@ -254,7 +256,8 @@ pub async fn get_page<C>(
   with_hidden: bool,
 ) -> Result<(Vec<Model>, u64), DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   let page_size = page_size.max(1);
   let page = page.max(1);
   let mut sql = Entity::find();
@@ -282,7 +285,8 @@ pub async fn get_list<C>(
   end_at: Option<DateTime<Utc>>, archive_at: Option<DateTime<Utc>>,
 ) -> Result<Vec<Model>, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   let mut sql = Entity::find().filter(Column::HostType.eq(HostType::Game));
   if let Some(register_at) = register_at {
     sql = sql.filter(Column::RegisterAt.lte(register_at));
@@ -302,7 +306,8 @@ where
 
 pub async fn get_statistics<C>(db: &C) -> Result<Vec<StatisticsModel>, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   let mut sql = Entity::find().select_only().columns(vec![
     Column::Id,
     Column::Name,
@@ -336,7 +341,8 @@ where
 
 pub async fn create<C>(db: &C, game: Model) -> Result<Model, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   let game = ActiveModel {
     id: ActiveValue::NotSet,
     updated_at: ActiveValue::Set(Utc::now()),
@@ -347,7 +353,8 @@ where
 
 pub async fn update<C>(db: &C, game: Model) -> Result<Model, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   let game = ActiveModel {
     id: ActiveValue::Unchanged(game.id),
     updated_at: ActiveValue::Set(Utc::now()),
@@ -358,6 +365,7 @@ where
 
 pub async fn delete<C>(db: &C, game_id: i64) -> Result<(), DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   Entity::delete_by_id(game_id).exec(db).await.map(|_| ())
 }

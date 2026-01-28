@@ -66,13 +66,15 @@ impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get<C>(db: &C) -> Result<Option<Model>, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   Entity::find().one(db).await
 }
 
 pub async fn update<C>(db: &C, config: Model) -> Result<Model, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   let original_info = Entity::find().one(db).await?;
   match original_info {
     Some(original_info) => {

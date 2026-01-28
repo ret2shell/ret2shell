@@ -47,7 +47,8 @@ impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn user_join_team<C>(db: &C, user_id: i64, team_id: i64) -> Result<Model, DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   let model = ActiveModel {
     id: ActiveValue::NotSet,
     user_id: ActiveValue::Set(user_id),
@@ -58,7 +59,8 @@ where
 
 pub async fn user_leave_team<C>(db: &C, user_id: i64, team_id: i64) -> Result<(), DbErr>
 where
-  C: ConnectionTrait, {
+  C: ConnectionTrait,
+{
   Entity::delete_many()
     .filter(Column::UserId.eq(user_id))
     .filter(Column::TeamId.eq(team_id))
