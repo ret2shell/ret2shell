@@ -26,17 +26,22 @@ Follow these instructions when contributing to this repository. Keep changes min
 
 ## Git & Pull Request Conventions
 
-- **Commit format**: Use gitmoji for every commit, followed by a concise message.
+- **Commit format**: Use gitmoji (emoji shortcodes, see https://gitmoji.dev) for every commit, followed by a concise message.
   - Format: `<gitmoji> <summary>`
   - Example: `:sparkles: add new challenge export`
 - **Common gitmoji**:
   - `:sparkles:` New feature
   - `:bug:` Bug fix
   - `:memo:` Documentation
+  - `:recycle:` Refactor
+  - `:art:` Formatting/style changes
+  - `:zap:` Performance improvement
+  - `:white_check_mark:` Tests
+  - `:construction:` Work in progress
   - `:fire:` Remove code or files
   - `:package:` Dependency updates
 - **Scope**: One logical change per commit; keep commits small and focused.
-- **PR Title**: Prefix with the same gitmoji as the primary change.
+- **PR Title**: Prefix with the same gitmoji shortcode as the primary change.
   - Example: `:memo: update AGENTS instructions`
 - **PR Description**: Include a brief summary plus any testing performed.
 - **Branch naming**: Use short, kebab-case names (e.g., `docs/git-guidelines`).
