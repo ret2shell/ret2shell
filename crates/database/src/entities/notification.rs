@@ -69,8 +69,7 @@ impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get_list<C>(db: &C, game_id: i64) -> Result<Vec<Model>, DbErr>
 where
-  C: ConnectionTrait,
-{
+  C: ConnectionTrait, {
   let notifications = Entity::find()
     .filter(Column::GameId.eq(game_id))
     .all(db)
@@ -80,8 +79,7 @@ where
 
 pub async fn get_list_ex<C>(db: &C, game_id: i64) -> Result<Vec<ExModel>, DbErr>
 where
-  C: ConnectionTrait,
-{
+  C: ConnectionTrait, {
   let notifications = Entity::find()
     .join(JoinType::InnerJoin, Relation::Publisher.def())
     .column_as(user::Column::Nickname, "publisher_name")
@@ -94,15 +92,13 @@ where
 
 pub async fn get<C>(db: &C, id: i64) -> Result<Option<Model>, DbErr>
 where
-  C: ConnectionTrait,
-{
+  C: ConnectionTrait, {
   Entity::find_by_id(id).one(db).await
 }
 
 pub async fn create<C>(db: &C, notification: Model) -> Result<Model, DbErr>
 where
-  C: ConnectionTrait,
-{
+  C: ConnectionTrait, {
   let notification = ActiveModel {
     id: ActiveValue::NotSet,
     ..notification.into_active_model().reset_all()
@@ -112,7 +108,6 @@ where
 
 pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-  C: ConnectionTrait,
-{
+  C: ConnectionTrait, {
   Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }

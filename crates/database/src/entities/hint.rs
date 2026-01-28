@@ -57,8 +57,7 @@ impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get_list<C>(db: &C, challenge_id: i64) -> Result<Vec<Model>, DbErr>
 where
-  C: ConnectionTrait,
-{
+  C: ConnectionTrait, {
   Entity::find()
     .filter(Column::ChallengeId.eq(challenge_id))
     .all(db)
@@ -67,15 +66,13 @@ where
 
 pub async fn get<C>(db: &C, hint_id: i64) -> Result<Option<Model>, DbErr>
 where
-  C: ConnectionTrait,
-{
+  C: ConnectionTrait, {
   Entity::find_by_id(hint_id).one(db).await
 }
 
 pub async fn create<C>(db: &C, hint: Model) -> Result<Model, DbErr>
 where
-  C: ConnectionTrait,
-{
+  C: ConnectionTrait, {
   let hint = ActiveModel {
     id: ActiveValue::NotSet,
     created_at: ActiveValue::Set(Utc::now()),
@@ -86,7 +83,6 @@ where
 
 pub async fn delete<C>(db: &C, hint_id: i64) -> Result<(), DbErr>
 where
-  C: ConnectionTrait,
-{
+  C: ConnectionTrait, {
   Entity::delete_by_id(hint_id).exec(db).await.map(|_| ())
 }

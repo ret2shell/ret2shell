@@ -36,8 +36,7 @@ pub async fn make_thumbnail<PA, PB>(
 ) -> Result<(), MediaError>
 where
   PA: AsRef<Path>,
-  PB: AsRef<Path>,
-{
+  PB: AsRef<Path>, {
   // prevent generate thumbnail repeatedly
   if tokio::fs::metadata(&dest).await.is_ok() {
     return Ok(());

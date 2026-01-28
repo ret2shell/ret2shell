@@ -30,8 +30,7 @@ pub static GLOBAL_ENGINE: Lazy<Engine> = Lazy::new(Engine::default);
 impl Engine {
   async fn build_context<M>(modules: Vec<M>) -> Result<Context, EngineError>
   where
-    M: Fn(bool) -> Result<rune::Module, rune::ContextError>,
-  {
+    M: Fn(bool) -> Result<rune::Module, rune::ContextError>, {
     let mut context = Context::with_default_modules()?;
     for module in modules {
       context.install(module(true)?)?;
@@ -43,8 +42,7 @@ impl Engine {
     modules: Vec<M>, script: impl AsRef<str>, required_funcs: &[&'static str],
   ) -> Result<Vec<DiagnosticMarker>, EngineError>
   where
-    M: Fn(bool) -> Result<rune::Module, rune::ContextError>,
-  {
+    M: Fn(bool) -> Result<rune::Module, rune::ContextError>, {
     let script = script.as_ref();
     trace!(?script, "linting script");
     let context = Self::build_context(modules).await?;

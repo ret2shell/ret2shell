@@ -76,8 +76,7 @@ impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get<C>(db: &C, id: i64) -> Result<Option<Model>, DbErr>
 where
-  C: ConnectionTrait,
-{
+  C: ConnectionTrait, {
   Entity::find_by_id(id).one(db).await
 }
 
@@ -85,8 +84,7 @@ pub async fn get_by_auth_key<C>(
   db: &C, provider: &str, auth_key: &str,
 ) -> Result<Option<Model>, DbErr>
 where
-  C: ConnectionTrait,
-{
+  C: ConnectionTrait, {
   Entity::find()
     .filter(Column::Provider.eq(provider))
     .filter(Column::AuthKey.eq(auth_key))
@@ -96,8 +94,7 @@ where
 
 pub async fn get_list<C>(db: &C, user_id: i64) -> Result<Vec<Model>, DbErr>
 where
-  C: ConnectionTrait,
-{
+  C: ConnectionTrait, {
   Entity::find()
     .filter(Column::UserId.eq(user_id))
     .all(db)
@@ -106,8 +103,7 @@ where
 
 pub async fn get_list_ex<C>(db: &C, user_id: i64) -> Result<Vec<ExModel>, DbErr>
 where
-  C: ConnectionTrait,
-{
+  C: ConnectionTrait, {
   Entity::find()
     .join(JoinType::InnerJoin, Relation::User.def())
     .join(JoinType::LeftJoin, Relation::Institute.def())
@@ -121,8 +117,7 @@ where
 
 pub async fn create<C>(db: &C, oauth: Model) -> Result<Model, DbErr>
 where
-  C: ConnectionTrait,
-{
+  C: ConnectionTrait, {
   let oauth = ActiveModel {
     id: ActiveValue::NotSet,
     created_at: ActiveValue::Set(Utc::now()),
@@ -134,8 +129,7 @@ where
 
 pub async fn update<C>(db: &C, id: i64, oauth: Model) -> Result<Model, DbErr>
 where
-  C: ConnectionTrait,
-{
+  C: ConnectionTrait, {
   let oauth = ActiveModel {
     id: ActiveValue::Unchanged(id),
     updated_at: ActiveValue::Set(Utc::now()),
@@ -146,15 +140,13 @@ where
 
 pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
 where
-  C: ConnectionTrait,
-{
+  C: ConnectionTrait, {
   Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }
 
 pub async fn delete_by_user_id<C>(db: &C, user_id: i64) -> Result<(), DbErr>
 where
-  C: ConnectionTrait,
-{
+  C: ConnectionTrait, {
   Entity::delete_many()
     .filter(Column::UserId.eq(user_id))
     .exec(db)
