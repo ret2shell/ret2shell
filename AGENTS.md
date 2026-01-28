@@ -13,7 +13,7 @@ Follow these instructions when contributing to this repository. Keep changes min
 
 - Use SolidJS idioms with functional components.
 - Prefer existing helpers in `web/src/lib` and keep imports organized.
-- Formatting and linting is handled by Biome:
+- Formatting and linting are handled by Biome:
   - `pnpm --prefix web format`
   - `pnpm --prefix web lint`
 - Follow the existing file structure: routes in `web/src/routes`, reusable widgets in `web/src/lib/widgets`, and API modules in `web/src/lib/api`.
