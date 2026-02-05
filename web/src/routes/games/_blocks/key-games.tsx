@@ -105,7 +105,7 @@ export default function () {
               ghost
               class={clsx("w-4/5", selectedGameId() === game.id && !showCreate() && "btn-active")}
               justify="start"
-              href={`/games?selected=${game.id}`}
+              href={`/games?selected=${game.id}&key-page=${page()}`}
             >
               <span
                 class={clsx(
