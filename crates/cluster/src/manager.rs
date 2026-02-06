@@ -449,7 +449,7 @@ impl Cluster {
     &self, labels: BTreeMap<String, String>, annotations: BTreeMap<String, String>,
     envs: HashMap<String, String>, env_config: ChallengeEnv, node_selector: Option<String>,
     need_expose: bool,
-  ) -> Result<(), ClusterError> {
+  ) -> Result<Pod, ClusterError> {
     let challenge_id = labels
       .get("ret.sh.cn/challenge")
       .ok_or(ClusterError::MissingField("challenge".to_string()))?;
@@ -614,10 +614,10 @@ impl Cluster {
     {
       return Err(ClusterError::MissingField("service ports".to_string()));
     }
-    self.create_pod(pod).await?;
+    let pod = self.create_pod(pod).await?;
     debug!(?service, "created pod, creating service");
     match self.create_service(service).await {
-      Ok(_) => Ok(()),
+      Ok(_) => Ok(pod),
       Err(err) => {
         error!(pod=?pod_name, error=?err, "failed to create service, deleting pod");
         self.delete_pod(&pod_name).await?;

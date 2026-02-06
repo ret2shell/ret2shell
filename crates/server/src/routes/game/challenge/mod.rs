@@ -18,7 +18,7 @@ use r2s_bucket::{
 };
 use r2s_cache::Cache;
 use r2s_checker::Checker;
-use r2s_cluster::{CHALLENGE_NS, Cluster, Pod};
+use r2s_cluster::{CHALLENGE_NS, Cluster, ClusterError, Pod};
 use r2s_config::cluster::ChallengeEnv;
 use r2s_database::{
   challenge, config, extra,
@@ -39,7 +39,7 @@ use sea_orm::{DatabaseTransaction, TransactionTrait};
 use serde::{Deserialize, Serialize};
 use tokio_util::io::{ReaderStream, StreamReader};
 use tower_http::request_id::RequestId;
-use tracing::{debug, info, warn};
+use tracing::{debug, error, info, warn};
 
 use super::{get_pod_field, worker};
 use crate::{
@@ -1119,6 +1119,111 @@ async fn get_challenge_env_config(
   }
 }
 
+macro_rules! get_traffic_pair {
+  ($game:expr, $config:expr) => {{
+    let default_script = if let Some(config) = &$config.cluster {
+      config.traffic.clone()
+    } else {
+      return Err(ResponseError::PreconditionFailed(
+        "cluster is disabled".to_owned(),
+      ));
+    };
+    if $game.archive_at > Utc::now() {
+      if let Some(traffic) = $game.traffic.clone() {
+        (
+          $game
+            .bucket
+            .clone()
+            .ok_or(ResponseError::PreconditionFailed(
+              "game bucket not found".to_string(),
+            ))?,
+          Some(traffic),
+        )
+      } else {
+        ("default".to_string(), default_script.clone())
+      }
+    } else {
+      ("default".to_string(), default_script.clone())
+    }
+  }};
+}
+
+async fn update_challenge_exposed_ports(
+  cluster: &Cluster, cache: Cache, pods: Vec<Pod>, traffic_pair: (String, Option<String>),
+) -> Result<Vec<Instance>, ResponseError> {
+  let mut result: Vec<Instance> = Vec::new();
+  let (traffic_key, traffic_script) = traffic_pair;
+
+  let traffic_mapper = cluster
+    .traffic
+    .clone()
+    .ok_or(ResponseError::InternalServerError(
+      "traffic mapper is not initialized".to_string(),
+    ))
+    .inspect_err(|err| {
+      warn!(error=?err, "traffic mapper is not initialized");
+    })?;
+
+  for pod in pods {
+    let mut instance: Instance = pod.clone().try_into()?;
+
+    if traffic_script.is_none() || traffic_script.clone().unwrap().is_empty() {
+      result.push(instance);
+      continue;
+    }
+    let traffic_script = traffic_script.clone().unwrap();
+    let traffic_id = instance.traffic.clone();
+
+    // cleanup this outdated cache
+    cache.at("traffic").del(&traffic_id).await.ok();
+
+    let env_name = pod
+      .metadata
+      .name
+      .clone()
+      .ok_or(ResponseError::PreconditionFailed(
+        "the env has no name".to_string(),
+      ))?;
+    let service = match cluster.at(CHALLENGE_NS).get_service(&env_name).await {
+      Ok(service) => service,
+      Err(ClusterError::KubeError(e)) => {
+        warn!(
+          env=%env_name,
+          error=?e,
+          "service not found in game, maybe not initialized?",
+        );
+        result.push(instance);
+        continue;
+      }
+      Err(e) => {
+        return Err(e.into());
+      }
+    };
+    traffic_mapper
+      .preload(&traffic_key, &traffic_script)
+      .await?;
+    let exposed_ports = match traffic_mapper.expose(&traffic_key, pod, service).await {
+      Ok(ports) => ports,
+      Err(ClusterError::MissingField(e)) => {
+        warn!(field=%e, env=%env_name, "traffic mapper missing field for env, maybe the cluster is maintaining?",);
+        result.push(instance);
+        continue;
+      }
+      Err(e) => {
+        error!(error=?e, env=%env_name, "failed to expose traffic for env");
+        return Err(e.into());
+      }
+    };
+    cache
+      .at("traffic")
+      .set_ex(&traffic_id, &exposed_ports, 3600)
+      .await?;
+    instance.exposed_ports = Some(exposed_ports);
+    result.push(instance);
+  }
+  Ok(result)
+}
+
 #[allow(clippy::too_many_arguments)]
 async fn start_challenge_instance(
   State(bucket): State<Bucket>, State(cluster): State<Cluster>, State(cache): State<Cache>,
@@ -1136,7 +1241,7 @@ async fn start_challenge_instance(
   } else {
     None
   };
-  let config = if let Some(config) = &config.cluster {
+  let cluster_config = if let Some(config) = &config.cluster {
     config
   } else {
     return Err(ResponseError::PreconditionFailed(
@@ -1228,20 +1333,23 @@ async fn start_challenge_instance(
     debug!(?env_map);
     debug!(?game);
     let node_selector = if game.archive_at > Utc::now() {
-      game.node_selector.clone().or(config.node_selector.clone())
+      game
+        .node_selector
+        .clone()
+        .or(cluster_config.node_selector.clone())
     } else {
-      config.node_selector.clone()
+      cluster_config.node_selector.clone()
     }
     .and_then(|ns| if ns.is_empty() { None } else { Some(ns) });
 
     let need_expose = if game.archive_at > Utc::now() {
-      game.traffic.is_some() || config.traffic.is_some()
+      game.traffic.is_some() || cluster_config.traffic.is_some()
     } else {
-      config.traffic.is_some()
+      cluster_config.traffic.is_some()
     };
     debug!(?node_selector);
     debug!(?need_expose);
-    cluster
+    let pod = cluster
       .at(CHALLENGE_NS)
       .create_challenge_env(
         [
@@ -1287,7 +1395,16 @@ async fn start_challenge_instance(
       .at("cluster")
       .set_ex(token.id.to_string(), Utc::now().timestamp(), 60)
       .await?;
-    Ok(())
+    // Ok(())
+    let pods = vec![pod];
+    let updated = update_challenge_exposed_ports(
+      &cluster,
+      cache.clone(),
+      pods,
+      get_traffic_pair!(game, config),
+    )
+    .await?;
+    Ok(Json(updated))
   } else {
     Err(ResponseError::PreconditionFailed(
       "challenge does not have online environment".to_owned(),
@@ -1313,8 +1430,9 @@ async fn cleanup_traffic_for_instance(cache: Cache, pods: Vec<Pod>) {
 
 async fn delay_challenge_instance(
   State(cache): State<Cache>, State(ref cluster): State<Cluster>,
-  Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
-  Extension(challenge): Extension<challenge::Model>, team_ext: Extension<Option<team::Model>>,
+  Extension(token): Extension<Token>, Extension(config): Extension<config::Model>,
+  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
+  team_ext: Extension<Option<team::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let team = extract_team!(game, team_ext, token);
 
@@ -1328,8 +1446,15 @@ async fn delay_challenge_instance(
     Vec::new()
   };
   if !pods.is_empty() {
-    tokio::spawn(cleanup_traffic_for_instance(cache.clone(), pods));
-    return Ok(());
+    // tokio::spawn(cleanup_traffic_for_instance(cache.clone(), pods));
+    let updated = update_challenge_exposed_ports(
+      &cluster,
+      cache.clone(),
+      pods,
+      get_traffic_pair!(game, config),
+    )
+    .await?;
+    return Ok(Json(updated));
   }
 
   info!("delaying challenge env");
@@ -1338,10 +1463,18 @@ async fn delay_challenge_instance(
     .delay_challenge_env_by_user(challenge.id, token.id)
     .await?;
   if !pods.is_empty() {
-    tokio::spawn(cleanup_traffic_for_instance(cache.clone(), pods));
+    // tokio::spawn(cleanup_traffic_for_instance(cache.clone(), pods));
+    let updated = update_challenge_exposed_ports(
+      &cluster,
+      cache.clone(),
+      pods,
+      get_traffic_pair!(game, config),
+    )
+    .await?;
+    return Ok(Json(updated));
   }
 
-  Ok(())
+  Ok(Json(Vec::<Instance>::new()))
 }
 
 async fn stop_challenge_instance(
@@ -1362,7 +1495,6 @@ async fn stop_challenge_instance(
   };
   if !pods.is_empty() {
     tokio::spawn(cleanup_traffic_for_instance(cache.clone(), pods));
-
     return Ok(());
   }
 
