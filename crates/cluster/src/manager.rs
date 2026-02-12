@@ -20,7 +20,7 @@ use kube::{
   api::{DeleteParams, ListParams, LogParams, ObjectList, ObjectMeta, PartialObjectMetaExt, Patch},
   runtime::reflector::Lookup,
 };
-use r2s_config::cluster::{ChallengeEnv, Config, ServiceType};
+use r2s_config::cluster::{AppProtocol, ChallengeEnv, ChallengeImage, Config, Protocol, ServiceType};
 use tokio_util::{codec::Framed, sync::CancellationToken};
 use tracing::{debug, error, info, warn};
 
@@ -436,21 +436,32 @@ impl Cluster {
     Ok(pods)
   }
 
-  fn map_protocol(&self, service: &Option<ServiceType>) -> String {
-    match *service {
-      Some(ServiceType::Tcp) => "TCP".to_owned(),
-      Some(ServiceType::Udp) => "UDP".to_owned(),
-      Some(ServiceType::Http) => "TCP".to_owned(),
-      None => "TCP".to_owned(),
+  fn map_protocol(&self, image: &ChallengeImage) -> String {
+    match image.protocol {
+      Some(Protocol::Tcp) => "TCP".to_owned(),
+      Some(Protocol::Udp) => "UDP".to_owned(),
+      Some(Protocol::Stcp) => "STCP".to_owned(),
+      #[allow(deprecated, reason = "for backward compatibility")]
+      None => match image.service_type {
+        Some(ServiceType::Http) => "TCP".to_owned(),
+        Some(ServiceType::Tcp) => "TCP".to_owned(),
+        Some(ServiceType::Udp) => "UDP".to_owned(),
+        None => "TCP".to_owned(),
+      },
     }
   }
 
-  fn map_app_protocol(&self, service: &Option<ServiceType>) -> String {
-    match *service {
-      Some(ServiceType::Tcp) => "tcp".to_owned(),
-      Some(ServiceType::Udp) => "udp".to_owned(),
-      Some(ServiceType::Http) => "http".to_owned(),
-      None => "tcp".to_owned(),
+  fn map_app_protocol(&self, image: &ChallengeImage) -> String {
+    match image.app_protocol {
+      Some(AppProtocol::Raw) => "raw".to_owned(),
+      Some(AppProtocol::Http) => "http".to_owned(),
+      #[allow(deprecated, reason = "for backward compatibility")]
+      None => match image.service_type {
+        Some(ServiceType::Http) => "http".to_owned(),
+        Some(ServiceType::Tcp) => "raw".to_owned(),
+        Some(ServiceType::Udp) => "raw".to_owned(),
+        None => "raw".to_owned(),
+      },
     }
   }
 
@@ -531,7 +542,7 @@ impl Cluster {
             ports: image.port.map(|port| {
               vec![ContainerPort {
                 container_port: port as i32,
-                protocol: Some(self.map_protocol(&image.service_type)),
+                protocol: Some(self.map_protocol(&image)),
                 ..Default::default()
               }]
             }),
@@ -605,11 +616,11 @@ impl Cluster {
                 .map(|port| k8s_openapi::api::core::v1::ServicePort {
                   app_protocol: Some(format!(
                     "ret.sh.cn/traffic/{}",
-                    self.map_app_protocol(&image.service_type)
+                    self.map_app_protocol(&image)
                   )),
                   name: Some(image.name.clone()),
                   port: port as i32,
-                  protocol: Some(self.map_protocol(&image.service_type)),
+                  protocol: Some(self.map_protocol(&image)),
                   target_port: Some(
                     k8s_openapi::apimachinery::pkg::util::intstr::IntOrString::Int(port as i32),
                   ),

@@ -23,6 +23,8 @@ pub struct RunePortInfo {
   #[rune(get)]
   pub node_port: u16,
   #[rune(get)]
+  pub protocol: String,
+  #[rune(get)]
   pub app_protocol: String,
 }
 
@@ -62,6 +64,7 @@ impl RuneServiceInfo {
       let port_info = RunePortInfo {
         name: port.name.clone().unwrap_or("default".to_owned()),
         node_port: port.node_port.unwrap_or(0) as u16,
+        protocol: port.protocol.clone().unwrap_or("TCP".to_owned()),
         app_protocol: port
           .app_protocol
           .clone()

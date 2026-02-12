@@ -75,6 +75,21 @@ pub enum ServiceType {
   Udp,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum Protocol {
+  Tcp,
+  Stcp,
+  Udp,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum AppProtocol {
+  Raw,
+  Http,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ChallengeImage {
   pub name: String,
@@ -89,7 +104,10 @@ pub struct ChallengeImage {
   #[serde(default = "default_storage_req")]
   pub storage_req: Option<String>,
   pub port: Option<u16>,
+  #[deprecated(since="3.10.2", note = "use protocol and app_protocol instead")]
   pub service_type: Option<ServiceType>,
+  pub protocol: Option<Protocol>,
+  pub app_protocol: Option<AppProtocol>,
   pub description: Option<String>,
   pub restricted: Option<bool>,
 }
