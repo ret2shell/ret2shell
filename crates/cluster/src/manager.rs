@@ -445,6 +445,15 @@ impl Cluster {
     }
   }
 
+  fn map_app_protocol(&self, service: &Option<ServiceType>) -> String {
+    match *service {
+      Some(ServiceType::Tcp) => "tcp".to_owned(),
+      Some(ServiceType::Udp) => "udp".to_owned(),
+      Some(ServiceType::Http) => "http".to_owned(),
+      None => "tcp".to_owned(),
+    }
+  }
+
   pub async fn create_challenge_env(
     &self, labels: BTreeMap<String, String>, annotations: BTreeMap<String, String>,
     envs: HashMap<String, String>, env_config: ChallengeEnv, node_selector: Option<String>,
@@ -594,6 +603,7 @@ impl Cluster {
               image
                 .port
                 .map(|port| k8s_openapi::api::core::v1::ServicePort {
+                  app_protocol: Some(format!("ret.sh.cn/traffic/{}", self.map_app_protocol(&image.service_type))),
                   name: Some(image.name.clone()),
                   port: port as i32,
                   protocol: Some(self.map_protocol(&image.service_type)),

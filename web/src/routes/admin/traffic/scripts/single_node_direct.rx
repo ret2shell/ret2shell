@@ -7,13 +7,14 @@ const PUBLIC_ENTRY = "www.example.com";
 // Args:
 //
 // * node:string : k8s node name
-// * service: { traffic:string, created_at:u64, lifetime:u64, ports:Vec<#{name:string, node_port:u16}> }
+// * service: { traffic:string, created_at:u64, lifetime:u64, ports:Vec<#{name:string, node_port:u16, app_protocol:string}> }
 //   * traffic:string : the traffic id
 //   * created_at:u64 : the traffic was created at, in unix timestamps (seconds)
 //   * lifetime:u64 : the traffic should live (seconds)
-//   * ports:Vec<#{name:string, node_port:u16}>
+//   * ports:Vec<#{name:string, node_port:u16, app_protocol:string}>
 //     * name: the service name on this port
 //     * node_port: the exposed port
+//     * app_protocol: the application protocol for this port, should be one of "tcp", "udp", "http"
 //
 // Returns:
 //
