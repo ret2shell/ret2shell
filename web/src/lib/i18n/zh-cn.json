@@ -385,7 +385,7 @@
       },
       "record": {
         "placeholder": "请输入底部备案号",
-        "label": "中国工信部ICP备案号"
+        "label": "中国工信部 ICP 备案号"
       },
       "hideMaker": {
         "disabled": "你的许可证不允许隐藏此项",
@@ -445,7 +445,7 @@
       },
       "path": {
         "label": "路径",
-        "placeholder": "请输入路径，以 / 作为分隔符，例如 “入门指南/提问的智慧”",
+        "placeholder": "请输入路径，以 / 作为分隔符，例如“入门指南/提问的智慧”",
         "required": "路径不能为空"
       },
       "createdAt": {
@@ -943,7 +943,7 @@
       "hidden": {
         "title": "已隐藏",
         "message": "题目已隐藏，仅供管理员测试。",
-        "alert": "请在题目准备好后点击 “公开” 按钮公开题目。平台不会主动更改题目可见性，自动放题功能会使用时间节点与隐藏状态来计算题目的最终可见性。"
+        "alert": "请在题目准备好后点击“公开”按钮公开题目。平台不会主动更改题目可见性，自动放题功能会使用时间节点与隐藏状态来计算题目的最终可见性。"
       }
     },
     "actions": {
@@ -1220,8 +1220,28 @@
                 "http": "HTTP",
                 "udp": "UDP"
               },
-              "udpNotWorkingWithWsrx": "由于集群的端口转发功能不支持 UDP 转发，UDP 服务无法使用平台代理与WSRX访问，请妥善配置流量转发脚本。",
+              "udpNotWorkingWithWsrx": "由于集群的端口转发功能不支持 UDP 转发，UDP 服务无法使用平台代理与 WSRX 访问，请妥善配置流量转发脚本。",
               "requiredWhenHavePort": "当填写了服务端口时，服务类型不能为空"
+            },
+            "protocol": {
+              "label": "传输协议",
+              "placeholder": "请选择传输协议",
+              "items": {
+                "tcp": "TCP",
+                "stcp": "STCP",
+                "udp": "UDP"
+              },
+              "udpNotWorkingWithWsrx": "由于集群的端口转发功能不支持 UDP 转发，UDP 服务无法使用平台代理与 WSRX 访问，请妥善配置流量转发脚本。",
+              "requiredWhenHavePort": "当填写了服务端口时，传输协议不能为空"
+            },
+            "appProtocol": {
+              "label": "应用协议",
+              "placeholder": "请选择应用协议",
+              "items": {
+                "raw": "原始",
+                "http": "HTTP"
+              },
+              "requiredWhenHavePort": "当填写了服务端口时，应用协议不能为空"
             },
             "port": {
               "label": "服务端口",
@@ -1233,7 +1253,7 @@
             },
             "cpu": {
               "label": "CPU 限制",
-              "required": "CPU限制不能为空"
+              "required": "CPU 限制不能为空"
             },
             "mem": {
               "label": "内存限制",
@@ -1640,7 +1660,7 @@
           "message": "重置密码的邮件已发送至你的邮箱，请查收。"
         },
         "rateExceeded": {
-          "message": "太快了！如果没收到邮件，请检查你的垃圾箱，30分钟之后才可以重试发送。"
+          "message": "太快了！如果没收到邮件，请检查你的垃圾箱，30 分钟之后才可以重试发送。"
         }
       },
       "title": "找回密码",
@@ -1874,7 +1894,7 @@
     },
     "wget": {
       "man": "下载指定的文件。",
-      "usage": "使用方法： wget <文件名>",
+      "usage": "使用方法：wget <文件名>",
       "downloading": "下载中",
       "errors": {
         "fileNotFound": {

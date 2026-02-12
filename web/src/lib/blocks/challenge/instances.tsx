@@ -72,8 +72,9 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
     return {
       ...image,
       description: image.description || null,
-      // NOTE: do not change it to `??`, which can not be used to check "" empty string
-      service_type: image.service_type || null,
+      service_type: null,
+      protocol: image.protocol || null,
+      app_protocol: image.app_protocol || null,
       port: image.port && !Number.isNaN(image.port) && image.port > 0 && image.port < 65536 ? image.port : null,
     };
   }
@@ -90,7 +91,8 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
         storage: "1024Mi",
         storage_req: "64Mi",
         port: null,
-        service_type: null,
+        protocol: null,
+        app_protocol: null,
         description: "",
       });
       challengeEnv.refetch();
@@ -302,7 +304,10 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
           name="description"
           validate={[
             (value) => {
-              if (!value?.trim() && [getValue(form, "service_type"), getValue(form, "port")].some(Boolean)) {
+              if (
+                !value?.trim() &&
+                [getValue(form, "protocol"), getValue(form, "app_protocol"), getValue(form, "port")].some(Boolean)
+              ) {
                 return t("challenge.instance.image.form.service.description.requiredWhenHavePort");
               }
               return "";
@@ -321,83 +326,126 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
             />
           )}
         </Field>
-        <div class="flex flex-row space-x-2 flex-1">
-          <Field
-            name="service_type"
-            validate={[
-              (value) => {
-                if (!value && [getValue(form, "description"), getValue(form, "port")].some(Boolean)) {
-                  return t("challenge.instance.image.form.service.type.requiredWhenHavePort");
-                }
-                return "";
-              },
-            ]}
-          >
-            {(field, props) => (
-              <Select
-                label={t("challenge.instance.image.form.service.type.label")}
-                class="flex-1"
-                placeholder={t("challenge.instance.image.form.service.type.placeholder")}
-                items={[
-                  {
-                    value: "http",
-                    label: t("challenge.instance.image.form.service.type.items.http"),
-                    icon: "icon-[fluent--globe-20-regular]",
-                  },
-                  {
-                    value: "tcp",
-                    label: t("challenge.instance.image.form.service.type.items.tcp"),
-                    icon: "icon-[fluent--globe-20-regular]",
-                  },
-                  {
-                    value: "udp",
-                    label: t("challenge.instance.image.form.service.type.items.udp"),
-                    icon: "icon-[fluent--globe-20-regular]",
-                  },
-                ]}
-                value={field.value ? [field.value as string] : []}
-                inputProps={props}
-                error={field.error}
-              />
-            )}
-          </Field>
-          <Field
-            name="port"
-            type="number"
-            validate={[
-              (value) => {
-                if ((value || value === 0) && (value < 1 || value > 65535)) {
-                  return t("challenge.instance.image.form.service.port.mustBeInRange");
-                }
-                if (value && challengeEnv.data?.images?.some((image) => image.port && image.port === value)) {
-                  return t("challenge.instance.image.form.service.port.conflict");
-                }
-                if (!value && [getValue(form, "description"), getValue(form, "service_type")].some(Boolean)) {
-                  return t("challenge.instance.image.form.service.port.required");
-                }
-                return "";
-              },
-            ]}
-          >
-            {(field, props) => (
-              <Input
-                class="flex-1"
-                icon={<span class="shrink-0 icon-[fluent--cloud-link-20-regular] w-5 h-5" />}
-                title={t("challenge.instance.image.form.service.port.label")}
-                placeholder={t("challenge.instance.image.form.service.port.placeholder")}
-                type="number"
-                {...props}
-                value={field.value ?? ""}
-                error={field.error}
-              />
-            )}
-          </Field>
-        </div>
+        <Field
+          name="protocol"
+          validate={[
+            (value) => {
+              if (
+                !value &&
+                [getValue(form, "description"), getValue(form, "app_protocol"), getValue(form, "port")].some(Boolean)
+              ) {
+                return t("challenge.instance.image.form.service.protocol.requiredWhenHavePort");
+              }
+              return "";
+            },
+          ]}
+        >
+          {(field, props) => (
+            <Select
+              label={t("challenge.instance.image.form.service.protocol.label")}
+              class="flex-1"
+              placeholder={t("challenge.instance.image.form.service.protocol.placeholder")}
+              items={[
+                {
+                  value: "tcp",
+                  label: t("challenge.instance.image.form.service.protocol.items.tcp"),
+                  icon: "icon-[fluent--globe-20-regular]",
+                },
+                {
+                  value: "stcp",
+                  label: t("challenge.instance.image.form.service.protocol.items.stcp"),
+                  icon: "icon-[fluent--globe-20-regular]",
+                },
+                {
+                  value: "udp",
+                  label: t("challenge.instance.image.form.service.protocol.items.udp"),
+                  icon: "icon-[fluent--globe-20-regular]",
+                },
+              ]}
+              value={field.value ? [field.value as string] : []}
+              inputProps={props}
+              error={field.error}
+            />
+          )}
+        </Field>
+        <Field
+          name="app_protocol"
+          validate={[
+            (value) => {
+              if (
+                !value &&
+                [getValue(form, "description"), getValue(form, "protocol"), getValue(form, "port")].some(Boolean)
+              ) {
+                return t("challenge.instance.image.form.service.appProtocol.requiredWhenHavePort");
+              }
+              return "";
+            },
+          ]}
+        >
+          {(field, props) => (
+            <Select
+              label={t("challenge.instance.image.form.service.appProtocol.label")}
+              class="flex-1"
+              placeholder={t("challenge.instance.image.form.service.appProtocol.placeholder")}
+              items={[
+                {
+                  value: "raw",
+                  label: t("challenge.instance.image.form.service.appProtocol.items.raw"),
+                  icon: "icon-[fluent--globe-20-regular]",
+                },
+                {
+                  value: "http",
+                  label: t("challenge.instance.image.form.service.appProtocol.items.http"),
+                  icon: "icon-[fluent--globe-20-regular]",
+                },
+              ]}
+              value={field.value ? [field.value as string] : []}
+              inputProps={props}
+              error={field.error}
+            />
+          )}
+        </Field>
+        <Field
+          name="port"
+          type="number"
+          validate={[
+            (value) => {
+              if ((value || value === 0) && (value < 1 || value > 65535)) {
+                return t("challenge.instance.image.form.service.port.mustBeInRange");
+              }
+              if (value && challengeEnv.data?.images?.some((image) => image.port && image.port === value)) {
+                return t("challenge.instance.image.form.service.port.conflict");
+              }
+              if (
+                !value &&
+                [getValue(form, "description"), getValue(form, "protocol"), getValue(form, "app_protocol")].some(
+                  Boolean
+                )
+              ) {
+                return t("challenge.instance.image.form.service.port.required");
+              }
+              return "";
+            },
+          ]}
+        >
+          {(field, props) => (
+            <Input
+              class="flex-1"
+              icon={<span class="shrink-0 icon-[fluent--cloud-link-20-regular] w-5 h-5" />}
+              title={t("challenge.instance.image.form.service.port.label")}
+              placeholder={t("challenge.instance.image.form.service.port.placeholder")}
+              type="number"
+              {...props}
+              value={field.value ?? ""}
+              error={field.error}
+            />
+          )}
+        </Field>
       </div>
-      <Show when={getValue(form, "service_type") === "udp"}>
+      <Show when={getValue(form, "protocol") === "udp"}>
         <Card level="warning" contentClass="p-2 flex flex-row space-x-2 items-center">
           <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5" />
-          <span>{t("challenge.instance.image.form.service.type.udpNotWorkingWithWsrx")}</span>
+          <span>{t("challenge.instance.image.form.service.protocol.udpNotWorkingWithWsrx")}</span>
         </Card>
       </Show>
       <div class="flex flex-row space-x-2">
@@ -803,7 +851,7 @@ export default function (props: ChallengeWidgetProps) {
               <span class="shrink-0 icon-[fluent--cloud-link-20-regular] w-5 h-5" />
               <Show when={image.port} fallback={<span class="font-bold opacity-60">N/A</span>}>
                 <span class="text-warning font-bold">
-                  {image.service_type}:{image.port}
+                  {image.protocol || image.service_type || "tcp"}:{image.port} ({image.app_protocol || "raw"})
                 </span>
                 <span>({image.description})</span>
               </Show>

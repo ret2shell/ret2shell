@@ -1223,6 +1223,26 @@
               "udpNotWorkingWithWsrx": "Because the cluster's port forwarding feature does not support UDP forwarding, UDP services cannot be accessed with platform proxy and WSRX. Please configure the traffic forwarding script properly.",
               "requiredWhenHavePort": "The service type cannot be empty when a service port is open"
             },
+            "protocol": {
+              "label": "Transport protocol",
+              "placeholder": "Please select a transport protocol",
+              "items": {
+                "tcp": "TCP",
+                "stcp": "STCP",
+                "udp": "UDP"
+              },
+              "udpNotWorkingWithWsrx": "Because the cluster's port forwarding feature does not support UDP forwarding, UDP services cannot be accessed with platform proxy and WSRX. Please configure the traffic forwarding script properly.",
+              "requiredWhenHavePort": "The transport protocol cannot be empty when a service port is open"
+            },
+            "appProtocol": {
+              "label": "Application protocol",
+              "placeholder": "Please select an application protocol",
+              "items": {
+                "raw": "Raw",
+                "http": "HTTP"
+              },
+              "requiredWhenHavePort": "The application protocol cannot be empty when a service port is open"
+            },
             "port": {
               "label": "Service port",
               "placeholder": "Please enter the service port",

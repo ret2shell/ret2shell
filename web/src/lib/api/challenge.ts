@@ -1,5 +1,5 @@
 import { sleep } from "@lib/utils/timeout";
-import type { Challenge, ChallengeEnv } from "@models/challenge";
+import type { Challenge, ChallengeEnv, ChallengeImage } from "@models/challenge";
 import type { Submission } from "@models/submission";
 import { t } from "@storage/theme";
 import { useMutation, useQuery } from "@tanstack/solid-query";
@@ -387,7 +387,61 @@ export function useDeleteChallengeAttachmentMutation(props: {
 }
 
 export async function getChallengeEnv(game_id: number, challenge_id: number) {
-  return await api.get(`${api_root}/game/${game_id}/challenge/${challenge_id}/env`).json<ChallengeEnv | null>();
+  const env = await api.get(`${api_root}/game/${game_id}/challenge/${challenge_id}/env`).json<ChallengeEnv | null>();
+  return normalizeChallengeEnv(env);
+}
+
+function inferProtocolByServiceType(serviceType: ChallengeImage["service_type"]) {
+  switch (serviceType) {
+    case "http":
+      return {
+        protocol: "tcp" as const,
+        app_protocol: "http" as const,
+      };
+    case "udp":
+      return {
+        protocol: "udp" as const,
+        app_protocol: "raw" as const,
+      };
+    case "tcp":
+      return {
+        protocol: "tcp" as const,
+        app_protocol: "raw" as const,
+      };
+    default:
+      return {
+        protocol: null,
+        app_protocol: null,
+      };
+  }
+}
+
+function normalizeChallengeImage(image: ChallengeImage): ChallengeImage {
+  if ((image.protocol == null || image.protocol === undefined) && (image.app_protocol == null || image.app_protocol === undefined)) {
+    const next = inferProtocolByServiceType(image.service_type);
+    return {
+      ...image,
+      protocol: next.protocol,
+      app_protocol: next.app_protocol,
+    };
+  }
+
+  return {
+    ...image,
+    protocol: image.protocol ?? null,
+    app_protocol: image.app_protocol ?? null,
+  };
+}
+
+function normalizeChallengeEnv(env: ChallengeEnv | null): ChallengeEnv | null {
+  if (!env) {
+    return null;
+  }
+
+  return {
+    ...env,
+    images: env.images.map(normalizeChallengeImage),
+  };
 }
 
 export function useChallengeEnv({
@@ -449,7 +503,7 @@ export function useChallengeInstance({
 export async function updateChallengeEnv(game_id: number, challenge_id: number, env: ChallengeEnv) {
   return await api
     .patch(`${api_root}/game/${game_id}/challenge/${challenge_id}/env`, {
-      json: env,
+      json: normalizeChallengeEnv(env),
     })
     .json<void>();
 }

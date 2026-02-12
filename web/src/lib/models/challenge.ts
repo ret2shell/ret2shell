@@ -25,7 +25,9 @@ export type ChallengeImage = {
   storage: string | null;
   storage_req: string | null;
   port: number | null;
-  service_type: "http" | "tcp" | "udp" | null;
+  protocol?: "tcp" | "stcp" | "udp" | null;
+  app_protocol?: "raw" | "http" | null;
+  service_type?: "http" | "tcp" | "udp" | null;
   description: string | null;
   restricted: boolean | null;
 };
