@@ -46,7 +46,7 @@ nanoid             = "0.4"
 num-derive         = "0.4"
 num-traits         = "0.2"
 once_cell          = "1.21"
-owo-colors         = "4.2"
+owo-colors         = "4.3"
 rand               = "0.10"
 regex              = "1.12"
 ret2script         = { version = "1.8", default-features = false }
