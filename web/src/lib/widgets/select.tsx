@@ -51,6 +51,7 @@ export default function (
     })
   );
   let selectEl!: HTMLSelectElement;
+  let forwardingInputEvent = false;
 
   const [proxiedValue, setProxiedValue] = createSignal<string[] | undefined>(others.value);
 
@@ -82,9 +83,20 @@ export default function (
       value={proxiedValue()}
       onValueChange={(e) => {
         if (selectEl) {
-          selectEl.value = e.value[0] || "";
-          if (selectProps.inputProps?.onInput && typeof selectProps.inputProps.onInput === "function")
-            selectEl.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
+          const nextValue = e.value[0] || "";
+          const prevValue = selectEl.value;
+          selectEl.value = nextValue;
+
+          if (!forwardingInputEvent && prevValue !== nextValue) {
+            forwardingInputEvent = true;
+            queueMicrotask(() => {
+              try {
+                selectEl.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
+              } finally {
+                forwardingInputEvent = false;
+              }
+            });
+          }
         }
         others.onValueChange?.(e);
       }}
