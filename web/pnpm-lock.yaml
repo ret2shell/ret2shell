@@ -54,14 +54,14 @@ importers:
         specifier: ^0.15.4
         version: 0.15.4(solid-js@1.9.11)
       '@tanstack/query-persist-client-core':
-        specifier: ^5.92.0
-        version: 5.92.0
+        specifier: ^5.92.1
+        version: 5.92.1
       '@tanstack/solid-query':
         specifier: ^5.90.23
         version: 5.90.23(solid-js@1.9.11)
       '@tanstack/solid-query-persist-client':
         specifier: ^5.90.24
-        version: 5.90.24(@tanstack/solid-query@5.90.23(solid-js@1.9.11))(solid-js@1.9.11)
+        version: 5.90.25(@tanstack/solid-query@5.90.23(solid-js@1.9.11))(solid-js@1.9.11)
       '@xdsec/wsrx':
         specifier: ^0.5.5
         version: 0.5.5
@@ -954,11 +954,11 @@ packages:
   '@tanstack/query-core@5.90.20':
     resolution: {integrity: sha512-OMD2HLpNouXEfZJWcKeVKUgQ5n+n3A2JFmBaScpNDUqSrQSjiveC7dKMe53uJUg1nDG16ttFPz2xfilz6i2uVg==}
 
-  '@tanstack/query-persist-client-core@5.92.0':
-    resolution: {integrity: sha512-Q6gBeNwwA4fyC/PyW6xXBaAFggeEH+HmgQpmiNjVpTLsV1Una7j5Dzh4N130ZX5So13MAYOglUooceDEJJ479A==}
+  '@tanstack/query-persist-client-core@5.92.1':
+    resolution: {integrity: sha512-XGzB1lulFrGc8UwQnMI12r71R7ock/XOZvDaz3Fu3xrxCFwLHuFcABAOkIolS/6hFHe0pRdsBRXd4Q8ECqiCug==}
 
-  '@tanstack/solid-query-persist-client@5.90.24':
-    resolution: {integrity: sha512-zeEwFaOwexsfDYWkgOCBPJq02Rp7VfiyKlIlC/PX5nqKaBH2/7ODIlcOHOXL26+0KPGiWF6MCinpvcebA58f2Q==}
+  '@tanstack/solid-query-persist-client@5.90.25':
+    resolution: {integrity: sha512-wAePnubjQ/JBKVbHxKnS7zZxyvpx1OSk0YqJDL+FCUsUSK+WOmbfe6ohSnwXqVnqT1XLmYwIzMbX3atZ/UJh/A==}
     peerDependencies:
       '@tanstack/solid-query': ^5.90.23
       solid-js: ^1.6.0
@@ -2968,13 +2968,13 @@ snapshots:
 
   '@tanstack/query-core@5.90.20': {}
 
-  '@tanstack/query-persist-client-core@5.92.0':
+  '@tanstack/query-persist-client-core@5.92.1':
     dependencies:
       '@tanstack/query-core': 5.90.20
 
-  '@tanstack/solid-query-persist-client@5.90.24(@tanstack/solid-query@5.90.23(solid-js@1.9.11))(solid-js@1.9.11)':
+  '@tanstack/solid-query-persist-client@5.90.25(@tanstack/solid-query@5.90.23(solid-js@1.9.11))(solid-js@1.9.11)':
     dependencies:
-      '@tanstack/query-persist-client-core': 5.92.0
+      '@tanstack/query-persist-client-core': 5.92.1
       '@tanstack/solid-query': 5.90.23(solid-js@1.9.11)
       solid-js: 1.9.11
 

@@ -29,7 +29,7 @@
     "@solid-primitives/resize-observer": "^2.1.5",
     "@solid-primitives/storage": "^4.3.4",
     "@solidjs/router": "^0.15.4",
-    "@tanstack/query-persist-client-core": "^5.92.0",
+    "@tanstack/query-persist-client-core": "^5.92.1",
     "@tanstack/solid-query": "^5.90.23",
     "@tanstack/solid-query-persist-client": "^5.90.24",
     "@xdsec/wsrx": "^0.5.5",
