@@ -171,6 +171,26 @@ where
   sql.all(db).await
 }
 
+pub async fn get_full_list<C>(db: &C, game_id: i64) -> Result<Vec<Model>, DbErr>
+where
+  C: ConnectionTrait, {
+  Entity::find()
+    .filter(Column::GameId.eq(game_id))
+    .order_by_asc(Column::Id)
+    .all(db)
+    .await
+}
+
+pub async fn get_by_bucket<C>(db: &C, game_id: i64, bucket: &str) -> Result<Option<Model>, DbErr>
+where
+  C: ConnectionTrait, {
+  Entity::find()
+    .filter(Column::GameId.eq(game_id))
+    .filter(Column::Bucket.eq(bucket))
+    .one(db)
+    .await
+}
+
 pub async fn count<C>(
   db: &C, game_id: Option<i64>, game_type: Option<game::HostType>, with_hidden: bool,
 ) -> Result<u64, DbErr>

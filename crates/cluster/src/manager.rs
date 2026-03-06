@@ -20,7 +20,9 @@ use kube::{
   api::{DeleteParams, ListParams, LogParams, ObjectList, ObjectMeta, PartialObjectMetaExt, Patch},
   runtime::reflector::Lookup,
 };
-use r2s_config::cluster::{AppProtocol, ChallengeEnv, ChallengeImage, Config, Protocol, ServiceType};
+use r2s_config::cluster::{
+  AppProtocol, ChallengeEnv, ChallengeImage, Config, Protocol, ServiceType,
+};
 use tokio_util::{codec::Framed, sync::CancellationToken};
 use tracing::{debug, error, info, warn};
 

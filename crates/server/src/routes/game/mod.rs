@@ -24,6 +24,7 @@ mod notification;
 mod participant;
 mod registry;
 mod repo;
+pub(crate) mod repo_sync;
 mod runtime;
 mod statistics;
 mod team;

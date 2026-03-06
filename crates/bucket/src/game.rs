@@ -1,4 +1,5 @@
 use std::{
+  fs::OpenOptions,
   io::ErrorKind,
   path::{Path, PathBuf},
 };
@@ -23,7 +24,30 @@ pub struct GameBucket {
   pub name: String,
   path: PathBuf,
   pub git: Git,
-  locked: bool,
+  lock: Option<RepoLock>,
+  cleanup_on_drop: bool,
+}
+
+#[derive(Debug)]
+pub struct RepoLock {
+  path: PathBuf,
+}
+
+impl RepoLock {
+  pub fn acquire(repo_path: impl AsRef<Path>) -> Result<Self, BucketError> {
+    let path = repo_path.as_ref().join(".lock");
+    match OpenOptions::new().write(true).create_new(true).open(&path) {
+      Ok(_) => Ok(Self { path }),
+      Err(err) if err.kind() == ErrorKind::AlreadyExists => Err(BucketError::LockError),
+      Err(err) => Err(BucketError::IoError(err)),
+    }
+  }
+}
+
+impl Drop for RepoLock {
+  fn drop(&mut self) {
+    std::fs::remove_file(&self.path).ok();
+  }
 }
 
 #[derive(Clone, Debug, Serialize_repr, Deserialize_repr)]
@@ -84,18 +108,16 @@ impl GameBucket {
     root_path: impl AsRef<Path>, name: impl AsRef<str>, should_lock: bool,
   ) -> Result<Self, BucketError> {
     let game_path = root_path.as_ref().join(name.as_ref());
-    if should_lock && game_path.join(".lock").exists() {
-      return Err(BucketError::LockError);
-    }
     let git = Git::try_open(&game_path).await?;
-    if should_lock {
-      tokio::fs::write(&game_path.join(".lock"), "").await?;
-    }
+    let lock = should_lock
+      .then(|| RepoLock::acquire(&game_path))
+      .transpose()?;
     Ok(Self {
       name: name.as_ref().to_owned(),
       path: game_path,
       git,
-      locked: should_lock,
+      lock,
+      cleanup_on_drop: should_lock,
     })
   }
 
@@ -124,20 +146,26 @@ impl GameBucket {
       name: game_bucket_name.as_ref().to_owned(),
       path: game_path,
       git,
-      locked: false,
+      lock: None,
+      cleanup_on_drop: false,
     })
   }
 
   pub async fn at(
     &self, challenge: impl AsRef<str>,
   ) -> Result<challenge::ChallengeBucket, BucketError> {
-    challenge::ChallengeBucket::open(&self.path.join("challenges"), challenge, self.locked).await
+    challenge::ChallengeBucket::open(
+      &self.path.join("challenges"),
+      challenge,
+      self.lock.is_some(),
+    )
+    .await
   }
 
   pub async fn commit(
     &self, message: impl AsRef<str>, author: impl AsRef<str>, email: impl AsRef<str>,
   ) -> Result<(), BucketError> {
-    if !self.locked {
+    if self.lock.is_none() {
       return Err(BucketError::NeedLocking);
     }
     self.git.take_shot(message, author, email).await?;
@@ -145,7 +173,7 @@ impl GameBucket {
   }
 
   pub async fn cleanup(&self) -> Result<(), BucketError> {
-    if !self.locked {
+    if self.lock.is_none() {
       return Err(BucketError::NeedLocking);
     }
     self.git.cleanup().await?;
@@ -169,7 +197,7 @@ impl GameBucket {
   }
 
   pub async fn set_config(&self, game: Value) -> Result<(), BucketError> {
-    if !self.locked {
+    if self.lock.is_none() {
       return Err(BucketError::NeedLocking);
     }
     let game: GameConfig = serde_json::from_value(game)?;
@@ -192,7 +220,7 @@ impl GameBucket {
   pub async fn write_document(
     &self, document: GameDocument, content: &str,
   ) -> Result<(), BucketError> {
-    if !self.locked {
+    if self.lock.is_none() {
       return Err(BucketError::NeedLocking);
     }
     write(self.path.join(document.file_name()), content).await?;
@@ -206,7 +234,7 @@ impl GameBucket {
   }
 
   pub async fn create(&self, challenge: Value) -> Result<challenge::ChallengeBucket, BucketError> {
-    if !self.locked {
+    if self.lock.is_none() {
       return Err(BucketError::NeedLocking);
     }
     let challenge_config: challenge::ChallengeConfig = serde_json::from_value(challenge)?;
@@ -248,7 +276,7 @@ impl GameBucket {
   }
 
   pub async fn delete(&self, challenge: impl AsRef<str>) -> Result<(), BucketError> {
-    if !self.locked {
+    if self.lock.is_none() {
       return Err(BucketError::NeedLocking);
     }
     let _ = self.at(&challenge).await?;
@@ -259,8 +287,7 @@ impl GameBucket {
 
 impl Drop for GameBucket {
   fn drop(&mut self) {
-    if self.locked {
-      std::fs::remove_file(self.path.join(".lock")).ok();
+    if self.cleanup_on_drop && self.lock.is_some() {
       self.git.cleanup_sync().ok();
     }
   }

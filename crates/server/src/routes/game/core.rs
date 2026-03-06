@@ -150,7 +150,9 @@ fn game_doc_cache_key(game_id: i64, doc: GameDocKind, locale: GameDocLocale) -> 
   )
 }
 
-async fn invalidate_game_doc_cache(cache: &Cache, game_id: i64) -> Result<(), ResponseError> {
+pub(crate) async fn invalidate_game_doc_cache(
+  cache: &Cache, game_id: i64,
+) -> Result<(), ResponseError> {
   let cache = cache.at("game-doc");
   for doc in [
     GameDocKind::Readme,
@@ -400,7 +402,8 @@ pub(super) async fn update_game_intro_compat(
 
 pub(super) async fn get_game_doc(
   State(ref cache): State<Cache>, State(ref bucket): State<Bucket>,
-  Extension(game): Extension<game::Model>, Path(doc): Path<GameDocKind>, headers: HeaderMap,
+  Extension(game): Extension<game::Model>, Path((_, doc)): Path<(String, GameDocKind)>,
+  headers: HeaderMap,
 ) -> Result<impl IntoResponse, ResponseError> {
   let locale = GameDocLocale::from_headers(&headers);
   let cache_key = game_doc_cache_key(game.id, doc, locale);
@@ -435,7 +438,7 @@ pub(super) async fn get_game_doc(
 pub(super) async fn update_game_doc(
   State(ref cache): State<Cache>, State(ref bucket): State<Bucket>,
   Extension(game): Extension<game::Model>, Extension(token): Extension<Token>,
-  Path(doc): Path<GameDocKind>, Json(content): Json<String>,
+  Path((_, doc)): Path<(String, GameDocKind)>, Json(content): Json<String>,
 ) -> Result<impl IntoResponse, ResponseError> {
   Ok(Json(
     persist_game_doc(cache, bucket, &game, &token, doc, &content).await?,

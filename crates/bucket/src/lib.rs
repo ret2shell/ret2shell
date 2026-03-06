@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use deunicode::deunicode_with_tofu;
-use game::GameConfig;
+use game::{GameConfig, RepoLock};
 use heck::ToSnakeCase;
 use r2s_config::bucket;
 use serde_json::Value;
@@ -95,6 +95,10 @@ impl Bucket {
 
   pub async fn at_mut(&self, name: impl AsRef<str>) -> Result<game::GameBucket, BucketError> {
     game::GameBucket::open(&self.path, name, true).await
+  }
+
+  pub fn lock(&self, name: impl AsRef<str>) -> Result<RepoLock, BucketError> {
+    RepoLock::acquire(self.path.join(name.as_ref()))
   }
 
   pub async fn delete(&self, name: impl AsRef<str>) -> Result<(), BucketError> {

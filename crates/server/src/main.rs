@@ -1,9 +1,9 @@
-use std::process::exit;
+use std::{path::PathBuf, process::exit};
 
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueEnum};
 use owo_colors::OwoColorize;
 use r2s_config::GlobalConfig;
-use r2s_server::{R2S_VERSION, down, greet, up};
+use r2s_server::{R2S_VERSION, down, greet, run_post_receive, up};
 
 /// Clap arg definition.
 #[derive(Parser, Debug)]
@@ -21,7 +21,7 @@ VIA ANY MEDIUM IS STRICTLY PROHIBITED.
 If you have any problems, please contact tech support <support@ret.sh.cn>.
     "#
 )]
-struct Args {
+struct CliArgs {
   #[command(subcommand)]
   command: Option<Commands>,
 }
@@ -34,11 +34,55 @@ enum Commands {
   /// Remove all data and drop database, NEVER USE IT AT PRODUCTION
   /// ENVIRONMENT.
   Down,
+  /// Internal utilities.
+  Internal(InternalArgs),
+}
+
+#[derive(clap::Args, Debug)]
+struct InternalArgs {
+  #[command(subcommand)]
+  command: InternalCommands,
+}
+
+#[derive(Subcommand, Debug)]
+enum InternalCommands {
+  /// Run an internal git hook forwarder.
+  Hook(HookArgs),
+}
+
+#[derive(clap::Args, Debug)]
+struct HookArgs {
+  #[arg(value_enum)]
+  kind: HookKind,
+  #[arg(long)]
+  session: String,
+  #[arg(long)]
+  auth_key: String,
+  #[arg(long)]
+  base_url: String,
+  #[arg(long)]
+  repo_path: PathBuf,
+}
+
+#[derive(Clone, Debug, ValueEnum)]
+enum HookKind {
+  PostReceive,
 }
 
 /// Server entry.
 #[tokio::main]
 async fn main() {
+  let command = match CliArgs::parse().command {
+    Some(Commands::Internal(internal)) => {
+      if let Err(err) = run_internal(internal).await {
+        eprintln!("{} internal hook failed: {err}", "[ERROR]".red().bold());
+        exit(1);
+      }
+      return;
+    }
+    other => other,
+  };
+
   let config = match GlobalConfig::load() {
     Ok(config) => config,
     Err(e) => {
@@ -58,11 +102,10 @@ async fn main() {
     }
   };
   greet();
-  // Parse command line arguments
-  let args: Args = Args::parse();
-  match match args.command {
+  match match command {
     Some(Commands::Up) => up(config).await,
     Some(Commands::Down) => down(config).await,
+    Some(Commands::Internal(_)) => Ok(()),
     None => up(config).await,
   } {
     Ok(_) => {}
@@ -81,5 +124,21 @@ async fn main() {
       );
       exit(1)
     }
+  }
+}
+
+async fn run_internal(args: InternalArgs) -> anyhow::Result<()> {
+  match args.command {
+    InternalCommands::Hook(hook) => match hook.kind {
+      HookKind::PostReceive => {
+        run_post_receive(
+          &hook.session,
+          &hook.auth_key,
+          &hook.base_url,
+          &hook.repo_path,
+        )
+        .await
+      }
+    },
   }
 }

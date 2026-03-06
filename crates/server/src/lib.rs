@@ -15,6 +15,7 @@ use tracing::{error, info, warn};
 
 use crate::traits::GlobalState;
 
+mod hook;
 mod logger;
 mod middleware;
 mod routes;
@@ -37,6 +38,8 @@ pub fn greet() {
     "server log starts here".to_uppercase().bold()
   );
 }
+
+pub use hook::run_post_receive;
 
 pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
   let guards = logger::initialize(&config.logging).await?;

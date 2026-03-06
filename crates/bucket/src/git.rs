@@ -44,7 +44,18 @@ pub struct ObjectInfo {
   author: Option<String>,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct DiffEntry {
+  pub status: String,
+  pub old_path: Option<String>,
+  pub path: String,
+}
+
 impl Git {
+  pub fn path(&self) -> &Path {
+    &self.path
+  }
+
   pub async fn try_open(path: impl AsRef<Path>) -> Result<Self, BucketError> {
     let path = path.as_ref();
     if path.exists() {
@@ -404,6 +415,132 @@ impl Git {
     }
   }
 
+  pub async fn get_head_ref(&self) -> Result<String, BucketError> {
+    let output = Command::new("git")
+      .current_dir(&self.path)
+      .arg("symbolic-ref")
+      .arg("-q")
+      .arg("HEAD")
+      .output()
+      .await?;
+    if output.status.success() {
+      trace!(stdio=?output, "got HEAD ref from git repository");
+      Ok(String::from_utf8(output.stdout)?.trim().to_string())
+    } else {
+      warn!(stdio=?output, "failed to get HEAD ref from git repository");
+      Err(BucketError::GitCommandFailed(String::from_utf8(
+        output.stderr,
+      )?))
+    }
+  }
+
+  pub async fn reset_hard(&self, rev: impl AsRef<str>) -> Result<(), BucketError> {
+    let output = Command::new("git")
+      .current_dir(&self.path)
+      .arg("reset")
+      .arg("--hard")
+      .arg(rev.as_ref())
+      .output()
+      .await?;
+    if output.status.success() {
+      trace!(stdio=?output, target=%rev.as_ref(), "reset git repository to target");
+      Ok(())
+    } else {
+      warn!(stdio=?output, target=%rev.as_ref(), "failed to reset git repository to target");
+      Err(BucketError::GitCommandFailed(String::from_utf8(
+        output.stderr,
+      )?))
+    }
+  }
+
+  pub async fn update_ref(
+    &self, ref_name: impl AsRef<str>, new_oid: impl AsRef<str>, old_oid: impl AsRef<str>,
+  ) -> Result<(), BucketError> {
+    let output = Command::new("git")
+      .current_dir(&self.path)
+      .arg("update-ref")
+      .arg(ref_name.as_ref())
+      .arg(new_oid.as_ref())
+      .arg(old_oid.as_ref())
+      .output()
+      .await?;
+    if output.status.success() {
+      trace!(ref_name=%ref_name.as_ref(), new_oid=%new_oid.as_ref(), old_oid=%old_oid.as_ref(), "updated git ref");
+      Ok(())
+    } else {
+      warn!(stdio=?output, ref_name=%ref_name.as_ref(), "failed to update git ref");
+      Err(BucketError::GitCommandFailed(String::from_utf8(
+        output.stderr,
+      )?))
+    }
+  }
+
+  pub async fn delete_ref(
+    &self, ref_name: impl AsRef<str>, old_oid: impl AsRef<str>,
+  ) -> Result<(), BucketError> {
+    let output = Command::new("git")
+      .current_dir(&self.path)
+      .arg("update-ref")
+      .arg("-d")
+      .arg(ref_name.as_ref())
+      .arg(old_oid.as_ref())
+      .output()
+      .await?;
+    if output.status.success() {
+      trace!(ref_name=%ref_name.as_ref(), old_oid=%old_oid.as_ref(), "deleted git ref");
+      Ok(())
+    } else {
+      warn!(stdio=?output, ref_name=%ref_name.as_ref(), "failed to delete git ref");
+      Err(BucketError::GitCommandFailed(String::from_utf8(
+        output.stderr,
+      )?))
+    }
+  }
+
+  pub async fn diff_name_status(
+    &self, old_oid: impl AsRef<str>, new_oid: impl AsRef<str>,
+  ) -> Result<Vec<DiffEntry>, BucketError> {
+    let output = Command::new("git")
+      .current_dir(&self.path)
+      .arg("diff")
+      .arg("--name-status")
+      .arg("--find-renames")
+      .arg(old_oid.as_ref())
+      .arg(new_oid.as_ref())
+      .output()
+      .await?;
+    if !output.status.success() {
+      warn!(stdio=?output, "failed to diff git commits");
+      return Err(BucketError::GitCommandFailed(String::from_utf8(
+        output.stderr,
+      )?));
+    }
+
+    let output = String::from_utf8(output.stdout)?;
+    let mut entries = Vec::new();
+    for line in output.lines() {
+      let mut parts = line.split('\t');
+      let Some(status) = parts.next() else {
+        continue;
+      };
+      let Some(first_path) = parts.next() else {
+        continue;
+      };
+      let second_path = parts.next();
+      let (old_path, path) = if let Some(path) = second_path {
+        (Some(first_path.to_string()), path.to_string())
+      } else {
+        (None, first_path.to_string())
+      };
+      entries.push(DiffEntry {
+        status: status.to_string(),
+        old_path,
+        path,
+      });
+    }
+    Ok(entries)
+  }
+
   async fn stream_internal<T, S>(
     &self, protocol: impl AsRef<OsStr>, subcmd: impl AsRef<OsStr>, args: T,
     mut stdin: impl AsyncRead + Unpin + Send + 'static,
@@ -492,6 +629,8 @@ impl Git {
 /// # Examples
 ///
 /// ```
+/// use r2s_bucket::git::to_pkt_line;
+///
 /// let message = "Hello, world!";
 /// let pkt_line = to_pkt_line(message);
 /// ```

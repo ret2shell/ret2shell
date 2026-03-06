@@ -82,6 +82,7 @@ fn construct_router(state: &GlobalState) -> Router<GlobalState> {
     .nest("/calendar", calendar::router(state))
     .nest("/event", event::router(state))
     .nest("/game", game::router(state))
+    .nest("/internal", game::repo_sync::router())
     .nest("/cluster", cluster::router(state))
     .nest("/media", media::router(state))
     .nest("/platform", platform::router(state))
