@@ -46,7 +46,7 @@ pub(super) async fn update_game_traffic(
         .bucket
         .clone()
         .ok_or(ResponseError::PreconditionFailed(
-          "game bucket does not exist".to_owned(),
+          "game bucket not exist".to_owned(),
         ))?,
     )
     .await;
@@ -118,7 +118,7 @@ pub(super) async fn update_game_lifecycle(
         .bucket
         .clone()
         .ok_or(ResponseError::PreconditionFailed(
-          "game bucket does not exist".to_owned(),
+          "game bucket not exist".to_owned(),
         ))?,
     )
     .await;
