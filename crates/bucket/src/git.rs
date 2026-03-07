@@ -1,4 +1,5 @@
 use std::{
+  collections::HashMap,
   ffi::OsStr,
   path::{Path, PathBuf},
   process::{Command as SyncCommand, Stdio},
@@ -13,6 +14,9 @@ use tokio::{
 use tracing::{debug, trace, warn};
 
 use crate::BucketError;
+
+const GIT_LOG_RECORD_SEPARATOR: u8 = 0x1E;
+const GIT_LOG_FIELD_SEPARATOR: u8 = 0x1F;
 
 #[derive(Clone, Debug)]
 pub struct Git {
@@ -49,6 +53,174 @@ pub struct DiffEntry {
   pub status: String,
   pub old_path: Option<String>,
   pub path: String,
+}
+
+#[derive(Clone, Debug)]
+struct ObjectCommitInfo {
+  abbreviated_commit: String,
+  subject: String,
+  author: String,
+  date: i64,
+}
+
+fn next_non_empty_token<'a, I>(tokens: &mut I) -> Option<&'a [u8]>
+where
+  I: Iterator<Item = &'a [u8]>, {
+  tokens.find(|token| !token.is_empty())
+}
+
+fn parse_ls_tree_objects(output: &[u8]) -> Result<Vec<ObjectInfo>, BucketError> {
+  let mut tokens = output.split(|byte| *byte == 0);
+  let mut objects = Vec::new();
+
+  loop {
+    let Some(object_type) = next_non_empty_token(&mut tokens) else {
+      break;
+    };
+    let object_id = next_non_empty_token(&mut tokens).ok_or_else(|| {
+      BucketError::GitCommandFailed("failed to parse ls-tree object id".to_string())
+    })?;
+    let object_path = next_non_empty_token(&mut tokens).ok_or_else(|| {
+      BucketError::GitCommandFailed("failed to parse ls-tree object path".to_string())
+    })?;
+
+    objects.push(ObjectInfo {
+      path: String::from_utf8(object_path.to_vec())?,
+      commit: String::from_utf8(object_id.to_vec())?,
+      r#type: String::from_utf8(object_type.to_vec())?,
+      last_modified: None,
+      subject: None,
+      author: None,
+    });
+  }
+
+  Ok(objects)
+}
+
+fn parse_git_path(path: &Path) -> String {
+  path.to_string_lossy().replace('\\', "/")
+}
+
+fn repo_relative_path(repo_root: &Path, path: &Path) -> Result<String, BucketError> {
+  if path == repo_root {
+    return Ok(String::new());
+  }
+
+  let relative = path
+    .strip_prefix(repo_root)
+    .map_err(|_| BucketError::PathTraversal)?;
+  Ok(parse_git_path(relative))
+}
+
+fn listed_entry_for_changed_path(base_path: &str, changed_path: &str) -> Option<String> {
+  let relative_path = if base_path.is_empty() {
+    changed_path
+  } else {
+    let suffix = changed_path.strip_prefix(base_path)?;
+    suffix.strip_prefix('/')?
+  };
+
+  let child = relative_path.split('/').next()?;
+  if child.is_empty() {
+    return None;
+  }
+
+  if base_path.is_empty() {
+    Some(child.to_string())
+  } else {
+    Some(format!("{base_path}/{child}"))
+  }
+}
+
+fn parse_commit_record(record: &[u8]) -> Result<(ObjectCommitInfo, &[u8]), BucketError> {
+  let Some(header_end) = record.iter().position(|byte| *byte == 0) else {
+    return Err(BucketError::GitCommandFailed(
+      "failed to parse git log record header".to_string(),
+    ));
+  };
+  let header = &record[..header_end];
+  let mut body = &record[header_end + 1..];
+  if body.first() == Some(&b'\n') {
+    body = &body[1..];
+  }
+
+  let mut header_fields = header.split(|byte| *byte == GIT_LOG_FIELD_SEPARATOR);
+  let abbreviated_commit = header_fields.next().ok_or_else(|| {
+    BucketError::GitCommandFailed("failed to parse git log abbreviated commit".to_string())
+  })?;
+  let subject = header_fields
+    .next()
+    .ok_or_else(|| BucketError::GitCommandFailed("failed to parse git log subject".to_string()))?;
+  let author = header_fields
+    .next()
+    .ok_or_else(|| BucketError::GitCommandFailed("failed to parse git log author".to_string()))?;
+  let date = header_fields
+    .next()
+    .ok_or_else(|| BucketError::GitCommandFailed("failed to parse git log date".to_string()))?;
+
+  Ok((
+    ObjectCommitInfo {
+      abbreviated_commit: String::from_utf8(abbreviated_commit.to_vec())?,
+      subject: String::from_utf8(subject.to_vec())?,
+      author: String::from_utf8(author.to_vec())?,
+      date: String::from_utf8(date.to_vec())?.parse().map_err(|err| {
+        BucketError::GitCommandFailed(format!("failed to parse git log date: {err}"))
+      })?,
+    },
+    body,
+  ))
+}
+
+fn populate_object_commits(
+  base_path: &str, output: &[u8], objects: &mut [ObjectInfo],
+) -> Result<(), BucketError> {
+  let path_to_index: HashMap<_, _> = objects
+    .iter()
+    .enumerate()
+    .map(|(index, object)| (object.path.clone(), index))
+    .collect();
+  let mut remaining = objects.len();
+
+  for record in output.split(|byte| *byte == GIT_LOG_RECORD_SEPARATOR) {
+    if record.is_empty() {
+      continue;
+    }
+
+    let (commit, body) = parse_commit_record(record)?;
+    for changed_path in body
+      .split(|byte| *byte == 0)
+      .filter(|path| !path.is_empty())
+    {
+      let changed_path = String::from_utf8(changed_path.to_vec())?;
+      let Some(entry_path) = listed_entry_for_changed_path(base_path, &changed_path) else {
+        continue;
+      };
+      let Some(index) = path_to_index.get(&entry_path).copied() else {
+        continue;
+      };
+      let object = &mut objects[index];
+      if object.subject.is_some() {
+        continue;
+      }
+
+      object.commit = commit.abbreviated_commit.clone();
+      object.subject = Some(commit.subject.clone());
+      object.author = Some(commit.author.clone());
+      object.last_modified = Some(commit.date);
+      remaining -= 1;
+      if remaining == 0 {
+        return Ok(());
+      }
+    }
+  }
+
+  if remaining == 0 {
+    Ok(())
+  } else {
+    Err(BucketError::GitCommandFailed(format!(
+      "failed to resolve last commit for {remaining} object(s)"
+    )))
+  }
 }
 
 impl Git {
@@ -339,54 +511,51 @@ impl Git {
     if !sub_path.starts_with(&self.path) && sub_path != self.path {
       return Err(BucketError::PathTraversal);
     }
-    let output = Command::new("git")
+    let relative_path = repo_relative_path(&self.path, &sub_path)?;
+    let mut ls_tree = Command::new("git");
+    ls_tree
       .current_dir(&self.path)
       .arg("ls-tree")
-      .arg(
-        "--format={\"type\":\"%(objecttype)\",\"path\":\"%(path)\",\"commit\":\"%(objectname)\"}",
-      )
-      .arg("HEAD")
-      .arg(format!("{}/", sub_path.to_str().unwrap_or(".")))
-      .output()
-      .await?;
+      .arg("-z")
+      .arg("--format=%(objecttype)%x00%(objectname)%x00%(path)%x00")
+      .arg("HEAD");
+    if !relative_path.is_empty() {
+      ls_tree.arg("--").arg(format!(":(literal){relative_path}/"));
+    }
+
+    let output = ls_tree.output().await?;
     if output.status.success() {
       trace!(stdio=?output, "got objects from git repository");
-      let output = String::from_utf8(output.stdout)?;
-      let mut result: Vec<ObjectInfo> = output
-        .lines()
-        .map(serde_json::from_str)
-        .filter_map(Result::ok)
-        .collect();
-
-      // get each object info
-      for obj in result.iter_mut() {
-        let output = Command::new("git")
-          .current_dir(&self.path)
-          .arg("log")
-          .arg("--format={\"abbreviated_commit\":\"%h\",\"subject\":\"%s\",\"body\":\"%b\",\"author\":{\"name\":\"%aN\",\"email\":\"%aE\",\"date\":%at}}")
-          .arg("--date=unix")
-          .arg(format!("--find-object={}", obj.commit)).output().await?;
-
-        if output.status.success() {
-          trace!(stdio=?output, "got object info from git repository");
-          let output = String::from_utf8(output.stdout)?;
-          let obj_info: CommitLog = serde_json::from_str(output.lines().next().ok_or(
-            BucketError::GitCommandFailed("failed to parse object info".to_string()),
-          )?)?;
-          obj.commit = obj_info.abbreviated_commit;
-          obj.subject = Some(obj_info.subject);
-          obj.author = Some(obj_info.author.name);
-          obj.last_modified = Some(obj_info.author.date);
-        } else {
-          warn!(
-            stdio=?output,
-            "failed to get object info from git repository",
-          );
-          return Err(BucketError::GitCommandFailed(String::from_utf8(
-            output.stderr,
-          )?));
-        }
+      let mut result = parse_ls_tree_objects(&output.stdout)?;
+      if result.is_empty() {
+        return Ok(result);
       }
+
+      let mut git_log = Command::new("git");
+      git_log
+        .current_dir(&self.path)
+        .arg("log")
+        .arg("-m")
+        .arg("--name-only")
+        .arg("--no-renames")
+        .arg("-z")
+        .arg("--date=unix")
+        .arg("--format=%x1e%h%x1f%s%x1f%aN%x1f%at")
+        .arg("HEAD")
+        .arg("--");
+      for object in &result {
+        git_log.arg(format!(":(literal){}", object.path));
+      }
+
+      let output = git_log.output().await?;
+      if !output.status.success() {
+        warn!(stdio=?output, "failed to get batched object info from git repository");
+        return Err(BucketError::GitCommandFailed(String::from_utf8(
+          output.stderr,
+        )?));
+      }
+      trace!(stdio=?output, "got batched object info from git repository");
+      populate_object_commits(&relative_path, &output.stdout, &mut result)?;
 
       Ok(result)
     } else {
@@ -636,4 +805,182 @@ impl Git {
 /// ```
 pub fn to_pkt_line(msg: impl AsRef<str>) -> String {
   format!("{:04x}{}", msg.as_ref().len() + 4, msg.as_ref())
+}
+
+#[cfg(test)]
+mod tests {
+  use std::{
+    fs,
+    path::PathBuf,
+    process::Command,
+    time::{SystemTime, UNIX_EPOCH},
+  };
+
+  use super::{Git, listed_entry_for_changed_path, parse_ls_tree_objects};
+
+  fn temp_repo_path(name: &str) -> PathBuf {
+    let nanos = SystemTime::now()
+      .duration_since(UNIX_EPOCH)
+      .expect("system clock before unix epoch")
+      .as_nanos();
+    std::env::temp_dir().join(format!("ret2shell-{name}-{}-{nanos}", std::process::id()))
+  }
+
+  fn run_git(repo: &PathBuf, args: &[&str]) {
+    let status = Command::new("git")
+      .arg("-C")
+      .arg(repo)
+      .args(args)
+      .status()
+      .expect("run git command");
+    assert!(status.success(), "git command failed: {args:?}");
+  }
+
+  fn commit_all(repo: &PathBuf, message: &str, timestamp: &str) {
+    run_git(repo, &["add", "--all"]);
+    let status = Command::new("git")
+      .arg("-C")
+      .arg(repo)
+      .env("GIT_AUTHOR_NAME", "Tester")
+      .env("GIT_AUTHOR_EMAIL", "tester@example.com")
+      .env("GIT_COMMITTER_NAME", "Tester")
+      .env("GIT_COMMITTER_EMAIL", "tester@example.com")
+      .env("GIT_AUTHOR_DATE", timestamp)
+      .env("GIT_COMMITTER_DATE", timestamp)
+      .args(["commit", "-m", message])
+      .status()
+      .expect("commit changes");
+    assert!(status.success(), "git commit failed");
+  }
+
+  #[test]
+  fn parse_ls_tree_objects_handles_nul_records() {
+    let objects =
+      parse_ls_tree_objects(b"blob\0abc123\0dir/file.txt\0\0tree\0def456\0dir/subdir\0\0")
+        .expect("parse ls-tree objects");
+    assert_eq!(objects.len(), 2);
+    assert_eq!(objects[0].path, "dir/file.txt");
+    assert_eq!(objects[0].commit, "abc123");
+    assert_eq!(objects[1].path, "dir/subdir");
+    assert_eq!(objects[1].r#type, "tree");
+  }
+
+  #[test]
+  fn listed_entry_for_changed_path_maps_immediate_children() {
+    assert_eq!(
+      listed_entry_for_changed_path("", "challenges/world/static/simple").as_deref(),
+      Some("challenges")
+    );
+    assert_eq!(
+      listed_entry_for_changed_path("challenges", "challenges/world/static/simple").as_deref(),
+      Some("challenges/world")
+    );
+    assert_eq!(
+      listed_entry_for_changed_path("challenges", "challenges/.gitkeep").as_deref(),
+      Some("challenges/.gitkeep")
+    );
+    assert_eq!(
+      listed_entry_for_changed_path("challenges", "writeups/.gitkeep"),
+      None
+    );
+  }
+
+  #[tokio::test]
+  async fn list_objects_batches_last_commit_lookup() {
+    let repo = temp_repo_path("git-list-objects");
+    fs::create_dir_all(repo.join("challenges/alpha")).expect("create alpha dir");
+    fs::create_dir_all(repo.join("challenges/beta")).expect("create beta dir");
+
+    run_git(&repo, &["init"]);
+    fs::write(repo.join("challenges/alpha/README.md"), "alpha\n").expect("write alpha readme");
+    fs::write(repo.join("challenges/beta/README.md"), "beta\n").expect("write beta readme");
+    commit_all(&repo, "create challenges", "1700000000 +0000");
+
+    fs::write(repo.join("challenges/alpha/README.md"), "alpha updated\n")
+      .expect("update alpha readme");
+    commit_all(&repo, "update alpha", "1700000060 +0000");
+
+    let git = Git::try_open(&repo).await.expect("open git repo");
+    let objects = git.list_objects("challenges").await.expect("list objects");
+    let mut by_path = objects
+      .into_iter()
+      .map(|object| (object.path.clone(), object))
+      .collect::<std::collections::HashMap<_, _>>();
+
+    let alpha = by_path.remove("challenges/alpha").expect("alpha entry");
+    assert_eq!(alpha.subject.as_deref(), Some("update alpha"));
+    assert_eq!(alpha.author.as_deref(), Some("Tester"));
+    assert!(alpha.last_modified.is_some());
+    assert_ne!(alpha.commit.len(), 40);
+
+    let beta = by_path.remove("challenges/beta").expect("beta entry");
+    assert_eq!(beta.subject.as_deref(), Some("create challenges"));
+    assert_eq!(beta.author.as_deref(), Some("Tester"));
+    assert!(beta.last_modified.is_some());
+
+    fs::remove_dir_all(repo).expect("remove temp repo");
+  }
+
+  #[tokio::test]
+  async fn list_objects_keeps_merge_commit_as_latest_change() {
+    let repo = temp_repo_path("git-list-objects-merge");
+    fs::create_dir_all(repo.join("challenges/alpha")).expect("create alpha dir");
+
+    run_git(&repo, &["init"]);
+    fs::write(repo.join("challenges/alpha/README.md"), "base\n").expect("write base readme");
+    commit_all(&repo, "base", "1700000000 +0000");
+
+    run_git(&repo, &["checkout", "-b", "feature"]);
+    fs::write(repo.join("challenges/alpha/README.md"), "feature\n").expect("write feature readme");
+    commit_all(&repo, "feature", "1700000060 +0000");
+
+    run_git(&repo, &["checkout", "master"]);
+    fs::write(repo.join("challenges/alpha/README.md"), "master\n").expect("write master readme");
+    commit_all(&repo, "master", "1700000120 +0000");
+
+    let merge = Command::new("git")
+      .arg("-C")
+      .arg(&repo)
+      .env("GIT_AUTHOR_NAME", "Tester")
+      .env("GIT_AUTHOR_EMAIL", "tester@example.com")
+      .env("GIT_COMMITTER_NAME", "Tester")
+      .env("GIT_COMMITTER_EMAIL", "tester@example.com")
+      .env("GIT_AUTHOR_DATE", "1700000180 +0000")
+      .env("GIT_COMMITTER_DATE", "1700000180 +0000")
+      .args(["merge", "feature"])
+      .status()
+      .expect("start merge");
+    assert!(
+      !merge.success(),
+      "expected merge conflict to require resolution"
+    );
+
+    fs::write(repo.join("challenges/alpha/README.md"), "merged\n").expect("write merged readme");
+    run_git(&repo, &["add", "challenges/alpha/README.md"]);
+    let status = Command::new("git")
+      .arg("-C")
+      .arg(&repo)
+      .env("GIT_AUTHOR_NAME", "Tester")
+      .env("GIT_AUTHOR_EMAIL", "tester@example.com")
+      .env("GIT_COMMITTER_NAME", "Tester")
+      .env("GIT_COMMITTER_EMAIL", "tester@example.com")
+      .env("GIT_AUTHOR_DATE", "1700000180 +0000")
+      .env("GIT_COMMITTER_DATE", "1700000180 +0000")
+      .args(["commit", "-m", "merge"])
+      .status()
+      .expect("finish merge commit");
+    assert!(status.success(), "git merge commit failed");
+
+    let git = Git::try_open(&repo).await.expect("open git repo");
+    let objects = git.list_objects("challenges").await.expect("list objects");
+    let alpha = objects
+      .into_iter()
+      .find(|object| object.path == "challenges/alpha")
+      .expect("alpha entry");
+
+    assert_eq!(alpha.subject.as_deref(), Some("merge"));
+    assert_eq!(alpha.author.as_deref(), Some("Tester"));
+
+    fs::remove_dir_all(repo).expect("remove temp repo");
+  }
 }

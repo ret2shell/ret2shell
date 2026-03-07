@@ -15,7 +15,11 @@ use axum::{
 };
 use futures::TryStreamExt;
 use nanoid::nanoid;
-use r2s_bucket::{Bucket, git::to_pkt_line};
+use r2s_bucket::{
+  Bucket,
+  git::{ObjectInfo, to_pkt_line},
+};
+use r2s_cache::Cache;
 use r2s_config::GlobalConfig;
 use r2s_database::game;
 use regex::Regex;
@@ -35,14 +39,30 @@ use crate::{
   traits::{GlobalState, ResponseError},
 };
 
+const GAME_REPO_CACHE_TTL: i64 = 60 * 5;
+
 #[derive(Deserialize)]
 pub(super) struct GameRepoGitQuery {
   pub path: Option<String>,
 }
 
+fn normalize_game_repo_path(path: Option<String>) -> String {
+  let path = path.unwrap_or_else(|| ".".to_owned());
+  let path = path.trim().trim_matches('/');
+  if path.is_empty() {
+    ".".to_owned()
+  } else {
+    path.to_owned()
+  }
+}
+
+fn game_repo_cache_key(game_id: i64, head: &str, path: &str) -> String {
+  format!("{game_id}:{head}:{path}")
+}
+
 pub(super) async fn get_game_repo_git(
-  State(ref bucket): State<Bucket>, Extension(game): Extension<game::Model>,
-  Query(query): Query<GameRepoGitQuery>,
+  State(ref bucket): State<Bucket>, State(ref cache): State<Cache>,
+  Extension(game): Extension<game::Model>, Query(query): Query<GameRepoGitQuery>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let game_bucket = bucket
     .at(
@@ -54,12 +74,20 @@ pub(super) async fn get_game_repo_git(
         ))?,
     )
     .await?;
-  let path = match query.path {
-    Some(path) => path,
-    None => ".".to_owned(),
-  };
+  let path = normalize_game_repo_path(query.path);
+  let head = game_bucket.git.get_head().await?;
+  let cache = cache.at("game-repo");
+  let cache_key = game_repo_cache_key(game.id, &head, &path);
+  if let Some(objects) = cache.get::<Vec<ObjectInfo>>(&cache_key).await? {
+    return Ok(Json(objects));
+  }
 
-  Ok(Json(game_bucket.git.list_objects(&path).await?))
+  let objects = game_bucket.git.list_objects(&path).await?;
+  cache
+    .set_ex(&cache_key, &objects, GAME_REPO_CACHE_TTL)
+    .await?;
+
+  Ok(Json(objects))
 }
 
 #[derive(Clone, Deserialize)]
@@ -454,4 +482,33 @@ pub(super) async fn game_repo_git_upload_pack(
   body: Body,
 ) -> Result<impl IntoResponse, ResponseError> {
   game_repo_git_rpc("upload-pack", bucket, game, headers, body).await
+}
+
+#[cfg(test)]
+mod tests {
+  use super::{game_repo_cache_key, normalize_game_repo_path};
+
+  #[test]
+  fn normalize_game_repo_path_collapses_root_and_trailing_slashes() {
+    assert_eq!(normalize_game_repo_path(None), ".");
+    assert_eq!(normalize_game_repo_path(Some("".to_owned())), ".");
+    assert_eq!(normalize_game_repo_path(Some("/".to_owned())), ".");
+    assert_eq!(normalize_game_repo_path(Some("./".to_owned())), ".");
+    assert_eq!(
+      normalize_game_repo_path(Some(" challenges/ ".to_owned())),
+      "challenges"
+    );
+    assert_eq!(
+      normalize_game_repo_path(Some("/challenges/world/".to_owned())),
+      "challenges/world"
+    );
+  }
+
+  #[test]
+  fn game_repo_cache_key_uses_game_head_and_path() {
+    assert_eq!(
+      game_repo_cache_key(42, "deadbeef", "challenges/world"),
+      "42:deadbeef:challenges/world"
+    );
+  }
 }
