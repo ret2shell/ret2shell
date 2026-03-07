@@ -3,8 +3,8 @@ use r2s_cache::Cache;
 use r2s_cluster::{
   ChallengeEnvSnapshot, Cluster, Pod,
   lifecycle::{
-    LifecycleChallengeInfo, LifecycleEvent, LifecycleExecutionStatus, LifecycleStopReason,
-    LifecycleTeamInfo, LifecycleUserInfo,
+    LifecycleChallengeInfo, LifecycleEvent, LifecycleExecutionRequest, LifecycleExecutionStatus,
+    LifecycleStopReason, LifecycleTeamInfo, LifecycleUserInfo,
   },
 };
 use r2s_database::{challenge, config, game, team, user};
@@ -12,6 +12,15 @@ use r2s_engine::Engine;
 use tracing::{error, info, warn};
 
 use crate::{middleware::auth::Token, traits::GlobalState};
+
+macro_rules! trace_aware_log {
+  ($logger:ident, $trace_id:expr, $($fields:tt)*) => {
+    match $trace_id {
+      Some(trace_id) => $logger!(trace_id=%trace_id, $($fields)*),
+      None => $logger!($($fields)*),
+    }
+  };
+}
 
 #[derive(Clone, Copy, Debug)]
 enum ScriptScope {
@@ -33,6 +42,30 @@ struct ResolvedLifecycleScript {
   key: String,
   script: String,
   scope: ScriptScope,
+}
+
+#[derive(Clone)]
+struct LifecycleHookContext {
+  cluster: Cluster,
+  engine: Engine,
+  config: config::Model,
+  game: game::Model,
+  challenge: LifecycleChallengeInfo,
+  user: LifecycleUserInfo,
+  team: Option<LifecycleTeamInfo>,
+  trace_id: Option<String>,
+}
+
+pub(crate) struct RequestLifecycleHooks {
+  pub(crate) state: GlobalState,
+  pub(crate) config: config::Model,
+  pub(crate) game: game::Model,
+  pub(crate) challenge: challenge::Model,
+  pub(crate) token: Token,
+  pub(crate) team: Option<team::Model>,
+  pub(crate) snapshots: Vec<ChallengeEnvSnapshot>,
+  pub(crate) event: LifecycleEvent,
+  pub(crate) trace_id: String,
 }
 
 pub fn user_info_from_token(token: &Token) -> LifecycleUserInfo {
@@ -92,12 +125,9 @@ fn fallback_user_info(snapshot: &ChallengeEnvSnapshot) -> LifecycleUserInfo {
 fn fallback_team_info(snapshot: &ChallengeEnvSnapshot) -> Option<LifecycleTeamInfo> {
   let id = pod_label(&snapshot.pod, "ret.sh.cn/team")
     .and_then(|value| value.parse::<i64>().ok())
-    .filter(|value| *value > 0);
-  if id.is_none() {
-    return None;
-  }
+    .filter(|value| *value > 0)?;
   Some(LifecycleTeamInfo {
-    id,
+    id: Some(id),
     name: pod_annotation(&snapshot.pod, "ret.sh.cn/team"),
     institute_id: None,
     token: None,
@@ -141,20 +171,20 @@ fn resolve_lifecycle_script(
   let Some(cluster_config) = &config.cluster else {
     return Ok(None);
   };
-  if game.archive_at > Utc::now() {
-    if let Some(lifecycle) = game.lifecycle.clone() {
-      let key = game.bucket.clone().ok_or_else(|| {
-        format!(
-          "game {}:{} missing bucket for lifecycle",
-          game.id, game.name
-        )
-      })?;
-      return Ok(Some(ResolvedLifecycleScript {
-        key,
-        script: lifecycle,
-        scope: ScriptScope::Game,
-      }));
-    }
+  if game.archive_at > Utc::now()
+    && let Some(lifecycle) = game.lifecycle.clone()
+  {
+    let key = game.bucket.clone().ok_or_else(|| {
+      format!(
+        "game {}:{} missing bucket for lifecycle",
+        game.id, game.name
+      )
+    })?;
+    return Ok(Some(ResolvedLifecycleScript {
+      key,
+      script: lifecycle,
+      scope: ScriptScope::Game,
+    }));
   }
   Ok(Some(ResolvedLifecycleScript {
     key: "default".to_owned(),
@@ -172,53 +202,89 @@ async fn cleanup_traffic_cache(cache: Cache, snapshots: &[ChallengeEnvSnapshot])
 }
 
 async fn trigger_lifecycle_for_snapshots(
-  cluster: Cluster, engine: Engine, config: config::Model, game: game::Model,
-  challenge: LifecycleChallengeInfo, user: LifecycleUserInfo, team: Option<LifecycleTeamInfo>,
-  snapshots: Vec<ChallengeEnvSnapshot>, event: LifecycleEvent, trace_id: Option<String>,
+  context: LifecycleHookContext, snapshots: Vec<ChallengeEnvSnapshot>, event: LifecycleEvent,
 ) {
+  let LifecycleHookContext {
+    cluster,
+    engine,
+    config,
+    game,
+    challenge,
+    user,
+    team,
+    trace_id,
+  } = context;
+  let trace_id = trace_id.as_deref();
+  let event_name = event.name();
+  let stop_reason = event.reason().map(|reason| reason.as_str()).unwrap_or("");
+  let game_id = game.id;
+  let challenge_id = challenge.id;
+  let user_id = user.id;
+  let team_id = team.as_ref().and_then(|team| team.id).unwrap_or_default();
+  let team_name = team
+    .as_ref()
+    .and_then(|team| team.name.as_deref())
+    .unwrap_or("");
+
   let Some(mapper) = cluster.lifecycle.clone() else {
-    error!(event=%event.name(), "lifecycle mapper is not initialized");
+    trace_aware_log!(
+      error,
+      trace_id,
+      event=%event_name,
+      "lifecycle mapper is not initialized"
+    );
     return;
   };
   let resolved = match resolve_lifecycle_script(&config, &game) {
     Ok(resolved) => resolved,
     Err(err) => {
-      match trace_id.as_deref() {
-        Some(trace_id) => {
-          error!(trace_id=%trace_id, event=%event.name(), game_id=%game.id, challenge_id=%challenge.id, error=%err, "failed to resolve lifecycle script");
-        }
-        None => {
-          error!(event=%event.name(), game_id=%game.id, challenge_id=%challenge.id, error=%err, "failed to resolve lifecycle script");
-        }
-      }
+      trace_aware_log!(
+        error,
+        trace_id,
+        event=%event_name,
+        game_id=%game_id,
+        challenge_id=%challenge_id,
+        error=%err,
+        "failed to resolve lifecycle script"
+      );
       return;
     }
   };
   let Some(resolved) = resolved else {
     for snapshot in snapshots {
       let pod_name = snapshot.pod.metadata.name.clone().unwrap_or_default();
-      match trace_id.as_deref() {
-        Some(trace_id) => {
-          info!(trace_id=%trace_id, event=%event.name(), pod=%pod_name, game_id=%game.id, challenge_id=%challenge.id, user_id=%user.id, outcome="skipped", reason="cluster config missing", "lifecycle hook skipped");
-        }
-        None => {
-          info!(event=%event.name(), pod=%pod_name, game_id=%game.id, challenge_id=%challenge.id, user_id=%user.id, outcome="skipped", reason="cluster config missing", "lifecycle hook skipped");
-        }
-      }
+      trace_aware_log!(
+        info,
+        trace_id,
+        event=%event_name,
+        pod=%pod_name,
+        game_id=%game_id,
+        challenge_id=%challenge_id,
+        user_id=%user_id,
+        outcome="skipped",
+        reason="cluster config missing",
+        "lifecycle hook skipped"
+      );
     }
     return;
   };
+  let scope = resolved.scope.as_str();
   if resolved.script.trim().is_empty() {
     for snapshot in snapshots {
       let pod_name = snapshot.pod.metadata.name.clone().unwrap_or_default();
-      match trace_id.as_deref() {
-        Some(trace_id) => {
-          info!(trace_id=%trace_id, event=%event.name(), scope=%resolved.scope.as_str(), pod=%pod_name, game_id=%game.id, challenge_id=%challenge.id, user_id=%user.id, outcome="skipped", reason="script empty", "lifecycle hook skipped");
-        }
-        None => {
-          info!(event=%event.name(), scope=%resolved.scope.as_str(), pod=%pod_name, game_id=%game.id, challenge_id=%challenge.id, user_id=%user.id, outcome="skipped", reason="script empty", "lifecycle hook skipped");
-        }
-      }
+      trace_aware_log!(
+        info,
+        trace_id,
+        event=%event_name,
+        scope=%scope,
+        pod=%pod_name,
+        game_id=%game_id,
+        challenge_id=%challenge_id,
+        user_id=%user_id,
+        outcome="skipped",
+        reason="script empty",
+        "lifecycle hook skipped"
+      );
     }
     return;
   }
@@ -226,91 +292,115 @@ async fn trigger_lifecycle_for_snapshots(
     .preload(&engine, &resolved.key, &resolved.script)
     .await
   {
-    match trace_id.as_deref() {
-      Some(trace_id) => {
-        error!(trace_id=%trace_id, event=%event.name(), scope=%resolved.scope.as_str(), game_id=%game.id, challenge_id=%challenge.id, error=?err, "failed to preload lifecycle script");
-      }
-      None => {
-        error!(event=%event.name(), scope=%resolved.scope.as_str(), game_id=%game.id, challenge_id=%challenge.id, error=?err, "failed to preload lifecycle script");
-      }
-    }
+    trace_aware_log!(
+      error,
+      trace_id,
+      event=%event_name,
+      scope=%scope,
+      game_id=%game_id,
+      challenge_id=%challenge_id,
+      error=?err,
+      "failed to preload lifecycle script"
+    );
     return;
   }
   for snapshot in snapshots {
     let pod_name = snapshot.pod.metadata.name.clone().unwrap_or_default();
-    let team_id = team.as_ref().and_then(|team| team.id).unwrap_or_default();
-    let team_name = team
-      .as_ref()
-      .and_then(|team| team.name.clone())
-      .unwrap_or_default();
     match mapper
       .execute(
         &engine,
         &resolved.key,
-        event,
-        &snapshot,
-        user.clone(),
-        team.clone(),
-        challenge.clone(),
+        LifecycleExecutionRequest {
+          event,
+          snapshot: &snapshot,
+          user: user.clone(),
+          team: team.clone(),
+          challenge: challenge.clone(),
+        },
       )
       .await
     {
-      Ok(LifecycleExecutionStatus::Executed) => match trace_id.as_deref() {
-        Some(trace_id) => {
-          info!(trace_id=%trace_id, event=%event.name(), reason=%event.reason().map(|reason| reason.as_str()).unwrap_or(""), scope=%resolved.scope.as_str(), pod=%pod_name, game_id=%game.id, challenge_id=%challenge.id, user_id=%user.id, team_id, team_name=%team_name, outcome="executed", "lifecycle hook executed");
-        }
-        None => {
-          info!(event=%event.name(), reason=%event.reason().map(|reason| reason.as_str()).unwrap_or(""), scope=%resolved.scope.as_str(), pod=%pod_name, game_id=%game.id, challenge_id=%challenge.id, user_id=%user.id, team_id, team_name=%team_name, outcome="executed", "lifecycle hook executed");
-        }
-      },
-      Ok(LifecycleExecutionStatus::Skipped) => match trace_id.as_deref() {
-        Some(trace_id) => {
-          info!(trace_id=%trace_id, event=%event.name(), reason=%event.reason().map(|reason| reason.as_str()).unwrap_or(""), scope=%resolved.scope.as_str(), pod=%pod_name, game_id=%game.id, challenge_id=%challenge.id, user_id=%user.id, team_id, team_name=%team_name, outcome="skipped", reason_detail="function missing", "lifecycle hook skipped");
-        }
-        None => {
-          info!(event=%event.name(), reason=%event.reason().map(|reason| reason.as_str()).unwrap_or(""), scope=%resolved.scope.as_str(), pod=%pod_name, game_id=%game.id, challenge_id=%challenge.id, user_id=%user.id, team_id, team_name=%team_name, outcome="skipped", reason_detail="function missing", "lifecycle hook skipped");
-        }
-      },
-      Err(err) => match trace_id.as_deref() {
-        Some(trace_id) => {
-          error!(trace_id=%trace_id, event=%event.name(), reason=%event.reason().map(|reason| reason.as_str()).unwrap_or(""), scope=%resolved.scope.as_str(), pod=%pod_name, game_id=%game.id, challenge_id=%challenge.id, user_id=%user.id, team_id, team_name=%team_name, error=?err, outcome="failed", "lifecycle hook failed");
-        }
-        None => {
-          error!(event=%event.name(), reason=%event.reason().map(|reason| reason.as_str()).unwrap_or(""), scope=%resolved.scope.as_str(), pod=%pod_name, game_id=%game.id, challenge_id=%challenge.id, user_id=%user.id, team_id, team_name=%team_name, error=?err, outcome="failed", "lifecycle hook failed");
-        }
-      },
+      Ok(LifecycleExecutionStatus::Executed) => trace_aware_log!(
+        info,
+        trace_id,
+        event=%event_name,
+        reason=%stop_reason,
+        scope=%scope,
+        pod=%pod_name,
+        game_id=%game_id,
+        challenge_id=%challenge_id,
+        user_id=%user_id,
+        team_id=%team_id,
+        team_name=%team_name,
+        outcome="executed",
+        "lifecycle hook executed"
+      ),
+      Ok(LifecycleExecutionStatus::Skipped) => trace_aware_log!(
+        info,
+        trace_id,
+        event=%event_name,
+        reason=%stop_reason,
+        scope=%scope,
+        pod=%pod_name,
+        game_id=%game_id,
+        challenge_id=%challenge_id,
+        user_id=%user_id,
+        team_id=%team_id,
+        team_name=%team_name,
+        outcome="skipped",
+        reason_detail="function missing",
+        "lifecycle hook skipped"
+      ),
+      Err(err) => trace_aware_log!(
+        error,
+        trace_id,
+        event=%event_name,
+        reason=%stop_reason,
+        scope=%scope,
+        pod=%pod_name,
+        game_id=%game_id,
+        challenge_id=%challenge_id,
+        user_id=%user_id,
+        team_id=%team_id,
+        team_name=%team_name,
+        error=?err,
+        outcome="failed",
+        "lifecycle hook failed"
+      ),
     }
   }
 }
 
-pub fn spawn_request_hooks(
-  cache: Option<Cache>, cluster: Cluster, engine: Engine, config: config::Model, game: game::Model,
-  challenge: challenge::Model, token: Token, team: Option<team::Model>,
-  snapshots: Vec<ChallengeEnvSnapshot>, event: LifecycleEvent, trace_id: String,
-) {
+pub fn spawn_request_hooks(request: RequestLifecycleHooks) {
+  let RequestLifecycleHooks {
+    state,
+    config,
+    game,
+    challenge,
+    token,
+    team,
+    snapshots,
+    event,
+    trace_id,
+  } = request;
   if snapshots.is_empty() {
     return;
   }
-  let user = user_info_from_token(&token);
-  let challenge = challenge_info_from_model(&challenge);
-  let team = team.as_ref().map(team_info_from_model);
+  let context = LifecycleHookContext {
+    cluster: state.cluster.clone(),
+    engine: state.engine.clone(),
+    config,
+    game,
+    challenge: challenge_info_from_model(&challenge),
+    user: user_info_from_token(&token),
+    team: team.as_ref().map(team_info_from_model),
+    trace_id: Some(trace_id),
+  };
   tokio::spawn(async move {
-    if let Some(cache) = cache {
-      cleanup_traffic_cache(cache, &snapshots).await;
+    if !matches!(event, LifecycleEvent::Start) {
+      cleanup_traffic_cache(state.cache.clone(), &snapshots).await;
     }
-    trigger_lifecycle_for_snapshots(
-      cluster,
-      engine,
-      config,
-      game,
-      challenge,
-      user,
-      team,
-      snapshots,
-      event,
-      Some(trace_id),
-    )
-    .await;
+    trigger_lifecycle_for_snapshots(context, snapshots, event).await;
   });
 }
 
@@ -382,16 +472,18 @@ pub fn spawn_timeout_stop_hooks(state: GlobalState, snapshots: Vec<ChallengeEnvS
         None => None,
       };
       trigger_lifecycle_for_snapshots(
-        state.cluster.clone(),
-        state.engine.clone(),
-        config.clone(),
-        game,
-        challenge,
-        user,
-        team,
+        LifecycleHookContext {
+          cluster: state.cluster.clone(),
+          engine: state.engine.clone(),
+          config: config.clone(),
+          game,
+          challenge,
+          user,
+          team,
+          trace_id: None,
+        },
         vec![snapshot],
         LifecycleEvent::Stop(LifecycleStopReason::Timeout),
-        None,
       )
       .await;
     }

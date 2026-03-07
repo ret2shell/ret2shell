@@ -26,11 +26,10 @@ use tokio_util::io::{ReaderStream, StreamReader};
 use tower_http::request_id::RequestId;
 use tracing::error;
 
+use super::hook::{
+  GIT_HOOK_AUTH_DOMAIN, GIT_HOOK_SESSION_DOMAIN, GIT_HOOK_TTL, GitHookSession, cleanup_hook_session,
+};
 use crate::{
-  hook::{
-    GIT_HOOK_AUTH_DOMAIN, GIT_HOOK_SESSION_DOMAIN, GIT_HOOK_TTL, GitHookSession,
-    cleanup_hook_session,
-  },
   middleware::auth::Token,
   traits::{GlobalState, ResponseError},
 };

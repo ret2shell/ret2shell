@@ -1,5 +1,6 @@
 use std::{
   collections::{BTreeMap, BTreeSet, HashSet},
+  fmt::Display,
   net::SocketAddr,
 };
 
@@ -8,7 +9,7 @@ use axum::{
   Router,
   body::{Body, Bytes},
   extract::{ConnectInfo, Query, State},
-  http::StatusCode,
+  http::{HeaderMap, StatusCode},
   response::IntoResponse,
   routing::post,
 };
@@ -23,14 +24,14 @@ use tokio::{fs, sync::mpsc};
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::{error, info, warn};
 
-use crate::{
+use super::{
+  core::invalidate_game_doc_cache,
   hook::{
-    GIT_HOOK_AUTH_DOMAIN, GIT_HOOK_SESSION_DOMAIN, GitHookMessageLevel, GitHookSession,
-    format_git_hook_line,
+    GIT_HOOK_AUTH_DOMAIN, GIT_HOOK_SESSION_DOMAIN, GitHookFormatter, GitHookMessageLevel,
+    GitHookSession, strip_git_hook_ansi,
   },
-  routes::game::core::invalidate_game_doc_cache,
-  traits::{GlobalState, ResponseError},
 };
+use crate::traits::{GlobalState, ResponseError};
 
 const ZERO_OID: &str = "0000000000000000000000000000000000000000";
 
@@ -71,54 +72,79 @@ struct ChallengeChangeSet {
 #[derive(Clone)]
 struct StreamLogger {
   tx: mpsc::Sender<Result<Bytes, std::io::Error>>,
+  formatter: GitHookFormatter,
 }
 
 impl StreamLogger {
-  fn new(tx: mpsc::Sender<Result<Bytes, std::io::Error>>) -> Self {
-    Self { tx }
+  fn new(tx: mpsc::Sender<Result<Bytes, std::io::Error>>, formatter: GitHookFormatter) -> Self {
+    Self { tx, formatter }
+  }
+
+  fn name(&self, value: impl Display) -> String {
+    self.formatter.name(value)
+  }
+
+  fn reference(&self, value: impl Display) -> String {
+    self.formatter.reference(value)
+  }
+
+  fn old_oid(&self, value: impl Display) -> String {
+    self.formatter.old_oid(value)
+  }
+
+  fn new_oid(&self, value: impl Display) -> String {
+    self.formatter.new_oid(value)
+  }
+
+  fn count(&self, value: impl Display) -> String {
+    self.formatter.count(value)
   }
 
   async fn header(&self, line: impl AsRef<str>) {
     self
-      .send(format_git_hook_line(GitHookMessageLevel::Header, line))
+      .send(self.formatter.line(GitHookMessageLevel::Header, line))
       .await;
   }
 
   async fn detail(&self, line: impl AsRef<str>) {
     self
-      .send(format_git_hook_line(GitHookMessageLevel::Detail, line))
+      .send(self.formatter.line(GitHookMessageLevel::Detail, line))
       .await;
   }
 
   async fn info(&self, line: impl AsRef<str>) {
     let line = line.as_ref().to_owned();
-    info!(message=%line, "git push sync");
+    let message = strip_git_hook_ansi(&line);
+    info!(message=%message, "git push sync");
     self
-      .send(format_git_hook_line(GitHookMessageLevel::Info, &line))
+      .send(self.formatter.line(GitHookMessageLevel::Info, &line))
       .await;
   }
 
   async fn warn(&self, line: impl AsRef<str>) {
     let line = line.as_ref().to_owned();
-    warn!(message=%line, "git push sync");
+    let message = strip_git_hook_ansi(&line);
+    warn!(message=%message, "git push sync");
     self
-      .send(format_git_hook_line(GitHookMessageLevel::Warn, &line))
+      .send(self.formatter.line(GitHookMessageLevel::Warn, &line))
       .await;
   }
 
   async fn error(&self, line: impl AsRef<str>) {
     let line = line.as_ref().to_owned();
-    error!(message=%line, "git push sync");
+    let message = strip_git_hook_ansi(&line);
+    error!(message=%message, "git push sync");
     self
-      .send(format_git_hook_line(GitHookMessageLevel::Error, &line))
+      .send(self.formatter.line(GitHookMessageLevel::Error, &line))
       .await;
   }
 
   async fn success(&self, line: impl AsRef<str>) {
     let line = line.as_ref().to_owned();
-    info!(message=%line, "git push sync");
+    let message = strip_git_hook_ansi(&line);
+    info!(message=%message, "git push sync");
     self
-      .send(format_git_hook_line(GitHookMessageLevel::Success, &line))
+      .send(self.formatter.line(GitHookMessageLevel::Success, &line))
       .await;
   }
 
@@ -133,7 +159,7 @@ impl StreamLogger {
 
 pub(crate) async fn post_receive(
   ConnectInfo(addr): ConnectInfo<SocketAddr>, State(state): State<GlobalState>,
-  Query(query): Query<PostReceiveQuery>, body: Body,
+  Query(query): Query<PostReceiveQuery>, headers: HeaderMap, body: Body,
 ) -> Result<impl IntoResponse, ResponseError> {
   if !addr.ip().is_loopback() {
     return Err(ResponseError::Forbidden(
@@ -164,7 +190,7 @@ pub(crate) async fn post_receive(
   let updates = parse_post_receive_updates(&payload)?;
 
   let (tx, rx) = mpsc::channel(64);
-  let logger = StreamLogger::new(tx);
+  let logger = StreamLogger::new(tx, GitHookFormatter::from_headers(&headers));
   tokio::spawn(async move {
     if let Err(err) = execute_post_receive(state, session, updates, logger.clone()).await {
       logger.error(format!("Synchronization failed: {err}")).await;
@@ -205,11 +231,16 @@ async fn execute_post_receive(
 
     info!(game=%game.name, "git push sync started");
     logger.header("Ret2Shell post-receive").await;
-    logger.detail(format!("Game   : {}", game.name)).await;
+    logger
+      .detail(format!("Game   : {}", logger.name(&game.name)))
+      .await;
 
     if updates.len() != 1 {
       logger
-        .detail(format!("Refs   : {} update(s)", updates.len()))
+        .detail(format!(
+          "Refs   : {} update(s)",
+          logger.count(updates.len())
+        ))
         .await;
       logger
         .error("Rejecting push: pushing multiple refs is not supported.")
@@ -219,13 +250,16 @@ async fn execute_post_receive(
 
     let update = &updates[0];
     logger
-      .detail(format!("Branch : {}", display_ref_name(&update.ref_name)))
+      .detail(format!(
+        "Branch : {}",
+        logger.reference(display_ref_name(&update.ref_name))
+      ))
       .await;
     logger
       .detail(format!(
         "Commit : {} -> {}",
-        short_oid(&update.old_oid),
-        short_oid(&update.new_oid)
+        logger.old_oid(short_oid(&update.old_oid)),
+        logger.new_oid(short_oid(&update.new_oid))
       ))
       .await;
 
@@ -233,7 +267,7 @@ async fn execute_post_receive(
       logger
         .error(format!(
           "Rejecting push: only the current branch `{}` can be pushed.",
-          head_ref
+          logger.reference(&head_ref)
         ))
         .await;
       bail!("only the current branch can be pushed");
@@ -248,9 +282,9 @@ async fn execute_post_receive(
     logger
       .info(format!(
         "Synchronizing `{}` from {} to {}.",
-        display_ref_name(&update.ref_name),
-        short_oid(&update.old_oid),
-        short_oid(&update.new_oid)
+        logger.reference(display_ref_name(&update.ref_name)),
+        logger.old_oid(short_oid(&update.old_oid)),
+        logger.new_oid(short_oid(&update.new_oid))
       ))
       .await;
 
@@ -260,7 +294,10 @@ async fn execute_post_receive(
       .diff_name_status(&update.old_oid, &update.new_oid)
       .await?;
     logger
-      .info(format!("Detected {} changed path(s).", diff.len()))
+      .info(format!(
+        "Detected {} changed path(s).",
+        logger.count(diff.len())
+      ))
       .await;
 
     let txn = state.db.conn.begin().await?;
@@ -369,7 +406,8 @@ async fn synchronize_repository(
   for bucket_name in &new_buckets {
     logger
       .info(format!(
-        "Creating challenge `{bucket_name}` from the repository."
+        "Creating challenge `{}` from the repository.",
+        logger.name(bucket_name)
       ))
       .await;
     let challenge_bucket = game_bucket.at(bucket_name).await?;
@@ -381,7 +419,7 @@ async fn synchronize_repository(
       logger
         .warn(format!(
           "Skipping checker validation for new challenge `{}` because the checker script was not changed in this push.",
-          challenge_bucket.name
+          logger.name(&challenge_bucket.name)
         ))
         .await;
     }
@@ -416,7 +454,10 @@ async fn synchronize_repository(
     let challenge_bucket = game_bucket.at(&bucket_name).await?;
 
     logger
-      .info(format!("Synchronizing challenge `{}`...", existing.name))
+      .info(format!(
+        "Synchronizing challenge `{}`...",
+        logger.name(&existing.name)
+      ))
       .await;
 
     if challenge_changes.env.contains(&bucket_name) {
@@ -626,15 +667,15 @@ async fn lint_checker(
     logger
       .info(format!(
         "Checker validation passed for challenge `{}`.",
-        challenge_bucket.name
+        logger.name(&challenge_bucket.name)
       ))
       .await;
   } else {
     logger
       .warn(format!(
         "Checker validation produced {} diagnostic(s) for challenge `{}`.",
-        diagnostics.len(),
-        challenge_bucket.name
+        logger.count(diagnostics.len()),
+        logger.name(&challenge_bucket.name)
       ))
       .await;
   }

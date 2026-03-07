@@ -4,8 +4,6 @@ use axum::{Extension, Json, extract::State, response::IntoResponse};
 use chrono::Utc;
 use nanoid::nanoid;
 use r2s_bucket::Bucket;
-use r2s_cache::Cache;
-use r2s_checker::Checker;
 use r2s_cluster::{
   CHALLENGE_NS, Cluster,
   lifecycle::{LifecycleEvent, LifecycleStopReason},
@@ -15,16 +13,14 @@ use r2s_database::{
   challenge, config, game, team,
   user::{self, Permission},
 };
-use r2s_engine::Engine;
 use serde_json::to_value;
 use tower_http::request_id::RequestId;
 use tracing::{debug, info, warn};
 
 use crate::{
-  lifecycle,
   middleware::{auth::Token, data::extract_team},
-  routes::game::get_pod_field,
-  traits::ResponseError,
+  routes::game::{get_pod_field, lifecycle},
+  traits::{GlobalState, ResponseError},
 };
 
 const LABEL_ALPHABET: [char; 62] = [
@@ -47,14 +43,17 @@ pub(super) async fn get_challenge_env_config(
   }
 }
 
-#[allow(clippy::too_many_arguments)]
 pub(super) async fn start_challenge_instance(
-  State(bucket): State<Bucket>, State(cluster): State<Cluster>, State(cache): State<Cache>,
-  State(checker): State<Checker>, State(engine): State<Engine>,
-  Extension(config_model): Extension<config::Model>, Extension(game): Extension<game::Model>,
-  Extension(challenge): Extension<challenge::Model>, Extension(token): Extension<Token>,
-  Extension(trace): Extension<RequestId>, team_ext: Extension<Option<team::Model>>,
+  State(state): State<GlobalState>, Extension(config_model): Extension<config::Model>,
+  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
+  Extension(token): Extension<Token>, Extension(trace): Extension<RequestId>,
+  team_ext: Extension<Option<team::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  let bucket = state.bucket.clone();
+  let cluster = state.cluster.clone();
+  let cache = state.cache.clone();
+  let checker = state.checker.clone();
+  let engine = state.engine.clone();
   let team = extract_team!(game, team_ext, token);
   let team = if team.is_some()
     && game.in_progress()
@@ -220,23 +219,21 @@ pub(super) async fn start_challenge_instance(
       .at("cluster")
       .set_ex(token.id.to_string(), Utc::now().timestamp(), 60)
       .await?;
-    lifecycle::spawn_request_hooks(
-      None,
-      cluster.clone(),
-      engine.clone(),
-      config_model.clone(),
-      game.clone(),
-      challenge.clone(),
-      token.clone(),
-      lifecycle_team,
-      vec![snapshot],
-      LifecycleEvent::Start,
-      trace
+    lifecycle::spawn_request_hooks(lifecycle::RequestLifecycleHooks {
+      state: state.clone(),
+      config: config_model.clone(),
+      game: game.clone(),
+      challenge: challenge.clone(),
+      token: token.clone(),
+      team: lifecycle_team,
+      snapshots: vec![snapshot],
+      event: LifecycleEvent::Start,
+      trace_id: trace
         .header_value()
         .to_str()
         .unwrap_or("UNKNOWN")
         .to_owned(),
-    );
+    });
     Ok(())
   } else {
     Err(ResponseError::PreconditionFailed(
@@ -246,135 +243,119 @@ pub(super) async fn start_challenge_instance(
 }
 
 pub(super) async fn delay_challenge_instance(
-  State(cache): State<Cache>, State(ref cluster): State<Cluster>, State(engine): State<Engine>,
-  Extension(config_model): Extension<config::Model>, Extension(token): Extension<Token>,
-  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
-  Extension(trace): Extension<RequestId>, team_ext: Extension<Option<team::Model>>,
+  State(state): State<GlobalState>, Extension(config_model): Extension<config::Model>,
+  Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
+  Extension(challenge): Extension<challenge::Model>, Extension(trace): Extension<RequestId>,
+  team_ext: Extension<Option<team::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let team = extract_team!(game, team_ext, token);
   let lifecycle_team = team.clone();
+  let cluster = state.cluster.at(CHALLENGE_NS);
+  let trace_id = trace
+    .header_value()
+    .to_str()
+    .unwrap_or("UNKNOWN")
+    .to_owned();
 
   let pods = if let Some(team) = team {
     info!("delaying challenge env");
     cluster
-      .at(CHALLENGE_NS)
       .delay_challenge_env_by_team(challenge.id, team.id)
       .await?
   } else {
     Vec::new()
   };
   if !pods.is_empty() {
-    lifecycle::spawn_request_hooks(
-      Some(cache.clone()),
-      cluster.clone(),
-      engine.clone(),
-      config_model.clone(),
-      game.clone(),
-      challenge.clone(),
-      token.clone(),
-      lifecycle_team.clone(),
-      pods,
-      LifecycleEvent::Delay,
-      trace
-        .header_value()
-        .to_str()
-        .unwrap_or("UNKNOWN")
-        .to_owned(),
-    );
+    lifecycle::spawn_request_hooks(lifecycle::RequestLifecycleHooks {
+      state: state.clone(),
+      config: config_model.clone(),
+      game: game.clone(),
+      challenge: challenge.clone(),
+      token: token.clone(),
+      team: lifecycle_team.clone(),
+      snapshots: pods,
+      event: LifecycleEvent::Delay,
+      trace_id: trace_id.clone(),
+    });
     return Ok(());
   }
 
   info!("delaying challenge env");
   let pods = cluster
-    .at(CHALLENGE_NS)
     .delay_challenge_env_by_user(challenge.id, token.id)
     .await?;
   if !pods.is_empty() {
-    lifecycle::spawn_request_hooks(
-      Some(cache.clone()),
-      cluster.clone(),
-      engine.clone(),
-      config_model.clone(),
-      game.clone(),
-      challenge.clone(),
-      token.clone(),
-      lifecycle_team,
-      pods,
-      LifecycleEvent::Delay,
-      trace
-        .header_value()
-        .to_str()
-        .unwrap_or("UNKNOWN")
-        .to_owned(),
-    );
+    lifecycle::spawn_request_hooks(lifecycle::RequestLifecycleHooks {
+      state: state.clone(),
+      config: config_model.clone(),
+      game: game.clone(),
+      challenge: challenge.clone(),
+      token: token.clone(),
+      team: lifecycle_team,
+      snapshots: pods,
+      event: LifecycleEvent::Delay,
+      trace_id,
+    });
   }
 
   Ok(())
 }
 
 pub(super) async fn stop_challenge_instance(
-  State(cache): State<Cache>, State(ref cluster): State<Cluster>, State(engine): State<Engine>,
-  Extension(config_model): Extension<config::Model>, Extension(token): Extension<Token>,
-  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
-  Extension(trace): Extension<RequestId>, team_ext: Extension<Option<team::Model>>,
+  State(state): State<GlobalState>, Extension(config_model): Extension<config::Model>,
+  Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
+  Extension(challenge): Extension<challenge::Model>, Extension(trace): Extension<RequestId>,
+  team_ext: Extension<Option<team::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let team = extract_team!(game, team_ext, token);
   let lifecycle_team = team.clone();
+  let cluster = state.cluster.at(CHALLENGE_NS);
+  let trace_id = trace
+    .header_value()
+    .to_str()
+    .unwrap_or("UNKNOWN")
+    .to_owned();
 
   let pods = if let Some(team) = team {
     info!("stopping challenge env");
     cluster
-      .at(CHALLENGE_NS)
       .stop_challenge_env_by_team(challenge.id, team.id)
       .await?
   } else {
     Vec::new()
   };
   if !pods.is_empty() {
-    lifecycle::spawn_request_hooks(
-      Some(cache.clone()),
-      cluster.clone(),
-      engine.clone(),
-      config_model.clone(),
-      game.clone(),
-      challenge.clone(),
-      token.clone(),
-      lifecycle_team.clone(),
-      pods,
-      LifecycleEvent::Stop(LifecycleStopReason::Manual),
-      trace
-        .header_value()
-        .to_str()
-        .unwrap_or("UNKNOWN")
-        .to_owned(),
-    );
+    lifecycle::spawn_request_hooks(lifecycle::RequestLifecycleHooks {
+      state: state.clone(),
+      config: config_model.clone(),
+      game: game.clone(),
+      challenge: challenge.clone(),
+      token: token.clone(),
+      team: lifecycle_team.clone(),
+      snapshots: pods,
+      event: LifecycleEvent::Stop(LifecycleStopReason::Manual),
+      trace_id: trace_id.clone(),
+    });
     return Ok(());
   }
 
   info!("stopping challenge env");
   let pods = cluster
-    .at(CHALLENGE_NS)
     .stop_challenge_env_by_user(challenge.id, token.id)
     .await?;
 
   if !pods.is_empty() {
-    lifecycle::spawn_request_hooks(
-      Some(cache.clone()),
-      cluster.clone(),
-      engine.clone(),
-      config_model.clone(),
-      game.clone(),
-      challenge.clone(),
-      token.clone(),
-      lifecycle_team,
-      pods,
-      LifecycleEvent::Stop(LifecycleStopReason::Manual),
-      trace
-        .header_value()
-        .to_str()
-        .unwrap_or("UNKNOWN")
-        .to_owned(),
-    );
+    lifecycle::spawn_request_hooks(lifecycle::RequestLifecycleHooks {
+      state: state.clone(),
+      config: config_model.clone(),
+      game: game.clone(),
+      challenge: challenge.clone(),
+      token: token.clone(),
+      team: lifecycle_team,
+      snapshots: pods,
+      event: LifecycleEvent::Stop(LifecycleStopReason::Manual),
+      trace_id,
+    });
   }
 
   Ok(())

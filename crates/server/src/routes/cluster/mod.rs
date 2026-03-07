@@ -22,8 +22,8 @@ use tracing::{error, info, warn};
 mod registry;
 
 use crate::{
-  lifecycle,
   middleware::auth::{self, Token},
+  routes::game::lifecycle,
   traits::{GlobalState, ResponseError},
 };
 

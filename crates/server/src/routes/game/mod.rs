@@ -20,6 +20,8 @@ mod admin;
 mod challenge;
 mod chat;
 mod core;
+pub(crate) mod hook;
+pub(crate) mod lifecycle;
 mod notification;
 mod participant;
 mod registry;

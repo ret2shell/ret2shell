@@ -1,7 +1,10 @@
-use std::path::Path;
+use std::{fmt::Display, path::Path};
 
 use anyhow::{Context, anyhow};
-use axum::{body::Body, http::Request};
+use axum::{
+  body::Body,
+  http::{HeaderMap, Request},
+};
 use futures::TryStreamExt;
 use hyper_util::{client::legacy::Client, rt::TokioExecutor};
 use owo_colors::OwoColorize;
@@ -15,7 +18,19 @@ use tokio::{
 pub const GIT_HOOK_SESSION_DOMAIN: &str = "git-hook-session";
 pub const GIT_HOOK_AUTH_DOMAIN: &str = "git-hook-auth";
 pub const GIT_HOOK_TTL: i64 = 60 * 10;
+pub const GIT_HOOK_COLOR_HEADER: &str = "x-ret2shell-git-hook-color";
 const ZERO_OID: &str = "0000000000000000000000000000000000000000";
+const GIT_HOOK_COLOR_ALWAYS: &str = "always";
+const GIT_HOOK_COLOR_NEVER: &str = "never";
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum GitHookInlineStyle {
+  Name,
+  RefName,
+  OldOid,
+  NewOid,
+  Count,
+}
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum GitHookMessageLevel {
@@ -25,6 +40,77 @@ pub(crate) enum GitHookMessageLevel {
   Warn,
   Error,
   Success,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) struct GitHookFormatter {
+  use_color: bool,
+}
+
+impl GitHookFormatter {
+  pub(crate) const fn new(use_color: bool) -> Self {
+    Self { use_color }
+  }
+
+  pub(crate) fn from_env() -> Self {
+    Self::new(git_hook_colors_enabled())
+  }
+
+  pub(crate) fn from_headers(headers: &HeaderMap) -> Self {
+    match headers
+      .get(GIT_HOOK_COLOR_HEADER)
+      .and_then(|value| value.to_str().ok())
+    {
+      Some(GIT_HOOK_COLOR_ALWAYS) => Self::new(true),
+      _ => Self::new(false),
+    }
+  }
+
+  pub(crate) const fn header_value(self) -> &'static str {
+    if self.use_color {
+      GIT_HOOK_COLOR_ALWAYS
+    } else {
+      GIT_HOOK_COLOR_NEVER
+    }
+  }
+
+  pub(crate) fn line(self, level: GitHookMessageLevel, line: impl AsRef<str>) -> String {
+    format_git_hook_line_with_color(level, line.as_ref(), self.use_color)
+  }
+
+  pub(crate) fn name(self, value: impl Display) -> String {
+    self.inline(GitHookInlineStyle::Name, value)
+  }
+
+  pub(crate) fn reference(self, value: impl Display) -> String {
+    self.inline(GitHookInlineStyle::RefName, value)
+  }
+
+  pub(crate) fn old_oid(self, value: impl Display) -> String {
+    self.inline(GitHookInlineStyle::OldOid, value)
+  }
+
+  pub(crate) fn new_oid(self, value: impl Display) -> String {
+    self.inline(GitHookInlineStyle::NewOid, value)
+  }
+
+  pub(crate) fn count(self, value: impl Display) -> String {
+    self.inline(GitHookInlineStyle::Count, value)
+  }
+
+  fn inline(self, style: GitHookInlineStyle, value: impl Display) -> String {
+    let value = value.to_string();
+    if !self.use_color {
+      return value;
+    }
+    match style {
+      GitHookInlineStyle::Name => value.bright_yellow().bold().to_string(),
+      GitHookInlineStyle::RefName => value.bright_cyan().bold().to_string(),
+      GitHookInlineStyle::OldOid => value.bright_black().bold().to_string(),
+      GitHookInlineStyle::NewOid => value.bright_green().bold().to_string(),
+      GitHookInlineStyle::Count => value.bright_blue().bold().to_string(),
+    }
+  }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -45,6 +131,7 @@ struct UpdatedRef {
 pub async fn run_post_receive(
   session_id: &str, auth_key: &str, base_url: &str, repo_path: &Path,
 ) -> anyhow::Result<()> {
+  let formatter = GitHookFormatter::from_env();
   let mut stdin = tokio::io::stdin();
   let mut payload = Vec::new();
   stdin.read_to_end(&mut payload).await?;
@@ -60,12 +147,13 @@ pub async fn run_post_receive(
   let request = Request::builder()
     .method("POST")
     .uri(url)
+    .header(GIT_HOOK_COLOR_HEADER, formatter.header_value())
     .header("Content-Type", "text/plain")
     .body(Body::from(payload.clone()))?;
   let response = match client.request(request).await {
     Ok(response) => response,
     Err(err) => {
-      if let Err(rollback_err) = rollback_post_receive(repo_path, &payload).await {
+      if let Err(rollback_err) = rollback_post_receive(repo_path, &payload, formatter).await {
         return Err(anyhow!(err).context(format!(
           "failed to roll the repository back after the internal hook request failed: {rollback_err}"
         )));
@@ -76,7 +164,7 @@ pub async fn run_post_receive(
   let status = response.status();
   let body = forward_response(Body::new(response.into_body())).await;
   if !status.is_success() {
-    if let Err(rollback_err) = rollback_post_receive(repo_path, &payload).await {
+    if let Err(rollback_err) = rollback_post_receive(repo_path, &payload, formatter).await {
       return Err(anyhow!(
         "internal hook request failed with status {status}; repository rollback also failed: {rollback_err}"
       ));
@@ -99,7 +187,9 @@ async fn forward_response(body: Body) -> anyhow::Result<()> {
   Ok(())
 }
 
-async fn rollback_post_receive(repo_path: &Path, payload: &[u8]) -> anyhow::Result<()> {
+async fn rollback_post_receive(
+  repo_path: &Path, payload: &[u8], formatter: GitHookFormatter,
+) -> anyhow::Result<()> {
   let updates = parse_post_receive_updates(payload)?;
   if updates.is_empty() {
     return Ok(());
@@ -107,7 +197,7 @@ async fn rollback_post_receive(repo_path: &Path, payload: &[u8]) -> anyhow::Resu
 
   eprintln!(
     "{}",
-    format_git_hook_line(
+    formatter.line(
       GitHookMessageLevel::Warn,
       "Internal synchronization failed before completion; rolling the repository back locally."
     )
@@ -132,16 +222,12 @@ async fn rollback_post_receive(repo_path: &Path, payload: &[u8]) -> anyhow::Resu
   reset_hard(repo_path, "HEAD").await?;
   eprintln!(
     "{}",
-    format_git_hook_line(
+    formatter.line(
       GitHookMessageLevel::Success,
       "Local repository rollback completed."
     )
   );
   Ok(())
-}
-
-pub(crate) fn format_git_hook_line(level: GitHookMessageLevel, line: impl AsRef<str>) -> String {
-  format_git_hook_line_with_color(level, line.as_ref(), git_hook_colors_enabled())
 }
 
 fn format_git_hook_line_with_color(
@@ -152,8 +238,8 @@ fn format_git_hook_line_with_color(
     GitHookMessageLevel::Detail => "->",
     GitHookMessageLevel::Info => "[INFO]",
     GitHookMessageLevel::Warn => "[WARN]",
-    GitHookMessageLevel::Error => "[ERROR]",
-    GitHookMessageLevel::Success => "[OK]",
+    GitHookMessageLevel::Error => "[ ERR]",
+    GitHookMessageLevel::Success => "[ OK ]",
   };
 
   if !use_color {
@@ -164,15 +250,33 @@ fn format_git_hook_line_with_color(
     GitHookMessageLevel::Header => format!("{} {}", prefix.bright_blue().bold(), line.bold()),
     GitHookMessageLevel::Detail => format!("{} {}", prefix.bright_black().bold(), line.dimmed()),
     GitHookMessageLevel::Info => format!("{} {line}", prefix.bright_blue().bold()),
-    GitHookMessageLevel::Warn => format!("{} {}", prefix.yellow().bold(), line.yellow()),
-    GitHookMessageLevel::Error => format!("{} {}", prefix.red().bold(), line.red()),
-    GitHookMessageLevel::Success => format!("{} {}", prefix.green().bold(), line.green()),
+    GitHookMessageLevel::Warn => format!("{} {line}", prefix.yellow().bold()),
+    GitHookMessageLevel::Error => format!("{} {line}", prefix.red().bold()),
+    GitHookMessageLevel::Success => format!("{} {line}", prefix.green().bold()),
   }
 }
 
 fn git_hook_colors_enabled() -> bool {
   std::env::var_os("NO_COLOR").is_none()
     && std::env::var("TERM").map_or(true, |term| term != "dumb")
+}
+
+pub(crate) fn strip_git_hook_ansi(line: &str) -> String {
+  let mut plain = String::with_capacity(line.len());
+  let mut chars = line.chars().peekable();
+  while let Some(ch) = chars.next() {
+    if ch == '\u{1b}' && matches!(chars.peek(), Some('[')) {
+      chars.next();
+      for next in chars.by_ref() {
+        if ('@'..='~').contains(&next) {
+          break;
+        }
+      }
+      continue;
+    }
+    plain.push(ch);
+  }
+  plain
 }
 
 fn parse_post_receive_updates(payload: &[u8]) -> anyhow::Result<Vec<UpdatedRef>> {
@@ -270,7 +374,9 @@ pub async fn cleanup_hook_session(cache: &Cache, session_id: &str) {
 
 #[cfg(test)]
 mod tests {
-  use super::{GitHookMessageLevel, format_git_hook_line_with_color};
+  use super::{
+    GitHookFormatter, GitHookMessageLevel, format_git_hook_line_with_color, strip_git_hook_ansi,
+  };
 
   #[test]
   fn git_hook_formats_plain_lines_without_color() {
@@ -284,7 +390,7 @@ mod tests {
         "Repository synchronization completed successfully.",
         false,
       ),
-      "[OK] Repository synchronization completed successfully."
+      "[ OK ] Repository synchronization completed successfully."
     );
   }
 
@@ -294,7 +400,31 @@ mod tests {
       format_git_hook_line_with_color(GitHookMessageLevel::Error, "Synchronization failed.", true);
 
     assert!(line.contains("\u{1b}["));
-    assert!(line.contains("[ERROR]"));
+    assert!(line.contains("[ ERR]"));
     assert!(line.contains("Synchronization failed."));
+  }
+
+  #[test]
+  fn git_hook_formatter_styles_inline_values_when_enabled() {
+    let formatter = GitHookFormatter::new(true);
+
+    assert!(formatter.reference("main").contains("\u{1b}["));
+    assert!(formatter.old_oid("abc1234").contains("\u{1b}["));
+    assert!(formatter.new_oid("def5678").contains("\u{1b}["));
+    assert!(formatter.name("challenge").contains("\u{1b}["));
+    assert!(formatter.count(3).contains("\u{1b}["));
+  }
+
+  #[test]
+  fn git_hook_strip_ansi_keeps_plain_text() {
+    let formatter = GitHookFormatter::new(true);
+    let line = format!(
+      "{} {} -> {}",
+      formatter.reference("main"),
+      formatter.old_oid("abc1234"),
+      formatter.new_oid("def5678")
+    );
+
+    assert_eq!(strip_git_hook_ansi(&line), "main abc1234 -> def5678");
   }
 }

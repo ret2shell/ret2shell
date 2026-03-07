@@ -368,6 +368,14 @@ pub struct LifecycleChallengeInfo {
   pub game_id: i64,
 }
 
+pub struct LifecycleExecutionRequest<'a> {
+  pub event: LifecycleEvent,
+  pub snapshot: &'a ChallengeEnvSnapshot,
+  pub user: LifecycleUserInfo,
+  pub team: Option<LifecycleTeamInfo>,
+  pub challenge: LifecycleChallengeInfo,
+}
+
 #[derive(Debug, TryClone, Any)]
 #[rune(item = ::ret2shell::cluster)]
 pub struct LifecycleContext {
@@ -483,64 +491,46 @@ fn dns_names(name: Option<&String>, namespace: Option<&String>) -> Vec<String> {
 }
 
 impl RuneMetadata {
-  fn from_parts(
-    name: Option<String>, namespace: Option<String>, uid: Option<String>,
-    resource_version: Option<String>, generation: Option<i64>, creation_timestamp: Option<i64>,
-    deletion_timestamp: Option<i64>, labels: RuneStringMap, annotations: RuneStringMap,
-  ) -> Self {
-    Self {
-      name,
-      namespace,
-      uid,
-      resource_version,
-      generation,
-      creation_timestamp,
-      deletion_timestamp,
-      labels,
-      annotations,
-    }
-  }
-
   fn from_pod(pod: &Pod) -> Result<Self, ClusterError> {
-    Ok(Self::from_parts(
-      pod.metadata.name.clone(),
-      pod.metadata.namespace.clone(),
-      pod.metadata.uid.clone(),
-      pod.metadata.resource_version.clone(),
-      pod.metadata.generation,
-      timestamp_to_seconds(pod.metadata.creation_timestamp.clone()),
-      timestamp_to_seconds(pod.metadata.deletion_timestamp.clone()),
-      to_rune_map(pod.metadata.labels.as_ref(), true)?,
-      to_rune_map(pod.metadata.annotations.as_ref(), true)?,
-    ))
+    Ok(Self {
+      name: pod.metadata.name.clone(),
+      namespace: pod.metadata.namespace.clone(),
+      uid: pod.metadata.uid.clone(),
+      resource_version: pod.metadata.resource_version.clone(),
+      generation: pod.metadata.generation,
+      creation_timestamp: timestamp_to_seconds(pod.metadata.creation_timestamp.clone()),
+      deletion_timestamp: timestamp_to_seconds(pod.metadata.deletion_timestamp.clone()),
+      labels: to_rune_map(pod.metadata.labels.as_ref(), true)?,
+      annotations: to_rune_map(pod.metadata.annotations.as_ref(), true)?,
+    })
   }
 
   fn from_service(service: &Service) -> Result<Self, ClusterError> {
-    Ok(Self::from_parts(
-      service.metadata.name.clone(),
-      service.metadata.namespace.clone(),
-      service.metadata.uid.clone(),
-      service.metadata.resource_version.clone(),
-      service.metadata.generation,
-      timestamp_to_seconds(service.metadata.creation_timestamp.clone()),
-      timestamp_to_seconds(service.metadata.deletion_timestamp.clone()),
-      to_rune_map(service.metadata.labels.as_ref(), true)?,
-      to_rune_map(service.metadata.annotations.as_ref(), true)?,
-    ))
+    Ok(Self {
+      name: service.metadata.name.clone(),
+      namespace: service.metadata.namespace.clone(),
+      uid: service.metadata.uid.clone(),
+      resource_version: service.metadata.resource_version.clone(),
+      generation: service.metadata.generation,
+      creation_timestamp: timestamp_to_seconds(service.metadata.creation_timestamp.clone()),
+      deletion_timestamp: timestamp_to_seconds(service.metadata.deletion_timestamp.clone()),
+      labels: to_rune_map(service.metadata.labels.as_ref(), true)?,
+      annotations: to_rune_map(service.metadata.annotations.as_ref(), true)?,
+    })
   }
 
   fn from_missing_service(snapshot: &ChallengeEnvSnapshot) -> Result<Self, ClusterError> {
-    Ok(Self::from_parts(
-      snapshot.pod.metadata.name.clone(),
-      snapshot.pod.metadata.namespace.clone(),
-      None,
-      None,
-      None,
-      None,
-      None,
-      to_rune_map(snapshot.pod.metadata.labels.as_ref(), true)?,
-      to_rune_map(None, true)?,
-    ))
+    Ok(Self {
+      name: snapshot.pod.metadata.name.clone(),
+      namespace: snapshot.pod.metadata.namespace.clone(),
+      uid: None,
+      resource_version: None,
+      generation: None,
+      creation_timestamp: None,
+      deletion_timestamp: None,
+      labels: to_rune_map(snapshot.pod.metadata.labels.as_ref(), true)?,
+      annotations: to_rune_map(None, true)?,
+    })
   }
 }
 
@@ -899,21 +889,22 @@ impl LifecycleMapper {
   }
 
   pub async fn execute(
-    &self, engine: &Engine, key: impl AsRef<str>, event: LifecycleEvent,
-    snapshot: &ChallengeEnvSnapshot, user: LifecycleUserInfo, team: Option<LifecycleTeamInfo>,
-    challenge: LifecycleChallengeInfo,
+    &self, engine: &Engine, key: impl AsRef<str>, request: LifecycleExecutionRequest<'_>,
   ) -> Result<LifecycleExecutionStatus, ClusterError> {
     let key = format!("lifecycle-{}", key.as_ref());
-    let function_name = event.function_name();
+    let function_name = request.event.function_name();
     if !engine.has_function(&key, function_name).await? {
       return Ok(LifecycleExecutionStatus::Skipped);
     }
     let ctx = LifecycleContext::from_snapshot(
-      snapshot,
-      user,
-      team,
-      challenge,
-      event.reason().map(|reason| reason.as_str().to_string()),
+      request.snapshot,
+      request.user,
+      request.team,
+      request.challenge,
+      request
+        .event
+        .reason()
+        .map(|reason| reason.as_str().to_string()),
     )?;
     let _output: Value = engine.execute(key, function_name, (ctx,)).await?;
     Ok(LifecycleExecutionStatus::Executed)

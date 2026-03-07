@@ -15,8 +15,6 @@ use tracing::{error, info, warn};
 
 use crate::traits::GlobalState;
 
-mod hook;
-mod lifecycle;
 mod logger;
 mod middleware;
 mod routes;
@@ -40,7 +38,7 @@ pub fn greet() {
   );
 }
 
-pub use hook::run_post_receive;
+pub use routes::run_post_receive;
 
 pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
   let guards = logger::initialize(&config.logging).await?;

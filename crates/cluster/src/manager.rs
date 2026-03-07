@@ -27,7 +27,7 @@ use tokio_util::{codec::Framed, sync::CancellationToken};
 use tracing::{debug, error, info, warn};
 
 use super::traits::ClusterError;
-use crate::{registry::Registry, traffic::TrafficMapper};
+use crate::{lifecycle::LifecycleMapper, registry::Registry, traffic::TrafficMapper};
 
 pub const CHALLENGE_NS: &str = "ret2shell-challenge";
 
@@ -51,7 +51,7 @@ pub struct Cluster {
   pub registry: Option<Registry>,
   namespace: Option<String>,
   pub traffic: Option<TrafficMapper>,
-  pub lifecycle: Option<crate::lifecycle::LifecycleMapper>,
+  pub lifecycle: Option<LifecycleMapper>,
 }
 
 macro_rules! with_namespace {
@@ -83,7 +83,7 @@ impl Cluster {
       registry,
       namespace: Some(String::from("default")),
       traffic: Some(TrafficMapper),
-      lifecycle: Some(crate::lifecycle::LifecycleMapper),
+      lifecycle: Some(LifecycleMapper),
     }
   }
 
@@ -711,66 +711,62 @@ impl Cluster {
     Ok(pod)
   }
 
-  pub async fn delay_challenge_env_by_user(
-    &self, challenge_id: i64, user_id: i64,
+  fn challenge_member_selector(challenge_id: i64, member_kind: &str, member_id: i64) -> String {
+    format!("ret.sh.cn/challenge={challenge_id},ret.sh.cn/{member_kind}={member_id}")
+  }
+
+  fn with_incremented_renew_annotation(mut pod: Pod) -> Pod {
+    let renew = pod
+      .metadata
+      .annotations
+      .as_ref()
+      .and_then(|annotations| annotations.get("ret.sh.cn/renew"))
+      .and_then(|value| value.parse::<i32>().ok())
+      .unwrap_or_default();
+    let annotations = pod.metadata.annotations.get_or_insert_default();
+    annotations.insert("ret.sh.cn/renew".to_owned(), (renew + 1).to_string());
+    pod
+  }
+
+  async fn delay_challenge_env_by_selector(
+    &self, selector: &str,
   ) -> Result<Vec<ChallengeEnvSnapshot>, ClusterError> {
-    let pods = self
-      .get_pods_by_label(&format!(
-        "ret.sh.cn/challenge={challenge_id},ret.sh.cn/user={user_id}"
-      ))
-      .await?;
-    let mut snapshots = Vec::new();
-    for p in pods.iter() {
-      self.renew_pod(p.metadata.name.as_ref().unwrap()).await?;
-      let mut pod = p.clone();
-      let renew = pod
-        .metadata
-        .annotations
-        .clone()
-        .unwrap_or_default()
-        .get("ret.sh.cn/renew")
-        .and_then(|value| value.parse::<i32>().ok())
-        .unwrap_or(0);
-      let mut annotations = pod.metadata.annotations.clone().unwrap_or_default();
-      annotations.insert("ret.sh.cn/renew".to_owned(), (renew + 1).to_string());
-      pod.metadata.annotations = Some(annotations);
+    let pods = self.get_pods_by_label(selector).await?;
+    let mut snapshots = Vec::with_capacity(pods.len());
+    for pod in &pods {
+      self
+        .renew_pod(pod.metadata.name.as_deref().unwrap())
+        .await?;
       snapshots.push(ChallengeEnvSnapshot {
-        pod,
-        service: self.capture_service_snapshot(p).await,
+        pod: Self::with_incremented_renew_annotation(pod.clone()),
+        service: self.capture_service_snapshot(pod).await,
       });
     }
     Ok(snapshots)
   }
 
+  pub async fn delay_challenge_env_by_user(
+    &self, challenge_id: i64, user_id: i64,
+  ) -> Result<Vec<ChallengeEnvSnapshot>, ClusterError> {
+    self
+      .delay_challenge_env_by_selector(&Self::challenge_member_selector(
+        challenge_id,
+        "user",
+        user_id,
+      ))
+      .await
+  }
+
   pub async fn delay_challenge_env_by_team(
     &self, challenge_id: i64, team_id: i64,
   ) -> Result<Vec<ChallengeEnvSnapshot>, ClusterError> {
-    let pods = self
-      .get_pods_by_label(&format!(
-        "ret.sh.cn/challenge={challenge_id},ret.sh.cn/team={team_id}"
+    self
+      .delay_challenge_env_by_selector(&Self::challenge_member_selector(
+        challenge_id,
+        "team",
+        team_id,
       ))
-      .await?;
-    let mut snapshots = Vec::new();
-    for p in pods.iter() {
-      self.renew_pod(p.metadata.name.as_ref().unwrap()).await?;
-      let mut pod = p.clone();
-      let renew = pod
-        .metadata
-        .annotations
-        .clone()
-        .unwrap_or_default()
-        .get("ret.sh.cn/renew")
-        .and_then(|value| value.parse::<i32>().ok())
-        .unwrap_or(0);
-      let mut annotations = pod.metadata.annotations.clone().unwrap_or_default();
-      annotations.insert("ret.sh.cn/renew".to_owned(), (renew + 1).to_string());
-      pod.metadata.annotations = Some(annotations);
-      snapshots.push(ChallengeEnvSnapshot {
-        pod,
-        service: self.capture_service_snapshot(p).await,
-      });
-    }
-    Ok(snapshots)
+      .await
   }
 
   pub async fn stop_challenge_env_by_user(
