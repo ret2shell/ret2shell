@@ -10,8 +10,11 @@
     "build": "vite build --mode production",
     "build:dev": "vite build --mode development",
     "serve": "vite preview",
+    "check": "biome check",
     "format": "biome check --write",
-    "lint": "biome lint"
+    "lint": "biome lint",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@ark-ui/solid": "^5.34.1",

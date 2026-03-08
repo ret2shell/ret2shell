@@ -49,3 +49,32 @@ pub fn decode(data: &str) -> Option<Vec<u8>> {
   }
   Some(result)
 }
+
+#[cfg(test)]
+mod tests {
+  use super::{decode, encode};
+
+  #[test]
+  fn codec_roundtrips_binary_payloads() {
+    let payload = [0x00, 0x1F, 0x80, 0xAB, 0xFF];
+
+    let encoded = encode(&payload);
+    let decoded = decode(&encoded).unwrap();
+
+    assert_eq!(decoded, payload);
+  }
+
+  #[test]
+  fn decode_rejects_invalid_tokens_and_odd_pairs() {
+    assert_eq!(decode("totally-invalid"), None);
+    assert_eq!(decode("呐~"), None);
+  }
+
+  #[test]
+  fn decode_ignores_surrounding_whitespace() {
+    let encoded = encode(&[0x42]);
+
+    assert_eq!(decode(&format!("  {encoded}  \n\t")).unwrap(), vec![0x42]);
+    assert_eq!(decode(""), Some(Vec::new()));
+  }
+}

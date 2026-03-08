@@ -417,7 +417,10 @@ function inferProtocolByServiceType(serviceType: ChallengeImage["service_type"])
 }
 
 function normalizeChallengeImage(image: ChallengeImage): ChallengeImage {
-  if ((image.protocol == null || image.protocol === undefined) && (image.app_protocol == null || image.app_protocol === undefined)) {
+  if (
+    (image.protocol == null || image.protocol === undefined) &&
+    (image.app_protocol == null || image.app_protocol === undefined)
+  ) {
     const next = inferProtocolByServiceType(image.service_type);
     return {
       ...image,

@@ -1,9 +1,5 @@
-import {
-  useDeleteGameLifecycleMutation,
-  useGame,
-  useUpdateGameLifecycleMutation,
-} from "@api/game";
-import { lifecyclePresetEntries, lifecyclePresetMap, type LifecyclePreset } from "@lib/lifecycle/presets";
+import { useDeleteGameLifecycleMutation, useGame, useUpdateGameLifecycleMutation } from "@api/game";
+import { type LifecyclePreset, lifecyclePresetEntries, lifecyclePresetMap } from "@lib/lifecycle/presets";
 import { useParams } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";

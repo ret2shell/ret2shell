@@ -5,7 +5,7 @@ export function mediaPath(hashUrl?: string | null) {
   if (!hashUrl) {
     return Bg;
   }
-  const pattern = /[A-Fa-f0-9]{64}/;
+  const pattern = /^[A-Fa-f0-9]{64}$/;
   if (!pattern.test(hashUrl)) {
     return hashUrl;
   }

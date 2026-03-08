@@ -485,7 +485,52 @@ pub(super) async fn game_repo_git_upload_pack(
 
 #[cfg(test)]
 mod tests {
-  use super::{game_repo_cache_key, normalize_game_repo_path};
+  use axum::http::{
+    HeaderMap,
+    header::{CONTENT_TYPE, HeaderValue},
+  };
+  use r2s_config::{GlobalConfig, server};
+
+  use super::{
+    InfoRefsQuery, check_git_protocol_safe, game_repo_cache_key, get_protocol, internal_api_origin,
+    normalize_game_repo_path, prepare_git_rpc_headers, shell_quote,
+  };
+  use crate::traits::ResponseError;
+
+  fn config_with_host(host: &str) -> GlobalConfig {
+    GlobalConfig {
+      auditor: None,
+      auth: None,
+      bucket: None,
+      cache: None,
+      captcha: None,
+      cluster: None,
+      database: None,
+      email: None,
+      logging: None,
+      media: None,
+      queue: None,
+      server: Some(server::Config {
+        host: host.to_owned(),
+        port: 8080,
+        external_domain: "ret.sh.cn".to_owned(),
+        external_https: true,
+        api_base_path: "/api".to_owned(),
+        cors_origins: "*".to_owned(),
+        rate_limit: None,
+        frontend: None,
+        name: None,
+        footer_info: None,
+        footer_url: None,
+        subject_info: None,
+        subject_url: None,
+        record: None,
+        hide_maker: None,
+        highlight_banner: None,
+        zen_game: None,
+      }),
+    }
+  }
 
   #[test]
   fn normalize_game_repo_path_collapses_root_and_trailing_slashes() {
@@ -509,5 +554,108 @@ mod tests {
       game_repo_cache_key(42, "deadbeef", "challenges/world"),
       "42:deadbeef:challenges/world"
     );
+  }
+
+  #[test]
+  fn service_trimmed_removes_git_prefix_only() {
+    assert_eq!(
+      InfoRefsQuery {
+        service: "git-upload-pack".to_owned(),
+      }
+      .service_trimmed(),
+      "upload-pack"
+    );
+    assert_eq!(
+      InfoRefsQuery {
+        service: "receive-pack".to_owned(),
+      }
+      .service_trimmed(),
+      "receive-pack"
+    );
+  }
+
+  #[test]
+  fn git_protocol_validation_accepts_capabilities_and_rejects_unsafe_values() {
+    assert!(check_git_protocol_safe("version=2"));
+    assert!(check_git_protocol_safe("version=2:agent=git"));
+    assert!(!check_git_protocol_safe("version=2:agent=git/2.0"));
+    assert!(!check_git_protocol_safe("version=2;rm=1"));
+  }
+
+  #[test]
+  fn get_protocol_reads_safe_headers_and_rejects_invalid_values() {
+    let mut headers = HeaderMap::new();
+    headers.insert("Git-Protocol", HeaderValue::from_static("version=2"));
+    assert_eq!(get_protocol(&headers).unwrap(), "version=2");
+    assert_eq!(get_protocol(&HeaderMap::new()).unwrap(), "");
+
+    headers.insert("Git-Protocol", HeaderValue::from_static("version=2;rm=1"));
+    assert!(matches!(
+      get_protocol(&headers),
+      Err(ResponseError::BadRequest(message)) if message == "invalid git protocol"
+    ));
+  }
+
+  #[test]
+  fn prepare_git_rpc_headers_validates_content_type_and_sets_response_type() {
+    let mut headers = HeaderMap::new();
+    headers.insert(
+      CONTENT_TYPE,
+      HeaderValue::from_static("application/x-git-upload-pack-request"),
+    );
+    headers.insert("Git-Protocol", HeaderValue::from_static("version=2"));
+
+    let (protocol, response_headers) = prepare_git_rpc_headers("upload-pack", &headers).unwrap();
+    assert_eq!(protocol, "version=2");
+    assert_eq!(
+      response_headers.get(CONTENT_TYPE).unwrap(),
+      "application/x-git-upload-pack-result"
+    );
+
+    headers.insert(CONTENT_TYPE, HeaderValue::from_static("text/plain"));
+    assert!(matches!(
+      prepare_git_rpc_headers("upload-pack", &headers),
+      Err(ResponseError::BadRequest(message)) if message == "invalid content type for git rpc"
+    ));
+  }
+
+  #[test]
+  fn internal_api_origin_normalizes_unspecified_and_ipv6_hosts() {
+    assert_eq!(
+      internal_api_origin(&config_with_host("0.0.0.0")).unwrap(),
+      "http://127.0.0.1:8080/api"
+    );
+    assert_eq!(
+      internal_api_origin(&config_with_host("::")).unwrap(),
+      "http://[::1]:8080/api"
+    );
+    assert_eq!(
+      internal_api_origin(&config_with_host("2001:db8::1")).unwrap(),
+      "http://[2001:db8::1]:8080/api"
+    );
+    assert!(matches!(
+      internal_api_origin(&GlobalConfig {
+        auditor: None,
+        auth: None,
+        bucket: None,
+        cache: None,
+        captcha: None,
+        cluster: None,
+        database: None,
+        email: None,
+        logging: None,
+        media: None,
+        queue: None,
+        server: None,
+      }),
+      Err(ResponseError::InternalServerError(message))
+        if message == "server configuration is not available"
+    ));
+  }
+
+  #[test]
+  fn shell_quote_wraps_values_and_escapes_single_quotes() {
+    assert_eq!(shell_quote("plain"), "'plain'");
+    assert_eq!(shell_quote("it's ready"), "'it'\\''s ready'");
   }
 }

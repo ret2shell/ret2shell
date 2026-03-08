@@ -1,9 +1,6 @@
-import {
-  useDeleteGlobalLifecycleScriptMutation,
-  useUpdateGlobalLifecycleScriptMutation,
-} from "@api/cluster";
-import { lifecyclePresetEntries, lifecyclePresetMap, type LifecyclePreset } from "@lib/lifecycle/presets";
+import { useDeleteGlobalLifecycleScriptMutation, useUpdateGlobalLifecycleScriptMutation } from "@api/cluster";
 import { usePlatformConfig } from "@api/platform";
+import { type LifecyclePreset, lifecyclePresetEntries, lifecyclePresetMap } from "@lib/lifecycle/presets";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
@@ -102,12 +99,7 @@ export default function Lifecycle() {
                     <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
                     <span>{t("general.actions.delete.message")}</span>
                   </span>
-                  <Button
-                    level="primary"
-                    size="sm"
-                    class="self-end"
-                    onClick={() => deleteLifecycleMutation.mutate()}
-                  >
+                  <Button level="primary" size="sm" class="self-end" onClick={() => deleteLifecycleMutation.mutate()}>
                     {t("general.actions.yes.title")}
                   </Button>
                 </Card>

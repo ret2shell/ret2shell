@@ -364,3 +364,83 @@ where
   C: ConnectionTrait, {
   Entity::delete_by_id(game_id).exec(db).await.map(|_| ())
 }
+
+#[cfg(test)]
+mod tests {
+  use chrono::{Duration, Utc};
+
+  use super::{AccessPolicy, Admins, ArchivePolicy, HammerPolicy, HostType, Model};
+
+  fn sample_game(
+    host_type: HostType, start_offset_seconds: i64, end_offset_seconds: i64,
+    archive_offset_seconds: i64,
+  ) -> Model {
+    let now = Utc::now();
+    Model {
+      id: 1,
+      updated_at: now,
+      name: "sample".to_owned(),
+      brief: "sample brief".to_owned(),
+      introduction_id: None,
+      start_at: now + Duration::seconds(start_offset_seconds),
+      end_at: now + Duration::seconds(end_offset_seconds),
+      register_at: now - Duration::days(1),
+      archive_at: now + Duration::seconds(archive_offset_seconds),
+      hidden: false,
+      offline: false,
+      frozen: false,
+      host_type,
+      team_size: 4,
+      access_policy: AccessPolicy {
+        restrict: false,
+        institutes: vec![],
+        sync: 0,
+      },
+      archive_policy: ArchivePolicy::default(),
+      hammer_policy: HammerPolicy::default(),
+      cover: Some("cover".to_owned()),
+      logo: Some("logo".to_owned()),
+      enable_audit: true,
+      can_register_after_started: false,
+      award_rate: 100,
+      award_rates: None,
+      admins: Admins(vec![1]),
+      weight: 10,
+      bucket: Some("bucket".to_owned()),
+      token: Some("token".to_owned()),
+      timeline_presets: None,
+      node_selector: Some("node-a".to_owned()),
+      traffic: Some("traffic script".to_owned()),
+      lifecycle: Some("lifecycle script".to_owned()),
+    }
+  }
+
+  #[test]
+  fn desensitize_clears_sensitive_runtime_fields() {
+    let game = sample_game(HostType::Game, -3600, 3600, 7200);
+
+    let desensitized = game.clone().desensitize();
+
+    assert_eq!(desensitized.name, game.name);
+    assert_eq!(desensitized.bucket, None);
+    assert_eq!(desensitized.token, None);
+    assert_eq!(desensitized.node_selector, None);
+    assert_eq!(desensitized.traffic, None);
+    assert_eq!(desensitized.lifecycle, None);
+  }
+
+  #[test]
+  fn in_progress_requires_game_host_type_and_active_time_window() {
+    assert!(sample_game(HostType::Game, -3600, 3600, 7200).in_progress());
+    assert!(!sample_game(HostType::Game, 3600, 7200, 10800).in_progress());
+    assert!(!sample_game(HostType::Game, -7200, -3600, 3600).in_progress());
+    assert!(!sample_game(HostType::Training, -3600, 3600, 7200).in_progress());
+  }
+
+  #[test]
+  fn archived_requires_game_host_type_and_elapsed_archive_time() {
+    assert!(sample_game(HostType::Game, -7200, -3600, -60).archived());
+    assert!(!sample_game(HostType::Game, -3600, 3600, 3600).archived());
+    assert!(!sample_game(HostType::Training, -7200, -3600, -60).archived());
+  }
+}

@@ -5,29 +5,122 @@ on:
     paths:
       - ".github/workflows/binary.yml"
       - ".github/setup-env.sh"
+      - "config/pub.bin"
       - "crates/**"
       - "Cargo.toml"
       - "Cargo.lock"
-
+      - "rustfmt.toml"
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - ".github/workflows/binary.yml"
+      - ".github/setup-env.sh"
+      - "config/pub.bin"
+      - "crates/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "rustfmt.toml"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: binary-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  fmt-check:
+    name: Format
+    if: ${{ github.event_name != 'workflow_dispatch' }}
+    runs-on: [self-hosted, linux, x64]
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup nightly rustfmt
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: rustfmt
+
+      - name: Rust format check
+        run: cargo +nightly fmt --all -- --check
+
+  check:
+    name: Test and Clippy
+    if: ${{ github.event_name != 'workflow_dispatch' }}
+    runs-on: [self-hosted, linux, x64]
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install linker toolchain
+        run: |
+          if ! command -v clang >/dev/null 2>&1 || ! command -v ld.lld >/dev/null 2>&1; then
+            sudo apt update
+            sudo apt install -y clang lld
+          fi
+
+      - name: Setup rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            ~/.cargo/git/checkouts/
+          key: cargo-${{ runner.os }}-stable-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            cargo-${{ runner.os }}-stable-
+            cargo-${{ runner.os }}-
+
+      - name: Cache target
+        uses: actions/cache@v4
+        with:
+          path: target/
+          key: cargo-target-${{ runner.os }}-stable-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            cargo-target-${{ runner.os }}-stable-
+            cargo-target-${{ runner.os }}-
+
+      - name: Prepare public key
+        run: |
+          mkdir -p config
+          if [ -n '${{ vars.PUBKEY_BASE64 }}' ]; then
+            base64 -d <<< '${{ vars.PUBKEY_BASE64 }}' > config/pub.bin
+          elif [ ! -f config/pub.bin ]; then
+            : > config/pub.bin
+          fi
+
+      - name: Run tests
+        run: cargo test --locked --workspace --all-features
+
+      - name: Cargo clippy checks
+        run: cargo clippy --locked --workspace --all-features --all-targets -- -D warnings
+
   binary:
     name: Build
+    if: ${{ github.event_name != 'pull_request' }}
     runs-on: [self-hosted, linux, x64]
+    timeout-minutes: 90
     strategy:
       matrix:
         target: [x86_64-unknown-linux-musl]
     env:
       R2S_GIT_VERSION: unknown
-      # These environment variables will be set by `setup-env.sh`
       commit_sha: unknown
       app_v: unknown
 
     steps:
       - uses: actions/checkout@v4
         with:
-          # fetch depth 0 to fetch all history for git-restore-mtime-action
           fetch-depth: 0
 
       - uses: chetan/git-restore-mtime-action@v2
@@ -35,7 +128,10 @@ jobs:
       - name: Setup environment
         id: setup-env
         run: |
-          sudo apt update && sudo apt install -y musl-tools musl-dev clang lld
+          if ! command -v musl-gcc >/dev/null 2>&1 || ! command -v clang >/dev/null 2>&1 || ! command -v ld.lld >/dev/null 2>&1; then
+            sudo apt update
+            sudo apt install -y musl-tools musl-dev clang lld
+          fi
           bash .github/setup-env.sh
 
       - name: Setup rust
@@ -43,31 +139,37 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
-      - name: Cache cargo
+      - name: Cache cargo registry
         uses: actions/cache@v4
         with:
           path: |
-            ~/.cargo/bin/
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-          key: cargo-${{ runner.os }}-${{ steps.setup-env.outputs.cache_v }}
+            ~/.cargo/git/checkouts/
+          key: cargo-${{ runner.os }}-${{ matrix.target }}-${{ hashFiles('Cargo.lock') }}
           restore-keys: |
+            cargo-${{ runner.os }}-${{ matrix.target }}-
             cargo-${{ runner.os }}-
 
-      - name: Cache target
+      - name: Cache build target
         uses: actions/cache@v4
         with:
           path: target/
-          key: rustc-${{ runner.os }}-${{ matrix.target }}-${{ steps.setup-env.outputs.cache_v }}
+          key: cargo-target-${{ runner.os }}-${{ matrix.target }}-${{ hashFiles('Cargo.lock') }}
           restore-keys: |
-            rustc-${{ runner.os }}-${{ matrix.target }}-
-            rustc-${{ runner.os }}-
+            cargo-target-${{ runner.os }}-${{ matrix.target }}-
+            cargo-target-${{ runner.os }}-
 
       - name: Build on version ${{ env.app_v }}-${{ env.commit_sha }}
         run: |
-          base64 -d <<< '${{ vars.PUBKEY_BASE64 }}' > config/pub.bin
-          cargo build --bin r2s-server --release --target '${{ matrix.target }}'
+          mkdir -p config
+          if [ -n '${{ vars.PUBKEY_BASE64 }}' ]; then
+            base64 -d <<< '${{ vars.PUBKEY_BASE64 }}' > config/pub.bin
+          elif [ ! -f config/pub.bin ]; then
+            : > config/pub.bin
+          fi
+          cargo build --locked --bin r2s-server --release --target '${{ matrix.target }}'
 
       - name: Upload artifact
         continue-on-error: true
@@ -76,22 +178,3 @@ jobs:
           name: r2s-server
           path: target/${{ matrix.target }}/release/r2s-server
           retention-days: 1
-
-  clippy-check:
-    name: Check
-    if: ${{ github.event_name != 'workflow_dispatch' }}
-    runs-on: [self-hosted, linux, x64]
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Setup rust
-      uses: dtolnay/rust-toolchain@stable
-
-    - name: Setup clippy
-      id: setup-clippy
-      run: rustup component add clippy
-
-    - name: Cargo clippy checks
-      run: |
-        base64 -d <<< '${{ vars.PUBKEY_BASE64 }}' > config/pub.bin
-        cargo clippy --all-features --all-targets -- -D warnings

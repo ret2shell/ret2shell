@@ -435,7 +435,9 @@ export default function (props: ChallengeWidgetProps) {
                             <span>{image.description}</span>
                           </span>
                           <Tag level="info">
-                            <span>{image.protocol || image.service_type || "tcp"}({image.app_protocol || "raw"})</span>
+                            <span>
+                              {image.protocol || image.service_type || "tcp"}({image.app_protocol || "raw"})
+                            </span>
                           </Tag>
                         </div>
                         <span class="flex-1" />

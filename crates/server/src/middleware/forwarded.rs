@@ -66,7 +66,7 @@ fn maybe_connect_info<B>(req: &Request<B>) -> Option<IpAddr> {
     .map(|ConnectInfo(addr)| addr.ip())
 }
 
-#[derive(PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Protocol {
   Http,
   Https,
@@ -84,7 +84,7 @@ impl FromStr for Protocol {
   }
 }
 
-#[derive(PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Identifier {
   SocketAddr(SocketAddr),
   IpAddr(IpAddr),
@@ -357,5 +357,130 @@ impl MakeRequestId for MakeRequestNanoId {
   fn make_request_id<B>(&mut self, _request: &Request<B>) -> Option<RequestId> {
     let request_id = nanoid::nanoid!();
     Some(RequestId::new(request_id.parse().unwrap()))
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use std::{
+    net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr},
+    str::FromStr,
+  };
+
+  use axum::{
+    extract::ConnectInfo,
+    http::{HeaderMap, Request, header::FORWARDED},
+  };
+
+  use super::{
+    ForwardedHeaderValue, ForwardedHeaderValueParseError, ForwardedStanza, Identifier, Protocol,
+    X_FORWARDED_FOR, X_REAL_IP, get_client_ip,
+  };
+
+  fn request_with_headers(headers: HeaderMap) -> Request<()> {
+    let mut request = Request::builder().uri("/").body(()).unwrap();
+    *request.headers_mut() = headers;
+    request
+      .extensions_mut()
+      .insert(ConnectInfo(SocketAddr::from((Ipv4Addr::LOCALHOST, 8080))));
+    request
+  }
+
+  #[test]
+  fn identifier_parses_standard_forwarded_variants() {
+    assert_eq!(
+      Identifier::from_str("192.0.2.10:443").unwrap(),
+      Identifier::SocketAddr(SocketAddr::from((Ipv4Addr::new(192, 0, 2, 10), 443)))
+    );
+    assert_eq!(
+      Identifier::from_str("198.51.100.2").unwrap(),
+      Identifier::IpAddr(IpAddr::V4(Ipv4Addr::new(198, 51, 100, 2)))
+    );
+    assert_eq!(
+      Identifier::from_str("[2001:db8::1]").unwrap(),
+      Identifier::IpAddr(IpAddr::V6(Ipv6Addr::from_str("2001:db8::1").unwrap()))
+    );
+    assert_eq!(
+      Identifier::from_str("_gateway").unwrap(),
+      Identifier::String("_gateway".to_owned())
+    );
+    assert_eq!(
+      Identifier::from_str("unknown").unwrap(),
+      Identifier::Unknown
+    );
+  }
+
+  #[test]
+  fn forwarded_stanza_parses_host_protocol_and_ipv6_addresses() {
+    let stanza = ForwardedStanza::from_str(
+      "for=\"[2001:db8::9]\";by=192.0.2.1;host=\"git.example.com:443\";proto=https",
+    )
+    .unwrap();
+
+    assert_eq!(
+      stanza.forwarded_for,
+      Some(Identifier::IpAddr(IpAddr::V6(
+        Ipv6Addr::from_str("2001:db8::9").unwrap()
+      )))
+    );
+    assert_eq!(
+      stanza.forwarded_by,
+      Some(Identifier::IpAddr(IpAddr::V4(Ipv4Addr::new(192, 0, 2, 1))))
+    );
+    assert_eq!(
+      stanza.forwarded_host.as_deref(),
+      Some("git.example.com:443")
+    );
+    assert_eq!(stanza.forwarded_proto, Some(Protocol::Https));
+  }
+
+  #[test]
+  fn forwarded_parser_rejects_empty_headers_and_invalid_nodes() {
+    assert!(matches!(
+      ForwardedHeaderValue::from_str(" , "),
+      Err(ForwardedHeaderValueParseError::HeaderIsEmpty)
+    ));
+    assert!(matches!(
+      Identifier::from_str("proxy-a"),
+      Err(ForwardedHeaderValueParseError::InvalidObfuscatedNode(node)) if node == "proxy-a"
+    ));
+  }
+
+  #[test]
+  fn get_client_ip_prefers_x_forwarded_for_over_other_sources() {
+    let mut headers = HeaderMap::new();
+    headers.insert(X_FORWARDED_FOR, "203.0.113.10, 10.0.0.1".parse().unwrap());
+    headers.insert(X_REAL_IP, "198.51.100.1".parse().unwrap());
+    headers.insert(FORWARDED, "for=192.0.2.99".parse().unwrap());
+
+    let request = request_with_headers(headers);
+
+    assert_eq!(
+      get_client_ip(&request),
+      Some(IpAddr::V4(Ipv4Addr::new(203, 0, 113, 10)))
+    );
+  }
+
+  #[test]
+  fn get_client_ip_uses_forwarded_and_connect_info_as_fallbacks() {
+    let mut headers = HeaderMap::new();
+    headers.insert(
+      FORWARDED,
+      "for=unknown;by=192.0.2.1, for=\"[2001:db8::8]\""
+        .parse()
+        .unwrap(),
+    );
+
+    let request = request_with_headers(headers);
+    assert_eq!(
+      get_client_ip(&request),
+      Some(IpAddr::V6(Ipv6Addr::from_str("2001:db8::8").unwrap()))
+    );
+
+    let request = request_with_headers(HeaderMap::new());
+    assert_eq!(
+      get_client_ip(&request),
+      Some(IpAddr::V4(Ipv4Addr::LOCALHOST))
+    );
   }
 }

@@ -43,13 +43,13 @@ impl Cache {
   /// You should call this function at each time you want to get some data
   /// from the cache.
   ///
-  /// ```rust
+  /// ```ignore
   /// cache.at("email").set("example@private.ret.sh.cn", "114514").await?;
   /// ```
   ///
   /// or scope it in a function:
   ///
-  /// ```rust
+  /// ```ignore
   /// async fn some_user_endpoint(State(cache): State<Cache>, ...) -> impl IntoResponse {
   ///     let cache = cache.at("user");
   ///     ...

@@ -6,24 +6,35 @@ on:
       - ".github/workflows/web.yml"
       - "web/**"
   pull_request:
-    types: [review_requested]
-
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - ".github/workflows/web.yml"
+      - "web/**"
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   web:
     name: Build
     runs-on: [self-hosted, linux, x64]
+    timeout-minutes: 30
     defaults:
       run:
-        shell: bash -lieo pipefail {0}
+        shell: bash -leo pipefail {0}
+        working-directory: web
 
     steps:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 10.11.0
           run_install: false
 
       - name: Setup Node.js
@@ -31,20 +42,20 @@ jobs:
         with:
           node-version: lts/*
           cache: pnpm
-          cache-dependency-path: |
-            web/pnpm-lock.yaml
-            web/package-lock.json
-            web/yarn.lock
+          cache-dependency-path: web/pnpm-lock.yaml
 
       - name: Install dependencies
         run: |
-          pnpm config set --global registry '${{ vars.NPM_REGISTRY }}'
-          pnpm --prefix web install
+          if [ -n '${{ vars.NPM_REGISTRY }}' ]; then
+            export NPM_CONFIG_REGISTRY='${{ vars.NPM_REGISTRY }}'
+          fi
+          pnpm install --frozen-lockfile
 
       - name: Build
-        run: pnpm --prefix web build
+        run: pnpm build
 
       - name: Upload artifact
+        if: ${{ github.event_name != 'pull_request' }}
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
@@ -56,16 +67,18 @@ jobs:
     name: Check
     if: ${{ github.event_name != 'workflow_dispatch' }}
     runs-on: [self-hosted, linux, x64]
+    timeout-minutes: 30
     defaults:
       run:
-        shell: bash -lieo pipefail {0}
+        shell: bash -leo pipefail {0}
+        working-directory: web
 
     steps:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 10.11.0
           run_install: false
 
       - name: Setup Node.js
@@ -73,15 +86,17 @@ jobs:
         with:
           node-version: lts/*
           cache: pnpm
-          cache-dependency-path: |
-            web/pnpm-lock.yaml
-            web/package-lock.json
-            web/yarn.lock
+          cache-dependency-path: web/pnpm-lock.yaml
 
       - name: Install dependencies
         run: |
-          pnpm config set --global registry '${{ vars.NPM_REGISTRY }}'
-          pnpm --prefix web install
+          if [ -n '${{ vars.NPM_REGISTRY }}' ]; then
+            export NPM_CONFIG_REGISTRY='${{ vars.NPM_REGISTRY }}'
+          fi
+          pnpm install --frozen-lockfile
 
-      - name: Lint
-        run: pnpm --prefix web format && pnpm --prefix web lint
+      - name: Biome check
+        run: pnpm check
+
+      - name: Run tests
+        run: pnpm test

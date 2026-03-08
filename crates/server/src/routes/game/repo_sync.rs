@@ -860,12 +860,139 @@ fn convert_score_rule(
 
 #[cfg(test)]
 mod tests {
-  use super::display_ref_name;
+  use r2s_config::cluster::{ChallengeEnv, ChallengeImage};
+
+  use super::{
+    ChallengeChangeSet, classify_path, display_ref_name, parse_post_receive_updates, short_oid,
+    validate_env_config,
+  };
+  use crate::traits::ResponseError;
+
+  #[allow(deprecated)]
+  fn image(name: &str, port: Option<u16>) -> ChallengeImage {
+    ChallengeImage {
+      name: name.to_owned(),
+      tag: "latest".to_owned(),
+      cpu: 1.0,
+      cpu_req: 0.5,
+      mem: "256Mi".to_owned(),
+      mem_req: "128Mi".to_owned(),
+      storage: Some("1Gi".to_owned()),
+      storage_req: Some("256Mi".to_owned()),
+      port,
+      service_type: None,
+      protocol: None,
+      app_protocol: None,
+      description: None,
+      restricted: None,
+    }
+  }
+
+  fn env(images: Vec<ChallengeImage>) -> ChallengeEnv {
+    ChallengeEnv {
+      internet: true,
+      restricted: Some(false),
+      images,
+      pull_secret: Some("registry-secret".to_owned()),
+    }
+  }
 
   #[test]
   fn git_hook_humanizes_common_ref_names() {
     assert_eq!(display_ref_name("refs/heads/main"), "main");
     assert_eq!(display_ref_name("refs/tags/v1.0.0"), "v1.0.0");
     assert_eq!(display_ref_name("refs/notes/build"), "refs/notes/build");
+  }
+
+  #[test]
+  fn classify_path_tracks_repo_changes_for_game_and_challenges() {
+    let mut game_config_changed = false;
+    let mut doc_changed = false;
+    let mut challenge_changes = ChallengeChangeSet::default();
+
+    for path in [
+      "config.toml",
+      "README.md",
+      "challenges/web/README.md",
+      "challenges/web/hints.toml",
+      "challenges/web/env.toml",
+      "challenges/web/checker/main.rx",
+      "challenges/web/assets/logo.png",
+      "notes/todo.txt",
+    ] {
+      classify_path(
+        path,
+        &mut game_config_changed,
+        &mut doc_changed,
+        &mut challenge_changes,
+      );
+    }
+
+    assert!(game_config_changed);
+    assert!(doc_changed);
+    assert!(challenge_changes.buckets.contains("web"));
+    assert!(challenge_changes.db_backed.contains("web"));
+    assert!(challenge_changes.hints.contains("web"));
+    assert!(challenge_changes.env.contains("web"));
+    assert!(challenge_changes.checker.contains("web"));
+    assert_eq!(challenge_changes.buckets.len(), 1);
+  }
+
+  #[test]
+  fn parse_post_receive_updates_reads_multiple_lines_and_skips_blanks() {
+    let payload = br#"
+old-1 new-1 refs/heads/main
+
+old-2 new-2 refs/tags/v1.0.0
+"#;
+
+    let updates = parse_post_receive_updates(payload).unwrap();
+
+    assert_eq!(updates.len(), 2);
+    assert_eq!(updates[0].old_oid, "old-1");
+    assert_eq!(updates[0].new_oid, "new-1");
+    assert_eq!(updates[0].ref_name, "refs/heads/main");
+    assert_eq!(updates[1].ref_name, "refs/tags/v1.0.0");
+  }
+
+  #[test]
+  fn parse_post_receive_updates_rejects_invalid_input() {
+    assert!(matches!(
+      parse_post_receive_updates(b"old new"),
+      Err(ResponseError::BadRequest(message)) if message == "invalid post-receive payload"
+    ));
+    assert!(matches!(
+      parse_post_receive_updates(&[0xff]),
+      Err(ResponseError::BadRequest(message))
+        if message == "invalid post-receive payload encoding"
+    ));
+  }
+
+  #[test]
+  fn short_oid_truncates_long_hashes_but_keeps_short_values() {
+    assert_eq!(short_oid("1234567890abcdef"), "1234567");
+    assert_eq!(short_oid("dead"), "dead");
+  }
+
+  #[test]
+  fn validate_env_config_detects_duplicate_ports() {
+    assert!(
+      validate_env_config(
+        "web",
+        &env(vec![image("api", Some(8080)), image("web", Some(8080))])
+      )
+      .is_err()
+    );
+    assert!(
+      validate_env_config(
+        "web",
+        &env(vec![
+          image("api", Some(8080)),
+          image("web", Some(8081)),
+          image("db", None)
+        ]),
+      )
+      .is_ok()
+    );
   }
 }

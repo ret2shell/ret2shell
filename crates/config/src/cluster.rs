@@ -160,3 +160,119 @@ impl ChallengeEnv {
     }
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::{AppProtocol, ChallengeEnv, ChallengeImage, Config, Protocol, RegistryConfig};
+  use crate::traits::Merge;
+
+  fn registry() -> RegistryConfig {
+    RegistryConfig {
+      username: Some("ci".to_owned()),
+      password: Some("secret".to_owned()),
+      server: "registry.example.com".to_owned(),
+      insecure: false,
+      external: "registry.example.com".to_owned(),
+      enabled: Some(true),
+    }
+  }
+
+  #[allow(deprecated)]
+  fn image(name: &str) -> ChallengeImage {
+    ChallengeImage {
+      name: name.to_owned(),
+      tag: "challenge:latest".to_owned(),
+      cpu: 1.5,
+      cpu_req: 1.0,
+      mem: "512Mi".to_owned(),
+      mem_req: "256Mi".to_owned(),
+      storage: Some("2Gi".to_owned()),
+      storage_req: Some("1Gi".to_owned()),
+      port: Some(8080),
+      service_type: None,
+      protocol: Some(Protocol::Tcp),
+      app_protocol: Some(AppProtocol::Http),
+      description: Some("web challenge".to_owned()),
+      restricted: Some(true),
+    }
+  }
+
+  #[test]
+  fn merge_prefers_overrideable_fields_without_losing_base_connection_settings() {
+    let base = Some(Config {
+      enabled: true,
+      try_default: Some(false),
+      auto_infer: Some(true),
+      kube_config_path: Some("/etc/kube/config".to_owned()),
+      node_selector: Some("general".to_owned()),
+      traffic: Some("base-traffic".to_owned()),
+      lifecycle: Some("base-lifecycle".to_owned()),
+      enable_capture: Some(false),
+      capture_directory: Some("/var/lib/r2s/capture".to_owned()),
+      registry: Some(registry()),
+    });
+    let overlay = Some(Config {
+      enabled: false,
+      try_default: Some(true),
+      auto_infer: Some(false),
+      kube_config_path: Some("/tmp/ignored".to_owned()),
+      node_selector: Some("gpu".to_owned()),
+      traffic: Some("overlay-traffic".to_owned()),
+      lifecycle: Some("overlay-lifecycle".to_owned()),
+      enable_capture: Some(true),
+      capture_directory: None,
+      registry: None,
+    });
+
+    let merged = base.merge(overlay).unwrap();
+
+    assert!(merged.enabled);
+    assert_eq!(merged.try_default, Some(false));
+    assert_eq!(merged.auto_infer, Some(true));
+    assert_eq!(merged.kube_config_path.as_deref(), Some("/etc/kube/config"));
+    assert_eq!(merged.node_selector.as_deref(), Some("gpu"));
+    assert_eq!(merged.traffic.as_deref(), Some("overlay-traffic"));
+    assert_eq!(merged.lifecycle.as_deref(), Some("overlay-lifecycle"));
+    assert_eq!(merged.enable_capture, Some(true));
+    assert_eq!(
+      merged.capture_directory.as_deref(),
+      Some("/var/lib/r2s/capture")
+    );
+    assert_eq!(merged.registry, Some(registry()));
+  }
+
+  #[test]
+  fn challenge_image_desensitize_redacts_resource_details_but_preserves_identity() {
+    let desensitized = image("web").desensitize();
+
+    assert_eq!(desensitized.name, "web");
+    assert_eq!(desensitized.tag, "ret.sh.cn/shadowed:latest");
+    assert_eq!(desensitized.cpu, 0.0);
+    assert_eq!(desensitized.cpu_req, 0.0);
+    assert_eq!(desensitized.mem, "NaN");
+    assert_eq!(desensitized.mem_req, "NaN");
+    assert_eq!(desensitized.storage, None);
+    assert_eq!(desensitized.storage_req, None);
+    assert_eq!(desensitized.port, Some(8080));
+    assert_eq!(desensitized.protocol, Some(Protocol::Tcp));
+    assert_eq!(desensitized.app_protocol, Some(AppProtocol::Http));
+  }
+
+  #[test]
+  fn challenge_env_desensitize_redacts_network_and_pull_credentials() {
+    let desensitized = ChallengeEnv {
+      internet: true,
+      restricted: Some(true),
+      images: vec![image("web")],
+      pull_secret: Some("registry-secret".to_owned()),
+    }
+    .desensitize();
+
+    assert!(!desensitized.internet);
+    assert_eq!(desensitized.restricted, None);
+    assert_eq!(desensitized.pull_secret, None);
+    assert_eq!(desensitized.images.len(), 1);
+    assert_eq!(desensitized.images[0].tag, "ret.sh.cn/shadowed:latest");
+    assert_eq!(desensitized.images[0].cpu, 0.0);
+  }
+}

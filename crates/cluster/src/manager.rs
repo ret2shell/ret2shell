@@ -91,7 +91,7 @@ impl Cluster {
   ///
   /// Example:
   ///
-  /// ```rust
+  /// ```ignore
   /// cluster.at("challenge").some_operations().await;
   /// ```
   pub fn at(&self, namespace: &str) -> Self {

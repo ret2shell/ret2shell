@@ -1050,7 +1050,8 @@ export function useUpdateGameLifecycleMutation(
   props: { onSuccess?: (result: { lint: DiagnosticMarker[] | null }) => void; onError?: (err: Error) => void } = {}
 ) {
   return useMutation(() => ({
-    mutationFn: (params: { game_id: number; lifecycle: string }) => updateGameLifecycle(params.game_id, params.lifecycle),
+    mutationFn: (params: { game_id: number; lifecycle: string }) =>
+      updateGameLifecycle(params.game_id, params.lifecycle),
     onSuccess: (data) => {
       toastSuccess(t("general.actions.save.status.success"));
       props.onSuccess?.(data);
@@ -1066,9 +1067,7 @@ export async function deleteGameLifecycle(game_id: number) {
   return await api.delete(`${api_root}/game/${game_id}/lifecycle`).json<void>();
 }
 
-export function useDeleteGameLifecycleMutation(
-  props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}
-) {
+export function useDeleteGameLifecycleMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
   return useMutation(() => ({
     mutationFn: ({ game_id }: { game_id: number }) => deleteGameLifecycle(game_id),
     onSuccess: () => {

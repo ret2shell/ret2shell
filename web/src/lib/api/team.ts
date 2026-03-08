@@ -418,7 +418,14 @@ export function useTeamList({
     () => ({
       queryKey: keys(),
       queryFn: () =>
-        getTeamList(game_id(), page?.() ?? 1, page_size?.() ?? 15, order?.(), filter?.(), institute_id?.() ?? undefined),
+        getTeamList(
+          game_id(),
+          page?.() ?? 1,
+          page_size?.() ?? 15,
+          order?.(),
+          filter?.(),
+          institute_id?.() ?? undefined
+        ),
       enabled: enabled?.(),
       throwOnError: (err: Error) => {
         handleHttpError(err, t("team.errors.fetchList.title"));

@@ -40,3 +40,30 @@ pub fn verify_password(password: &str, hash: &str) -> Result<bool, PasswordHashi
     Ok(bcrypt::verify(password, hash)?)
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::{hash_password, verify_password};
+
+  #[test]
+  fn argon_hashes_round_trip_and_reject_wrong_passwords() {
+    let hash = hash_password("p@ssword🔐").unwrap();
+
+    assert!(hash.starts_with("$argon2"));
+    assert!(verify_password("p@ssword🔐", &hash).unwrap());
+    assert!(!verify_password("wrong-password", &hash).unwrap());
+  }
+
+  #[test]
+  fn verify_password_supports_legacy_bcrypt_hashes() {
+    let hash = bcrypt::hash("legacy-password", bcrypt::DEFAULT_COST).unwrap();
+
+    assert!(verify_password("legacy-password", &hash).unwrap());
+    assert!(!verify_password("not-it", &hash).unwrap());
+  }
+
+  #[test]
+  fn malformed_hashes_return_errors() {
+    assert!(verify_password("password", "not-a-valid-hash").is_err());
+  }
+}

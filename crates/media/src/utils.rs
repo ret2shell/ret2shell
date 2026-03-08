@@ -72,16 +72,97 @@ where
 
 #[cfg(test)]
 mod tests {
+  use std::{
+    fs,
+    path::PathBuf,
+    time::{SystemTime, UNIX_EPOCH},
+  };
+
+  use image::{Rgba, RgbaImage};
+
+  use super::{get_media_extension, get_media_type, make_thumbnail};
+  use crate::traits::MediaError;
+
+  fn temp_path(name: &str, extension: &str) -> PathBuf {
+    let unique = SystemTime::now()
+      .duration_since(UNIX_EPOCH)
+      .unwrap()
+      .as_nanos();
+    std::env::temp_dir().join(format!(
+      "ret2shell-{name}-{}-{unique}.{extension}",
+      std::process::id()
+    ))
+  }
+
   #[test]
-  fn test_media_extension() {
-    let content_type = "image/png";
-    let extension = super::get_media_extension(content_type).unwrap();
-    assert_eq!(extension, "png");
-    let content_type = "image/jpeg";
-    let extension = super::get_media_extension(content_type).unwrap();
-    assert_eq!(extension, "jpeg");
-    let content_type = "image/svg+xml";
-    let extension = super::get_media_extension(content_type).unwrap();
-    assert_eq!(extension, "svg");
+  fn media_extension_parses_supported_image_types() {
+    assert_eq!(get_media_extension("image/png").unwrap(), "png");
+    assert_eq!(get_media_extension("image/jpeg").unwrap(), "jpeg");
+    assert_eq!(
+      get_media_extension("image/svg+xml; charset=utf-8").unwrap(),
+      "svg"
+    );
+    assert!(matches!(
+      get_media_extension("text/plain"),
+      Err(MediaError::UnsupportedFileType(content_type)) if content_type == "text/plain"
+    ));
+  }
+
+  #[test]
+  fn media_type_detects_svg_and_rejects_unknown_files() {
+    let svg_path = temp_path("vector", "svg");
+    let unknown_path = temp_path("unknown", "bin");
+
+    fs::write(
+      &svg_path,
+      br#"<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"></svg>"#,
+    )
+    .unwrap();
+    fs::write(&unknown_path, []).unwrap();
+
+    assert_eq!(get_media_type(&svg_path).unwrap(), "image/svg+xml");
+    assert!(matches!(
+      get_media_type(&unknown_path),
+      Err(MediaError::UnsupportedFileType(file_type)) if file_type == "unknown"
+    ));
+
+    fs::remove_file(svg_path).ok();
+    fs::remove_file(unknown_path).ok();
+  }
+
+  #[tokio::test]
+  async fn make_thumbnail_resizes_raster_images() {
+    let original = temp_path("image", "png");
+    let dest = temp_path("thumb", "png");
+
+    RgbaImage::from_pixel(8, 4, Rgba([255, 0, 0, 255]))
+      .save(&original)
+      .unwrap();
+
+    make_thumbnail(&original, &dest, 4).await.unwrap();
+
+    let thumbnail = image::open(&dest).unwrap();
+    assert!(thumbnail.width() <= 4);
+    assert!(thumbnail.height() <= 4);
+
+    fs::remove_file(original).ok();
+    fs::remove_file(dest).ok();
+  }
+
+  #[tokio::test]
+  async fn make_thumbnail_preserves_svg_content() {
+    let original = temp_path("vector", "svg");
+    let dest = temp_path("vector-thumb", "svg");
+    let content =
+      br#"<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"></svg>"#;
+
+    fs::write(&original, content).unwrap();
+
+    make_thumbnail(&original, &dest, 4).await.unwrap();
+
+    assert_eq!(fs::read(&dest).unwrap(), content);
+
+    fs::remove_file(original).ok();
+    fs::remove_file(dest).ok();
   }
 }

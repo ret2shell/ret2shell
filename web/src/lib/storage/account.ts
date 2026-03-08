@@ -22,13 +22,13 @@ export const accountStore = accountRoot[0];
 export const setAccountStore = accountRoot[1];
 
 export function storeToken(token: string) {
-  setAccountStore({ token });
   const tokenRaw = new TextDecoder().decode(base64urlnopad.decode(token.split(".")[1]));
   const tokenJson = JSON.parse(tokenRaw) as Token;
   setAccountStore({
     id: tokenJson.id,
     account: tokenJson.account,
     nickname: tokenJson.nickname,
+    token,
     permissions: tokenJson.permissions,
   });
 }
