@@ -9,18 +9,9 @@ use r2s_cluster::{
 };
 use r2s_database::{challenge, config, game, team, user};
 use r2s_engine::Engine;
-use tracing::{error, info, warn};
+use tracing::{Instrument, Span, error, error_span, info, warn};
 
 use crate::{middleware::auth::Token, traits::GlobalState};
-
-macro_rules! trace_aware_log {
-  ($logger:ident, $trace_id:expr, $($fields:tt)*) => {
-    match $trace_id {
-      Some(trace_id) => $logger!(trace_id=%trace_id, $($fields)*),
-      None => $logger!($($fields)*),
-    }
-  };
-}
 
 #[derive(Clone, Copy, Debug)]
 enum ScriptScope {
@@ -101,6 +92,61 @@ pub fn challenge_info_from_model(challenge: &challenge::Model) -> LifecycleChall
     name: challenge.name.clone(),
     game_id: challenge.game_id,
   }
+}
+
+fn lifecycle_request_span(
+  trace_id: Option<&str>, game: &game::Model, challenge: &LifecycleChallengeInfo,
+  user: &LifecycleUserInfo, team: Option<&LifecycleTeamInfo>,
+) -> Span {
+  let span = error_span!(
+    "request",
+    trace=%trace_id.unwrap_or("UNKNOWN"),
+    "user-id"=tracing::field::Empty,
+    "user-account"=tracing::field::Empty,
+    "user-nickname"=tracing::field::Empty,
+    "team-id"=tracing::field::Empty,
+    "team-name"=tracing::field::Empty,
+    "data-challenge-id"=tracing::field::Empty,
+    "data-challenge-name"=tracing::field::Empty,
+    "data-game-id"=tracing::field::Empty,
+    "data-game-name"=tracing::field::Empty,
+  );
+
+  if user.id > 0 {
+    span.record("user-id", user.id);
+  }
+  if !user.account.is_empty() {
+    span.record("user-account", user.account.as_str());
+  }
+  if !user.nickname.is_empty() {
+    span.record("user-nickname", user.nickname.as_str());
+  }
+  if let Some(team) = team {
+    if let Some(team_id) = team.id
+      && team_id > 0
+    {
+      span.record("team-id", team_id);
+    }
+    if let Some(team_name) = team.name.as_deref()
+      && !team_name.is_empty()
+    {
+      span.record("team-name", team_name);
+    }
+  }
+  if challenge.id > 0 {
+    span.record("data-challenge-id", challenge.id);
+  }
+  if !challenge.name.is_empty() {
+    span.record("data-challenge-name", challenge.name.as_str());
+  }
+  if game.id > 0 {
+    span.record("data-game-id", game.id);
+  }
+  if !game.name.is_empty() {
+    span.record("data-game-name", game.name.as_str());
+  }
+
+  span
 }
 
 fn pod_label(pod: &Pod, key: &str) -> Option<String> {
@@ -204,171 +250,126 @@ async fn cleanup_traffic_cache(cache: Cache, snapshots: &[ChallengeEnvSnapshot])
 async fn trigger_lifecycle_for_snapshots(
   context: LifecycleHookContext, snapshots: Vec<ChallengeEnvSnapshot>, event: LifecycleEvent,
 ) {
-  let LifecycleHookContext {
-    cluster,
-    engine,
-    config,
-    game,
-    challenge,
-    user,
-    team,
-    trace_id,
-  } = context;
-  let trace_id = trace_id.as_deref();
-  let event_name = event.name();
-  let stop_reason = event.reason().map(|reason| reason.as_str()).unwrap_or("");
-  let game_id = game.id;
-  let challenge_id = challenge.id;
-  let user_id = user.id;
-  let team_id = team.as_ref().and_then(|team| team.id).unwrap_or_default();
-  let team_name = team
-    .as_ref()
-    .and_then(|team| team.name.as_deref())
-    .unwrap_or("");
+  let span = lifecycle_request_span(
+    context.trace_id.as_deref(),
+    &context.game,
+    &context.challenge,
+    &context.user,
+    context.team.as_ref(),
+  );
 
-  let Some(mapper) = cluster.lifecycle.clone() else {
-    trace_aware_log!(
-      error,
-      trace_id,
-      event=%event_name,
-      "lifecycle mapper is not initialized"
-    );
-    return;
-  };
-  let resolved = match resolve_lifecycle_script(&config, &game) {
-    Ok(resolved) => resolved,
-    Err(err) => {
-      trace_aware_log!(
-        error,
-        trace_id,
+  async move {
+    let LifecycleHookContext {
+      cluster,
+      engine,
+      config,
+      game,
+      challenge,
+      user,
+      team,
+      trace_id: _,
+    } = context;
+    let event_name = event.name();
+    let stop_reason = event.reason().map(|reason| reason.as_str()).unwrap_or("");
+
+    let Some(mapper) = cluster.lifecycle.clone() else {
+      error!(event=%event_name, "lifecycle mapper is not initialized");
+      return;
+    };
+    let resolved = match resolve_lifecycle_script(&config, &game) {
+      Ok(resolved) => resolved,
+      Err(err) => {
+        error!(event=%event_name, error=%err, "failed to resolve lifecycle script");
+        return;
+      }
+    };
+    let Some(resolved) = resolved else {
+      for snapshot in snapshots {
+        let pod_name = snapshot.pod.metadata.name.clone().unwrap_or_default();
+        info!(
+          event=%event_name,
+          pod=%pod_name,
+          outcome="skipped",
+          reason="cluster config missing",
+          "lifecycle hook skipped"
+        );
+      }
+      return;
+    };
+    let scope = resolved.scope.as_str();
+    if resolved.script.trim().is_empty() {
+      for snapshot in snapshots {
+        let pod_name = snapshot.pod.metadata.name.clone().unwrap_or_default();
+        info!(
+          event=%event_name,
+          scope=%scope,
+          pod=%pod_name,
+          outcome="skipped",
+          reason="script empty",
+          "lifecycle hook skipped"
+        );
+      }
+      return;
+    }
+    if let Err(err) = mapper
+      .preload(&engine, &resolved.key, &resolved.script)
+      .await
+    {
+      error!(
         event=%event_name,
-        game_id=%game_id,
-        challenge_id=%challenge_id,
-        error=%err,
-        "failed to resolve lifecycle script"
+        scope=%scope,
+        error=?err,
+        "failed to preload lifecycle script"
       );
       return;
     }
-  };
-  let Some(resolved) = resolved else {
     for snapshot in snapshots {
       let pod_name = snapshot.pod.metadata.name.clone().unwrap_or_default();
-      trace_aware_log!(
-        info,
-        trace_id,
-        event=%event_name,
-        pod=%pod_name,
-        game_id=%game_id,
-        challenge_id=%challenge_id,
-        user_id=%user_id,
-        outcome="skipped",
-        reason="cluster config missing",
-        "lifecycle hook skipped"
-      );
-    }
-    return;
-  };
-  let scope = resolved.scope.as_str();
-  if resolved.script.trim().is_empty() {
-    for snapshot in snapshots {
-      let pod_name = snapshot.pod.metadata.name.clone().unwrap_or_default();
-      trace_aware_log!(
-        info,
-        trace_id,
-        event=%event_name,
-        scope=%scope,
-        pod=%pod_name,
-        game_id=%game_id,
-        challenge_id=%challenge_id,
-        user_id=%user_id,
-        outcome="skipped",
-        reason="script empty",
-        "lifecycle hook skipped"
-      );
-    }
-    return;
-  }
-  if let Err(err) = mapper
-    .preload(&engine, &resolved.key, &resolved.script)
-    .await
-  {
-    trace_aware_log!(
-      error,
-      trace_id,
-      event=%event_name,
-      scope=%scope,
-      game_id=%game_id,
-      challenge_id=%challenge_id,
-      error=?err,
-      "failed to preload lifecycle script"
-    );
-    return;
-  }
-  for snapshot in snapshots {
-    let pod_name = snapshot.pod.metadata.name.clone().unwrap_or_default();
-    match mapper
-      .execute(
-        &engine,
-        &resolved.key,
-        LifecycleExecutionRequest {
-          event,
-          snapshot: &snapshot,
-          user: user.clone(),
-          team: team.clone(),
-          challenge: challenge.clone(),
-        },
-      )
-      .await
-    {
-      Ok(LifecycleExecutionStatus::Executed) => trace_aware_log!(
-        info,
-        trace_id,
-        event=%event_name,
-        reason=%stop_reason,
-        scope=%scope,
-        pod=%pod_name,
-        game_id=%game_id,
-        challenge_id=%challenge_id,
-        user_id=%user_id,
-        team_id=%team_id,
-        team_name=%team_name,
-        outcome="executed",
-        "lifecycle hook executed"
-      ),
-      Ok(LifecycleExecutionStatus::Skipped) => trace_aware_log!(
-        info,
-        trace_id,
-        event=%event_name,
-        reason=%stop_reason,
-        scope=%scope,
-        pod=%pod_name,
-        game_id=%game_id,
-        challenge_id=%challenge_id,
-        user_id=%user_id,
-        team_id=%team_id,
-        team_name=%team_name,
-        outcome="skipped",
-        reason_detail="function missing",
-        "lifecycle hook skipped"
-      ),
-      Err(err) => trace_aware_log!(
-        error,
-        trace_id,
-        event=%event_name,
-        reason=%stop_reason,
-        scope=%scope,
-        pod=%pod_name,
-        game_id=%game_id,
-        challenge_id=%challenge_id,
-        user_id=%user_id,
-        team_id=%team_id,
-        team_name=%team_name,
-        error=?err,
-        outcome="failed",
-        "lifecycle hook failed"
-      ),
+      match mapper
+        .execute(
+          &engine,
+          &resolved.key,
+          LifecycleExecutionRequest {
+            event,
+            snapshot: &snapshot,
+            user: user.clone(),
+            team: team.clone(),
+            challenge: challenge.clone(),
+          },
+        )
+        .await
+      {
+        Ok(LifecycleExecutionStatus::Executed) => info!(
+          event=%event_name,
+          reason=%stop_reason,
+          scope=%scope,
+          pod=%pod_name,
+          outcome="executed",
+          "lifecycle hook executed"
+        ),
+        Ok(LifecycleExecutionStatus::Skipped) => info!(
+          event=%event_name,
+          reason=%stop_reason,
+          scope=%scope,
+          pod=%pod_name,
+          outcome="skipped",
+          reason_detail="function missing",
+          "lifecycle hook skipped"
+        ),
+        Err(err) => error!(
+          event=%event_name,
+          reason=%stop_reason,
+          scope=%scope,
+          pod=%pod_name,
+          error=?err,
+          outcome="failed",
+          "lifecycle hook failed"
+        ),
+      }
     }
   }
+  .instrument(span)
+  .await;
 }
 
 pub fn spawn_request_hooks(request: RequestLifecycleHooks) {
