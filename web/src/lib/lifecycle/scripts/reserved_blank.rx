@@ -1,13 +1,52 @@
 //! * reserved_blank.rx
+//! No-op lifecycle template.
+//!
+//! Usage:
+//! 1. Select this preset when you want a valid lifecycle script with no side effects.
+//! 2. Save it to `$GAME/lifecycle.rx` if you need to override an inherited global lifecycle script
+//!    and disable the hooks for one game only.
+//! 3. Rename `_ctx` to `ctx` in the hooks you plan to use, then add your own logic.
+//! 4. Leave unused hooks returning `Ok(())`.
+//!
+//! Lifecycle hook API:
+//!
+//! * `on_start(ctx)`: called after a challenge environment starts.
+//! * `on_delay(ctx)`: called after the environment lifetime is extended.
+//! * `on_stop(ctx)`: called after the environment stops.
+//!
+//! Hook context:
+//!
+//! * `ctx.pod`: current pod metadata, spec, and status.
+//! * `ctx.service`: current service metadata plus internal and external ports.
+//! * `ctx.user`: `{ id, account, nickname, institute_id }`.
+//! * `ctx.team`: `{ id, name, institute_id, token }` or `None` in solo mode.
+//! * `ctx.challenge`: `{ id, name, game_id }`.
+//! * `ctx.reason`: only available in `on_stop`; usually `manual` or `timeout`.
+//!
+//! Notes:
+//!
+//! * Missing lifecycle functions are skipped by the platform, but keeping all three hooks here makes the
+//!   available entry points explicit.
+//! * Most nested fields inside `ctx.pod` and `ctx.service` are `Option` values; check them before use.
 
+/// Called after an instance starts.
+///
+/// Replace `Ok(())` with your startup logic when needed.
 pub async fn on_start(_ctx) {
     Ok(())
 }
 
+/// Called when an instance lifetime is extended.
+///
+/// Replace `Ok(())` with lease renewal, TTL refresh, or any other delay logic.
 pub async fn on_delay(_ctx) {
     Ok(())
 }
 
+/// Called after an instance stops.
+///
+/// Replace `Ok(())` with cleanup logic. Read `ctx.reason` if you need to tell
+/// manual stop from timeout stop.
 pub async fn on_stop(_ctx) {
     Ok(())
 }

@@ -1,7 +1,42 @@
 //! * webhook_example.rx
+//! Send lifecycle events to an external webhook.
+//!
+//! Usage:
+//! 1. Select this preset in the Lifecycle editor.
+//! 2. Replace `WEBHOOK_URL` with your own endpoint.
+//! 3. Save it to `$GLOBAL/lifecycle.rx` or `$GAME/lifecycle.rx`.
+//! 4. Start, delay, or stop an instance to verify that your webhook receives the events.
+//!
+//! Lifecycle hook API:
+//!
+//! * `on_start(ctx)`: called after a challenge environment starts.
+//! * `on_delay(ctx)`: called after the environment lifetime is extended.
+//! * `on_stop(ctx)`: called after the environment stops.
+//!
+//! Hook context:
+//!
+//! * `ctx.pod`: current pod metadata, spec, and status.
+//! * `ctx.service`: current service metadata plus internal and external ports.
+//! * `ctx.user`: `{ id, account, nickname, institute_id }`.
+//! * `ctx.team`: `{ id, name, institute_id, token }` or `None` in solo mode.
+//! * `ctx.challenge`: `{ id, name, game_id }`.
+//! * `ctx.reason`: only available in `on_stop`; usually `manual` or `timeout`.
+//!
+//! Notes:
+//!
+//! * Hooks run once for each environment snapshot, so multi-pod challenges may trigger multiple requests.
+//! * Most nested fields inside `ctx.pod` and `ctx.service` are `Option` values; check them before use.
+//! * Extend `send_event` if you want to forward more fields, but avoid sending sensitive values such as
+//!   `ctx.team.token` unless your receiver really needs them.
 
+/// Replace this with your webhook endpoint.
+/// The receiver should accept `POST application/json`.
 const WEBHOOK_URL = "https://ret.sh.cn/api/dev/null";
 
+/// Send a lifecycle event to the configured webhook.
+///
+/// Usage: keep the helper small, then add extra JSON fields here if your
+/// external system needs more context.
 pub async fn send_event(event) {
     let client = http::Client::new();
     client.post(WEBHOOK_URL)
@@ -15,16 +50,27 @@ pub async fn send_event(event) {
     Ok(())
 }
 
+/// Called after an instance starts.
+///
+/// Typical use: notify external systems, register temporary resources, or
+/// warm up related services.
 pub async fn on_start(_ctx) {
     send_event("start").await?;
     Ok(())
 }
 
+/// Called when an instance lifetime is extended.
+///
+/// Typical use: renew TTL, update leases, or reschedule external cleanup jobs.
 pub async fn on_delay(_ctx) {
     send_event("delay").await?;
     Ok(())
 }
 
+/// Called after an instance stops.
+///
+/// Typical use: release external resources or send a final notification.
+/// Read `ctx.reason` if you need to distinguish manual stop from timeout.
 pub async fn on_stop(_ctx) {
     send_event("stop").await?;
     Ok(())
