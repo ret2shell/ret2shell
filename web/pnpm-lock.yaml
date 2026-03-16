@@ -118,7 +118,7 @@ importers:
         version: 3.7.2
       nanoid:
         specifier: ^5.1.6
-        version: 5.1.6
+        version: 5.1.7
       overlayscrollbars:
         specifier: ^2.14.0
         version: 2.14.0
@@ -190,8 +190,8 @@ importers:
         specifier: ^2.4.7
         version: 2.4.7
       '@iconify-json/fluent':
-        specifier: ^1.2.40
-        version: 1.2.40
+        specifier: ^1.2.41
+        version: 1.2.41
       '@iconify-json/fluent-emoji-flat':
         specifier: ^1.2.5
         version: 1.2.5
@@ -561,8 +561,8 @@ packages:
   '@iconify-json/fluent-emoji-flat@1.2.5':
     resolution: {integrity: sha512-5ShoOHJ0ezYEIMfp2zvbRiZpL1Af8Prg5v9pElaIQhfqwbyD57pzrp70g/rK2EjigajBq9/cPrJXh224HaP3TQ==}
 
-  '@iconify-json/fluent@1.2.40':
-    resolution: {integrity: sha512-mGHKd14H0RyS2PLRn2Q1n0M+PW+TQRFuk12QjJ6N7yi2BlKaMbEQYDW7rlc5hvvJ2smpp+TpakBc2ooqyQKxZw==}
+  '@iconify-json/fluent@1.2.41':
+    resolution: {integrity: sha512-UbUFCJm7gICJuiDVZdo259L05TxAKbECJ/NBax/+N5CejWXJ0q/y++HNWLdJBkSfsZVYH9KtFZgwox36PC0/Wg==}
 
   '@iconify-json/meteocons@1.2.4':
     resolution: {integrity: sha512-E7YV02ql5WmJgAOpXU/hoF9Mdshq73KjwR6fBxZ5SrqMJghMa3CIcRG6NQGwP4I1uBOhIjOFlAikYoPAKuT56A==}
@@ -1887,8 +1887,8 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  nanoid@5.1.6:
-    resolution: {integrity: sha512-c7+7RQ+dMB5dPwwCp4ee1/iV/q2P6aK1mTZcfr1BTuVlyW9hJYiMPybJCcnBlQtuSmTIWNeazm/zqNoZSSElBg==}
+  nanoid@5.1.7:
+    resolution: {integrity: sha512-ua3NDgISf6jdwezAheMOk4mbE1LXjm1DfMUDMuJf4AqxLFK3ccGpgWizwa5YV7Yz9EpXwEaWoRXSb/BnV0t5dQ==}
     engines: {node: ^18 || >=20}
     hasBin: true
 
@@ -2629,7 +2629,7 @@ snapshots:
     dependencies:
       '@iconify/types': 2.0.0
 
-  '@iconify-json/fluent@1.2.40':
+  '@iconify-json/fluent@1.2.41':
     dependencies:
       '@iconify/types': 2.0.0
 
@@ -3088,7 +3088,7 @@ snapshots:
   '@xdsec/wsrx@0.5.5':
     dependencies:
       ky: 1.14.3
-      nanoid: 5.1.6
+      nanoid: 5.1.7
 
   '@xterm/addon-canvas@0.7.0(@xterm/xterm@5.5.0)':
     dependencies:
@@ -4422,7 +4422,7 @@ snapshots:
 
   nanoid@3.3.11: {}
 
-  nanoid@5.1.6: {}
+  nanoid@5.1.7: {}
 
   node-releases@2.0.36: {}
 
