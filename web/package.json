@@ -53,7 +53,7 @@
     "ky": "^1.14.3",
     "lorem-ipsum": "^2.0.8",
     "luxon": "^3.7.2",
-    "nanoid": "^5.1.6",
+    "nanoid": "^5.1.7",
     "overlayscrollbars": "^2.14.0",
     "overlayscrollbars-solid": "^0.5.6",
     "passive-events-support": "^1.1.0",
