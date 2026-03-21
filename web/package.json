@@ -31,7 +31,7 @@
     "@solid-primitives/refs": "^1.1.3",
     "@solid-primitives/resize-observer": "^2.1.5",
     "@solid-primitives/storage": "^4.3.4",
-    "@solidjs/router": "^0.15.4",
+    "@solidjs/router": "^0.16.1",
     "@tanstack/query-persist-client-core": "^5.92.4",
     "@tanstack/solid-query": "^5.91.4",
     "@tanstack/solid-query-persist-client": "^5.90.28",
