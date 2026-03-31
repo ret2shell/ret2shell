@@ -10,6 +10,7 @@ export type Challenge = {
   tag: { name: string; primary: boolean }[];
   score_rule: { initial: number; minimum: number; decay: number };
   score: number;
+  display_order?: number;
   bucket: string | null;
   release_at: DateTime | null;
   archive_at: DateTime | null;
@@ -18,6 +19,8 @@ export type Challenge = {
 export type ChallengeImage = {
   name: string;
   tag: string;
+  internal_managed: boolean;
+  internal_tag: string | null;
   cpu: number;
   cpu_req: number;
   mem: string;

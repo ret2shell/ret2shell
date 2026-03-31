@@ -9,6 +9,7 @@ mod utils;
 
 use r2s_config::captcha::ValidatorType;
 pub use traits::{Captcha, CaptchaError, CaptchaValidator};
+pub use utils::sha256sum_str;
 
 /// Generate a captcha. you should desensitize the captcha before sending it to
 /// the client, and store the original captcha object into cache.

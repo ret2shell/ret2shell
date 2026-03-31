@@ -1,5 +1,7 @@
 import { inflyClient } from "@api";
 import { useChallengeCheckerScript, useUpdateChallengeCheckerScriptMutation } from "@api/challenge";
+import { useGameSyncStatus } from "@api/game";
+import GameSyncReadonlyBanner from "@lib/blocks/game/sync-readonly-banner";
 import { generateRandomMotto } from "@lib/utils/random-motto";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
@@ -82,6 +84,10 @@ export default function (props: ChallengeWidgetProps) {
     return Tmpl.withContext(checkerCtx).execute(checkerMap[preset()!]);
   });
   const [script, setScript] = createSignal("");
+  const syncStatus = useGameSyncStatus({
+    game_id: () => props.gameId,
+    enabled: () => props.gameId > 0,
+  });
 
   const scriptRemote = useChallengeCheckerScript({
     game_id: () => props.gameId,
@@ -118,6 +124,7 @@ export default function (props: ChallengeWidgetProps) {
 
   return (
     <div class="flex-1 flex flex-col h-full space-y-2 p-3 lg:p-6 lg:pb-3">
+      <GameSyncReadonlyBanner gameId={props.gameId} />
       <header class="min-h-12 border-b border-b-layer-content/10 flex flex-row flex-wrap justify-end space-x-2 items-center gap-y-2 py-2">
         <span class="flex flex-row space-x-2 items-center overflow-hidden">
           <span class="shrink-0 icon-[fluent--code-20-regular] w-5 h-5" />
@@ -155,6 +162,7 @@ export default function (props: ChallengeWidgetProps) {
             onValueChange={(e) => {
               setPreset((e.value.at(0) as PresetChecker) || null);
             }}
+            disabled={syncStatus.data?.readonly}
           />
           <span class="flex flex-row justify-end items-center flex-wrap gap-y-2 gap-x-2">
             <Button size="sm" square onClick={restoreScript}>
@@ -163,15 +171,18 @@ export default function (props: ChallengeWidgetProps) {
             <Button
               level="info"
               size="sm"
-              onClick={() =>
+              onClick={() => {
+                if (syncStatus.data?.readonly) {
+                  return;
+                }
                 updateScriptMutation.mutate({
                   game_id: props.gameId,
                   challenge_id: props.challengeId,
                   content: script(),
-                })
-              }
+                });
+              }}
               loading={updateScriptMutation.isPending || scriptRemote.isLoading}
-              disabled={updateScriptMutation.isPending || scriptRemote.isLoading}
+              disabled={updateScriptMutation.isPending || scriptRemote.isLoading || syncStatus.data?.readonly}
             >
               {t("general.actions.save.title")}
               <span>&</span>
@@ -186,8 +197,11 @@ export default function (props: ChallengeWidgetProps) {
         lang="rune"
         value={script()}
         lints={scriptRemote.data?.lint ?? []}
+        readonly={syncStatus.data?.readonly}
         onValueChanged={(e) => {
-          setScript(e);
+          if (!syncStatus.data?.readonly) {
+            setScript(e);
+          }
         }}
       />
       <footer class="min-h-12 border-t border-t-layer-content/10 flex flex-col lg:flex-row flex-wrap justify-start space-x-2 items-center gap-y-2 py-2">

@@ -1,6 +1,7 @@
 import { inflyClient } from "@api";
 import { useChallenge } from "@api/challenge";
-import { useGame } from "@api/game";
+import { useGame, useGameSyncStatus } from "@api/game";
+import GameSyncReadonlyBanner from "@lib/blocks/game/sync-readonly-banner";
 import { createForm, getValue, required, setValue, setValues } from "@modular-forms/solid";
 import { fullTheme, t } from "@storage/theme";
 import Button from "@widgets/button";
@@ -30,6 +31,10 @@ export function FormBare(
 ) {
   // Load edit source
   const game = useGame({ id: () => props.gameId });
+  const syncStatus = useGameSyncStatus({
+    game_id: () => props.gameId,
+    enabled: () => props.gameId > 0,
+  });
   const challenge = useChallenge({
     game_id: () => props.gameId,
     challenge_id: () => props.challengeId || 0,
@@ -48,6 +53,9 @@ export function FormBare(
     },
   });
   async function onSubmit(result: ChallengeForm) {
+    if (syncStatus.data?.readonly) {
+      return;
+    }
     await props.onDone(result);
     inflyClient.invalidateQueries({
       queryKey: ["game", props.gameId, "challenge"],
@@ -81,171 +89,175 @@ export function FormBare(
 
   return (
     <Form onSubmit={onSubmit} class="flex flex-col w-full max-w-5xl space-y-2 relative">
-      <Field name="name" validate={[required(t("challenge.form.name.required"))]}>
-        {(field, props) => (
-          <Input
-            icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
-            title={t("challenge.form.name.label")}
-            placeholder={t("challenge.form.name.placeholder")}
-            {...props}
-            value={field.value}
-            error={field.error}
-            required
-          />
-        )}
-      </Field>
-      <Field name="tag" validate={[required(t("challenge.form.tag.required"))]}>
-        {(field, props) => (
-          <Input
-            icon={<span class="shrink-0 icon-[fluent--tag-20-regular] w-5 h-5" />}
-            title={t("challenge.form.tag.label")}
-            placeholder={t("challenge.form.tag.placeholder")}
-            {...props}
-            value={field.value}
-            error={field.error}
-            required
-          />
-        )}
-      </Field>
-      <Show when={!props.training}>
-        <div class="flex space-y-2 lg:space-x-2 lg:space-y-0 flex-col lg:flex-row">
-          <Field name="initial" type="number">
-            {(initialField, initialProps) => (
-              <Field name="minimum" type="number">
-                {(minField, minProps) => (
-                  <Field name="decay" type="number">
-                    {(decayField, decayProps) => (
-                      <>
-                        <div class="flex flex-col space-y-2 flex-1">
-                          <Input
-                            icon={<span class="shrink-0 icon-[fluent--chevron-double-up-20-regular] w-5 h-5" />}
-                            title={t("challenge.form.scoreRule.initial.label")}
-                            placeholder={t("challenge.form.scoreRule.initial.placeholder")}
-                            {...initialProps}
-                            value={initialField.value}
-                            error={initialField.error}
-                            type="number"
-                            min={0}
-                            max={1500}
-                            required
+      <GameSyncReadonlyBanner gameId={props.gameId} />
+      <fieldset disabled={syncStatus.data?.readonly} class="contents">
+        <Field name="name" validate={[required(t("challenge.form.name.required"))]}>
+          {(field, props) => (
+            <Input
+              icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
+              title={t("challenge.form.name.label")}
+              placeholder={t("challenge.form.name.placeholder")}
+              {...props}
+              value={field.value}
+              error={field.error}
+              required
+            />
+          )}
+        </Field>
+        <Field name="tag" validate={[required(t("challenge.form.tag.required"))]}>
+          {(field, props) => (
+            <Input
+              icon={<span class="shrink-0 icon-[fluent--tag-20-regular] w-5 h-5" />}
+              title={t("challenge.form.tag.label")}
+              placeholder={t("challenge.form.tag.placeholder")}
+              {...props}
+              value={field.value}
+              error={field.error}
+              required
+            />
+          )}
+        </Field>
+        <Show when={!props.training}>
+          <div class="flex space-y-2 lg:space-x-2 lg:space-y-0 flex-col lg:flex-row">
+            <Field name="initial" type="number">
+              {(initialField, initialProps) => (
+                <Field name="minimum" type="number">
+                  {(minField, minProps) => (
+                    <Field name="decay" type="number">
+                      {(decayField, decayProps) => (
+                        <>
+                          <div class="flex flex-col space-y-2 flex-1">
+                            <Input
+                              icon={<span class="shrink-0 icon-[fluent--chevron-double-up-20-regular] w-5 h-5" />}
+                              title={t("challenge.form.scoreRule.initial.label")}
+                              placeholder={t("challenge.form.scoreRule.initial.placeholder")}
+                              {...initialProps}
+                              value={initialField.value}
+                              error={initialField.error}
+                              type="number"
+                              min={0}
+                              max={1500}
+                              required
+                            />
+                            <Input
+                              icon={<span class="shrink-0 icon-[fluent--chevron-double-down-20-regular] w-5 h-5" />}
+                              title={t("challenge.form.scoreRule.minimum.label")}
+                              placeholder={t("challenge.form.scoreRule.minimum.placeholder")}
+                              {...minProps}
+                              value={minField.value}
+                              error={minField.error}
+                              type="number"
+                              min={0}
+                              max={1500}
+                              required
+                            />
+                            <Input
+                              icon={<span class="shrink-0 icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
+                              title={t("challenge.form.scoreRule.decay.label")}
+                              placeholder={t("challenge.form.scoreRule.decay.placeholder")}
+                              {...decayProps}
+                              value={decayField.value}
+                              error={decayField.error}
+                              type="number"
+                              min={1}
+                              max={50}
+                              required
+                            />
+                          </div>
+                          <ScorePicker
+                            class="flex-1"
+                            max={initialField.value ?? 0}
+                            onChangeMax={(v) => {
+                              setValue(form, "initial", v);
+                            }}
+                            min={minField.value ?? 0}
+                            onChangeMin={(v) => {
+                              setValue(form, "minimum", v);
+                            }}
+                            decay={decayField.value || 10}
+                            onChangeDecay={(v) => {
+                              setValue(form, "decay", v);
+                            }}
                           />
-                          <Input
-                            icon={<span class="shrink-0 icon-[fluent--chevron-double-down-20-regular] w-5 h-5" />}
-                            title={t("challenge.form.scoreRule.minimum.label")}
-                            placeholder={t("challenge.form.scoreRule.minimum.placeholder")}
-                            {...minProps}
-                            value={minField.value}
-                            error={minField.error}
-                            type="number"
-                            min={0}
-                            max={1500}
-                            required
-                          />
-                          <Input
-                            icon={<span class="shrink-0 icon-[fluent--number-symbol-20-regular] w-5 h-5" />}
-                            title={t("challenge.form.scoreRule.decay.label")}
-                            placeholder={t("challenge.form.scoreRule.decay.placeholder")}
-                            {...decayProps}
-                            value={decayField.value}
-                            error={decayField.error}
-                            type="number"
-                            min={1}
-                            max={50}
-                            required
-                          />
-                        </div>
-                        <ScorePicker
-                          class="flex-1"
-                          max={initialField.value ?? 0}
-                          onChangeMax={(v) => {
-                            setValue(form, "initial", v);
-                          }}
-                          min={minField.value ?? 0}
-                          onChangeMin={(v) => {
-                            setValue(form, "minimum", v);
-                          }}
-                          decay={decayField.value || 10}
-                          onChangeDecay={(v) => {
-                            setValue(form, "decay", v);
-                          }}
-                        />
-                      </>
-                    )}
-                  </Field>
+                        </>
+                      )}
+                    </Field>
+                  )}
+                </Field>
+              )}
+            </Field>
+          </div>
+        </Show>
+        <Show when={!props.training && (game.data?.timeline_presets?.length ?? 0) > 0 && challenge.data}>
+          <Field name="release_at" type="number">
+            {() => (
+              <Field name="archive_at" type="number">
+                {() => (
+                  <>
+                    <Select
+                      placeholder={t("challenge.form.scoringPeriod.placeholder")}
+                      label={t("challenge.form.scoringPeriod.label")}
+                      class="flex-1"
+                      items={
+                        game.data?.timeline_presets?.map((t) => {
+                          return {
+                            value: t.label,
+                            label: `${t.start_at.toFormat("yyyy-MM-dd HH:mm:ss")} - ${t.end_at.toFormat("yyyy-MM-dd HH:mm:ss")}: ${t.label}`,
+                          };
+                        }) ?? []
+                      }
+                      value={
+                        [
+                          game.data?.timeline_presets?.find(
+                            (i) =>
+                              i.start_at.toSeconds() === getValue(form, "release_at") &&
+                              i.end_at.toSeconds() === getValue(form, "archive_at")
+                          )?.label ?? "",
+                        ].filter((s) => s) ?? []
+                      }
+                      onValueChange={(v) => {
+                        if (v.value[0]) {
+                          const item = game.data?.timeline_presets?.find((i) => i.label === v.value[0]);
+                          setValue(form, "release_at", item?.start_at.toSeconds() ?? null);
+                          setValue(form, "archive_at", item?.end_at.toSeconds() ?? null);
+                        } else {
+                          setValue(form, "release_at", null);
+                          setValue(form, "archive_at", null);
+                        }
+                      }}
+                    />
+                  </>
                 )}
               </Field>
             )}
           </Field>
-        </div>
-      </Show>
-      <Show when={!props.training && (game.data?.timeline_presets?.length ?? 0) > 0 && challenge.data}>
-        <Field name="release_at" type="number">
-          {() => (
-            <Field name="archive_at" type="number">
-              {() => (
-                <>
-                  <Select
-                    placeholder={t("challenge.form.scoringPeriod.placeholder")}
-                    label={t("challenge.form.scoringPeriod.label")}
-                    class="flex-1"
-                    items={
-                      game.data?.timeline_presets?.map((t) => {
-                        return {
-                          value: t.label,
-                          label: `${t.start_at.toFormat("yyyy-MM-dd HH:mm:ss")} - ${t.end_at.toFormat("yyyy-MM-dd HH:mm:ss")}: ${t.label}`,
-                        };
-                      }) ?? []
-                    }
-                    value={
-                      [
-                        game.data?.timeline_presets?.find(
-                          (i) =>
-                            i.start_at.toSeconds() === getValue(form, "release_at") &&
-                            i.end_at.toSeconds() === getValue(form, "archive_at")
-                        )?.label ?? "",
-                      ].filter((s) => s) ?? []
-                    }
-                    onValueChange={(v) => {
-                      if (v.value[0]) {
-                        const item = game.data?.timeline_presets?.find((i) => i.label === v.value[0]);
-                        setValue(form, "release_at", item?.start_at.toSeconds() ?? null);
-                        setValue(form, "archive_at", item?.end_at.toSeconds() ?? null);
-                      } else {
-                        setValue(form, "release_at", null);
-                        setValue(form, "archive_at", null);
-                      }
-                    }}
-                  />
-                </>
-              )}
-            </Field>
+        </Show>
+        <Field name="content" validate={[required(t("challenge.form.content.required"))]}>
+          {(field) => (
+            <Editor
+              form={form}
+              lineNumbers
+              class="h-96"
+              lang="markdown"
+              readonly={syncStatus.data?.readonly}
+              placeholder="MARKDOWN"
+              title={t("challenge.form.content.label")}
+              name="content"
+              value={field.value}
+              error={field.error}
+            />
           )}
         </Field>
-      </Show>
-      <Field name="content" validate={[required(t("challenge.form.content.required"))]}>
-        {(field) => (
-          <Editor
-            form={form}
-            lineNumbers
-            class="h-96"
-            lang="markdown"
-            placeholder="MARKDOWN"
-            title={t("challenge.form.content.label")}
-            name="content"
-            value={field.value}
-            error={field.error}
-          />
-        )}
-      </Field>
-      <Button
-        type="submit"
-        level="primary"
-        class="mt-4!"
-        loading={game.isLoading || challenge.isLoading}
-        disabled={game.isLoading || challenge.isLoading}
-      >
-        {props.challengeId ? t("general.actions.save.title") : t("general.actions.create.title")}
-      </Button>
+        <Button
+          type="submit"
+          level="primary"
+          class="mt-4!"
+          loading={game.isLoading || challenge.isLoading}
+          disabled={game.isLoading || challenge.isLoading || syncStatus.data?.readonly}
+        >
+          {props.challengeId ? t("general.actions.save.title") : t("general.actions.create.title")}
+        </Button>
+      </fieldset>
     </Form>
   );
 }

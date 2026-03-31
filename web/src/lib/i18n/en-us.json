@@ -299,7 +299,191 @@
       "title": "Switch protocol"
     },
     "sync": {
-      "title": "Sync resources"
+      "title": "Sync resources",
+      "sources": {
+        "title": "Registry discovery sources",
+        "description": "Manage read-only registry repositories used for catalog discovery and import.",
+        "empty": "No registry discovery source configured",
+        "form": {
+          "name": "Source name",
+          "gitUrl": "Git URL",
+          "branch": "Branch",
+          "priority": "Priority",
+          "enabled": "Enabled",
+          "publishEnabled": "Publish enabled",
+          "privateSource": "Private source"
+        },
+        "actions": {
+          "fetch": {
+            "title": "Fetch",
+            "success": "Registry discovery source fetched successfully",
+            "fail": "Failed to fetch registry discovery source"
+          }
+        },
+        "badges": {
+          "enabled": "Source: {{enabled}}",
+          "publishEnabled": "Publish: {{enabled}}"
+        },
+        "state": {
+          "enabled": "enabled",
+          "disabled": "disabled"
+        },
+        "lastFetched": "Last fetched: {{value}}",
+        "errors": {
+          "fetch": {
+            "title": "Failed to fetch registry discovery sources"
+          }
+        }
+      },
+      "direct": {
+        "title": "Direct upstream discovery",
+        "description": "Probe another Ret2Shell instance directly without using a registry discovery source.",
+        "action": "Discover remote",
+        "import": {
+          "title": "Import release",
+          "success": "Remote release imported successfully",
+          "fail": "Failed to import remote release"
+        },
+        "games": "Remote games",
+        "releases": "Remote releases",
+        "releaseCount": "{{count}} release(s)",
+        "info": "Remote base URL: {{baseUrl}} | protocol v{{version}}",
+        "fail": "Failed to discover remote sync source",
+        "form": {
+          "baseUrl": "Remote base URL",
+          "syncToken": "Sync token",
+          "gameKey": "Game key",
+          "releaseId": "Release ID"
+        }
+      },
+      "catalog": {
+        "title": "Registry catalog import",
+        "description": "Browse one fetched registry discovery source, inspect releases, choose an upstream, and start an import job.",
+        "source": "Registry discovery source",
+        "sourcePlaceholder": "Choose one source",
+        "games": "Games",
+        "releases": "Releases",
+        "upstreams": "Upstreams",
+        "releaseCount": "{{count}} release(s)",
+        "emptyGames": "No games found in this source",
+        "emptyReleases": "No releases available for the selected game",
+        "emptyUpstreams": "No active upstreams available for the selected release",
+        "conflicts": {
+          "title": "Conflicting registry entries",
+          "description": "Other fetched discovery sources publish the same game key and release ID with different snapshot or manifest content."
+        },
+        "import": {
+          "title": "Import from registry",
+          "success": "Registry import job created successfully",
+          "fail": "Failed to create registry import job"
+        },
+        "errors": {
+          "fetchGames": {
+            "title": "Failed to fetch registry games"
+          },
+          "fetchReleases": {
+            "title": "Failed to fetch registry releases"
+          },
+          "fetchDetail": {
+            "title": "Failed to fetch registry release detail"
+          }
+        }
+      },
+      "jobs": {
+        "title": "Sync jobs",
+        "empty": "No sync jobs yet",
+        "stage": "Status: {{status}} | stage: {{stage}}",
+        "status": {
+          "pending": "pending",
+          "running": "running",
+          "paused": "paused",
+          "failed": "failed",
+          "completed": "completed",
+          "cancelled": "cancelled"
+        },
+        "stages": {
+          "queued": "queued",
+          "discover": "discovering release metadata",
+          "fetchRepoInit": "initializing repo workspace",
+          "fetchRepoFetch": "fetching release ref",
+          "fetchRepoCheckout": "checking out release snapshot",
+          "fetchRepoVerify": "verifying fetched snapshot",
+          "fetchRepoDone": "repo snapshot ready",
+          "fetchMedia": "fetching media {{done}}/{{total}}",
+          "fetchOci": "mirroring OCI assets {{done}}/{{total}}",
+          "finalizeMoveRepo": "swapping staged repo into place",
+          "completed": "completed"
+        },
+        "upstream": "Upstream: {{value}}",
+        "createdAt": "Created at: {{value}}",
+        "updatedAt": "Updated at: {{value}}",
+        "finishedAt": "Finished at: {{value}}",
+        "actions": {
+          "refresh": {
+            "title": "Refresh"
+          },
+          "retry": {
+            "title": "Retry"
+          },
+          "resume": {
+            "title": "Resume",
+            "success": "Sync job resumed successfully",
+            "fail": "Failed to resume sync job"
+          },
+          "cancel": {
+            "title": "Cancel",
+            "success": "Sync job cancelled successfully",
+            "fail": "Failed to cancel sync job"
+          },
+          "openGame": {
+            "title": "Open game"
+          }
+        },
+        "request": {
+          "tokenPresent": "attached",
+          "tokenMissing": "not attached"
+        },
+        "detail": {
+          "title": "Job detail",
+          "loading": "Loading selected job details...",
+          "empty": "Select one job to inspect its checkpoint and current request",
+          "summary": "Summary",
+          "request": "Current request",
+          "checkpoint": "Checkpoint",
+          "bucket": "Bucket: {{value}}",
+          "repo": "Repository",
+          "media": "Media",
+          "oci": "OCI assets",
+          "discovered": "Discovered release",
+          "noDiscovery": "Discovery has not completed yet",
+          "upstreamInstance": "Upstream instance: {{value}}",
+          "remote": "Remote: {{value}}",
+          "snapshot": "Snapshot: {{value}}",
+          "manifest": "Manifest SHA256: {{value}}",
+          "firstParty": "First-party: {{value}}",
+          "publishedAt": "Published at: {{value}}",
+          "protocolVersion": "Protocol version: {{value}}"
+        },
+        "errors": {
+          "fetch": {
+            "title": "Failed to fetch sync jobs"
+          },
+          "fetchDetail": {
+            "title": "Failed to fetch sync job detail"
+          }
+        }
+      },
+      "phase1": {
+        "title": "Phase 1 scaffold",
+        "message": "The sync workspace, data model, and read-only mirror guard rails are being prepared in this phase.",
+        "completedTitle": "What is available now",
+        "completedMessage": "This page is reserved for the upcoming registry and upstream sync workflow. Phase 1 mainly adds schema groundwork and read-only protection for mirrored games."
+      },
+      "errors": {
+        "fetchStatus": {
+          "title": "Failed to fetch game sync status"
+        }
+      }
     },
     "email": {
       "title": "Platform email",
@@ -638,6 +822,99 @@
       "errors": {
         "fetchRepo": {
           "title": "Failed to fetch repository"
+        }
+      }
+    },
+    "sync": {
+      "title": "Game sync",
+      "readonly": {
+        "title": "Remote mirror is locked",
+        "message": "This game is synchronized from a remote source and is currently read-only. Detach the mirror before making local changes.",
+        "source": "First-party upstream: {{source}}"
+      },
+      "identity": {
+        "title": "Sync identity",
+        "syncKey": "Sync key",
+        "syncToken": "Sync token"
+      },
+      "remote": {
+        "title": "Remote mirror state",
+        "state": "Current state: {{state}}",
+        "stateMirrorLocked": "mirror locked",
+        "stateDetached": "detached",
+        "release": "Current release: {{value}}",
+        "source": "First-party source: {{value}}",
+        "releaseSummary": "Current mirror record: {{origin}} | published at {{publishedAt}}",
+        "detachDescription": "Detaching the mirror unlocks local editing, and this instance will no longer be accepted as a third-party upstream for this game.",
+        "detachReason": "Detach reason",
+        "detachReasonPlaceholder": "Optional note for why this mirror is being detached",
+        "detachReasonHelp": "This note is stored with the detach request for audit context when provided."
+      },
+      "publish": {
+        "title": "Generate first-party metadata",
+        "description": "Generate the release and upstream metadata files needed for external publication.",
+        "source": "External workflow",
+        "sourcePlaceholder": "Ret2Shell does not choose a target"
+      },
+      "manualPr": {
+        "title": "Publication metadata bundle",
+        "description": "Use the files below in any compatible external registry workflow. Ret2Shell does not choose the target repository or push strategy.",
+        "target": "Target repository: {{repo}} (branch: {{branch}})",
+        "prTitle": "Suggested PR title: {{title}}"
+      },
+      "advertise": {
+        "title": "Generate third-party upstream metadata",
+        "description": "If this mirror remains locked and unchanged, generate an upstream advertisement file for external publication.",
+        "source": "External workflow",
+        "sourcePlaceholder": "Ret2Shell does not choose a target"
+      },
+      "manualUpstream": {
+        "title": "Third-party upstream metadata bundle",
+        "description": "Use the file below in any compatible external registry workflow.",
+        "target": "Target repository: {{repo}} (branch: {{branch}})",
+        "prTitle": "Suggested PR title: {{title}}"
+      },
+      "actions": {
+        "rotateToken": {
+          "title": "Rotate sync token",
+          "fail": "Failed to rotate sync token"
+        },
+        "detach": {
+          "title": "Detach mirror",
+          "confirm": "Confirm detach",
+          "success": "Remote mirror detached successfully",
+          "fail": "Failed to detach remote mirror"
+        },
+        "advertise": {
+          "title": "Generate upstream metadata",
+          "success": "Third-party upstream metadata generated successfully",
+          "fail": "Failed to generate third-party upstream metadata"
+        },
+        "publish": {
+          "title": "Generate release metadata",
+          "success": "Release publication metadata generated successfully",
+          "fail": "Failed to generate release publication metadata"
+        }
+      },
+      "releases": {
+        "title": "Local release records",
+        "empty": "No local release records yet",
+        "current": "Current mirror release",
+        "snapshot": "Snapshot commit: {{value}}",
+        "origin": "Origin: {{value}}",
+        "originFirstParty": "first-party",
+        "originMirror": "mirror",
+        "firstPartySource": "First-party source: {{value}}",
+        "firstPartyInstance": "First-party instance: {{value}}",
+        "publishedAt": "Published at: {{value}}"
+      },
+      "trainingHint": "Training instances do not generate first-party registry publication metadata in this phase.",
+      "errors": {
+        "fetchSources": {
+          "title": "Failed to fetch available registry discovery sources"
+        },
+        "fetchReleases": {
+          "title": "Failed to fetch game releases"
         }
       }
     },

@@ -46,6 +46,7 @@ pub struct Model {
   #[sea_orm(column_type = "JsonBinary")]
   pub score_rule: ScoreRule,
   pub score: i32,
+  pub display_order: i32,
   pub bucket: Option<String>,
   pub ref_id: Option<i64>,
   #[serde(with = "ts_seconds_option", default = "Option::default")]
@@ -150,6 +151,7 @@ where
     sql = sql.filter(Column::Hidden.eq(false));
   }
   let paginator = sql
+    .order_by_asc(Column::DisplayOrder)
     .order_by_asc(Column::Id)
     .into_model()
     .paginate(db, page_size);
@@ -168,7 +170,11 @@ where
   if !with_hidden {
     sql = sql.filter(Column::Hidden.eq(false));
   }
-  sql.all(db).await
+  sql
+    .order_by_asc(Column::DisplayOrder)
+    .order_by_asc(Column::Id)
+    .all(db)
+    .await
 }
 
 pub async fn get_full_list<C>(db: &C, game_id: i64) -> Result<Vec<Model>, DbErr>
@@ -176,9 +182,25 @@ where
   C: ConnectionTrait, {
   Entity::find()
     .filter(Column::GameId.eq(game_id))
+    .order_by_asc(Column::DisplayOrder)
     .order_by_asc(Column::Id)
     .all(db)
     .await
+}
+
+pub async fn next_display_order<C>(db: &C, game_id: i64) -> Result<i32, DbErr>
+where
+  C: ConnectionTrait, {
+  Ok(
+    Entity::find()
+      .filter(Column::GameId.eq(game_id))
+      .order_by_desc(Column::DisplayOrder)
+      .order_by_desc(Column::Id)
+      .one(db)
+      .await?
+      .map(|challenge| challenge.display_order + 1)
+      .unwrap_or(1),
+  )
 }
 
 pub async fn get_by_bucket<C>(db: &C, game_id: i64, bucket: &str) -> Result<Option<Model>, DbErr>

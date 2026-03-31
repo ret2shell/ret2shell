@@ -268,6 +268,8 @@ pub(super) async fn create_game(
       admins: game::Admins(vec![token.id]),
       introduction_id: None,
       token: Some(nanoid!()),
+      sync_key: None,
+      sync_token: (model.host_type == game::HostType::Game).then(|| nanoid!()),
       archive_policy: ArchivePolicy::default(),
       ..model
     },
@@ -295,12 +297,15 @@ pub(super) async fn update_game(
   Extension(trace): Extension<RequestId>, Extension(token): Extension<Token>,
   Json(model): Json<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::ensure_game_sync_writable(&db.conn, &game).await?;
   let txn = db.conn.begin().await?;
   let model = game::update(
     &txn,
     game::Model {
       id: game.id,
       bucket: game.bucket.clone(),
+      sync_key: game.sync_key.clone(),
+      sync_token: game.sync_token.clone(),
       traffic: game.traffic.clone(),
       lifecycle: game.lifecycle.clone(),
       node_selector: game.node_selector.clone(),
@@ -391,10 +396,11 @@ pub(super) async fn redirect_game_intro_to_readme() -> impl IntoResponse {
 }
 
 pub(super) async fn update_game_intro_compat(
-  State(ref cache): State<Cache>, State(ref bucket): State<Bucket>,
+  State(ref db): State<Database>, State(ref cache): State<Cache>, State(ref bucket): State<Bucket>,
   Extension(game): Extension<game::Model>, Extension(token): Extension<Token>,
   Json(payload): Json<Value>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::ensure_game_sync_writable(&db.conn, &game).await?;
   let content = extract_legacy_intro_content(payload)?;
   Ok(Json(
     persist_game_doc(cache, bucket, &game, &token, GameDocKind::Readme, &content).await?,
@@ -437,10 +443,11 @@ pub(super) async fn get_game_doc(
 }
 
 pub(super) async fn update_game_doc(
-  State(ref cache): State<Cache>, State(ref bucket): State<Bucket>,
+  State(ref db): State<Database>, State(ref cache): State<Cache>, State(ref bucket): State<Bucket>,
   Extension(game): Extension<game::Model>, Extension(token): Extension<Token>,
   Path((_, doc)): Path<(String, GameDocKind)>, Json(content): Json<String>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::ensure_game_sync_writable(&db.conn, &game).await?;
   Ok(Json(
     persist_game_doc(cache, bucket, &game, &token, doc, &content).await?,
   ))

@@ -1,12 +1,13 @@
 import { handleHttpError } from "@api";
 import { useInstitutes } from "@api/account";
-import { useGame, useGameDoc, useUpdateGameDocMutation, useUpdateGameMutation } from "@api/game";
+import { useGame, useGameDoc, useGameSyncStatus, useUpdateGameDocMutation, useUpdateGameMutation } from "@api/game";
 import { uploadMedia } from "@api/media";
 import { useSelfTeam, useTeamRank } from "@api/team";
 import LogoAnimate from "@assets/animates/logo-animate";
 import Spin from "@assets/animates/spin";
 import EditFlag from "@assets/icons/edit-flag";
 import bgGameDefault from "@assets/imgs/bg-game-default.webp";
+import GameSyncReadonlyBanner from "@lib/blocks/game/sync-readonly-banner";
 import { randomTips } from "@lib/utils/loading-tips";
 import { mediaPath } from "@lib/utils/media";
 import { stringifyState, TeamState } from "@models/team";
@@ -56,6 +57,10 @@ export default function () {
   const game = useGame({
     id: gameId,
     enabled: () => gameId() > 0,
+  });
+  const syncStatus = useGameSyncStatus({
+    game_id: gameId,
+    enabled: () => gameId() > 0 && isAdmin(),
   });
   const institutes = useInstitutes();
 
@@ -128,6 +133,9 @@ export default function () {
     }
   }
   async function handleUploadCover() {
+    if (syncStatus.data?.readonly) {
+      return;
+    }
     if (coverFile()) {
       setCoverUploading(true);
       try {
@@ -175,6 +183,9 @@ export default function () {
     }
   }
   async function handleUploadLogo() {
+    if (syncStatus.data?.readonly) {
+      return;
+    }
     if (logoFile()) {
       setLogoUploading(true);
       try {
@@ -240,6 +251,11 @@ export default function () {
             <Picture class="aspect-video" src={coverSrc()} />
 
             <div class="absolute top-0 left-0 w-full h-full flex flex-col justify-end items-end z-10 p-3 lg:p-6 space-y-2">
+              <Show when={isAdmin() && syncStatus.data?.readonly}>
+                <div class="w-full max-w-md">
+                  <GameSyncReadonlyBanner gameId={gameId()} compact />
+                </div>
+              </Show>
               <Show when={isAdmin()}>
                 <div class="flex flex-row space-x-2">
                   <Button
@@ -248,7 +264,7 @@ export default function () {
                     class="bg-layer/50 print:hidden"
                     onClick={coverSet() ? handleUploadCover : handleSelectCover}
                     loading={coverUploading()}
-                    disabled={logoSet()}
+                    disabled={logoSet() || syncStatus.data?.readonly}
                   >
                     <input type="file" class="hidden" ref={coverInput!} onChange={handleSelectedCover} />
                     <Show
@@ -264,7 +280,7 @@ export default function () {
                     class="bg-layer/50 print:hidden"
                     onClick={logoSet() ? handleUploadLogo : handleSelectLogo}
                     loading={logoUploading()}
-                    disabled={coverSet()}
+                    disabled={coverSet() || syncStatus.data?.readonly}
                   >
                     <input type="file" class="hidden" ref={logoInput!} onChange={handleSelectedLogo} />
                     <Show when={logoSet()} fallback={<EditFlag class="w-5 h-5" />}>

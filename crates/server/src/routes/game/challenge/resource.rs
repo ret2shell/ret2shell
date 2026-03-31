@@ -94,6 +94,7 @@ pub(super) async fn create_challenge(
   State(ref db): State<Database>, State(bucket): State<Bucket>, Extension(token): Extension<Token>,
   Extension(game): Extension<game::Model>, Json(challenge): Json<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::super::ensure_game_sync_writable(&db.conn, &game).await?;
   let txn = db.conn.begin().await?;
   let game_bucket = bucket
     .at_mut(
@@ -116,6 +117,7 @@ pub(super) async fn create_challenge(
     challenge::Model {
       game_id: game.id,
       hidden: true,
+      display_order: challenge::next_display_order(&txn, game.id).await?,
       bucket: Some(challenge_bucket.name),
       ..challenge
     },
@@ -140,6 +142,7 @@ pub(super) async fn update_challenge(
   Extension(game): Extension<game::Model>, Extension(prev_challenge): Extension<challenge::Model>,
   Extension(trace): Extension<RequestId>, Json(challenge): Json<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::super::ensure_game_sync_writable(&db.conn, &game).await?;
   super::check_challenge_publishing(&prev_challenge)?;
   let txn = db.conn.begin().await?;
   let score_changed = prev_challenge.score_rule != challenge.score_rule;
@@ -147,6 +150,7 @@ pub(super) async fn update_challenge(
     &txn,
     challenge::Model {
       hidden: prev_challenge.hidden,
+      display_order: prev_challenge.display_order,
       ..challenge
     },
   )
@@ -207,6 +211,7 @@ pub(super) async fn up_challenge(
   Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
   Extension(trace): Extension<RequestId>, Extension(challenge): Extension<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::super::ensure_game_sync_writable(&db.conn, &game).await?;
   let txn = db.conn.begin().await?;
   let challenge_bucket = super::get_challenge_bucket(&bucket, &game, &challenge).await?;
   let challenge = challenge::update(
@@ -248,9 +253,10 @@ pub(super) async fn up_challenge(
 
 pub(super) async fn down_challenge(
   State(ref db): State<Database>, State(cache): State<Cache>, State(ref queue): State<Queue>,
-  Extension(token): Extension<Token>, Extension(challenge): Extension<challenge::Model>,
-  Extension(trace): Extension<RequestId>,
+  Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
+  Extension(challenge): Extension<challenge::Model>, Extension(trace): Extension<RequestId>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::super::ensure_game_sync_writable(&db.conn, &game).await?;
   let txn = db.conn.begin().await?;
   let challenge = challenge::update(
     &txn,
@@ -292,6 +298,7 @@ pub(super) async fn delete_challenge(
   Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
   Extension(challenge): Extension<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::super::ensure_game_sync_writable(&db.conn, &game).await?;
   let txn = db.conn.begin().await?;
   challenge::delete(&txn, challenge.id).await?;
   let game_bucket = bucket
@@ -413,10 +420,11 @@ pub(super) async fn get_answer(
 }
 
 pub(super) async fn update_answer(
-  State(bucket): State<Bucket>, Extension(token): Extension<Token>,
+  State(ref db): State<Database>, State(bucket): State<Bucket>, Extension(token): Extension<Token>,
   Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
   Json(answer): Json<String>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::super::ensure_game_sync_writable(&db.conn, &game).await?;
   let (game_bucket, challenge_bucket) =
     super::get_challenge_bucket_mut(&bucket, &game, &challenge).await?;
   challenge_bucket.set_answer(answer.clone()).await?;

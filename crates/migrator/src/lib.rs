@@ -45,6 +45,7 @@ impl MigratorTrait for Migrator {
       Box::new(migrations::m_20250622_000001_create_game_hammer_policy::Migration),
       Box::new(migrations::m_20250721_000001_create_ip_time_info::Migration),
       Box::new(migrations::m_20260307_000001_game_lifecycle::Migration),
+      Box::new(migrations::m_20260310_000001_game_sync_phase1::Migration),
     ]
   }
 }

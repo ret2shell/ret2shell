@@ -18,6 +18,7 @@ use crate::traits::GlobalState;
 mod logger;
 mod middleware;
 mod routes;
+mod sync;
 mod traits;
 mod utility;
 mod worker;
@@ -74,6 +75,7 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
   let cache = r2s_cache::initialize(&config.cache, Some(migrated)).await?;
   info!("loading module: < Bucket >");
   let bucket = r2s_bucket::initialize(&config.bucket).await?;
+  sync::initialize(&db, &config.bucket).await?;
   info!("loading module: < Message Queue >");
   let queue = r2s_queue::initialize(&config.queue).await?;
   info!("loading module: < Event Manager >");
@@ -113,6 +115,7 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
     media,
     version: R2S_VERSION.to_string(),
   };
+  sync::spawn_cleanup_worker(state.db.clone(), state.config.bucket.clone());
   info!("modules loaded, constructing router...");
 
   let router = routes::initialize(config.server.clone(), state.clone()).await?;

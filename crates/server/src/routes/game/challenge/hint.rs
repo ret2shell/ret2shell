@@ -153,6 +153,7 @@ pub(super) async fn create_challenge_hint(
   Extension(trace): Extension<RequestId>, Extension(challenge): Extension<challenge::Model>,
   Json(hint): Json<hint::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::super::ensure_game_sync_writable(&db.conn, &game).await?;
   let txn = db.conn.begin().await?;
   let (game_bucket, challenge_bucket) =
     super::get_challenge_bucket_mut(&bucket, &game, &challenge).await?;
@@ -212,6 +213,7 @@ pub(super) async fn delete_challenge_hint(
   Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
   Query(query): Query<DeleteHintQuery>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::super::ensure_game_sync_writable(&db.conn, &game).await?;
   let txn = db.conn.begin().await?;
   let (game_bucket, challenge_bucket) =
     super::get_challenge_bucket_mut(&bucket, &game, &challenge).await?;

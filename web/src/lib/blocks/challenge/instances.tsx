@@ -8,6 +8,7 @@ import {
 } from "@api/challenge";
 import {
   useGame,
+  useGameSyncStatus,
   useRefreshRegistryMutation,
   useRegistryConfig,
   useRegistryImageTags,
@@ -15,6 +16,7 @@ import {
 } from "@api/game";
 import { Popover as ArkPopover } from "@ark-ui/solid";
 import UploadButton from "@blocks/upload-button";
+import GameSyncReadonlyBanner from "@lib/blocks/game/sync-readonly-banner";
 import type { ChallengeImage } from "@models/challenge";
 import { createForm, getValue, pattern, required, setValue, setValues } from "@modular-forms/solid";
 import { A } from "@solidjs/router";
@@ -35,9 +37,32 @@ import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { createSignal, For, Match, onCleanup, Show, Switch } from "solid-js";
 import type { ChallengeWidgetProps } from ".";
 
+function normalizeInternalImageTag(value?: string | null) {
+  const normalized = value?.trim().replace(/^\/+|\/+$/g, "") || "";
+  return normalized || null;
+}
+
+function buildInternalImageReference(
+  registryExternal?: string | null,
+  imageNamespace?: string | null,
+  internalTag?: string | null
+) {
+  const normalizedRegistry = registryExternal?.trim().replace(/\/+$/g, "") || "";
+  const normalizedNamespace = imageNamespace?.trim().replace(/^\/+|\/+$/g, "") || "";
+  const normalizedTag = normalizeInternalImageTag(internalTag);
+
+  if (!normalizedRegistry || !normalizedNamespace || !normalizedTag) {
+    return null;
+  }
+
+  return `${normalizedRegistry}/${normalizedNamespace}/${normalizedTag}`;
+}
+
 function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () => void }) {
   const [form, { Form, Field }] = createForm<ChallengeImage>({
     initialValues: {
+      internal_managed: false,
+      internal_tag: null,
       cpu: 0.5,
       cpu_req: 0.01,
       mem: "128Mi",
@@ -50,6 +75,10 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
   const [selected, setSelected] = createSignal(false);
 
   const game = useGame({ id: () => fnProps.gameId });
+  const syncStatus = useGameSyncStatus({
+    game_id: () => fnProps.gameId,
+    enabled: () => fnProps.gameId > 0,
+  });
   const challenge = useChallenge({
     game_id: () => fnProps.gameId,
     challenge_id: () => fnProps.challengeId,
@@ -69,9 +98,14 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
   });
 
   function sanitizeChallengeImage(image: ChallengeImage): ChallengeImage {
+    const internalTag = normalizeInternalImageTag(image.internal_tag);
+    const internalManaged = !!image.internal_managed && !!internalTag;
+
     return {
       ...image,
       description: image.description || null,
+      internal_managed: internalManaged,
+      internal_tag: internalManaged ? internalTag : null,
       service_type: null,
       protocol: image.protocol || null,
       app_protocol: image.app_protocol || null,
@@ -84,6 +118,8 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
       setValues(form, {
         name: "",
         tag: "",
+        internal_managed: false,
+        internal_tag: null,
         cpu: 0.5,
         cpu_req: 0.01,
         mem: "128Mi",
@@ -109,7 +145,10 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
 
   return (
     <Form
-      onSubmit={(form) =>
+      onSubmit={(form) => {
+        if (syncStatus.data?.readonly) {
+          return;
+        }
         addMutation.mutate({
           game_id: challenge.data!.game_id,
           challenge_id: challenge.data!.id,
@@ -119,10 +158,11 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
             images: [...(challengeEnv.data?.images || []), sanitizeChallengeImage(form)],
             pull_secret: challengeEnv.data?.pull_secret || null,
           },
-        })
-      }
+        });
+      }}
       class="flex flex-col space-y-2"
     >
+      <GameSyncReadonlyBanner gameId={fnProps.gameId} />
       <div class="flex flex-row space-x-2">
         <Field
           name="name"
@@ -199,6 +239,8 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
                         setSearchedRepo(e.target.value);
                         setSelected(false);
                         setValue(form, "tag", "");
+                        setValue(form, "internal_managed", false);
+                        setValue(form, "internal_tag", null);
                       }}
                       extraBtn={
                         <Button
@@ -243,6 +285,8 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
                                   setSearchedRepo(repo);
                                   setSelected(true);
                                   setValue(form, "tag", "");
+                                  setValue(form, "internal_managed", false);
+                                  setValue(form, "internal_tag", null);
                                 }}
                               >
                                 <span class="shrink-0 icon-[fluent--beaker-20-regular] w-5 h-5" />
@@ -271,11 +315,15 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
                   }
                   // inputProps={props}
                   onValueChange={(e) => {
+                    const version = e.value.at(0) || "latest";
+                    const internalTag = `${searchedRepo()}:${version}`;
                     setValue(
                       form,
                       "tag",
-                      `${registryConfig.data?.external}/${game.data?.bucket}/${searchedRepo()}:${e.value.at(0)}`
+                      buildInternalImageReference(registryConfig.data?.external, game.data?.bucket, internalTag) || ""
                     );
+                    setValue(form, "internal_managed", true);
+                    setValue(form, "internal_tag", internalTag);
                   }}
                 />
                 <Field name="restricted" type="boolean">
@@ -532,7 +580,7 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
         level="primary"
         class="mt-4!"
         loading={addMutation.isPending}
-        disabled={addMutation.isPending}
+        disabled={addMutation.isPending || syncStatus.data?.readonly}
       >
         {t("general.actions.add.title")}
       </Button>
@@ -627,6 +675,7 @@ function InstanceList(props: ChallengeWidgetProps) {
 
 export default function (props: ChallengeWidgetProps) {
   let pullSecretInput: HTMLInputElement;
+  const game = useGame({ id: () => props.gameId });
   const challenge = useChallenge({
     game_id: () => props.gameId,
     challenge_id: () => props.challengeId,
@@ -637,6 +686,10 @@ export default function (props: ChallengeWidgetProps) {
   });
 
   const registryConfig = useRegistryConfig({ game_id: () => props.gameId });
+  const syncStatus = useGameSyncStatus({
+    game_id: () => props.gameId,
+    enabled: () => props.gameId > 0,
+  });
   const repos = useRegistryRepositories({ game_id: () => props.gameId });
   const updateMutation = useUpdateChallengeEnvMutation({
     onSuccess: () => {
@@ -646,7 +699,16 @@ export default function (props: ChallengeWidgetProps) {
     },
   });
 
+  function effectiveImageTag(image: ChallengeImage) {
+    return (
+      buildInternalImageReference(registryConfig.data?.external, game.data?.bucket, image.internal_tag) || image.tag
+    );
+  }
+
   async function onToggleInternet() {
+    if (syncStatus.data?.readonly) {
+      return;
+    }
     updateMutation.mutate({
       game_id: challenge.data!.game_id,
       challenge_id: challenge.data!.id,
@@ -659,6 +721,9 @@ export default function (props: ChallengeWidgetProps) {
     });
   }
   async function onToggleRestricted() {
+    if (syncStatus.data?.readonly) {
+      return;
+    }
     updateMutation.mutate({
       game_id: challenge.data!.game_id,
       challenge_id: challenge.data!.id,
@@ -672,6 +737,9 @@ export default function (props: ChallengeWidgetProps) {
   }
 
   async function onDeleteImage(name: string) {
+    if (syncStatus.data?.readonly) {
+      return;
+    }
     updateMutation.mutate({
       game_id: challenge.data!.game_id,
       challenge_id: challenge.data!.id,
@@ -690,6 +758,9 @@ export default function (props: ChallengeWidgetProps) {
     },
   });
   async function onDeleteEnv() {
+    if (syncStatus.data?.readonly) {
+      return;
+    }
     deleteMutation.mutate({
       game_id: challenge.data!.game_id,
       challenge_id: challenge.data!.id,
@@ -697,6 +768,9 @@ export default function (props: ChallengeWidgetProps) {
   }
 
   async function onSavePullSecret(n: string) {
+    if (syncStatus.data?.readonly) {
+      return;
+    }
     updateMutation.mutate({
       game_id: challenge.data!.game_id,
       challenge_id: challenge.data!.id,
@@ -712,6 +786,7 @@ export default function (props: ChallengeWidgetProps) {
   const [formOpen, setFormOpen] = createSignal(false);
   return (
     <div class="flex-1 flex flex-col space-y-2 p-3 lg:p-6">
+      <GameSyncReadonlyBanner gameId={props.gameId} />
       <header class="min-h-12 border-b border-b-layer-content/15 flex flex-row items-center flex-wrap justify-end space-x-2 font-bold py-2 gap-y-2">
         <span class="flex flex-row space-x-2 items-center overflow-hidden">
           <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
@@ -726,6 +801,7 @@ export default function (props: ChallengeWidgetProps) {
             <UploadButton
               size="sm"
               url={`${api_root}/game/${props.gameId}/registry`}
+              disabled={syncStatus.data?.readonly}
               onDone={() => {
                 addToast({
                   level: "success",
@@ -740,6 +816,7 @@ export default function (props: ChallengeWidgetProps) {
             size="sm"
             btnContent={<span>{t("general.actions.add.title")}</span>}
             stretched
+            disabled={syncStatus.data?.readonly}
             open={formOpen()}
             onOpenChange={(details) => {
               setFormOpen(details.open);
@@ -763,7 +840,13 @@ export default function (props: ChallengeWidgetProps) {
                   <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
                   <span>{t("challenge.instance.delete")}</span>
                 </span>
-                <Button level="primary" size="sm" class="self-end" onClick={onDeleteEnv}>
+                <Button
+                  level="primary"
+                  size="sm"
+                  class="self-end"
+                  onClick={onDeleteEnv}
+                  disabled={syncStatus.data?.readonly}
+                >
                   {t("general.actions.yes.title")}
                 </Button>
               </Card>
@@ -774,6 +857,7 @@ export default function (props: ChallengeWidgetProps) {
       <div class="grid grid-cols-fit-xs max-w-full gap-2">
         <Checkbox
           checked={challengeEnv.data?.internet}
+          disabled={syncStatus.data?.readonly}
           onChange={() => {
             onToggleInternet();
           }}
@@ -782,6 +866,7 @@ export default function (props: ChallengeWidgetProps) {
         </Checkbox>
         <Checkbox
           checked={challengeEnv.data?.restricted ?? false}
+          disabled={syncStatus.data?.readonly}
           onChange={() => {
             onToggleRestricted();
           }}
@@ -797,6 +882,7 @@ export default function (props: ChallengeWidgetProps) {
           extraBtn={
             <Button
               class="rounded-l-none!"
+              disabled={syncStatus.data?.readonly}
               onClick={() => {
                 onSavePullSecret(pullSecretInput!.value);
               }}
@@ -826,8 +912,8 @@ export default function (props: ChallengeWidgetProps) {
             <div class="flex flex-row space-x-2 items-center">
               <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
               <span>{image.name}</span>
-              <span class="opacity-60 flex-1 text-end truncate" title={image.tag}>
-                {image.tag}
+              <span class="opacity-60 flex-1 text-end truncate" title={effectiveImageTag(image)}>
+                {effectiveImageTag(image)}
               </span>
               <Popover
                 level="error"
@@ -841,7 +927,13 @@ export default function (props: ChallengeWidgetProps) {
                     <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
                     <span>{t("general.actions.delete.message")}</span>
                   </span>
-                  <Button level="primary" size="sm" class="self-end" onClick={() => onDeleteImage(image.name)}>
+                  <Button
+                    level="primary"
+                    size="sm"
+                    class="self-end"
+                    onClick={() => onDeleteImage(image.name)}
+                    disabled={syncStatus.data?.readonly}
+                  >
                     {t("general.actions.yes.title")}
                   </Button>
                 </Card>

@@ -30,6 +30,7 @@ use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+pub use toml;
 pub mod auditor;
 pub mod auth;
 pub mod bucket;

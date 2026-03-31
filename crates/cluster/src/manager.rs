@@ -38,6 +38,13 @@ pub struct ChallengeEnvSnapshot {
 }
 
 #[derive(Clone, Debug, Default)]
+pub struct ChallengeEnvCreateOptions {
+  pub image_namespace: Option<String>,
+  pub node_selector: Option<String>,
+  pub need_expose: bool,
+}
+
+#[derive(Clone, Debug, Default)]
 pub struct DeleteOutdatedEnvsResult {
   pub overloaded: bool,
   pub running: i32,
@@ -504,8 +511,7 @@ impl Cluster {
 
   pub async fn create_challenge_env(
     &self, labels: BTreeMap<String, String>, annotations: BTreeMap<String, String>,
-    envs: HashMap<String, String>, env_config: ChallengeEnv, node_selector: Option<String>,
-    need_expose: bool,
+    envs: HashMap<String, String>, env_config: ChallengeEnv, options: ChallengeEnvCreateOptions,
   ) -> Result<ChallengeEnvSnapshot, ClusterError> {
     let challenge_id = labels
       .get("ret.sh.cn/challenge")
@@ -520,7 +526,7 @@ impl Cluster {
       "ret2shell-{challenge_id}-{user_id}-{}",
       Utc::now().timestamp()
     );
-    let node_selector = if let Some(node_selector) = node_selector {
+    let node_selector = if let Some(node_selector) = options.node_selector {
       let mut n = BTreeMap::new();
       n.insert("ret.sh.cn/workload".to_owned(), node_selector);
       Some(n)
@@ -561,9 +567,19 @@ impl Cluster {
         containers: env_config
           .images
           .iter()
-          .map(|image| Container {
+          .map(|image| {
+            let resolved_tag = image.resolved_tag(
+              self
+                .registry
+                .as_ref()
+                .and_then(|registry| registry.external()),
+              options.image_namespace.as_deref(),
+            );
+            (image, resolved_tag)
+          })
+          .map(|(image, resolved_tag)| Container {
             name: image.name.clone(),
-            image: Some(image.tag.clone()),
+            image: Some(resolved_tag),
             image_pull_policy: Some(String::from("Always")),
             env: Some(
               envs
@@ -627,7 +643,11 @@ impl Cluster {
       ..Default::default()
     };
 
-    let service_type = if need_expose { "NodePort" } else { "ClusterIP" };
+    let service_type = if options.need_expose {
+      "NodePort"
+    } else {
+      "ClusterIP"
+    };
     let service = Service {
       metadata: ObjectMeta {
         name: Some(pod_name.clone()),

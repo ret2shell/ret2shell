@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use deunicode::deunicode_with_tofu;
 use game::{GameConfig, RepoLock};
@@ -21,6 +21,10 @@ pub struct Bucket {
 }
 
 impl Bucket {
+  pub fn path(&self) -> &Path {
+    &self.path
+  }
+
   async fn check_git_safe_directories(&self) -> Result<i32, BucketError> {
     // get all child directories, and try open it with git
     let mut count = 0;

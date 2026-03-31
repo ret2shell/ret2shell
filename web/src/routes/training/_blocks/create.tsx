@@ -38,6 +38,8 @@ export default function CreatePlayground(props: { onDone: (game: Game) => void }
       logo: null,
       admins: [accountStore.id!],
       token: null,
+      sync_key: null,
+      sync_token: null,
       offline: false,
       team_size: 1,
       can_register_after_started: true,

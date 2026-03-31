@@ -40,6 +40,7 @@ pub(super) async fn regenerate_game_token(
   State(ref db): State<Database>, State(ref cache): State<Cache>,
   Extension(game): Extension<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::ensure_game_sync_writable(&db.conn, &game).await?;
   let token = game::update(
     &db.conn,
     game::Model {
@@ -64,6 +65,7 @@ pub(super) async fn update_game_administrator(
   State(ref db): State<Database>, State(ref cache): State<Cache>,
   Extension(game): Extension<game::Model>, Json(admins): Json<Vec<i64>>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::ensure_game_sync_writable(&db.conn, &game).await?;
   let model = game::update(
     &db.conn,
     game::Model {

@@ -156,6 +156,10 @@ pub enum Relation {
   Institute,
   #[sea_orm(has_many = "super::media::Entity")]
   Media,
+  #[sea_orm(has_many = "super::game_remote_sync::Entity")]
+  GameRemoteSyncDetached,
+  #[sea_orm(has_many = "super::game_sync_job::Entity")]
+  GameSyncJob,
   #[sea_orm(has_many = "super::oauth::Entity")]
   Oauth,
   #[sea_orm(has_many = "super::submission::Entity")]
@@ -201,6 +205,18 @@ impl Related<super::institute::Entity> for Entity {
 impl Related<super::media::Entity> for Entity {
   fn to() -> RelationDef {
     Relation::Media.def()
+  }
+}
+
+impl Related<super::game_remote_sync::Entity> for Entity {
+  fn to() -> RelationDef {
+    Relation::GameRemoteSyncDetached.def()
+  }
+}
+
+impl Related<super::game_sync_job::Entity> for Entity {
+  fn to() -> RelationDef {
+    Relation::GameSyncJob.def()
   }
 }
 

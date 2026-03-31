@@ -299,7 +299,191 @@
       "title": "替换协议"
     },
     "sync": {
-      "title": "资源同步"
+      "title": "资源同步",
+      "sources": {
+        "title": "Registry 发现源",
+        "description": "管理用于目录发现与导入的只读 registry 仓库。",
+        "empty": "当前没有配置 registry 发现源",
+        "form": {
+          "name": "源名称",
+          "gitUrl": "Git 地址",
+          "branch": "分支",
+          "priority": "优先级",
+          "enabled": "启用",
+          "publishEnabled": "允许发布",
+          "privateSource": "私有源"
+        },
+        "actions": {
+          "fetch": {
+            "title": "拉取",
+            "success": "Registry 发现源拉取成功",
+            "fail": "Registry 发现源拉取失败"
+          }
+        },
+        "badges": {
+          "enabled": "源状态：{{enabled}}",
+          "publishEnabled": "发布：{{enabled}}"
+        },
+        "state": {
+          "enabled": "启用",
+          "disabled": "禁用"
+        },
+        "lastFetched": "最近拉取：{{value}}",
+        "errors": {
+          "fetch": {
+            "title": "获取 registry 发现源失败"
+          }
+        }
+      },
+      "direct": {
+        "title": "直连上游探测",
+        "description": "不经过 registry 发现源，直接探测另一台 Ret2Shell 实例。",
+        "action": "探测远端",
+        "import": {
+          "title": "导入 release",
+          "success": "远端 release 导入成功",
+          "fail": "远端 release 导入失败"
+        },
+        "games": "远端赛事",
+        "releases": "远端 release",
+        "releaseCount": "{{count}} 个 release",
+        "info": "远端地址：{{baseUrl}} | 协议版本 v{{version}}",
+        "fail": "探测远端同步源失败",
+        "form": {
+          "baseUrl": "远端地址",
+          "syncToken": "同步令牌",
+          "gameKey": "Game Key",
+          "releaseId": "Release ID"
+        }
+      },
+      "catalog": {
+        "title": "Registry 目录导入",
+        "description": "浏览某个已拉取的 registry 发现源，查看 release，选择 upstream，并创建导入任务。",
+        "source": "Registry 发现源",
+        "sourcePlaceholder": "请选择一个源",
+        "games": "赛事列表",
+        "releases": "Release 列表",
+        "upstreams": "上游列表",
+        "releaseCount": "{{count}} 个 release",
+        "emptyGames": "该源中没有发现赛事",
+        "emptyReleases": "当前选中赛事没有可用 release",
+        "emptyUpstreams": "当前 release 没有可用的活动 upstream",
+        "conflicts": {
+          "title": "存在冲突的 registry 条目",
+          "description": "其他已获取的发现源也发布了相同的 game key 与 release ID，但其快照或 manifest 内容不同。"
+        },
+        "import": {
+          "title": "从 registry 导入",
+          "success": "已成功创建 registry 导入任务",
+          "fail": "创建 registry 导入任务失败"
+        },
+        "errors": {
+          "fetchGames": {
+            "title": "获取 registry 赛事列表失败"
+          },
+          "fetchReleases": {
+            "title": "获取 registry release 列表失败"
+          },
+          "fetchDetail": {
+            "title": "获取 registry release 详情失败"
+          }
+        }
+      },
+      "jobs": {
+        "title": "同步任务",
+        "empty": "当前还没有同步任务",
+        "stage": "状态：{{status}} | 阶段：{{stage}}",
+        "status": {
+          "pending": "等待中",
+          "running": "运行中",
+          "paused": "已暂停",
+          "failed": "失败",
+          "completed": "已完成",
+          "cancelled": "已取消"
+        },
+        "stages": {
+          "queued": "已排队",
+          "discover": "正在发现 release 元数据",
+          "fetchRepoInit": "初始化仓库工作目录",
+          "fetchRepoFetch": "拉取 release 引用",
+          "fetchRepoCheckout": "检出 release 快照",
+          "fetchRepoVerify": "校验快照一致性",
+          "fetchRepoDone": "仓库快照已就绪",
+          "fetchMedia": "拉取媒体 {{done}}/{{total}}",
+          "fetchOci": "镜像同步 OCI 资产 {{done}}/{{total}}",
+          "finalizeMoveRepo": "切换已暂存仓库",
+          "completed": "已完成"
+        },
+        "upstream": "上游：{{value}}",
+        "createdAt": "创建时间：{{value}}",
+        "updatedAt": "更新时间：{{value}}",
+        "finishedAt": "完成时间：{{value}}",
+        "actions": {
+          "refresh": {
+            "title": "刷新"
+          },
+          "retry": {
+            "title": "重试"
+          },
+          "resume": {
+            "title": "恢复",
+            "success": "同步任务恢复成功",
+            "fail": "同步任务恢复失败"
+          },
+          "cancel": {
+            "title": "取消",
+            "success": "同步任务已取消",
+            "fail": "取消同步任务失败"
+          },
+          "openGame": {
+            "title": "打开赛事"
+          }
+        },
+        "request": {
+          "tokenPresent": "已携带",
+          "tokenMissing": "未携带"
+        },
+        "detail": {
+          "title": "任务详情",
+          "loading": "正在加载所选任务详情...",
+          "empty": "请选择一个任务以查看其检查点与当前请求",
+          "summary": "概要",
+          "request": "当前请求",
+          "checkpoint": "检查点",
+          "bucket": "目标 bucket：{{value}}",
+          "repo": "仓库",
+          "media": "媒体",
+          "oci": "OCI 资产",
+          "discovered": "已发现的 release",
+          "noDiscovery": "当前还没有 discovery 结果",
+          "upstreamInstance": "上游实例：{{value}}",
+          "remote": "远端：{{value}}",
+          "snapshot": "快照：{{value}}",
+          "manifest": "Manifest SHA256：{{value}}",
+          "firstParty": "第一方源：{{value}}",
+          "publishedAt": "发布时间：{{value}}",
+          "protocolVersion": "协议版本：{{value}}"
+        },
+        "errors": {
+          "fetch": {
+            "title": "获取同步任务失败"
+          },
+          "fetchDetail": {
+            "title": "获取同步任务详情失败"
+          }
+        }
+      },
+      "phase1": {
+        "title": "第一阶段脚手架",
+        "message": "当前阶段会先准备同步工作目录、数据模型，以及远端镜像只读保护能力。",
+        "completedTitle": "当前已就绪内容",
+        "completedMessage": "这个页面将用于后续 registry 与上下游同步流程。第一阶段主要完成数据库基础设施与远端镜像只读保护。"
+      },
+      "errors": {
+        "fetchStatus": {
+          "title": "获取赛事同步状态失败"
+        }
+      }
     },
     "email": {
       "title": "平台发信邮箱",
@@ -638,6 +822,99 @@
       "errors": {
         "fetchRepo": {
           "title": "获取题目仓库失败"
+        }
+      }
+    },
+    "sync": {
+      "title": "赛事同步",
+      "readonly": {
+        "title": "远端镜像已锁定",
+        "message": "该赛事来自远端同步，当前处于只读状态。如需本地修改，请先解除远端镜像锁定。",
+        "source": "第一方上游：{{source}}"
+      },
+      "identity": {
+        "title": "同步身份",
+        "syncKey": "同步键",
+        "syncToken": "同步令牌"
+      },
+      "remote": {
+        "title": "远端镜像状态",
+        "state": "当前状态：{{state}}",
+        "stateMirrorLocked": "镜像锁定",
+        "stateDetached": "已解除锁定",
+        "release": "当前 release：{{value}}",
+        "source": "第一方来源：{{value}}",
+        "releaseSummary": "当前镜像记录：{{origin}} | 发布时间 {{publishedAt}}",
+        "detachDescription": "解除镜像锁定后，本地将允许继续编辑，同时当前实例也不再会被其他平台接受为该赛事的 third-party upstream。",
+        "detachReason": "解除原因",
+        "detachReasonPlaceholder": "可选：说明为什么要解除这个镜像锁定",
+        "detachReasonHelp": "如填写，该说明会随解除操作一起记录，方便审计与回溯。"
+      },
+      "publish": {
+        "title": "生成 first-party 发布元数据",
+        "description": "为当前归档赛事生成供外部发布使用的 release 和 upstream 元数据文件。",
+        "source": "外部工作流",
+        "sourcePlaceholder": "Ret2Shell 内不选择目标"
+      },
+      "manualPr": {
+        "title": "发布元数据",
+        "description": "请将下面的文件接入任意兼容的外部 registry 工作流。Ret2Shell 不感知目标仓库，也不会执行 push。",
+        "target": "目标仓库：{{repo}}（分支：{{branch}}）",
+        "prTitle": "建议 PR 标题：{{title}}"
+      },
+      "advertise": {
+        "title": "生成 third-party upstream 元数据",
+        "description": "当这个镜像保持锁定且未被修改时，可以生成供外部发布的 upstream 广告文件。",
+        "source": "外部工作流",
+        "sourcePlaceholder": "Ret2Shell 内不选择目标"
+      },
+      "manualUpstream": {
+        "title": "third-party upstream 元数据",
+        "description": "请将下面的文件接入任意兼容的外部 registry 工作流。",
+        "target": "目标仓库：{{repo}}（分支：{{branch}}）",
+        "prTitle": "建议 PR 标题：{{title}}"
+      },
+      "actions": {
+        "rotateToken": {
+          "title": "轮换同步令牌",
+          "fail": "轮换同步令牌失败"
+        },
+        "detach": {
+          "title": "解除镜像锁定",
+          "confirm": "确认解除",
+          "success": "远端镜像已成功解除锁定",
+          "fail": "解除远端镜像锁定失败"
+        },
+        "advertise": {
+          "title": "生成 upstream 元数据",
+          "success": "已成功生成 third-party upstream 元数据",
+          "fail": "生成 third-party upstream 元数据失败"
+        },
+        "publish": {
+          "title": "生成 release 元数据",
+          "success": "已成功生成发布元数据",
+          "fail": "生成赛事 release 发布元数据失败"
+        }
+      },
+      "releases": {
+        "title": "本地 release 记录",
+        "empty": "还没有本地 release 记录",
+        "current": "当前镜像 release",
+        "snapshot": "快照提交：{{value}}",
+        "origin": "来源角色：{{value}}",
+        "originFirstParty": "第一方",
+        "originMirror": "镜像",
+        "firstPartySource": "第一方来源：{{value}}",
+        "firstPartyInstance": "第一方实例：{{value}}",
+        "publishedAt": "发布时间：{{value}}"
+      },
+      "trainingHint": "当前阶段不会为训练场生成 first-party registry 发布元数据。",
+      "errors": {
+        "fetchSources": {
+          "title": "获取可用 registry 发现源失败"
+        },
+        "fetchReleases": {
+          "title": "获取赛事 release 列表失败"
         }
       }
     },

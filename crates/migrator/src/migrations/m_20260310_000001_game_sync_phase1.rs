@@ -1,0 +1,512 @@
+use sea_orm_migration::prelude::*;
+use sea_query::Keyword::CurrentTimestamp;
+
+use super::{
+  m_20240101_000002_create_user::User, m_20240104_000001_create_game::Game,
+  m_20240104_000004_create_challenge::Challenge,
+};
+
+pub struct Migration;
+
+impl MigrationName for Migration {
+  fn name(&self) -> &str {
+    "m_20260310_000001_game_sync_phase1"
+  }
+}
+
+#[derive(Iden)]
+enum GameRelease {
+  Table,
+  Id,
+  GameId,
+  GameKey,
+  ReleaseId,
+  SnapshotCommit,
+  ManifestSha256,
+  ManifestBody,
+  OriginRole,
+  FirstPartyInstanceId,
+  FirstPartyBaseUrl,
+  PublishedAt,
+  CreatedAt,
+}
+
+#[derive(Iden)]
+enum GameRemoteSync {
+  Table,
+  GameId,
+  State,
+  CurrentReleaseId,
+  SnapshotCommit,
+  ManifestSha256,
+  ManifestBody,
+  FirstPartyInstanceId,
+  FirstPartyBaseUrl,
+  SelectedUpstreamInstanceId,
+  SelectedUpstreamBaseUrl,
+  LastSyncedAt,
+  DetachedAt,
+  DetachedBy,
+}
+
+#[derive(Iden)]
+enum GameRegistrySource {
+  Table,
+  Id,
+  Name,
+  GitUrl,
+  Branch,
+  Enabled,
+  Priority,
+  PublishEnabled,
+  PrivateSource,
+  LastFetchedAt,
+  LastError,
+  CreatedAt,
+  UpdatedAt,
+}
+
+#[derive(Iden)]
+enum GameSyncJob {
+  Table,
+  Id,
+  Kind,
+  Mode,
+  Status,
+  Stage,
+  GameId,
+  GameKey,
+  ReleaseId,
+  RegistrySourceId,
+  UpstreamInstanceId,
+  UpstreamBaseUrl,
+  RequestBody,
+  Checkpoint,
+  ErrorMessage,
+  CreatedBy,
+  CreatedAt,
+  UpdatedAt,
+  FinishedAt,
+}
+
+#[async_trait::async_trait]
+impl MigrationTrait for Migration {
+  async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+    manager
+      .alter_table(
+        Table::alter()
+          .table(Game::Table)
+          .add_column_if_not_exists(ColumnDef::new(Game::SyncKey).string_len(127))
+          .add_column_if_not_exists(ColumnDef::new(Game::SyncToken).string_len(127))
+          .to_owned(),
+      )
+      .await?;
+
+    manager
+      .create_index(
+        Index::create()
+          .name("idx-game-sync-key-unique")
+          .table(Game::Table)
+          .col(Game::SyncKey)
+          .unique()
+          .to_owned(),
+      )
+      .await?;
+
+    manager
+      .alter_table(
+        Table::alter()
+          .table(Challenge::Table)
+          .add_column_if_not_exists(
+            ColumnDef::new(Challenge::DisplayOrder)
+              .integer()
+              .not_null()
+              .default(0),
+          )
+          .to_owned(),
+      )
+      .await?;
+
+    manager
+      .create_table(
+        Table::create()
+          .table(GameRelease::Table)
+          .if_not_exists()
+          .col(
+            ColumnDef::new(GameRelease::Id)
+              .big_integer()
+              .not_null()
+              .auto_increment()
+              .primary_key(),
+          )
+          .col(ColumnDef::new(GameRelease::GameId).big_integer().not_null())
+          .col(
+            ColumnDef::new(GameRelease::GameKey)
+              .string_len(127)
+              .not_null(),
+          )
+          .col(
+            ColumnDef::new(GameRelease::ReleaseId)
+              .string_len(127)
+              .not_null(),
+          )
+          .col(
+            ColumnDef::new(GameRelease::SnapshotCommit)
+              .string_len(127)
+              .not_null(),
+          )
+          .col(
+            ColumnDef::new(GameRelease::ManifestSha256)
+              .string_len(127)
+              .not_null(),
+          )
+          .col(ColumnDef::new(GameRelease::ManifestBody).text().not_null())
+          .col(ColumnDef::new(GameRelease::OriginRole).integer().not_null())
+          .col(
+            ColumnDef::new(GameRelease::FirstPartyInstanceId)
+              .string_len(127)
+              .not_null(),
+          )
+          .col(
+            ColumnDef::new(GameRelease::FirstPartyBaseUrl)
+              .string_len(255)
+              .not_null(),
+          )
+          .col(
+            ColumnDef::new(GameRelease::PublishedAt)
+              .timestamp_with_time_zone()
+              .not_null(),
+          )
+          .col(
+            ColumnDef::new(GameRelease::CreatedAt)
+              .timestamp_with_time_zone()
+              .not_null()
+              .default(CurrentTimestamp),
+          )
+          .foreign_key(
+            ForeignKey::create()
+              .from(GameRelease::Table, GameRelease::GameId)
+              .to(Game::Table, Game::Id)
+              .on_update(ForeignKeyAction::Cascade)
+              .on_delete(ForeignKeyAction::Cascade),
+          )
+          .to_owned(),
+      )
+      .await?;
+
+    manager
+      .create_index(
+        Index::create()
+          .name("idx-game-release-game-release-unique")
+          .table(GameRelease::Table)
+          .col(GameRelease::GameId)
+          .col(GameRelease::ReleaseId)
+          .unique()
+          .to_owned(),
+      )
+      .await?;
+    manager
+      .create_index(
+        Index::create()
+          .name("idx-game-release-key-release-unique")
+          .table(GameRelease::Table)
+          .col(GameRelease::GameKey)
+          .col(GameRelease::ReleaseId)
+          .unique()
+          .to_owned(),
+      )
+      .await?;
+
+    manager
+      .create_table(
+        Table::create()
+          .table(GameRemoteSync::Table)
+          .if_not_exists()
+          .col(
+            ColumnDef::new(GameRemoteSync::GameId)
+              .big_integer()
+              .not_null()
+              .primary_key(),
+          )
+          .col(ColumnDef::new(GameRemoteSync::State).integer().not_null())
+          .col(
+            ColumnDef::new(GameRemoteSync::CurrentReleaseId)
+              .string_len(127)
+              .not_null(),
+          )
+          .col(
+            ColumnDef::new(GameRemoteSync::SnapshotCommit)
+              .string_len(127)
+              .not_null(),
+          )
+          .col(
+            ColumnDef::new(GameRemoteSync::ManifestSha256)
+              .string_len(127)
+              .not_null(),
+          )
+          .col(
+            ColumnDef::new(GameRemoteSync::ManifestBody)
+              .text()
+              .not_null(),
+          )
+          .col(
+            ColumnDef::new(GameRemoteSync::FirstPartyInstanceId)
+              .string_len(127)
+              .not_null(),
+          )
+          .col(
+            ColumnDef::new(GameRemoteSync::FirstPartyBaseUrl)
+              .string_len(255)
+              .not_null(),
+          )
+          .col(
+            ColumnDef::new(GameRemoteSync::SelectedUpstreamInstanceId)
+              .string_len(127)
+              .not_null(),
+          )
+          .col(
+            ColumnDef::new(GameRemoteSync::SelectedUpstreamBaseUrl)
+              .string_len(255)
+              .not_null(),
+          )
+          .col(
+            ColumnDef::new(GameRemoteSync::LastSyncedAt)
+              .timestamp_with_time_zone()
+              .not_null(),
+          )
+          .col(ColumnDef::new(GameRemoteSync::DetachedAt).timestamp_with_time_zone())
+          .col(ColumnDef::new(GameRemoteSync::DetachedBy).big_integer())
+          .foreign_key(
+            ForeignKey::create()
+              .from(GameRemoteSync::Table, GameRemoteSync::GameId)
+              .to(Game::Table, Game::Id)
+              .on_update(ForeignKeyAction::Cascade)
+              .on_delete(ForeignKeyAction::Cascade),
+          )
+          .foreign_key(
+            ForeignKey::create()
+              .from(GameRemoteSync::Table, GameRemoteSync::DetachedBy)
+              .to(User::Table, User::Id)
+              .on_update(ForeignKeyAction::Cascade)
+              .on_delete(ForeignKeyAction::SetNull),
+          )
+          .to_owned(),
+      )
+      .await?;
+
+    manager
+      .create_table(
+        Table::create()
+          .table(GameRegistrySource::Table)
+          .if_not_exists()
+          .col(
+            ColumnDef::new(GameRegistrySource::Id)
+              .big_integer()
+              .not_null()
+              .auto_increment()
+              .primary_key(),
+          )
+          .col(
+            ColumnDef::new(GameRegistrySource::Name)
+              .string_len(127)
+              .not_null(),
+          )
+          .col(
+            ColumnDef::new(GameRegistrySource::GitUrl)
+              .string_len(255)
+              .not_null(),
+          )
+          .col(
+            ColumnDef::new(GameRegistrySource::Branch)
+              .string_len(127)
+              .not_null(),
+          )
+          .col(
+            ColumnDef::new(GameRegistrySource::Enabled)
+              .boolean()
+              .not_null(),
+          )
+          .col(
+            ColumnDef::new(GameRegistrySource::Priority)
+              .integer()
+              .not_null()
+              .default(0),
+          )
+          .col(
+            ColumnDef::new(GameRegistrySource::PublishEnabled)
+              .boolean()
+              .not_null()
+              .default(false),
+          )
+          .col(
+            ColumnDef::new(GameRegistrySource::PrivateSource)
+              .boolean()
+              .not_null()
+              .default(false),
+          )
+          .col(ColumnDef::new(GameRegistrySource::LastFetchedAt).timestamp_with_time_zone())
+          .col(ColumnDef::new(GameRegistrySource::LastError).text())
+          .col(
+            ColumnDef::new(GameRegistrySource::CreatedAt)
+              .timestamp_with_time_zone()
+              .not_null()
+              .default(CurrentTimestamp),
+          )
+          .col(
+            ColumnDef::new(GameRegistrySource::UpdatedAt)
+              .timestamp_with_time_zone()
+              .not_null()
+              .default(CurrentTimestamp),
+          )
+          .to_owned(),
+      )
+      .await?;
+
+    manager
+      .create_index(
+        Index::create()
+          .name("idx-game-registry-source-name-unique")
+          .table(GameRegistrySource::Table)
+          .col(GameRegistrySource::Name)
+          .unique()
+          .to_owned(),
+      )
+      .await?;
+    manager
+      .create_index(
+        Index::create()
+          .name("idx-game-registry-source-url-branch-unique")
+          .table(GameRegistrySource::Table)
+          .col(GameRegistrySource::GitUrl)
+          .col(GameRegistrySource::Branch)
+          .unique()
+          .to_owned(),
+      )
+      .await?;
+
+    manager
+      .create_table(
+        Table::create()
+          .table(GameSyncJob::Table)
+          .if_not_exists()
+          .col(
+            ColumnDef::new(GameSyncJob::Id)
+              .big_integer()
+              .not_null()
+              .auto_increment()
+              .primary_key(),
+          )
+          .col(ColumnDef::new(GameSyncJob::Kind).integer().not_null())
+          .col(ColumnDef::new(GameSyncJob::Mode).integer().not_null())
+          .col(ColumnDef::new(GameSyncJob::Status).integer().not_null())
+          .col(
+            ColumnDef::new(GameSyncJob::Stage)
+              .string_len(127)
+              .not_null(),
+          )
+          .col(ColumnDef::new(GameSyncJob::GameId).big_integer())
+          .col(ColumnDef::new(GameSyncJob::GameKey).string_len(127))
+          .col(ColumnDef::new(GameSyncJob::ReleaseId).string_len(127))
+          .col(ColumnDef::new(GameSyncJob::RegistrySourceId).big_integer())
+          .col(ColumnDef::new(GameSyncJob::UpstreamInstanceId).string_len(127))
+          .col(ColumnDef::new(GameSyncJob::UpstreamBaseUrl).string_len(255))
+          .col(
+            ColumnDef::new(GameSyncJob::RequestBody)
+              .json_binary()
+              .not_null()
+              .default("{}"),
+          )
+          .col(
+            ColumnDef::new(GameSyncJob::Checkpoint)
+              .json_binary()
+              .not_null()
+              .default("{}"),
+          )
+          .col(ColumnDef::new(GameSyncJob::ErrorMessage).text())
+          .col(
+            ColumnDef::new(GameSyncJob::CreatedBy)
+              .big_integer()
+              .not_null(),
+          )
+          .col(
+            ColumnDef::new(GameSyncJob::CreatedAt)
+              .timestamp_with_time_zone()
+              .not_null()
+              .default(CurrentTimestamp),
+          )
+          .col(
+            ColumnDef::new(GameSyncJob::UpdatedAt)
+              .timestamp_with_time_zone()
+              .not_null()
+              .default(CurrentTimestamp),
+          )
+          .col(ColumnDef::new(GameSyncJob::FinishedAt).timestamp_with_time_zone())
+          .foreign_key(
+            ForeignKey::create()
+              .from(GameSyncJob::Table, GameSyncJob::GameId)
+              .to(Game::Table, Game::Id)
+              .on_update(ForeignKeyAction::Cascade)
+              .on_delete(ForeignKeyAction::SetNull),
+          )
+          .foreign_key(
+            ForeignKey::create()
+              .from(GameSyncJob::Table, GameSyncJob::RegistrySourceId)
+              .to(GameRegistrySource::Table, GameRegistrySource::Id)
+              .on_update(ForeignKeyAction::Cascade)
+              .on_delete(ForeignKeyAction::SetNull),
+          )
+          .foreign_key(
+            ForeignKey::create()
+              .from(GameSyncJob::Table, GameSyncJob::CreatedBy)
+              .to(User::Table, User::Id)
+              .on_update(ForeignKeyAction::Cascade)
+              .on_delete(ForeignKeyAction::Restrict),
+          )
+          .to_owned(),
+      )
+      .await?;
+
+    Ok(())
+  }
+
+  async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+    manager
+      .drop_table(Table::drop().table(GameSyncJob::Table).to_owned())
+      .await?;
+    manager
+      .drop_table(Table::drop().table(GameRegistrySource::Table).to_owned())
+      .await?;
+    manager
+      .drop_table(Table::drop().table(GameRemoteSync::Table).to_owned())
+      .await?;
+    manager
+      .drop_table(Table::drop().table(GameRelease::Table).to_owned())
+      .await?;
+    manager
+      .alter_table(
+        Table::alter()
+          .table(Challenge::Table)
+          .drop_column(Challenge::DisplayOrder)
+          .to_owned(),
+      )
+      .await?;
+    manager
+      .drop_index(
+        Index::drop()
+          .name("idx-game-sync-key-unique")
+          .table(Game::Table)
+          .to_owned(),
+      )
+      .await?;
+    manager
+      .alter_table(
+        Table::alter()
+          .table(Game::Table)
+          .drop_column(Game::SyncToken)
+          .drop_column(Game::SyncKey)
+          .to_owned(),
+      )
+      .await?;
+    Ok(())
+  }
+}

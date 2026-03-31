@@ -1,6 +1,7 @@
 import { inflyClient } from "@api";
 import { useChallengeAnswer, useUpdateChallengeAnswerMutation } from "@api/challenge";
-import { useGame } from "@api/game";
+import { useGame, useGameSyncStatus } from "@api/game";
+import GameSyncReadonlyBanner from "@lib/blocks/game/sync-readonly-banner";
 import { isAdminOfGame } from "@storage/game";
 import { t } from "@storage/theme";
 import Article from "@widgets/article";
@@ -14,6 +15,10 @@ export default function (props: ChallengeWidgetProps) {
   const [answer, setAnswer] = createSignal("");
   const [inEdit, setInEdit] = createSignal(false);
   const game = useGame({ id: () => props.gameId });
+  const syncStatus = useGameSyncStatus({
+    game_id: () => props.gameId,
+    enabled: () => props.gameId > 0 && isAdminOfGame(game.data),
+  });
 
   const answerQuery = useChallengeAnswer({
     game_id: () => props.gameId,
@@ -42,15 +47,18 @@ export default function (props: ChallengeWidgetProps) {
               <Button
                 size="sm"
                 level="primary"
-                onClick={() =>
+                onClick={() => {
+                  if (syncStatus.data?.readonly) {
+                    return;
+                  }
                   updateAnswerMutation.mutate({
                     game_id: props.gameId,
                     challenge_id: props.challengeId,
                     answer: answer(),
-                  })
-                }
+                  });
+                }}
                 loading={updateAnswerMutation.isPending}
-                disabled={updateAnswerMutation.isPending}
+                disabled={updateAnswerMutation.isPending || syncStatus.data?.readonly}
               >
                 {t("general.actions.save.title")}
               </Button>
@@ -60,24 +68,33 @@ export default function (props: ChallengeWidgetProps) {
               size="sm"
               level="primary"
               onClick={() => {
-                setInEdit(true);
+                if (!syncStatus.data?.readonly) setInEdit(true);
               }}
+              disabled={syncStatus.data?.readonly}
             >
               {t("general.actions.edit.title")}
             </Button>
           </Show>
         </Show>
       </header>
+      <Show when={isAdminOfGame(game.data)}>
+        <div class="w-full">
+          <GameSyncReadonlyBanner gameId={props.gameId} />
+        </div>
+      </Show>
       <Show
         when={!inEdit()}
         fallback={
-          <EditorBare
-            class="flex-1 w-full"
-            value={answerQuery.data}
-            lang="markdown"
-            lineNumbers
-            onValueChanged={(v) => setAnswer(v)}
-          />
+          <div class="flex-1 w-full flex flex-col space-y-2">
+            <EditorBare
+              class="flex-1 w-full"
+              value={answerQuery.data}
+              lang="markdown"
+              lineNumbers
+              readonly={syncStatus.data?.readonly}
+              onValueChanged={(v) => setAnswer(v)}
+            />
+          </div>
         }
       >
         <Suspense

@@ -7,6 +7,7 @@ use r2s_bucket::Bucket;
 use r2s_checker::Checker;
 use r2s_database::{challenge, game};
 use r2s_engine::{DiagnosticMarker, Engine};
+use r2s_migrator::Database;
 use serde::{Deserialize, Serialize};
 
 use crate::{middleware::auth::Token, traits::ResponseError};
@@ -45,11 +46,14 @@ pub(super) struct UpdateCheckerScriptRequest {
   pub content: String,
 }
 
+#[allow(clippy::too_many_arguments)]
 pub(super) async fn update_checker_script(
-  State(bucket): State<Bucket>, State(checker): State<Checker>, State(engine): State<Engine>,
-  Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
-  Extension(challenge): Extension<challenge::Model>, Json(req): Json<UpdateCheckerScriptRequest>,
+  State(ref db): State<Database>, State(bucket): State<Bucket>, State(checker): State<Checker>,
+  State(engine): State<Engine>, Extension(token): Extension<Token>,
+  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
+  Json(req): Json<UpdateCheckerScriptRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::super::ensure_game_sync_writable(&db.conn, &game).await?;
   super::check_challenge_publishing(&challenge)?;
   let (game_bucket, challenge_bucket) =
     super::get_challenge_bucket_mut(&bucket, &game, &challenge).await?;

@@ -299,7 +299,191 @@
       "title": "替換協議"
     },
     "sync": {
-      "title": "資源同步"
+      "title": "資源同步",
+      "sources": {
+        "title": "Registry 發現源",
+        "description": "管理用於目錄發現與導入的唯讀 registry 倉庫。",
+        "empty": "目前沒有設定 registry 發現源",
+        "form": {
+          "name": "來源名稱",
+          "gitUrl": "Git 位址",
+          "branch": "分支",
+          "priority": "優先級",
+          "enabled": "啟用",
+          "publishEnabled": "允許發佈",
+          "privateSource": "私有來源"
+        },
+        "actions": {
+          "fetch": {
+            "title": "拉取",
+            "success": "Registry 發現源拉取成功",
+            "fail": "Registry 發現源拉取失敗"
+          }
+        },
+        "badges": {
+          "enabled": "來源狀態：{{enabled}}",
+          "publishEnabled": "發佈：{{enabled}}"
+        },
+        "state": {
+          "enabled": "啟用",
+          "disabled": "停用"
+        },
+        "lastFetched": "最近拉取：{{value}}",
+        "errors": {
+          "fetch": {
+            "title": "取得 registry 發現源失敗"
+          }
+        }
+      },
+      "direct": {
+        "title": "直連上游探測",
+        "description": "不經過 registry 發現源，直接探測另一台 Ret2Shell 實例。",
+        "action": "探測遠端",
+        "import": {
+          "title": "導入 release",
+          "success": "遠端 release 導入成功",
+          "fail": "遠端 release 導入失敗"
+        },
+        "games": "遠端賽事",
+        "releases": "遠端 release",
+        "releaseCount": "{{count}} 個 release",
+        "info": "遠端位址：{{baseUrl}} | 協議版本 v{{version}}",
+        "fail": "探測遠端同步來源失敗",
+        "form": {
+          "baseUrl": "遠端位址",
+          "syncToken": "同步令牌",
+          "gameKey": "Game Key",
+          "releaseId": "Release ID"
+        }
+      },
+      "catalog": {
+        "title": "Registry 目錄導入",
+        "description": "瀏覽某個已拉取的 registry 發現源，查看 release，選擇 upstream，並建立導入任務。",
+        "source": "Registry 發現源",
+        "sourcePlaceholder": "請選擇一個來源",
+        "games": "賽事列表",
+        "releases": "Release 列表",
+        "upstreams": "上游列表",
+        "releaseCount": "{{count}} 個 release",
+        "emptyGames": "此來源中沒有發現賽事",
+        "emptyReleases": "目前選中賽事沒有可用 release",
+        "emptyUpstreams": "目前 release 沒有可用的活動 upstream",
+        "conflicts": {
+          "title": "存在衝突的 registry 條目",
+          "description": "其他已拉取的發現源也發佈了相同的 game key 與 release ID，但其快照或 manifest 內容不同。"
+        },
+        "import": {
+          "title": "從 registry 導入",
+          "success": "已成功建立 registry 導入任務",
+          "fail": "建立 registry 導入任務失敗"
+        },
+        "errors": {
+          "fetchGames": {
+            "title": "取得 registry 賽事列表失敗"
+          },
+          "fetchReleases": {
+            "title": "取得 registry release 列表失敗"
+          },
+          "fetchDetail": {
+            "title": "取得 registry release 詳情失敗"
+          }
+        }
+      },
+      "jobs": {
+        "title": "同步任務",
+        "empty": "目前還沒有同步任務",
+        "stage": "狀態：{{status}} | 階段：{{stage}}",
+        "status": {
+          "pending": "等待中",
+          "running": "執行中",
+          "paused": "已暫停",
+          "failed": "失敗",
+          "completed": "已完成",
+          "cancelled": "已取消"
+        },
+        "stages": {
+          "queued": "已排隊",
+          "discover": "正在發現 release 元資料",
+          "fetchRepoInit": "初始化倉庫工作目錄",
+          "fetchRepoFetch": "拉取 release 引用",
+          "fetchRepoCheckout": "檢出 release 快照",
+          "fetchRepoVerify": "校驗快照一致性",
+          "fetchRepoDone": "倉庫快照已就緒",
+          "fetchMedia": "拉取媒體 {{done}}/{{total}}",
+          "fetchOci": "鏡像同步 OCI 資產 {{done}}/{{total}}",
+          "finalizeMoveRepo": "切換已暫存倉庫",
+          "completed": "已完成"
+        },
+        "upstream": "上游：{{value}}",
+        "createdAt": "建立時間：{{value}}",
+        "updatedAt": "更新時間：{{value}}",
+        "finishedAt": "完成時間：{{value}}",
+        "actions": {
+          "refresh": {
+            "title": "重新整理"
+          },
+          "retry": {
+            "title": "重試"
+          },
+          "resume": {
+            "title": "恢復",
+            "success": "同步任務恢復成功",
+            "fail": "同步任務恢復失敗"
+          },
+          "cancel": {
+            "title": "取消",
+            "success": "同步任務已取消",
+            "fail": "取消同步任務失敗"
+          },
+          "openGame": {
+            "title": "開啟賽事"
+          }
+        },
+        "request": {
+          "tokenPresent": "已攜帶",
+          "tokenMissing": "未攜帶"
+        },
+        "detail": {
+          "title": "任務詳情",
+          "loading": "正在載入所選任務詳情...",
+          "empty": "請選擇一個任務以查看其檢查點與目前請求",
+          "summary": "摘要",
+          "request": "目前請求",
+          "checkpoint": "檢查點",
+          "bucket": "目標 bucket：{{value}}",
+          "repo": "倉庫",
+          "media": "媒體",
+          "oci": "OCI 資產",
+          "discovered": "已發現的 release",
+          "noDiscovery": "目前還沒有 discovery 結果",
+          "upstreamInstance": "上游實例：{{value}}",
+          "remote": "遠端：{{value}}",
+          "snapshot": "快照：{{value}}",
+          "manifest": "Manifest SHA256：{{value}}",
+          "firstParty": "第一方來源：{{value}}",
+          "publishedAt": "發佈時間：{{value}}",
+          "protocolVersion": "協議版本：{{value}}"
+        },
+        "errors": {
+          "fetch": {
+            "title": "取得同步任務失敗"
+          },
+          "fetchDetail": {
+            "title": "取得同步任務詳情失敗"
+          }
+        }
+      },
+      "phase1": {
+        "title": "第一階段腳手架",
+        "message": "目前階段會先準備同步工作目錄、資料模型，以及遠端鏡像唯讀保護能力。",
+        "completedTitle": "目前已就緒內容",
+        "completedMessage": "這個頁面將用於後續 registry 與上下游同步流程。第一階段主要完成資料庫基礎設施與遠端鏡像唯讀保護。"
+      },
+      "errors": {
+        "fetchStatus": {
+          "title": "取得賽事同步狀態失敗"
+        }
+      }
     },
     "email": {
       "title": "平臺發信郵箱",
@@ -638,6 +822,99 @@
       "errors": {
         "fetchRepo": {
           "title": "獲取題目倉庫失敗"
+        }
+      }
+    },
+    "sync": {
+      "title": "賽事同步",
+      "readonly": {
+        "title": "遠端鏡像已鎖定",
+        "message": "此賽事來自遠端同步，目前處於唯讀狀態。如需本地修改，請先解除遠端鏡像鎖定。",
+        "source": "第一方上游：{{source}}"
+      },
+      "identity": {
+        "title": "同步身份",
+        "syncKey": "同步鍵",
+        "syncToken": "同步令牌"
+      },
+      "remote": {
+        "title": "遠端鏡像狀態",
+        "state": "目前狀態：{{state}}",
+        "stateMirrorLocked": "鏡像鎖定",
+        "stateDetached": "已解除鎖定",
+        "release": "目前 release：{{value}}",
+        "source": "第一方來源：{{value}}",
+        "releaseSummary": "目前鏡像記錄：{{origin}} | 發佈時間 {{publishedAt}}",
+        "detachDescription": "解除鏡像鎖定後，本地將允許繼續編輯，同時目前實例也不再會被其他平台接受為該賽事的 third-party upstream。",
+        "detachReason": "解除原因",
+        "detachReasonPlaceholder": "可選：說明為什麼要解除這個鏡像鎖定",
+        "detachReasonHelp": "如有填寫，該說明會隨解除操作一起記錄，方便審計與追溯。"
+      },
+      "publish": {
+        "title": "產生 first-party 發佈元資料",
+        "description": "為目前已封存的賽事產生供外部發佈使用的 release 與 upstream 元資料檔案。",
+        "source": "外部工作流",
+        "sourcePlaceholder": "Ret2Shell 內不選擇目標"
+      },
+      "manualPr": {
+        "title": "發佈元資料",
+        "description": "請將下面的檔案接入任意相容的外部 registry 工作流。Ret2Shell 不感知目標倉庫，也不會執行 push。",
+        "target": "目標倉庫：{{repo}}（分支：{{branch}}）",
+        "prTitle": "建議 PR 標題：{{title}}"
+      },
+      "advertise": {
+        "title": "產生 third-party upstream 元資料",
+        "description": "當這個鏡像保持鎖定且未被修改時，可以產生供外部發佈的 upstream 廣告檔案。",
+        "source": "外部工作流",
+        "sourcePlaceholder": "Ret2Shell 內不選擇目標"
+      },
+      "manualUpstream": {
+        "title": "third-party upstream 元資料",
+        "description": "請將下面的檔案接入任意相容的外部 registry 工作流。",
+        "target": "目標倉庫：{{repo}}（分支：{{branch}}）",
+        "prTitle": "建議 PR 標題：{{title}}"
+      },
+      "actions": {
+        "rotateToken": {
+          "title": "輪換同步令牌",
+          "fail": "輪換同步令牌失敗"
+        },
+        "detach": {
+          "title": "解除鏡像鎖定",
+          "confirm": "確認解除",
+          "success": "遠端鏡像已成功解除鎖定",
+          "fail": "解除遠端鏡像鎖定失敗"
+        },
+        "advertise": {
+          "title": "產生 upstream 元資料",
+          "success": "已成功產生 third-party upstream 元資料",
+          "fail": "產生 third-party upstream 元資料失敗"
+        },
+        "publish": {
+          "title": "產生 release 元資料",
+          "success": "已成功產生發佈元資料",
+          "fail": "產生賽事 release 發佈元資料失敗"
+        }
+      },
+      "releases": {
+        "title": "本地 release 記錄",
+        "empty": "尚未有本地 release 記錄",
+        "current": "目前鏡像 release",
+        "snapshot": "快照提交：{{value}}",
+        "origin": "來源角色：{{value}}",
+        "originFirstParty": "第一方",
+        "originMirror": "鏡像",
+        "firstPartySource": "第一方來源：{{value}}",
+        "firstPartyInstance": "第一方實例：{{value}}",
+        "publishedAt": "發佈時間：{{value}}"
+      },
+      "trainingHint": "目前階段不會為訓練場產生 first-party registry 發佈元資料。",
+      "errors": {
+        "fetchSources": {
+          "title": "取得可用 registry 發現源失敗"
+        },
+        "fetchReleases": {
+          "title": "取得賽事 release 列表失敗"
         }
       }
     },

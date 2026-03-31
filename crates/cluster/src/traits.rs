@@ -29,6 +29,10 @@ pub enum ClusterError {
   IoError(#[from] std::io::Error),
   #[error("upload to registry failed: {0}")]
   UploadFailed(String),
+  #[error("registry sync failed: {0}")]
+  RegistrySyncFailed(String),
+  #[error("registry digest not found: {0}")]
+  RegistryDigestMissing(String),
   #[error("renew exceed limit: {0}")]
   PodRenewExceedLimit(String),
   #[error("invalid image file type: {0}")]

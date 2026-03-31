@@ -97,6 +97,9 @@ pub enum AppProtocol {
 pub struct ChallengeImage {
   pub name: String,
   pub tag: String,
+  #[serde(default)]
+  pub internal_managed: bool,
+  pub internal_tag: Option<String>,
   pub cpu: f64,
   #[serde(default = "default_cpu_req")]
   pub cpu_req: f64,
@@ -136,9 +139,53 @@ pub struct ChallengeEnv {
 }
 
 impl ChallengeImage {
+  fn normalized_internal_tag(&self) -> Option<&str> {
+    self
+      .internal_tag
+      .as_deref()
+      .map(str::trim)
+      .map(|tag| tag.trim_matches('/'))
+      .filter(|tag| !tag.is_empty())
+  }
+
+  pub fn managed_image_tag(
+    &self, internal_registry_external: Option<&str>, image_namespace: Option<&str>,
+  ) -> Option<String> {
+    if !self.internal_managed {
+      return None;
+    }
+
+    let internal_registry_external = internal_registry_external
+      .map(str::trim)
+      .map(|host| host.trim_end_matches('/'))
+      .filter(|host| !host.is_empty())?;
+    let image_namespace = image_namespace
+      .map(str::trim)
+      .map(|namespace| namespace.trim_matches('/'))
+      .filter(|namespace| !namespace.is_empty())?;
+    let internal_tag = self.normalized_internal_tag()?;
+
+    Some(format!(
+      "{internal_registry_external}/{image_namespace}/{internal_tag}"
+    ))
+  }
+
+  pub fn resolved_tag(
+    &self, internal_registry_external: Option<&str>, image_namespace: Option<&str>,
+  ) -> String {
+    self
+      .managed_image_tag(internal_registry_external, image_namespace)
+      .unwrap_or_else(|| self.tag.clone())
+  }
+
   pub fn desensitize(self) -> Self {
+    let internal_tag = self
+      .internal_tag
+      .as_ref()
+      .map(|_| "shadowed:latest".to_string());
     Self {
       tag: "ret.sh.cn/shadowed:latest".to_string(),
+      internal_tag,
       cpu: 0.0,
       cpu_req: 0.0,
       mem: "NaN".to_string(),
@@ -182,6 +229,8 @@ mod tests {
     ChallengeImage {
       name: name.to_owned(),
       tag: "challenge:latest".to_owned(),
+      internal_managed: false,
+      internal_tag: None,
       cpu: 1.5,
       cpu_req: 1.0,
       mem: "512Mi".to_owned(),
@@ -247,6 +296,7 @@ mod tests {
 
     assert_eq!(desensitized.name, "web");
     assert_eq!(desensitized.tag, "ret.sh.cn/shadowed:latest");
+    assert_eq!(desensitized.internal_tag, None);
     assert_eq!(desensitized.cpu, 0.0);
     assert_eq!(desensitized.cpu_req, 0.0);
     assert_eq!(desensitized.mem, "NaN");
@@ -273,6 +323,45 @@ mod tests {
     assert_eq!(desensitized.pull_secret, None);
     assert_eq!(desensitized.images.len(), 1);
     assert_eq!(desensitized.images[0].tag, "ret.sh.cn/shadowed:latest");
+    assert_eq!(desensitized.images[0].internal_tag, None);
     assert_eq!(desensitized.images[0].cpu, 0.0);
+  }
+
+  #[test]
+  fn challenge_image_resolved_tag_prefers_internal_registry_reference() {
+    let mut challenge_image = image("web");
+    challenge_image.internal_managed = true;
+    challenge_image.internal_tag = Some("web:main".to_owned());
+
+    assert_eq!(
+      challenge_image.resolved_tag(Some("registry.example.com"), Some("example_game")),
+      "registry.example.com/example_game/web:main"
+    );
+    assert_eq!(
+      challenge_image.resolved_tag(None, Some("example_game")),
+      "challenge:latest"
+    );
+    assert_eq!(
+      challenge_image.resolved_tag(Some("registry.example.com"), None),
+      "challenge:latest"
+    );
+  }
+
+  #[test]
+  fn challenge_image_deserializes_without_internal_fields() {
+    let image: ChallengeImage = toml::from_str(
+      r#"
+name = "web"
+tag = "registry.example.com/example/web:latest"
+cpu = 0.5
+mem = "128Mi"
+"#,
+    )
+    .unwrap();
+
+    assert!(!image.internal_managed);
+    assert_eq!(image.internal_tag, None);
+    assert_eq!(image.cpu_req, 0.01);
+    assert_eq!(image.mem_req, "32Mi");
   }
 }

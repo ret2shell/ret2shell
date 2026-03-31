@@ -7,7 +7,8 @@ use axum::{
 use chrono::{DateTime, Utc, serde::ts_seconds};
 use r2s_bucket::{Bucket, game::GameBucket};
 use r2s_cluster::{Pod, traffic::MappedPort};
-use r2s_database::{game, user::Permission};
+use r2s_database::{game, game_remote_sync, user::Permission};
+use sea_orm::ConnectionTrait;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -29,6 +30,7 @@ mod repo;
 pub(crate) mod repo_sync;
 mod runtime;
 mod statistics;
+mod sync;
 mod team;
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
@@ -90,6 +92,16 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         )
         .route("/device", get(admin::get_connected_devices))
         .route("/token", post(admin::regenerate_game_token))
+        .route("/sync", get(sync::get_game_sync_status))
+        .route("/sync/sources", get(sync::get_game_sync_sources))
+        .route("/sync/releases", get(sync::get_game_sync_releases))
+        .route("/sync/sync-token", post(sync::rotate_game_sync_token))
+        .route("/sync/detach", post(sync::detach_remote_sync_game))
+        .route(
+          "/sync/advertise",
+          post(sync::advertise_remote_sync_upstream),
+        )
+        .route("/sync/publish", post(sync::publish_game_release))
         .route("/doc/{doc}", patch(core::update_game_doc))
         .route("/introduction", patch(core::update_game_intro_compat))
         .route("/submission", get(admin::get_submissions))
@@ -149,6 +161,21 @@ pub(super) async fn get_game_bucket_mut(
     )
     .await
     .map_err(Into::into)
+}
+
+pub(super) async fn ensure_game_sync_writable<C>(
+  db: &C, game: &game::Model,
+) -> Result<(), ResponseError>
+where
+  C: ConnectionTrait, {
+  if let Some(remote_sync) = game_remote_sync::get(db, game.id).await?
+    && remote_sync.state == game_remote_sync::RemoteGameState::MirrorLocked
+  {
+    return Err(ResponseError::Conflict(
+      "this game is a locked remote mirror; detach it before making local changes".to_owned(),
+    ));
+  }
+  Ok(())
 }
 
 #[derive(Serialize, Clone, Deserialize)]

@@ -41,6 +41,8 @@ pub enum Game {
   Weight,
   Bucket,
   Token,
+  SyncKey,
+  SyncToken,
   TimelinePresets,
   Traffic,
   NodeSelector,

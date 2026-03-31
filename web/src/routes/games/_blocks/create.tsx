@@ -91,6 +91,8 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
       award_rate: 0,
       admins: [accountStore.id!],
       token: null,
+      sync_key: null,
+      sync_token: null,
       timeline_presets: [],
       award_rates: [0, 0, 0],
       node_selector: null,

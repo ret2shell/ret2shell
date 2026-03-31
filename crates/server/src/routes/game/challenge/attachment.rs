@@ -8,6 +8,7 @@ use axum::{
 use futures::TryStreamExt;
 use r2s_bucket::{Bucket, challenge::ChallengeBucket};
 use r2s_database::{challenge, game, team, user::Permission};
+use r2s_migrator::Database;
 use serde::{Deserialize, Serialize};
 use tokio_util::io::{ReaderStream, StreamReader};
 use tracing::{debug, info, warn};
@@ -140,10 +141,11 @@ pub(super) struct UploadChallengeAttachmentQuery {
 }
 
 pub(super) async fn upload_challenge_attachment(
-  State(bucket): State<Bucket>, Extension(token): Extension<Token>,
+  State(ref db): State<Database>, State(bucket): State<Bucket>, Extension(token): Extension<Token>,
   Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
   Query(query): Query<UploadChallengeAttachmentQuery>, mut multipart: Multipart,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::super::ensure_game_sync_writable(&db.conn, &game).await?;
   super::check_challenge_publishing(&challenge)?;
   let (game_bucket, challenge_bucket) =
     super::get_challenge_bucket_mut(&bucket, &game, &challenge).await?;
@@ -179,10 +181,11 @@ pub(super) async fn upload_challenge_attachment(
 }
 
 pub(super) async fn delete_challenge_attachment(
-  State(bucket): State<Bucket>, Extension(token): Extension<Token>,
+  State(ref db): State<Database>, State(bucket): State<Bucket>, Extension(token): Extension<Token>,
   Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
   Query(query): Query<FileRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::super::ensure_game_sync_writable(&db.conn, &game).await?;
   super::check_challenge_publishing(&challenge)?;
   let (game_bucket, challenge_bucket) =
     super::get_challenge_bucket_mut(&bucket, &game, &challenge).await?;

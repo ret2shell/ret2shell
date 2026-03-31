@@ -18,8 +18,11 @@ mod traits;
 
 pub use k8s_openapi::api::core::v1::{ConfigMap, Namespace, Node, Pod, Service};
 pub use kube::api::ObjectList;
-pub use manager::{CHALLENGE_NS, ChallengeEnvSnapshot, Cluster, DeleteOutdatedEnvsResult};
+pub use manager::{
+  CHALLENGE_NS, ChallengeEnvCreateOptions, ChallengeEnvSnapshot, Cluster, DeleteOutdatedEnvsResult,
+};
 use r2s_config::cluster;
+pub use registry::{Registry, SyncImageMirrorRequest};
 use tracing::{error, info};
 pub use traits::ClusterError;
 

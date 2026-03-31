@@ -1,5 +1,6 @@
 import { useGame } from "@api/game";
 import SidebarLayout from "@blocks/sidebar-layout";
+import GameSyncReadonlyBanner from "@lib/blocks/game/sync-readonly-banner";
 import { createBreakpoints } from "@solid-primitives/media";
 import { useNavigate, useParams } from "@solidjs/router";
 import { isAdminOfGame } from "@storage/game";
@@ -24,7 +25,10 @@ export default function (props: { children?: JSX.Element }) {
   return (
     <>
       <SidebarLayout leftBar={() => <SideBar />} showLeftBar={showSidebar()}>
-        {props.children}
+        <div class="flex-1 flex flex-col">
+          <GameSyncReadonlyBanner gameId={gameId()} compact />
+          {props.children}
+        </div>
       </SidebarLayout>
       <Transition name="slide-fade-right">
         <Show when={!matches.lg}>

@@ -5,7 +5,7 @@ use chrono::Utc;
 use nanoid::nanoid;
 use r2s_bucket::Bucket;
 use r2s_cluster::{
-  CHALLENGE_NS, Cluster,
+  CHALLENGE_NS, ChallengeEnvCreateOptions, Cluster,
   lifecycle::{LifecycleEvent, LifecycleStopReason},
 };
 use r2s_config::cluster::ChallengeEnv;
@@ -13,6 +13,7 @@ use r2s_database::{
   challenge, config, game, team,
   user::{self, Permission},
 };
+use r2s_migrator::Database;
 use serde_json::to_value;
 use tower_http::request_id::RequestId;
 use tracing::{debug, info, warn};
@@ -211,8 +212,11 @@ pub(super) async fn start_challenge_instance(
         .collect(),
         env_map,
         env_config,
-        node_selector,
-        need_expose,
+        ChallengeEnvCreateOptions {
+          image_namespace: game.bucket.clone(),
+          node_selector,
+          need_expose,
+        },
       )
       .await?;
     cache
@@ -362,10 +366,11 @@ pub(super) async fn stop_challenge_instance(
 }
 
 pub(super) async fn update_challenge_env_config(
-  State(ref bucket): State<Bucket>, Extension(game): Extension<game::Model>,
-  Extension(token): Extension<Token>, Extension(challenge): Extension<challenge::Model>,
-  Json(env): Json<ChallengeEnv>,
+  State(ref db): State<Database>, State(ref bucket): State<Bucket>,
+  Extension(game): Extension<game::Model>, Extension(token): Extension<Token>,
+  Extension(challenge): Extension<challenge::Model>, Json(env): Json<ChallengeEnv>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::super::ensure_game_sync_writable(&db.conn, &game).await?;
   super::check_challenge_publishing(&challenge)?;
 
   let mut ports = HashSet::new();
@@ -394,9 +399,11 @@ pub(super) async fn update_challenge_env_config(
 }
 
 pub(super) async fn delete_challenge_env_config(
-  State(ref bucket): State<Bucket>, Extension(game): Extension<game::Model>,
-  Extension(token): Extension<Token>, Extension(challenge): Extension<challenge::Model>,
+  State(ref db): State<Database>, State(ref bucket): State<Bucket>,
+  Extension(game): Extension<game::Model>, Extension(token): Extension<Token>,
+  Extension(challenge): Extension<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::super::ensure_game_sync_writable(&db.conn, &game).await?;
   super::check_challenge_publishing(&challenge)?;
   let (game_bucket, challenge_bucket) =
     super::get_challenge_bucket_mut(bucket, &game, &challenge).await?;

@@ -435,14 +435,7 @@ impl Git {
   pub async fn commit(
     &self, message: impl AsRef<str>, author: impl AsRef<str>, email: impl AsRef<str>,
   ) -> Result<(), BucketError> {
-    let output = Command::new("git")
-      .current_dir(&self.path)
-      .arg("status")
-      .arg("-u")
-      .arg("--porcelain")
-      .output()
-      .await?;
-    let git_status = String::from_utf8(output.stdout)?;
+    let git_status = self.status_porcelain().await?;
     if git_status.trim().is_empty() {
       return Ok(());
     }
@@ -762,6 +755,66 @@ impl Git {
     }
   }
 
+  pub async fn status_porcelain(&self) -> Result<String, BucketError> {
+    let output = Command::new("git")
+      .current_dir(&self.path)
+      .arg("status")
+      .arg("-u")
+      .arg("--porcelain")
+      .output()
+      .await?;
+    if output.status.success() {
+      Ok(String::from_utf8(output.stdout)?)
+    } else {
+      Err(BucketError::GitCommandFailed(String::from_utf8(
+        output.stderr,
+      )?))
+    }
+  }
+
+  pub async fn is_clean(&self) -> Result<bool, BucketError> {
+    Ok(self.status_porcelain().await?.trim().is_empty())
+  }
+
+  pub async fn get_ref(&self, ref_name: impl AsRef<str>) -> Result<Option<String>, BucketError> {
+    let output = Command::new("git")
+      .current_dir(&self.path)
+      .arg("rev-parse")
+      .arg("--verify")
+      .arg(ref_name.as_ref())
+      .output()
+      .await?;
+    if output.status.success() {
+      Ok(Some(String::from_utf8(output.stdout)?.trim().to_string()))
+    } else {
+      let stderr = String::from_utf8(output.stderr)?;
+      if stderr.contains("Needed a single revision") || stderr.contains("unknown revision") {
+        Ok(None)
+      } else {
+        Err(BucketError::GitCommandFailed(stderr))
+      }
+    }
+  }
+
+  pub async fn set_ref(
+    &self, ref_name: impl AsRef<str>, new_oid: impl AsRef<str>,
+  ) -> Result<(), BucketError> {
+    let output = Command::new("git")
+      .current_dir(&self.path)
+      .arg("update-ref")
+      .arg(ref_name.as_ref())
+      .arg(new_oid.as_ref())
+      .output()
+      .await?;
+    if output.status.success() {
+      Ok(())
+    } else {
+      Err(BucketError::GitCommandFailed(String::from_utf8(
+        output.stderr,
+      )?))
+    }
+  }
+
   pub async fn get_head_ref(&self) -> Result<String, BucketError> {
     let output = Command::new("git")
       .current_dir(&self.path)
@@ -890,12 +943,38 @@ impl Git {
 
   async fn stream_internal<T, S>(
     &self, protocol: impl AsRef<OsStr>, subcmd: impl AsRef<OsStr>, args: T,
-    mut stdin: impl AsyncRead + Unpin + Send + 'static,
+    stdin: impl AsyncRead + Unpin + Send + 'static,
   ) -> Result<ChildStdout, BucketError>
   where
     T: IntoIterator<Item = S>,
     S: AsRef<OsStr>, {
+    self
+      .stream_internal_with_config(
+        protocol,
+        std::iter::empty::<(&str, &str)>(),
+        subcmd,
+        args,
+        stdin,
+      )
+      .await
+  }
+
+  async fn stream_internal_with_config<T, S, C, K, V>(
+    &self, protocol: impl AsRef<OsStr>, config: C, subcmd: impl AsRef<OsStr>, args: T,
+    mut stdin: impl AsyncRead + Unpin + Send + 'static,
+  ) -> Result<ChildStdout, BucketError>
+  where
+    T: IntoIterator<Item = S>,
+    S: AsRef<OsStr>,
+    C: IntoIterator<Item = (K, V)>,
+    K: AsRef<str>,
+    V: AsRef<str>, {
     let mut cmd = Command::new("git");
+    for (key, value) in config {
+      cmd
+        .arg("-c")
+        .arg(format!("{}={}", key.as_ref(), value.as_ref()));
+    }
     cmd
       .stdin(Stdio::piped())
       .stdout(Stdio::piped())
@@ -940,11 +1019,41 @@ impl Git {
       .await
   }
 
+  pub async fn info_refs_upload_release_only(
+    &self, protocol: impl AsRef<OsStr>, release_ref: &str,
+    stdin: impl AsyncRead + Unpin + Send + 'static,
+  ) -> Result<ChildStdout, BucketError> {
+    self
+      .stream_internal_with_config(
+        protocol,
+        release_only_uploadpack_config(release_ref),
+        "upload-pack",
+        ["--stateless-rpc", "--advertise-refs"],
+        stdin,
+      )
+      .await
+  }
+
   pub async fn upload_pack(
     &self, protocol: impl AsRef<OsStr>, stdin: impl AsyncRead + Unpin + Send + 'static,
   ) -> Result<ChildStdout, BucketError> {
     self
       .stream_internal(protocol, "upload-pack", ["--stateless-rpc"], stdin)
+      .await
+  }
+
+  pub async fn upload_pack_release_only(
+    &self, protocol: impl AsRef<OsStr>, release_ref: &str,
+    stdin: impl AsyncRead + Unpin + Send + 'static,
+  ) -> Result<ChildStdout, BucketError> {
+    self
+      .stream_internal_with_config(
+        protocol,
+        release_only_uploadpack_config(release_ref),
+        "upload-pack",
+        ["--stateless-rpc"],
+        stdin,
+      )
       .await
   }
 
@@ -955,6 +1064,17 @@ impl Git {
       .stream_internal(protocol, "receive-pack", ["--stateless-rpc"], stdin)
       .await
   }
+}
+
+fn release_only_uploadpack_config(release_ref: &str) -> Vec<(String, String)> {
+  vec![
+    ("uploadpack.hideRefs".to_owned(), "HEAD".to_owned()),
+    ("uploadpack.hideRefs".to_owned(), "refs".to_owned()),
+    (
+      "uploadpack.hideRefs".to_owned(),
+      format!("!{}", release_ref.trim_matches('/')),
+    ),
+  ]
 }
 
 // covert a message to PKT-LINE format
@@ -996,7 +1116,24 @@ mod tests {
 
   use super::{
     Git, entry_paths_for_changed_path, listed_entry_for_changed_path, parse_ls_tree_objects,
+    release_only_uploadpack_config,
   };
+
+  #[test]
+  fn release_only_uploadpack_config_hides_all_other_refs() {
+    let config = release_only_uploadpack_config("refs/ret2shell/releases/deadbeef");
+    assert_eq!(
+      config,
+      vec![
+        ("uploadpack.hideRefs".to_owned(), "HEAD".to_owned()),
+        ("uploadpack.hideRefs".to_owned(), "refs".to_owned()),
+        (
+          "uploadpack.hideRefs".to_owned(),
+          "!refs/ret2shell/releases/deadbeef".to_owned(),
+        ),
+      ]
+    );
+  }
 
   fn temp_repo_path(name: &str) -> PathBuf {
     let nanos = SystemTime::now()

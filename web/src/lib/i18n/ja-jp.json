@@ -299,7 +299,191 @@
       "title": "代替プロトコル"
     },
     "sync": {
-      "title": "リソースの同期"
+      "title": "リソースの同期",
+      "sources": {
+        "title": "Registry discovery ソース",
+        "description": "カタログ閲覧と取り込みに使う、読み取り専用の registry リポジトリを管理します。",
+        "empty": "registry discovery ソースがまだ設定されていません",
+        "form": {
+          "name": "ソース名",
+          "gitUrl": "Git URL",
+          "branch": "ブランチ",
+          "priority": "優先度",
+          "enabled": "有効",
+          "publishEnabled": "公開を許可",
+          "privateSource": "プライベートソース"
+        },
+        "actions": {
+          "fetch": {
+            "title": "取得",
+            "success": "registry discovery ソースの取得に成功しました",
+            "fail": "registry discovery ソースの取得に失敗しました"
+          }
+        },
+        "badges": {
+          "enabled": "ソース状態: {{enabled}}",
+          "publishEnabled": "公開: {{enabled}}"
+        },
+        "state": {
+          "enabled": "有効",
+          "disabled": "無効"
+        },
+        "lastFetched": "最終取得: {{value}}",
+        "errors": {
+          "fetch": {
+            "title": "registry discovery ソースの取得に失敗しました"
+          }
+        }
+      },
+      "direct": {
+        "title": "直接 upstream 探索",
+        "description": "registry discovery ソースを使わず、別の Ret2Shell インスタンスを直接探索します。",
+        "action": "リモートを探索",
+        "import": {
+          "title": "release を取り込む",
+          "success": "リモート release の取り込みに成功しました",
+          "fail": "リモート release の取り込みに失敗しました"
+        },
+        "games": "リモートゲーム",
+        "releases": "リモート release",
+        "releaseCount": "{{count}} 件の release",
+        "info": "リモート URL: {{baseUrl}} | プロトコル v{{version}}",
+        "fail": "リモート同期ソースの探索に失敗しました",
+        "form": {
+          "baseUrl": "リモート URL",
+          "syncToken": "同期トークン",
+          "gameKey": "Game Key",
+          "releaseId": "Release ID"
+        }
+      },
+      "catalog": {
+        "title": "Registry カタログ取り込み",
+        "description": "取得済みの registry discovery ソースを閲覧し、release と upstream を選んで取り込みジョブを開始します。",
+        "source": "Registry discovery ソース",
+        "sourcePlaceholder": "ソースを選択してください",
+        "games": "ゲーム一覧",
+        "releases": "Release 一覧",
+        "upstreams": "Upstream 一覧",
+        "releaseCount": "{{count}} 件の release",
+        "emptyGames": "このソースにはゲームがありません",
+        "emptyReleases": "選択したゲームに利用可能な release がありません",
+        "emptyUpstreams": "選択した release に有効な upstream がありません",
+        "conflicts": {
+          "title": "競合する registry エントリ",
+          "description": "他の取得済み discovery ソースにも同じ game key と release ID がありますが、snapshot または manifest の内容が一致しません。"
+        },
+        "import": {
+          "title": "registry から取り込む",
+          "success": "registry 取り込みジョブを作成しました",
+          "fail": "registry 取り込みジョブの作成に失敗しました"
+        },
+        "errors": {
+          "fetchGames": {
+            "title": "registry ゲーム一覧の取得に失敗しました"
+          },
+          "fetchReleases": {
+            "title": "registry release 一覧の取得に失敗しました"
+          },
+          "fetchDetail": {
+            "title": "registry release 詳細の取得に失敗しました"
+          }
+        }
+      },
+      "jobs": {
+        "title": "同期ジョブ",
+        "empty": "まだ同期ジョブはありません",
+        "stage": "状態: {{status}} | ステージ: {{stage}}",
+        "status": {
+          "pending": "待機中",
+          "running": "実行中",
+          "paused": "一時停止",
+          "failed": "失敗",
+          "completed": "完了",
+          "cancelled": "キャンセル済み"
+        },
+        "stages": {
+          "queued": "キュー待ち",
+          "discover": "release メタデータを確認中",
+          "fetchRepoInit": "リポジトリ作業領域を初期化中",
+          "fetchRepoFetch": "release ref を取得中",
+          "fetchRepoCheckout": "release スナップショットを checkout 中",
+          "fetchRepoVerify": "取得したスナップショットを検証中",
+          "fetchRepoDone": "リポジトリスナップショットの準備完了",
+          "fetchMedia": "メディア取得 {{done}}/{{total}}",
+          "fetchOci": "OCI アセット同期 {{done}}/{{total}}",
+          "finalizeMoveRepo": "退避済みリポジトリを本配置へ切り替え中",
+          "completed": "完了"
+        },
+        "upstream": "Upstream: {{value}}",
+        "createdAt": "作成日時: {{value}}",
+        "updatedAt": "更新日時: {{value}}",
+        "finishedAt": "完了日時: {{value}}",
+        "actions": {
+          "refresh": {
+            "title": "更新"
+          },
+          "retry": {
+            "title": "再試行"
+          },
+          "resume": {
+            "title": "再開",
+            "success": "同期ジョブを再開しました",
+            "fail": "同期ジョブの再開に失敗しました"
+          },
+          "cancel": {
+            "title": "キャンセル",
+            "success": "同期ジョブをキャンセルしました",
+            "fail": "同期ジョブのキャンセルに失敗しました"
+          },
+          "openGame": {
+            "title": "ゲームを開く"
+          }
+        },
+        "request": {
+          "tokenPresent": "あり",
+          "tokenMissing": "なし"
+        },
+        "detail": {
+          "title": "ジョブ詳細",
+          "loading": "選択したジョブ詳細を読み込み中...",
+          "empty": "ジョブを選択してチェックポイントと現在のリクエストを確認してください",
+          "summary": "概要",
+          "request": "現在のリクエスト",
+          "checkpoint": "チェックポイント",
+          "bucket": "対象 bucket: {{value}}",
+          "repo": "リポジトリ",
+          "media": "メディア",
+          "oci": "OCI アセット",
+          "discovered": "検出済み release",
+          "noDiscovery": "まだ discovery は完了していません",
+          "upstreamInstance": "Upstream instance: {{value}}",
+          "remote": "Remote: {{value}}",
+          "snapshot": "Snapshot: {{value}}",
+          "manifest": "Manifest SHA256: {{value}}",
+          "firstParty": "First-party: {{value}}",
+          "publishedAt": "公開日時: {{value}}",
+          "protocolVersion": "プロトコルバージョン: {{value}}"
+        },
+        "errors": {
+          "fetch": {
+            "title": "同期ジョブの取得に失敗しました"
+          },
+          "fetchDetail": {
+            "title": "同期ジョブ詳細の取得に失敗しました"
+          }
+        }
+      },
+      "phase1": {
+        "title": "フェーズ1の基盤",
+        "message": "この段階では、同期ワークスペース、データモデル、そしてリモートミラーの読み取り専用ガードを先に整備します。",
+        "completedTitle": "現在利用できる内容",
+        "completedMessage": "このページは今後の registry と upstream sync ワークフロー用です。フェーズ1では主にスキーマの土台とリモートミラーの読み取り専用保護を追加します。"
+      },
+      "errors": {
+        "fetchStatus": {
+          "title": "ゲーム同期状態の取得に失敗しました"
+        }
+      }
     },
     "email": {
       "title": "プラットフォームメールアドレス",
@@ -638,6 +822,99 @@
       "errors": {
         "fetchRepo": {
           "title": "問題の取得に失敗しました"
+        }
+      }
+    },
+    "sync": {
+      "title": "ゲーム同期",
+      "readonly": {
+        "title": "リモートミラーはロックされています",
+        "message": "このゲームはリモートソースから同期されており、現在は読み取り専用です。ローカルで変更する前にミラーを切り離してください。",
+        "source": "ファーストパーティ upstream: {{source}}"
+      },
+      "identity": {
+        "title": "同期 ID",
+        "syncKey": "同期キー",
+        "syncToken": "同期トークン"
+      },
+      "remote": {
+        "title": "リモートミラー状態",
+        "state": "現在の状態: {{state}}",
+        "stateMirrorLocked": "ミラー locked",
+        "stateDetached": "detached",
+        "release": "現在の release: {{value}}",
+        "source": "ファーストパーティ source: {{value}}",
+        "releaseSummary": "現在のミラー記録: {{origin}} | 公開日時 {{publishedAt}}",
+        "detachDescription": "ミラーを切り離すとローカル編集が可能になりますが、このインスタンスは今後このゲームの third-party upstream として受け入れられなくなります。",
+        "detachReason": "切り離し理由",
+        "detachReasonPlaceholder": "任意: このミラーを切り離す理由を入力",
+        "detachReasonHelp": "入力した場合、この説明は監査用の文脈として切り離し操作と一緒に保存されます。"
+      },
+      "publish": {
+        "title": "first-party 公開メタデータを生成",
+        "description": "外部公開に使う release と upstream のメタデータファイルを生成します。",
+        "source": "外部ワークフロー",
+        "sourcePlaceholder": "Ret2Shell では対象を選択しません"
+      },
+      "manualPr": {
+        "title": "公開メタデータ",
+        "description": "下記のファイルを任意の互換 registry ワークフローで利用してください。Ret2Shell 自体は対象リポジトリや push 方法を管理しません。",
+        "target": "対象リポジトリ: {{repo}}（ブランチ: {{branch}}）",
+        "prTitle": "推奨 PR タイトル: {{title}}"
+      },
+      "advertise": {
+        "title": "third-party upstream メタデータを生成",
+        "description": "このミラーが locked のままで変更されていなければ、外部公開用の upstream 広告ファイルを生成できます。",
+        "source": "外部ワークフロー",
+        "sourcePlaceholder": "Ret2Shell では対象を選択しません"
+      },
+      "manualUpstream": {
+        "title": "third-party upstream メタデータ",
+        "description": "下記のファイルを任意の互換 registry ワークフローで利用してください。",
+        "target": "対象リポジトリ: {{repo}}（ブランチ: {{branch}}）",
+        "prTitle": "推奨 PR タイトル: {{title}}"
+      },
+      "actions": {
+        "rotateToken": {
+          "title": "同期トークンを再生成",
+          "fail": "同期トークンの再生成に失敗しました"
+        },
+        "detach": {
+          "title": "ミラーを切り離す",
+          "confirm": "切り離しを確定",
+          "success": "リモートミラーを切り離しました",
+          "fail": "リモートミラーの切り離しに失敗しました"
+        },
+        "advertise": {
+          "title": "upstream メタデータを生成",
+          "success": "third-party upstream メタデータを生成しました",
+          "fail": "third-party upstream メタデータの生成に失敗しました"
+        },
+        "publish": {
+          "title": "release メタデータを生成",
+          "success": "公開メタデータを生成しました",
+          "fail": "ゲーム release 公開メタデータの生成に失敗しました"
+        }
+      },
+      "releases": {
+        "title": "ローカル release 記録",
+        "empty": "ローカル release 記録はまだありません",
+        "current": "現在のミラー release",
+        "snapshot": "スナップショットコミット: {{value}}",
+        "origin": "由来: {{value}}",
+        "originFirstParty": "ファーストパーティ",
+        "originMirror": "ミラー",
+        "firstPartySource": "ファーストパーティ source: {{value}}",
+        "firstPartyInstance": "ファーストパーティ instance: {{value}}",
+        "publishedAt": "公開日時: {{value}}"
+      },
+      "trainingHint": "このフェーズでは training は first-party registry 公開メタデータの生成対象ではありません。",
+      "errors": {
+        "fetchSources": {
+          "title": "利用可能な registry discovery ソースの取得に失敗しました"
+        },
+        "fetchReleases": {
+          "title": "ゲーム release 一覧の取得に失敗しました"
         }
       }
     },

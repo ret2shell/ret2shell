@@ -1,5 +1,6 @@
 import { handleHttpError, inflyClient } from "@api";
-import { type GameDocType, useGameDoc } from "@api/game";
+import { type GameDocType, useGameDoc, useGameSyncStatus } from "@api/game";
+import GameSyncReadonlyBanner from "@lib/blocks/game/sync-readonly-banner";
 import { createForm, setValues } from "@modular-forms/solid";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
@@ -32,6 +33,10 @@ export default function GameDocForm(props: {
     type: () => props.docType,
     enabled: () => props.gameId > 0,
   });
+  const syncStatus = useGameSyncStatus({
+    game_id: () => props.gameId,
+    enabled: () => props.gameId > 0,
+  });
   const title = createMemo(() => getDocTitle(props.docType));
   const [form, { Form, Field }] = createForm<GameDocFormValues>({
     initialValues: {
@@ -48,6 +53,9 @@ export default function GameDocForm(props: {
   });
 
   async function onSubmit(result: GameDocFormValues) {
+    if (syncStatus.data?.readonly) {
+      return;
+    }
     setLoading(true);
     try {
       await props.onDone(result.content);
@@ -62,6 +70,7 @@ export default function GameDocForm(props: {
 
   return (
     <Form onSubmit={onSubmit} class="flex flex-col space-y-2 self-center w-full max-w-5xl flex-1">
+      <GameSyncReadonlyBanner gameId={props.gameId} />
       <Field name="content">
         {(field) => (
           <Editor
@@ -69,6 +78,7 @@ export default function GameDocForm(props: {
             lineNumbers
             class="flex-1"
             lang="markdown"
+            readonly={syncStatus.data?.readonly}
             placeholder="MARKDOWN"
             title={title()}
             name="content"
@@ -77,7 +87,13 @@ export default function GameDocForm(props: {
           />
         )}
       </Field>
-      <Button type="submit" level="primary" class="mt-4!" loading={loading()} disabled={loading()}>
+      <Button
+        type="submit"
+        level="primary"
+        class="mt-4!"
+        loading={loading()}
+        disabled={loading() || syncStatus.data?.readonly}
+      >
         {t("general.actions.save.title")}
       </Button>
     </Form>

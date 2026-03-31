@@ -1,7 +1,9 @@
 import { api_root, inflyClient } from "@api";
 import { useChallengeAttachments, useDeleteChallengeAttachmentMutation } from "@api/challenge";
+import { useGameSyncStatus } from "@api/game";
 import DownloadButton from "@blocks/download-button";
 import UploadButton from "@blocks/upload-button";
+import GameSyncReadonlyBanner from "@lib/blocks/game/sync-readonly-banner";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
@@ -14,6 +16,10 @@ type FileType = "static" | "mapped" | "checker";
 
 export default function (props: ChallengeWidgetProps) {
   const [folder, setFolder] = createSignal<FileType>("static");
+  const syncStatus = useGameSyncStatus({
+    game_id: () => props.gameId,
+    enabled: () => props.gameId > 0,
+  });
 
   const attachmentsQuery = useChallengeAttachments({
     game_id: () => props.gameId,
@@ -86,6 +92,7 @@ export default function (props: ChallengeWidgetProps) {
       </ul>
       <Divider direction="vertical" />
       <div class="flex-1 flex flex-col w-0 space-y-2 p-3 lg:p-6">
+        <GameSyncReadonlyBanner gameId={props.gameId} />
         <header class="h-12 border-b border-b-layer-content/15 flex flex-row items-center space-x-2 font-bold">
           <span class="shrink-0 icon-[fluent--folder-zip-20-regular] w-5 h-5" />
           <span class="flex-1 text-start">{t("general.actions.upload.title")}</span>
@@ -98,6 +105,7 @@ export default function (props: ChallengeWidgetProps) {
               });
             }}
             multiple
+            disabled={syncStatus.data?.readonly}
           />
         </header>
         <Card level="info" contentClass="p-2 flex flex-row space-x-2 items-center">
@@ -129,16 +137,19 @@ export default function (props: ChallengeWidgetProps) {
                   <Button
                     size="sm"
                     square
-                    onClick={() =>
+                    onClick={() => {
+                      if (syncStatus.data?.readonly) {
+                        return;
+                      }
                       deleteAttachmentMutation.mutate({
                         game_id: props.gameId,
                         challenge_id: props.challengeId,
                         file: file.file,
                         folder: file.folder,
-                      })
-                    }
+                      });
+                    }}
                     loading={deleteAttachmentMutation.isPending}
-                    disabled={deleteAttachmentMutation.isPending}
+                    disabled={deleteAttachmentMutation.isPending || syncStatus.data?.readonly}
                   >
                     <span class="shrink-0 icon-[fluent--delete-16-regular] w-4 h-4" />
                   </Button>

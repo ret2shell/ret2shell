@@ -22,6 +22,7 @@ pub enum Challenge {
   Tag,
   ScoreRule,
   Score,
+  DisplayOrder,
   Bucket,
   RefId,
   ReleaseAt,

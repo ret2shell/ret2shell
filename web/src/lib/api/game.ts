@@ -5,6 +5,7 @@ import type { Game, HostType } from "@models/game";
 import type { ObjectInfo } from "@models/git";
 import type { Instance } from "@models/instance";
 import type { Submission } from "@models/submission";
+import type { GameSyncStatus } from "@models/sync";
 import { type Team, TeamState } from "@models/team";
 import type { User } from "@models/user";
 import { t, themeStore } from "@storage/theme";
@@ -64,6 +65,10 @@ export async function getGame(id: number) {
   return await api.get(`${api_root}/game/${id}`).json<Game>();
 }
 
+export async function getGameSyncStatus(game_id: number) {
+  return await api.get(`${api_root}/game/${game_id}/sync`).json<GameSyncStatus>();
+}
+
 export function useGame({
   id,
   enabled,
@@ -81,6 +86,30 @@ export function useGame({
       enabled: enabled?.(),
       throwOnError: (err: Error) => {
         handleHttpError(err, t("game.errors.fetch.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
+}
+
+export function useGameSyncStatus({
+  game_id,
+  enabled,
+  onError,
+}: {
+  game_id: () => number;
+  enabled?: () => boolean;
+  onError?: (err: Error) => boolean;
+}) {
+  const keys = createMemo(() => ["game", game_id(), "sync-status"]);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getGameSyncStatus(game_id()),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("platform.sync.errors.fetchStatus.title"));
         return onError?.(err) ?? false;
       },
     }),

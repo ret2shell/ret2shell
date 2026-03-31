@@ -24,6 +24,7 @@ pub(super) async fn update_game_traffic(
   State(engine): State<Engine>, Extension(game): Extension<game::Model>,
   Json(req): Json<GameTraffic>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::ensure_game_sync_writable(&db.conn, &game).await?;
   let traffic_mapper = cluster
     .traffic
     .clone()
@@ -60,6 +61,7 @@ pub(super) async fn delete_game_traffic(
   State(cluster): State<Cluster>, State(ref db): State<Database>, State(cache): State<Cache>,
   State(engine): State<Engine>, Extension(game): Extension<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::ensure_game_sync_writable(&db.conn, &game).await?;
   let traffic_mapper = cluster
     .traffic
     .clone()
@@ -96,6 +98,7 @@ pub(super) async fn update_game_lifecycle(
   State(engine): State<Engine>, Extension(game): Extension<game::Model>,
   Json(req): Json<GameLifecycle>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::ensure_game_sync_writable(&db.conn, &game).await?;
   let lifecycle_mapper = cluster
     .lifecycle
     .clone()
@@ -132,6 +135,7 @@ pub(super) async fn delete_game_lifecycle(
   State(cluster): State<Cluster>, State(ref db): State<Database>, State(cache): State<Cache>,
   State(engine): State<Engine>, Extension(game): Extension<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::ensure_game_sync_writable(&db.conn, &game).await?;
   let lifecycle_mapper = cluster
     .lifecycle
     .clone()
@@ -167,6 +171,7 @@ pub(super) async fn update_game_node_selector(
   State(ref db): State<Database>, State(cache): State<Cache>,
   Extension(game): Extension<game::Model>, Json(req): Json<GameNodeSelector>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::ensure_game_sync_writable(&db.conn, &game).await?;
   let node_selector = req.node_selector.clone();
   game::update(
     &db.conn,
@@ -186,6 +191,7 @@ pub(super) async fn delete_game_node_selector(
   State(ref db): State<Database>, State(cache): State<Cache>,
   Extension(game): Extension<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::ensure_game_sync_writable(&db.conn, &game).await?;
   game::update(
     &db.conn,
     game::Model {

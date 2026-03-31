@@ -10,6 +10,7 @@ use r2s_cache::Cache;
 use r2s_cluster::Cluster;
 use r2s_config::GlobalConfig;
 use r2s_database::game;
+use r2s_migrator::Database;
 use tokio_util::io::StreamReader;
 use tracing::info;
 
@@ -73,9 +74,10 @@ pub(super) async fn get_cluster_registry_image(
 }
 
 pub(super) async fn upload_image(
-  State(cluster): State<Cluster>, State(cache): State<Cache>,
+  State(cluster): State<Cluster>, State(cache): State<Cache>, State(ref db): State<Database>,
   Extension(game): Extension<game::Model>, mut multipart: Multipart,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::ensure_game_sync_writable(&db.conn, &game).await?;
   let registry = if let Some(registry) = cluster.registry {
     registry
   } else {

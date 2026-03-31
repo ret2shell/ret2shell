@@ -53,6 +53,8 @@ export type Game = {
   weight: number;
   token: string | null;
   bucket: string | null;
+  sync_key: string | null;
+  sync_token: string | null;
   timeline_presets:
     | {
         label: string;

@@ -21,6 +21,7 @@ use r2s_bucket::{
 };
 use r2s_config::GlobalConfig;
 use r2s_database::game;
+use r2s_migrator::Database;
 use regex::Regex;
 use serde::Deserialize;
 use tokio::{fs, process::Command};
@@ -296,11 +297,13 @@ async fn spawn_receive_pack_with_hook(
 }
 
 pub(super) async fn game_repo_info_refs(
-  State(ref bucket): State<Bucket>, Extension(game): Extension<game::Model>,
-  Query(query): Query<InfoRefsQuery>, headers: HeaderMap, body: Body,
+  State(ref db): State<Database>, State(ref bucket): State<Bucket>,
+  Extension(game): Extension<game::Model>, Query(query): Query<InfoRefsQuery>, headers: HeaderMap,
+  body: Body,
 ) -> Result<impl IntoResponse, ResponseError> {
   let service = query.service_trimmed();
   if service == "receive-pack" {
+    super::ensure_game_sync_writable(&db.conn, &game).await?;
     ensure_receive_pack_writable(&game)?;
   }
   let protocol = get_protocol(&headers)?;
@@ -406,6 +409,7 @@ pub(super) async fn game_repo_git_receive_pack(
   Extension(token): Extension<Token>, Extension(trace): Extension<RequestId>, headers: HeaderMap,
   body: Body,
 ) -> Result<impl IntoResponse, ResponseError> {
+  super::ensure_game_sync_writable(&state.db.conn, &game).await?;
   ensure_receive_pack_writable(&game)?;
   let (protocol, headers) = prepare_git_rpc_headers("receive-pack", &headers)?;
   let base_url = internal_api_origin(&state.config)?;

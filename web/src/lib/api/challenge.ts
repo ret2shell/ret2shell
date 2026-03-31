@@ -417,22 +417,28 @@ function inferProtocolByServiceType(serviceType: ChallengeImage["service_type"])
 }
 
 function normalizeChallengeImage(image: ChallengeImage): ChallengeImage {
+  const normalized = {
+    ...image,
+    internal_managed: image.internal_managed ?? false,
+    internal_tag: image.internal_tag?.trim() || null,
+  };
+
   if (
-    (image.protocol == null || image.protocol === undefined) &&
-    (image.app_protocol == null || image.app_protocol === undefined)
+    (normalized.protocol == null || normalized.protocol === undefined) &&
+    (normalized.app_protocol == null || normalized.app_protocol === undefined)
   ) {
-    const next = inferProtocolByServiceType(image.service_type);
+    const next = inferProtocolByServiceType(normalized.service_type);
     return {
-      ...image,
+      ...normalized,
       protocol: next.protocol,
       app_protocol: next.app_protocol,
     };
   }
 
   return {
-    ...image,
-    protocol: image.protocol ?? null,
-    app_protocol: image.app_protocol ?? null,
+    ...normalized,
+    protocol: normalized.protocol ?? null,
+    app_protocol: normalized.app_protocol ?? null,
   };
 }
 

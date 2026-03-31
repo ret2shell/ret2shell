@@ -6,8 +6,9 @@ import {
   useDeleteChallengeHintMutation,
   useUnlockChallengeHintMutation,
 } from "@api/challenge";
-import { useGame } from "@api/game";
+import { useGame, useGameSyncStatus } from "@api/game";
 import { useSelfTeam, useTeamExtras } from "@api/team";
+import GameSyncReadonlyBanner from "@lib/blocks/game/sync-readonly-banner";
 import { clearError, createForm, required, reset as resetForm } from "@modular-forms/solid";
 import { isAdminOfGame } from "@storage/game";
 import { t } from "@storage/theme";
@@ -28,6 +29,10 @@ type CreateHintForm = {
 
 export default function (props: ChallengeWidgetProps) {
   const game = useGame({ id: () => props.gameId });
+  const syncStatus = useGameSyncStatus({
+    game_id: () => props.gameId,
+    enabled: () => props.gameId > 0 && isAdminOfGame(game.data),
+  });
   const challenge = useChallenge({ game_id: () => props.gameId, challenge_id: () => props.challengeId });
   const team = useSelfTeam({
     game_id: () => props.gameId,
@@ -93,6 +98,9 @@ export default function (props: ChallengeWidgetProps) {
   };
   return (
     <div class="flex flex-col p-3 lg:p-6">
+      <Show when={isAdminOfGame(game.data)}>
+        <GameSyncReadonlyBanner gameId={props.gameId} />
+      </Show>
       <For
         each={hints.data ?? []}
         fallback={
@@ -191,12 +199,15 @@ export default function (props: ChallengeWidgetProps) {
                 ghost
                 square
                 onClick={() => {
-                  deleteMutation.mutate({
-                    game_id: props.gameId,
-                    challenge_id: props.challengeId,
-                    hint_id: hint.id,
-                  });
+                  if (!syncStatus.data?.readonly) {
+                    deleteMutation.mutate({
+                      game_id: props.gameId,
+                      challenge_id: props.challengeId,
+                      hint_id: hint.id,
+                    });
+                  }
                 }}
+                disabled={syncStatus.data?.readonly}
               >
                 <span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5" />
               </Button>
@@ -207,6 +218,9 @@ export default function (props: ChallengeWidgetProps) {
       <Show when={isAdminOfGame(game.data)}>
         <Form
           onSubmit={(value) => {
+            if (syncStatus.data?.readonly) {
+              return;
+            }
             createMutation.mutate({
               game_id: props.gameId,
               challenge_id: props.challengeId,
@@ -288,7 +302,7 @@ export default function (props: ChallengeWidgetProps) {
             level="primary"
             type="submit"
             loading={createMutation.isPending}
-            disabled={createMutation.isPending}
+            disabled={createMutation.isPending || syncStatus.data?.readonly}
           >
             <span class="shrink-0 icon-[fluent--add-20-regular] w-5 h-5" />
             <span>{t("general.actions.add.title")}</span>
