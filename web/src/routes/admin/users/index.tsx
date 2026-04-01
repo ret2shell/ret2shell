@@ -182,18 +182,18 @@ export default function () {
     filter,
     institute_id: instituteId,
   });
-  const mutation = useUpdateUserMutation({
-    onSuccess: () => {
-      user.refetch();
-      users.refetch();
-    },
-  });
+  const mutation = useUpdateUserMutation();
+
+  async function onSubmit(v: Parameters<typeof mutation.mutateAsync>[0]) {
+    await mutation.mutateAsync(v);
+    await Promise.all([user.refetch(), users.refetch()]);
+  }
   return (
     <>
       <Title page={t("user.list.title")} route="/admin/users" />
       <div class="flex-1 flex flex-col items-center">
         <Show when={inEdit()} fallback={<UserList />}>
-          <Form editSource={user.data} onDone={(v) => mutation.mutate(v)} loading={mutation.isPending} />
+          <Form editSource={user.data} onDone={onSubmit} loading={mutation.isPending} />
         </Show>
       </div>
     </>

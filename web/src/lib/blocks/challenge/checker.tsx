@@ -1,11 +1,14 @@
 import { inflyClient } from "@api";
 import { useChallengeCheckerScript, useUpdateChallengeCheckerScriptMutation } from "@api/challenge";
 import { generateRandomMotto } from "@lib/utils/random-motto";
+import { createForm, setValue } from "@modular-forms/solid";
+import { buildFormDraftKey, useFormDraft } from "@storage/form";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import { EditorBare } from "@widgets/editor";
+import FormDraftReset from "@widgets/form-draft-reset";
 import Select from "@widgets/select";
-import { createEffect, createMemo, createSignal, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal } from "solid-js";
 import type { ChallengeWidgetProps } from ".";
 import dynamicLeetChecker from "./scripts/dynamic-leet.rx";
 import dynamicUuidChecker from "./scripts/dynamic-uuid.rx";
@@ -13,6 +16,9 @@ import mappedChecker from "./scripts/mapped.rx";
 import simpleChecker from "./scripts/simple.rx";
 
 type PresetChecker = "simple" | "mapped" | "dynamic-leet" | "dynamic-uuid";
+type CheckerForm = {
+  script: string;
+};
 
 const checkerMap = {
   simple: simpleChecker,
@@ -81,43 +87,52 @@ export default function (props: ChallengeWidgetProps) {
     if (!preset()) return null;
     return Tmpl.withContext(checkerCtx).execute(checkerMap[preset()!]);
   });
-  const [script, setScript] = createSignal("");
 
   const scriptRemote = useChallengeCheckerScript({
     game_id: () => props.gameId,
     challenge_id: () => props.challengeId,
   });
-
-  createEffect(() => {
-    if (scriptRemote.data) {
-      untrack(() => {
-        setScript(scriptRemote.data?.script || "");
-      });
-    }
+  const [form, { Form, Field }] = createForm<CheckerForm>({
+    initialValues: {
+      script: scriptRemote.data?.script || "",
+    },
+  });
+  const remoteValues = createMemo<CheckerForm>(() => ({
+    script: scriptRemote.data?.script || "",
+  }));
+  const draft = useFormDraft({
+    form,
+    key: () => buildFormDraftKey("games", props.gameId, "challenge", props.challengeId, "checker"),
+    remoteValues,
+    enabled: () => props.challengeId > 0 && !scriptRemote.isLoading,
   });
 
   const updateScriptMutation = useUpdateChallengeCheckerScriptMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
+      await scriptRemote.refetch();
+      draft.discardDraft();
       inflyClient.invalidateQueries({
         queryKey: ["game", props.gameId, "challenge", props.challengeId],
       });
     },
   });
 
-  function restoreScript() {
-    setScript(scriptRemote.data?.script || "");
-  }
-
   createEffect(() => {
     if (presetChecker()) {
-      untrack(() => {
-        setScript(presetChecker()!);
-      });
+      setValue(form, "script", presetChecker()!);
     }
   });
 
+  function onSubmit(result: CheckerForm) {
+    updateScriptMutation.mutate({
+      game_id: props.gameId,
+      challenge_id: props.challengeId,
+      content: result.script,
+    });
+  }
+
   return (
-    <div class="flex-1 flex flex-col h-full space-y-2 p-3 lg:p-6 lg:pb-3">
+    <Form onSubmit={onSubmit} class="flex-1 flex flex-col h-full space-y-2 p-3 lg:p-6 lg:pb-3">
       <header class="min-h-12 border-b border-b-layer-content/10 flex flex-row flex-wrap justify-end space-x-2 items-center gap-y-2 py-2">
         <span class="flex flex-row space-x-2 items-center overflow-hidden">
           <span class="shrink-0 icon-[fluent--code-20-regular] w-5 h-5" />
@@ -157,19 +172,17 @@ export default function (props: ChallengeWidgetProps) {
             }}
           />
           <span class="flex flex-row justify-end items-center flex-wrap gap-y-2 gap-x-2">
-            <Button size="sm" square onClick={restoreScript}>
-              <span class="shrink-0 icon-[fluent--arrow-reset-20-regular] w-5 h-5" />
-            </Button>
+            <FormDraftReset
+              when={draft.hasDraft()}
+              size="sm"
+              loading={updateScriptMutation.isPending || scriptRemote.isLoading}
+              disabled={updateScriptMutation.isPending || scriptRemote.isLoading}
+              onConfirm={draft.discardDraft}
+            />
             <Button
+              type="submit"
               level="info"
               size="sm"
-              onClick={() =>
-                updateScriptMutation.mutate({
-                  game_id: props.gameId,
-                  challenge_id: props.challengeId,
-                  content: script(),
-                })
-              }
               loading={updateScriptMutation.isPending || scriptRemote.isLoading}
               disabled={updateScriptMutation.isPending || scriptRemote.isLoading}
             >
@@ -180,16 +193,20 @@ export default function (props: ChallengeWidgetProps) {
           </span>
         </span>
       </header>
-      <EditorBare
-        class="w-full h-full"
-        lineNumbers
-        lang="rune"
-        value={script()}
-        lints={scriptRemote.data?.lint ?? []}
-        onValueChanged={(e) => {
-          setScript(e);
-        }}
-      />
+      <Field name="script">
+        {(field) => (
+          <EditorBare
+            class="w-full h-full"
+            form={form}
+            name={field.name}
+            value={field.value}
+            error={field.error}
+            lineNumbers
+            lang="rune"
+            lints={scriptRemote.data?.lint ?? []}
+          />
+        )}
+      </Field>
       <footer class="min-h-12 border-t border-t-layer-content/10 flex flex-col lg:flex-row flex-wrap justify-start space-x-2 items-center gap-y-2 py-2">
         <span class="text-primary icon-[fluent--info-16-regular]" />
         <span class="text-primary">{scriptRemote.data?.lint?.filter((v) => v.kind === "info").length ?? 0}</span>
@@ -206,6 +223,6 @@ export default function (props: ChallengeWidgetProps) {
           Ret2Script <span class="icon-[fluent--open-12-regular]" />
         </a>
       </footer>
-    </div>
+    </Form>
   );
 }

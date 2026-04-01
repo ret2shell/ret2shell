@@ -1,13 +1,15 @@
 import { usePlatformConfig, useUpdatePlatformConfigMutation } from "@api/platform";
 import type { Config, MediaConfig } from "@models/config";
 import { createForm, setValues } from "@modular-forms/solid";
+import { buildFormDraftKey, useFormDraft } from "@storage/form";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Checkbox from "@widgets/checkbox";
+import FormDraftReset from "@widgets/form-draft-reset";
 import Input from "@widgets/input";
 import Slider from "@widgets/slider";
-import { createEffect, untrack } from "solid-js";
+import { createMemo } from "solid-js";
 
 export default function () {
   const config = usePlatformConfig();
@@ -18,17 +20,22 @@ export default function () {
       anti_theft: config.data?.media.anti_theft,
     },
   });
-  const mutation = useUpdatePlatformConfigMutation();
-  createEffect(() => {
-    if (config.data) {
-      untrack(() => {
-        setValues(form, {
-          path: config.data.media.path,
-          limit: config.data.media.limit,
-          anti_theft: config.data.media.anti_theft,
-        });
-      });
-    }
+  const remoteValues = createMemo<MediaConfig>(() => ({
+    path: config.data?.media.path ?? "",
+    limit: config.data?.media.limit ?? 100,
+    anti_theft: config.data?.media.anti_theft ?? false,
+  }));
+  const mutation = useUpdatePlatformConfigMutation({
+    onSuccess: async () => {
+      await config.refetch();
+      draft.discardDraft();
+    },
+  });
+  const draft = useFormDraft({
+    form,
+    key: () => buildFormDraftKey("admin", "media"),
+    remoteValues,
+    enabled: () => !!config.data,
   });
   async function onSubmit(result: MediaConfig) {
     const mergedConfig = {
@@ -91,15 +98,23 @@ export default function () {
               )}
             </Field>
           </div>
-          <Button
-            type="submit"
-            level="primary"
-            class="mt-4!"
-            loading={config.isLoading || mutation.isPending}
-            disabled={config.isLoading || mutation.isPending}
-          >
-            {t("general.actions.save.title")}
-          </Button>
+          <div class="mt-4! flex flex-row space-x-2">
+            <Button
+              type="submit"
+              level="primary"
+              class="flex-1"
+              loading={config.isLoading || mutation.isPending}
+              disabled={config.isLoading || mutation.isPending}
+            >
+              {t("general.actions.save.title")}
+            </Button>
+            <FormDraftReset
+              when={draft.hasDraft()}
+              loading={config.isLoading || mutation.isPending}
+              disabled={config.isLoading || mutation.isPending}
+              onConfirm={draft.discardDraft}
+            />
+          </div>
         </Form>
       </div>
     </>

@@ -3,24 +3,16 @@ import { useOAuthProvider } from "@api/account";
 import { uploadMedia } from "@api/media";
 import { mediaPath } from "@lib/utils/media";
 import type { OAuthProvider } from "@models/oauth-provider";
-import {
-  createForm,
-  getValue,
-  maxLength,
-  minLength,
-  pattern,
-  required,
-  setValue,
-  setValues,
-  url,
-} from "@modular-forms/solid";
+import { createForm, getValue, maxLength, minLength, pattern, required, setValue, url } from "@modular-forms/solid";
+import { buildFormDraftKey, useFormDraft } from "@storage/form";
 import { t } from "@storage/theme";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
 import Editor from "@widgets/editor";
+import FormDraftReset from "@widgets/form-draft-reset";
 import Input from "@widgets/input";
 import Select from "@widgets/select";
-import { createEffect, createSignal, Show, untrack } from "solid-js";
+import { createMemo, createSignal, Show } from "solid-js";
 import emailScript from "../scripts/email.rx";
 import oauth2AuthCodeScript from "../scripts/oauth2_auth_code.rx";
 import yaleCasScript from "../scripts/yale_cas.rx";
@@ -57,26 +49,24 @@ export default function ProviderForm(props: {
       portal: oauthProvider.data?.item.portal || "",
     },
   });
-  const [avatarFile, setAvatarFile] = createSignal(null as File | null);
-  const [avatarSet, setAvatarSet] = createSignal(false);
-  const [avatarUploading, setAvatarUploading] = createSignal(false);
-
-  createEffect(() => {
-    if (oauthProvider.data) {
-      untrack(async () => {
-        const { item } = oauthProvider.data || {};
-        setValues(form, {
-          name: item?.name || "" || "",
-          provider: item?.provider || "",
-          avatar: item?.avatar || "",
-          script: item?.script || "",
-          portal: item?.portal || "",
-        });
-      });
-    }
+  const remoteValues = createMemo<FormType>(() => ({
+    name: oauthProvider.data?.item.name || "",
+    provider: oauthProvider.data?.item.provider || "",
+    avatar: oauthProvider.data?.item.avatar || "",
+    script: oauthProvider.data?.item.script || "",
+    portal: oauthProvider.data?.item.portal || "",
+  }));
+  const draft = useFormDraft({
+    form,
+    key: () => (props.provider ? buildFormDraftKey("admin", "oauth", "provider", props.provider) : undefined),
+    remoteValues,
+    enabled: () => !!props.provider && !!oauthProvider.data,
   });
+  const [avatarFile, setAvatarFile] = createSignal(null as File | null);
+  const [avatarUploading, setAvatarUploading] = createSignal(false);
+  const hasAvatar = createMemo(() => !!getValue(form, "avatar"));
   async function onSubmit(result: FormType) {
-    props.onDone?.({
+    await props.onDone?.({
       id: oauthProvider.data?.item.id || 0,
       name: result.name,
       provider: result.provider,
@@ -84,6 +74,7 @@ export default function ProviderForm(props: {
       script: result.script,
       portal: result.portal,
     });
+    draft.discardDraft();
   }
   let avatarInput: HTMLInputElement;
   function handleSelectAvatar() {
@@ -105,7 +96,6 @@ export default function ProviderForm(props: {
       try {
         const resp = await uploadMedia(avatarFile()!, false);
         setValue(form, "avatar", resp.hash);
-        setAvatarSet(true);
       } catch (err) {
         handleHttpError(err as Error, t("general.actions.save.status.fail"));
       }
@@ -165,8 +155,7 @@ export default function ProviderForm(props: {
                 type="button"
                 class="opacity-0 hover:opacity-100 bg-layer/80! absolute top-0 left-0 w-full h-full"
                 onClick={() => {
-                  if (avatarSet()) {
-                    setAvatarSet(false);
+                  if (hasAvatar()) {
                     setAvatarFile(null);
                     setValue(form, "avatar", "");
                   } else {
@@ -183,7 +172,7 @@ export default function ProviderForm(props: {
                   onChange={handleSelectedAvatar}
                 />
                 <Show
-                  when={getValue(form, "avatar")}
+                  when={hasAvatar()}
                   fallback={<span class="shrink-0 icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />}
                 >
                   <span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5 text-error" />
@@ -257,9 +246,17 @@ export default function ProviderForm(props: {
           />
         )}
       </Field>
-      <Button type="submit" level="primary" class="mt-4!" loading={props.loading} disabled={props.loading}>
-        {props.provider ? t("general.actions.save.title") : t("general.actions.create.title")}
-      </Button>
+      <div class="mt-4! flex flex-row space-x-2">
+        <Button type="submit" level="primary" class="flex-1" loading={props.loading} disabled={props.loading}>
+          {props.provider ? t("general.actions.save.title") : t("general.actions.create.title")}
+        </Button>
+        <FormDraftReset
+          when={draft.hasDraft()}
+          loading={props.loading}
+          disabled={props.loading}
+          onConfirm={draft.discardDraft}
+        />
+      </div>
     </Form>
   );
 }

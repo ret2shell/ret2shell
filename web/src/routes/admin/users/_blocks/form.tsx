@@ -4,20 +4,22 @@ import { uploadMedia } from "@api/media";
 import { useDeleteUserMutation, useUserIpList, useUserOAuthList } from "@api/user";
 import { mediaPath } from "@lib/utils/media";
 import { Permission, permissionToString, type User } from "@models/user";
-import { createForm, email, getValue, required, setValue, setValues } from "@modular-forms/solid";
+import { createForm, email, getValue, required, setValue } from "@modular-forms/solid";
 import { A } from "@solidjs/router";
+import { buildFormDraftKey, useFormDraft } from "@storage/form";
 import { t } from "@storage/theme";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Checkbox from "@widgets/checkbox";
 import Editor from "@widgets/editor";
+import FormDraftReset from "@widgets/form-draft-reset";
 import Input from "@widgets/input";
 import Link from "@widgets/link";
 import Popover from "@widgets/popover";
 import Select from "@widgets/select";
 import Tag from "@widgets/tag";
-import { createEffect, createMemo, createSignal, For, Show, untrack } from "solid-js";
+import { createMemo, createSignal, For, Show } from "solid-js";
 
 export type UserForm = {
   account: string;
@@ -40,7 +42,7 @@ export type UserForm = {
   permDevOps: boolean;
 };
 
-export default function (compProps: { onDone?: (result: User) => void; editSource?: User; loading: boolean }) {
+export default function (compProps: { onDone?: (result: User) => Promise<void>; editSource?: User; loading: boolean }) {
   const [deleteConfirmValue, setDeleteConfirmValue] = createSignal("");
   const [form, { Form, Field }] = createForm<UserForm>({
     initialValues: {
@@ -64,36 +66,35 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
       permDevOps: compProps.editSource?.permissions.includes(Permission.DevOps) || false,
     },
   });
-  createEffect(() => {
-    if (compProps.editSource) {
-      untrack(async () => {
-        setValues(form, {
-          account: compProps.editSource?.account || "",
-          nickname: compProps.editSource?.nickname || "",
-          email: compProps.editSource?.email || "",
-          avatar: compProps.editSource?.avatar || "",
-          description: compProps.editSource?.description || "",
-          institute_id: compProps.editSource?.institute_id?.toString() || undefined,
-          hidden: compProps.editSource?.hidden || false,
-          banned: compProps.editSource?.banned || false,
-          permBasic: compProps.editSource?.permissions.includes(Permission.Basic) || false,
-          permVerified: compProps.editSource?.permissions.includes(Permission.Verified) || false,
-          permCalendar: compProps.editSource?.permissions.includes(Permission.Calendar) || false,
-          permWiki: compProps.editSource?.permissions.includes(Permission.Wiki) || false,
-          permBulletin: compProps.editSource?.permissions.includes(Permission.Bulletin) || false,
-          permGame: compProps.editSource?.permissions.includes(Permission.Game) || false,
-          permHost: compProps.editSource?.permissions.includes(Permission.Host) || false,
-          permUser: compProps.editSource?.permissions.includes(Permission.User) || false,
-          permStat: compProps.editSource?.permissions.includes(Permission.Statistics) || false,
-          permDevOps: compProps.editSource?.permissions.includes(Permission.DevOps) || false,
-        });
-        setAvatarSet(!!compProps.editSource?.avatar);
-      });
-    }
+  const remoteValues = createMemo<UserForm>(() => ({
+    account: compProps.editSource?.account || "",
+    nickname: compProps.editSource?.nickname || "",
+    email: compProps.editSource?.email || "",
+    avatar: compProps.editSource?.avatar || "",
+    description: compProps.editSource?.description || "",
+    institute_id: compProps.editSource?.institute_id?.toString() || undefined,
+    hidden: compProps.editSource?.hidden || false,
+    banned: compProps.editSource?.banned || false,
+    permBasic: compProps.editSource?.permissions.includes(Permission.Basic) || false,
+    permVerified: compProps.editSource?.permissions.includes(Permission.Verified) || false,
+    permCalendar: compProps.editSource?.permissions.includes(Permission.Calendar) || false,
+    permWiki: compProps.editSource?.permissions.includes(Permission.Wiki) || false,
+    permBulletin: compProps.editSource?.permissions.includes(Permission.Bulletin) || false,
+    permGame: compProps.editSource?.permissions.includes(Permission.Game) || false,
+    permHost: compProps.editSource?.permissions.includes(Permission.Host) || false,
+    permUser: compProps.editSource?.permissions.includes(Permission.User) || false,
+    permStat: compProps.editSource?.permissions.includes(Permission.Statistics) || false,
+    permDevOps: compProps.editSource?.permissions.includes(Permission.DevOps) || false,
+  }));
+  const draft = useFormDraft({
+    form,
+    key: () => (compProps.editSource ? buildFormDraftKey("admin", "users", compProps.editSource.id) : undefined),
+    remoteValues,
+    enabled: () => !!compProps.editSource,
   });
   const [avatarFile, setAvatarFile] = createSignal(null as File | null);
-  const [avatarSet, setAvatarSet] = createSignal(false);
   const [avatarUploading, setAvatarUploading] = createSignal(false);
+  const hasAvatar = createMemo(() => !!getValue(form, "avatar"));
   const ips = useUserIpList({ id: () => compProps.editSource?.id || 0, enabled: () => !!compProps.editSource });
   const oauths = useUserOAuthList({ id: () => compProps.editSource?.id || 0, enabled: () => !!compProps.editSource });
   const institutes = useInstitutes();
@@ -118,7 +119,6 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
       try {
         const resp = await uploadMedia(avatarFile()!, false);
         setValue(form, "avatar", resp.hash);
-        setAvatarSet(true);
       } catch (err) {
         handleHttpError(err as Error, t("general.actions.upload.status.fail"));
       }
@@ -141,7 +141,7 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
     );
   });
 
-  function onSubmit(result: UserForm) {
+  async function onSubmit(result: UserForm) {
     const permissions: Permission[] = [];
     if (result.permBasic) permissions.push(Permission.Basic);
     if (result.permVerified) permissions.push(Permission.Verified);
@@ -154,7 +154,7 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
     if (result.permStat) permissions.push(Permission.Statistics);
     if (result.permDevOps) permissions.push(Permission.DevOps);
 
-    compProps.onDone?.({
+    await compProps.onDone?.({
       ...compProps.editSource,
       account: result.account,
       nickname: result.nickname,
@@ -166,6 +166,7 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
       banned: result.banned,
       permissions,
     } as User);
+    draft.discardDraft();
   }
   return (
     <div class="w-full p-3 lg:p-6 flex flex-col flex-1 space-y-2 items-center">
@@ -296,8 +297,7 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
                   type="button"
                   class="opacity-0 hover:opacity-100 bg-layer/80! absolute top-0 left-0 w-full h-full"
                   onClick={() => {
-                    if (avatarSet()) {
-                      setAvatarSet(false);
+                    if (hasAvatar()) {
                       setAvatarFile(null);
                       setValue(form, "avatar", "");
                     } else {
@@ -314,7 +314,7 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
                     onChange={handleSelectedAvatar}
                   />
                   <Show
-                    when={compProps.editSource?.avatar}
+                    when={hasAvatar()}
                     fallback={<span class="shrink-0 icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />}
                   >
                     <span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5 text-error" />
@@ -425,9 +425,17 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
             )}
           </Field>
         </div>
-        <Button type="submit" level="primary" class="mt-4!" loading={compProps.loading} disabled={compProps.loading}>
-          {t("general.actions.save.title")}
-        </Button>
+        <div class="mt-4! flex flex-row space-x-2">
+          <Button type="submit" level="primary" class="flex-1" loading={compProps.loading} disabled={compProps.loading}>
+            {t("general.actions.save.title")}
+          </Button>
+          <FormDraftReset
+            when={draft.hasDraft()}
+            loading={compProps.loading}
+            disabled={compProps.loading}
+            onConfirm={draft.discardDraft}
+          />
+        </div>
       </Form>
       <div class="w-full flex flex-col">
         <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2 w-full">

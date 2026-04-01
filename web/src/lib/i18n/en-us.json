@@ -140,6 +140,12 @@
           "fail": "Failed to reset"
         }
       },
+      "discardDraft": {
+        "title": "Discard draft",
+        "message": "Discard the current draft?",
+        "description": "This clears the local draft and restores the remote form values.",
+        "confirm": "Discard draft"
+      },
       "search": {
         "title": "Search"
       },

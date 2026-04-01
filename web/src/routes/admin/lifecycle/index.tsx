@@ -1,20 +1,40 @@
 import { useDeleteGlobalLifecycleScriptMutation, useUpdateGlobalLifecycleScriptMutation } from "@api/cluster";
 import { usePlatformConfig } from "@api/platform";
 import { type LifecyclePreset, lifecyclePresetEntries, lifecyclePresetMap } from "@lib/lifecycle/presets";
+import { createForm, setValue } from "@modular-forms/solid";
+import { buildFormDraftKey, useFormDraft } from "@storage/form";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
 import { type DiagnosticMarker, EditorBare } from "@widgets/editor";
+import FormDraftReset from "@widgets/form-draft-reset";
 import Popover from "@widgets/popover";
 import Select from "@widgets/select";
 import { createEffect, createMemo, createSignal, Show } from "solid-js";
 
+type LifecycleForm = {
+  script: string;
+};
+
 export default function Lifecycle() {
   const config = usePlatformConfig();
   const [preset, setPreset] = createSignal(null as LifecyclePreset | null);
-  const [script, setScript] = createSignal("");
   const [lint, setLint] = createSignal([] as DiagnosticMarker[]);
+  const [form, { Form, Field }] = createForm<LifecycleForm>({
+    initialValues: {
+      script: config.data?.cluster.lifecycle || "",
+    },
+  });
+  const remoteValues = createMemo<LifecycleForm>(() => ({
+    script: config.data?.cluster.lifecycle || "",
+  }));
+  const draft = useFormDraft({
+    form,
+    key: () => buildFormDraftKey("admin", "lifecycle"),
+    remoteValues,
+    enabled: () => !!config.data?.cluster,
+  });
   const presetItems = createMemo(() =>
     lifecyclePresetEntries.map((preset) => ({
       label: t(preset.labelKey),
@@ -25,44 +45,38 @@ export default function Lifecycle() {
 
   createEffect(() => {
     if (preset()) {
-      setScript(lifecyclePresetMap[preset()!]);
-    }
-  });
-
-  createEffect(() => {
-    if (config.data?.cluster) {
-      setScript(config.data.cluster.lifecycle || "");
-    } else {
-      setScript("");
+      setValue(form, "script", lifecyclePresetMap[preset()!]);
     }
   });
 
   const hasLifecycle = createMemo(() => !!config.data?.cluster?.lifecycle);
 
-  function onSuccess() {
-    config.refetch();
-  }
-
   const updateLifecycleMutation = useUpdateGlobalLifecycleScriptMutation({
-    onSuccess: (v) => {
+    onSuccess: async (v) => {
       setLint(v.lint ?? []);
-      onSuccess();
+      await config.refetch();
+      draft.discardDraft();
     },
   });
   const deleteLifecycleMutation = useDeleteGlobalLifecycleScriptMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       setLint([]);
-      onSuccess();
+      await config.refetch();
+      draft.discardDraft();
     },
   });
 
   const saving = createMemo(() => updateLifecycleMutation.isPending || deleteLifecycleMutation.isPending);
 
+  function onSubmit(result: LifecycleForm) {
+    updateLifecycleMutation.mutate({ lifecycle: result.script });
+  }
+
   return (
     <>
       <Title page={t("lifecycle.title")} route="/admin/lifecycle" />
       <div class="flex-1 flex flex-col items-center p-3 lg:p-6 lg:pb-3 relative">
-        <div class="flex-1 flex flex-col w-full">
+        <Form onSubmit={onSubmit} class="flex-1 flex flex-col w-full">
           <h2 class="h-12 shrink-0 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
             <span class="shrink-0 icon-[fluent--script-20-regular] w-5 h-5" />
             <span class="flex-1 flex items-center justify-start space-x-2">
@@ -78,16 +92,19 @@ export default function Lifecycle() {
                 setPreset((e.value.at(0) as LifecyclePreset) || null);
               }}
             />
-            <Button
-              size="sm"
-              level="primary"
-              onClick={() => updateLifecycleMutation.mutate({ lifecycle: script() })}
-              loading={saving()}
-            >
+            <Button size="sm" type="submit" level="primary" loading={saving()} disabled={saving()}>
               {t("general.actions.save.title")}
             </Button>
+            <FormDraftReset
+              when={draft.hasDraft()}
+              size="sm"
+              loading={saving()}
+              disabled={saving()}
+              onConfirm={draft.discardDraft}
+            />
             <Show when={hasLifecycle()}>
               <Popover
+                type="button"
                 level="error"
                 ghost
                 size="sm"
@@ -99,23 +116,33 @@ export default function Lifecycle() {
                     <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
                     <span>{t("general.actions.delete.message")}</span>
                   </span>
-                  <Button level="primary" size="sm" class="self-end" onClick={() => deleteLifecycleMutation.mutate()}>
+                  <Button
+                    type="button"
+                    level="primary"
+                    size="sm"
+                    class="self-end"
+                    onClick={() => deleteLifecycleMutation.mutate()}
+                  >
                     {t("general.actions.yes.title")}
                   </Button>
                 </Card>
               </Popover>
             </Show>
           </h2>
-          <EditorBare
-            class="w-full h-full"
-            lineNumbers
-            lang="rune"
-            value={script()}
-            lints={lint()}
-            onValueChanged={(e) => {
-              setScript(e);
-            }}
-          />
+          <Field name="script">
+            {(field) => (
+              <EditorBare
+                class="w-full h-full"
+                form={form}
+                name={field.name}
+                value={field.value}
+                error={field.error}
+                lineNumbers
+                lang="rune"
+                lints={lint()}
+              />
+            )}
+          </Field>
           <footer class="min-h-12 border-t border-t-layer-content/10 flex flex-col lg:flex-row flex-wrap justify-start space-x-2 items-center gap-y-2 py-2">
             <span class="text-primary icon-[fluent--info-16-regular]" />
             <span class="text-primary">{lint()?.filter((v) => v.kind === "info").length ?? 0}</span>
@@ -133,7 +160,7 @@ export default function Lifecycle() {
               Ret2Script <span class="icon-[fluent--open-12-regular]" />
             </a>
           </footer>
-        </div>
+        </Form>
       </div>
     </>
   );

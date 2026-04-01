@@ -1,14 +1,16 @@
 import { inflyClient } from "@api";
 import { useChallenge } from "@api/challenge";
 import { useGame } from "@api/game";
-import { createForm, getValue, required, setValue, setValues } from "@modular-forms/solid";
+import { createForm, getValue, required, setValue } from "@modular-forms/solid";
+import { buildFormDraftKey, useFormDraft } from "@storage/form";
 import { fullTheme, t } from "@storage/theme";
 import Button from "@widgets/button";
 import Editor from "@widgets/editor";
+import FormDraftReset from "@widgets/form-draft-reset";
 import Input from "@widgets/input";
 import Select from "@widgets/select";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { createEffect, Show, untrack } from "solid-js";
+import { createMemo, Show } from "solid-js";
 import type { ChallengeWidgetProps } from ".";
 import ScorePicker from "./score-picker";
 
@@ -47,38 +49,30 @@ export function FormBare(
       archive_at: challenge.data?.archive_at?.toSeconds() ?? null,
     },
   });
+  const remoteValues = createMemo<ChallengeForm>(() => ({
+    name: challenge.data?.name || "",
+    tag: challenge.data?.tag.map((tag) => tag.name).join("/") || "",
+    content: challenge.data?.content || "",
+    initial: challenge.data?.score_rule?.initial ?? 1000,
+    minimum: challenge.data?.score_rule?.minimum ?? 500,
+    decay: challenge.data?.score_rule?.decay ?? 10,
+    release_at: challenge.data?.release_at?.toSeconds() ?? null,
+    archive_at: challenge.data?.archive_at?.toSeconds() ?? null,
+  }));
+  const draft = useFormDraft({
+    form,
+    key: () =>
+      props.challengeId ? buildFormDraftKey("games", props.gameId, "challenge", props.challengeId, "form") : undefined,
+    remoteValues,
+    enabled: () => !!props.challengeId && !!challenge.data,
+  });
   async function onSubmit(result: ChallengeForm) {
     await props.onDone(result);
-    inflyClient.invalidateQueries({
+    await inflyClient.invalidateQueries({
       queryKey: ["game", props.gameId, "challenge"],
     });
+    draft.discardDraft();
   }
-
-  createEffect(() => {
-    if (challenge.data) {
-      untrack(() => {
-        setValues(form, {
-          name: challenge.data?.name,
-          tag: challenge.data?.tag.map((t) => t.name).join("/"),
-          content: challenge.data?.content || "",
-          initial: challenge.data?.score_rule?.initial ?? 1000,
-          minimum: challenge.data?.score_rule?.minimum ?? 500,
-          decay: challenge.data?.score_rule?.decay ?? 10,
-          release_at: challenge.data?.release_at?.toSeconds() ?? null,
-          archive_at: challenge.data?.archive_at?.toSeconds() ?? null,
-        });
-      });
-    } else {
-      untrack(() => {
-        setValues(form, {
-          initial: 1000,
-          minimum: 500,
-          decay: 10,
-        });
-      });
-    }
-  });
-
   return (
     <Form onSubmit={onSubmit} class="flex flex-col w-full max-w-5xl space-y-2 relative">
       <Field name="name" validate={[required(t("challenge.form.name.required"))]}>
@@ -237,15 +231,23 @@ export function FormBare(
           />
         )}
       </Field>
-      <Button
-        type="submit"
-        level="primary"
-        class="mt-4!"
-        loading={game.isLoading || challenge.isLoading}
-        disabled={game.isLoading || challenge.isLoading}
-      >
-        {props.challengeId ? t("general.actions.save.title") : t("general.actions.create.title")}
-      </Button>
+      <div class="mt-4! flex flex-row space-x-2">
+        <Button
+          type="submit"
+          level="primary"
+          class="flex-1"
+          loading={game.isLoading || challenge.isLoading}
+          disabled={game.isLoading || challenge.isLoading}
+        >
+          {props.challengeId ? t("general.actions.save.title") : t("general.actions.create.title")}
+        </Button>
+        <FormDraftReset
+          when={draft.hasDraft()}
+          loading={game.isLoading || challenge.isLoading}
+          disabled={game.isLoading || challenge.isLoading}
+          onConfirm={draft.discardDraft}
+        />
+      </div>
     </Form>
   );
 }

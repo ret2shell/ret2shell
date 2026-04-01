@@ -14,10 +14,11 @@ import {
 } from "@api/team";
 import SidebarLayout from "@blocks/sidebar-layout";
 import type { Team } from "@models/team";
-import { clearError, createForm, maxLength, required, reset as resetForm, setValues } from "@modular-forms/solid";
+import { clearError, createForm, maxLength, required, reset as resetForm } from "@modular-forms/solid";
 import { createBreakpoints } from "@solid-primitives/media";
 import { A, useNavigate, useParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
+import { buildFormDraftKey, useFormDraft } from "@storage/form";
 import { isAdminOfGame } from "@storage/game";
 import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
@@ -25,13 +26,14 @@ import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Chart from "@widgets/chart";
 import Clipboard from "@widgets/clipboard";
+import FormDraftReset from "@widgets/form-draft-reset";
 import Input from "@widgets/input";
 import Popover from "@widgets/popover";
 import Select from "@widgets/select";
 import clsx from "clsx";
 import { HTTPError } from "ky";
 import { DateTime } from "luxon";
-import { createEffect, createMemo, createSignal, For, Show, untrack } from "solid-js";
+import { createMemo, createSignal, For, Show } from "solid-js";
 import { Transition } from "solid-transition-group";
 import Sidebar from "./_blocks/sidebar";
 
@@ -42,7 +44,7 @@ type TeamAdminUpdateForm = {
   institute_id: string;
 };
 
-function AdminManagement(props: { gameId: number; team: Team | null; onDone?: (team: Team) => void }) {
+function AdminManagement(props: { gameId: number; team: Team | null; onDone?: (team: Team) => Promise<void> }) {
   const navigate = useNavigate();
   const institutes = useInstitutes();
   const [form, { Form, Field }] = createForm<TeamAdminUpdateForm>({
@@ -53,18 +55,17 @@ function AdminManagement(props: { gameId: number; team: Team | null; onDone?: (t
       state: props.team?.state.toString() || "0",
     },
   });
-
-  createEffect(() => {
-    if (props.team) {
-      untrack(() => {
-        setValues(form, {
-          name: props.team?.name || "",
-          tag: props.team?.tag || "",
-          institute_id: props.team?.institute_id?.toString() || "0",
-          state: props.team?.state.toString() || "0",
-        });
-      });
-    }
+  const remoteValues = createMemo<TeamAdminUpdateForm>(() => ({
+    name: props.team?.name || "",
+    tag: props.team?.tag || "",
+    institute_id: props.team?.institute_id?.toString() || "0",
+    state: props.team?.state.toString() || "0",
+  }));
+  const draft = useFormDraft({
+    form,
+    key: () => (props.team ? buildFormDraftKey("games", props.gameId, "teams", props.team.id, "admin") : undefined),
+    remoteValues,
+    enabled: () => !!props.team,
   });
   const institutesSelect = createMemo(() => {
     const result = [] as { value: string; label: string; icon: string }[];
@@ -84,8 +85,9 @@ function AdminManagement(props: { gameId: number; team: Team | null; onDone?: (t
   });
 
   const updateMutation = useUpdateTeamInfoMutation({
-    onSuccess: (team) => {
-      props.onDone?.(team);
+    onSuccess: async (team) => {
+      await props.onDone?.(team);
+      draft.discardDraft();
     },
   });
 
@@ -216,6 +218,12 @@ function AdminManagement(props: { gameId: number; team: Team | null; onDone?: (t
             >
               {t("general.actions.save.title")}
             </Button>
+            <FormDraftReset
+              when={draft.hasDraft()}
+              loading={updateMutation.isPending}
+              disabled={updateMutation.isPending}
+              onConfirm={draft.discardDraft}
+            />
             <Popover
               type="button"
               level="error"
@@ -255,7 +263,7 @@ type TeamSelfUpdateForm = {
   institute_id: string;
 };
 
-function SelfManagement(props: { gameId: number; onDone?: (team: Team) => void; onLeft?: () => void }) {
+function SelfManagement(props: { gameId: number; onDone?: (team: Team) => Promise<void>; onLeft?: () => void }) {
   const game = useGame({ id: () => props.gameId, enabled: () => !!props.gameId });
   const institutes = useInstitutes();
   const team = useSelfTeam({ game_id: () => props.gameId });
@@ -271,16 +279,16 @@ function SelfManagement(props: { gameId: number; onDone?: (team: Team) => void; 
       institute_id: team.data?.institute_id?.toString() || "0",
     },
   });
-  createEffect(() => {
-    if (team.data) {
-      untrack(() => {
-        setValues(form, {
-          name: team.data!.name,
-          tag: team.data?.tag || "",
-          institute_id: team.data?.institute_id?.toString() || "0",
-        });
-      });
-    }
+  const remoteValues = createMemo<TeamSelfUpdateForm>(() => ({
+    name: team.data?.name || "",
+    tag: team.data?.tag || "",
+    institute_id: team.data?.institute_id?.toString() || "0",
+  }));
+  const draft = useFormDraft({
+    form,
+    key: () => (team.data ? buildFormDraftKey("games", props.gameId, "teams", team.data.id, "self") : undefined),
+    remoteValues,
+    enabled: () => !!team.data,
   });
   const institutesSelect = createMemo(() => {
     const result = [] as { value: string; label: string; icon: string }[];
@@ -305,8 +313,9 @@ function SelfManagement(props: { gameId: number; onDone?: (team: Team) => void; 
   });
 
   const updateMutation = useUpdateSelfTeamMutation({
-    onSuccess: (team) => {
-      props.onDone?.(team);
+    onSuccess: async (team) => {
+      await props.onDone?.(team);
+      draft.discardDraft();
     },
   });
 
@@ -403,6 +412,12 @@ function SelfManagement(props: { gameId: number; onDone?: (team: Team) => void; 
             >
               {t("general.actions.save.title")}
             </Button>
+            <FormDraftReset
+              when={draft.hasDraft()}
+              loading={updateMutation.isPending}
+              disabled={updateMutation.isPending}
+              onConfirm={draft.discardDraft}
+            />
             <Popover
               type="button"
               level="error"
@@ -642,9 +657,8 @@ export default function () {
             <Show when={isSelfTeam()}>
               <SelfManagement
                 gameId={gameId()}
-                onDone={() => {
-                  selfTeam.refetch();
-                  team.refetch();
+                onDone={async () => {
+                  await Promise.all([selfTeam.refetch(), team.refetch()]);
                 }}
                 onLeft={() => {
                   navigate(`/games/${gameId()}`);
@@ -655,11 +669,8 @@ export default function () {
               <AdminManagement
                 gameId={gameId()}
                 team={team.data ?? null}
-                onDone={() => {
-                  team.refetch();
-                  members.refetch();
-                  solves.refetch();
-                  extras.refetch();
+                onDone={async () => {
+                  await Promise.all([team.refetch(), members.refetch(), solves.refetch(), extras.refetch()]);
                 }}
               />
             </Show>

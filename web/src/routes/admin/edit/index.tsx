@@ -3,13 +3,15 @@ import { usePlatformConfig, usePlatformInfo, useUpdatePlatformConfigMutation } f
 import LogoAnimate from "@assets/animates/logo-animate";
 import type { Config } from "@models/config";
 import { createForm, setValues } from "@modular-forms/solid";
+import { buildFormDraftKey, useFormDraft } from "@storage/form";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
+import FormDraftReset from "@widgets/form-draft-reset";
 import Input from "@widgets/input";
 import Select from "@widgets/select";
 import { DateTime } from "luxon";
-import { createEffect, untrack } from "solid-js";
+import { createMemo } from "solid-js";
 
 type PlatformConfigForm = {
   name?: string;
@@ -31,13 +33,24 @@ export default function () {
       ...JSON.parse(JSON.stringify(config.data?.server || {})),
     },
   });
+  const remoteValues = createMemo<PlatformConfigForm>(() => ({
+    name: config.data?.server.name || "",
+    footer_info: config.data?.server.footer_info || "",
+    footer_url: config.data?.server.footer_url || "",
+    subject_info: config.data?.server.subject_info || "",
+    subject_url: config.data?.server.subject_url || "",
+    record: config.data?.server.record || "",
+    hide_maker: false,
+    highlight_banner: config.data?.server.highlight_banner || "",
+    zen_game: config.data?.server.zen_game || null,
+  }));
   const games = useGames({
     weight: () => 3,
   });
   const mutation = useUpdatePlatformConfigMutation({
-    onSuccess: () => {
-      config.refetch();
-      info.refetch();
+    onSuccess: async () => {
+      await Promise.all([config.refetch(), info.refetch()]);
+      draft.discardDraft();
     },
   });
   async function onSubmit(result: PlatformConfigForm) {
@@ -58,21 +71,11 @@ export default function () {
     } as Config;
     mutation.mutate(mergedConfig);
   }
-  createEffect(() => {
-    if (config.data)
-      untrack(() => {
-        setValues(form, {
-          name: config.data.server.name || "",
-          footer_info: config.data.server.footer_info || "",
-          footer_url: config.data.server.footer_url || "",
-          subject_info: config.data.server.subject_info || "",
-          subject_url: config.data.server.subject_url || "",
-          record: config.data.server.record || "",
-          hide_maker: false,
-          highlight_banner: config.data.server.highlight_banner || "",
-          zen_game: config.data.server.zen_game || null,
-        });
-      });
+  const draft = useFormDraft({
+    form,
+    key: () => buildFormDraftKey("admin", "edit"),
+    remoteValues,
+    enabled: () => !!config.data,
   });
   return (
     <>
@@ -193,15 +196,23 @@ export default function () {
               />
             )}
           </Field>
-          <Button
-            type="submit"
-            level="primary"
-            class="mt-4!"
-            loading={config.isLoading || mutation.isPending}
-            disabled={config.isLoading || mutation.isPending}
-          >
-            {t("general.actions.save.title")}
-          </Button>
+          <div class="mt-4! flex flex-row space-x-2">
+            <Button
+              type="submit"
+              level="primary"
+              class="flex-1"
+              loading={config.isLoading || mutation.isPending}
+              disabled={config.isLoading || mutation.isPending}
+            >
+              {t("general.actions.save.title")}
+            </Button>
+            <FormDraftReset
+              when={draft.hasDraft()}
+              loading={config.isLoading || mutation.isPending}
+              disabled={config.isLoading || mutation.isPending}
+              onConfirm={draft.discardDraft}
+            />
+          </div>
         </Form>
       </div>
     </>

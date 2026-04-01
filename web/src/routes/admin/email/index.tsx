@@ -1,15 +1,17 @@
 import { usePlatformConfig, useUpdatePlatformConfigMutation } from "@api/platform";
 import type { EmailConfig } from "@models/config";
-import { createForm, custom, getValue, setValues } from "@modular-forms/solid";
+import { createForm, custom, getValue } from "@modular-forms/solid";
+import { buildFormDraftKey, useFormDraft } from "@storage/form";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Checkbox from "@widgets/checkbox";
 import Divider from "@widgets/divider";
 import Editor from "@widgets/editor";
+import FormDraftReset from "@widgets/form-draft-reset";
 import Input from "@widgets/input";
 import Select from "@widgets/select";
-import { createEffect, untrack } from "solid-js";
+import { createMemo } from "solid-js";
 
 export default function () {
   const config = usePlatformConfig();
@@ -18,19 +20,31 @@ export default function () {
       ...config.data?.email,
     },
   });
+  const remoteValues = createMemo<EmailConfig>(() => ({
+    enabled: config.data?.email.enabled ?? false,
+    host: config.data?.email.host ?? "",
+    port: config.data?.email.port ?? 25,
+    sender: config.data?.email.sender ?? "",
+    sender_address: config.data ? config.data.email.sender_address : null,
+    username: config.data?.email.username ?? "",
+    password: config.data?.email.password ?? "",
+    tls: config.data?.email.tls ?? "none",
+    reset_password_email_body: config.data ? config.data.email.reset_password_email_body : null,
+    reset_password_email_subject: config.data ? config.data.email.reset_password_email_subject : null,
+    verify_email_body: config.data ? config.data.email.verify_email_body : null,
+    verify_email_subject: config.data ? config.data.email.verify_email_subject : null,
+  }));
   const mutation = useUpdatePlatformConfigMutation({
-    onSuccess: () => {
-      config.refetch();
+    onSuccess: async () => {
+      await config.refetch();
+      draft.discardDraft();
     },
   });
-  createEffect(() => {
-    if (config.data) {
-      untrack(() => {
-        setValues(form, {
-          ...config.data.email,
-        });
-      });
-    }
+  const draft = useFormDraft({
+    form,
+    key: () => buildFormDraftKey("admin", "email"),
+    remoteValues,
+    enabled: () => !!config.data,
   });
 
   async function onSubmit(result: EmailConfig) {
@@ -353,15 +367,23 @@ export default function () {
               />
             )}
           </Field>
-          <Button
-            type="submit"
-            level="primary"
-            class="mt-4!"
-            loading={config.isLoading || mutation.isPending}
-            disabled={config.isLoading || mutation.isPending}
-          >
-            {t("general.actions.save.title")}
-          </Button>
+          <div class="mt-4! flex flex-row space-x-2">
+            <Button
+              type="submit"
+              level="primary"
+              class="flex-1"
+              loading={config.isLoading || mutation.isPending}
+              disabled={config.isLoading || mutation.isPending}
+            >
+              {t("general.actions.save.title")}
+            </Button>
+            <FormDraftReset
+              when={draft.hasDraft()}
+              loading={config.isLoading || mutation.isPending}
+              disabled={config.isLoading || mutation.isPending}
+              onConfirm={draft.discardDraft}
+            />
+          </div>
         </Form>
       </div>
     </>

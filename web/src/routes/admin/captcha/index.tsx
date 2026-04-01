@@ -1,14 +1,16 @@
 import { usePlatformConfig, useUpdatePlatformConfigMutation } from "@api/platform";
 import type { CaptchaConfig, Config } from "@models/config";
 import { createForm, getValue, required, setValues } from "@modular-forms/solid";
+import { buildFormDraftKey, useFormDraft } from "@storage/form";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Checkbox from "@widgets/checkbox";
+import FormDraftReset from "@widgets/form-draft-reset";
 import Select from "@widgets/select";
 import Slider from "@widgets/slider";
-import { createEffect, Show, untrack } from "solid-js";
+import { createMemo, Show } from "solid-js";
 
 export default function () {
   const config = usePlatformConfig();
@@ -19,27 +21,22 @@ export default function () {
       validator: config.data?.captcha.validator,
     },
   });
+  const remoteValues = createMemo<CaptchaConfig>(() => ({
+    enabled: config.data?.captcha.enabled ?? false,
+    difficulty: config.data ? config.data.captcha.difficulty : 1,
+    validator: config.data?.captcha.validator ?? "none",
+  }));
   const mutation = useUpdatePlatformConfigMutation({
-    onSuccess: () => {
-      config.refetch();
+    onSuccess: async () => {
+      await config.refetch();
+      draft.discardDraft();
     },
   });
-
-  createEffect(() => {
-    if (config.data)
-      untrack(() => {
-        setValues(
-          form,
-          {
-            enabled: config.data.captcha.enabled,
-            difficulty: config.data.captcha.difficulty,
-            validator: config.data.captcha.validator,
-          },
-          {
-            shouldDirty: false,
-          }
-        );
-      });
+  const draft = useFormDraft({
+    form,
+    key: () => buildFormDraftKey("admin", "captcha"),
+    remoteValues,
+    enabled: () => !!config.data,
   });
 
   async function onSubmit(result: CaptchaConfig) {
@@ -62,7 +59,7 @@ export default function () {
             <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
             <span>{t("captcha.title")}</span>
           </h3>
-          <Show when={form.dirty}>
+          <Show when={form.dirty || draft.hasDraft()}>
             <Card level="warning" contentClass="p-2 flex flex-row space-x-2 items-center pl-4">
               <span class="shrink-0 icon-[fluent--warning-20-filled] w-5 h-5" />
               <span class="flex-1 text-start">{t("account.form.saveHint")}</span>
@@ -127,15 +124,23 @@ export default function () {
               />
             )}
           </Field>
-          <Button
-            type="submit"
-            level="primary"
-            class="mt-4!"
-            loading={config.isLoading || mutation.isPending}
-            disabled={config.isLoading || mutation.isPending}
-          >
-            {t("general.actions.save.title")}
-          </Button>
+          <div class="mt-4! flex flex-row space-x-2">
+            <Button
+              type="submit"
+              level="primary"
+              class="flex-1"
+              loading={config.isLoading || mutation.isPending}
+              disabled={config.isLoading || mutation.isPending}
+            >
+              {t("general.actions.save.title")}
+            </Button>
+            <FormDraftReset
+              when={draft.hasDraft()}
+              loading={config.isLoading || mutation.isPending}
+              disabled={config.isLoading || mutation.isPending}
+              onConfirm={draft.discardDraft}
+            />
+          </div>
         </Form>
       </div>
     </>

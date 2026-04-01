@@ -1,14 +1,16 @@
 import { useCreateWikiMutation, useUpdateWikiMutation } from "@api/wiki";
 import { type Article, ArticleAccessPolicy } from "@models/article";
-import { createForm, required, setValues } from "@modular-forms/solid";
+import { createForm, required } from "@modular-forms/solid";
 import { accountStore } from "@storage/account";
+import { buildFormDraftKey, useFormDraft } from "@storage/form";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Editor from "@widgets/editor";
+import FormDraftReset from "@widgets/form-draft-reset";
 import IconCheckbox from "@widgets/icon-checkbox";
 import Input from "@widgets/input";
 import { DateTime } from "luxon";
-import { createEffect, createMemo, untrack } from "solid-js";
+import { createMemo } from "solid-js";
 
 type WikiForm = {
   title: string;
@@ -30,44 +32,35 @@ export default function (props: { onDone: (article: Article) => void; editSource
       published: !!props.editSource?.published,
     },
   });
+  const remoteValues = createMemo<WikiForm>(() => ({
+    title: props.editSource?.title || "",
+    path: props.editSource?.path.join("/") || "",
+    content: props.editSource?.content || "",
+    enable_comment: !!props.editSource?.enable_comment,
+    draft: !!props.editSource?.draft,
+    published: !!props.editSource?.published,
+  }));
+  const draft = useFormDraft({
+    form,
+    key: () => (props.editSource ? buildFormDraftKey("wiki", props.editSource.id) : undefined),
+    remoteValues,
+    enabled: () => !!props.editSource,
+  });
 
   const createWikiMutation = useCreateWikiMutation({
     onSuccess: (saved) => {
+      draft.discardDraft();
       props.onDone(saved);
     },
   });
   const updateWikiMutation = useUpdateWikiMutation({
     onSuccess: (saved) => {
+      draft.discardDraft();
       props.onDone(saved);
     },
   });
   const loading = createMemo(() => createWikiMutation.isPending || updateWikiMutation.isPending);
 
-  createEffect(() => {
-    if (props.editSource) {
-      untrack(() => {
-        setValues(form, {
-          title: props.editSource?.title || "",
-          path: props.editSource?.path.join("/") || "",
-          content: props.editSource?.content || "",
-          enable_comment: !!props.editSource?.enable_comment,
-          draft: !!props.editSource?.draft,
-          published: !!props.editSource?.published,
-        });
-      });
-    } else {
-      untrack(() => {
-        setValues(form, {
-          title: "",
-          path: "",
-          content: "",
-          enable_comment: true,
-          draft: true,
-          published: false,
-        });
-      });
-    }
-  });
   function onSubmit(result: WikiForm) {
     const article: Article = {
       ...result,
@@ -174,9 +167,17 @@ export default function (props: { onDone: (article: Article) => void; editSource
           />
         )}
       </Field>
-      <Button type="submit" level="primary" class="mt-4!" loading={loading()} disabled={loading()}>
-        {props.editSource ? t("general.actions.save.title") : t("general.actions.create.title")}
-      </Button>
+      <div class="mt-4! flex flex-row space-x-2">
+        <Button type="submit" level="primary" class="flex-1" loading={loading()} disabled={loading()}>
+          {props.editSource ? t("general.actions.save.title") : t("general.actions.create.title")}
+        </Button>
+        <FormDraftReset
+          when={draft.hasDraft()}
+          loading={loading()}
+          disabled={loading()}
+          onConfirm={draft.discardDraft}
+        />
+      </div>
     </Form>
   );
 }

@@ -140,6 +140,12 @@
           "fail": "重置失败"
         }
       },
+      "discardDraft": {
+        "title": "丢弃草稿",
+        "message": "确定要丢弃当前草稿吗？",
+        "description": "这会清除本地草稿，并恢复为远端表单值。",
+        "confirm": "丢弃草稿"
+      },
       "search": {
         "title": "搜索"
       },

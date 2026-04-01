@@ -1,11 +1,13 @@
 import { useOAuthProviders } from "@api/account";
 import type { Institute } from "@models/institute";
-import { createForm, required, setValues } from "@modular-forms/solid";
+import { createForm, required } from "@modular-forms/solid";
+import { buildFormDraftKey, useFormDraft } from "@storage/form";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
+import FormDraftReset from "@widgets/form-draft-reset";
 import Input from "@widgets/input";
 import Select from "@widgets/select";
-import { createEffect, untrack } from "solid-js";
+import { createMemo } from "solid-js";
 
 type FormType = {
   name: string;
@@ -14,7 +16,7 @@ type FormType = {
 };
 
 export default function InstituteForm(props: {
-  onDone?: (result: Institute) => void;
+  onDone?: (result: Institute) => Promise<void>;
   editSource?: Institute;
   loading?: boolean;
 }) {
@@ -26,19 +28,19 @@ export default function InstituteForm(props: {
       token: props.editSource?.token || undefined,
     },
   });
-  createEffect(() => {
-    if (props.editSource) {
-      untrack(() => {
-        setValues(form, {
-          name: props.editSource?.name,
-          provider: props.editSource?.provider || undefined,
-          token: props.editSource?.token || undefined,
-        });
-      });
-    }
+  const remoteValues = createMemo<FormType>(() => ({
+    name: props.editSource?.name || "",
+    provider: props.editSource?.provider || undefined,
+    token: props.editSource?.token || undefined,
+  }));
+  const draft = useFormDraft({
+    form,
+    key: () => (props.editSource ? buildFormDraftKey("admin", "oauth", "institute", props.editSource.id) : undefined),
+    remoteValues,
+    enabled: () => !!props.editSource,
   });
-  function onSubmit(result: FormType) {
-    props.onDone?.({
+  async function onSubmit(result: FormType) {
+    await props.onDone?.({
       id: props.editSource?.id || 0,
       name: result.name,
       description: null,
@@ -46,6 +48,7 @@ export default function InstituteForm(props: {
       provider: result.provider || null,
       token: result.token || null,
     });
+    draft.discardDraft();
   }
   return (
     <Form onSubmit={onSubmit} class="flex flex-col w-96 space-y-2 relative">
@@ -96,9 +99,17 @@ export default function InstituteForm(props: {
           />
         )}
       </Field>
-      <Button type="submit" level="primary" class="mt-4!" loading={props.loading} disabled={props.loading}>
-        {props.editSource ? t("general.actions.save.title") : t("general.actions.create.title")}
-      </Button>
+      <div class="mt-4! flex flex-row space-x-2">
+        <Button type="submit" level="primary" class="flex-1" loading={props.loading} disabled={props.loading}>
+          {props.editSource ? t("general.actions.save.title") : t("general.actions.create.title")}
+        </Button>
+        <FormDraftReset
+          when={draft.hasDraft()}
+          loading={props.loading}
+          disabled={props.loading}
+          onConfirm={draft.discardDraft}
+        />
+      </div>
     </Form>
   );
 }

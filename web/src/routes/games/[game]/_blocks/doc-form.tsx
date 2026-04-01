@@ -1,10 +1,12 @@
 import { handleHttpError, inflyClient } from "@api";
 import { type GameDocType, useGameDoc } from "@api/game";
-import { createForm, setValues } from "@modular-forms/solid";
+import { createForm } from "@modular-forms/solid";
+import { buildFormDraftKey, useFormDraft } from "@storage/form";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Editor from "@widgets/editor";
-import { createEffect, createMemo, createSignal, untrack } from "solid-js";
+import FormDraftReset from "@widgets/form-draft-reset";
+import { createMemo, createSignal } from "solid-js";
 
 type GameDocFormValues = {
   content: string;
@@ -38,13 +40,14 @@ export default function GameDocForm(props: {
       content: doc.data ?? "",
     },
   });
-
-  createEffect(() => {
-    untrack(() => {
-      setValues(form, {
-        content: doc.data ?? "",
-      });
-    });
+  const remoteValues = createMemo<GameDocFormValues>(() => ({
+    content: doc.data ?? "",
+  }));
+  const draft = useFormDraft({
+    form,
+    key: () => buildFormDraftKey("games", props.gameId, "doc", props.docType),
+    remoteValues,
+    enabled: () => props.gameId > 0 && !doc.isLoading,
   });
 
   async function onSubmit(result: GameDocFormValues) {
@@ -54,6 +57,7 @@ export default function GameDocForm(props: {
       await inflyClient.invalidateQueries({
         queryKey: ["game", props.gameId, "doc", props.docType],
       });
+      draft.discardDraft();
     } catch (err) {
       handleHttpError(err as Error, t("general.actions.save.status.fail"));
     }
@@ -77,9 +81,17 @@ export default function GameDocForm(props: {
           />
         )}
       </Field>
-      <Button type="submit" level="primary" class="mt-4!" loading={loading()} disabled={loading()}>
-        {t("general.actions.save.title")}
-      </Button>
+      <div class="mt-4! flex flex-row space-x-2">
+        <Button type="submit" level="primary" class="flex-1" loading={loading()} disabled={loading()}>
+          {t("general.actions.save.title")}
+        </Button>
+        <FormDraftReset
+          when={draft.hasDraft()}
+          loading={loading()}
+          disabled={loading()}
+          onConfirm={draft.discardDraft}
+        />
+      </div>
     </Form>
   );
 }

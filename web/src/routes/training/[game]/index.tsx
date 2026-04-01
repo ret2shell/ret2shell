@@ -133,6 +133,7 @@ export default function () {
         },
       },
     });
+    await game.refetch();
   }
 
   async function onEditTrainingDoc(content: string) {

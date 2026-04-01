@@ -3,16 +3,18 @@ import { useAccountProfile, useChangeProfileMutation, useResendEmailMutation } f
 import { uploadMedia } from "@api/media";
 import { mediaPath } from "@lib/utils/media";
 import { Permission } from "@models/user";
-import { createForm, email, getValue, required, setValue, setValues } from "@modular-forms/solid";
+import { createForm, email, getValue, required, setValue } from "@modular-forms/solid";
 import { accountStore } from "@storage/account";
+import { buildFormDraftKey, useFormDraft } from "@storage/form";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Editor from "@widgets/editor";
+import FormDraftReset from "@widgets/form-draft-reset";
 import Input from "@widgets/input";
-import { createEffect, createSignal, Show, untrack } from "solid-js";
+import { createMemo, createSignal, Show } from "solid-js";
 
 export type UserForm = {
   nickname: string;
@@ -31,28 +33,21 @@ export default function () {
       description: profile.data?.description || undefined,
     },
   });
-  createEffect(() => {
-    if (profile.data) {
-      untrack(() => {
-        setValues(
-          form,
-          {
-            nickname: profile.data?.nickname || "",
-            email: profile.data?.email || "",
-            avatar: profile.data?.avatar || "",
-            description: profile.data?.description || "",
-          },
-          {
-            shouldDirty: false,
-          }
-        );
-        setAvatarSet(!!profile.data?.avatar);
-      });
-    }
+  const remoteValues = createMemo<UserForm>(() => ({
+    nickname: profile.data?.nickname || "",
+    email: profile.data?.email || "",
+    avatar: profile.data?.avatar || "",
+    description: profile.data?.description || "",
+  }));
+  const draft = useFormDraft({
+    form,
+    key: () => buildFormDraftKey("account", "settings", "info"),
+    remoteValues,
+    enabled: () => !!profile.data,
   });
   const [avatarFile, setAvatarFile] = createSignal(null as File | null);
-  const [avatarSet, setAvatarSet] = createSignal(false);
   const [avatarUploading, setAvatarUploading] = createSignal(false);
+  const hasAvatar = createMemo(() => !!getValue(form, "avatar"));
   let avatarInput: HTMLInputElement;
   function handleSelectAvatar() {
     avatarInput!.click();
@@ -73,7 +68,6 @@ export default function () {
       try {
         const resp = await uploadMedia(avatarFile()!, false);
         setValue(form, "avatar", resp.hash);
-        setAvatarSet(true);
       } catch (err) {
         handleHttpError(err as Error, t("general.actions.upload.status.fail"));
       }
@@ -84,8 +78,9 @@ export default function () {
   const resendEmailMutation = useResendEmailMutation();
 
   const updateMutation = useChangeProfileMutation({
-    onSuccess: () => {
-      profile.refetch();
+    onSuccess: async () => {
+      await profile.refetch();
+      draft.discardDraft();
     },
   });
 
@@ -105,7 +100,7 @@ export default function () {
             <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />
             <span>{t("account.info.title")}</span>
           </h3>
-          <Show when={form.dirty}>
+          <Show when={form.dirty || draft.hasDraft()}>
             <Card level="warning" contentClass="p-2 flex flex-row space-x-2 items-center pl-4">
               <span class="shrink-0 icon-[fluent--warning-20-filled] w-5 h-5" />
               <span class="flex-1 text-start">{t("account.form.saveHint")}</span>
@@ -147,8 +142,7 @@ export default function () {
                     type="button"
                     class="opacity-0 hover:opacity-100 bg-layer/80! absolute top-0 left-0 w-full h-full"
                     onClick={() => {
-                      if (avatarSet()) {
-                        setAvatarSet(false);
+                      if (hasAvatar()) {
                         setAvatarFile(null);
                         setValue(form, "avatar", "");
                       } else {
@@ -165,7 +159,7 @@ export default function () {
                       onChange={handleSelectedAvatar}
                     />
                     <Show
-                      when={getValue(form, "avatar") && avatarSet()}
+                      when={hasAvatar()}
                       fallback={<span class="shrink-0 icon-[fluent--cloud-arrow-up-20-regular] w-5 h-5" />}
                     >
                       <span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5 text-error" />
@@ -222,15 +216,23 @@ export default function () {
               />
             )}
           </Field>
-          <Button
-            type="submit"
-            level="primary"
-            class="mt-4!"
-            loading={updateMutation.isPending}
-            disabled={updateMutation.isPending}
-          >
-            {t("general.actions.save.title")}
-          </Button>
+          <div class="mt-4! flex flex-row space-x-2">
+            <Button
+              type="submit"
+              level="primary"
+              class="flex-1"
+              loading={updateMutation.isPending}
+              disabled={updateMutation.isPending}
+            >
+              {t("general.actions.save.title")}
+            </Button>
+            <FormDraftReset
+              when={draft.hasDraft()}
+              loading={updateMutation.isPending}
+              disabled={updateMutation.isPending}
+              onConfirm={draft.discardDraft}
+            />
+          </div>
         </Form>
       </div>
     </>

@@ -11,15 +11,11 @@ export default function () {
   const gameId = createMemo(() => Number.parseInt(params.game ?? "", 10) || -1);
   const game = useGame({ id: gameId, enabled: () => gameId() > 0 });
 
-  const updateMutation = useUpdateGameMutation({
-    onSuccess: () => {
-      game.refetch();
-    },
-  });
+  const updateMutation = useUpdateGameMutation();
 
   async function onSubmit(result: GameForm) {
     if (!game.data) return;
-    updateMutation.mutate({
+    await updateMutation.mutateAsync({
       id: game.data.id,
       game: {
         ...game.data,
@@ -40,6 +36,7 @@ export default function () {
         },
       },
     });
+    await game.refetch();
   }
   return (
     <>

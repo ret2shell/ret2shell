@@ -1,14 +1,16 @@
 import { useBulletin, useCreateBulletinMutation, useUpdateBulletinMutation } from "@api/bulletin";
 import { type Article, ArticleAccessPolicy } from "@models/article";
-import { createForm, required, setValues } from "@modular-forms/solid";
+import { createForm, required } from "@modular-forms/solid";
 import { accountStore } from "@storage/account";
+import { buildFormDraftKey, useFormDraft } from "@storage/form";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Editor from "@widgets/editor";
+import FormDraftReset from "@widgets/form-draft-reset";
 import IconCheckbox from "@widgets/icon-checkbox";
 import Input from "@widgets/input";
 import { DateTime } from "luxon";
-import { createEffect, untrack } from "solid-js";
+import { createMemo } from "solid-js";
 
 type BulletinForm = {
   title: string;
@@ -21,11 +23,13 @@ export default function (props: { onDone: (calendar: Article) => void; articleId
   const article = useBulletin({ id: () => props.articleId!, enabled: () => !!props.articleId });
   const createBulletinMutation = useCreateBulletinMutation({
     onSuccess: (data) => {
+      draft.discardDraft();
       props.onDone(data);
     },
   });
   const updateBulletinMutation = useUpdateBulletinMutation({
     onSuccess: (data) => {
+      draft.discardDraft();
       props.onDone(data);
     },
   });
@@ -37,27 +41,17 @@ export default function (props: { onDone: (calendar: Article) => void; articleId
       weight: !!article.data?.weight,
     },
   });
-
-  createEffect(() => {
-    if (article.data) {
-      untrack(() => {
-        setValues(form, {
-          title: article.data?.title || "",
-          content: article.data?.content || "",
-          enable_comment: article.data?.enable_comment || false,
-          weight: !!article.data?.weight,
-        });
-      });
-    } else {
-      untrack(() => {
-        setValues(form, {
-          title: "",
-          content: "",
-          enable_comment: true,
-          weight: false,
-        });
-      });
-    }
+  const remoteValues = createMemo<BulletinForm>(() => ({
+    title: article.data?.title || "",
+    content: article.data?.content || "",
+    enable_comment: article.data?.enable_comment || false,
+    weight: !!article.data?.weight,
+  }));
+  const draft = useFormDraft({
+    form,
+    key: () => (props.articleId ? buildFormDraftKey("bulletin", props.articleId) : undefined),
+    remoteValues,
+    enabled: () => !!props.articleId && !!article.data,
   });
   async function onSubmit(result: BulletinForm) {
     (article.data ? updateBulletinMutation : createBulletinMutation).mutate({
@@ -134,15 +128,23 @@ export default function (props: { onDone: (calendar: Article) => void; articleId
           />
         )}
       </Field>
-      <Button
-        type="submit"
-        level="primary"
-        class="mt-4!"
-        loading={createBulletinMutation.isPending || updateBulletinMutation.isPending}
-        disabled={createBulletinMutation.isPending || updateBulletinMutation.isPending}
-      >
-        {props.articleId ? t("general.actions.save.title") : t("general.actions.create.title")}
-      </Button>
+      <div class="mt-4! flex flex-row space-x-2">
+        <Button
+          type="submit"
+          level="primary"
+          class="flex-1"
+          loading={createBulletinMutation.isPending || updateBulletinMutation.isPending}
+          disabled={createBulletinMutation.isPending || updateBulletinMutation.isPending}
+        >
+          {props.articleId ? t("general.actions.save.title") : t("general.actions.create.title")}
+        </Button>
+        <FormDraftReset
+          when={draft.hasDraft()}
+          loading={createBulletinMutation.isPending || updateBulletinMutation.isPending}
+          disabled={createBulletinMutation.isPending || updateBulletinMutation.isPending}
+          onConfirm={draft.discardDraft}
+        />
+      </div>
     </Form>
   );
 }
