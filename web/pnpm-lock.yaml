@@ -108,8 +108,8 @@ importers:
         specifier: ^0.16.45
         version: 0.16.45
       ky:
-        specifier: ^1.14.3
-        version: 1.14.3
+        specifier: ^2.0.1
+        version: 2.0.1
       lorem-ipsum:
         specifier: ^2.0.8
         version: 2.0.8
@@ -1637,6 +1637,10 @@ packages:
   ky@1.14.3:
     resolution: {integrity: sha512-9zy9lkjac+TR1c2tG+mkNSVlyOpInnWdSMiue4F+kq8TwJSgv6o8jhLRg8Ho6SnZ9wOYUq/yozts9qQCfk7bIw==}
     engines: {node: '>=18'}
+
+  ky@2.0.1:
+    resolution: {integrity: sha512-HJPEjEpQPZQ5M3G5eu90/LWZDwysCnvqcfbLvq9FUvfizBZRi58WEixswyyI32LOLcFQd43w7kcfgkCPFxDt/Q==}
+    engines: {node: '>=22'}
 
   lightningcss-android-arm64@1.32.0:
     resolution: {integrity: sha512-YK7/ClTt4kAK0vo6w3X+Pnm0D2cf2vPHbhOXdoNti1Ga0al1P4TBZhwjATvjNwLEBCnKvjJc2jQgHXH0NEwlAg==}
@@ -4028,6 +4032,8 @@ snapshots:
   kubernetes-types@1.30.0: {}
 
   ky@1.14.3: {}
+
+  ky@2.0.1: {}
 
   lightningcss-android-arm64@1.32.0:
     optional: true
