@@ -71,7 +71,7 @@ export class Service implements Command {
       return env;
     } catch (e) {
       if (e instanceof HTTPError) {
-        const text = await e.response.text();
+        const text = typeof e.data === "string" ? e.data : JSON.stringify(e.data);
         io.error(`${t("challenge.instance.errors.fetchInstances.title")}: ${text}`);
       } else {
         io.error(`${t("challenge.instance.errors.fetchInstances.title")}: ${e}`);
@@ -120,7 +120,7 @@ export class Service implements Command {
         await stopChallengeInstance(inst.game_id, inst.challenge_id);
       } catch (e) {
         if (e instanceof HTTPError) {
-          const text = await e.response.text();
+          const text = typeof e.data === "string" ? e.data : JSON.stringify(e.data);
           io.error(`${t("challenge.instance.errors.stop.title")}: ${text}`);
         }
       }
@@ -136,7 +136,7 @@ export class Service implements Command {
       await startChallengeInstance(envVars.challenge.game_id, envVars.challenge.id);
     } catch (e) {
       if (e instanceof HTTPError) {
-        const text = await e.response.text();
+        const text = typeof e.data === "string" ? e.data : JSON.stringify(e.data);
         io.error(`${t("challenge.instance.errors.start.title")}: ${text}`);
       }
     }
@@ -160,7 +160,7 @@ export class Service implements Command {
       await stopChallengeInstance(envVars.challenge.game_id, envVars.challenge.id);
     } catch (e) {
       if (e instanceof HTTPError) {
-        const text = await e.response.text();
+        const text = typeof e.data === "string" ? e.data : JSON.stringify(e.data);
         io.error(`${t("challenge.instance.errors.stop.title")}: ${text}`);
       }
     }
@@ -274,7 +274,7 @@ export class Service implements Command {
       await delayChallengeInstance(envVars.challenge.game_id, envVars.challenge.id);
     } catch (e) {
       if (e instanceof HTTPError) {
-        const text = await e.response.text();
+        const text = typeof e.data === "string" ? e.data : JSON.stringify(e.data);
         io.error(`${t("challenge.instance.errors.delay.title")}: ${text}`);
       }
     }

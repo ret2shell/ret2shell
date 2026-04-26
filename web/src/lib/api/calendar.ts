@@ -26,5 +26,5 @@ export async function updateCalendar(calendar: Calendar) {
 }
 
 export async function deleteCalendar(id: number) {
-  return await api.delete(`${api_root}/calendar/${id}`).json();
+  return await api.delete(`${api_root}/calendar/${id}`);
 }

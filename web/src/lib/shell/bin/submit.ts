@@ -69,7 +69,7 @@ export class Submit implements Command {
       }
     } catch (e) {
       if (e instanceof HTTPError) {
-        const text = await e.response.text();
+        const text = typeof e.data === "string" ? e.data : JSON.stringify(e.data);
         io.error(`${t("challenge.submission.errors.submit.title")}: ${text}`);
       }
     }

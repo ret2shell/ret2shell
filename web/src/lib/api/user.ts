@@ -146,7 +146,7 @@ export function useUpdateUserMutation(
 }
 
 export async function deleteUser(id: number) {
-  return await api.delete(`${api_root}/user/${id}`).json();
+  return await api.delete(`${api_root}/user/${id}`);
 }
 
 export function useDeleteUserMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {

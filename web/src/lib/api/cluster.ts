@@ -106,7 +106,7 @@ export function useUpdateGlobalTrafficScriptMutation(
 }
 
 export async function deleteGlobalTrafficScript() {
-  return await api.delete(`${api_root}/cluster/traffic`).json<void>();
+  return await api.delete(`${api_root}/cluster/traffic`);
 }
 
 export function useDeleteGlobalTrafficScriptMutation(
@@ -148,7 +148,7 @@ export function useUpdateGlobalLifecycleScriptMutation(
 }
 
 export async function deleteGlobalLifecycleScript() {
-  return await api.delete(`${api_root}/cluster/lifecycle`).json<void>();
+  return await api.delete(`${api_root}/cluster/lifecycle`);
 }
 
 export function useDeleteGlobalLifecycleScriptMutation(
@@ -168,7 +168,7 @@ export function useDeleteGlobalLifecycleScriptMutation(
 }
 
 export async function updateDefaultNodeSelector(node_selector: string) {
-  return await api.patch(`${api_root}/cluster/node-selector`, { json: { node_selector } }).json<void>();
+  return await api.patch(`${api_root}/cluster/node-selector`, { json: { node_selector } });
 }
 
 export function useUpdateDefaultNodeSelectorMutation(
@@ -188,7 +188,7 @@ export function useUpdateDefaultNodeSelectorMutation(
 }
 
 export async function deleteDefaultNodeSelector() {
-  return await api.delete(`${api_root}/cluster/node-selector`).json<void>();
+  return await api.delete(`${api_root}/cluster/node-selector`);
 }
 
 export function useDeleteDefaultNodeSelectorMutation(

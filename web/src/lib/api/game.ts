@@ -129,7 +129,7 @@ export function useUpdateGameMutation(
 }
 
 export async function deleteGame(id: number) {
-  return await api.delete(`${api_root}/game/${id}`).json<null>();
+  return await api.delete(`${api_root}/game/${id}`);
 }
 
 export function useDeleteGameMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -565,17 +565,15 @@ export async function sendGameAdminChatMessage(
   team_id: number,
   content: string
 ) {
-  return await api
-    .post(`${api_root}/game/${game_id}/chat/admin/session`, {
-      searchParams: {
-        challenge_id,
-        team_id,
-      },
-      json: {
-        content,
-      },
-    })
-    .json<void>();
+  return await api.post(`${api_root}/game/${game_id}/chat/admin/session`, {
+    searchParams: {
+      challenge_id,
+      team_id,
+    },
+    json: {
+      content,
+    },
+  });
 }
 
 export function useSendGameAdminChatMessageMutation(
@@ -625,13 +623,11 @@ export function useGamePlayerChatMessages({
 }
 
 export async function sendGamePlayerChatMessage(game_id: number, challenge_id: number, content: string) {
-  return await api
-    .post(`${api_root}/game/${game_id}/chat/${challenge_id}`, {
-      json: {
-        content,
-      },
-    })
-    .json<void>();
+  return await api.post(`${api_root}/game/${game_id}/chat/${challenge_id}`, {
+    json: {
+      content,
+    },
+  });
 }
 
 export function useSendGamePlayerChatMessageMutation(
@@ -942,7 +938,7 @@ export function useRegistryRepositories({
 }
 
 export async function refreshRegistry(game_id: number) {
-  return await api.delete(`${api_root}/game/${game_id}/registry/refresh`).json<void>();
+  return await api.delete(`${api_root}/game/${game_id}/registry/refresh`);
 }
 
 export function useRefreshRegistryMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -1017,7 +1013,7 @@ export function useUpdateGameTrafficMutation(
 }
 
 export async function deleteGameTraffic(game_id: number) {
-  return await api.delete(`${api_root}/game/${game_id}/traffic`).json<void>();
+  return await api.delete(`${api_root}/game/${game_id}/traffic`);
 }
 
 export function useDeleteGameTrafficMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -1064,7 +1060,7 @@ export function useUpdateGameLifecycleMutation(
 }
 
 export async function deleteGameLifecycle(game_id: number) {
-  return await api.delete(`${api_root}/game/${game_id}/lifecycle`).json<void>();
+  return await api.delete(`${api_root}/game/${game_id}/lifecycle`);
 }
 
 export function useDeleteGameLifecycleMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -1082,13 +1078,11 @@ export function useDeleteGameLifecycleMutation(props: { onSuccess?: () => void; 
 }
 
 export async function updateGameNodeSelector(game_id: number, node_selector: string) {
-  return await api
-    .patch(`${api_root}/game/${game_id}/node-selector`, {
-      json: {
-        node_selector,
-      },
-    })
-    .json<void>();
+  return await api.patch(`${api_root}/game/${game_id}/node-selector`, {
+    json: {
+      node_selector,
+    },
+  });
 }
 
 export function useUpdateGameNodeSelectorMutation(
@@ -1109,7 +1103,7 @@ export function useUpdateGameNodeSelectorMutation(
 }
 
 export async function deleteGameNodeSelector(game_id: number) {
-  return await api.delete(`${api_root}/game/${game_id}/node-selector`).json<void>();
+  return await api.delete(`${api_root}/game/${game_id}/node-selector`);
 }
 
 export function useDeleteGameNodeSelectorMutation(

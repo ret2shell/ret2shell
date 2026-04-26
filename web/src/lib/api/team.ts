@@ -103,7 +103,7 @@ export function useUpdateTeamInfoMutation(
 }
 
 export async function deleteTeam(game_id: number, team_id: number) {
-  return await api.delete(`${api_root}/game/${game_id}/team/${team_id}`).json<void>();
+  return await api.delete(`${api_root}/game/${game_id}/team/${team_id}`);
 }
 
 export function useDeleteTeamMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -210,7 +210,7 @@ export function useUpdateSelfTeamMutation(
 }
 
 export async function leaveSelfTeam(game_id: number) {
-  return await api.delete(`${api_root}/game/${game_id}/team/self`).json<void>();
+  return await api.delete(`${api_root}/game/${game_id}/team/self`);
 }
 
 export function useLeaveSelfTeamMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {

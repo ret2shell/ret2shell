@@ -90,7 +90,7 @@ export function useUpdateWikiMutation(
 }
 
 export async function deleteWiki(id: number) {
-  return await api.delete(`${api_root}/wiki/${id}`).json();
+  return await api.delete(`${api_root}/wiki/${id}`);
 }
 
 export function useDeleteWikiMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {

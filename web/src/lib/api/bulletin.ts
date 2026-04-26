@@ -113,7 +113,7 @@ export function useUpdateBulletinMutation(
 }
 
 export async function deleteBulletin(id: number) {
-  return await api.delete(`${api_root}/bulletin/${id}`).json();
+  return await api.delete(`${api_root}/bulletin/${id}`);
 }
 
 export function useDeleteBulletinMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {

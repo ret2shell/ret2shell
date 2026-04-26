@@ -65,7 +65,7 @@ export class Wget implements Command {
     } catch (err: unknown) {
       io.println("");
       if (err instanceof HTTPError) {
-        const text = await err.response.text();
+        const text = typeof err.data === "string" ? err.data : JSON.stringify(err.data);
         io.error(`${t("general.actions.download.status.fail")}: ${text}`);
         return 255;
       }

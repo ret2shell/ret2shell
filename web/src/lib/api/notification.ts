@@ -54,7 +54,7 @@ export function useCreateNotificationMutation(
 }
 
 export async function deleteNotification(game_id: number, id: number) {
-  return await api.delete(`${api_root}/game/${game_id}/notification/${id}`).json<null>();
+  return await api.delete(`${api_root}/game/${game_id}/notification/${id}`);
 }
 
 export function useDeleteNotificationMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {

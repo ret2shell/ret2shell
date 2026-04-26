@@ -20,7 +20,7 @@ export function toastError(description: string, duration = 5000) {
 export async function handleHttpError(err: Error, tip: string) {
   if (err instanceof HTTPError) {
     try {
-      const text = await err.response.text();
+      const text = typeof err.data === "string" ? err.data : JSON.stringify(err.data);
       toastError(`${tip}: ${text}`);
     } catch {}
   } else {

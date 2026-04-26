@@ -168,7 +168,7 @@ export function useDownChallengeMutation(
 }
 
 export async function deleteChallenge(game_id: number, challenge_id: number) {
-  return await api.delete(`${api_root}/game/${game_id}/challenge/${challenge_id}`).json<void>();
+  return await api.delete(`${api_root}/game/${game_id}/challenge/${challenge_id}`);
 }
 
 export function useDeleteChallengeMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void }) {
@@ -270,13 +270,11 @@ export function useCreateChallengeHintMutation(props: {
 }
 
 export async function deleteChallengeHint(game_id: number, challenge_id: number, hint_id: number) {
-  return await api
-    .delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/hint`, {
-      searchParams: {
-        id: hint_id,
-      },
-    })
-    .json<void>();
+  return await api.delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/hint`, {
+    searchParams: {
+      id: hint_id,
+    },
+  });
 }
 
 export function useDeleteChallengeHintMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void }) {
@@ -355,14 +353,12 @@ export async function deleteChallengeAttachment(
   folder: "static" | "mapped" | "checker",
   file: string
 ) {
-  return await api
-    .delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/file`, {
-      searchParams: {
-        folder,
-        file,
-      },
-    })
-    .json<void>();
+  return await api.delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/file`, {
+    searchParams: {
+      folder,
+      file,
+    },
+  });
 }
 
 export function useDeleteChallengeAttachmentMutation(props: {
@@ -504,11 +500,9 @@ export function useChallengeInstance({
 }
 
 export async function updateChallengeEnv(game_id: number, challenge_id: number, env: ChallengeEnv) {
-  return await api
-    .patch(`${api_root}/game/${game_id}/challenge/${challenge_id}/env`, {
-      json: normalizeChallengeEnv(env),
-    })
-    .json<void>();
+  return await api.patch(`${api_root}/game/${game_id}/challenge/${challenge_id}/env`, {
+    json: normalizeChallengeEnv(env),
+  });
 }
 
 export function useUpdateChallengeEnvMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -527,7 +521,7 @@ export function useUpdateChallengeEnvMutation(props: { onSuccess?: () => void; o
 }
 
 export async function deleteChallengeEnv(game_id: number, challenge_id: number) {
-  return await api.delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/env`).json<void>();
+  return await api.delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/env`);
 }
 
 export function useDeleteChallengeEnvMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void }) {
@@ -586,13 +580,11 @@ export function useChallengeCheckerScript({
 }
 
 export async function updateChallengeCheckerScript(game_id: number, challenge_id: number, content: string) {
-  return await api
-    .patch(`${api_root}/game/${game_id}/challenge/${challenge_id}/checker`, {
-      json: {
-        content,
-      },
-    })
-    .json<void>();
+  return await api.patch(`${api_root}/game/${game_id}/challenge/${challenge_id}/checker`, {
+    json: {
+      content,
+    },
+  });
 }
 
 export function useUpdateChallengeCheckerScriptMutation(props: {
@@ -677,7 +669,7 @@ export function useChallengeSubmissions({
 
 export async function startChallengeInstance(game_id: number, challenge_id: number) {
   await sleep(1000);
-  return await api.post(`${api_root}/game/${game_id}/challenge/${challenge_id}/instance`).json<void>();
+  return await api.post(`${api_root}/game/${game_id}/challenge/${challenge_id}/instance`);
 }
 
 export function useStartChallengeInstanceMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void }) {
@@ -696,7 +688,7 @@ export function useStartChallengeInstanceMutation(props: { onSuccess?: () => voi
 
 export async function delayChallengeInstance(game_id: number, challenge_id: number) {
   await sleep(1000);
-  return await api.patch(`${api_root}/game/${game_id}/challenge/${challenge_id}/instance`, {}).json<void>();
+  return await api.patch(`${api_root}/game/${game_id}/challenge/${challenge_id}/instance`, {});
 }
 
 export function useDelayChallengeInstanceMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void }) {
@@ -715,7 +707,7 @@ export function useDelayChallengeInstanceMutation(props: { onSuccess?: () => voi
 
 export async function stopChallengeInstance(game_id: number, challenge_id: number) {
   await sleep(1000);
-  return await api.delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/instance`).json<void>();
+  return await api.delete(`${api_root}/game/${game_id}/challenge/${challenge_id}/instance`);
 }
 
 export function useStopChallengeInstanceMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void }) {
