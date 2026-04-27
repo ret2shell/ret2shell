@@ -1,6 +1,6 @@
 import type { Calendar } from "@models/calendar";
 import type { DateTime } from "luxon";
-import api, { api_root } from ".";
+import api, { api_root, safeJson } from ".";
 
 export async function getCalendarList(start_time: DateTime, end_time: DateTime) {
   return (
@@ -26,5 +26,5 @@ export async function updateCalendar(calendar: Calendar) {
 }
 
 export async function deleteCalendar(id: number) {
-  return await api.delete(`${api_root}/calendar/${id}`);
+  return await safeJson(api.delete(`${api_root}/calendar/${id}`).json());
 }

@@ -13,7 +13,7 @@ import type { DiagnosticMarker } from "@widgets/editor";
 import { HTTPError, type SearchParamsOption } from "ky";
 import type { DateTime } from "luxon";
 import { createMemo } from "solid-js";
-import api, { api_root, handleHttpError, inflyClient, toastSuccess } from ".";
+import api, { api_root, handleHttpError, inflyClient, safeJson, toastSuccess } from ".";
 
 export async function getGames(page?: number, page_size?: number, host_type?: HostType, weight?: number) {
   return (
@@ -129,7 +129,7 @@ export function useUpdateGameMutation(
 }
 
 export async function deleteGame(id: number) {
-  return await api.delete(`${api_root}/game/${id}`);
+  return await safeJson(api.delete(`${api_root}/game/${id}`).json<null>());
 }
 
 export function useDeleteGameMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -565,15 +565,17 @@ export async function sendGameAdminChatMessage(
   team_id: number,
   content: string
 ) {
-  return await api.post(`${api_root}/game/${game_id}/chat/admin/session`, {
-    searchParams: {
-      challenge_id,
-      team_id,
-    },
-    json: {
-      content,
-    },
-  });
+  return await safeJson(api
+    .post(`${api_root}/game/${game_id}/chat/admin/session`, {
+      searchParams: {
+        challenge_id,
+        team_id,
+      },
+      json: {
+        content,
+      },
+    })
+    .json<void>());
 }
 
 export function useSendGameAdminChatMessageMutation(
@@ -623,11 +625,13 @@ export function useGamePlayerChatMessages({
 }
 
 export async function sendGamePlayerChatMessage(game_id: number, challenge_id: number, content: string) {
-  return await api.post(`${api_root}/game/${game_id}/chat/${challenge_id}`, {
-    json: {
-      content,
-    },
-  });
+  return await safeJson(api
+    .post(`${api_root}/game/${game_id}/chat/${challenge_id}`, {
+      json: {
+        content,
+      },
+    })
+    .json<void>());
 }
 
 export function useSendGamePlayerChatMessageMutation(
@@ -938,7 +942,7 @@ export function useRegistryRepositories({
 }
 
 export async function refreshRegistry(game_id: number) {
-  return await api.delete(`${api_root}/game/${game_id}/registry/refresh`);
+  return await safeJson(api.delete(`${api_root}/game/${game_id}/registry/refresh`).json<void>());
 }
 
 export function useRefreshRegistryMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -1013,7 +1017,7 @@ export function useUpdateGameTrafficMutation(
 }
 
 export async function deleteGameTraffic(game_id: number) {
-  return await api.delete(`${api_root}/game/${game_id}/traffic`);
+  return await safeJson(api.delete(`${api_root}/game/${game_id}/traffic`).json<void>());
 }
 
 export function useDeleteGameTrafficMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -1060,7 +1064,7 @@ export function useUpdateGameLifecycleMutation(
 }
 
 export async function deleteGameLifecycle(game_id: number) {
-  return await api.delete(`${api_root}/game/${game_id}/lifecycle`);
+  return await safeJson(api.delete(`${api_root}/game/${game_id}/lifecycle`).json<void>());
 }
 
 export function useDeleteGameLifecycleMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -1078,11 +1082,13 @@ export function useDeleteGameLifecycleMutation(props: { onSuccess?: () => void; 
 }
 
 export async function updateGameNodeSelector(game_id: number, node_selector: string) {
-  return await api.patch(`${api_root}/game/${game_id}/node-selector`, {
-    json: {
-      node_selector,
-    },
-  });
+  return await safeJson(api
+    .patch(`${api_root}/game/${game_id}/node-selector`, {
+      json: {
+        node_selector,
+      },
+    })
+    .json<void>());
 }
 
 export function useUpdateGameNodeSelectorMutation(
@@ -1103,7 +1109,7 @@ export function useUpdateGameNodeSelectorMutation(
 }
 
 export async function deleteGameNodeSelector(game_id: number) {
-  return await api.delete(`${api_root}/game/${game_id}/node-selector`);
+  return await safeJson(api.delete(`${api_root}/game/${game_id}/node-selector`).json<void>());
 }
 
 export function useDeleteGameNodeSelectorMutation(

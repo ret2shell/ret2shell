@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/solid-query";
 import type { DiagnosticMarker } from "@widgets/editor";
 import type { ConfigMapList, NodeList } from "kubernetes-types/core/v1";
 import { DateTime } from "luxon";
-import api, { api_root, handleHttpError, inflyClient, toastSuccess } from ".";
+import api, { api_root, handleHttpError, inflyClient, safeJson, toastSuccess } from ".";
 
 export async function getClusterConfig() {
   return await api.get(`${api_root}/cluster/config`).json<ConfigMapList>();
@@ -106,7 +106,7 @@ export function useUpdateGlobalTrafficScriptMutation(
 }
 
 export async function deleteGlobalTrafficScript() {
-  return await api.delete(`${api_root}/cluster/traffic`);
+  return await safeJson(api.delete(`${api_root}/cluster/traffic`).json<void>());
 }
 
 export function useDeleteGlobalTrafficScriptMutation(
@@ -148,7 +148,7 @@ export function useUpdateGlobalLifecycleScriptMutation(
 }
 
 export async function deleteGlobalLifecycleScript() {
-  return await api.delete(`${api_root}/cluster/lifecycle`);
+  return await safeJson(api.delete(`${api_root}/cluster/lifecycle`).json<void>());
 }
 
 export function useDeleteGlobalLifecycleScriptMutation(
@@ -168,7 +168,7 @@ export function useDeleteGlobalLifecycleScriptMutation(
 }
 
 export async function updateDefaultNodeSelector(node_selector: string) {
-  return await api.patch(`${api_root}/cluster/node-selector`, { json: { node_selector } });
+  return await safeJson(api.patch(`${api_root}/cluster/node-selector`, { json: { node_selector } }).json<void>());
 }
 
 export function useUpdateDefaultNodeSelectorMutation(
@@ -188,7 +188,7 @@ export function useUpdateDefaultNodeSelectorMutation(
 }
 
 export async function deleteDefaultNodeSelector() {
-  return await api.delete(`${api_root}/cluster/node-selector`);
+  return await safeJson(api.delete(`${api_root}/cluster/node-selector`).json<void>());
 }
 
 export function useDeleteDefaultNodeSelectorMutation(

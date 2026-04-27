@@ -6,7 +6,7 @@ import { t } from "@storage/theme";
 import { useMutation, useQuery } from "@tanstack/solid-query";
 import type { SearchParamsOption } from "ky";
 import { createMemo } from "solid-js";
-import api, { api_root, handleHttpError, inflyClient, toastSuccess } from ".";
+import api, { api_root, handleHttpError, inflyClient, safeJson, toastSuccess } from ".";
 
 export async function getUserList(
   page?: number,
@@ -146,7 +146,7 @@ export function useUpdateUserMutation(
 }
 
 export async function deleteUser(id: number) {
-  return await api.delete(`${api_root}/user/${id}`);
+  return await safeJson(api.delete(`${api_root}/user/${id}`).json());
 }
 
 export function useDeleteUserMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {

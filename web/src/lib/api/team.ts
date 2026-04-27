@@ -6,7 +6,7 @@ import { t } from "@storage/theme";
 import { useMutation, useQuery } from "@tanstack/solid-query";
 import { HTTPError, type SearchParamsOption } from "ky";
 import { createMemo } from "solid-js";
-import api, { api_root, handleHttpError, inflyClient, toastSuccess } from ".";
+import api, { api_root, handleHttpError, inflyClient, safeJson, toastSuccess } from ".";
 
 export async function getTeamInfo(game_id: number, team_id: number, ex?: boolean) {
   return await api
@@ -103,7 +103,7 @@ export function useUpdateTeamInfoMutation(
 }
 
 export async function deleteTeam(game_id: number, team_id: number) {
-  return await api.delete(`${api_root}/game/${game_id}/team/${team_id}`);
+  return await safeJson(api.delete(`${api_root}/game/${game_id}/team/${team_id}`).json<void>());
 }
 
 export function useDeleteTeamMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
@@ -210,7 +210,7 @@ export function useUpdateSelfTeamMutation(
 }
 
 export async function leaveSelfTeam(game_id: number) {
-  return await api.delete(`${api_root}/game/${game_id}/team/self`);
+  return await safeJson(api.delete(`${api_root}/game/${game_id}/team/self`).json<void>());
 }
 
 export function useLeaveSelfTeamMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {

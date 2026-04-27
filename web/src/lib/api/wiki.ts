@@ -2,7 +2,7 @@ import type { Article } from "@models/article";
 import { t } from "@storage/theme";
 import { useMutation, useQuery } from "@tanstack/solid-query";
 import { createMemo } from "solid-js";
-import api, { api_root, handleHttpError, inflyClient, toastSuccess } from ".";
+import api, { api_root, handleHttpError, inflyClient, safeJson, toastSuccess } from ".";
 
 export async function getWikiTree() {
   return await api.get(`${api_root}/wiki`).json<Article[]>();
@@ -90,7 +90,7 @@ export function useUpdateWikiMutation(
 }
 
 export async function deleteWiki(id: number) {
-  return await api.delete(`${api_root}/wiki/${id}`);
+  return await safeJson(api.delete(`${api_root}/wiki/${id}`).json());
 }
 
 export function useDeleteWikiMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {

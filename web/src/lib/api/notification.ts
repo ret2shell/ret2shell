@@ -2,7 +2,7 @@ import type { Notification } from "@models/notification";
 import { t } from "@storage/theme";
 import { useMutation, useQuery } from "@tanstack/solid-query";
 import { createMemo } from "solid-js";
-import api, { api_root, handleHttpError, inflyClient, toastSuccess } from ".";
+import api, { api_root, handleHttpError, inflyClient, safeJson, toastSuccess } from ".";
 
 export async function getNotifications(game_id: number) {
   return await api.get(`${api_root}/game/${game_id}/notification`).json<Notification[]>();
@@ -54,7 +54,7 @@ export function useCreateNotificationMutation(
 }
 
 export async function deleteNotification(game_id: number, id: number) {
-  return await api.delete(`${api_root}/game/${game_id}/notification/${id}`);
+  return await safeJson(api.delete(`${api_root}/game/${game_id}/notification/${id}`).json<null>());
 }
 
 export function useDeleteNotificationMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {

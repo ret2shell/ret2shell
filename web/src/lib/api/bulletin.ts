@@ -3,7 +3,7 @@ import { t } from "@storage/theme";
 import { useMutation, useQuery } from "@tanstack/solid-query";
 import type { SearchParamsOption } from "ky";
 import { createMemo } from "solid-js";
-import api, { api_root, handleHttpError, inflyClient, toastSuccess } from ".";
+import api, { api_root, handleHttpError, inflyClient, safeJson, toastSuccess } from ".";
 
 export async function getBulletinList(page: number, page_size: number) {
   return await api
@@ -113,7 +113,7 @@ export function useUpdateBulletinMutation(
 }
 
 export async function deleteBulletin(id: number) {
-  return await api.delete(`${api_root}/bulletin/${id}`);
+  return await safeJson(api.delete(`${api_root}/bulletin/${id}`).json());
 }
 
 export function useDeleteBulletinMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
