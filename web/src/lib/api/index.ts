@@ -67,12 +67,15 @@ const api = ky.extend({
 
 export default api;
 
-export async function safeJson<T>(promise: Promise<T>): Promise<[T | undefined, Error | undefined]> {
+export async function safeJson<T>(promise: Promise<T>): Promise<T | undefined> {
   try {
-    const data = await promise;
-    return [data, undefined];
+    return await promise;
   } catch (error) {
-    return [undefined, error instanceof Error ? error : new Error(String(error))];
+    if (error instanceof SyntaxError && error.message.includes("Unexpected end of JSON input")) {
+      return undefined;
+    }
+
+    throw error;
   }
 }
 
