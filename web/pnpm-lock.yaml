@@ -4031,8 +4031,6 @@ snapshots:
 
   kubernetes-types@1.30.0: {}
 
-  ky@1.14.3: {}
-
   ky@2.0.1: {}
 
   lightningcss-android-arm64@1.32.0:
