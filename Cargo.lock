@@ -3189,6 +3189,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "nanoid"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8628de41fe064cc3f0cf07f3d299ee3e73521adaff72278731d5c8cae3797873"
+dependencies = [
+ "rand 0.9.4",
+]
+
+[[package]]
 name = "nanorand"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4091,7 +4100,7 @@ dependencies = [
  "async-trait",
  "biosvg",
  "hex",
- "nanoid",
+ "nanoid 0.5.0",
  "r2s-config",
  "ring",
  "serde",
@@ -4225,7 +4234,7 @@ dependencies = [
  "image",
  "infer",
  "mime",
- "nanoid",
+ "nanoid 0.5.0",
  "r2s-config",
  "r2s-database",
  "ring",
@@ -4299,7 +4308,7 @@ dependencies = [
  "heck 0.5.0",
  "hyper-util",
  "jsonwebtoken",
- "nanoid",
+ "nanoid 0.5.0",
  "once_cell",
  "owo-colors",
  "r2s-auditor",
@@ -4691,7 +4700,7 @@ dependencies = [
  "async-trait",
  "chrono",
  "hex",
- "nanoid",
+ "nanoid 0.4.0",
  "once_cell",
  "regex",
  "ring",
