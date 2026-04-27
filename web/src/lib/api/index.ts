@@ -15,7 +15,7 @@ const Ret2StreamTable = "SUCaeck4xrsbgtPwnGY56qpm9vWDIZAKVjlf.HFd,E17Tz0iNQ2yJML
 const OriginalStreamTable = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 const api = ky.extend({
-  parseJson: (text, { request, response }) => JSON.parse(text, luxonReviver) as unknown,
+  parseJson: (text, _context) => JSON.parse(text, luxonReviver) as unknown,
   stringifyJson: (data) => {
     let result = JSON.stringify(data, luxonReplacer);
     if (platformStore.enable_ret2codec) {
