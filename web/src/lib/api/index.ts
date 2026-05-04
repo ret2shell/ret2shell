@@ -71,7 +71,8 @@ export async function safeJson<T>(promise: Promise<T>): Promise<T | undefined> {
   try {
     return await promise;
   } catch (error) {
-    if (error instanceof SyntaxError && error.message.includes("Unexpected end of JSON input")) {
+    console.log(error);
+    if (error instanceof SyntaxError) {
       return undefined;
     }
 

@@ -56,19 +56,19 @@ export default function () {
                     <p class="max-w-2xl text-center text-sm opacity-60">{t("magic.about.license.description")}</p>
                     <div class="flex flex-row flex-wrap justify-center">
                       <Tag level="info" class="m-1">
-                        {t("magic.about.license.gplBase")}
+                        <span>{t("magic.about.license.gplBase")}</span>
                       </Tag>
                       <Tag level="success" class="m-1">
-                        {t("magic.about.license.copyleft")}
+                        <span>{t("magic.about.license.copyleft")}</span>
                       </Tag>
                       <Tag level="warning" class="m-1">
-                        {t("magic.about.license.commercial")}
+                        <span>{t("magic.about.license.commercial")}</span>
                       </Tag>
                       <Tag level="error" class="m-1">
-                        {t("magic.about.license.noUserFees")}
+                        <span>{t("magic.about.license.noUserFees")}</span>
                       </Tag>
                     </div>
-                    <Link href="/license" ghost size="sm" class="space-x-2">
+                    <Link href="https://ret.sh.cn/license" ghost size="sm" class="space-x-2">
                       <span class="shrink-0 icon-[fluent--open-20-regular] w-4 h-4" />
                       <span>{t("magic.about.license.view")}</span>
                     </Link>
