@@ -63,8 +63,8 @@ importers:
         specifier: ^5.100.9
         version: 5.100.9(@tanstack/solid-query@5.100.9(solid-js@1.9.12))(solid-js@1.9.12)
       '@xdsec/wsrx':
-        specifier: ^0.5.5
-        version: 0.5.5
+        specifier: ^0.5.6
+        version: 0.5.6
       '@xterm/addon-canvas':
         specifier: ^0.7.0
         version: 0.7.0(@xterm/xterm@5.5.0)
@@ -1039,8 +1039,8 @@ packages:
   '@vitest/utils@4.1.5':
     resolution: {integrity: sha512-76wdkrmfXfqGjueGgnb45ITPyUi1ycZ4IHgC2bhPDUfWHklY/q3MdLOAB+TF1e6xfl8NxNY0ZYaPCFNWSsw3Ug==}
 
-  '@xdsec/wsrx@0.5.5':
-    resolution: {integrity: sha512-agQ13POWJNSjK4Co/YumDRrM+WUFlXIcckZcKho3cEKOSI8liA8O2jHJuc1FVFT54+yoFBFBGq56swP+2tdOXA==}
+  '@xdsec/wsrx@0.5.6':
+    resolution: {integrity: sha512-LNhF5h4A+wGUBLTJ52/heBGq12quxaqMQNnG45ehyY1PcBb71pLvkYIRRqZL9x4NesbNHZ51+q65oGmrWsoBZA==}
     engines: {node: '>=18'}
 
   '@xterm/addon-canvas@0.7.0':
@@ -1633,10 +1633,6 @@ packages:
 
   kubernetes-types@1.30.0:
     resolution: {integrity: sha512-Dew1okvhM/SQcIa2rcgujNndZwU8VnSapDgdxlYoB84ZlpAD43U6KLAFqYo17ykSFGHNPrg0qry0bP+GJd9v7Q==}
-
-  ky@1.14.3:
-    resolution: {integrity: sha512-9zy9lkjac+TR1c2tG+mkNSVlyOpInnWdSMiue4F+kq8TwJSgv6o8jhLRg8Ho6SnZ9wOYUq/yozts9qQCfk7bIw==}
-    engines: {node: '>=18'}
 
   ky@2.0.2:
     resolution: {integrity: sha512-/GmXpo9F9W+f8n4Ivr2iH+7h7wL7jLbLKWkMlpflcCRb6kGjBfTlASEXaZ9qUgNTn4VgS0P2pwxxzQ4EM6Ulgg==}
@@ -3099,9 +3095,9 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
 
-  '@xdsec/wsrx@0.5.5':
+  '@xdsec/wsrx@0.5.6':
     dependencies:
-      ky: 1.14.3
+      ky: 2.0.2
       nanoid: 5.1.11
 
   '@xterm/addon-canvas@0.7.0(@xterm/xterm@5.5.0)':
@@ -4030,8 +4026,6 @@ snapshots:
       commander: 8.3.0
 
   kubernetes-types@1.30.0: {}
-
-  ky@1.14.3: {}
 
   ky@2.0.2: {}
 
