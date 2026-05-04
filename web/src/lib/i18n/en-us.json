@@ -1196,7 +1196,7 @@
             "label": "Container name",
             "placeholder": "Please enter the container name",
             "required": "Container name cannot be empty",
-            "mustBeValidName": "The container name must be a combination of lowercase letters, numbers, and underscores, and must start with a lowercase letter"
+            "mustBeValidName": "Use 3-40 characters, start with a lowercase letter, only use lowercase letters, numbers, or hyphens (-), and do not end with a hyphen"
           },
           "tag": {
             "label": "Image tag",

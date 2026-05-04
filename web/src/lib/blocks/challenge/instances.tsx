@@ -35,6 +35,8 @@ import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { createSignal, For, Match, onCleanup, Show, Switch } from "solid-js";
 import type { ChallengeWidgetProps } from ".";
 
+const CONTAINER_NAME_PATTERN = /^(?=.{3,40}$)[a-z](?:[a-z0-9-]*[a-z0-9])$/;
+
 function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () => void }) {
   const [form, { Form, Field }] = createForm<ChallengeImage>({
     initialValues: {
@@ -128,7 +130,7 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
           name="name"
           validate={[
             required(t("challenge.instance.image.form.containerName.required")),
-            pattern(/^[a-z0-9-]{3,40}$/, t("challenge.instance.image.form.containerName.mustBeValidName")),
+            pattern(CONTAINER_NAME_PATTERN, t("challenge.instance.image.form.containerName.mustBeValidName")),
           ]}
         >
           {(field, props) => (
