@@ -61,16 +61,11 @@ describe("Service", () => {
     service.start = start as Service["start"];
 
     await expect(
-      service.func(
-        {} as Stdio,
-        ["start"] as ParseEntry[],
-        "service start",
-        {
-          challenge: { id: 2, game_id: 1, name: "demo" },
-          game: { id: 1 },
-          team: { id: 3, name: "team" },
-        } as Parameters<Service["func"]>[3]
-      )
+      service.func({} as Stdio, ["start"] as ParseEntry[], "service start", {
+        challenge: { id: 2, game_id: 1, name: "demo" },
+        game: { id: 1 },
+        team: { id: 3, name: "team" },
+      } as Parameters<Service["func"]>[3])
     ).resolves.toBe(0);
     expect(start).toHaveBeenCalledOnce();
     expect(start.mock.contexts[0]).toBe(service);
