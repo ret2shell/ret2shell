@@ -41,6 +41,14 @@ vi.mock("@storage/theme", () => ({
   t: (key: string) => key,
 }));
 
+vi.mock("@xdsec/wsrx", () => ({
+  WsrxState: {
+    Invalid: 0,
+    Pending: 1,
+    Usable: 2,
+  },
+}));
+
 import { Service } from "./service";
 
 describe("Service", () => {
