@@ -4095,8 +4095,10 @@ version = "3.10.8"
 dependencies = [
  "base64",
  "clap",
+ "hex",
  "r2s-database",
  "reqwest 0.13.3",
+ "ring",
  "serde",
  "serde_json",
  "thiserror 2.0.18",

@@ -77,10 +77,15 @@ impl Media {
 
     fs::create_dir_all(self.path.join(&hash[..2]).join(&hash[2..4])).await?;
     let dest = hashed_path!(self.path, &hash);
-    if fs::metadata(&dest).await.is_ok() {
-      fs::remove_file(&temp_path).await?;
-    } else {
-      fs::rename(&temp_path, &dest).await?;
+    match fs::rename(&temp_path, &dest).await {
+      Ok(()) => {}
+      Err(err) if err.kind() == std::io::ErrorKind::AlreadyExists => {
+        let _ = fs::remove_file(&temp_path).await;
+      }
+      Err(err) => {
+        let _ = fs::remove_file(&temp_path).await;
+        return Err(err.into());
+      }
     }
     Ok(media::Model {
       id: 0,

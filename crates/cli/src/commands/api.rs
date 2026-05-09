@@ -44,7 +44,8 @@ impl ApiCommands {
     let value = match self.command {
       ApiCommand::Get(args) => {
         let query = parse_query(args.query)?;
-        client.get(&args.path, &query_refs(&query)).await?
+        let refs = query_refs(&query);
+        client.get(&args.path, &refs).await?
       }
       ApiCommand::Post(args) => send_body(client, Method::POST, args).await?,
       ApiCommand::Patch(args) => send_body(client, Method::PATCH, args).await?,
@@ -59,7 +60,8 @@ async fn send_body(
 ) -> CliResult<serde_json::Value> {
   let query = parse_query(args.query)?;
   let body = optional_json(args.body, args.body_file)?;
+  let refs = query_refs(&query);
   client
-    .send_json(method, &args.path, &query_refs(&query), body.as_ref())
+    .send_json(method, &args.path, &refs, body.as_ref())
     .await
 }

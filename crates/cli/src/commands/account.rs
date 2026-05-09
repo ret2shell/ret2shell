@@ -3,7 +3,10 @@ use reqwest::Method;
 use serde_json::json;
 
 use crate::{
-  client::Client, commands::common::JsonBodyArgs, error::CliResult, output::print_value,
+  client::Client,
+  commands::common::{JsonBodyArgs, parse_query, query_refs},
+  error::CliResult,
+  output::print_value,
 };
 
 #[derive(Args, Debug)]
@@ -179,16 +182,9 @@ impl AccountCommands {
       }
       AccountCommand::OAuthStatus => client.get("/account/oauth/bind", &[]).await?,
       AccountCommand::BindOAuth(args) => {
-        let mut query = vec![("service".to_owned(), args.service)];
-        for item in args.query {
-          if let Some((key, value)) = item.split_once('=') {
-            query.push((key.to_owned(), value.to_owned()));
-          }
-        }
-        let query = query
-          .iter()
-          .map(|(key, value)| (key.as_str(), value.clone()))
-          .collect::<Vec<_>>();
+        let mut query = parse_query(args.query)?;
+        query.insert(0, ("service".to_owned(), args.service));
+        let query = query_refs(&query);
         client
           .send_json(Method::POST, "/account/oauth/bind", &query, None)
           .await?
