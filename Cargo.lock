@@ -4090,6 +4090,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "r2s-cli"
+version = "3.10.8"
+dependencies = [
+ "base64",
+ "clap",
+ "r2s-database",
+ "reqwest 0.13.3",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tokio",
+]
+
+[[package]]
 name = "r2s-cluster"
 version = "3.10.8"
 dependencies = [
