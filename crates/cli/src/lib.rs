@@ -32,7 +32,7 @@ use crate::{
 
 #[derive(Parser, Debug)]
 #[command(
-  author = "Reverier-Xu <reverier.xu@woooo.tech>",
+  author = "ZacharyZcR <ZacharyZcR1984@gmail.com>",
   version,
   about = "Ret2Shell command line client"
 )]

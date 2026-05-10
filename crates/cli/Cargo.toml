@@ -23,5 +23,5 @@ thiserror    = { workspace = true }
 tokio        = { workspace = true }
 
 [[bin]]
-name = "r2s"
+name = "r2s-cli"
 path = "src/main.rs"
