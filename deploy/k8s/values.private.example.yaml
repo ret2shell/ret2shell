@@ -1,6 +1,6 @@
 platform:
   image:
-    tag: "3.10.8"
+    tag: "3.10.9"
   config:
     auth:
       signingKey: replace-with-a-long-random-string

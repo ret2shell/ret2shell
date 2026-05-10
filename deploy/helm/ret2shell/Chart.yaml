@@ -2,5 +2,5 @@ apiVersion: v2
 name: ret2shell
 description: Self-maintained Helm chart for Ret2Shell and its optional dependencies
 type: application
-version: 3.10.8
-appVersion: "3.10.8"
+version: 3.10.9
+appVersion: "3.10.9"

@@ -65,7 +65,7 @@ The default local PV paths intentionally stay under `/srv/ret2shell/backend/stor
 5. Install from a GitHub release asset. This is the recommended path because the packaged chart is already rewritten to the release version:
 
    ```bash
-   R2S_VERSION=3.10.8
+   R2S_VERSION=3.10.9
    helm upgrade --install ret2shell \
      "https://github.com/ret2shell/ret2shell/releases/download/${R2S_VERSION}/ret2shell-${R2S_VERSION}.tgz" \
      -n ret2shell-platform \
@@ -102,7 +102,7 @@ kubectl label nodes ret2shell-worker-1 ret.sh.cn/workload=challenge
 Upgrade by changing the version and rerunning `helm upgrade --install`:
 
 ```bash
-R2S_VERSION=3.10.8
+R2S_VERSION=3.10.9
 helm upgrade --install ret2shell \
   "https://github.com/ret2shell/ret2shell/releases/download/${R2S_VERSION}/ret2shell-${R2S_VERSION}.tgz" \
   -n ret2shell-platform \
