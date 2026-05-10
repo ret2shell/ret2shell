@@ -1,6 +1,7 @@
 mod auth;
 mod client;
 mod commands;
+pub mod config;
 mod error;
 mod output;
 
@@ -28,6 +29,7 @@ use crate::{
     team::TeamCommands,
     user::UserCommands,
   },
+  config::ClientConfig,
 };
 
 #[derive(Parser, Debug)]
@@ -42,12 +44,6 @@ pub struct Cli {
 
   #[arg(long)]
   pub token: Option<String>,
-
-  #[arg(long)]
-  pub account: Option<String>,
-
-  #[arg(long)]
-  pub password: Option<String>,
 
   #[arg(long, global = true)]
   pub json: bool,
@@ -77,15 +73,24 @@ pub enum Commands {
 }
 
 pub async fn run(cli: Cli) -> CliResult<()> {
+  let config = ClientConfig::load().unwrap_or_default();
+
   let base_url = cli
     .base_url
     .or_else(|| env::var("R2S_BASE_URL").ok())
+    .or(config.base_url)
     .unwrap_or_else(|| "http://127.0.0.1:8080/api".to_owned());
-  let auth = Auth::from_parts(
-    cli.token.or_else(|| env::var("R2S_TOKEN").ok()),
-    cli.account.or_else(|| env::var("R2S_ACCOUNT").ok()),
-    cli.password.or_else(|| env::var("R2S_PASSWORD").ok()),
-  )?;
+
+  let token = cli
+    .token
+    .or_else(|| env::var("R2S_TOKEN").ok())
+    .or(config.token);
+
+  let auth = match token {
+    Some(t) => Auth::Bearer(t),
+    None => Auth::None,
+  };
+
   let client = Client::new(base_url, auth)?;
   match cli.command {
     Commands::Account(command) => command.run(&client, cli.json).await,

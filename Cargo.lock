@@ -4091,9 +4091,8 @@ dependencies = [
 
 [[package]]
 name = "r2s-cli"
-version = "3.10.8"
+version = "3.10.9"
 dependencies = [
- "base64",
  "clap",
  "hex",
  "r2s-database",
@@ -4103,6 +4102,7 @@ dependencies = [
  "serde_json",
  "thiserror 2.0.18",
  "tokio",
+ "toml 1.1.2+spec-1.1.0",
 ]
 
 [[package]]

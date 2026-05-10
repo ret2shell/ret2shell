@@ -5,6 +5,7 @@ use ring::digest::{Context, SHA256};
 
 use crate::{
   client::Client,
+  config::ClientConfig,
   error::{CliError, CliResult},
   output::print_value,
 };
@@ -18,6 +19,9 @@ pub struct AuthCommands {
 #[derive(Subcommand, Debug)]
 enum AuthCommand {
   Login(LoginArgs),
+  Token(TokenArgs),
+  Status,
+  Logout,
 }
 
 #[derive(Args, Debug)]
@@ -26,6 +30,11 @@ struct LoginArgs {
   account: Option<String>,
   #[arg(long)]
   password: Option<String>,
+}
+
+#[derive(Args, Debug)]
+struct TokenArgs {
+  token: String,
 }
 
 impl AuthCommands {
@@ -65,7 +74,38 @@ impl AuthCommands {
         let value = client
           .login(account, password, captcha_id.to_owned(), answer)
           .await?;
+
+        if let Some(token) = value["token"].as_str() {
+          let mut config = ClientConfig::load()?;
+          config.token = Some(token.to_owned());
+          config.base_url = Some(client.base_url().to_owned());
+          config.save()?;
+        }
+
         print_value(value, json)
+      }
+      AuthCommand::Token(args) => {
+        let mut config = ClientConfig::load()?;
+        config.token = Some(args.token);
+        if config.base_url.is_none() {
+          config.base_url = Some(client.base_url().to_owned());
+        }
+        config.save()?;
+        print_value(serde_json::json!({"status": "token saved"}), json)
+      }
+      AuthCommand::Status => {
+        let config = ClientConfig::load()?;
+        let value = serde_json::json!({
+          "base_url": config.base_url,
+          "authenticated": config.token.is_some(),
+        });
+        print_value(value, json)
+      }
+      AuthCommand::Logout => {
+        let mut config = ClientConfig::load()?;
+        config.token = None;
+        config.save()?;
+        print_value(serde_json::json!({"status": "logged out"}), json)
       }
     }
   }

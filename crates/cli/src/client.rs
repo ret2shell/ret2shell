@@ -3,7 +3,6 @@ use std::{
   time::{SystemTime, UNIX_EPOCH},
 };
 
-use base64::{Engine, engine::general_purpose::STANDARD};
 use reqwest::{
   Client as HttpClient, Method, Response, Url,
   header::{AUTHORIZATION, CONTENT_TYPE, HeaderMap, HeaderValue},
@@ -21,25 +20,6 @@ use crate::{
 pub enum Auth {
   None,
   Bearer(String),
-  Basic { account: String, password: String },
-}
-
-impl Auth {
-  pub fn from_parts(
-    token: Option<String>, account: Option<String>, password: Option<String>,
-  ) -> CliResult<Self> {
-    if let Some(token) = token {
-      return Ok(Self::Bearer(token));
-    }
-
-    match (account, password) {
-      (Some(account), Some(password)) => Ok(Self::Basic { account, password }),
-      (None, None) => Ok(Self::None),
-      _ => Err(CliError::Config(
-        "account and password must be provided together".to_owned(),
-      )),
-    }
-  }
 }
 
 pub struct Client {
@@ -60,6 +40,10 @@ impl Client {
       auth,
       http: HttpClient::new(),
     })
+  }
+
+  pub fn base_url(&self) -> &str {
+    &self.base_url
   }
 
   pub async fn login(
@@ -180,23 +164,12 @@ impl Client {
 
   fn auth_headers(&self) -> CliResult<HeaderMap> {
     let mut headers = HeaderMap::new();
-    match &self.auth {
-      Auth::None => {}
-      Auth::Bearer(token) => {
-        headers.insert(
-          AUTHORIZATION,
-          HeaderValue::from_str(&format!("Bearer {token}"))
-            .map_err(|_| CliError::Config("invalid bearer token".to_owned()))?,
-        );
-      }
-      Auth::Basic { account, password } => {
-        let token = STANDARD.encode(format!("{account}:{password}"));
-        headers.insert(
-          AUTHORIZATION,
-          HeaderValue::from_str(&format!("Basic {token}"))
-            .map_err(|_| CliError::Config("invalid basic credential".to_owned()))?,
-        );
-      }
+    if let Auth::Bearer(token) = &self.auth {
+      headers.insert(
+        AUTHORIZATION,
+        HeaderValue::from_str(&format!("Bearer {token}"))
+          .map_err(|_| CliError::Config("invalid bearer token".to_owned()))?,
+      );
     }
     Ok(headers)
   }
