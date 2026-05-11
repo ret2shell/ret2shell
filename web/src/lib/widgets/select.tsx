@@ -84,9 +84,10 @@ export default function (
       onValueChange={(e) => {
         if (selectEl) {
           const nextValue = e.value[0] || "";
+          const prevValue = selectEl.value;
           selectEl.value = nextValue;
 
-          if (!forwardingInputEvent) {
+          if (!forwardingInputEvent && prevValue !== nextValue) {
             forwardingInputEvent = true;
             queueMicrotask(() => {
               try {
