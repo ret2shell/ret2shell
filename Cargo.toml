@@ -65,7 +65,7 @@ serde_repr         = "0.1"
 systemstat         = { version = "0.2", features = ["serde"] }
 tar                = "0.4"
 thiserror          = "2.0"
-tokio              = { version = "1.50", features = ["full"] }
+tokio              = { version = "1.52", features = ["full"] }
 tokio-stream       = "0.1"
 tokio-util         = { version = "0.7", features = ["codec"] }
 toml               = "1.0"
@@ -98,7 +98,7 @@ version  = "0.8"
 [workspace.dependencies.jsonwebtoken]
 default-features = false
 features         = ["aws_lc_rs"]
-version          = "10.2"
+version          = "10.4"
 
 [workspace.dependencies.tower_governor]
 default-features = false
