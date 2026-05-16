@@ -3,7 +3,7 @@ use thiserror::Error;
 #[derive(Error, Debug)]
 pub enum CacheError {
   #[error("redis error: {0}")]
-  Redis(#[from] fred::error::Error),
+  Redis(#[from] redis::RedisError),
   #[error("serde error: {0}")]
   Serde(#[from] serde_json::Error),
   #[error("domain needed for key: {0}")]

@@ -11,7 +11,7 @@ rust-version = { workspace = true }
 version      = { workspace = true }
 
 [dependencies]
-fred       = { workspace = true }
+redis      = { workspace = true }
 serde      = { workspace = true }
 serde_json = { workspace = true }
 thiserror  = { workspace = true }
@@ -21,3 +21,6 @@ r2s-config = { workspace = true }
 
 [lib]
 path = "src/lib.rs"
+
+[dev-dependencies]
+tokio = { workspace = true }
