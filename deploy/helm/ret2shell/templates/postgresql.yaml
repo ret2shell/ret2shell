@@ -210,7 +210,7 @@ spec:
     - metadata:
         name: data
         labels:
-          {{- include "ret2shell.commonLabels" . | nindent 10 }}
+          {{- include "ret2shell.volumeLabels" . | nindent 10 }}
           app.kubernetes.io/component: postgresql
       spec:
         accessModes:
