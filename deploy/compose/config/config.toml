@@ -21,8 +21,9 @@ path = '/var/lib/ret2shell/bucket'
 # ? url format:
 # ? - redis://username:password@foo.com:6379/1
 # ? - rediss://username:password@foo.com:6379/1
-# ? - redis-cluster://username:password@foo.com:30001?node=bar.com:30002&node=baz.com:30003
-# ? - redis-sentinel://username:password@foo.com:6379/1?sentinelServiceName=fakename&node=foo.com:30001&node=bar.com:30002
+# ? - redis-cluster://host:port,host:port,… (cluster, comma-separated node list)
+# ? - rediss-cluster://host:port,host:port,… (cluster over TLS)
+# ? Sentinel (redis-sentinel:// / rediss-sentinel://) is not yet supported.
 url = 'redis://cache:6379'
 
 # * Captcha config

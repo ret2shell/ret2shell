@@ -1,7 +1,12 @@
 use std::fmt::Display;
 
 use r2s_config::cache;
-use redis::{AsyncCommands, SetExpiry, SetOptions, aio::MultiplexedConnection};
+use redis::{
+  AsyncCommands, Cmd, Pipeline, RedisFuture, SetExpiry, SetOptions, Value,
+  aio::{ConnectionLike, ConnectionManager},
+  cluster::ClusterClient,
+  cluster_async::ClusterConnection,
+};
 use serde::{Deserialize, Serialize};
 use tracing::debug;
 pub use traits::CacheError;
@@ -20,14 +25,66 @@ macro_rules! with_domain {
   };
 }
 
+/// A unified Redis connection abstraction that supports both standalone
+/// (single-node) and cluster deployments.
+///
+/// `RedisConnection` delegates all `ConnectionLike` trait methods to the
+/// underlying connection type, which means `AsyncCommands` and all raw
+/// `redis::cmd(…)` operations work transparently regardless of the backend.
+#[derive(Clone)]
+enum RedisConnection {
+  Standalone(ConnectionManager),
+  Cluster(ClusterConnection),
+}
+
+impl std::fmt::Debug for RedisConnection {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    match self {
+      Self::Standalone(_) => f
+        .debug_tuple("Standalone")
+        .field(&"ConnectionManager")
+        .finish(),
+      Self::Cluster(_) => f
+        .debug_tuple("Cluster")
+        .field(&"ClusterConnection")
+        .finish(),
+    }
+  }
+}
+
+impl ConnectionLike for RedisConnection {
+  fn req_packed_command<'a>(&'a mut self, cmd: &'a Cmd) -> RedisFuture<'a, Value> {
+    match self {
+      Self::Standalone(mgr) => mgr.req_packed_command(cmd),
+      Self::Cluster(cluster) => cluster.req_packed_command(cmd),
+    }
+  }
+
+  fn req_packed_commands<'a>(
+    &'a mut self, cmd: &'a Pipeline, offset: usize, count: usize,
+  ) -> RedisFuture<'a, Vec<Value>> {
+    match self {
+      Self::Standalone(mgr) => mgr.req_packed_commands(cmd, offset, count),
+      Self::Cluster(cluster) => cluster.req_packed_commands(cmd, offset, count),
+    }
+  }
+
+  fn get_db(&self) -> i64 {
+    match self {
+      Self::Standalone(mgr) => ConnectionLike::get_db(mgr),
+      Self::Cluster(cluster) => ConnectionLike::get_db(cluster),
+    }
+  }
+}
+
 #[derive(Debug, Clone)]
 pub struct Cache {
-  conn: MultiplexedConnection,
+  conn: RedisConnection,
   domain: Option<String>,
 }
 
 impl Cache {
-  pub fn new(conn: MultiplexedConnection) -> Self {
+  pub(crate) fn new(conn: RedisConnection) -> Self {
     Cache { conn, domain: None }
   }
 
@@ -107,10 +164,13 @@ impl Cache {
   ///
   /// * `key` - The key to set.
   /// * `value` - The value to set.
-  /// * `ttl` - The time to live for the key in seconds.
+  /// * `ttl` - The time to live for the key in seconds. Must be positive.
   pub async fn set_ex(
     &self, key: impl Display, value: impl Serialize + Send, ttl: i64,
   ) -> Result<(), CacheError> {
+    if ttl <= 0 {
+      return Err(CacheError::Other("ttl must be positive".into()));
+    }
     let domain_key = with_domain!(self.domain, key);
     let value = serde_json::to_string(&value)?;
     let mut conn = self.conn.clone();
@@ -132,6 +192,9 @@ impl Cache {
   }
 
   pub async fn expire(&self, key: impl Display, ttl: i64) -> Result<(), CacheError> {
+    if ttl <= 0 {
+      return Err(CacheError::Other("ttl must be positive".into()));
+    }
     let domain_key = with_domain!(self.domain, key);
     let mut conn = self.conn.clone();
     let _: bool = conn.expire(&domain_key, ttl).await?;
@@ -191,31 +254,71 @@ impl Cache {
   }
 }
 
-/// Init the cache manager.
+/// Initialize the cache manager.
 ///
-/// * `url` - The redis url, supports centralized / clustered and
-///   sentinel-layered node.
-/// * `max_connections` - The max connections for each node.
+/// Supports the following URL schemes:
+/// - `redis://host:port` — standalone (single-node) Redis.
+/// - `rediss://host:port` — standalone Redis over TLS.
+/// - `redis-cluster://host:port,host:port,…` — Redis cluster. Each element
+///   after the scheme is a bare `host:port`, and `redis://` is prepended
+///   automatically.
+/// - `rediss-cluster://host:port,host:port,…` — Redis cluster over TLS. Each
+///   element gets `rediss://` prepended.
+///
+/// Sentinel (`redis-sentinel://` / `rediss-sentinel://`) is not yet
+/// supported.
 pub async fn initialize(
   config: &Option<cache::Config>, flush: Option<bool>,
 ) -> Result<Cache, CacheError> {
   let config = config.clone().ok_or(CacheError::ConfigNeeded)?;
   debug!(url = ?config.url, "initialize cache manager");
-  let client = redis::Client::open(config.url.as_str())?;
-  let conn = client.get_multiplexed_async_connection().await?;
+
+  let conn = match config.url.as_str() {
+    url if url.starts_with("redis-cluster://") => {
+      let nodes_str = url.strip_prefix("redis-cluster://").unwrap();
+      let nodes: Vec<String> = nodes_str
+        .split(',')
+        .map(|n| format!("redis://{n}"))
+        .collect();
+      let client = ClusterClient::new(nodes)?;
+      let cluster_conn = client.get_async_connection().await?;
+      RedisConnection::Cluster(cluster_conn)
+    }
+    url if url.starts_with("rediss-cluster://") => {
+      let nodes_str = url.strip_prefix("rediss-cluster://").unwrap();
+      let nodes: Vec<String> = nodes_str
+        .split(',')
+        .map(|n| format!("rediss://{n}"))
+        .collect();
+      let client = ClusterClient::new(nodes)?;
+      let cluster_conn = client.get_async_connection().await?;
+      RedisConnection::Cluster(cluster_conn)
+    }
+    url if url.starts_with("redis-sentinel://") | url.starts_with("rediss-sentinel://") => {
+      return Err(CacheError::Other(
+        "sentinel mode is not yet supported, use redis:// or redis-cluster:// instead".into(),
+      ));
+    }
+    url => {
+      let client = redis::Client::open(url)?;
+      let conn = client.get_connection_manager().await?;
+      RedisConnection::Standalone(conn)
+    }
+  };
+
+  let cache = Cache::new(conn);
+
   if flush.unwrap_or(false) {
-    let mut conn = conn.clone();
-    redis::cmd("FLUSHALL").query_async::<()>(&mut conn).await?;
+    cache.flush().await?;
   }
-  Ok(Cache::new(conn))
+
+  Ok(cache)
 }
 
+/// Tear down the cache by flushing all data. Reuses [`initialize`] to
+/// handle URL scheme detection, then drops the connection immediately.
 pub async fn down(config: &Option<cache::Config>) -> Result<(), CacheError> {
-  let config = config.clone().ok_or(CacheError::ConfigNeeded)?;
-  debug!(url = ?config.url, "down cache manager");
-  let client = redis::Client::open(config.url.as_str())?;
-  let mut conn = client.get_multiplexed_async_connection().await?;
-  redis::cmd("FLUSHALL").query_async::<()>(&mut conn).await?;
+  initialize(config, Some(true)).await?;
   Ok(())
 }
 
