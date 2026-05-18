@@ -85,7 +85,7 @@
     "@iconify/tailwind4": "^1.2.3",
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.3.0",
-    "@types/howler": "^2.2.12",
+    "@types/howler": "^2.2.13",
     "@types/luxon": "^3.7.1",
     "@types/node": "^25.8.0",
     "@types/shell-quote": "^1.7.5",
