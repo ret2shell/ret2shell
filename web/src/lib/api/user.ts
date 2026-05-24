@@ -253,13 +253,7 @@ export function useUserSubmissions({
   return useQuery(
     () => ({
       queryKey: keys(),
-      queryFn: async () =>
-        await getUserSubmissions(
-          id(),
-          page() ?? 1,
-          page_size() ?? 10,
-          game_id?.() ?? undefined
-        ),
+      queryFn: async () => await getUserSubmissions(id(), page() ?? 1, page_size() ?? 10, game_id?.() ?? undefined),
       enabled: enabled?.(),
       throwOnError: (err: Error) => {
         handleHttpError(err, t("user.errors.fetchSubmissions.title"));
@@ -281,7 +275,6 @@ export type GameStats = {
 export type ChallengeStats = {
   challenge_id: number;
   challenge_name: string;
-  game_name: string;
   solved: boolean;
   total_submissions: number;
   failed_submissions: number;

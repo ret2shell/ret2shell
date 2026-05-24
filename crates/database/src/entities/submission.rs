@@ -307,27 +307,11 @@ where
   }
   if only_solved {
     sql = sql.filter(Column::Solved.eq(true));
-    if team_id.is_some() {
-      sql = sql
-        .filter(Column::TeamId.is_not_null())
-        .filter(team::Column::State.gte(team::State::Hidden))
-        .order_by_asc(Column::ChallengeId)
-        .order_by_asc(Column::TeamId)
-        .order_by_asc(Column::CreatedAt)
-        .order_by_asc(Column::Id)
-        .distinct_on([(Entity, Column::ChallengeId), (Entity, Column::TeamId)]);
-    } else {
-      sql = sql
-        .order_by_asc(Column::ChallengeId)
-        .order_by_asc(Column::UserId)
-        .order_by_asc(Column::CreatedAt)
-        .order_by_asc(Column::Id)
-        .distinct_on([(Entity, Column::ChallengeId), (Entity, Column::UserId)]);
-    }
-  } else {
-    sql = sql.order_by_desc(Column::CreatedAt);
   }
   sql = sql.column_as(challenge::Column::Score, "score");
+  if !only_solved {
+    sql = sql.order_by_desc(Column::CreatedAt);
+  }
   let paginator = sql.into_model().paginate(db, page_size);
   let total = paginator.num_items().await?;
   let submissions = paginator.fetch_page(page - 1).await?;
@@ -343,6 +327,49 @@ where
   } else {
     submissions
   };
+  Ok((submissions, total))
+}
+
+#[allow(clippy::too_many_arguments)]
+pub async fn get_user_solved_challenges<C>(
+  db: &C, page: u64, page_size: u64, game_id: Option<i64>, user_id: i64,
+) -> Result<(Vec<ExModel>, u64), DbErr>
+where
+  C: ConnectionTrait, {
+  let page_size = page_size.max(1);
+  let page = page.max(1);
+  let mut sql = Entity::find()
+    .join(JoinType::LeftJoin, Relation::Team.def())
+    .join(JoinType::InnerJoin, Relation::Challenge.def())
+    .join(JoinType::InnerJoin, Relation::User.def())
+    .column_as(user::Column::Nickname, "user_name")
+    .column_as(team::Column::Name, "team_name")
+    .column_as(challenge::Column::Name, "challenge_name")
+    .filter(Column::UserId.eq(user_id))
+    .filter(Column::Solved.eq(true))
+    .filter(Column::TeamId.is_not_null())
+    .filter(team::Column::State.gte(team::State::Hidden));
+  if let Some(game_id) = game_id {
+    sql = sql.filter(challenge::Column::GameId.eq(game_id));
+  }
+  sql = sql
+    .order_by_asc(Column::ChallengeId)
+    .order_by_asc(Column::UserId)
+    .order_by_asc(Column::CreatedAt)
+    .order_by_asc(Column::Id)
+    .distinct_on([(Entity, Column::ChallengeId), (Entity, Column::UserId)]);
+  sql = sql.column_as(challenge::Column::Score, "score");
+  let paginator = sql.into_model().paginate(db, page_size);
+  let total = paginator.num_items().await?;
+  let submissions = paginator.fetch_page(page - 1).await?;
+  let submissions = submissions
+    .into_iter()
+    .map(|r| ExModel {
+      content: None,
+      result: None,
+      ..r
+    })
+    .collect();
   Ok((submissions, total))
 }
 

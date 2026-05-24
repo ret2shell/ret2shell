@@ -1,7 +1,6 @@
 import { handleHttpError } from "@api";
-import { getUser, getUserSubmissions, getUserTeams, useUserSubmissionStats } from "@api/user";
+import { getUser, getUserTeams, useUserSubmissionStats, useUserSubmissions } from "@api/user";
 import SidebarLayout from "@blocks/sidebar-layout";
-import type { Submission } from "@models/submission";
 import type { Team } from "@models/team";
 import type { User } from "@models/user";
 import { createBreakpoints } from "@solid-primitives/media";
@@ -15,7 +14,7 @@ import LoadingTips from "@widgets/loading-tips";
 import Pagination from "@widgets/pagination";
 import Select from "@widgets/select";
 import clsx from "clsx";
-import { createEffect, createMemo, createResource, createSignal, For, Match, Show, Switch, untrack } from "solid-js";
+import { createEffect, createMemo, createSignal, For, Match, Show, Switch, untrack } from "solid-js";
 import { Transition } from "solid-transition-group";
 import Sidebar from "./_blocks/sidebar";
 
@@ -26,11 +25,8 @@ export default function () {
   const navigate = useNavigate();
   const userId = () => Number.parseInt(params.user ?? "", 10) || null;
   const [teams, setTeams] = createSignal([] as Team[]);
-  const [submissions, setSubmissions] = createSignal([] as Submission[]);
-  const [submissionTotal, setSubmissionTotal] = createSignal(0);
   const [submissionPage, setSubmissionPage] = createSignal(1);
   const [selectedGameId, setSelectedGameId] = createSignal<string | null>(null);
-  const [loadingSubmissions, setLoadingSubmissions] = createSignal(false);
   const pageSize = 10;
 
   createEffect(() => {
@@ -94,6 +90,17 @@ export default function () {
     enabled: () => !!userId(),
   });
 
+  const submissionsQuery = useUserSubmissions({
+    id: () => userId()!,
+    page: () => submissionPage(),
+    page_size: () => pageSize,
+    game_id: () => {
+      const val = selectedGameId();
+      return val ? Number.parseInt(val, 10) : null;
+    },
+    enabled: () => !!userId(),
+  });
+
   const chartOption = createMemo(() => {
     const stats = submissionStats.data;
     if (!stats || stats.challenges.length === 0) return null;
@@ -148,29 +155,6 @@ export default function () {
         },
       ],
     };
-  });
-
-  createEffect(() => {
-    const uid = userId();
-    const page = submissionPage();
-    const gameId = selectedGameId();
-    if (!uid) return;
-    untrack(async () => {
-      setLoadingSubmissions(true);
-      try {
-        const [data, total] = await getUserSubmissions(
-          uid,
-          page,
-          pageSize,
-          gameId ? Number.parseInt(gameId, 10) : undefined
-        );
-        setSubmissions(data);
-        setSubmissionTotal(total);
-      } catch (err) {
-        handleHttpError(err as Error, t("user.errors.fetchSubmissions.title"));
-      }
-      setLoadingSubmissions(false);
-    });
   });
 
   const matches = createBreakpoints(breakpoints);
@@ -232,7 +216,7 @@ export default function () {
                   size="sm"
                   class="w-64"
                   items={gameOptions()}
-                  value={selectedGameId() ?? ""}
+                  value={selectedGameId() ? [selectedGameId()!] : []}
                   onValueChange={(e) => {
                     setSelectedGameId(e.value[0] || null);
                     setSubmissionPage(1);
@@ -246,10 +230,10 @@ export default function () {
                 </div>
               </Show>
               <Switch>
-                <Match when={loadingSubmissions()}>
+                <Match when={submissionsQuery.isLoading}>
                   <LoadingTips />
                 </Match>
-                <Match when={submissions().length === 0}>
+                <Match when={!submissionsQuery.data || submissionsQuery.data[0].length === 0}>
                   <div class="h-12 flex items-center justify-center opacity-60">
                     <span>{t("user.submissions.empty")}</span>
                   </div>
@@ -268,15 +252,13 @@ export default function () {
                         </tr>
                       </thead>
                       <tbody>
-                        <For each={submissions()}>
+                        <For each={submissionsQuery.data[0]}>
                           {(sub) => (
                             <tr class="border-b border-b-layer-content/10 hover:bg-layer-content/5">
                               <td class="text-start py-3">
                                 <Show
                                   when={sub.team_id && teamIdToGameId().has(sub.team_id)}
-                                  fallback={
-                                    <span class="opacity-60">{sub.challenge_name}</span>
-                                  }
+                                  fallback={<span class="opacity-60">{sub.challenge_name}</span>}
                                 >
                                   <A
                                     href={`/games/${teamIdToGameId().get(sub.team_id)}/challenges?challenge=${sub.challenge_id}`}
@@ -294,30 +276,22 @@ export default function () {
                               <td class="text-center py-3">
                                 <Show
                                   when={sub.solved}
-                                  fallback={
-                                    <span class="text-error">
-                                      {t("user.submissions.failed")}
-                                    </span>
-                                  }
+                                  fallback={<span class="text-error">{t("user.submissions.failed")}</span>}
                                 >
-                                  <span class="text-success">
-                                    {t("user.submissions.solved")}
-                                  </span>
+                                  <span class="text-success">{t("user.submissions.solved")}</span>
                                 </Show>
                               </td>
-                              <td class="text-end py-3 opacity-60">
-                                {sub.created_at.toFormat("yyyy-MM-dd HH:mm")}
-                              </td>
+                              <td class="text-end py-3 opacity-60">{sub.created_at.toFormat("yyyy-MM-dd HH:mm")}</td>
                             </tr>
                           )}
                         </For>
                       </tbody>
                     </table>
                   </div>
-                  <Show when={submissionTotal() > pageSize}>
+                  <Show when={submissionsQuery.data && submissionsQuery.data[1] > pageSize}>
                     <div class="flex justify-center py-4">
                       <Pagination
-                        count={submissionTotal()}
+                        count={submissionsQuery.data![1]}
                         pageSize={pageSize}
                         page={submissionPage()}
                         onPageChange={(p) => setSubmissionPage(p.page)}
