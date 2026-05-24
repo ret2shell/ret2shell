@@ -309,9 +309,7 @@ where
     sql = sql.filter(Column::Solved.eq(true));
   }
   sql = sql.column_as(challenge::Column::Score, "score");
-  if !only_solved {
-    sql = sql.order_by_desc(Column::CreatedAt);
-  }
+  sql = sql.order_by_desc(Column::CreatedAt);
   let paginator = sql.into_model().paginate(db, page_size);
   let total = paginator.num_items().await?;
   let submissions = paginator.fetch_page(page - 1).await?;
