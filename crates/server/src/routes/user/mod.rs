@@ -7,11 +7,11 @@ use axum::{
 };
 use r2s_cache::Cache;
 use r2s_database::{
-  ip, oauth, team,
+  ip, oauth, submission, team,
   user::{self, Permission},
 };
 use r2s_migrator::Database;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use tracing::info;
 
 use crate::{
@@ -39,6 +39,8 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         )))
         .route("/", get(get_user))
         .route("/team", get(get_teams))
+        .route("/submission", get(get_submissions))
+        .route("/submission/stats", get(get_submission_stats))
         .route_layer(middleware::from_fn_with_state(
           state.clone(),
           data::prepare_data!(user, false, id, account, nickname),
@@ -54,6 +56,31 @@ struct UserListQuery {
   order: Option<String>,
   filter: Option<String>,
   institute_id: Option<i64>,
+}
+
+#[derive(Deserialize)]
+struct SubmissionQuery {
+  page: Option<u64>,
+  page_size: Option<u64>,
+  game_id: Option<i64>,
+}
+
+#[derive(Serialize)]
+struct ChallengeStats {
+  challenge_id: i64,
+  challenge_name: String,
+  game_name: String,
+  solved: bool,
+  total_submissions: u64,
+  failed_submissions: u64,
+}
+
+#[derive(Serialize)]
+struct SubmissionStats {
+  total_submissions: u64,
+  total_solved: u64,
+  total_failed: u64,
+  challenges: Vec<ChallengeStats>,
 }
 
 async fn get_user_list(
@@ -195,4 +222,76 @@ async fn get_oauth_list(
 ) -> Result<impl IntoResponse, ResponseError> {
   let oauths = oauth::get_list_ex(&db.conn, user.id).await?;
   Ok(Json(oauths))
+}
+
+async fn get_submissions(
+  State(ref db): State<Database>, Extension(user): Extension<user::Model>,
+  Query(query): Query<SubmissionQuery>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let (submissions, total) = submission::get_page_ex(
+    &db.conn,
+    page(query.page),
+    page_size(query.page_size, 10),
+    true,
+    false,
+    query.game_id,
+    None,
+    None,
+    Some(user.id),
+  )
+  .await?;
+  Ok(Json((submissions, total)))
+}
+
+async fn get_submission_stats(
+  State(ref db): State<Database>, Extension(user): Extension<user::Model>,
+  Query(query): Query<SubmissionQuery>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let submissions = submission::get_list_ex(
+    &db.conn,
+    false,
+    false,
+    query.game_id,
+    None,
+    None,
+    Some(user.id),
+    true,
+  )
+  .await?;
+
+  use std::collections::HashMap;
+  let mut challenge_map: HashMap<i64, ChallengeStats> = HashMap::new();
+  let mut total_submissions: u64 = 0;
+  let mut total_solved: u64 = 0;
+
+  for sub in &submissions {
+    total_submissions += 1;
+    let entry = challenge_map.entry(sub.challenge_id).or_insert(ChallengeStats {
+      challenge_id: sub.challenge_id,
+      challenge_name: sub.challenge_name.clone().unwrap_or_default(),
+      game_name: String::new(),
+      solved: false,
+      total_submissions: 0,
+      failed_submissions: 0,
+    });
+    entry.total_submissions += 1;
+    if sub.solved == Some(true) {
+      entry.solved = true;
+      total_solved += 1;
+    } else {
+      entry.failed_submissions += 1;
+    }
+    if entry.game_name.is_empty() {
+      entry.game_name = sub.team_name.clone().unwrap_or_default();
+    }
+  }
+
+  let challenges: Vec<ChallengeStats> = challenge_map.into_values().collect();
+  let stats = SubmissionStats {
+    total_submissions,
+    total_solved,
+    total_failed: total_submissions.saturating_sub(total_solved),
+    challenges,
+  };
+  Ok(Json(stats))
 }

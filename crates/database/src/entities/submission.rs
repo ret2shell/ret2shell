@@ -307,9 +307,27 @@ where
   }
   if only_solved {
     sql = sql.filter(Column::Solved.eq(true));
+    if team_id.is_some() {
+      sql = sql
+        .filter(Column::TeamId.is_not_null())
+        .filter(team::Column::State.gte(team::State::Hidden))
+        .order_by_asc(Column::ChallengeId)
+        .order_by_asc(Column::TeamId)
+        .order_by_asc(Column::CreatedAt)
+        .order_by_asc(Column::Id)
+        .distinct_on([(Entity, Column::ChallengeId), (Entity, Column::TeamId)]);
+    } else {
+      sql = sql
+        .order_by_asc(Column::ChallengeId)
+        .order_by_asc(Column::UserId)
+        .order_by_asc(Column::CreatedAt)
+        .order_by_asc(Column::Id)
+        .distinct_on([(Entity, Column::ChallengeId), (Entity, Column::UserId)]);
+    }
+  } else {
+    sql = sql.order_by_desc(Column::CreatedAt);
   }
   sql = sql.column_as(challenge::Column::Score, "score");
-  sql = sql.order_by_desc(Column::CreatedAt);
   let paginator = sql.into_model().paginate(db, page_size);
   let total = paginator.num_items().await?;
   let submissions = paginator.fetch_page(page - 1).await?;
