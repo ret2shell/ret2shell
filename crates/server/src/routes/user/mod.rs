@@ -281,9 +281,6 @@ async fn get_submission_stats(
     } else {
       entry.failed_submissions += 1;
     }
-    if entry.game_name.is_empty() {
-      entry.game_name = sub.team_name.clone().unwrap_or_default();
-    }
   }
 
   let challenges: Vec<ChallengeStats> = challenge_map.into_values().collect();
