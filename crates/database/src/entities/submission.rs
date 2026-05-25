@@ -309,7 +309,15 @@ where
     sql = sql.filter(Column::Solved.eq(true));
   }
   sql = sql.column_as(challenge::Column::Score, "score");
-  if !only_solved {
+  if only_solved {
+    sql = sql
+      .distinct_on([Column::ChallengeId, Column::TeamId, Column::UserId])
+      .order_by_asc(Column::ChallengeId)
+      .order_by_asc(Column::TeamId)
+      .order_by_asc(Column::UserId)
+      .order_by_asc(Column::CreatedAt)
+      .order_by_asc(Column::Id);
+  } else {
     sql = sql.order_by_desc(Column::CreatedAt);
   }
   let paginator = sql.into_model().paginate(db, page_size);
