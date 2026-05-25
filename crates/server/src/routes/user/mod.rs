@@ -39,8 +39,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         )))
         .route("/", get(get_user))
         .route("/team", get(get_teams))
-        .route("/submission", get(get_submissions))
-        .route("/submission/stats", get(get_submission_stats))
+        .route("/stats", get(get_submission_stats))
         .route_layer(middleware::from_fn_with_state(
           state.clone(),
           data::prepare_data!(user, false, id, account, nickname),
@@ -60,8 +59,6 @@ struct UserListQuery {
 
 #[derive(Deserialize)]
 struct SubmissionQuery {
-  page: Option<u64>,
-  page_size: Option<u64>,
   game_id: Option<i64>,
 }
 
@@ -223,24 +220,6 @@ async fn get_oauth_list(
   Ok(Json(oauths))
 }
 
-async fn get_submissions(
-  State(ref db): State<Database>, Extension(token): Extension<Token>,
-  Extension(user): Extension<user::Model>, Query(query): Query<SubmissionQuery>,
-) -> Result<impl IntoResponse, ResponseError> {
-  if user.hidden && !token.permissions.0.contains(&Permission::User) && token.id != user.id {
-    return Err(ResponseError::NotFound("user not found".to_owned()));
-  }
-  let (submissions, total) = submission::get_user_solved_challenges(
-    &db.conn,
-    page(query.page),
-    page_size(query.page_size, 10),
-    query.game_id,
-    user.id,
-  )
-  .await?;
-  Ok(Json((submissions, total)))
-}
-
 async fn get_submission_stats(
   State(ref db): State<Database>, Extension(token): Extension<Token>,
   Extension(user): Extension<user::Model>, Query(query): Query<SubmissionQuery>,
@@ -248,51 +227,30 @@ async fn get_submission_stats(
   if user.hidden && !token.permissions.0.contains(&Permission::User) && token.id != user.id {
     return Err(ResponseError::NotFound("user not found".to_owned()));
   }
-  let submissions = submission::get_list_ex(
-    &db.conn,
-    false,
-    false,
-    query.game_id,
-    None,
-    None,
-    Some(user.id),
-    false,
-  )
-  .await?;
+  let stats = submission::get_user_submission_stats(&db.conn, query.game_id, user.id).await?;
 
-  use std::collections::HashMap;
-  let mut challenge_map: HashMap<i64, ChallengeStats> = HashMap::new();
-  let mut total_submissions: u64 = 0;
-  let mut solved_challenges: std::collections::HashSet<i64> = std::collections::HashSet::new();
+  let total_submissions: u64 = stats.iter().map(|s| s.total_submissions as u64).sum();
+  let total_solved = stats.iter().filter(|s| s.solved_count > 0).count() as u64;
+  let total_failed: u64 = stats
+    .iter()
+    .map(|s| (s.total_submissions - s.solved_count) as u64)
+    .sum();
 
-  for sub in &submissions {
-    total_submissions += 1;
-    let entry = challenge_map
-      .entry(sub.challenge_id)
-      .or_insert(ChallengeStats {
-        challenge_id: sub.challenge_id,
-        challenge_name: sub.challenge_name.clone().unwrap_or_default(),
-        solved: false,
-        total_submissions: 0,
-        failed_submissions: 0,
-      });
-    entry.total_submissions += 1;
-    if sub.solved == Some(true) {
-      entry.solved = true;
-      solved_challenges.insert(sub.challenge_id);
-    } else if sub.solved == Some(false) {
-      entry.failed_submissions += 1;
-    }
-  }
+  let challenges: Vec<ChallengeStats> = stats
+    .iter()
+    .map(|s| ChallengeStats {
+      challenge_id: s.challenge_id,
+      challenge_name: s.challenge_name.clone(),
+      solved: s.solved_count > 0,
+      total_submissions: s.total_submissions as u64,
+      failed_submissions: (s.total_submissions - s.solved_count) as u64,
+    })
+    .collect();
 
-  let total_solved = solved_challenges.len() as u64;
-  let total_failed = total_submissions - total_solved;
-  let challenges: Vec<ChallengeStats> = challenge_map.into_values().collect();
-  let stats = SubmissionStats {
+  Ok(Json(SubmissionStats {
     total_submissions,
     total_solved,
     total_failed,
     challenges,
-  };
-  Ok(Json(stats))
+  }))
 }

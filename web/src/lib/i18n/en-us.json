@@ -1529,11 +1529,8 @@
       "title": "Solved Challenges",
       "allGames": "All Games",
       "challenge": "Challenge",
-      "game": "Game",
-      "team": "Team",
-      "score": "Score",
+      "submissions": "Submissions",
       "status": "Status",
-      "time": "Time",
       "empty": "No solved challenges yet",
       "solved": "Solved",
       "failed": "Failed"

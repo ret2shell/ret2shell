@@ -1,5 +1,5 @@
 import { handleHttpError } from "@api";
-import { getUser, getUserTeams, useUserSubmissionStats, useUserSubmissions } from "@api/user";
+import { getUser, getUserTeams, useUserSubmissionStats } from "@api/user";
 import SidebarLayout from "@blocks/sidebar-layout";
 import type { Team } from "@models/team";
 import type { User } from "@models/user";
@@ -11,7 +11,6 @@ import Article from "@widgets/article";
 import Button from "@widgets/button";
 import Chart from "@widgets/chart";
 import LoadingTips from "@widgets/loading-tips";
-import Pagination from "@widgets/pagination";
 import Select from "@widgets/select";
 import clsx from "clsx";
 import { createEffect, createMemo, createSignal, For, Match, Show, Switch, untrack } from "solid-js";
@@ -25,9 +24,7 @@ export default function () {
   const navigate = useNavigate();
   const userId = () => Number.parseInt(params.user ?? "", 10) || null;
   const [teams, setTeams] = createSignal([] as Team[]);
-  const [submissionPage, setSubmissionPage] = createSignal(1);
   const [selectedGameId, setSelectedGameId] = createSignal<string | null>(null);
-  const pageSize = 10;
 
   createEffect(() => {
     if (!userId()) {
@@ -63,37 +60,8 @@ export default function () {
     ];
   });
 
-  const teamIdToGameId = createMemo(() => {
-    const map = new Map<number, number>();
-    for (const team of teams()) {
-      map.set(team.id, team.game_id);
-    }
-    return map;
-  });
-
-  const gameIdToGameName = createMemo(() => {
-    const map = new Map<number, string>();
-    for (const team of teams()) {
-      if (team.game_name) {
-        map.set(team.game_id, team.game_name);
-      }
-    }
-    return map;
-  });
-
   const submissionStats = useUserSubmissionStats({
     id: () => userId()!,
-    game_id: () => {
-      const val = selectedGameId();
-      return val ? Number.parseInt(val, 10) : null;
-    },
-    enabled: () => !!userId(),
-  });
-
-  const submissionsQuery = useUserSubmissions({
-    id: () => userId()!,
-    page: () => submissionPage(),
-    page_size: () => pageSize,
     game_id: () => {
       const val = selectedGameId();
       return val ? Number.parseInt(val, 10) : null;
@@ -219,7 +187,6 @@ export default function () {
                   value={selectedGameId() ? [selectedGameId()!] : []}
                   onValueChange={(e) => {
                     setSelectedGameId(e.value[0] || null);
-                    setSubmissionPage(1);
                   }}
                   placeholder={t("user.submissions.allGames")}
                 />
@@ -230,10 +197,10 @@ export default function () {
                 </div>
               </Show>
               <Switch>
-                <Match when={submissionsQuery.isLoading}>
+                <Match when={submissionStats.isLoading}>
                   <LoadingTips />
                 </Match>
-                <Match when={!submissionsQuery.data || submissionsQuery.data[0].length === 0}>
+                <Match when={!submissionStats.data || submissionStats.data.challenges.length === 0}>
                   <div class="h-12 flex items-center justify-center opacity-60">
                     <span>{t("user.submissions.empty")}</span>
                   </div>
@@ -244,60 +211,32 @@ export default function () {
                       <thead>
                         <tr class="border-b border-b-layer-content/15">
                           <th class="text-start h-10 font-normal opacity-60">{t("user.submissions.challenge")}</th>
-                          <th class="text-start h-10 font-normal opacity-60">{t("user.submissions.game")}</th>
-                          <th class="text-start h-10 font-normal opacity-60">{t("user.submissions.team")}</th>
-                          <th class="text-end h-10 font-normal opacity-60">{t("user.submissions.score")}</th>
+                          <th class="text-end h-10 font-normal opacity-60">{t("user.submissions.submissions")}</th>
                           <th class="text-center h-10 font-normal opacity-60">{t("user.submissions.status")}</th>
-                          <th class="text-end h-10 font-normal opacity-60">{t("user.submissions.time")}</th>
                         </tr>
                       </thead>
                       <tbody>
-                        <For each={submissionsQuery.data[0]}>
-                          {(sub) => (
+                        <For each={submissionStats.data!.challenges}>
+                          {(challenge) => (
                             <tr class="border-b border-b-layer-content/10 hover:bg-layer-content/5">
                               <td class="text-start py-3">
-                                <Show
-                                  when={sub.team_id && teamIdToGameId().has(sub.team_id)}
-                                  fallback={<span class="opacity-60">{sub.challenge_name}</span>}
-                                >
-                                  <A
-                                    href={`/games/${teamIdToGameId().get(sub.team_id)}/challenges?challenge=${sub.challenge_id}`}
-                                    class="hover:underline"
-                                  >
-                                    {sub.challenge_name}
-                                  </A>
-                                </Show>
+                                <span class="opacity-60">{challenge.challenge_name}</span>
                               </td>
-                              <td class="text-start py-3 opacity-80">
-                                {(sub.team_id && gameIdToGameName().get(teamIdToGameId().get(sub.team_id)!)) ?? "-"}
-                              </td>
-                              <td class="text-start py-3 opacity-80">{sub.team_name ?? "-"}</td>
-                              <td class="text-end py-3">{sub.score ?? "-"}</td>
+                              <td class="text-end py-3 opacity-80">{challenge.total_submissions}</td>
                               <td class="text-center py-3">
                                 <Show
-                                  when={sub.solved}
+                                  when={challenge.solved}
                                   fallback={<span class="text-error">{t("user.submissions.failed")}</span>}
                                 >
                                   <span class="text-success">{t("user.submissions.solved")}</span>
                                 </Show>
                               </td>
-                              <td class="text-end py-3 opacity-60">{sub.created_at.toFormat("yyyy-MM-dd HH:mm")}</td>
                             </tr>
                           )}
                         </For>
                       </tbody>
                     </table>
                   </div>
-                  <Show when={submissionsQuery.data && submissionsQuery.data[1] > pageSize}>
-                    <div class="flex justify-center py-4">
-                      <Pagination
-                        count={submissionsQuery.data![1]}
-                        pageSize={pageSize}
-                        page={submissionPage()}
-                        onPageChange={(p) => setSubmissionPage(p.page)}
-                      />
-                    </div>
-                  </Show>
                 </Match>
               </Switch>
             </section>

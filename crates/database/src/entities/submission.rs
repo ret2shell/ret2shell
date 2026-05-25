@@ -309,7 +309,9 @@ where
     sql = sql.filter(Column::Solved.eq(true));
   }
   sql = sql.column_as(challenge::Column::Score, "score");
-  sql = sql.order_by_desc(Column::CreatedAt);
+  if !only_solved {
+    sql = sql.order_by_desc(Column::CreatedAt);
+  }
   let paginator = sql.into_model().paginate(db, page_size);
   let total = paginator.num_items().await?;
   let submissions = paginator.fetch_page(page - 1).await?;
@@ -328,47 +330,86 @@ where
   Ok((submissions, total))
 }
 
-#[allow(clippy::too_many_arguments)]
-pub async fn get_user_solved_challenges<C>(
-  db: &C, page: u64, page_size: u64, game_id: Option<i64>, user_id: i64,
-) -> Result<(Vec<ExModel>, u64), DbErr>
+#[derive(Debug, FromQueryResult)]
+pub struct UserChallengeStats {
+  pub challenge_id: i64,
+  pub challenge_name: String,
+  pub total_submissions: i64,
+  pub solved_count: i64,
+}
+
+#[derive(Debug, FromQueryResult)]
+struct ChallengeTotalStats {
+  pub challenge_id: i64,
+  pub challenge_name: String,
+  pub total_submissions: i64,
+}
+
+#[derive(Debug, FromQueryResult)]
+struct ChallengeSolvedStats {
+  pub challenge_id: i64,
+  pub solved_count: i64,
+}
+
+pub async fn get_user_submission_stats<C>(
+  db: &C, game_id: Option<i64>, user_id: i64,
+) -> Result<Vec<UserChallengeStats>, DbErr>
 where
   C: ConnectionTrait, {
-  let page_size = page_size.max(1);
-  let page = page.max(1);
-  let mut sql = Entity::find()
-    .join(JoinType::LeftJoin, Relation::Team.def())
+  let mut sql_total = Entity::find()
     .join(JoinType::InnerJoin, Relation::Challenge.def())
-    .join(JoinType::InnerJoin, Relation::User.def())
-    .column_as(user::Column::Nickname, "user_name")
-    .column_as(team::Column::Name, "team_name")
-    .column_as(challenge::Column::Name, "challenge_name")
+    .join(JoinType::LeftJoin, Relation::Team.def())
     .filter(Column::UserId.eq(user_id))
-    .filter(Column::Solved.eq(true))
     .filter(Column::TeamId.is_not_null())
     .filter(team::Column::State.gte(team::State::Hidden));
   if let Some(game_id) = game_id {
-    sql = sql.filter(challenge::Column::GameId.eq(game_id));
+    sql_total = sql_total.filter(challenge::Column::GameId.eq(game_id));
   }
-  sql = sql
+  let total_stats = sql_total
+    .select_only()
+    .column_as(Column::ChallengeId, "challenge_id")
+    .column_as(challenge::Column::Name, "challenge_name")
+    .column_as(Column::Id.count(), "total_submissions")
+    .group_by(Column::ChallengeId)
+    .group_by(challenge::Column::Name)
     .order_by_asc(Column::ChallengeId)
-    .order_by_asc(Column::UserId)
-    .order_by_asc(Column::CreatedAt)
-    .order_by_asc(Column::Id)
-    .distinct_on([(Entity, Column::ChallengeId), (Entity, Column::UserId)]);
-  sql = sql.column_as(challenge::Column::Score, "score");
-  let paginator = sql.into_model().paginate(db, page_size);
-  let total = paginator.num_items().await?;
-  let submissions = paginator.fetch_page(page - 1).await?;
-  let submissions = submissions
-    .into_iter()
-    .map(|r| ExModel {
-      content: None,
-      result: None,
-      ..r
-    })
-    .collect();
-  Ok((submissions, total))
+    .into_model::<ChallengeTotalStats>()
+    .all(db)
+    .await?;
+
+  let mut sql_solved = Entity::find()
+    .join(JoinType::InnerJoin, Relation::Challenge.def())
+    .join(JoinType::LeftJoin, Relation::Team.def())
+    .filter(Column::UserId.eq(user_id))
+    .filter(Column::TeamId.is_not_null())
+    .filter(team::Column::State.gte(team::State::Hidden))
+    .filter(Column::Solved.eq(true));
+  if let Some(game_id) = game_id {
+    sql_solved = sql_solved.filter(challenge::Column::GameId.eq(game_id));
+  }
+  let solved_stats = sql_solved
+    .select_only()
+    .column_as(Column::ChallengeId, "challenge_id")
+    .column_as(Column::Id.count(), "solved_count")
+    .group_by(Column::ChallengeId)
+    .order_by_asc(Column::ChallengeId)
+    .into_model::<ChallengeSolvedStats>()
+    .all(db)
+    .await?;
+
+  let mut result = Vec::new();
+  for total in &total_stats {
+    let solved = solved_stats
+      .iter()
+      .find(|s| s.challenge_id == total.challenge_id);
+    result.push(UserChallengeStats {
+      challenge_id: total.challenge_id,
+      challenge_name: total.challenge_name.clone(),
+      total_submissions: total.total_submissions,
+      solved_count: solved.map(|s| s.solved_count).unwrap_or(0),
+    });
+  }
+  Ok(result)
 }
 
 #[allow(clippy::too_many_arguments)]

@@ -1,6 +1,5 @@
 import type { Ip } from "@models/ip";
 import type { OAuth } from "@models/oauth";
-import type { Submission } from "@models/submission";
 import type { Team } from "@models/team";
 import type { User } from "@models/user";
 import { t } from "@storage/theme";
@@ -220,58 +219,6 @@ export function useUserOAuthList({
   );
 }
 
-export async function getUserSubmissions(id: number, page?: number, page_size?: number, game_id?: number) {
-  return await api
-    .get(`${api_root}/user/${id}/submission`, {
-      searchParams: JSON.parse(
-        JSON.stringify({
-          page,
-          page_size,
-          game_id,
-        })
-      ) as SearchParamsOption,
-    })
-    .json<[Submission[], number]>();
-}
-
-export function useUserSubmissions({
-  id,
-  page,
-  page_size,
-  game_id,
-  enabled,
-  onError,
-}: {
-  id: () => number;
-  page: () => number;
-  page_size: () => number;
-  game_id?: () => number | null;
-  enabled?: () => boolean;
-  onError?: (err: Error) => boolean;
-}) {
-  const keys = createMemo(() => ["user", id(), "submissions", page(), page_size(), game_id?.()]);
-  return useQuery(
-    () => ({
-      queryKey: keys(),
-      queryFn: async () => await getUserSubmissions(id(), page() ?? 1, page_size() ?? 10, game_id?.() ?? undefined),
-      enabled: enabled?.(),
-      throwOnError: (err: Error) => {
-        handleHttpError(err, t("user.errors.fetchSubmissions.title"));
-        return onError?.(err) ?? false;
-      },
-    }),
-    () => inflyClient
-  );
-}
-
-export type GameStats = {
-  game_id: number;
-  game_name: string;
-  total_submissions: number;
-  solved: number;
-  failed: number;
-};
-
 export type ChallengeStats = {
   challenge_id: number;
   challenge_name: string;
@@ -289,7 +236,7 @@ export type SubmissionStats = {
 
 export async function getUserSubmissionStats(id: number, game_id?: number) {
   return await api
-    .get(`${api_root}/user/${id}/submission/stats`, {
+    .get(`${api_root}/user/${id}/stats`, {
       searchParams: JSON.parse(
         JSON.stringify({
           game_id,
