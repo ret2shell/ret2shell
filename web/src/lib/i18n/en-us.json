@@ -1526,12 +1526,12 @@
     "gameJournal": "Joined in {{game}} as a member of {{team}}.",
     "moreJournal": "Life continues, exploration never stops...",
     "submissions": {
-      "title": "Solved Challenges",
+      "title": "Submission Records",
       "allGames": "All Games",
       "challenge": "Challenge",
       "submissions": "Submissions",
       "status": "Status",
-      "empty": "No solved challenges yet",
+      "empty": "No submission records yet",
       "solved": "Solved",
       "failed": "Failed"
     },
