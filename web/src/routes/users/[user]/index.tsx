@@ -98,7 +98,7 @@ export default function () {
       yAxis: {
         type: "value",
         min: 0,
-        interval: 1,
+        minInterval: 1,
       },
       series: [
         {
