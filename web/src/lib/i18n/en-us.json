@@ -1529,8 +1529,11 @@
       "title": "Submission Records",
       "allGames": "All Games",
       "challenge": "Challenge",
+      "game": "Game",
+      "team": "Team",
       "submissions": "Submissions",
       "status": "Status",
+      "time": "Time",
       "empty": "No submission records yet",
       "solved": "Solved",
       "failed": "Failed"

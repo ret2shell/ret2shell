@@ -71,8 +71,8 @@ export default function () {
 
   const chartOption = createMemo(() => {
     const stats = submissionStats.data;
-    if (!stats || stats.challenges.length === 0) return null;
-    const sortedChallenges = [...stats.challenges].sort((a, b) => b.total_submissions - a.total_submissions);
+    if (!stats || stats.length === 0) return null;
+    const sortedChallenges = [...stats].sort((a, b) => b.total_submissions - a.total_submissions);
     return {
       grid: {
         left: "16px",
@@ -105,7 +105,7 @@ export default function () {
           name: t("user.submissions.solved"),
           type: "bar",
           stack: "total",
-          data: sortedChallenges.map((c) => (c.solved ? 1 : 0)),
+          data: sortedChallenges.map((c) => (c.solved_count > 0 ? 1 : 0)),
           itemStyle: {
             color: "#17a750",
           },
@@ -115,7 +115,7 @@ export default function () {
           name: t("user.submissions.failed"),
           type: "bar",
           stack: "total",
-          data: sortedChallenges.map((c) => c.failed_submissions),
+          data: sortedChallenges.map((c) => c.total_submissions - c.solved_count),
           itemStyle: {
             color: "#808080",
           },
@@ -200,7 +200,7 @@ export default function () {
                 <Match when={submissionStats.isLoading}>
                   <LoadingTips />
                 </Match>
-                <Match when={!submissionStats.data || submissionStats.data.challenges.length === 0}>
+                <Match when={!submissionStats.data || submissionStats.data.length === 0}>
                   <div class="h-12 flex items-center justify-center opacity-60">
                     <span>{t("user.submissions.empty")}</span>
                   </div>
@@ -211,25 +211,36 @@ export default function () {
                       <thead>
                         <tr class="border-b border-b-layer-content/15">
                           <th class="text-start h-10 font-normal opacity-60">{t("user.submissions.challenge")}</th>
-                          <th class="text-end h-10 font-normal opacity-60">{t("user.submissions.submissions")}</th>
+                          <th class="text-start h-10 font-normal opacity-60">{t("user.submissions.game")}</th>
+                          <th class="text-start h-10 font-normal opacity-60">{t("user.submissions.team")}</th>
                           <th class="text-center h-10 font-normal opacity-60">{t("user.submissions.status")}</th>
+                          <th class="text-end h-10 font-normal opacity-60">{t("user.submissions.time")}</th>
                         </tr>
                       </thead>
                       <tbody>
-                        <For each={submissionStats.data!.challenges}>
+                        <For each={submissionStats.data!}>
                           {(challenge) => (
                             <tr class="border-b border-b-layer-content/10 hover:bg-layer-content/5">
                               <td class="text-start py-3">
-                                <span class="opacity-60">{challenge.challenge_name}</span>
+                                <A
+                                  class="link-primary hover:underline"
+                                  href={`/games/${challenge.game_id}/challenges/${challenge.challenge_id}`}
+                                >
+                                  {challenge.challenge_name}
+                                </A>
                               </td>
-                              <td class="text-end py-3 opacity-80">{challenge.total_submissions}</td>
+                              <td class="text-start py-3 opacity-80">{challenge.game_name}</td>
+                              <td class="text-start py-3 opacity-80">{challenge.team_name ?? "-"}</td>
                               <td class="text-center py-3">
                                 <Show
-                                  when={challenge.solved}
+                                  when={challenge.solved_count > 0}
                                   fallback={<span class="text-error">{t("user.submissions.failed")}</span>}
                                 >
                                   <span class="text-success">{t("user.submissions.solved")}</span>
                                 </Show>
+                              </td>
+                              <td class="text-end py-3 opacity-60">
+                                {new Date(challenge.last_submission_at).toLocaleString()}
                               </td>
                             </tr>
                           )}

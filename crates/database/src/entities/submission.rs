@@ -7,7 +7,7 @@ use sea_orm::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::{challenge, team, user};
+use super::{challenge, game, team, user};
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "submission")]
 pub struct Model {
@@ -338,18 +338,25 @@ where
   Ok((submissions, total))
 }
 
-#[derive(Debug, FromQueryResult)]
+#[derive(Debug, Serialize, FromQueryResult)]
 pub struct UserChallengeStats {
   pub challenge_id: i64,
   pub challenge_name: String,
+  pub game_id: i64,
+  pub game_name: String,
+  pub team_name: Option<String>,
   pub total_submissions: i64,
   pub solved_count: i64,
+  #[serde(with = "ts_seconds")]
+  pub last_submission_at: DateTime<Utc>,
 }
 
 #[derive(Debug, FromQueryResult)]
 struct ChallengeTotalStats {
   pub challenge_id: i64,
   pub challenge_name: String,
+  pub game_id: i64,
+  pub game_name: String,
   pub total_submissions: i64,
 }
 
@@ -359,6 +366,13 @@ struct ChallengeSolvedStats {
   pub solved_count: i64,
 }
 
+#[derive(Debug, FromQueryResult)]
+struct LastSubmissionInfo {
+  pub challenge_id: i64,
+  pub team_name: Option<String>,
+  pub last_submission_at: DateTime<Utc>,
+}
+
 pub async fn get_user_submission_stats<C>(
   db: &C, game_id: Option<i64>, user_id: i64,
 ) -> Result<Vec<UserChallengeStats>, DbErr>
@@ -366,6 +380,7 @@ where
   C: ConnectionTrait, {
   let mut sql_total = Entity::find()
     .join(JoinType::InnerJoin, Relation::Challenge.def())
+    .join(JoinType::InnerJoin, challenge::Relation::Game.def())
     .join(JoinType::LeftJoin, Relation::Team.def())
     .filter(Column::UserId.eq(user_id))
     .filter(Column::TeamId.is_not_null())
@@ -377,9 +392,13 @@ where
     .select_only()
     .column_as(Column::ChallengeId, "challenge_id")
     .column_as(challenge::Column::Name, "challenge_name")
+    .column_as(challenge::Column::GameId, "game_id")
+    .column_as(game::Column::Name, "game_name")
     .column_as(Column::Id.count(), "total_submissions")
     .group_by(Column::ChallengeId)
     .group_by(challenge::Column::Name)
+    .group_by(challenge::Column::GameId)
+    .group_by(game::Column::Name)
     .order_by_asc(Column::ChallengeId)
     .into_model::<ChallengeTotalStats>()
     .all(db)
@@ -405,16 +424,45 @@ where
     .all(db)
     .await?;
 
+  let mut sql_last = Entity::find()
+    .join(JoinType::InnerJoin, Relation::Challenge.def())
+    .join(JoinType::LeftJoin, Relation::Team.def())
+    .filter(Column::UserId.eq(user_id))
+    .filter(Column::TeamId.is_not_null())
+    .filter(team::Column::State.gte(team::State::Hidden))
+    .distinct_on([(Entity, Column::ChallengeId)])
+    .order_by_asc(Column::ChallengeId)
+    .order_by_desc(Column::CreatedAt)
+    .order_by_desc(Column::Id);
+  if let Some(game_id) = game_id {
+    sql_last = sql_last.filter(challenge::Column::GameId.eq(game_id));
+  }
+  let last_info = sql_last
+    .select_only()
+    .column_as(Column::ChallengeId, "challenge_id")
+    .column_as(team::Column::Name, "team_name")
+    .column_as(Column::CreatedAt, "last_submission_at")
+    .into_model::<LastSubmissionInfo>()
+    .all(db)
+    .await?;
+
   let mut result = Vec::new();
   for total in &total_stats {
     let solved = solved_stats
       .iter()
       .find(|s| s.challenge_id == total.challenge_id);
+    let last = last_info
+      .iter()
+      .find(|l| l.challenge_id == total.challenge_id);
     result.push(UserChallengeStats {
       challenge_id: total.challenge_id,
       challenge_name: total.challenge_name.clone(),
+      game_id: total.game_id,
+      game_name: total.game_name.clone(),
+      team_name: last.and_then(|l| l.team_name.clone()),
       total_submissions: total.total_submissions,
       solved_count: solved.map(|s| s.solved_count).unwrap_or(0),
+      last_submission_at: last.map(|l| l.last_submission_at).unwrap_or_default(),
     });
   }
   Ok(result)

@@ -222,16 +222,12 @@ export function useUserOAuthList({
 export type ChallengeStats = {
   challenge_id: number;
   challenge_name: string;
-  solved: boolean;
+  game_id: number;
+  game_name: string;
+  team_name: string | null;
   total_submissions: number;
-  failed_submissions: number;
-};
-
-export type SubmissionStats = {
-  total_submissions: number;
-  total_solved: number;
-  total_failed: number;
-  challenges: ChallengeStats[];
+  solved_count: number;
+  last_submission_at: number;
 };
 
 export async function getUserSubmissionStats(id: number, game_id?: number) {
@@ -243,7 +239,7 @@ export async function getUserSubmissionStats(id: number, game_id?: number) {
         })
       ) as SearchParamsOption,
     })
-    .json<SubmissionStats>();
+    .json<ChallengeStats[]>();
 }
 
 export function useUserSubmissionStats({

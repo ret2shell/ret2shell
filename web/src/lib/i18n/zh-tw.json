@@ -1529,8 +1529,11 @@
       "title": "解題記錄",
       "allGames": "全部賽事",
       "challenge": "題目",
+      "game": "賽事",
+      "team": "隊伍",
       "submissions": "提交次數",
       "status": "狀態",
+      "time": "時間",
       "empty": "暫無解題記錄",
       "solved": "已解出",
       "failed": "未解出"

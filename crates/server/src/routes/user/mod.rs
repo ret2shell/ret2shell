@@ -11,7 +11,7 @@ use r2s_database::{
   user::{self, Permission},
 };
 use r2s_migrator::Database;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use tracing::info;
 
 use crate::{
@@ -60,23 +60,6 @@ struct UserListQuery {
 #[derive(Deserialize)]
 struct SubmissionQuery {
   game_id: Option<i64>,
-}
-
-#[derive(Serialize)]
-struct ChallengeStats {
-  challenge_id: i64,
-  challenge_name: String,
-  solved: bool,
-  total_submissions: u64,
-  failed_submissions: u64,
-}
-
-#[derive(Serialize)]
-struct SubmissionStats {
-  total_submissions: u64,
-  total_solved: u64,
-  total_failed: u64,
-  challenges: Vec<ChallengeStats>,
 }
 
 async fn get_user_list(
@@ -228,29 +211,5 @@ async fn get_submission_stats(
     return Err(ResponseError::NotFound("user not found".to_owned()));
   }
   let stats = submission::get_user_submission_stats(&db.conn, query.game_id, user.id).await?;
-
-  let total_submissions: u64 = stats.iter().map(|s| s.total_submissions as u64).sum();
-  let total_solved = stats.iter().filter(|s| s.solved_count > 0).count() as u64;
-  let total_failed: u64 = stats
-    .iter()
-    .map(|s| (s.total_submissions - s.solved_count) as u64)
-    .sum();
-
-  let challenges: Vec<ChallengeStats> = stats
-    .iter()
-    .map(|s| ChallengeStats {
-      challenge_id: s.challenge_id,
-      challenge_name: s.challenge_name.clone(),
-      solved: s.solved_count > 0,
-      total_submissions: s.total_submissions as u64,
-      failed_submissions: (s.total_submissions - s.solved_count) as u64,
-    })
-    .collect();
-
-  Ok(Json(SubmissionStats {
-    total_submissions,
-    total_solved,
-    total_failed,
-    challenges,
-  }))
+  Ok(Json(stats))
 }
