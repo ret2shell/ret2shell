@@ -240,7 +240,7 @@ export default function () {
                                 </Show>
                               </td>
                               <td class="text-end py-3 opacity-60">
-                                {new Date(challenge.last_submission_at).toLocaleString()}
+                                {challenge.last_submission_at.toFormat("yyyy-MM-dd HH:mm:ss")}
                               </td>
                             </tr>
                           )}
