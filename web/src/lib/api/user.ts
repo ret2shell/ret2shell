@@ -7,6 +7,7 @@ import { useMutation, useQuery } from "@tanstack/solid-query";
 import type { SearchParamsOption } from "ky";
 import { createMemo } from "solid-js";
 import api, { api_root, handleHttpError, inflyClient, safeJson, toastSuccess } from ".";
+import type { DateTime } from "luxon";
 
 export async function getUserList(
   page?: number,
@@ -227,7 +228,7 @@ export type ChallengeStats = {
   team_name: string | null;
   total_submissions: number;
   solved_count: number;
-  last_submission_at: number;
+  last_submission_at: DateTime;
 };
 
 export async function getUserSubmissionStats(id: number, game_id?: number) {
