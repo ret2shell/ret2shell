@@ -5,9 +5,9 @@ import type { User } from "@models/user";
 import { t } from "@storage/theme";
 import { useMutation, useQuery } from "@tanstack/solid-query";
 import type { SearchParamsOption } from "ky";
+import type { DateTime } from "luxon";
 import { createMemo } from "solid-js";
 import api, { api_root, handleHttpError, inflyClient, safeJson, toastSuccess } from ".";
-import type { DateTime } from "luxon";
 
 export async function getUserList(
   page?: number,
