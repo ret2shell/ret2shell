@@ -227,7 +227,7 @@ export default function () {
                               <td class="text-start py-3">
                                 <A
                                   class="link-primary hover:underline"
-                                  href={`/games/${challenge.game_id}/challenges/${challenge.challenge_id}`}
+                                  href={`/games/${challenge.game_id}/challenges?challenge=${challenge.challenge_id}`}
                                 >
                                   {challenge.challenge_name}
                                 </A>
