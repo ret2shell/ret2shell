@@ -381,10 +381,7 @@ where
   let mut sql_total = Entity::find()
     .join(JoinType::InnerJoin, Relation::Challenge.def())
     .join(JoinType::InnerJoin, challenge::Relation::Game.def())
-    .join(JoinType::LeftJoin, Relation::Team.def())
-    .filter(Column::UserId.eq(user_id))
-    .filter(Column::TeamId.is_not_null())
-    .filter(team::Column::State.gte(team::State::Hidden));
+    .filter(Column::UserId.eq(user_id));
   if let Some(game_id) = game_id {
     sql_total = sql_total.filter(challenge::Column::GameId.eq(game_id));
   }
@@ -406,10 +403,7 @@ where
 
   let mut sql_solved = Entity::find()
     .join(JoinType::InnerJoin, Relation::Challenge.def())
-    .join(JoinType::LeftJoin, Relation::Team.def())
     .filter(Column::UserId.eq(user_id))
-    .filter(Column::TeamId.is_not_null())
-    .filter(team::Column::State.gte(team::State::Hidden))
     .filter(Column::Solved.eq(true));
   if let Some(game_id) = game_id {
     sql_solved = sql_solved.filter(challenge::Column::GameId.eq(game_id));
@@ -428,8 +422,6 @@ where
     .join(JoinType::InnerJoin, Relation::Challenge.def())
     .join(JoinType::LeftJoin, Relation::Team.def())
     .filter(Column::UserId.eq(user_id))
-    .filter(Column::TeamId.is_not_null())
-    .filter(team::Column::State.gte(team::State::Hidden))
     .distinct_on([(Entity, Column::ChallengeId)])
     .order_by_asc(Column::ChallengeId)
     .order_by_desc(Column::CreatedAt)

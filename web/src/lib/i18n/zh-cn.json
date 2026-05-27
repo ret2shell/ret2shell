@@ -1533,7 +1533,7 @@
       "team": "队伍",
       "submissions": "提交次数",
       "status": "状态",
-      "time": "时间",
+      "time": "提交时间",
       "empty": "暂无解题记录",
       "solved": "已解出",
       "failed": "未解出"

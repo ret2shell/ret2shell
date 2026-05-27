@@ -4,7 +4,7 @@ import SidebarLayout from "@blocks/sidebar-layout";
 import type { Team } from "@models/team";
 import type { User } from "@models/user";
 import { createBreakpoints } from "@solid-primitives/media";
-import { A, useNavigate, useParams } from "@solidjs/router";
+import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
 import Article from "@widgets/article";
@@ -22,9 +22,11 @@ export default function () {
   const [loading, setLoading] = createSignal(true);
   const params = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const userId = () => Number.parseInt(params.user ?? "", 10) || null;
   const [teams, setTeams] = createSignal([] as Team[]);
-  const [selectedGameId, setSelectedGameId] = createSignal<string | null>(null);
+  const [selectedGameId, setSelectedGameId] = createSignal<string | null>((searchParams.game as string) || null);
+  const [allGames, setAllGames] = createSignal(new Map<number, string>());
 
   createEffect(() => {
     if (!userId()) {
@@ -44,12 +46,39 @@ export default function () {
     });
   });
 
+  const submissionStats = useUserSubmissionStats({
+    id: () => userId()!,
+    game_id: () => {
+      const val = selectedGameId();
+      return val ? Number.parseInt(val, 10) : null;
+    },
+    enabled: () => !!userId(),
+  });
+
+  createEffect(() => {
+    const stats = submissionStats.data;
+    if (stats) {
+      setAllGames((prev) => {
+        const next = new Map(prev);
+        for (const stat of stats) {
+          if (stat.game_id && stat.game_name) {
+            next.set(stat.game_id, stat.game_name);
+          }
+        }
+        return next;
+      });
+    }
+  });
+
   const gameOptions = createMemo(() => {
     const games = new Map<number, string>();
     for (const team of teams()) {
       if (team.game_id && team.game_name) {
         games.set(team.game_id, team.game_name);
       }
+    }
+    for (const [id, name] of allGames()) {
+      games.set(id, name);
     }
     return [
       { label: t("user.submissions.allGames"), value: "" },
@@ -58,15 +87,6 @@ export default function () {
         value: id.toString(),
       })),
     ];
-  });
-
-  const submissionStats = useUserSubmissionStats({
-    id: () => userId()!,
-    game_id: () => {
-      const val = selectedGameId();
-      return val ? Number.parseInt(val, 10) : null;
-    },
-    enabled: () => !!userId(),
   });
 
   const chartOption = createMemo(() => {
@@ -135,21 +155,6 @@ export default function () {
         <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
           <div class="flex flex-col w-full max-w-5xl">
             <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
-              <span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5" />
-              <span>{t("user.description.title")}</span>
-            </h3>
-            <section class="max-h-96 overflow-y-auto">
-              <Switch>
-                <Match when={loading()}>
-                  <LoadingTips />
-                </Match>
-                <Match when={true}>
-                  <Article content={user()?.description || t("user.description.empty")} noExtraPaddings compact />
-                </Match>
-              </Switch>
-            </section>
-            <div class="h-6" />
-            <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
               <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
               <span>{t("user.joinedGames")}</span>
             </h3>
@@ -176,21 +181,19 @@ export default function () {
             <div class="h-6" />
             <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
               <span class="shrink-0 icon-[fluent--checkmark-20-regular] w-5 h-5" />
-              <span>{t("user.submissions.title")}</span>
+              <span class="flex-1">{t("user.submissions.title")}</span>
+              <Select
+                size="sm"
+                class="w-64"
+                items={gameOptions()}
+                value={selectedGameId() ? [selectedGameId()!] : []}
+                onValueChange={(e) => {
+                  setSelectedGameId(e.value[0] || null);
+                }}
+                placeholder={t("user.submissions.allGames")}
+              />
             </h3>
             <section class="flex flex-col">
-              <div class="flex flex-row items-center py-3">
-                <Select
-                  size="sm"
-                  class="w-64"
-                  items={gameOptions()}
-                  value={selectedGameId() ? [selectedGameId()!] : []}
-                  onValueChange={(e) => {
-                    setSelectedGameId(e.value[0] || null);
-                  }}
-                  placeholder={t("user.submissions.allGames")}
-                />
-              </div>
               <Show when={chartOption() && !submissionStats.isLoading}>
                 <div class="h-64 py-2">
                   <Chart option={chartOption()!} />
@@ -248,6 +251,21 @@ export default function () {
                       </tbody>
                     </table>
                   </div>
+                </Match>
+              </Switch>
+            </section>
+            <div class="h-6" />
+            <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
+              <span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5" />
+              <span>{t("user.description.title")}</span>
+            </h3>
+            <section class="max-h-96 overflow-y-auto">
+              <Switch>
+                <Match when={loading()}>
+                  <LoadingTips />
+                </Match>
+                <Match when={true}>
+                  <Article content={user()?.description || t("user.description.empty")} noExtraPaddings compact />
                 </Match>
               </Switch>
             </section>
