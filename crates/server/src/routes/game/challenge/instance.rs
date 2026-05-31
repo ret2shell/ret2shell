@@ -162,7 +162,7 @@ pub(super) async fn start_challenge_instance(
     } else {
       config.node_selector.clone()
     }
-    .and_then(|ns| if ns.is_empty() { None } else { Some(ns) });
+    .filter(|ns| !ns.is_empty());
 
     let need_expose = if game.archive_at > Utc::now() {
       game.traffic.is_some() || config.traffic.is_some()

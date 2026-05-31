@@ -338,7 +338,7 @@ where
   Ok((submissions, total))
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, FromQueryResult)]
 pub struct ChallengeStat {
   pub challenge_id: i64,
   pub challenge_name: String,
@@ -346,7 +346,7 @@ pub struct ChallengeStat {
   pub solved: i64,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, FromQueryResult)]
 pub struct GameStat {
   pub game_id: i64,
   pub game_name: String,
@@ -354,32 +354,24 @@ pub struct GameStat {
   pub solved: i64,
 }
 
-#[derive(Debug, FromQueryResult)]
-struct ChallengeTotal {
-  challenge_id: i64,
-  challenge_name: String,
-  total: i64,
-}
-
-#[derive(Debug, FromQueryResult)]
-struct ChallengeSolved {
-  challenge_id: i64,
-  solved: i64,
-}
-
-#[derive(Debug, FromQueryResult)]
-struct UserGameChallenge {
-  game_id: i64,
-  game_name: String,
-  challenge_id: i64,
-  solved: bool,
-}
-
 pub async fn get_user_challenge_stats<C>(
   db: &C, game_id: i64, user_id: i64,
 ) -> Result<Vec<ChallengeStat>, DbErr>
 where
   C: ConnectionTrait, {
+  #[derive(FromQueryResult)]
+  struct ChallengeTotal {
+    challenge_id: i64,
+    challenge_name: String,
+    total: i64,
+  }
+
+  #[derive(FromQueryResult)]
+  struct ChallengeSolved {
+    challenge_id: i64,
+    solved: i64,
+  }
+
   let totals = Entity::find()
     .join(JoinType::InnerJoin, Relation::Challenge.def())
     .filter(Column::UserId.eq(user_id))
@@ -404,29 +396,39 @@ where
     .column_as(Column::ChallengeId, "challenge_id")
     .column_as(Column::Id.count(), "solved")
     .group_by(Column::ChallengeId)
-    .order_by_asc(Column::ChallengeId)
     .into_model::<ChallengeSolved>()
     .all(db)
     .await?;
 
-  let mut result = Vec::new();
-  for t in &totals {
-    let s = solved_rows
-      .iter()
-      .find(|s| s.challenge_id == t.challenge_id);
-    result.push(ChallengeStat {
+  let solved_map: std::collections::HashMap<i64, i64> = solved_rows
+    .into_iter()
+    .map(|r| (r.challenge_id, r.solved))
+    .collect();
+
+  let stats = totals
+    .into_iter()
+    .map(|t| ChallengeStat {
       challenge_id: t.challenge_id,
-      challenge_name: t.challenge_name.clone(),
+      challenge_name: t.challenge_name,
       total: t.total,
-      solved: s.map(|s| s.solved).unwrap_or(0),
-    });
-  }
-  Ok(result)
+      solved: solved_map.get(&t.challenge_id).copied().unwrap_or(0),
+    })
+    .collect();
+
+  Ok(stats)
 }
 
 pub async fn get_user_game_stats<C>(db: &C, user_id: i64) -> Result<Vec<GameStat>, DbErr>
 where
   C: ConnectionTrait, {
+  #[derive(FromQueryResult)]
+  struct GameRow {
+    game_id: i64,
+    game_name: String,
+    challenge_id: i64,
+    solved: bool,
+  }
+
   let rows = Entity::find()
     .join(JoinType::InnerJoin, Relation::Challenge.def())
     .join(JoinType::InnerJoin, challenge::Relation::Game.def())
@@ -436,7 +438,7 @@ where
     .column_as(game::Column::Name, "game_name")
     .column_as(Column::ChallengeId, "challenge_id")
     .column_as(Column::Solved, "solved")
-    .into_model::<UserGameChallenge>()
+    .into_model::<GameRow>()
     .all(db)
     .await?;
 
@@ -458,7 +460,7 @@ where
     }
   }
 
-  let mut result = game_challenges
+  let mut stats: Vec<GameStat> = game_challenges
     .into_iter()
     .map(|(game_id, (game_name, challenges))| GameStat {
       game_id,
@@ -469,9 +471,9 @@ where
         .map(|s| s.len() as i64)
         .unwrap_or(0),
     })
-    .collect::<Vec<_>>();
-  result.sort_by_key(|g| g.game_id);
-  Ok(result)
+    .collect();
+  stats.sort_by_key(|g| g.game_id);
+  Ok(stats)
 }
 
 #[allow(clippy::too_many_arguments)]
