@@ -39,7 +39,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         )))
         .route("/", get(get_user))
         .route("/team", get(get_teams))
-        .route("/stats", get(get_submission_stats))
+        .route("/stats", get(get_user_stats))
         .route_layer(middleware::from_fn_with_state(
           state.clone(),
           data::prepare_data!(user, false, id, account, nickname),
@@ -203,7 +203,7 @@ async fn get_oauth_list(
   Ok(Json(oauths))
 }
 
-async fn get_submission_stats(
+async fn get_user_stats(
   State(ref db): State<Database>, Extension(token): Extension<Token>,
   Extension(user): Extension<user::Model>, Query(query): Query<SubmissionQuery>,
 ) -> Result<impl IntoResponse, ResponseError> {
