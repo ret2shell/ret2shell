@@ -21,6 +21,3 @@ r2s-config = { workspace = true }
 
 [lib]
 path = "src/lib.rs"
-
-[dev-dependencies]
-tokio = { workspace = true }
