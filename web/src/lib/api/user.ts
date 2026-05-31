@@ -5,7 +5,6 @@ import type { User } from "@models/user";
 import { t } from "@storage/theme";
 import { useMutation, useQuery } from "@tanstack/solid-query";
 import type { SearchParamsOption } from "ky";
-import type { DateTime } from "luxon";
 import { createMemo } from "solid-js";
 import api, { api_root, handleHttpError, inflyClient, safeJson, toastSuccess } from ".";
 
@@ -220,15 +219,18 @@ export function useUserOAuthList({
   );
 }
 
-export type ChallengeStats = {
+export type ChallengeStat = {
   challenge_id: number;
   challenge_name: string;
+  total: number;
+  solved: number;
+};
+
+export type GameStat = {
   game_id: number;
   game_name: string;
-  team_name: string | null;
-  total_submissions: number;
-  solved_count: number;
-  last_submission_at: DateTime;
+  total: number;
+  solved: number;
 };
 
 export async function getUserSubmissionStats(id: number, game_id?: number) {
@@ -240,7 +242,7 @@ export async function getUserSubmissionStats(id: number, game_id?: number) {
         })
       ) as SearchParamsOption,
     })
-    .json<ChallengeStats[]>();
+    .json<ChallengeStat[] | GameStat[]>();
 }
 
 export function useUserSubmissionStats({
@@ -261,7 +263,7 @@ export function useUserSubmissionStats({
       queryFn: async () => await getUserSubmissionStats(id(), game_id?.() ?? undefined),
       enabled: enabled?.(),
       throwOnError: (err: Error) => {
-        handleHttpError(err, t("user.errors.fetchSubmissions.title"));
+        handleHttpError(err, t("user.errors.fetchStats.title"));
         return onError?.(err) ?? false;
       },
     }),

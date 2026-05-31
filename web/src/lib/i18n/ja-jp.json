@@ -1514,8 +1514,8 @@
       "fetch": {
         "title": "ユーザー情報の取得に失敗しました"
       },
-      "fetchSubmissions": {
-        "title": "解答記録の取得に失敗しました"
+      "fetchStats": {
+        "title": "キャリアデータの取得に失敗しました"
       }
     },
     "description": {
@@ -1525,15 +1525,9 @@
     "joinedGames": "大会に参加",
     "gameJournal": "{{team}}のメンバーとして{{game}}に参加しました。",
     "moreJournal": "命ある限り、探求を止めない……",
-    "submissions": {
-      "title": "解答記録",
+    "stats": {
+      "title": "キャリアデータ",
       "allGames": "すべての大会",
-      "challenge": "問題",
-      "game": "大会",
-      "team": "チーム",
-      "submissions": "提出回数",
-      "status": "ステータス",
-      "time": "提出時間",
       "empty": "解答記録はありません",
       "solved": "解答済み",
       "failed": "未解答"

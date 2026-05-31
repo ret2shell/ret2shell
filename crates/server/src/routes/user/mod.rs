@@ -210,6 +210,14 @@ async fn get_submission_stats(
   if user.hidden && !token.permissions.0.contains(&Permission::User) && token.id != user.id {
     return Err(ResponseError::NotFound("user not found".to_owned()));
   }
-  let stats = submission::get_user_submission_stats(&db.conn, query.game_id, user.id).await?;
-  Ok(Json(stats))
+  match query.game_id {
+    Some(game_id) => {
+      let stats = submission::get_user_challenge_stats(&db.conn, game_id, user.id).await?;
+      Ok(Json(stats).into_response())
+    }
+    None => {
+      let stats = submission::get_user_game_stats(&db.conn, user.id).await?;
+      Ok(Json(stats).into_response())
+    }
+  }
 }

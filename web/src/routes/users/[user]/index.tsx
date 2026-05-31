@@ -1,5 +1,5 @@
 import { handleHttpError } from "@api";
-import { getUser, getUserTeams, useUserSubmissionStats } from "@api/user";
+import { type ChallengeStat, type GameStat, getUser, getUserTeams, useUserSubmissionStats } from "@api/user";
 import SidebarLayout from "@blocks/sidebar-layout";
 import type { Team } from "@models/team";
 import type { User } from "@models/user";
@@ -22,11 +22,26 @@ export default function () {
   const [loading, setLoading] = createSignal(true);
   const params = useParams();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const userId = () => Number.parseInt(params.user ?? "", 10) || null;
   const [teams, setTeams] = createSignal([] as Team[]);
-  const [selectedGameId, setSelectedGameId] = createSignal<string | null>((searchParams.game as string) || null);
-  const [allGames, setAllGames] = createSignal(new Map<number, string>());
+
+  const selectedGameId = () => (searchParams.game as string) || null;
+
+  const submissionStats = useUserSubmissionStats({
+    id: () => userId()!,
+    game_id: () => {
+      const val = selectedGameId();
+      return val ? Number.parseInt(val, 10) : null;
+    },
+    enabled: () => !!userId(),
+  });
+
+  const allGameStats = useUserSubmissionStats({
+    id: () => userId()!,
+    game_id: () => null,
+    enabled: () => !!userId(),
+  });
 
   createEffect(() => {
     if (!userId()) {
@@ -46,42 +61,21 @@ export default function () {
     });
   });
 
-  const submissionStats = useUserSubmissionStats({
-    id: () => userId()!,
-    game_id: () => {
-      const val = selectedGameId();
-      return val ? Number.parseInt(val, 10) : null;
-    },
-    enabled: () => !!userId(),
-  });
-
-  createEffect(() => {
-    const stats = submissionStats.data;
-    if (stats) {
-      setAllGames((prev) => {
-        const next = new Map(prev);
-        for (const stat of stats) {
-          if (stat.game_id && stat.game_name) {
-            next.set(stat.game_id, stat.game_name);
-          }
-        }
-        return next;
-      });
-    }
-  });
-
   const gameOptions = createMemo(() => {
     const games = new Map<number, string>();
+    const stats = allGameStats.data;
+    if (stats && stats.length > 0 && "game_id" in stats[0]) {
+      for (const g of stats as GameStat[]) {
+        games.set(g.game_id, g.game_name);
+      }
+    }
     for (const team of teams()) {
       if (team.game_id && team.game_name) {
         games.set(team.game_id, team.game_name);
       }
     }
-    for (const [id, name] of allGames()) {
-      games.set(id, name);
-    }
     return [
-      { label: t("user.submissions.allGames"), value: "" },
+      { label: t("user.stats.allGames"), value: "" },
       ...Array.from(games.entries()).map(([id, name]) => ({
         label: name,
         value: id.toString(),
@@ -89,10 +83,104 @@ export default function () {
     ];
   });
 
+  const pieOption = createMemo(() => {
+    const stats = submissionStats.data;
+    if (!stats || stats.length === 0) return null;
+    let solved: number;
+    let total: number;
+    if (!selectedGameId()) {
+      const games = stats as GameStat[];
+      solved = games.reduce((sum, g) => sum + g.solved, 0);
+      total = games.reduce((sum, g) => sum + g.total, 0);
+    } else {
+      const challenges = stats as ChallengeStat[];
+      solved = challenges.filter((c) => c.solved > 0).length;
+      total = challenges.length;
+    }
+    return {
+      title: {
+        text: `${((solved / Math.max(total, 1)) * 100).toFixed(0)}%`,
+        left: "center",
+        top: "center",
+        textStyle: {
+          fontSize: 20,
+          fontWeight: "bold",
+        },
+      },
+      series: [
+        {
+          type: "pie",
+          radius: ["50%", "70%"],
+          center: ["50%", "50%"],
+          avoidLabelOverlap: true,
+          label: { show: false },
+          data: [
+            {
+              value: solved,
+              name: t("user.stats.solved"),
+              itemStyle: { color: "#17a750" },
+            },
+            {
+              value: total - solved,
+              name: t("user.stats.failed"),
+              itemStyle: { color: "#808080" },
+            },
+          ],
+        },
+      ],
+    };
+  });
+
   const chartOption = createMemo(() => {
     const stats = submissionStats.data;
     if (!stats || stats.length === 0) return null;
-    const sortedChallenges = [...stats].sort((a, b) => b.total_submissions - a.total_submissions);
+    if (selectedGameId()) {
+      const challenges = stats as ChallengeStat[];
+      const sorted = [...challenges].sort((a, b) => b.total - a.total);
+      return {
+        grid: {
+          left: "16px",
+          right: "32px",
+          bottom: "32px",
+          top: "16px",
+          containLabel: true,
+        },
+        tooltip: {
+          trigger: "axis",
+          axisPointer: { type: "shadow" },
+        },
+        xAxis: {
+          type: "category",
+          data: sorted.map((c) => c.challenge_name),
+          axisLabel: { rotate: 30, fontSize: 11 },
+        },
+        yAxis: {
+          type: "value",
+          min: 0,
+          minInterval: 1,
+        },
+        series: [
+          {
+            name: t("user.stats.solved"),
+            type: "bar",
+            stack: "total",
+            data: sorted.map((c) => c.solved),
+            itemStyle: { color: "#17a750" },
+            barMaxWidth: 48,
+          },
+          {
+            name: t("user.stats.failed"),
+            type: "bar",
+            stack: "total",
+            data: sorted.map((c) => c.total - c.solved),
+            itemStyle: { color: "#808080" },
+            barMaxWidth: 48,
+          },
+        ],
+      };
+    }
+    const games = stats as GameStat[];
+    const sorted = [...games].sort((a, b) => b.total - a.total);
     return {
       grid: {
         left: "16px",
@@ -103,17 +191,12 @@ export default function () {
       },
       tooltip: {
         trigger: "axis",
-        axisPointer: {
-          type: "shadow",
-        },
+        axisPointer: { type: "shadow" },
       },
       xAxis: {
         type: "category",
-        data: sortedChallenges.map((c) => c.challenge_name),
-        axisLabel: {
-          rotate: 30,
-          fontSize: 11,
-        },
+        data: sorted.map((g) => g.game_name),
+        axisLabel: { rotate: 30, fontSize: 11 },
       },
       yAxis: {
         type: "value",
@@ -122,23 +205,19 @@ export default function () {
       },
       series: [
         {
-          name: t("user.submissions.solved"),
+          name: t("user.stats.solved"),
           type: "bar",
           stack: "total",
-          data: sortedChallenges.map((c) => (c.solved_count > 0 ? 1 : 0)),
-          itemStyle: {
-            color: "#17a750",
-          },
+          data: sorted.map((g) => g.solved),
+          itemStyle: { color: "#17a750" },
           barMaxWidth: 48,
         },
         {
-          name: t("user.submissions.failed"),
+          name: t("user.stats.failed"),
           type: "bar",
           stack: "total",
-          data: sortedChallenges.map((c) => c.total_submissions - c.solved_count),
-          itemStyle: {
-            color: "#808080",
-          },
+          data: sorted.map((g) => g.total - g.solved),
+          itemStyle: { color: "#808080" },
           barMaxWidth: 48,
         },
       ],
@@ -167,7 +246,10 @@ export default function () {
                   >
                     <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5 text-warning" />
                     <span class="flex-1 text-start truncate">
-                      {t("user.gameJournal", { team: team.name, game: team.game_name! })}
+                      {t("user.gameJournal", {
+                        team: team.name,
+                        game: team.game_name!,
+                      })}
                     </span>
                     <span class="opacity-60">{team.last_active_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
                   </A>
@@ -180,76 +262,42 @@ export default function () {
             </section>
             <div class="h-6" />
             <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
-              <span class="shrink-0 icon-[fluent--checkmark-20-regular] w-5 h-5" />
-              <span class="flex-1">{t("user.submissions.title")}</span>
+              <span class="shrink-0 icon-[fluent--data-pie-20-regular] w-5 h-5" />
+              <span class="flex-1">{t("user.stats.title")}</span>
               <Select
                 size="sm"
                 class="w-64"
                 items={gameOptions()}
                 value={selectedGameId() ? [selectedGameId()!] : []}
                 onValueChange={(e) => {
-                  setSelectedGameId(e.value[0] || null);
+                  const game = e.value[0] || undefined;
+                  setSearchParams({ game });
                 }}
-                placeholder={t("user.submissions.allGames")}
+                placeholder={t("user.stats.allGames")}
               />
             </h3>
-            <section class="flex flex-col">
-              <Show when={chartOption() && !submissionStats.isLoading}>
-                <div class="h-64 py-2">
-                  <Chart option={chartOption()!} />
-                </div>
-              </Show>
+            <section class="flex flex-col p-2">
               <Switch>
                 <Match when={submissionStats.isLoading}>
                   <LoadingTips />
                 </Match>
                 <Match when={!submissionStats.data || submissionStats.data.length === 0}>
                   <div class="h-12 flex items-center justify-center opacity-60">
-                    <span>{t("user.submissions.empty")}</span>
+                    <span>{t("user.stats.empty")}</span>
                   </div>
                 </Match>
                 <Match when={true}>
-                  <div class="overflow-x-auto">
-                    <table class="table table-sm w-full">
-                      <thead>
-                        <tr class="border-b border-b-layer-content/15">
-                          <th class="text-start h-10 font-normal opacity-60">{t("user.submissions.challenge")}</th>
-                          <th class="text-start h-10 font-normal opacity-60">{t("user.submissions.game")}</th>
-                          <th class="text-start h-10 font-normal opacity-60">{t("user.submissions.team")}</th>
-                          <th class="text-center h-10 font-normal opacity-60">{t("user.submissions.status")}</th>
-                          <th class="text-end h-10 font-normal opacity-60">{t("user.submissions.time")}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <For each={submissionStats.data!}>
-                          {(challenge) => (
-                            <tr class="border-b border-b-layer-content/10 hover:bg-layer-content/5">
-                              <td class="text-start py-3">
-                                <A
-                                  class="link-primary hover:underline"
-                                  href={`/games/${challenge.game_id}/challenges?challenge=${challenge.challenge_id}`}
-                                >
-                                  {challenge.challenge_name}
-                                </A>
-                              </td>
-                              <td class="text-start py-3 opacity-80">{challenge.game_name}</td>
-                              <td class="text-start py-3 opacity-80">{challenge.team_name ?? "-"}</td>
-                              <td class="text-center py-3">
-                                <Show
-                                  when={challenge.solved_count > 0}
-                                  fallback={<span class="text-error">{t("user.submissions.failed")}</span>}
-                                >
-                                  <span class="text-success">{t("user.submissions.solved")}</span>
-                                </Show>
-                              </td>
-                              <td class="text-end py-3 opacity-60">
-                                {challenge.last_submission_at.toFormat("yyyy-MM-dd HH:mm:ss")}
-                              </td>
-                            </tr>
-                          )}
-                        </For>
-                      </tbody>
-                    </table>
+                  <div class="flex flex-row gap-4 py-2">
+                    <div class="w-64 h-64 flex items-center justify-center">
+                      <Show when={pieOption()} fallback={<LoadingTips />}>
+                        <Chart option={pieOption()!} />
+                      </Show>
+                    </div>
+                    <div class="flex-1 h-64">
+                      <Show when={chartOption()}>
+                        <Chart option={chartOption()!} />
+                      </Show>
+                    </div>
                   </div>
                 </Match>
               </Switch>
@@ -259,13 +307,13 @@ export default function () {
               <span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5" />
               <span>{t("user.description.title")}</span>
             </h3>
-            <section class="max-h-96 overflow-y-auto">
+            <section class="py-2">
               <Switch>
                 <Match when={loading()}>
                   <LoadingTips />
                 </Match>
                 <Match when={true}>
-                  <Article content={user()?.description || t("user.description.empty")} noExtraPaddings compact />
+                  <Article content={user()?.description || t("user.description.empty")} />
                 </Match>
               </Switch>
             </section>

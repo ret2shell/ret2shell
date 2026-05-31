@@ -338,125 +338,139 @@ where
   Ok((submissions, total))
 }
 
-#[derive(Debug, Serialize, FromQueryResult)]
-pub struct UserChallengeStats {
+#[derive(Debug, Serialize)]
+pub struct ChallengeStat {
   pub challenge_id: i64,
   pub challenge_name: String,
+  pub total: i64,
+  pub solved: i64,
+}
+
+#[derive(Debug, Serialize)]
+pub struct GameStat {
   pub game_id: i64,
   pub game_name: String,
-  pub team_name: Option<String>,
-  pub total_submissions: i64,
-  pub solved_count: i64,
-  #[serde(with = "ts_seconds")]
-  pub last_submission_at: DateTime<Utc>,
+  pub total: i64,
+  pub solved: i64,
 }
 
 #[derive(Debug, FromQueryResult)]
-struct ChallengeTotalStats {
-  pub challenge_id: i64,
-  pub challenge_name: String,
-  pub game_id: i64,
-  pub game_name: String,
-  pub total_submissions: i64,
+struct ChallengeTotal {
+  challenge_id: i64,
+  challenge_name: String,
+  total: i64,
 }
 
 #[derive(Debug, FromQueryResult)]
-struct ChallengeSolvedStats {
-  pub challenge_id: i64,
-  pub solved_count: i64,
+struct ChallengeSolved {
+  challenge_id: i64,
+  solved: i64,
 }
 
 #[derive(Debug, FromQueryResult)]
-struct LastSubmissionInfo {
-  pub challenge_id: i64,
-  pub team_name: Option<String>,
-  pub last_submission_at: DateTime<Utc>,
+struct UserGameChallenge {
+  game_id: i64,
+  game_name: String,
+  challenge_id: i64,
+  solved: bool,
 }
 
-pub async fn get_user_submission_stats<C>(
-  db: &C, game_id: Option<i64>, user_id: i64,
-) -> Result<Vec<UserChallengeStats>, DbErr>
+pub async fn get_user_challenge_stats<C>(
+  db: &C, game_id: i64, user_id: i64,
+) -> Result<Vec<ChallengeStat>, DbErr>
 where
   C: ConnectionTrait, {
-  let mut sql_total = Entity::find()
+  let totals = Entity::find()
     .join(JoinType::InnerJoin, Relation::Challenge.def())
-    .join(JoinType::InnerJoin, challenge::Relation::Game.def())
-    .filter(Column::UserId.eq(user_id));
-  if let Some(game_id) = game_id {
-    sql_total = sql_total.filter(challenge::Column::GameId.eq(game_id));
-  }
-  let total_stats = sql_total
+    .filter(Column::UserId.eq(user_id))
+    .filter(challenge::Column::GameId.eq(game_id))
     .select_only()
     .column_as(Column::ChallengeId, "challenge_id")
     .column_as(challenge::Column::Name, "challenge_name")
-    .column_as(challenge::Column::GameId, "game_id")
-    .column_as(game::Column::Name, "game_name")
-    .column_as(Column::Id.count(), "total_submissions")
+    .column_as(Column::Id.count(), "total")
     .group_by(Column::ChallengeId)
     .group_by(challenge::Column::Name)
-    .group_by(challenge::Column::GameId)
-    .group_by(game::Column::Name)
     .order_by_asc(Column::ChallengeId)
-    .into_model::<ChallengeTotalStats>()
+    .into_model::<ChallengeTotal>()
     .all(db)
     .await?;
 
-  let mut sql_solved = Entity::find()
+  let solved_rows = Entity::find()
     .join(JoinType::InnerJoin, Relation::Challenge.def())
     .filter(Column::UserId.eq(user_id))
-    .filter(Column::Solved.eq(true));
-  if let Some(game_id) = game_id {
-    sql_solved = sql_solved.filter(challenge::Column::GameId.eq(game_id));
-  }
-  let solved_stats = sql_solved
+    .filter(Column::Solved.eq(true))
+    .filter(challenge::Column::GameId.eq(game_id))
     .select_only()
     .column_as(Column::ChallengeId, "challenge_id")
-    .column_as(Column::Id.count(), "solved_count")
+    .column_as(Column::Id.count(), "solved")
     .group_by(Column::ChallengeId)
     .order_by_asc(Column::ChallengeId)
-    .into_model::<ChallengeSolvedStats>()
-    .all(db)
-    .await?;
-
-  let mut sql_last = Entity::find()
-    .join(JoinType::InnerJoin, Relation::Challenge.def())
-    .join(JoinType::LeftJoin, Relation::Team.def())
-    .filter(Column::UserId.eq(user_id))
-    .distinct_on([(Entity, Column::ChallengeId)])
-    .order_by_asc(Column::ChallengeId)
-    .order_by_desc(Column::CreatedAt)
-    .order_by_desc(Column::Id);
-  if let Some(game_id) = game_id {
-    sql_last = sql_last.filter(challenge::Column::GameId.eq(game_id));
-  }
-  let last_info = sql_last
-    .select_only()
-    .column_as(Column::ChallengeId, "challenge_id")
-    .column_as(team::Column::Name, "team_name")
-    .column_as(Column::CreatedAt, "last_submission_at")
-    .into_model::<LastSubmissionInfo>()
+    .into_model::<ChallengeSolved>()
     .all(db)
     .await?;
 
   let mut result = Vec::new();
-  for total in &total_stats {
-    let solved = solved_stats
+  for t in &totals {
+    let s = solved_rows
       .iter()
-      .find(|s| s.challenge_id == total.challenge_id);
-    let last = last_info
-      .iter()
-      .find(|l| l.challenge_id == total.challenge_id);
-    result.push(UserChallengeStats {
-      challenge_id: total.challenge_id,
-      challenge_name: total.challenge_name.clone(),
-      game_id: total.game_id,
-      game_name: total.game_name.clone(),
-      team_name: last.and_then(|l| l.team_name.clone()),
-      total_submissions: total.total_submissions,
-      solved_count: solved.map(|s| s.solved_count).unwrap_or(0),
-      last_submission_at: last.map(|l| l.last_submission_at).unwrap_or_default(),
+      .find(|s| s.challenge_id == t.challenge_id);
+    result.push(ChallengeStat {
+      challenge_id: t.challenge_id,
+      challenge_name: t.challenge_name.clone(),
+      total: t.total,
+      solved: s.map(|s| s.solved).unwrap_or(0),
     });
   }
+  Ok(result)
+}
+
+pub async fn get_user_game_stats<C>(db: &C, user_id: i64) -> Result<Vec<GameStat>, DbErr>
+where
+  C: ConnectionTrait, {
+  let rows = Entity::find()
+    .join(JoinType::InnerJoin, Relation::Challenge.def())
+    .join(JoinType::InnerJoin, challenge::Relation::Game.def())
+    .filter(Column::UserId.eq(user_id))
+    .select_only()
+    .column_as(challenge::Column::GameId, "game_id")
+    .column_as(game::Column::Name, "game_name")
+    .column_as(Column::ChallengeId, "challenge_id")
+    .column_as(Column::Solved, "solved")
+    .into_model::<UserGameChallenge>()
+    .all(db)
+    .await?;
+
+  use std::collections::{HashMap, HashSet};
+  let mut game_challenges: HashMap<i64, (String, HashSet<i64>)> = HashMap::new();
+  let mut game_solved: HashMap<i64, HashSet<i64>> = HashMap::new();
+
+  for row in &rows {
+    game_challenges
+      .entry(row.game_id)
+      .or_insert_with(|| (row.game_name.clone(), HashSet::new()))
+      .1
+      .insert(row.challenge_id);
+    if row.solved {
+      game_solved
+        .entry(row.game_id)
+        .or_default()
+        .insert(row.challenge_id);
+    }
+  }
+
+  let mut result = game_challenges
+    .into_iter()
+    .map(|(game_id, (game_name, challenges))| GameStat {
+      game_id,
+      game_name,
+      total: challenges.len() as i64,
+      solved: game_solved
+        .get(&game_id)
+        .map(|s| s.len() as i64)
+        .unwrap_or(0),
+    })
+    .collect::<Vec<_>>();
+  result.sort_by_key(|g| g.game_id);
   Ok(result)
 }
 

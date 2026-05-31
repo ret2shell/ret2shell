@@ -1514,8 +1514,8 @@
       "fetch": {
         "title": "獲取用戶信息失敗"
       },
-      "fetchSubmissions": {
-        "title": "獲取解題記錄失敗"
+      "fetchStats": {
+        "title": "獲取生涯數據失敗"
       }
     },
     "description": {
@@ -1525,15 +1525,9 @@
     "joinedGames": "參與賽事",
     "gameJournal": "作為 {{team}} 成員參與了 {{game}}。",
     "moreJournal": "生命不息，探索不止……",
-    "submissions": {
-      "title": "解題記錄",
+    "stats": {
+      "title": "生涯數據",
       "allGames": "全部賽事",
-      "challenge": "題目",
-      "game": "賽事",
-      "team": "隊伍",
-      "submissions": "提交次數",
-      "status": "狀態",
-      "time": "提交時間",
       "empty": "暫無解題記錄",
       "solved": "已解出",
       "failed": "未解出"

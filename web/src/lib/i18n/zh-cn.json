@@ -1514,8 +1514,8 @@
       "fetch": {
         "title": "获取用户信息失败"
       },
-      "fetchSubmissions": {
-        "title": "获取解题记录失败"
+      "fetchStats": {
+        "title": "获取生涯数据失败"
       }
     },
     "description": {
@@ -1525,15 +1525,9 @@
     "joinedGames": "参与赛事",
     "gameJournal": "作为 {{team}} 成员参与了 {{game}}。",
     "moreJournal": "生命不息，探索不止……",
-    "submissions": {
-      "title": "解题记录",
+    "stats": {
+      "title": "生涯数据",
       "allGames": "全部赛事",
-      "challenge": "题目",
-      "game": "赛事",
-      "team": "队伍",
-      "submissions": "提交次数",
-      "status": "状态",
-      "time": "提交时间",
       "empty": "暂无解题记录",
       "solved": "已解出",
       "failed": "未解出"

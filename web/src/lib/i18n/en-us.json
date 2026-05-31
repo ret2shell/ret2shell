@@ -1514,8 +1514,8 @@
       "fetch": {
         "title": "Failed to fetch user information"
       },
-      "fetchSubmissions": {
-        "title": "Failed to fetch submission records"
+      "fetchStats": {
+        "title": "Failed to fetch stats"
       }
     },
     "description": {
@@ -1525,15 +1525,9 @@
     "joinedGames": "Joined games",
     "gameJournal": "Joined in {{game}} as a member of {{team}}.",
     "moreJournal": "Life continues, exploration never stops...",
-    "submissions": {
-      "title": "Submission Records",
+    "stats": {
+      "title": "Career Stats",
       "allGames": "All Games",
-      "challenge": "Challenge",
-      "game": "Game",
-      "team": "Team",
-      "submissions": "Submissions",
-      "status": "Status",
-      "time": "Submission Time",
       "empty": "No submission records yet",
       "solved": "Solved",
       "failed": "Failed"
