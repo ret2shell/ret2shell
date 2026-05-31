@@ -355,7 +355,7 @@ mod tests {
   }
 
   #[test]
-  fn test_cache_error_redis_debug() {
+  fn test_cache_error_other_debug() {
     let err = CacheError::Other("test".to_string());
     assert!(format!("{:?}", err).contains("Other"));
   }
