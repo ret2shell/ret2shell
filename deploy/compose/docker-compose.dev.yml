@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: ret2shell
       POSTGRES_DB: ret2shell
     volumes:
-      - database:/var/lib/postgresql/data
+      - database:/var/lib/postgresql
     ports:
       - "5432:5432"
 
@@ -55,7 +55,6 @@ services:
       - registry:/var/lib/registry
     ports:
       - "5000:5000"
-    command: ["serve", "/etc/docker/registry/config.yml"]
 
 volumes:
   database:

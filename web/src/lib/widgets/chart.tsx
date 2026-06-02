@@ -161,7 +161,6 @@ export default function Chart(props: EChartsBaseProps) {
           width: size.width ?? 0,
           height: size.height ?? 0,
           renderer: isMobile ? "svg" : "canvas",
-          useDirtyRect: true,
           ...(props.initOptions ?? {}),
         });
         chartInstance.setOption(props.option, props.notMerge, props.lazyUpdate);

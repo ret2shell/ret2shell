@@ -1525,6 +1525,7 @@
     "joinedGames": "参与赛事",
     "gameJournal": "作为 {{team}} 成员参与了 {{game}}。",
     "moreJournal": "生命不息，探索不止……",
+    "solvedProblems": "解题情况",
     "stats": {
       "title": "生涯数据",
       "allGames": "全部赛事",

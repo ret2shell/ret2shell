@@ -1,6 +1,9 @@
 import { handleHttpError } from "@api";
+import { useChallenges } from "@api/challenge";
+import { useGame } from "@api/game";
 import { type ChallengeStat, type GameStat, getUser, getUserTeams, useUserSubmissionStats } from "@api/user";
 import SidebarLayout from "@blocks/sidebar-layout";
+import { HostType } from "@models/game";
 import type { Team } from "@models/team";
 import type { User } from "@models/user";
 import { createBreakpoints } from "@solid-primitives/media";
@@ -43,6 +46,16 @@ export default function () {
     enabled: () => !!userId(),
   });
 
+  const game = useGame({
+    id: () => Number.parseInt(selectedGameId()!, 10),
+    enabled: () => !!selectedGameId(),
+  });
+
+  const challenges = useChallenges({
+    game_id: () => Number.parseInt(selectedGameId()!, 10),
+    enabled: () => !!selectedGameId(),
+  });
+
   createEffect(() => {
     if (!userId()) {
       navigate("/sigtrap/404", { replace: true });
@@ -81,6 +94,28 @@ export default function () {
         value: id.toString(),
       })),
     ];
+  });
+
+  const challengesEx = createMemo(() => {
+    if (!selectedGameId() || !challenges.data) return null;
+    const stats = submissionStats.data as ChallengeStat[] | undefined;
+    const isTraining = game.data?.host_type === HostType.Training;
+    return (challenges.data[0] ?? [])
+      .filter((c) => !c.hidden)
+      .map((challenge) => {
+        const stat = stats?.find((s) => s.challenge_id === challenge.id);
+        return {
+          challenge,
+          solved: (stat?.solved ?? 0) > 0,
+          link: isTraining
+            ? `/training/${challenge.game_id}?challenge=${challenge.id}`
+            : `/games/${challenge.game_id}/challenges?challenge=${challenge.id}`,
+        };
+      })
+      .sort((a, b) => {
+        if (a.challenge.score !== b.challenge.score) return a.challenge.score - b.challenge.score;
+        return a.challenge.name < b.challenge.name ? -1 : 1;
+      });
   });
 
   const pieOption = createMemo(() => {
@@ -147,7 +182,12 @@ export default function () {
         },
         tooltip: {
           trigger: "axis",
-          axisPointer: { type: "shadow" },
+          axisPointer: {
+            type: "line",
+            label: { precision: 0 },
+            snap: true,
+          },
+          borderColor: "transparent",
         },
         xAxis: {
           type: "category",
@@ -191,7 +231,12 @@ export default function () {
       },
       tooltip: {
         trigger: "axis",
-        axisPointer: { type: "shadow" },
+        axisPointer: {
+          type: "line",
+          label: { precision: 0 },
+          snap: true,
+        },
+        borderColor: "transparent",
       },
       xAxis: {
         type: "category",
@@ -234,34 +279,6 @@ export default function () {
         <div class="flex-1 flex flex-col items-center p-3 lg:p-6">
           <div class="flex flex-col w-full max-w-5xl">
             <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
-              <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
-              <span>{t("user.joinedGames")}</span>
-            </h3>
-            <section class="flex flex-col">
-              <For each={teams()}>
-                {(team) => (
-                  <A
-                    class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2 hover:bg-layer-content/5 hover:cursor-pointer"
-                    href={`/games/${team.game_id}/teams/${team.id}`}
-                  >
-                    <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5 text-warning" />
-                    <span class="flex-1 text-start truncate">
-                      {t("user.gameJournal", {
-                        team: team.name,
-                        game: team.game_name!,
-                      })}
-                    </span>
-                    <span class="opacity-60">{team.last_active_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
-                  </A>
-                )}
-              </For>
-              <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2 opacity-60">
-                <span class="shrink-0 icon-[fluent--search-sparkle-20-regular] w-5 h-5 text-info" />
-                <span>{t("user.moreJournal")}</span>
-              </div>
-            </section>
-            <div class="h-6" />
-            <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
               <span class="shrink-0 icon-[fluent--data-pie-20-regular] w-5 h-5" />
               <span class="flex-1">{t("user.stats.title")}</span>
               <Select
@@ -298,6 +315,72 @@ export default function () {
                         <Chart option={chartOption()!} />
                       </Show>
                     </div>
+                  </div>
+                </Match>
+              </Switch>
+            </section>
+            <div class="h-6" />
+            <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
+              <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
+              <span>{selectedGameId() ? t("user.solvedProblems") : t("user.joinedGames")}</span>
+            </h3>
+            <section class="flex flex-col">
+              <Switch>
+                <Match when={!selectedGameId()}>
+                  <For each={teams()}>
+                    {(team) => (
+                      <A
+                        class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2 hover:bg-layer-content/5 hover:cursor-pointer"
+                        href={`/games/${team.game_id}/teams/${team.id}`}
+                      >
+                        <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5 text-warning" />
+                        <span class="flex-1 text-start truncate">
+                          {t("user.gameJournal", {
+                            team: team.name,
+                            game: team.game_name!,
+                          })}
+                        </span>
+                        <span class="opacity-60">{team.last_active_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
+                      </A>
+                    )}
+                  </For>
+                  <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2 opacity-60">
+                    <span class="shrink-0 icon-[fluent--search-sparkle-20-regular] w-5 h-5 text-info" />
+                    <span>{t("user.moreJournal")}</span>
+                  </div>
+                </Match>
+                <Match when={challenges.isLoading}>
+                  <LoadingTips />
+                </Match>
+                <Match when={challengesEx() && challengesEx()!.length > 0}>
+                  <For each={challengesEx()!}>
+                    {(item) => (
+                      <A
+                        class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2 hover:bg-layer-content/5 hover:cursor-pointer"
+                        href={item.link}
+                      >
+                        <span
+                          class={clsx(
+                            "shrink-0 w-5 h-5",
+                            item.solved
+                              ? "icon-[fluent--checkmark-circle-20-regular] text-success"
+                              : "icon-[fluent--flag-20-regular] text-warning"
+                          )}
+                        />
+                        <span class="flex-1 text-start truncate">{item.challenge.name}</span>
+                        <span class="opacity-60">{item.challenge.score} pts</span>
+                      </A>
+                    )}
+                  </For>
+                  <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2 opacity-60">
+                    <span class="shrink-0 icon-[fluent--search-sparkle-20-regular] w-5 h-5 text-info" />
+                    <span>{t("user.moreJournal")}</span>
+                  </div>
+                </Match>
+                <Match when={true}>
+                  <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2 opacity-60">
+                    <span class="shrink-0 icon-[fluent--search-sparkle-20-regular] w-5 h-5 text-info" />
+                    <span>{t("challenge.empty")}</span>
                   </div>
                 </Match>
               </Switch>

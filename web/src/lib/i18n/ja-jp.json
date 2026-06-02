@@ -1525,6 +1525,7 @@
     "joinedGames": "大会に参加",
     "gameJournal": "{{team}}のメンバーとして{{game}}に参加しました。",
     "moreJournal": "命ある限り、探求を止めない……",
+    "solvedProblems": "解答状況",
     "stats": {
       "title": "キャリアデータ",
       "allGames": "すべての大会",
