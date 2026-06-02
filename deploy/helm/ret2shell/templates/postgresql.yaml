@@ -101,6 +101,8 @@ spec:
           image: {{ include "ret2shell.image" .Values.postgresql.image }}
           imagePullPolicy: {{ .Values.postgresql.image.pullPolicy }}
           env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
