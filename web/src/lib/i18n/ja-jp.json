@@ -1533,6 +1533,12 @@
       "solved": "解答済み",
       "failed": "未解答"
     },
+    "statusFilter": {
+      "all": "すべての問題",
+      "notAttempted": "未着手",
+      "attempted": "挑戦済み",
+      "solved": "解答済み"
+    },
     "gotoAdminPanel": "ユーザー管理へ移動",
     "registeredAt": "{{time}}に登録",
     "title": "ユーザー",

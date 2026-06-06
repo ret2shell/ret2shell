@@ -1533,6 +1533,12 @@
       "solved": "Solved",
       "failed": "Failed"
     },
+    "statusFilter": {
+      "all": "All Challenges",
+      "notAttempted": "Not Attempted",
+      "attempted": "Attempted",
+      "solved": "Solved"
+    },
     "gotoAdminPanel": "Go to User Management",
     "registeredAt": "Registered at {{time}}",
     "title": "Users",

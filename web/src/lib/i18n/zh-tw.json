@@ -1533,6 +1533,12 @@
       "solved": "已解出",
       "failed": "未解出"
     },
+    "statusFilter": {
+      "all": "所有題目",
+      "notAttempted": "待完成",
+      "attempted": "嘗試過",
+      "solved": "已解答"
+    },
     "gotoAdminPanel": "轉至用戶管理",
     "registeredAt": "註冊於 {{time}}",
     "title": "用戶",

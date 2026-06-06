@@ -30,6 +30,7 @@ export default function () {
   const [teams, setTeams] = createSignal([] as Team[]);
 
   const selectedGameId = () => (searchParams.game as string) || null;
+  const [selectedStatus, setSelectedStatus] = createSignal<string>("all");
 
   const submissionStats = useUserSubmissionStats({
     id: () => userId()!,
@@ -96,6 +97,13 @@ export default function () {
     ];
   });
 
+  const statusOptions = createMemo(() => [
+    { label: t("user.statusFilter.all"), value: "all" },
+    { label: t("user.statusFilter.notAttempted"), value: "not_attempted" },
+    { label: t("user.statusFilter.attempted"), value: "attempted" },
+    { label: t("user.statusFilter.solved"), value: "solved" },
+  ]);
+
   const challengesEx = createMemo(() => {
     if (!selectedGameId() || !challenges.data) return null;
     const stats = submissionStats.data as ChallengeStat[] | undefined;
@@ -104,9 +112,12 @@ export default function () {
       .filter((c) => !c.hidden)
       .map((challenge) => {
         const stat = stats?.find((s) => s.challenge_id === challenge.id);
+        const total = stat?.total ?? 0;
+        const solved = stat?.solved ?? 0;
         return {
           challenge,
-          solved: (stat?.solved ?? 0) > 0,
+          total,
+          solved,
           link: isTraining
             ? `/training/${challenge.game_id}?challenge=${challenge.id}`
             : `/games/${challenge.game_id}/challenges?challenge=${challenge.id}`,
@@ -116,6 +127,22 @@ export default function () {
         if (a.challenge.score !== b.challenge.score) return a.challenge.score - b.challenge.score;
         return a.challenge.name < b.challenge.name ? -1 : 1;
       });
+  });
+
+  const filteredChallenges = createMemo(() => {
+    const items = challengesEx();
+    if (!items) return null;
+    const status = selectedStatus();
+    switch (status) {
+      case "not_attempted":
+        return items.filter((item) => item.total === 0);
+      case "attempted":
+        return items.filter((item) => item.total > 0 && item.solved === 0);
+      case "solved":
+        return items.filter((item) => item.solved > 0);
+      default:
+        return items;
+    }
   });
 
   const pieOption = createMemo(() => {
@@ -322,7 +349,19 @@ export default function () {
             <div class="h-6" />
             <h3 class="h-12 flex items-center border-b border-b-layer-content/15 font-bold space-x-2">
               <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
-              <span>{selectedGameId() ? t("user.solvedProblems") : t("user.joinedGames")}</span>
+              <span class="flex-1">{selectedGameId() ? t("user.solvedProblems") : t("user.joinedGames")}</span>
+              <Show when={selectedGameId()}>
+                <Select
+                  size="sm"
+                  class="w-40"
+                  items={statusOptions()}
+                  value={selectedStatus() === "all" ? [] : [selectedStatus()]}
+                  onValueChange={(e) => {
+                    setSelectedStatus(e.value[0] || "all");
+                  }}
+                  placeholder={t("user.statusFilter.all")}
+                />
+              </Show>
             </h3>
             <section class="flex flex-col">
               <Switch>
@@ -352,8 +391,8 @@ export default function () {
                 <Match when={challenges.isLoading}>
                   <LoadingTips />
                 </Match>
-                <Match when={challengesEx() && challengesEx()!.length > 0}>
-                  <For each={challengesEx()!}>
+                <Match when={filteredChallenges() && filteredChallenges()!.length > 0}>
+                  <For each={filteredChallenges()!}>
                     {(item) => (
                       <A
                         class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2 hover:bg-layer-content/5 hover:cursor-pointer"
@@ -362,7 +401,7 @@ export default function () {
                         <span
                           class={clsx(
                             "shrink-0 w-5 h-5",
-                            item.solved
+                            item.solved > 0
                               ? "icon-[fluent--checkmark-circle-20-regular] text-success"
                               : "icon-[fluent--flag-20-regular] text-warning"
                           )}
