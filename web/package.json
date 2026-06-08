@@ -70,7 +70,7 @@
     "remark-rehype": "^11.1.2",
     "sakana-widget": "^3.0.0",
     "shell-quote": "^1.8.4",
-    "shiki": "^3.23.0",
+    "shiki": "^4.2.0",
     "solid-js": "^1.9.13",
     "solid-transition-group": "^0.3.0",
     "strip-ansi": "^7.2.0",
