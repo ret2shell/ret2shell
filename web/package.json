@@ -68,7 +68,7 @@
     "remark-math": "^6.0.0",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",
-    "sakana-widget": "^3.0.0",
+    "sakana-widget": "^3.0.1",
     "shell-quote": "^1.8.4",
     "shiki": "^3.23.0",
     "solid-js": "^1.9.13",
