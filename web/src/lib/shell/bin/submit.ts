@@ -42,18 +42,7 @@ export class Submit implements Command {
         if (st.solved !== null) {
           io.println("");
           if (st.solved) {
-            inflyClient.invalidateQueries({
-              queryKey: ["game", game!.id, "challenge"],
-            });
-            inflyClient.invalidateQueries({
-              queryKey: ["game", game!.id, "selfSolves"],
-            });
             io.success(`${t("challenge.submission.status.solved.title")}: ${st.result}`);
-            if (isGameInProgress(game) && !isAdminOfGame(game)) {
-              inflyClient.invalidateQueries({
-                queryKey: ["game", game.id, "team", "self"],
-              });
-            }
             io.print(`${ansiColors.blue("[?]")} ${t("shell.submit.llmPrompt")} `);
             const answer = await io.input();
             io.print("\n");
@@ -74,6 +63,17 @@ export class Submit implements Command {
               }
             } else {
               io.info(t("shell.submit.llmSkipped"));
+            }
+            inflyClient.invalidateQueries({
+              queryKey: ["game", game!.id, "challenge"],
+            });
+            inflyClient.invalidateQueries({
+              queryKey: ["game", game!.id, "selfSolves"],
+            });
+            if (isGameInProgress(game) && !isAdminOfGame(game)) {
+              inflyClient.invalidateQueries({
+                queryKey: ["game", game.id, "team", "self"],
+              });
             }
           } else {
             io.error(`${t("challenge.submission.status.failed.title")}: ${st.result}`);

@@ -5,12 +5,11 @@ import { fullTheme, t } from "@storage/theme";
 import Button from "@widgets/button";
 import Input from "@widgets/input";
 import LoadingTips from "@widgets/loading-tips";
-import Tag from "@widgets/tag";
 import TreeView from "@widgets/treeview";
 import clsx from "clsx";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { createMemo, createSignal, For, Match, Show, Switch } from "solid-js";
+import { createMemo, createSignal, Match, Show, Switch } from "solid-js";
 import type { ChallengeWidgetProps } from ".";
 
 export default function ChallengeList(
@@ -91,17 +90,6 @@ export default function ChallengeList(
             {c.challenge.score} pts
           </span>
         ) : null,
-        belowPart: (
-          <div class="flex flex-wrap gap-1 mt-1">
-            <For each={c.challenge.tag}>
-              {(tag) => (
-                <Tag level={tag.primary ? "success" : "info"}>
-                  <span>{tag.name}</span>
-                </Tag>
-              )}
-            </For>
-          </div>
-        ),
         children: [],
       }));
   });
