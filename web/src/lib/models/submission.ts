@@ -13,4 +13,5 @@ export type Submission = {
   score?: number;
   solved: boolean | null;
   result: string | null;
+  is_llm_used: boolean | null;
 };

@@ -434,6 +434,22 @@ export async function checkSubmissionStatus(game_id: number, challenge_id: numbe
     .json<Submission>();
 }
 
+export async function labelSubmission(
+  game_id: number,
+  challenge_id: number,
+  submission_id: number,
+  is_llm_used: boolean
+) {
+  return await api
+    .patch(`${api_root}/game/${game_id}/challenge/${challenge_id}/submit`, {
+      json: {
+        id: submission_id,
+        is_llm_used,
+      },
+    })
+    .json<Submission>();
+}
+
 export async function getSelfSolves(game_id: number) {
   return await api.get(`${api_root}/game/${game_id}/solve`).json<Submission[]>();
 }

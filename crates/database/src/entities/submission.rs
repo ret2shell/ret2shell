@@ -23,6 +23,7 @@ pub struct Model {
   pub solved: Option<bool>,
   #[sea_orm(column_type = "Text")]
   pub result: Option<String>,
+  pub is_llm_used: Option<bool>,
 }
 
 impl Model {
@@ -49,6 +50,7 @@ pub struct ExModel {
   pub solved: Option<bool>,
   pub score: i32,
   pub result: Option<String>,
+  pub is_llm_used: Option<bool>,
 }
 
 impl ExModel {

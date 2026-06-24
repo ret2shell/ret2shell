@@ -123,6 +123,7 @@ pub(super) async fn submit_flag(
     content: Some(req.content.clone()),
     solved: None,
     result: None,
+    is_llm_used: None,
     team_id: team.as_ref().map(|t| t.id),
     user_id: token.id,
   };
@@ -179,4 +180,25 @@ pub(super) async fn submit_flag(
     )
     .await?;
   Ok(Json(submission))
+}
+
+#[derive(Deserialize)]
+pub(super) struct LabelSubmissionRequest {
+  pub id: i64,
+  pub is_llm_used: bool,
+}
+
+pub(super) async fn label_submission(
+  State(ref db): State<Database>, Extension(token): Extension<Token>,
+  Extension(challenge): Extension<challenge::Model>, Json(req): Json<LabelSubmissionRequest>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let mut submission = submission::get(&db.conn, req.id)
+    .await?
+    .ok_or_else(|| ResponseError::NotFound("submission not found".to_owned()))?;
+  if submission.user_id != token.id || submission.challenge_id != challenge.id {
+    return Err(ResponseError::NotFound("submission not found".to_owned()));
+  }
+  submission.is_llm_used = Some(req.is_llm_used);
+  let result = submission::update(&db.conn, submission).await?;
+  Ok(Json(result))
 }

@@ -1910,6 +1910,11 @@
       "man": "Submit the flag for this challenge to the platform.",
       "submitting": "Submitting...",
       "waitingForChecking": "Submitted, waiting for checker...",
+      "llmPrompt": "Did you use LLM assistance for this challenge? [y/n/Enter to skip]",
+      "llmMarked": "Marked as LLM-assisted",
+      "humanMarked": "Marked as human-led",
+      "llmSkipped": "LLM label skipped",
+      "llmMarkFailed": "Failed to mark LLM label",
       "errors": {
         "timeout": {
           "title": "The checking queue is too long. Please refresh after about five minutes to view the results. Do not resubmit."

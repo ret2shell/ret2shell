@@ -1910,6 +1910,11 @@
       "man": "向平臺提交本題 flag。",
       "submitting": "正在提交",
       "waitingForChecking": "已提交，正在等待評測...",
+      "llmPrompt": "本題是否使用了 LLM 協助？[y/n/留空跳過]",
+      "llmMarked": "已標記為 LLM 協助",
+      "humanMarked": "已標記為人類主導",
+      "llmSkipped": "已跳過 LLM 標記",
+      "llmMarkFailed": "LLM 標記失敗",
       "errors": {
         "timeout": {
           "title": "當前評測隊列過長，請約五分鐘後刷新查看評測結果，不要反覆提交。"

@@ -1910,6 +1910,11 @@
       "man": "この問題のflagをプラットフォームに提出します。",
       "submitting": "提出中...",
       "waitingForChecking": "提出しました。評価を待っています...",
+      "llmPrompt": "この問題でLLMの支援を使用しましたか？[y/n/空欄でスキップ]",
+      "llmMarked": "LLM支援としてマークしました",
+      "humanMarked": "人間主導としてマークしました",
+      "llmSkipped": "LLMマークをスキップしました",
+      "llmMarkFailed": "LLMマークに失敗しました",
       "errors": {
         "timeout": {
           "title": "現在、評価キューが長すぎます。5分後に更新して評価結果を確認してください。繰り返し送信しないでください。"

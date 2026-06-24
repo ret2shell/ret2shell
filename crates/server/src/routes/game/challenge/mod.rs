@@ -88,7 +88,9 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .route("/hint/unlock", post(hint::unlock_hint))
         .route(
           "/submit",
-          get(submission::get_challenge_solves_status).post(submission::submit_flag),
+          get(submission::get_challenge_solves_status)
+            .post(submission::submit_flag)
+            .patch(submission::label_submission),
         )
         .route("/", get(resource::get_challenge))
         .route_layer(middleware::from_fn_with_state(

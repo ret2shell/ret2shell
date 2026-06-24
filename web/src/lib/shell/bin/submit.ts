@@ -1,5 +1,5 @@
 import { inflyClient } from "@api";
-import { checkSubmissionStatus, submitFlag } from "@api/game";
+import { checkSubmissionStatus, labelSubmission, submitFlag } from "@api/game";
 import type { Challenge } from "@models/challenge";
 import type { Game } from "@models/game";
 import { isAdminOfGame, isGameInProgress } from "@storage/game";
@@ -53,6 +53,27 @@ export class Submit implements Command {
               inflyClient.invalidateQueries({
                 queryKey: ["game", game.id, "team", "self"],
               });
+            }
+            io.print(`${ansiColors.blue("[?]")} ${t("shell.submit.llmPrompt")} `);
+            const answer = await io.input();
+            io.print("\n");
+            const normalized = answer.trim().toLowerCase();
+            if (normalized === "y" || normalized === "yes") {
+              try {
+                await labelSubmission(game!.id, challenge!.id, submission.id, true);
+                io.success(t("shell.submit.llmMarked"));
+              } catch {
+                io.error(t("shell.submit.llmMarkFailed"));
+              }
+            } else if (normalized === "n" || normalized === "no") {
+              try {
+                await labelSubmission(game!.id, challenge!.id, submission.id, false);
+                io.success(t("shell.submit.humanMarked"));
+              } catch {
+                io.error(t("shell.submit.llmMarkFailed"));
+              }
+            } else {
+              io.info(t("shell.submit.llmSkipped"));
             }
           } else {
             io.error(`${t("challenge.submission.status.failed.title")}: ${st.result}`);

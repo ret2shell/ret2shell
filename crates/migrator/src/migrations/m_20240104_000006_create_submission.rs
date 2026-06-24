@@ -25,6 +25,7 @@ pub enum Submission {
   Content,
   Solved,
   Result,
+  IsLlmUsed,
 }
 
 #[async_trait::async_trait]
