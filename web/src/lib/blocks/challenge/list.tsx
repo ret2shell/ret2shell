@@ -75,7 +75,11 @@ export default function ChallengeList(
         icon: c.challenge.hidden
           ? "icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning"
           : c.solved
-            ? "icon-[fluent--checkmark-circle-20-regular] text-success"
+            ? c.llmStatus === "llm"
+              ? "icon-[fluent--bot-sparkle-20-regular] text-success"
+              : c.llmStatus === "human"
+                ? "icon-[fluent--scan-thumb-up-20-regular] text-success"
+                : "icon-[fluent--checkmark-circle-20-regular] text-success"
             : "icon-[fluent--flag-20-regular]",
         extraPart: props.showScore ? (
           <span
