@@ -570,7 +570,8 @@
     "scoreboard": {
       "title": "積分板",
       "empty": "暫無參賽隊伍",
-      "selectInstitute": "選擇組織...",
+      "humanLed": "人類主導",
+      "llmAssisted": "LLM 協助",
       "currentPeriod": "本週目",
       "errors": {
         "fetchScoreboard": {

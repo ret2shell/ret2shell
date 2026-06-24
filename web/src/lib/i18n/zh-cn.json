@@ -570,7 +570,8 @@
     "scoreboard": {
       "title": "积分板",
       "empty": "暂无参赛队伍",
-      "selectInstitute": "选择组织...",
+      "humanLed": "人类主导",
+      "llmAssisted": "LLM 协助",
       "currentPeriod": "本周目",
       "errors": {
         "fetchScoreboard": {

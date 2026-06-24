@@ -27,6 +27,7 @@ export type Team = {
   history: TeamScoreHistory[];
   last_active_at: DateTime;
   tag: string | null;
+  is_llm_used: boolean;
 };
 
 export function stringifyState(state: TeamState) {

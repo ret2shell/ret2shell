@@ -1,7 +1,7 @@
 import Spin from "@assets/animates/spin";
 import { randomTips } from "@lib/utils/loading-tips";
 import type { Game } from "@models/game";
-import type { Institute } from "@models/institute";
+
 import { type Team, TeamState } from "@models/team";
 import { createBreakpoints } from "@solid-primitives/media";
 import { A } from "@solidjs/router";
@@ -15,7 +15,7 @@ import { For, Match, Show, Switch } from "solid-js";
 export default function TeamRanks(props: {
   gameId: number;
   game?: Game;
-  institutes: Institute[];
+  institutes?: { id: number; name: string }[];
   teams: Team[];
   page: number;
   pageSize: number;
@@ -97,12 +97,12 @@ export default function TeamRanks(props: {
                 </Show>
                 <Show when={props.showTime && matches.lg}>
                   <div class="flex-1 flex items-center justify-end">
-                    <Show when={team.institute_id} fallback={<span>&nbsp;</span>}>
+                    <Show when={team.institute_id && props.institutes} fallback={<span>&nbsp;</span>}>
                       <span
                         class="opacity-80 text-primary truncate w-full"
-                        title={props.institutes.find((v) => v.id === team.institute_id)?.name}
+                        title={props.institutes?.find((v) => v.id === team.institute_id)?.name}
                       >
-                        #{props.institutes.find((v) => v.id === team.institute_id)?.name}
+                        #{props.institutes?.find((v) => v.id === team.institute_id)?.name}
                       </span>
                     </Show>
                   </div>

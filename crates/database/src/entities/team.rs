@@ -75,6 +75,7 @@ pub struct Model {
   #[serde(with = "ts_seconds")]
   pub last_active_at: DateTime<Utc>,
   pub tag: Option<String>,
+  pub is_llm_used: bool,
 }
 
 impl Model {
@@ -101,6 +102,7 @@ pub struct ExModel {
   #[serde(with = "ts_seconds")]
   pub last_active_at: DateTime<Utc>,
   pub tag: Option<String>,
+  pub is_llm_used: bool,
 }
 
 impl ExModel {
@@ -127,6 +129,7 @@ impl From<Model> for ExModel {
       history: model.history,
       last_active_at: model.last_active_at,
       tag: model.tag,
+      is_llm_used: model.is_llm_used,
     }
   }
 }
@@ -296,7 +299,8 @@ where
 #[allow(clippy::too_many_arguments)]
 pub async fn get_page<C>(
   db: &C, game_id: i64, page: u64, page_size: u64, min_state: Option<State>,
-  institute_id: Option<i64>, filter: Option<String>, order_by: Option<String>, asc: bool,
+  institute_id: Option<i64>, is_llm_used: Option<bool>, filter: Option<String>,
+  order_by: Option<String>, asc: bool,
 ) -> Result<(Vec<Model>, u64), DbErr>
 where
   C: ConnectionTrait, {
@@ -309,6 +313,9 @@ where
   sql = filter_sql(sql, filter)?;
   if let Some(institute_id) = institute_id {
     sql = sql.filter(Column::InstituteId.eq(institute_id));
+  }
+  if let Some(is_llm_used) = is_llm_used {
+    sql = sql.filter(Column::IsLlmUsed.eq(is_llm_used));
   }
   if let Some(order_by) = order_by {
     let order_by = Column::from_str(order_by.as_str())
@@ -329,7 +336,8 @@ where
 #[allow(clippy::too_many_arguments)]
 pub async fn get_page_ex<C>(
   db: &C, game_id: i64, page: u64, page_size: u64, min_state: Option<State>,
-  institute_id: Option<i64>, filter: Option<String>, order_by: Option<String>, asc: bool,
+  institute_id: Option<i64>, is_llm_used: Option<bool>, filter: Option<String>,
+  order_by: Option<String>, asc: bool,
 ) -> Result<(Vec<ExModel>, u64), DbErr>
 where
   C: ConnectionTrait, {
@@ -346,6 +354,9 @@ where
   sql = filter_sql(sql, filter)?;
   if let Some(institute_id) = institute_id {
     sql = sql.filter(Column::InstituteId.eq(institute_id));
+  }
+  if let Some(is_llm_used) = is_llm_used {
+    sql = sql.filter(Column::IsLlmUsed.eq(is_llm_used));
   }
   if let Some(order_by) = order_by {
     let order_by = Column::from_str(order_by.as_str())
@@ -379,7 +390,7 @@ fn filter_sql(mut sql: Select<Entity>, filter: Option<String>) -> Result<Select<
 }
 
 pub async fn count<C>(
-  db: &C, game_id: i64, min_state: State, institute_id: Option<i64>,
+  db: &C, game_id: i64, min_state: State, institute_id: Option<i64>, is_llm_used: Option<bool>,
 ) -> Result<u64, DbErr>
 where
   C: ConnectionTrait, {
@@ -388,6 +399,9 @@ where
     .filter(Column::State.gte(min_state));
   if let Some(institute_id) = institute_id {
     sql = sql.filter(Column::InstituteId.eq(institute_id));
+  }
+  if let Some(is_llm_used) = is_llm_used {
+    sql = sql.filter(Column::IsLlmUsed.eq(is_llm_used));
   }
   sql.count(db).await
 }
@@ -435,16 +449,21 @@ where
 
 pub async fn count_rank<C>(
   db: &C, game_id: i64, score: i32, last_active_at: DateTime<Utc>, with_hidden: bool,
+  is_llm_used: Option<bool>,
 ) -> Result<i64, DbErr>
 where
   C: ConnectionTrait, {
-  let count = Entity::find()
+  let mut sql = Entity::find()
     .filter(Column::GameId.eq(game_id))
     .filter(Column::State.gte(if with_hidden {
       State::Hidden
     } else {
       State::Passed
-    }))
+    }));
+  if let Some(is_llm_used) = is_llm_used {
+    sql = sql.filter(Column::IsLlmUsed.eq(is_llm_used));
+  }
+  let count = sql
     .filter(
       Condition::any().add(Column::Score.gt(score)).add(
         Condition::all()

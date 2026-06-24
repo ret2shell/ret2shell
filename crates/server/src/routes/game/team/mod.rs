@@ -237,6 +237,7 @@ async fn get_team_rank(
     team.score,
     team.last_active_at,
     team.state == team::State::Hidden,
+    Some(team.is_llm_used),
   )
   .await?;
   Ok(Json(result))
@@ -262,6 +263,7 @@ struct TeamListQuery {
   pub order: Option<String>,
   pub filter: Option<String>,
   pub institute_id: Option<i64>,
+  pub is_llm_used: Option<bool>,
   pub asc: Option<bool>,
   pub min_state: Option<team::State>,
 }
@@ -287,6 +289,7 @@ async fn get_team_list(
     page_size(query.page_size, DEFAULT_PAGE_SIZE),
     min_state,
     query.institute_id,
+    query.is_llm_used,
     query.filter,
     query.order,
     query.asc.unwrap_or(true),

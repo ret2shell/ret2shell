@@ -570,7 +570,8 @@
     "scoreboard": {
       "title": "Scoreboard",
       "empty": "No participating teams yet",
-      "selectInstitute": "Select an institute...",
+      "humanLed": "Human-led",
+      "llmAssisted": "LLM-assisted",
       "currentPeriod": "Current time period",
       "errors": {
         "fetchScoreboard": {

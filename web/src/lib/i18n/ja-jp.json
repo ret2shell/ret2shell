@@ -570,7 +570,8 @@
     "scoreboard": {
       "title": "ポイントボード",
       "empty": "参加チームなし",
-      "selectInstitute": "組織を選択...",
+      "humanLed": "人間主導",
+      "llmAssisted": "LLM支援",
       "currentPeriod": "今週目",
       "errors": {
         "fetchScoreboard": {

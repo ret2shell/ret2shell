@@ -1,4 +1,3 @@
-import { useInstitutes } from "@api/account";
 import { useChallenges } from "@api/challenge";
 import { useGame, useGameScoreboard } from "@api/game";
 import { useSelfTeam } from "@api/team";
@@ -12,7 +11,6 @@ import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
 import Button from "@widgets/button";
 import Chart from "@widgets/chart";
-import Select from "@widgets/select";
 import clsx from "clsx";
 import { DateTime } from "luxon";
 import { createEffect, createMemo, createSignal, Match, onMount, Show, Switch, untrack } from "solid-js";
@@ -23,28 +21,13 @@ import TeamSolves from "./_blocks/team-solves";
 function ChartOperations(props: {
   onRefresh?: () => void;
   onExport?: () => void;
-  onInstituteChanged?: (institute: number | null) => void;
+  onLlmUsedChange?: (isLlmUsed: boolean) => void;
   size?: "md" | "sm";
   ghost?: boolean;
   showHiddenTeams?: boolean;
   onShowHiddenTeams?: (show: boolean) => void;
-  institute?: number | null;
+  isLlmUsed?: boolean;
 }) {
-  const params = useParams();
-  const gameId = createMemo(() => Number.parseInt(params.game || "0", 10) || 0);
-  const game = useGame({ id: () => gameId(), enabled: () => gameId() > 0 });
-  const institutes = useInstitutes();
-  const gameInstitutes = createMemo(
-    () => institutes.data?.filter((i) => (game.data?.access_policy.institutes ?? []).includes(i.id)) || []
-  );
-  const gameInstitutesSelect = createMemo(() => {
-    return gameInstitutes().map((i) => ({
-      value: i.id.toString(),
-      label: i.name,
-      icon: "icon-[fluent--hat-graduation-20-regular] w-5 h-5",
-    }));
-  });
-
   const breakpoints = {
     sm: "640px",
     md: "768px",
@@ -84,17 +67,24 @@ function ChartOperations(props: {
           </Show>
         </Button>
       </div>
-      <Select
-        class="flex-1 max-w-64 min-w-0 w-0"
-        size={props.size}
-        ghost={props.ghost}
-        placeholder={t("game.scoreboard.selectInstitute")}
-        items={gameInstitutesSelect()}
-        onValueChange={(v) => {
-          props.onInstituteChanged?.((v.value.at(0) && Number.parseInt(v.value.at(0)!, 10)) || null);
-        }}
-        value={(props.institute && [props.institute.toString()]) || undefined}
-      />
+      <div class="flex flex-row space-x-1">
+        <Button
+          class={props.size === "md" ? (matches.lg ? "btn-md" : "btn-sm") : "btn-sm"}
+          ghost={props.ghost}
+          active={!props.isLlmUsed}
+          onClick={() => props.onLlmUsedChange?.(false)}
+        >
+          {t("game.scoreboard.humanLed")}
+        </Button>
+        <Button
+          class={props.size === "md" ? (matches.lg ? "btn-md" : "btn-sm") : "btn-sm"}
+          ghost={props.ghost}
+          active={props.isLlmUsed}
+          onClick={() => props.onLlmUsedChange?.(true)}
+        >
+          {t("game.scoreboard.llmAssisted")}
+        </Button>
+      </div>
     </div>
   );
 }
@@ -110,9 +100,7 @@ export default function () {
   const [page, setPage] = createSignal(1);
   const [pageSize, setPageSize] = createSignal(null as number | null);
   const showHiddenTeams = createMemo(() => searchParams.hidden === "true");
-  const selectedInstituteId = createMemo(
-    () => Number.parseInt((searchParams.institute as string) || "NaN", 10) || null
-  );
+  const isLlmUsed = createMemo(() => searchParams.llm === "true");
   const [showPlane, setShowPlane] = createSignal(false);
   // const [showReal, setShowReal] = createSignal(!canAccessChallenges()[0]);
   const [showReal, setShowReal] = createSignal(true);
@@ -122,8 +110,6 @@ export default function () {
     id: () => gameId(),
     enabled: () => gameId() > 0,
   });
-
-  const institutes = useInstitutes();
 
   const selfTeam = useSelfTeam({
     game_id: () => gameId(),
@@ -142,42 +128,26 @@ export default function () {
     enabled: () => gameId() > 0 && canAccessChallenges()[0],
   });
 
-  const topTeamsQueryAll = useGameScoreboard({
+  const topTeamsQuery = useGameScoreboard({
     id: () => gameId(),
     page: () => 1,
     page_size: () => 10,
     with_hidden: () => showHiddenTeams(),
-    enabled: () => gameId() > 0 && !selectedInstituteId(),
+    is_llm_used: () => isLlmUsed(),
+    enabled: () => gameId() > 0,
   });
 
-  const topTeamsQueryByInstitute = useGameScoreboard({
-    id: () => gameId(),
-    page: () => 1,
-    page_size: () => 10,
-    with_hidden: () => showHiddenTeams(),
-    institute_id: () => selectedInstituteId()!,
-    enabled: () => gameId() > 0 && !!selectedInstituteId(),
-  });
-
-  const teamsQueryAll = useGameScoreboard({
+  const teamsQuery = useGameScoreboard({
     id: () => gameId(),
     page: () => page(),
     page_size: () => pageSize() ?? 15,
     with_hidden: () => showHiddenTeams(),
-    enabled: () => gameId() > 0 && !!pageSize() && !selectedInstituteId(),
+    is_llm_used: () => isLlmUsed(),
+    enabled: () => gameId() > 0 && !!pageSize(),
   });
 
-  const teamsQueryByInstitute = useGameScoreboard({
-    id: () => gameId(),
-    page: () => page(),
-    page_size: () => pageSize() ?? 15,
-    with_hidden: () => showHiddenTeams(),
-    institute_id: () => selectedInstituteId()!,
-    enabled: () => gameId() > 0 && !!pageSize() && !!selectedInstituteId(),
-  });
-
-  const activeTopTeamsQuery = createMemo(() => (selectedInstituteId() ? topTeamsQueryByInstitute : topTeamsQueryAll));
-  const activeTeamsQuery = createMemo(() => (selectedInstituteId() ? teamsQueryByInstitute : teamsQueryAll));
+  const activeTopTeamsQuery = createMemo(() => topTeamsQuery);
+  const activeTeamsQuery = createMemo(() => teamsQuery);
 
   const topTeams = createMemo(() => activeTopTeamsQuery().data?.[0] ?? []);
   const teams = createMemo<Team[]>(() => activeTeamsQuery().data?.[0] ?? []);
@@ -189,10 +159,8 @@ export default function () {
   });
 
   function handleRefresh() {
-    topTeamsQueryAll.refetch();
-    topTeamsQueryByInstitute.refetch();
-    teamsQueryAll.refetch();
-    teamsQueryByInstitute.refetch();
+    topTeamsQuery.refetch();
+    teamsQuery.refetch();
     challenges.refetch();
   }
 
@@ -384,8 +352,8 @@ export default function () {
                     onRefresh={handleRefresh}
                     showHiddenTeams={showHiddenTeams()}
                     onShowHiddenTeams={(e) => setSearchParams({ hidden: e ? "true" : null })}
-                    onInstituteChanged={(e) => setSearchParams({ institute: e })}
-                    institute={selectedInstituteId()}
+                    onLlmUsedChange={(e) => setSearchParams({ llm: e ? "true" : null })}
+                    isLlmUsed={isLlmUsed()}
                   />
                 </div>
               </Show>
@@ -396,8 +364,8 @@ export default function () {
                 showHiddenTeams={showHiddenTeams()}
                 onRefresh={handleRefresh}
                 onShowHiddenTeams={(e) => setSearchParams({ hidden: e ? "true" : null })}
-                onInstituteChanged={(e) => setSearchParams({ institute: e })}
-                institute={selectedInstituteId()}
+                onLlmUsedChange={(e) => setSearchParams({ llm: e ? "true" : null })}
+                isLlmUsed={isLlmUsed()}
               />
             </Show>
             <Switch>
@@ -408,7 +376,6 @@ export default function () {
                 <TeamRanks
                   gameId={gameId()}
                   game={game.data}
-                  institutes={institutes.data ?? []}
                   teams={teams()}
                   page={page()}
                   pageSize={pageSize()!}
@@ -430,7 +397,6 @@ export default function () {
                 <TeamRanks
                   gameId={gameId()}
                   game={game.data}
-                  institutes={institutes.data ?? []}
                   teams={teams()}
                   page={page()}
                   pageSize={pageSize()!}

@@ -46,15 +46,27 @@ async fn get_game_statistics_impl(
       user::count(&db.conn, false, Some(i.id), Some(game.id), training).await?,
     );
   }
-  let total_teams =
-    team_db::count(&db.conn, game.id, team_db::State::Banned, query.institute).await?;
-  let total_passed_teams =
-    team_db::count(&db.conn, game.id, team_db::State::Passed, query.institute).await?;
+  let total_teams = team_db::count(
+    &db.conn,
+    game.id,
+    team_db::State::Banned,
+    query.institute,
+    None,
+  )
+  .await?;
+  let total_passed_teams = team_db::count(
+    &db.conn,
+    game.id,
+    team_db::State::Passed,
+    query.institute,
+    None,
+  )
+  .await?;
   let mut institute_teams = HashMap::new();
   for i in &institutes {
     institute_teams.insert(
       i.id,
-      team_db::count(&db.conn, game.id, team_db::State::Banned, Some(i.id)).await?,
+      team_db::count(&db.conn, game.id, team_db::State::Banned, Some(i.id), None).await?,
     );
   }
   let total_submissions = submission::count(
@@ -154,6 +166,7 @@ pub(super) async fn export_statistics(
     statistics.total_teams,
     Some(team_db::State::Banned),
     query.institute,
+    None,
     None,
     Some("score".to_owned()),
     false,

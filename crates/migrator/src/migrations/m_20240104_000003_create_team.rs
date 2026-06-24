@@ -24,6 +24,7 @@ pub enum Team {
   History,
   LastActiveAt,
   Tag,
+  IsLlmUsed,
 }
 
 #[async_trait::async_trait]

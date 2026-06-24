@@ -53,6 +53,7 @@ function AdminManagement(props: { gameId: number; team: Team | null; onDone?: (t
       state: props.team?.state.toString() || "0",
     },
   });
+  const [isLlmUsed, setIsLlmUsed] = createSignal(props.team?.is_llm_used ?? false);
 
   createEffect(() => {
     if (props.team) {
@@ -63,6 +64,7 @@ function AdminManagement(props: { gameId: number; team: Team | null; onDone?: (t
           institute_id: props.team?.institute_id?.toString() || "0",
           state: props.team?.state.toString() || "0",
         });
+        setIsLlmUsed(props.team?.is_llm_used ?? false);
       });
     }
   });
@@ -100,6 +102,7 @@ function AdminManagement(props: { gameId: number; team: Team | null; onDone?: (t
         tag: result.tag || null,
         state: Number.parseInt(result.state, 10),
         institute_id: Number.parseInt(result.institute_id, 10) || null,
+        is_llm_used: isLlmUsed(),
       },
     });
   }
@@ -192,6 +195,14 @@ function AdminManagement(props: { gameId: number; team: Team | null; onDone?: (t
                 />
               )}
             </Field>
+          </div>
+          <div class="flex flex-row space-x-2">
+            <Button type="button" class="flex-1" active={!isLlmUsed()} onClick={() => setIsLlmUsed(false)}>
+              {t("game.scoreboard.humanLed")}
+            </Button>
+            <Button type="button" class="flex-1" active={isLlmUsed()} onClick={() => setIsLlmUsed(true)}>
+              {t("game.scoreboard.llmAssisted")}
+            </Button>
           </div>
           <Field name="tag" validate={[maxLength(32, t("team.form.tag.maximumLength"))]}>
             {(field, props) => (
