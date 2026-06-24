@@ -1,15 +1,16 @@
 import { useChallenges } from "@api/challenge";
 import { useSelfSolves } from "@api/game";
-import { useSearchParams } from "@solidjs/router";
+
 import { fullTheme, t } from "@storage/theme";
 import Button from "@widgets/button";
 import Input from "@widgets/input";
 import LoadingTips from "@widgets/loading-tips";
-import TreeView, { type TreeNode } from "@widgets/treeview";
+import Tag from "@widgets/tag";
+import TreeView from "@widgets/treeview";
 import clsx from "clsx";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { createMemo, createSignal, Match, Show, Switch } from "solid-js";
+import { createMemo, createSignal, For, Match, Show, Switch } from "solid-js";
 import type { ChallengeWidgetProps } from ".";
 
 export default function ChallengeList(
@@ -18,10 +19,6 @@ export default function ChallengeList(
     paginated?: boolean;
   }
 ) {
-  const [searchParams, _] = useSearchParams();
-  const selectedChallengeId = createMemo(() => {
-    return Number.parseInt((searchParams.challenge as string) || "", 10) ?? null;
-  });
   const [search, setSearch] = createSignal("");
   const [hideSolved, setHideSolved] = createSignal(false);
   const [hideArchived, setHideArchived] = createSignal(false);
@@ -33,7 +30,6 @@ export default function ChallengeList(
     game_id: () => props.gameId,
   });
 
-  const selectedChallenge = createMemo(() => challenges.data?.[0].find((c) => c.id === selectedChallengeId()));
   const challengesEx = createMemo(() => {
     const result = [];
     for (const challenge of challenges.data?.[0].filter(
@@ -47,55 +43,50 @@ export default function ChallengeList(
         solved: (!props.training && submission?.team_id) || !!submission,
       });
     }
-    const tree = [] as TreeNode[];
-    const tags = new Set(
-      challenges.data?.[0].flatMap((c) => c.tag.find((t) => t.primary)?.name || t("challenge.tag.unknown"))
-    );
-    const tagsArray = Array.from(tags).sort((a, b) => a.localeCompare(b));
-    for (const tag of tagsArray) {
-      const taggedChallenges = result
-        .filter((c) => c.challenge.tag.find((t) => t.primary)?.name === tag)
-        .filter((c) => !c.solved || !hideSolved())
-        .filter((c) => !c.challenge.archive_at || !hideArchived() || c.challenge.archive_at > DateTime.now())
-        .sort((a, b) => {
-          if (a.challenge.score !== b.challenge.score) return a.challenge.score - b.challenge.score;
-          return a.challenge.name < b.challenge.name ? -1 : 1;
-        });
-      if (taggedChallenges.length === 0) continue;
-      tree.push({
-        id: tag,
-        name: tag,
-        type: "category",
-        icon: "icon-[fluent--tag-20-regular] w-5 h-5",
-        children: taggedChallenges.map((c) => ({
-          id: c.challenge.id,
-          name: c.challenge.name,
-          type: "item",
-          searchValue: c.challenge.id.toString(),
-          link: props.training
-            ? `/training/${props.gameId}?challenge=${c.challenge.id}`
-            : `/games/${props.gameId}/challenges?challenge=${c.challenge.id}`,
-          extraClasses: c.solved ? "opacity-60" : "",
-          icon: c.challenge.hidden
-            ? "icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning"
-            : c.solved
-              ? "icon-[fluent--checkmark-circle-20-regular] text-success"
-              : "icon-[fluent--flag-20-regular]",
-          extraPart: props.showScore ? (
-            <span
-              class={clsx(
-                "opacity-60",
-                c.challenge.archive_at && c.challenge.archive_at < DateTime.now() && "line-through"
+    return result
+      .filter((c) => !c.solved || !hideSolved())
+      .filter((c) => !c.challenge.archive_at || !hideArchived() || c.challenge.archive_at > DateTime.now())
+      .sort((a, b) => {
+        if (a.challenge.score !== b.challenge.score) return a.challenge.score - b.challenge.score;
+        return a.challenge.name < b.challenge.name ? -1 : 1;
+      })
+      .map((c) => ({
+        id: c.challenge.id,
+        name: c.challenge.name,
+        type: "item" as const,
+        searchValue: c.challenge.id.toString(),
+        link: props.training
+          ? `/training/${props.gameId}?challenge=${c.challenge.id}`
+          : `/games/${props.gameId}/challenges?challenge=${c.challenge.id}`,
+        extraClasses: c.solved ? "opacity-60" : "",
+        icon: c.challenge.hidden
+          ? "icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning"
+          : c.solved
+            ? "icon-[fluent--checkmark-circle-20-regular] text-success"
+            : "icon-[fluent--flag-20-regular]",
+        extraPart: props.showScore ? (
+          <span
+            class={clsx(
+              "opacity-60",
+              c.challenge.archive_at && c.challenge.archive_at < DateTime.now() && "line-through"
+            )}
+          >
+            {c.challenge.score} pts
+          </span>
+        ) : null,
+        belowPart: (
+          <div class="flex flex-wrap gap-1 mt-1">
+            <For each={c.challenge.tag}>
+              {(tag) => (
+                <Tag level={tag.primary ? "success" : "info"}>
+                  <span>{tag.name}</span>
+                </Tag>
               )}
-            >
-              {c.challenge.score} pts
-            </span>
-          ) : null,
-          children: [],
-        })),
-      });
-    }
-    return tree;
+            </For>
+          </div>
+        ),
+        children: [],
+      }));
   });
   return (
     <div class="flex-1 overflow-hidden">
@@ -169,18 +160,7 @@ export default function ChallengeList(
               </div>
             </Match>
             <Match when={challenges.data && challenges.data[0].length > 0}>
-              <TreeView
-                tree={challengesEx()}
-                activeSearchParams="challenge"
-                highlightPaths={
-                  selectedChallengeId()
-                    ? [
-                        selectedChallenge()?.tag.find((t) => t.primary)?.name || t("challenge.tag.unknown"),
-                        selectedChallengeId().toString(),
-                      ]
-                    : undefined
-                }
-              />
+              <TreeView tree={challengesEx()} activeSearchParams="challenge" />
             </Match>
           </Switch>
         </div>

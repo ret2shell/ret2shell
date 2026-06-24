@@ -15,6 +15,7 @@ export type TreeNode = {
       type: "item";
       link?: string;
       extraPart?: JSX.Element;
+      belowPart?: JSX.Element;
       searchValue?: string;
       onClick?: () => void;
     }
@@ -64,8 +65,13 @@ export default function TreeView(props: TreeViewProps) {
               }
             >
               <span class={clsx("w-5 h-5", node.icon)} />
-              <span class="flex-1 text-start truncate">{node.name}</span>
-              <Show when={node.type === "item" && node.extraPart}>{node.type === "item" && node.extraPart}</Show>
+              <div class="flex-1 min-w-0 flex flex-col items-start">
+                <div class="flex w-full items-center">
+                  <span class="flex-1 text-start truncate">{node.name}</span>
+                  <Show when={node.type === "item" && node.extraPart}>{node.type === "item" && node.extraPart}</Show>
+                </div>
+                <Show when={node.type === "item" && node.belowPart}>{node.type === "item" && node.belowPart}</Show>
+              </div>
             </Link>
           }
         >
