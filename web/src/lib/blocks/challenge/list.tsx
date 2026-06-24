@@ -38,9 +38,16 @@ export default function ChallengeList(
         !!c.tag.find((t) => t.name.toLowerCase().includes(search().toLowerCase()))
     ) ?? []) {
       const submission = solves.data?.find((s) => s.challenge_id === challenge.id);
+      const solved = (!props.training && submission?.team_id) || !!submission;
+      let llmStatus: "llm" | "human" | "unknown" = "unknown";
+      if (solved && submission) {
+        if (submission.is_llm_used === true) llmStatus = "llm";
+        else if (submission.is_llm_used === false) llmStatus = "human";
+      }
       result.push({
         challenge,
-        solved: (!props.training && submission?.team_id) || !!submission,
+        solved,
+        llmStatus,
       });
     }
     return result
@@ -58,7 +65,13 @@ export default function ChallengeList(
         link: props.training
           ? `/training/${props.gameId}?challenge=${c.challenge.id}`
           : `/games/${props.gameId}/challenges?challenge=${c.challenge.id}`,
-        extraClasses: c.solved ? "opacity-60" : "",
+        extraClasses: c.solved
+          ? c.llmStatus === "llm"
+            ? "line-through opacity-60"
+            : c.llmStatus === "human"
+              ? "font-bold"
+              : "opacity-60"
+          : "",
         icon: c.challenge.hidden
           ? "icon-[fluent--eye-off-20-regular] w-5 h-5 text-warning"
           : c.solved
