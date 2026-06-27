@@ -18,6 +18,7 @@ pub struct LifecycleMapper;
 pub enum LifecycleStopReason {
   Manual,
   Timeout,
+  Admin,
 }
 
 impl LifecycleStopReason {
@@ -25,6 +26,7 @@ impl LifecycleStopReason {
     match self {
       Self::Manual => "manual",
       Self::Timeout => "timeout",
+      Self::Admin => "admin",
     }
   }
 }
