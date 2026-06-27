@@ -1,7 +1,7 @@
 use chrono::Utc;
 use r2s_cache::Cache;
 use r2s_cluster::{
-  ChallengeEnvSnapshot, Cluster, Pod,
+  CHALLENGE_NS, ChallengeEnvSnapshot, Cluster, Pod,
   lifecycle::{
     LifecycleChallengeInfo, LifecycleEvent, LifecycleExecutionRequest, LifecycleExecutionStatus,
     LifecycleStopReason, LifecycleTeamInfo, LifecycleUserInfo,
@@ -547,6 +547,31 @@ pub fn spawn_admin_stop_hooks(
         LifecycleEvent::Stop(LifecycleStopReason::Admin),
       )
       .await;
+    }
+  });
+}
+
+pub fn spawn_challenge_stop(
+  state: GlobalState, game: game::Model, challenge: challenge::Model, trace_id: String,
+) {
+  tokio::spawn(async move {
+    match state
+      .cluster
+      .at(CHALLENGE_NS)
+      .stop_challenge_env(challenge.id)
+      .await
+    {
+      Ok(snapshots) if !snapshots.is_empty() => {
+        spawn_admin_stop_hooks(state, game, challenge, snapshots, trace_id);
+      }
+      Ok(_) => {}
+      Err(err) => {
+        error!(
+          challenge_id=%challenge.id,
+          error=?err,
+          "failed to stop challenge env asynchronously"
+        );
+      }
     }
   });
 }

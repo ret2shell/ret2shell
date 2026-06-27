@@ -7,7 +7,6 @@ use chrono::Utc;
 use r2s_bucket::Bucket;
 use r2s_cache::Cache;
 use r2s_checker::Checker;
-use r2s_cluster::{CHALLENGE_NS, ClusterError};
 use r2s_database::{
   challenge,
   game::{self, HostType},
@@ -273,31 +272,16 @@ pub(super) async fn down_challenge(
   txn.commit().await?;
   info!("challenge is maken invisible (down) by user");
 
-  match state
-    .cluster
-    .at(CHALLENGE_NS)
-    .stop_challenge_env(challenge.id)
-    .await
-  {
-    Ok(snapshots) if !snapshots.is_empty() => {
-      lifecycle::spawn_admin_stop_hooks(
-        state.clone(),
-        game.clone(),
-        challenge.clone(),
-        snapshots,
-        trace
-          .header_value()
-          .to_str()
-          .unwrap_or("UNKNOWN")
-          .to_owned(),
-      );
-    }
-    Ok(_) => {}
-    Err(ClusterError::ClusterDisabled) => {
-      info!("cluster is disabled, skipping stop challenge instances");
-    }
-    Err(err) => return Err(err.into()),
-  }
+  lifecycle::spawn_challenge_stop(
+    state.clone(),
+    game.clone(),
+    challenge.clone(),
+    trace
+      .header_value()
+      .to_str()
+      .unwrap_or("UNKNOWN")
+      .to_owned(),
+  );
 
   cache.at("challenge").del(challenge.id).await.ok();
   let event = EventContainer {
@@ -331,31 +315,16 @@ pub(super) async fn delete_challenge(
   Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
   Extension(trace): Extension<RequestId>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  match state
-    .cluster
-    .at(CHALLENGE_NS)
-    .stop_challenge_env(challenge.id)
-    .await
-  {
-    Ok(snapshots) if !snapshots.is_empty() => {
-      lifecycle::spawn_admin_stop_hooks(
-        state.clone(),
-        game.clone(),
-        challenge.clone(),
-        snapshots,
-        trace
-          .header_value()
-          .to_str()
-          .unwrap_or("UNKNOWN")
-          .to_owned(),
-      );
-    }
-    Ok(_) => {}
-    Err(ClusterError::ClusterDisabled) => {
-      info!("cluster is disabled, skipping stop challenge instances");
-    }
-    Err(err) => return Err(err.into()),
-  }
+  lifecycle::spawn_challenge_stop(
+    state.clone(),
+    game.clone(),
+    challenge.clone(),
+    trace
+      .header_value()
+      .to_str()
+      .unwrap_or("UNKNOWN")
+      .to_owned(),
+  );
 
   let txn = db.conn.begin().await?;
   challenge::delete(&txn, challenge.id).await?;
