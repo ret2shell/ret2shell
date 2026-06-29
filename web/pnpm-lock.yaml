@@ -55,13 +55,13 @@ importers:
         version: 0.16.1(solid-js@1.9.13)
       '@tanstack/query-persist-client-core':
         specifier: ^5.101.1
-        version: 5.101.1
+        version: 5.101.2
       '@tanstack/solid-query':
         specifier: ^5.101.1
-        version: 5.101.1(solid-js@1.9.13)
+        version: 5.101.2(solid-js@1.9.13)
       '@tanstack/solid-query-persist-client':
         specifier: ^5.101.1
-        version: 5.101.1(@tanstack/solid-query@5.101.1(solid-js@1.9.13))(solid-js@1.9.13)
+        version: 5.101.2(@tanstack/solid-query@5.101.2(solid-js@1.9.13))(solid-js@1.9.13)
       '@xdsec/wsrx':
         specifier: ^0.5.6
         version: 0.5.6
@@ -139,7 +139,7 @@ importers:
         version: 7.0.1
       rehype-pretty-code:
         specifier: ^0.14.3
-        version: 0.14.3(shiki@3.23.0)
+        version: 0.14.3(shiki@4.3.0)
       rehype-sanitize:
         specifier: ^6.0.0
         version: 6.0.0
@@ -168,8 +168,8 @@ importers:
         specifier: ^1.9.0
         version: 1.9.0
       shiki:
-        specifier: ^3.23.0
-        version: 3.23.0
+        specifier: ^4.3.0
+        version: 4.3.0
       solid-js:
         specifier: ^1.9.13
         version: 1.9.13
@@ -191,7 +191,7 @@ importers:
         version: 2.5.1
       '@iconify-json/fluent':
         specifier: ^1.2.51
-        version: 1.2.51
+        version: 1.2.52
       '@iconify-json/fluent-emoji-flat':
         specifier: ^1.2.5
         version: 1.2.5
@@ -570,8 +570,8 @@ packages:
   '@iconify-json/fluent-emoji-flat@1.2.5':
     resolution: {integrity: sha512-5ShoOHJ0ezYEIMfp2zvbRiZpL1Af8Prg5v9pElaIQhfqwbyD57pzrp70g/rK2EjigajBq9/cPrJXh224HaP3TQ==}
 
-  '@iconify-json/fluent@1.2.51':
-    resolution: {integrity: sha512-9yvCpC3uk1ZpSWNPnlSy/Rd+6HNT5/eyRwgZ42GSBbWzqnzo2GNpmDhVt3587sVrXNStI0KmU+K0ptIAqDgpPw==}
+  '@iconify-json/fluent@1.2.52':
+    resolution: {integrity: sha512-EyI5HVqpr7zhmpo3W+H/msF6iipYY29Y5fPAWXEp4GhI85e9GN3l0Aznip26oqSmtJL0lodIFwkTJ3s3Zd8CNA==}
 
   '@iconify-json/meteocons@1.2.4':
     resolution: {integrity: sha512-E7YV02ql5WmJgAOpXU/hoF9Mdshq73KjwR6fBxZ5SrqMJghMa3CIcRG6NQGwP4I1uBOhIjOFlAikYoPAKuT56A==}
@@ -729,23 +729,33 @@ packages:
   '@scure/base@2.2.0':
     resolution: {integrity: sha512-b8XEupJibegiXV+tDUseI8oLQc8ei3d/4Jkb2RpbHh3MfE054ov3uIz2dhFkB3FI8iwYkEh0gGCApkrYggkPNg==}
 
-  '@shikijs/core@3.23.0':
-    resolution: {integrity: sha512-NSWQz0riNb67xthdm5br6lAkvpDJRTgB36fxlo37ZzM2yq0PQFFzbd8psqC2XMPgCzo1fW6cVi18+ArJ44wqgA==}
+  '@shikijs/core@4.3.0':
+    resolution: {integrity: sha512-EooU3i9F6IAE8kEu+AnGf9DFZWkQBZ+hJn3tLVbsH+61mtQiva5biai66fAA6nvFPXkLgvrh7BrR7YcJU83xQQ==}
+    engines: {node: '>=20'}
 
-  '@shikijs/engine-javascript@3.23.0':
-    resolution: {integrity: sha512-aHt9eiGFobmWR5uqJUViySI1bHMqrAgamWE1TYSUoftkAeCCAiGawPMwM+VCadylQtF4V3VNOZ5LmfItH5f3yA==}
+  '@shikijs/engine-javascript@4.3.0':
+    resolution: {integrity: sha512-hTv/KiFf2tpiqlACPiztGGurEARWIutB8YUhcrA1pUC7VzzwKO+g5crUocrLztrZ5ro5Z4hbXg7bYclETn3gSQ==}
+    engines: {node: '>=20'}
 
-  '@shikijs/engine-oniguruma@3.23.0':
-    resolution: {integrity: sha512-1nWINwKXxKKLqPibT5f4pAFLej9oZzQTsby8942OTlsJzOBZ0MWKiwzMsd+jhzu8YPCHAswGnnN1YtQfirL35g==}
+  '@shikijs/engine-oniguruma@4.3.0':
+    resolution: {integrity: sha512-1vMdN3gHfnKfLYwecUI2ITJI4RhHt96xEaJumVn7Heb0IlJ8WQMIH0Voak+2j22BpSNKdnOfB/pCTPnPm2gq7A==}
+    engines: {node: '>=20'}
 
-  '@shikijs/langs@3.23.0':
-    resolution: {integrity: sha512-2Ep4W3Re5aB1/62RSYQInK9mM3HsLeB91cHqznAJMuylqjzNVAVCMnNWRHFtcNHXsoNRayP9z1qj4Sq3nMqYXg==}
+  '@shikijs/langs@4.3.0':
+    resolution: {integrity: sha512-rnlqFbBRSys9bT4gl/5rw9RnS0W/I84ZldXPkO7cvlEMoV85TyF/aU01N7/NbSR776RNLjrJKjfFUXJR6wN1Cg==}
+    engines: {node: '>=20'}
 
-  '@shikijs/themes@3.23.0':
-    resolution: {integrity: sha512-5qySYa1ZgAT18HR/ypENL9cUSGOeI2x+4IvYJu4JgVJdizn6kG4ia5Q1jDEOi7gTbN4RbuYtmHh0W3eccOrjMA==}
+  '@shikijs/primitive@4.3.0':
+    resolution: {integrity: sha512-CPkz64PTa5diRW1ggzMZH9VM/du4RNChYgVtgqrFcgruvIybmCvySv8GkiHSczUHXYuuR8TdKEwFx+UnZMpgdg==}
+    engines: {node: '>=20'}
 
-  '@shikijs/types@3.23.0':
-    resolution: {integrity: sha512-3JZ5HXOZfYjsYSk0yPwBrkupyYSLpAE26Qc0HLghhZNGTZg/SKxXIIgoxOpmmeQP0RRSDJTk1/vPfw9tbw+jSQ==}
+  '@shikijs/themes@4.3.0':
+    resolution: {integrity: sha512-Avgt05YiT+Y3prjIc9lmQxhJzHBcCfR6cjiFW4OyaMBbt2A6trX5rfjUzx+Vj/mE9qpArYjatnqo9XPjQNW/AQ==}
+    engines: {node: '>=20'}
+
+  '@shikijs/types@4.3.0':
+    resolution: {integrity: sha512-oc8b9U2SYvofKZk8e/737nIX0qwf6eV2vHFATeObAu7r+mUVpLs8Re0BmVkIjAWAYgkmG/CzLNo7rzuBzRu/wQ==}
+    engines: {node: '>=20'}
 
   '@shikijs/vscode-textmate@10.0.2':
     resolution: {integrity: sha512-83yeghZ2xxin3Nj8z1NMd/NCuca+gsYXswywDy5bHvwlWL8tpTQmzGeUuHd9FC3E/SBEMvzJRwWEOz5gGes9Qg==}
@@ -933,20 +943,20 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7 || ^8
 
-  '@tanstack/query-core@5.101.1':
-    resolution: {integrity: sha512-Y6Y92dkXtNqx67m2pMSxUsA3zOCwv862JexZRP8/EPwvKXMPu9m8rv43spiXWzOUIggQ3SQApttALStzhA8B4g==}
+  '@tanstack/query-core@5.101.2':
+    resolution: {integrity: sha512-hH5MLoJhF7KaIGd7q3xTXGXvslI+GYlM1Z/35aSHHWaCJWB7XvTSHYuV3eM7tw+aE0mT/xMro4M4Q9rCGHT0lw==}
 
-  '@tanstack/query-persist-client-core@5.101.1':
-    resolution: {integrity: sha512-rR5Er6jmdI3Oo8o6Wc0ceM6glDU4umgePu2IxM3Gy2UvPqcQONduxxxSzU1+F17mpS09XHqHKmj0Irhfb2cGYg==}
+  '@tanstack/query-persist-client-core@5.101.2':
+    resolution: {integrity: sha512-rgMsbvBVpSPDUsprC9FYxojdG0Q1LH6yq1i3DXz2aps4VEqv2l4Msj3YDqIifU3xkl/DrYe9YWntZAJLrM6xTg==}
 
-  '@tanstack/solid-query-persist-client@5.101.1':
-    resolution: {integrity: sha512-NEsVY2UcuZReG10GA4LmSqYjwdtag2Fi1McFoMdbJ1CvClJNlK+0HdXx1fnPHjcxtuJVoA5DvS4vtL/1OllfpA==}
+  '@tanstack/solid-query-persist-client@5.101.2':
+    resolution: {integrity: sha512-G3NYraM9fLTrHZGj8D079CmFsqbA4nWhmTu+IN14Cxiq+NEg1ohABduEnWoCc8gTlfhvBYlda703xKSdPr+O+w==}
     peerDependencies:
-      '@tanstack/solid-query': ^5.101.1
+      '@tanstack/solid-query': ^5.101.2
       solid-js: ^1.6.0
 
-  '@tanstack/solid-query@5.101.1':
-    resolution: {integrity: sha512-l46cY0/6Nw/3U+BKGySwg/oen6LiBoj9IKXqHZLxxi2lsQjdbslz5SOOI1dvQJWC7dPTG8Ek//wEFOI0NPMnsg==}
+  '@tanstack/solid-query@5.101.2':
+    resolution: {integrity: sha512-IbCeM23gEbU0lW4wWFQhS4ELjgdmVXjhyCUh8pFemdMIuA5UswlkqEMryEE+lCMtxLS7m0oN1yWMocKi7vwXdw==}
     peerDependencies:
       solid-js: ^1.6.0
 
@@ -2022,8 +2032,9 @@ packages:
     resolution: {integrity: sha512-Iov+JwFv/2HcTpcwNMKd8+IWNb8tboQJNQTkAY/LLVK7gGH9jy+LGkVqPxfekHl+yMmiqXszdGWXgkfml7hjqA==}
     engines: {node: '>= 0.4'}
 
-  shiki@3.23.0:
-    resolution: {integrity: sha512-55Dj73uq9ZXL5zyeRPzHQsK7Nbyt6Y10k5s7OjuFZGMhpp4r/rsLBH0o/0fstIzX1Lep9VxefWljK/SKCzygIA==}
+  shiki@4.3.0:
+    resolution: {integrity: sha512-NKKjWzR6LIGL3sXBrWDw9sDS9cxx42/DkysaNqJEeOWE8Kix5gpak0bc00OfDVEO4oyXSyz8+aRaqKoBD1yo7A==}
+    engines: {node: '>=20'}
 
   siginfo@2.0.0:
     resolution: {integrity: sha512-ybx0WO1/8bSBLEWXZvEd7gMW3Sn3JFlW3TvX1nREbDLRNQNaeNN8WK0meBwPdAaOI7TtRRRJn/Es1zhrrCHu7g==}
@@ -2633,7 +2644,7 @@ snapshots:
     dependencies:
       '@iconify/types': 2.0.0
 
-  '@iconify-json/fluent@1.2.51':
+  '@iconify-json/fluent@1.2.52':
     dependencies:
       '@iconify/types': 2.0.0
 
@@ -2766,33 +2777,40 @@ snapshots:
 
   '@scure/base@2.2.0': {}
 
-  '@shikijs/core@3.23.0':
+  '@shikijs/core@4.3.0':
     dependencies:
-      '@shikijs/types': 3.23.0
+      '@shikijs/primitive': 4.3.0
+      '@shikijs/types': 4.3.0
       '@shikijs/vscode-textmate': 10.0.2
       '@types/hast': 3.0.4
       hast-util-to-html: 9.0.5
 
-  '@shikijs/engine-javascript@3.23.0':
+  '@shikijs/engine-javascript@4.3.0':
     dependencies:
-      '@shikijs/types': 3.23.0
+      '@shikijs/types': 4.3.0
       '@shikijs/vscode-textmate': 10.0.2
       oniguruma-to-es: 4.3.6
 
-  '@shikijs/engine-oniguruma@3.23.0':
+  '@shikijs/engine-oniguruma@4.3.0':
     dependencies:
-      '@shikijs/types': 3.23.0
+      '@shikijs/types': 4.3.0
       '@shikijs/vscode-textmate': 10.0.2
 
-  '@shikijs/langs@3.23.0':
+  '@shikijs/langs@4.3.0':
     dependencies:
-      '@shikijs/types': 3.23.0
+      '@shikijs/types': 4.3.0
 
-  '@shikijs/themes@3.23.0':
+  '@shikijs/primitive@4.3.0':
     dependencies:
-      '@shikijs/types': 3.23.0
+      '@shikijs/types': 4.3.0
+      '@shikijs/vscode-textmate': 10.0.2
+      '@types/hast': 3.0.4
 
-  '@shikijs/types@3.23.0':
+  '@shikijs/themes@4.3.0':
+    dependencies:
+      '@shikijs/types': 4.3.0
+
+  '@shikijs/types@4.3.0':
     dependencies:
       '@shikijs/vscode-textmate': 10.0.2
       '@types/hast': 3.0.4
@@ -2954,21 +2972,21 @@ snapshots:
       tailwindcss: 4.3.1
       vite: 8.1.0(@types/node@26.0.1)(esbuild@0.27.4)(jiti@2.7.0)
 
-  '@tanstack/query-core@5.101.1': {}
+  '@tanstack/query-core@5.101.2': {}
 
-  '@tanstack/query-persist-client-core@5.101.1':
+  '@tanstack/query-persist-client-core@5.101.2':
     dependencies:
-      '@tanstack/query-core': 5.101.1
+      '@tanstack/query-core': 5.101.2
 
-  '@tanstack/solid-query-persist-client@5.101.1(@tanstack/solid-query@5.101.1(solid-js@1.9.13))(solid-js@1.9.13)':
+  '@tanstack/solid-query-persist-client@5.101.2(@tanstack/solid-query@5.101.2(solid-js@1.9.13))(solid-js@1.9.13)':
     dependencies:
-      '@tanstack/query-persist-client-core': 5.101.1
-      '@tanstack/solid-query': 5.101.1(solid-js@1.9.13)
+      '@tanstack/query-persist-client-core': 5.101.2
+      '@tanstack/solid-query': 5.101.2(solid-js@1.9.13)
       solid-js: 1.9.13
 
-  '@tanstack/solid-query@5.101.1(solid-js@1.9.13)':
+  '@tanstack/solid-query@5.101.2(solid-js@1.9.13)':
     dependencies:
-      '@tanstack/query-core': 5.101.1
+      '@tanstack/query-core': 5.101.2
       solid-js: 1.9.13
 
   '@tybys/wasm-util@0.10.3':
@@ -4523,13 +4541,13 @@ snapshots:
       hast-util-from-html: 2.0.3
       unified: 11.0.5
 
-  rehype-pretty-code@0.14.3(shiki@3.23.0):
+  rehype-pretty-code@0.14.3(shiki@4.3.0):
     dependencies:
       '@types/hast': 3.0.4
       hast-util-to-string: 3.0.1
       parse-numeric-range: 1.3.0
       rehype-parse: 9.0.1
-      shiki: 3.23.0
+      shiki: 4.3.0
       unified: 11.0.5
       unist-util-visit: 5.1.0
 
@@ -4630,14 +4648,14 @@ snapshots:
 
   shell-quote@1.9.0: {}
 
-  shiki@3.23.0:
+  shiki@4.3.0:
     dependencies:
-      '@shikijs/core': 3.23.0
-      '@shikijs/engine-javascript': 3.23.0
-      '@shikijs/engine-oniguruma': 3.23.0
-      '@shikijs/langs': 3.23.0
-      '@shikijs/themes': 3.23.0
-      '@shikijs/types': 3.23.0
+      '@shikijs/core': 4.3.0
+      '@shikijs/engine-javascript': 4.3.0
+      '@shikijs/engine-oniguruma': 4.3.0
+      '@shikijs/langs': 4.3.0
+      '@shikijs/themes': 4.3.0
+      '@shikijs/types': 4.3.0
       '@shikijs/vscode-textmate': 10.0.2
       '@types/hast': 3.0.4
 
