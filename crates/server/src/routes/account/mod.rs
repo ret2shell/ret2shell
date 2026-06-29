@@ -393,18 +393,22 @@ async fn send_email(
   let verify_email_subject = email_config
     .verify_email_subject
     .clone()
+    .filter(|s| !s.trim().is_empty())
     .unwrap_or("Verify your account - Ret2Shell".to_owned());
   let reset_password_subject = email_config
     .reset_password_email_subject
     .clone()
+    .filter(|s| !s.trim().is_empty())
     .unwrap_or("Reset your password - Ret2Shell".to_owned());
   let verify_email_body = email_config
     .verify_email_body
     .clone()
+    .filter(|s| !s.trim().is_empty())
     .unwrap_or(include_str!("./verify-email.html").to_owned());
   let reset_password_body = email_config
     .reset_password_email_body
     .clone()
+    .filter(|s| !s.trim().is_empty())
     .unwrap_or(include_str!("./reset-password.html").to_owned());
   let (subject, body) = match email_type {
     EmailType::Verify => (verify_email_subject, verify_email_body),
