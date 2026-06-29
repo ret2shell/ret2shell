@@ -26,7 +26,8 @@ use tracing::{info, warn};
 
 use crate::{
   middleware::auth::{Token, is_game_admin},
-  traits::ResponseError,
+  routes::game::lifecycle,
+  traits::{GlobalState, ResponseError},
   utility::{
     pagination::{DEFAULT_PAGE_SIZE, DEFAULT_SUBMISSION_PAGE_SIZE, page, page_size},
     validation::validate_challenge_model,
@@ -252,9 +253,11 @@ pub(super) async fn up_challenge(
   Ok(Json(challenge))
 }
 
+#[allow(clippy::too_many_arguments)]
 pub(super) async fn down_challenge(
-  State(ref db): State<Database>, State(cache): State<Cache>, State(ref queue): State<Queue>,
-  Extension(token): Extension<Token>, Extension(challenge): Extension<challenge::Model>,
+  State(state): State<GlobalState>, State(ref db): State<Database>, State(cache): State<Cache>,
+  State(ref queue): State<Queue>, Extension(token): Extension<Token>,
+  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
   Extension(trace): Extension<RequestId>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let txn = db.conn.begin().await?;
@@ -268,6 +271,18 @@ pub(super) async fn down_challenge(
   .await?;
   txn.commit().await?;
   info!("challenge is maken invisible (down) by user");
+
+  lifecycle::spawn_challenge_stop(
+    state.clone(),
+    game.clone(),
+    challenge.clone(),
+    trace
+      .header_value()
+      .to_str()
+      .unwrap_or("UNKNOWN")
+      .to_owned(),
+  );
+
   cache.at("challenge").del(challenge.id).await.ok();
   let event = EventContainer {
     game_id: challenge.game_id,
@@ -293,11 +308,24 @@ pub(super) async fn down_challenge(
   Ok(Json(challenge))
 }
 
+#[allow(clippy::too_many_arguments)]
 pub(super) async fn delete_challenge(
-  State(ref db): State<Database>, State(cache): State<Cache>, State(bucket): State<Bucket>,
-  Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
-  Extension(challenge): Extension<challenge::Model>,
+  State(state): State<GlobalState>, State(ref db): State<Database>, State(cache): State<Cache>,
+  State(bucket): State<Bucket>, Extension(token): Extension<Token>,
+  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
+  Extension(trace): Extension<RequestId>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  lifecycle::spawn_challenge_stop(
+    state.clone(),
+    game.clone(),
+    challenge.clone(),
+    trace
+      .header_value()
+      .to_str()
+      .unwrap_or("UNKNOWN")
+      .to_owned(),
+  );
+
   let txn = db.conn.begin().await?;
   challenge::delete(&txn, challenge.id).await?;
   let game_bucket = bucket

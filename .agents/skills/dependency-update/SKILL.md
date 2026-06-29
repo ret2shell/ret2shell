@@ -7,7 +7,7 @@ description: Non-destructively update project dependencies, identify semver-brea
 
 This skill describes the complete dependency update workflow for the Ret2Shell monorepo, covering both the Rust workspace (`crates/`) and the SolidJS frontend (`web/`).
 
-The workflow is designed to be executed in a temporary directory (e.g. `/tmp` or the OS equivalent) so that the original project is not mutated until the upgrade set has been reviewed and validated.
+All operations run directly in the project root directory so changes are applied in place.
 
 ## When to Use
 
@@ -20,18 +20,17 @@ Use this skill when the user asks to:
 
 ## Workflow
 
-### 1. Prepare a Temporary Workspace
+### 1. Confirm the Project Root
 
-To avoid modifying the original repository during exploration, copy or clone the project into a temporary directory first.
+Run all commands from the repository root (`/home/reverier/Code/Rust/ret2shell`).
+
+Before making changes, ensure the working tree is tracked by git so any unwanted mutation can be reverted:
 
 ```bash
-# Example on Linux/macOS
-TMP_DIR=$(mktemp -d)
-cp -r /path/to/ret2shell "$TMP_DIR/ret2shell-update"
-cd "$TMP_DIR/ret2shell-update"
+git status
 ```
 
-All subsequent commands should run inside this temporary copy. After the final upgrade set is approved and verified, apply the same changes to the real repository.
+If there are uncommitted changes, commit or stash them first, or confirm with the user that it is safe to proceed.
 
 ### 2. Apply Non-Breaking Updates
 
@@ -54,7 +53,7 @@ These commands only update versions that are compatible with the ranges declared
 Use the helper script shipped with this skill:
 
 ```bash
-python3 .agents/skills/dependency-update/check_rust_outdated.py --project-dir .
+python3 .agents/skills/dependency-update/check_rust_outdated.py
 ```
 
 This script reads `Cargo.toml` workspace dependencies, queries crates.io, and writes `outdated_rust_major.json` listing crates whose latest version is a semver-breaking upgrade from the current requirement.
@@ -142,9 +141,17 @@ If multiple semver-incompatible versions appear, determine whether this is accep
 - **Acceptable:** upstream crates still depend on the old version; Cargo resolves this by keeping both. Functionality is fine, but compile time/binary size increases slightly.
 - **Not acceptable:** wait until upstream crates update, or do not perform the upgrade.
 
-### 8. Promote Changes to the Real Repository
+### 8. Final Verification
 
-Once the temporary copy builds and passes checks cleanly, apply the same changes to the real repository. Run the same verification commands in the real project before committing.
+Because changes were applied directly in the project directory, run the verification commands one more time in the repository root and confirm everything is clean:
+
+```bash
+pnpm -C web check
+cargo check --workspace
+cargo clippy --workspace --all-targets --all-features
+```
+
+Review the git diff before committing.
 
 ## Common Pitfalls
 
@@ -160,6 +167,7 @@ Once the temporary copy builds and passes checks cleanly, apply the same changes
 
 ## Verification Checklist
 
+- [ ] Project root confirmed and git working tree is safe to modify
 - [ ] `pnpm -C web up` ran without errors
 - [ ] `cargo update` ran without errors
 - [ ] `pnpm -C web check` passes
@@ -168,3 +176,4 @@ Once the temporary copy builds and passes checks cleanly, apply the same changes
 - [ ] Major-version candidates documented with breaking changes
 - [ ] User approved each applied major-version upgrade
 - [ ] `Cargo.lock` inspected for duplicate transitive versions
+- [ ] Final git diff reviewed

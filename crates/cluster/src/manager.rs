@@ -815,6 +815,25 @@ impl Cluster {
     Ok(snapshots)
   }
 
+  pub async fn stop_challenge_env(
+    &self, challenge_id: i64,
+  ) -> Result<Vec<ChallengeEnvSnapshot>, ClusterError> {
+    let pods = self.get_challenge_env(challenge_id).await?;
+    let mut snapshots = Vec::new();
+    for pod in pods.iter() {
+      let service = self.capture_service_snapshot(pod).await;
+      self.delete_pod(pod.metadata.name.as_ref().unwrap()).await?;
+      self
+        .delete_service(pod.metadata.name.as_ref().unwrap())
+        .await?;
+      snapshots.push(ChallengeEnvSnapshot {
+        pod: pod.clone(),
+        service,
+      });
+    }
+    Ok(snapshots)
+  }
+
   pub async fn wsrx_link(&self, token: &str, port: u16, ws: WebSocket) -> Result<(), ClusterError> {
     let pod = self
       .get_pods_by_label(&format!("ret.sh.cn/traffic={token}"))
