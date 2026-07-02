@@ -527,12 +527,17 @@ impl Cluster {
     } else {
       None
     };
-    let security_context = SecurityContext {
+    let privileged = env_config.privileged.is_some_and(|p| p);
+    let restricted_security_context = SecurityContext {
       allow_privilege_escalation: Some(false),
       capabilities: Some(Capabilities {
         drop: Some(vec!["NET_BIND_SERVICE".to_owned()]),
         ..Default::default()
       }),
+      ..Default::default()
+    };
+    let privileged_security_context = SecurityContext {
+      privileged: Some(true),
       ..Default::default()
     };
     let pod_security_context = PodSecurityContext {
@@ -551,9 +556,7 @@ impl Cluster {
       },
       spec: Some(PodSpec {
         enable_service_links: Some(false),
-        security_context: env_config
-          .restricted
-          .is_some_and(|r| r)
+        security_context: (!privileged && env_config.restricted.is_some_and(|r| r))
           .then_some(pod_security_context),
         image_pull_secrets: env_config
           .pull_secret
@@ -614,10 +617,14 @@ impl Cluster {
               ),
               ..Default::default()
             }),
-            security_context: image
-              .restricted
-              .is_some_and(|r| r)
-              .then(|| security_context.clone()),
+            security_context: if privileged {
+              Some(privileged_security_context.clone())
+            } else {
+              image
+                .restricted
+                .is_some_and(|r| r)
+                .then(|| restricted_security_context.clone())
+            },
             ..Default::default()
           })
           .collect(),

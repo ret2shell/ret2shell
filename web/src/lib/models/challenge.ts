@@ -35,6 +35,7 @@ export type ChallengeImage = {
 export type ChallengeEnv = {
   internet: boolean;
   restricted: boolean | null;
+  privileged: boolean | null;
   images: ChallengeImage[];
   pull_secret: string | null;
 };
