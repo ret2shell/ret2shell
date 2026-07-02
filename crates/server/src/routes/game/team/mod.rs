@@ -387,6 +387,7 @@ async fn create_team(
       token: team_token,
       institute_id: user.institute_id,
       tag: req.tag,
+      is_llm_used: true,
       ..Default::default()
     },
   )

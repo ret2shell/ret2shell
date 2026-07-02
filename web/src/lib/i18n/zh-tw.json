@@ -572,6 +572,7 @@
       "empty": "暫無參賽隊伍",
       "humanLed": "人類主導",
       "llmAssisted": "LLM 協助",
+      "llmStatus": "LLM 狀態",
       "currentPeriod": "本週目",
       "errors": {
         "fetchScoreboard": {

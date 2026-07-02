@@ -11,6 +11,7 @@ import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
 import Button from "@widgets/button";
 import Chart from "@widgets/chart";
+import Select from "@widgets/select";
 import clsx from "clsx";
 import { DateTime } from "luxon";
 import { createEffect, createMemo, createSignal, Match, onMount, Show, Switch, untrack } from "solid-js";
@@ -67,24 +68,26 @@ function ChartOperations(props: {
           </Show>
         </Button>
       </div>
-      <div class="flex flex-row space-x-1">
-        <Button
-          class={props.size === "md" ? (matches.lg ? "btn-md" : "btn-sm") : "btn-sm"}
-          ghost={props.ghost}
-          active={!props.isLlmUsed}
-          onClick={() => props.onLlmUsedChange?.(false)}
-        >
-          {t("game.scoreboard.humanLed")}
-        </Button>
-        <Button
-          class={props.size === "md" ? (matches.lg ? "btn-md" : "btn-sm") : "btn-sm"}
-          ghost={props.ghost}
-          active={props.isLlmUsed}
-          onClick={() => props.onLlmUsedChange?.(true)}
-        >
-          {t("game.scoreboard.llmAssisted")}
-        </Button>
-      </div>
+      <Select
+        class={props.size === "md" ? (matches.lg ? "w-48" : "w-40") : "w-36"}
+        size={props.size === "md" ? (matches.lg ? "md" : "sm") : "sm"}
+        ghost={props.ghost}
+        placeholder={t("game.scoreboard.llmStatus")}
+        items={[
+          {
+            value: "false",
+            label: t("game.scoreboard.humanLed"),
+            icon: "icon-[fluent--scan-thumb-up-20-regular] w-5 h-5",
+          },
+          {
+            value: "true",
+            label: t("game.scoreboard.llmAssisted"),
+            icon: "icon-[fluent--bot-sparkle-20-regular] w-5 h-5",
+          },
+        ]}
+        value={props.isLlmUsed ? ["true"] : ["false"]}
+        onValueChange={(e) => props.onLlmUsedChange?.(e.value[0] === "true")}
+      />
     </div>
   );
 }

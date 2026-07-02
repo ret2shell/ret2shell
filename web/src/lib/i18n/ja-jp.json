@@ -572,6 +572,7 @@
       "empty": "参加チームなし",
       "humanLed": "人間主導",
       "llmAssisted": "LLM支援",
+      "llmStatus": "LLM状態",
       "currentPeriod": "今週目",
       "errors": {
         "fetchScoreboard": {

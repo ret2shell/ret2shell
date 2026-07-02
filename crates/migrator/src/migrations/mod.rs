@@ -32,3 +32,4 @@ pub mod m_20250721_000001_create_ip_time_info;
 pub mod m_20260307_000001_game_lifecycle;
 pub mod m_20260624_000001_team_is_llm_used;
 pub mod m_20260624_000002_submission_is_llm_used;
+pub mod m_20260702_000001_team_is_llm_used_default_true;

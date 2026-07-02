@@ -572,6 +572,7 @@
       "empty": "No participating teams yet",
       "humanLed": "Human-led",
       "llmAssisted": "LLM-assisted",
+      "llmStatus": "LLM Status",
       "currentPeriod": "Current time period",
       "errors": {
         "fetchScoreboard": {

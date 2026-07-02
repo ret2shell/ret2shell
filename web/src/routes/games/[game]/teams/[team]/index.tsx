@@ -53,7 +53,7 @@ function AdminManagement(props: { gameId: number; team: Team | null; onDone?: (t
       state: props.team?.state.toString() || "0",
     },
   });
-  const [isLlmUsed, setIsLlmUsed] = createSignal(props.team?.is_llm_used ?? false);
+  const [isLlmUsed, setIsLlmUsed] = createSignal((props.team?.is_llm_used ?? false).toString());
 
   createEffect(() => {
     if (props.team) {
@@ -64,7 +64,7 @@ function AdminManagement(props: { gameId: number; team: Team | null; onDone?: (t
           institute_id: props.team?.institute_id?.toString() || "0",
           state: props.team?.state.toString() || "0",
         });
-        setIsLlmUsed(props.team?.is_llm_used ?? false);
+        setIsLlmUsed((props.team?.is_llm_used ?? false).toString());
       });
     }
   });
@@ -102,7 +102,7 @@ function AdminManagement(props: { gameId: number; team: Team | null; onDone?: (t
         tag: result.tag || null,
         state: Number.parseInt(result.state, 10),
         institute_id: Number.parseInt(result.institute_id, 10) || null,
-        is_llm_used: isLlmUsed(),
+        is_llm_used: isLlmUsed() === "true",
       },
     });
   }
@@ -196,14 +196,24 @@ function AdminManagement(props: { gameId: number; team: Team | null; onDone?: (t
               )}
             </Field>
           </div>
-          <div class="flex flex-row space-x-2">
-            <Button type="button" class="flex-1" active={!isLlmUsed()} onClick={() => setIsLlmUsed(false)}>
-              {t("game.scoreboard.humanLed")}
-            </Button>
-            <Button type="button" class="flex-1" active={isLlmUsed()} onClick={() => setIsLlmUsed(true)}>
-              {t("game.scoreboard.llmAssisted")}
-            </Button>
-          </div>
+          <Select
+            class="flex-1 min-w-0"
+            label={t("game.scoreboard.llmStatus")}
+            items={[
+              {
+                value: "false",
+                label: t("game.scoreboard.humanLed"),
+                icon: "icon-[fluent--scan-thumb-up-20-regular] w-5 h-5",
+              },
+              {
+                value: "true",
+                label: t("game.scoreboard.llmAssisted"),
+                icon: "icon-[fluent--bot-sparkle-20-regular] w-5 h-5",
+              },
+            ]}
+            value={isLlmUsed() ? [isLlmUsed()] : undefined}
+            onValueChange={(e) => setIsLlmUsed(e.value[0] ?? "false")}
+          />
           <Field name="tag" validate={[maxLength(32, t("team.form.tag.maximumLength"))]}>
             {(field, props) => (
               <Input

@@ -572,6 +572,7 @@
       "empty": "暂无参赛队伍",
       "humanLed": "人类主导",
       "llmAssisted": "LLM 协助",
+      "llmStatus": "LLM 状态",
       "currentPeriod": "本周目",
       "errors": {
         "fetchScoreboard": {

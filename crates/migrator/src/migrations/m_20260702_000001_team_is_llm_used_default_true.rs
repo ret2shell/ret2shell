@@ -6,7 +6,7 @@ pub struct Migration;
 
 impl MigrationName for Migration {
   fn name(&self) -> &str {
-    "m_20260624_000001_team_is_llm_used"
+    "m_20260702_000001_team_is_llm_used_default_true"
   }
 }
 
@@ -17,7 +17,7 @@ impl MigrationTrait for Migration {
       .alter_table(
         Table::alter()
           .table(Team::Table)
-          .add_column_if_not_exists(
+          .modify_column(
             ColumnDef::new(Team::IsLlmUsed)
               .boolean()
               .not_null()
@@ -33,7 +33,12 @@ impl MigrationTrait for Migration {
       .alter_table(
         Table::alter()
           .table(Team::Table)
-          .drop_column(Team::IsLlmUsed)
+          .modify_column(
+            ColumnDef::new(Team::IsLlmUsed)
+              .boolean()
+              .not_null()
+              .default(false),
+          )
           .to_owned(),
       )
       .await
