@@ -131,6 +131,7 @@ fn default_storage_req() -> Option<String> {
 pub struct ChallengeEnv {
   pub internet: bool,
   pub restricted: Option<bool>,
+  pub privileged: Option<bool>,
   pub images: Vec<ChallengeImage>,
   pub pull_secret: Option<String>,
 }
@@ -155,6 +156,7 @@ impl ChallengeEnv {
     Self {
       internet: false,
       restricted: None,
+      privileged: None,
       images: self.images.into_iter().map(|i| i.desensitize()).collect(),
       pull_secret: None,
     }
@@ -263,6 +265,7 @@ mod tests {
     let desensitized = ChallengeEnv {
       internet: true,
       restricted: Some(true),
+      privileged: Some(true),
       images: vec![image("web")],
       pull_secret: Some("registry-secret".to_owned()),
     }
@@ -270,6 +273,7 @@ mod tests {
 
     assert!(!desensitized.internet);
     assert_eq!(desensitized.restricted, None);
+    assert_eq!(desensitized.privileged, None);
     assert_eq!(desensitized.pull_secret, None);
     assert_eq!(desensitized.images.len(), 1);
     assert_eq!(desensitized.images[0].tag, "ret.sh.cn/shadowed:latest");
