@@ -1171,6 +1171,7 @@
       "delete": "環境設定を削除すると、問題は添付ファイル形式の問題に戻ります。",
       "internet": "コンテナ内からインターネットへのアクセスを許可する",
       "restrict": "Root権限の制限",
+      "privileged": "特権で実行",
       "registrySecret": "リポジトリシークレット（事前にリソースを構成する必要があります）",
       "runningContainers": "実行中の環境",
       "status": {

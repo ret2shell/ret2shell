@@ -1171,6 +1171,7 @@
       "delete": "After deleting the instance configuration, the challenge will revert to an attachment-based challenge.",
       "internet": "Allow Internet access",
       "restrict": "Restrict root privileges",
+      "privileged": "Run as privileged",
       "registrySecret": "Registry secret (must be configured in cluster)",
       "runningContainers": "Running instances",
       "status": {

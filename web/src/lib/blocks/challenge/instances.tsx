@@ -118,6 +118,7 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
           env: {
             internet: challengeEnv.data?.internet || false,
             restricted: challengeEnv.data?.restricted ?? null,
+            privileged: challengeEnv.data?.privileged ?? null,
             images: [...(challengeEnv.data?.images || []), sanitizeChallengeImage(form)],
             pull_secret: challengeEnv.data?.pull_secret || null,
           },
@@ -655,6 +656,7 @@ export default function (props: ChallengeWidgetProps) {
       env: {
         internet: !(challengeEnv.data?.internet || false),
         restricted: challengeEnv.data?.restricted ?? null,
+        privileged: challengeEnv.data?.privileged ?? null,
         images: challengeEnv.data?.images || [],
         pull_secret: challengeEnv.data?.pull_secret || null,
       },
@@ -667,6 +669,20 @@ export default function (props: ChallengeWidgetProps) {
       env: {
         internet: challengeEnv.data?.internet || false,
         restricted: !(challengeEnv.data?.restricted ?? false),
+        privileged: challengeEnv.data?.privileged ?? null,
+        images: challengeEnv.data?.images || [],
+        pull_secret: challengeEnv.data?.pull_secret || null,
+      },
+    });
+  }
+  async function onTogglePrivileged() {
+    updateMutation.mutate({
+      game_id: challenge.data!.game_id,
+      challenge_id: challenge.data!.id,
+      env: {
+        internet: challengeEnv.data?.internet || false,
+        restricted: challengeEnv.data?.restricted ?? null,
+        privileged: !(challengeEnv.data?.privileged ?? false),
         images: challengeEnv.data?.images || [],
         pull_secret: challengeEnv.data?.pull_secret || null,
       },
@@ -680,6 +696,7 @@ export default function (props: ChallengeWidgetProps) {
       env: {
         internet: challengeEnv.data?.internet || false,
         restricted: challengeEnv.data?.restricted ?? null,
+        privileged: challengeEnv.data?.privileged ?? null,
         images: challengeEnv.data?.images?.filter((image) => image.name !== name) || [],
         pull_secret: challengeEnv.data?.pull_secret || null,
       },
@@ -705,6 +722,7 @@ export default function (props: ChallengeWidgetProps) {
       env: {
         internet: challengeEnv.data?.internet || false,
         restricted: challengeEnv.data?.restricted ?? null,
+        privileged: challengeEnv.data?.privileged ?? null,
         images: challengeEnv.data?.images || [],
         pull_secret: n ?? null,
       },
@@ -789,6 +807,15 @@ export default function (props: ChallengeWidgetProps) {
           }}
         >
           <span class="flex-1 text-start">{t("challenge.instance.restrict")}</span>
+        </Checkbox>
+        <Checkbox
+          checked={challengeEnv.data?.privileged ?? false}
+          onChange={() => {
+            onTogglePrivileged();
+          }}
+        >
+          <span class="shrink-0 icon-[fluent--shield-20-regular] w-5 h-5" />
+          <span class="flex-1 text-start">{t("challenge.instance.privileged")}</span>
         </Checkbox>
         <Input
           class="flex-1"

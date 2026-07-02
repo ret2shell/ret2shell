@@ -1171,6 +1171,7 @@
       "delete": "刪除環境配置後，題目將變回附件類題目。",
       "internet": "允許容器內訪問互聯網",
       "restrict": "限制 Root 權限",
+      "privileged": "以特權執行",
       "registrySecret": "倉庫密鑰（需預先配置資源）",
       "runningContainers": "運行中的環境",
       "status": {

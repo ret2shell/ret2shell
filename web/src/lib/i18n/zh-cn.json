@@ -1171,6 +1171,7 @@
       "delete": "删除环境配置后，题目将变回附件类题目。",
       "internet": "允许容器内访问互联网",
       "restrict": "限制 Root 权限",
+      "privileged": "以特权运行",
       "registrySecret": "仓库密钥（需预先配置资源）",
       "runningContainers": "运行中的环境",
       "status": {
