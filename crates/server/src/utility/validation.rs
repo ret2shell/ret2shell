@@ -185,7 +185,7 @@ pub fn validate_challenge_model(challenge: &challenge::Model) -> Result<(), Resp
   }
   validate_range(challenge.score_rule.initial, "initial score", 0, 1500)?;
   validate_range(challenge.score_rule.minimum, "minimum score", 0, 1500)?;
-  validate_range(challenge.score_rule.decay, "score decay", 1, 50)?;
+  validate_range(challenge.score_rule.decay, "score decay", 1, 100)?;
   if challenge.score_rule.minimum > challenge.score_rule.initial {
     return Err(ResponseError::BadRequest(
       "minimum score must not exceed initial score".to_owned(),
