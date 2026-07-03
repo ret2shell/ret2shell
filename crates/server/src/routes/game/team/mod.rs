@@ -591,6 +591,7 @@ async fn delete_team_extra(
 #[derive(Deserialize)]
 struct TeamTokenQuery {
   pub token: String,
+  pub ex: Option<bool>,
 }
 
 async fn query_team_by_token(
@@ -600,5 +601,12 @@ async fn query_team_by_token(
   let team = team::get_by_token(&db.conn, game.id, &query.token)
     .await?
     .ok_or_else(|| ResponseError::NotFound("team not found".to_owned()))?;
-  Ok(Json(team))
+  let result = if query.ex.unwrap_or(false) {
+    team::get_ex(&db.conn, team.id)
+      .await?
+      .ok_or(ResponseError::NotFound("team not found".to_string()))?
+  } else {
+    team.into()
+  };
+  Ok(Json(result))
 }
