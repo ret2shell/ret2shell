@@ -570,8 +570,11 @@
     "scoreboard": {
       "title": "Scoreboard",
       "empty": "No participating teams yet",
+      "all": "All",
       "humanLed": "Human-led",
       "llmAssisted": "LLM-assisted",
+      "humanLedHint": "Human led",
+      "llmAssistedHint": "LLM assisted",
       "llmStatus": "LLM Status",
       "currentPeriod": "Current time period",
       "errors": {

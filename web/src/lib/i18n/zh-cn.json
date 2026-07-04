@@ -570,8 +570,11 @@
     "scoreboard": {
       "title": "积分板",
       "empty": "暂无参赛队伍",
+      "all": "全部",
       "humanLed": "人类主导",
       "llmAssisted": "LLM 协助",
+      "humanLedHint": "人类主导",
+      "llmAssistedHint": "LLM 协助",
       "llmStatus": "LLM 状态",
       "currentPeriod": "本周目",
       "errors": {

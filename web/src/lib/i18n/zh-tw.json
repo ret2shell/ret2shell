@@ -570,8 +570,11 @@
     "scoreboard": {
       "title": "積分板",
       "empty": "暫無參賽隊伍",
+      "all": "全部",
       "humanLed": "人類主導",
       "llmAssisted": "LLM 協助",
+      "humanLedHint": "人類主導",
+      "llmAssistedHint": "LLM 協助",
       "llmStatus": "LLM 狀態",
       "currentPeriod": "本週目",
       "errors": {

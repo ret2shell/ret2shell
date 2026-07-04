@@ -78,15 +78,22 @@ export default function TeamRanks(props: {
                   </Match>
                 </Switch>
               </span>
-              <div class="flex flex-col flex-1 w-0">
+              <div class="flex flex-col flex-1 w-0 min-w-0">
                 <A class="font-bold hover:underline truncate" href={`/games/${props.gameId}/teams/${team.id}`}>
                   {team.name}
                 </A>
-                <Show when={team.tag}>
-                  <span class="truncate text-xs opacity-60" title={team.tag ?? ""}>
-                    {team.tag}
+                <div class="flex flex-row items-center space-x-1">
+                  <span class={clsx("text-xs shrink-0", team.is_llm_used ? "text-warning" : "text-success")}>
+                    {team.is_llm_used
+                      ? `[${t("game.scoreboard.llmAssistedHint")}]`
+                      : `[${t("game.scoreboard.humanLedHint")}]`}
                   </span>
-                </Show>
+                  <Show when={team.tag}>
+                    <span class="truncate text-xs opacity-60 flex-1" title={team.tag ?? ""}>
+                      {team.tag}
+                    </span>
+                  </Show>
+                </div>
               </div>
               <span class={clsx("flex flex-row items-center space-x-2", props.showTime && matches.lg && "flex-1 w-0")}>
                 <span class="flex-1" />

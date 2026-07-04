@@ -570,8 +570,11 @@
     "scoreboard": {
       "title": "ポイントボード",
       "empty": "参加チームなし",
+      "all": "すべて",
       "humanLed": "人間主導",
       "llmAssisted": "LLM支援",
+      "humanLedHint": "人間主導",
+      "llmAssistedHint": "LLM支援",
       "llmStatus": "LLM状態",
       "currentPeriod": "今週目",
       "errors": {

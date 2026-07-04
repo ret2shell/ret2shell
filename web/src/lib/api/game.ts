@@ -238,7 +238,7 @@ export function useGameScoreboard({
   page?: () => number;
   page_size?: () => number;
   with_hidden?: () => boolean;
-  is_llm_used?: () => boolean;
+  is_llm_used?: () => boolean | undefined;
   enabled?: () => boolean;
   onError?: (err: Error) => boolean;
 }) {

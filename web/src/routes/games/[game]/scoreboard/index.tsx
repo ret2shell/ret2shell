@@ -19,15 +19,17 @@ import TeamDetails from "./_blocks/team-details";
 import TeamRanks from "./_blocks/team-ranks";
 import TeamSolves from "./_blocks/team-solves";
 
+type LlmFilter = "all" | "true" | "false";
+
 function ChartOperations(props: {
   onRefresh?: () => void;
   onExport?: () => void;
-  onLlmUsedChange?: (isLlmUsed: boolean) => void;
+  onLlmFilterChange?: (value: LlmFilter) => void;
   size?: "md" | "sm";
   ghost?: boolean;
   showHiddenTeams?: boolean;
   onShowHiddenTeams?: (show: boolean) => void;
-  isLlmUsed?: boolean;
+  llmFilter?: LlmFilter;
 }) {
   const breakpoints = {
     sm: "640px",
@@ -75,6 +77,11 @@ function ChartOperations(props: {
         placeholder={t("game.scoreboard.llmStatus")}
         items={[
           {
+            value: "all",
+            label: t("game.scoreboard.all"),
+            icon: "icon-[fluent--people-team-20-regular] w-5 h-5",
+          },
+          {
             value: "false",
             label: t("game.scoreboard.humanLed"),
             icon: "icon-[fluent--scan-thumb-up-20-regular] w-5 h-5",
@@ -85,8 +92,8 @@ function ChartOperations(props: {
             icon: "icon-[fluent--bot-sparkle-20-regular] w-5 h-5",
           },
         ]}
-        value={props.isLlmUsed ? ["true"] : ["false"]}
-        onValueChange={(e) => props.onLlmUsedChange?.(e.value[0] === "true")}
+        value={props.llmFilter ? [props.llmFilter] : ["all"]}
+        onValueChange={(e) => props.onLlmFilterChange?.((e.value[0] as LlmFilter) ?? "all")}
       />
     </div>
   );
@@ -103,7 +110,17 @@ export default function () {
   const [page, setPage] = createSignal(1);
   const [pageSize, setPageSize] = createSignal(null as number | null);
   const showHiddenTeams = createMemo(() => searchParams.hidden === "true");
-  const isLlmUsed = createMemo(() => searchParams.llm === "true");
+  const llmFilter = createMemo<LlmFilter>(() => {
+    const v = searchParams.llm;
+    if (v === "true" || v === "false") return v;
+    return "all";
+  });
+  const isLlmUsed = createMemo<boolean | undefined>(() => {
+    const f = llmFilter();
+    if (f === "true") return true;
+    if (f === "false") return false;
+    return undefined;
+  });
   const [showPlane, setShowPlane] = createSignal(false);
   // const [showReal, setShowReal] = createSignal(!canAccessChallenges()[0]);
   const [showReal, setShowReal] = createSignal(true);
@@ -355,8 +372,8 @@ export default function () {
                     onRefresh={handleRefresh}
                     showHiddenTeams={showHiddenTeams()}
                     onShowHiddenTeams={(e) => setSearchParams({ hidden: e ? "true" : null })}
-                    onLlmUsedChange={(e) => setSearchParams({ llm: e ? "true" : null })}
-                    isLlmUsed={isLlmUsed()}
+                    onLlmFilterChange={(e) => setSearchParams({ llm: e === "all" ? null : e })}
+                    llmFilter={llmFilter()}
                   />
                 </div>
               </Show>
@@ -367,8 +384,8 @@ export default function () {
                 showHiddenTeams={showHiddenTeams()}
                 onRefresh={handleRefresh}
                 onShowHiddenTeams={(e) => setSearchParams({ hidden: e ? "true" : null })}
-                onLlmUsedChange={(e) => setSearchParams({ llm: e ? "true" : null })}
-                isLlmUsed={isLlmUsed()}
+                onLlmFilterChange={(e) => setSearchParams({ llm: e === "all" ? null : e })}
+                llmFilter={llmFilter()}
               />
             </Show>
             <Switch>
