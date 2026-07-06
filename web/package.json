@@ -29,7 +29,7 @@
     "@solid-primitives/media": "^2.3.6",
     "@solid-primitives/platform": "^0.2.1",
     "@solid-primitives/refs": "^1.1.4",
-    "@solid-primitives/resize-observer": "^2.1.6",
+    "@solid-primitives/resize-observer": "^2.2.0",
     "@solid-primitives/storage": "^4.3.5",
     "@solidjs/router": "^0.16.1",
     "@tanstack/query-persist-client-core": "^5.101.2",
