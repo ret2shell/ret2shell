@@ -43,12 +43,12 @@ export function useChallenges({
   enabled?: () => boolean;
   onError?: (err: Error) => boolean;
 }) {
-  const keys = createMemo(() => ["game", game_id(), "challenge", "list", page?.() ?? 1, page_size?.() ?? 200]);
+  const keys = createMemo(() => ["game", game_id(), "challenge", "list", page?.() ?? "all", page_size?.() ?? "all"]);
   // console.log(keys());
   return useQuery(
     () => ({
       queryKey: keys(),
-      queryFn: async () => await getChallengeList(game_id(), page?.() ?? 1, page_size?.() ?? 200),
+      queryFn: async () => await getChallengeList(game_id(), page?.(), page_size?.()),
       enabled: enabled?.(),
       throwOnError: (err: Error) => {
         handleHttpError(err, t("challenge.errors.fetchList.title"));
