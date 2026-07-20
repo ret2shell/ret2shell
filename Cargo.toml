@@ -39,7 +39,7 @@ heck               = "0.5"
 hex                = "0.4"
 hyper-util         = "0.1"
 image              = "0.25"
-infer              = "0.19"
+infer              = "0.22"
 k8s-openapi        = { version = "0.28", features = ["latest"] }
 mime               = "0.3"
 nanoid             = "0.5"
