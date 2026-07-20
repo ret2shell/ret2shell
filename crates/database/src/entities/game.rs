@@ -6,7 +6,7 @@ use sea_orm::{
   ActiveValue, FromJsonQueryResult, FromQueryResult, IntoActiveModel, IntoSimpleExpr, Order,
   QueryOrder, QuerySelect,
   entity::prelude::*,
-  sea_query::{BinOper, Query, SimpleExpr},
+  sea_query::{BinOper, Query, QueryStatementBuilder, SimpleExpr},
 };
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
