@@ -6,7 +6,7 @@ use sea_orm::{
   ActiveValue, FromJsonQueryResult, FromQueryResult, IntoActiveModel, IntoSimpleExpr, Order,
   QueryOrder, QuerySelect,
   entity::prelude::*,
-  sea_query::{BinOper, Query, SimpleExpr},
+  sea_query::{BinOper, Query, QueryStatementBuilder, SimpleExpr},
 };
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
@@ -271,8 +271,8 @@ pub async fn get_page<C>(
 ) -> Result<(Vec<Model>, u64), DbErr>
 where
   C: ConnectionTrait, {
-  let page_size = page_size.max(1);
-  let page = page.max(1);
+  let page_size = Ord::max(page_size, 1);
+  let page = Ord::max(page, 1);
   let mut sql = Entity::find();
   if let Some(host_type) = host_type {
     sql = sql.filter(Column::HostType.eq(host_type));
