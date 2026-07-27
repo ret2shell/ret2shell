@@ -97,7 +97,7 @@ version  = "0.8"
 [workspace.dependencies.jsonwebtoken]
 default-features = false
 features         = ["aws_lc_rs"]
-version          = "10.2"
+version          = "11.0"
 
 [workspace.dependencies.tower_governor]
 default-features = false
