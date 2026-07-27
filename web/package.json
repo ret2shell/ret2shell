@@ -49,7 +49,7 @@
     "hast-util-to-html": "^9.0.5",
     "hastscript": "^9.0.1",
     "howler": "^2.2.4",
-    "katex": "^0.17.0",
+    "katex": "^0.18.1",
     "ky": "^2.0.2",
     "lorem-ipsum": "^3.0.0",
     "luxon": "^3.7.2",
