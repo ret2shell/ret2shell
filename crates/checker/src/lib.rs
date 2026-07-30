@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use r2s_bucket::challenge::ChallengeBucket;
 use r2s_database::{challenge, submission, team, user};
-use r2s_engine::{DiagnosticMarker, Engine, EngineError};
+use r2s_engine::{DiagnosticMarker, Engine, EngineError, parse_value, script_error_from_value};
 use rune::{Any, ContextError, Module, Value, runtime::Object};
 use serde::{Deserialize, Serialize};
 use tracing::debug;
@@ -164,44 +164,46 @@ impl Checker {
       None => RuneTeam::default(),
     };
     let bucket = ret2script::modules::bucket::Bucket::try_new(bucket.path())?;
-    let output = engine
-      .execute(
+    let output: Result<Value, Value> = engine
+      .execute_as(
         key,
         "check",
         (bucket, user_object, team_object, submission_object),
+        "`Result`",
       )
       .await?;
     debug!(?output, function = "check", "checker finished");
-    let output: Result<(bool, String, Option<Object>), Value> = rune::from_value(output)?;
-    if let Ok((result, message, audit)) = output {
-      let audit = if let Some(audit) = audit {
-        Some(AuditMessage {
-          peer_team: rune::from_value(
-            audit
-              .get("peer_team")
-              .ok_or(EngineError::MissingResultField(
-                "audit::peer_team".to_owned(),
-              ))?
-              .to_owned(),
-          )?,
-          reason: rune::from_value(
-            audit
-              .get("reason")
-              .ok_or(EngineError::MissingResultField(
-                "audit::peer_team".to_owned(),
-              ))?
-              .to_owned(),
-          )?,
-        })
-      } else {
-        None
-      };
-      Ok((result, message, audit))
+    let value = match output {
+      Ok(value) => value,
+      Err(error) => return Err(script_error_from_value(error)),
+    };
+    let (result, message, audit): (bool, String, Option<Object>) = parse_value(
+      value,
+      "a `(bool, String, Option<Object>)` tuple inside `Ok`",
+    )?;
+    let audit = if let Some(audit) = audit {
+      Some(AuditMessage {
+        peer_team: parse_value(
+          audit
+            .get("peer_team")
+            .ok_or(EngineError::MissingResultField(
+              "audit::peer_team".to_owned(),
+            ))?
+            .to_owned(),
+          "an `i64` field `audit.peer_team`",
+        )?,
+        reason: parse_value(
+          audit
+            .get("reason")
+            .ok_or(EngineError::MissingResultField("audit::reason".to_owned()))?
+            .to_owned(),
+          "a `String` field `audit.reason`",
+        )?,
+      })
     } else {
-      Err(EngineError::ScriptError(
-        "early returns from script".to_owned(),
-      ))
-    }
+      None
+    };
+    Ok((result, message, audit))
   }
 
   pub async fn environ(
@@ -216,22 +218,31 @@ impl Checker {
     };
     let bucket = ret2script::modules::bucket::Bucket::try_new(bucket.path())?;
     debug!("calling environ");
-    let output = engine
-      .execute(key, "environ", (bucket, user_object, team_object))
+    let output: Result<Value, Value> = engine
+      .execute_as(
+        key,
+        "environ",
+        (bucket, user_object, team_object),
+        "`Result`",
+      )
       .await?;
     debug!(?output, function = "environ", "checker finished");
-    let object: Result<Object, Value> = rune::from_value(output)?;
-    if let Ok(object) = object {
-      let mut environ = HashMap::new();
-      for (key, value) in object.iter() {
-        environ.insert(key.to_string(), rune::from_value(value.clone())?);
-      }
-      Ok(environ)
-    } else {
-      Err(EngineError::ScriptError(
-        "early returns from script".to_owned(),
-      ))
+    let value = match output {
+      Ok(value) => value,
+      Err(error) => return Err(script_error_from_value(error)),
+    };
+    let object: Object = parse_value(value, "`Object` inside `Ok`")?;
+    let mut environ = HashMap::new();
+    for (key, value) in object.iter() {
+      environ.insert(
+        key.to_string(),
+        parse_value(
+          value.clone(),
+          format!("a `String` environment variable `{key}`"),
+        )?,
+      );
     }
+    Ok(environ)
   }
 }
 
