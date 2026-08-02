@@ -19,6 +19,29 @@ use crate::utils::diagnostic_to_marker;
 
 type EngineContext = (Arc<Unit>, Arc<RuntimeContext>, DateTime<Utc>);
 
+/// Parse a Rune script value according to the function's return contract.
+pub fn parse_value<T>(value: Value, expected: impl Into<String>) -> Result<T, EngineError>
+where
+  T: rune::FromValue, {
+  let actual = value.type_info();
+  rune::from_value(value).map_err(|_| EngineError::InvalidReturnType {
+    expected: expected.into(),
+    actual: actual.to_string(),
+  })
+}
+
+/// Convert a Rune script error value into the caller's error type.
+pub fn script_error_from_value<E>(error: Value) -> E
+where
+  E: From<EngineError>, {
+  let message = match rune::from_value::<String>(error.clone()) {
+    Ok(message) => message,
+    Err(_) => serde_json::to_string(&error)
+      .unwrap_or_else(|_| format!("got a non-serializable `{}` error value", error.type_info())),
+  };
+  EngineError::ScriptError(message).into()
+}
+
 #[derive(Clone, Debug, Default)]
 pub struct Engine {
   contexts: Arc<RwLock<HashMap<String, EngineContext>>>,
@@ -162,6 +185,17 @@ impl Engine {
     let result = result.async_complete().await.into_result()?;
 
     Ok(result)
+  }
+
+  /// Execute a Rune function and parse its output according to the function's
+  /// return contract.
+  pub async fn execute_as<T>(
+    &self, key: impl AsRef<str>, func: &'static str, args: impl Args + Send,
+    expected: impl Into<String>,
+  ) -> Result<T, EngineError>
+  where
+    T: rune::FromValue, {
+    parse_value(self.execute(key, func, args).await?, expected)
   }
 
   pub async fn has_function(

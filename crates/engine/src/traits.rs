@@ -21,6 +21,8 @@ pub enum EngineError {
   ExecError(#[from] rune::runtime::VmError),
   #[error("missing fields from script result: {0}")]
   MissingResultField(String),
+  #[error("script returned an invalid type: expected {expected}, got `{actual}`")]
+  InvalidReturnType { expected: String, actual: String },
   #[error("script error: {0}")]
   ScriptError(String),
   #[error("compile error: {0}")]
