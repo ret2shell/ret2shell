@@ -35,6 +35,8 @@ import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { createSignal, For, Match, onCleanup, Show, Switch } from "solid-js";
 import type { ChallengeWidgetProps } from ".";
 
+const CONTAINER_NAME_PATTERN = /^(?=.{3,40}$)[a-z](?:[a-z0-9-]*[a-z0-9])$/;
+
 function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () => void }) {
   const [form, { Form, Field }] = createForm<ChallengeImage>({
     initialValues: {
@@ -116,6 +118,7 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
           env: {
             internet: challengeEnv.data?.internet || false,
             restricted: challengeEnv.data?.restricted ?? null,
+            privileged: challengeEnv.data?.privileged ?? null,
             images: [...(challengeEnv.data?.images || []), sanitizeChallengeImage(form)],
             pull_secret: challengeEnv.data?.pull_secret || null,
           },
@@ -128,7 +131,7 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
           name="name"
           validate={[
             required(t("challenge.instance.image.form.containerName.required")),
-            pattern(/^[a-z0-9-]{3,40}$/, t("challenge.instance.image.form.containerName.mustBeValidName")),
+            pattern(CONTAINER_NAME_PATTERN, t("challenge.instance.image.form.containerName.mustBeValidName")),
           ]}
         >
           {(field, props) => (
@@ -653,6 +656,7 @@ export default function (props: ChallengeWidgetProps) {
       env: {
         internet: !(challengeEnv.data?.internet || false),
         restricted: challengeEnv.data?.restricted ?? null,
+        privileged: challengeEnv.data?.privileged ?? null,
         images: challengeEnv.data?.images || [],
         pull_secret: challengeEnv.data?.pull_secret || null,
       },
@@ -665,6 +669,20 @@ export default function (props: ChallengeWidgetProps) {
       env: {
         internet: challengeEnv.data?.internet || false,
         restricted: !(challengeEnv.data?.restricted ?? false),
+        privileged: challengeEnv.data?.privileged ?? null,
+        images: challengeEnv.data?.images || [],
+        pull_secret: challengeEnv.data?.pull_secret || null,
+      },
+    });
+  }
+  async function onTogglePrivileged() {
+    updateMutation.mutate({
+      game_id: challenge.data!.game_id,
+      challenge_id: challenge.data!.id,
+      env: {
+        internet: challengeEnv.data?.internet || false,
+        restricted: challengeEnv.data?.restricted ?? null,
+        privileged: !(challengeEnv.data?.privileged ?? false),
         images: challengeEnv.data?.images || [],
         pull_secret: challengeEnv.data?.pull_secret || null,
       },
@@ -678,6 +696,7 @@ export default function (props: ChallengeWidgetProps) {
       env: {
         internet: challengeEnv.data?.internet || false,
         restricted: challengeEnv.data?.restricted ?? null,
+        privileged: challengeEnv.data?.privileged ?? null,
         images: challengeEnv.data?.images?.filter((image) => image.name !== name) || [],
         pull_secret: challengeEnv.data?.pull_secret || null,
       },
@@ -703,6 +722,7 @@ export default function (props: ChallengeWidgetProps) {
       env: {
         internet: challengeEnv.data?.internet || false,
         restricted: challengeEnv.data?.restricted ?? null,
+        privileged: challengeEnv.data?.privileged ?? null,
         images: challengeEnv.data?.images || [],
         pull_secret: n ?? null,
       },
@@ -787,6 +807,15 @@ export default function (props: ChallengeWidgetProps) {
           }}
         >
           <span class="flex-1 text-start">{t("challenge.instance.restrict")}</span>
+        </Checkbox>
+        <Checkbox
+          checked={challengeEnv.data?.privileged ?? false}
+          onChange={() => {
+            onTogglePrivileged();
+          }}
+        >
+          <span class="shrink-0 icon-[fluent--shield-20-regular] w-5 h-5" />
+          <span class="flex-1 text-start">{t("challenge.instance.privileged")}</span>
         </Checkbox>
         <Input
           class="flex-1"

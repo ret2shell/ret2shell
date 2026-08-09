@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use k8s_openapi::api::core::v1::{Container, Pod, Service, ServicePort};
-use r2s_engine::{DiagnosticMarker, Engine, EngineError};
+use r2s_engine::{DiagnosticMarker, Engine, EngineError, parse_value, script_error_from_value};
 use rune::{
   Any, ContextError, Module, Value,
   alloc::{Error as RuneAllocError, Vec as RuneVec, clone::TryClone},
@@ -18,6 +18,7 @@ pub struct LifecycleMapper;
 pub enum LifecycleStopReason {
   Manual,
   Timeout,
+  Admin,
 }
 
 impl LifecycleStopReason {
@@ -25,6 +26,7 @@ impl LifecycleStopReason {
     match self {
       Self::Manual => "manual",
       Self::Timeout => "timeout",
+      Self::Admin => "admin",
     }
   }
 }
@@ -906,7 +908,14 @@ impl LifecycleMapper {
         .reason()
         .map(|reason| reason.as_str().to_string()),
     )?;
-    let _output: Value = engine.execute(key, function_name, (ctx,)).await?;
+    let output: Result<Value, Value> = engine
+      .execute_as(key, function_name, (ctx,), "`Result`")
+      .await?;
+    let value = match output {
+      Ok(value) => value,
+      Err(error) => return Err(script_error_from_value(error)),
+    };
+    let _: () = parse_value(value, "`()` inside `Ok`")?;
     Ok(LifecycleExecutionStatus::Executed)
   }
 }

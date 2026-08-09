@@ -65,7 +65,7 @@ The default local PV paths intentionally stay under `/srv/ret2shell/backend/stor
 5. Install from a GitHub release asset. This is the recommended path because the packaged chart is already rewritten to the release version:
 
    ```bash
-   R2S_VERSION=3.10.5
+   R2S_VERSION=3.11.3
    helm upgrade --install ret2shell \
      "https://github.com/ret2shell/ret2shell/releases/download/${R2S_VERSION}/ret2shell-${R2S_VERSION}.tgz" \
      -n ret2shell-platform \
@@ -102,7 +102,7 @@ kubectl label nodes ret2shell-worker-1 ret.sh.cn/workload=challenge
 Upgrade by changing the version and rerunning `helm upgrade --install`:
 
 ```bash
-R2S_VERSION=3.10.5
+R2S_VERSION=3.11.3
 helm upgrade --install ret2shell \
   "https://github.com/ret2shell/ret2shell/releases/download/${R2S_VERSION}/ret2shell-${R2S_VERSION}.tgz" \
   -n ret2shell-platform \
@@ -113,13 +113,13 @@ helm upgrade --install ret2shell \
 
 ## Migration Map
 
-| Deprecated layout | New layout |
-| --- | --- |
-| `0-init.yaml` | `--create-namespace` plus chart-managed challenge namespace and RBAC |
-| `1-volumes.yaml` | `deploy/k8s/storage-local.yaml` |
-| `2-cache/` | `valkey.*` values in the unified chart |
-| `3-database/` | `postgresql.*` values in the unified chart |
-| `4-queue/` | `nats.*` values in the unified chart |
-| `5-registry/` | `registry.*` values in the unified chart |
-| `6-logs/` | `victoriaLogs.*` values in the unified chart |
-| `7-platform.yaml` | `platform.*` values in the unified chart |
+| Deprecated layout | New layout                                                           |
+| ----------------- | -------------------------------------------------------------------- |
+| `0-init.yaml`     | `--create-namespace` plus chart-managed challenge namespace and RBAC |
+| `1-volumes.yaml`  | `deploy/k8s/storage-local.yaml`                                      |
+| `2-cache/`        | `valkey.*` values in the unified chart                               |
+| `3-database/`     | `postgresql.*` values in the unified chart                           |
+| `4-queue/`        | `nats.*` values in the unified chart                                 |
+| `5-registry/`     | `registry.*` values in the unified chart                             |
+| `6-logs/`         | `victoriaLogs.*` values in the unified chart                         |
+| `7-platform.yaml` | `platform.*` values in the unified chart                             |

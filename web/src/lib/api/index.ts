@@ -5,7 +5,7 @@ import { platformStore } from "@storage/platform";
 import { themeStore } from "@storage/theme";
 import { experimental_createQueryPersister } from "@tanstack/query-persist-client-core";
 import { QueryClient } from "@tanstack/solid-query";
-import ky from "ky";
+import ky, { type AfterResponseHook, type AfterResponseState } from "ky";
 
 export { handleHttpError, toastError, toastSuccess } from "./utils";
 
@@ -13,6 +13,27 @@ export const api_root = (import.meta.env.VITE_API_ROOT as string) || "/api";
 
 const Ret2StreamTable = "SUCaeck4xrsbgtPwnGY56qpm9vWDIZAKVjlf.HFd,E17Tz0iNQ2yJMLh8OoRuX3B";
 const OriginalStreamTable = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+type LegacyAfterResponseArgs = [Request, unknown, Response];
+
+const syncAccountFromResponse = ((...args: [AfterResponseState] | LegacyAfterResponseArgs) => {
+  const response = args.length === 1 ? args[0]?.response : args[2];
+  if (!response) {
+    return;
+  }
+
+  if (response.status === 401) {
+    resetUser();
+  }
+  if (response.headers.has("Set-Token")) {
+    const token = response.headers.get("Set-Token");
+    if (token) {
+      storeToken(token);
+    }
+  }
+
+  return response;
+}) as AfterResponseHook;
 
 const api = ky.extend({
   parseJson: (text, _context) => JSON.parse(text, luxonReviver) as unknown,
@@ -49,19 +70,7 @@ const api = ky.extend({
         }
       },
     ],
-    afterResponse: [
-      ({ response }) => {
-        if (response.status === 401) {
-          resetUser();
-        }
-        if (response.headers.has("Set-Token")) {
-          const token = response.headers.get("Set-Token");
-          if (token) {
-            storeToken(token);
-          }
-        }
-      },
-    ],
+    afterResponse: [syncAccountFromResponse],
   },
 });
 
@@ -71,7 +80,8 @@ export async function safeJson<T>(promise: Promise<T>): Promise<T | undefined> {
   try {
     return await promise;
   } catch (error) {
-    if (error instanceof SyntaxError && error.message.includes("Unexpected end of JSON input")) {
+    console.log(error);
+    if (error instanceof SyntaxError) {
       return undefined;
     }
 

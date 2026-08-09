@@ -266,8 +266,7 @@ where
 
 #[cfg(test)]
 mod tests {
-  use sea_orm::QueryTrait;
-  use sea_query::PostgresQueryBuilder;
+  use sea_orm::{QueryTrait, sea_query::PostgresQueryBuilder};
 
   use super::*;
 

@@ -516,6 +516,7 @@ async fn sync_game_config(
         frozen: game.frozen,
         host_type: convert_game_host_type(bucket_config.host_type)?,
         team_size: bucket_config.team_size,
+        env_limit: bucket_config.env_limit.filter(|&v| v > 0),
         access_policy: game::AccessPolicy {
           sync: bucket_config.access_policy.sync,
           ..game.access_policy.clone()
@@ -896,6 +897,7 @@ mod tests {
     ChallengeEnv {
       internet: true,
       restricted: Some(false),
+      privileged: Some(false),
       images,
       pull_secret: Some("registry-secret".to_owned()),
     }

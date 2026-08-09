@@ -4,9 +4,10 @@ use chrono::{DateTime, Utc, serde::ts_seconds};
 use num_derive::{FromPrimitive, ToPrimitive};
 use sea_orm::{
   ActiveValue, FromJsonQueryResult, FromQueryResult, IntoActiveModel, IntoSimpleExpr, Order,
-  QueryOrder, QuerySelect, entity::prelude::*,
+  QueryOrder, QuerySelect,
+  entity::prelude::*,
+  sea_query::{BinOper, Query, SimpleExpr},
 };
-use sea_query::{BinOper, Query, SimpleExpr};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -125,6 +126,7 @@ pub struct Model {
   pub frozen: bool,
   pub host_type: HostType,
   pub team_size: i32,
+  pub env_limit: Option<i32>,
   #[sea_orm(column_type = "JsonBinary")]
   pub access_policy: AccessPolicy,
   #[sea_orm(column_type = "JsonBinary")]
@@ -173,6 +175,17 @@ impl Model {
 
   pub fn archived(&self) -> bool {
     self.host_type == HostType::Game && self.archive_at <= Utc::now()
+  }
+
+  pub fn env_limit(&self) -> i32 {
+    self
+      .env_limit
+      .filter(|&v| v > 0)
+      .unwrap_or(if self.team_size == 0 {
+        1
+      } else {
+        self.team_size
+      })
   }
 }
 
@@ -391,6 +404,7 @@ mod tests {
       frozen: false,
       host_type,
       team_size: 4,
+      env_limit: None,
       access_policy: AccessPolicy {
         restrict: false,
         institutes: vec![],
@@ -442,5 +456,38 @@ mod tests {
     assert!(sample_game(HostType::Game, -7200, -3600, -60).archived());
     assert!(!sample_game(HostType::Game, -3600, 3600, 3600).archived());
     assert!(!sample_game(HostType::Training, -7200, -3600, -60).archived());
+  }
+
+  #[test]
+  fn env_limit_uses_stored_value_when_positive() {
+    let mut game = sample_game(HostType::Game, -3600, 3600, 7200);
+    game.env_limit = Some(3);
+    assert_eq!(game.env_limit(), 3);
+  }
+
+  #[test]
+  fn env_limit_falls_back_to_team_size() {
+    let mut game = sample_game(HostType::Game, -3600, 3600, 7200);
+    game.team_size = 4;
+    game.env_limit = None;
+    assert_eq!(game.env_limit(), 4);
+  }
+
+  #[test]
+  fn env_limit_defaults_to_one_when_team_size_is_zero() {
+    let mut game = sample_game(HostType::Game, -3600, 3600, 7200);
+    game.team_size = 0;
+    game.env_limit = None;
+    assert_eq!(game.env_limit(), 1);
+  }
+
+  #[test]
+  fn env_limit_ignores_non_positive_values() {
+    let mut game = sample_game(HostType::Game, -3600, 3600, 7200);
+    game.team_size = 4;
+    game.env_limit = Some(0);
+    assert_eq!(game.env_limit(), 4);
+    game.env_limit = Some(-1);
+    assert_eq!(game.env_limit(), 4);
   }
 }

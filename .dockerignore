@@ -8,7 +8,6 @@ build/
 .env.*.local
 
 debug/
-Cargo.lock
 Cargo.dup
 
 **/*.rs.bk

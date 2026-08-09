@@ -708,12 +708,18 @@
       },
       "teamSize": {
         "label": "チーム人数",
-        "placeholder": "チーム人数を入力してください",
+        "placeholder": "チーム人数を入力してください。0 は制限なし",
         "required": "チーム人数は必須です",
         "mustBeNumber": "チーム人数は数字でなければなりません",
         "mustBePositiveNumber": "チーム人数は正の数でなければなりません",
-        "minimum": "人数は1未満であってはなりません",
+        "minimum": "人数は0未満であってはなりません",
         "maximum": "人数は99を超えてはなりません"
+      },
+      "envLimit": {
+        "label": "コンテナ制限",
+        "placeholder": "空欄の場合、チーム人数に従います（無制限時は 1）",
+        "minimum": "コンテナ制限は1未満であってはなりません",
+        "maximum": "コンテナ制限は99を超えてはなりません"
       },
       "enableTeamAudit": {
         "label": "チーム審査を有効にする",
@@ -1171,6 +1177,7 @@
       "delete": "環境設定を削除すると、問題は添付ファイル形式の問題に戻ります。",
       "internet": "コンテナ内からインターネットへのアクセスを許可する",
       "restrict": "Root権限の制限",
+      "privileged": "特権で実行",
       "registrySecret": "リポジトリシークレット（事前にリソースを構成する必要があります）",
       "runningContainers": "実行中の環境",
       "status": {
@@ -1196,7 +1203,7 @@
             "label": "コンテナ名",
             "placeholder": "コンテナ名を入力してください",
             "required": "コンテナ名は必須です",
-            "mustBeValidName": "コンテナ名は小文字のアルファベット、数字、アンダースコアの組み合わせでなければならず、小文字のアルファベットで始まる必要があります"
+            "mustBeValidName": "3-40文字で、小文字英字で始まり、小文字英字、数字、ハイフン(-)のみを使用し、末尾にハイフンは使えません"
           },
           "tag": {
             "label": "イメージタグ",
@@ -1513,6 +1520,9 @@
       },
       "fetch": {
         "title": "ユーザー情報の取得に失敗しました"
+      },
+      "fetchStats": {
+        "title": "キャリアデータの取得に失敗しました"
       }
     },
     "description": {
@@ -1522,6 +1532,20 @@
     "joinedGames": "大会に参加",
     "gameJournal": "{{team}}のメンバーとして{{game}}に参加しました。",
     "moreJournal": "命ある限り、探求を止めない……",
+    "solvedProblems": "解答状況",
+    "stats": {
+      "title": "キャリアデータ",
+      "allGames": "すべての大会",
+      "empty": "解答記録はありません",
+      "solved": "解答済み",
+      "failed": "未解答"
+    },
+    "statusFilter": {
+      "all": "すべての問題",
+      "notAttempted": "未着手",
+      "attempted": "挑戦済み",
+      "solved": "解答済み"
+    },
     "gotoAdminPanel": "ユーザー管理へ移動",
     "registeredAt": "{{time}}に登録",
     "title": "ユーザー",
@@ -2010,6 +2034,7 @@
     },
     "solo": "シングル戦",
     "collab": "{{size}} 人チーム戦",
+    "unlimited": "人数無制限チーム戦",
     "list": {
       "title": "チーム一覧",
       "selectInstitute": "組織を選択...",

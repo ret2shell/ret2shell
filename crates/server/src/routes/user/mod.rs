@@ -7,7 +7,7 @@ use axum::{
 };
 use r2s_cache::Cache;
 use r2s_database::{
-  ip, oauth, team,
+  ip, oauth, submission, team,
   user::{self, Permission},
 };
 use r2s_migrator::Database;
@@ -39,6 +39,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         )))
         .route("/", get(get_user))
         .route("/team", get(get_teams))
+        .route("/stats", get(get_user_stats))
         .route_layer(middleware::from_fn_with_state(
           state.clone(),
           data::prepare_data!(user, false, id, account, nickname),
@@ -54,6 +55,11 @@ struct UserListQuery {
   order: Option<String>,
   filter: Option<String>,
   institute_id: Option<i64>,
+}
+
+#[derive(Deserialize)]
+struct SubmissionQuery {
+  game_id: Option<i64>,
 }
 
 async fn get_user_list(
@@ -195,4 +201,23 @@ async fn get_oauth_list(
 ) -> Result<impl IntoResponse, ResponseError> {
   let oauths = oauth::get_list_ex(&db.conn, user.id).await?;
   Ok(Json(oauths))
+}
+
+async fn get_user_stats(
+  State(ref db): State<Database>, Extension(token): Extension<Token>,
+  Extension(user): Extension<user::Model>, Query(query): Query<SubmissionQuery>,
+) -> Result<impl IntoResponse, ResponseError> {
+  if user.hidden && !token.permissions.0.contains(&Permission::User) && token.id != user.id {
+    return Err(ResponseError::NotFound("user not found".to_owned()));
+  }
+  match query.game_id {
+    Some(game_id) => {
+      let stats = submission::get_user_challenge_stats(&db.conn, game_id, user.id).await?;
+      Ok(Json(stats).into_response())
+    }
+    None => {
+      let stats = submission::get_user_game_stats(&db.conn, user.id).await?;
+      Ok(Json(stats).into_response())
+    }
+  }
 }

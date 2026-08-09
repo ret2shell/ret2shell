@@ -35,7 +35,7 @@ export type UserForm = {
   email: string;
   avatar: string;
   description: string;
-  institute_id?: string;
+  institute_id: string;
   hidden: boolean;
   banned: boolean;
   permBasic: boolean;
@@ -59,7 +59,7 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
       email: compProps.editSource?.email || "",
       avatar: compProps.editSource?.avatar || "",
       description: compProps.editSource?.description || "",
-      institute_id: compProps.editSource?.institute_id?.toString() || undefined,
+      institute_id: compProps.editSource?.institute_id?.toString() || "0",
       hidden: compProps.editSource?.hidden || false,
       banned: compProps.editSource?.banned || false,
       permBasic: compProps.editSource?.permissions.includes(Permission.Basic) || false,
@@ -83,7 +83,7 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
           email: compProps.editSource?.email || "",
           avatar: compProps.editSource?.avatar || "",
           description: compProps.editSource?.description || "",
-          institute_id: compProps.editSource?.institute_id?.toString() || undefined,
+          institute_id: compProps.editSource?.institute_id?.toString() || "0",
           hidden: compProps.editSource?.hidden || false,
           banned: compProps.editSource?.banned || false,
           permBasic: compProps.editSource?.permissions.includes(Permission.Basic) || false,
@@ -142,13 +142,18 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
   }
 
   const institutesSelect = createMemo(() => {
-    return (
-      institutes.data?.map((i) => ({
+    return [
+      {
+        value: "0",
+        label: t("institute.empty"),
+        icon: "icon-[fluent--earth-20-regular] w-5 h-5",
+      },
+      ...(institutes.data?.map((i) => ({
         value: i.id.toString(),
         label: i.name,
         icon: "icon-[fluent--hat-graduation-20-regular] w-5 h-5",
-      })) ?? []
-    );
+      })) ?? []),
+    ];
   });
 
   function onSubmit(result: UserForm) {
@@ -171,7 +176,7 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
       email: result.email,
       avatar: result.avatar,
       description: result.description,
-      institute_id: Number.parseInt(result.institute_id || "NONE", 10) || null,
+      institute_id: Number.parseInt(result.institute_id, 10) || null,
       hidden: result.hidden,
       banned: result.banned,
       permissions,
@@ -299,9 +304,6 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
                     name={field.name}
                     error={field.error}
                     inputProps={props}
-                    // onValueChange={(v) => {
-                    //   setValue(form, "institute_id", v.value.at(0) ? Number.parseInt(v.value.at(0)!) : undefined);
-                    // }}
                     value={field.value ? [field.value.toString()] : undefined}
                   />
                 )}

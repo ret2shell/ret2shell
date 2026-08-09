@@ -106,7 +106,7 @@ async fn update_self_team(
   Extension(team): Extension<Option<team::Model>>, Json(req): Json<UpdateTeamRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let mut team = team.ok_or_else(|| ResponseError::NotFound("team not found".to_owned()))?;
-  if game.team_size > 1 {
+  if game.team_size != 1 {
     team.name = req.name;
   } else {
     team.name = token.nickname.clone();
@@ -444,7 +444,7 @@ async fn join_team(
     .await?
     .ok_or_else(|| ResponseError::NotFound("team".to_owned()))?;
   let members = team::get_members(&db.conn, team.id).await?;
-  if members.len() >= (game.team_size as usize) {
+  if game.team_size > 0 && members.len() >= (game.team_size as usize) {
     warn!(team_id=%team.id, team_name=%team.name, "user try to join team, but team size is full");
     return Err(ResponseError::PreconditionFailed("team is full".to_owned()));
   }
@@ -591,6 +591,7 @@ async fn delete_team_extra(
 #[derive(Deserialize)]
 struct TeamTokenQuery {
   pub token: String,
+  pub ex: Option<bool>,
 }
 
 async fn query_team_by_token(
@@ -600,5 +601,12 @@ async fn query_team_by_token(
   let team = team::get_by_token(&db.conn, game.id, &query.token)
     .await?
     .ok_or_else(|| ResponseError::NotFound("team not found".to_owned()))?;
-  Ok(Json(team))
+  let result = if query.ex.unwrap_or(false) {
+    team::get_ex(&db.conn, team.id)
+      .await?
+      .ok_or(ResponseError::NotFound("team not found".to_string()))?
+  } else {
+    team.into()
+  };
+  Ok(Json(result))
 }

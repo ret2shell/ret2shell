@@ -62,7 +62,7 @@ jobs:
           fi
 
       - name: Setup rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@1.95.0
         with:
           components: clippy
 
@@ -74,18 +74,18 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             ~/.cargo/git/checkouts/
-          key: cargo-${{ runner.os }}-stable-${{ hashFiles('Cargo.lock') }}
+          key: cargo-${{ runner.os }}-1.95.0-${{ hashFiles('Cargo.lock') }}
           restore-keys: |
-            cargo-${{ runner.os }}-stable-
+            cargo-${{ runner.os }}-1.95.0-
             cargo-${{ runner.os }}-
 
       - name: Cache target
         uses: actions/cache@v5
         with:
           path: target/
-          key: cargo-target-${{ runner.os }}-stable-${{ hashFiles('Cargo.lock') }}
+          key: cargo-target-${{ runner.os }}-1.95.0-${{ hashFiles('Cargo.lock') }}
           restore-keys: |
-            cargo-target-${{ runner.os }}-stable-
+            cargo-target-${{ runner.os }}-1.95.0-
             cargo-target-${{ runner.os }}-
 
       - name: Run tests
@@ -124,7 +124,7 @@ jobs:
           bash .github/setup-env.sh
 
       - name: Setup rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@1.95.0
         with:
           targets: ${{ matrix.target }}
 

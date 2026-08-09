@@ -16,7 +16,6 @@ sea-orm = { workspace = true, features = [
   "runtime-tokio-rustls",
 ] }
 sea-orm-migration = { workspace = true }
-sea-query = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
 

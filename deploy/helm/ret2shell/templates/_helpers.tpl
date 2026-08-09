@@ -30,6 +30,15 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 {{- end -}}
 
+{{- define "ret2shell.volumeLabels" -}}
+app.kubernetes.io/name: {{ include "ret2shell.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- with .Values.global.labels }}
+{{ toYaml . }}
+{{- end }}
+{{- end -}}
+
 {{- define "ret2shell.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "ret2shell.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}

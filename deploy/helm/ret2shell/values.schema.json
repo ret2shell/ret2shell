@@ -14,7 +14,7 @@
           "properties": {
             "type": {
               "type": "string",
-              "enum": ["ingress", "nodePort"]
+              "enum": ["ingress", "nodePort", "clusterIP"]
             }
           }
         },
@@ -49,6 +49,28 @@
                   }
                 },
                 "required": ["host", "paths"]
+              }
+            }
+          }
+        },
+        "extraVolumes": {
+          "type": "array"
+        },
+        "extraVolumeMounts": {
+          "type": "array"
+        },
+        "config": {
+          "type": "object",
+          "properties": {
+            "cluster": {
+              "type": "object",
+              "properties": {
+                "tryDefault": {
+                  "type": "boolean"
+                },
+                "kubeConfigPath": {
+                  "type": "string"
+                }
               }
             }
           }
@@ -104,6 +126,43 @@
                   }
                 },
                 "required": ["hosts"]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "config": {
+                "properties": {
+                  "cluster": {
+                    "properties": {
+                      "tryDefault": {
+                        "const": false
+                      }
+                    },
+                    "required": ["tryDefault"]
+                  }
+                },
+                "required": ["cluster"]
+              }
+            },
+            "required": ["config"]
+          },
+          "then": {
+            "properties": {
+              "config": {
+                "properties": {
+                  "cluster": {
+                    "properties": {
+                      "kubeConfigPath": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": ["kubeConfigPath"]
+                  }
+                }
               }
             }
           }

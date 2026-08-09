@@ -95,6 +95,7 @@ pub struct GameConfig {
   pub archive_at: DateTime<Utc>,
   pub host_type: HostType,
   pub team_size: i32,
+  pub env_limit: Option<i32>,
   pub access_policy: AccessPolicy,
   pub cover: Option<String>,
   pub logo: Option<String>,

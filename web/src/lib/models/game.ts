@@ -41,6 +41,7 @@ export type Game = {
   frozen: boolean;
   host_type: HostType;
   team_size: number;
+  env_limit: number | null;
   access_policy: GameAccessPolicy;
   archive_policy: ArchivePolicy;
   cover: string | null;

@@ -7,7 +7,7 @@ use sea_orm::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::{challenge, team, user};
+use super::{challenge, game, team, user};
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "submission")]
 pub struct Model {
@@ -180,9 +180,18 @@ where
     sql = sql
       .filter(Column::TeamId.is_not_null())
       .filter(team::Column::State.gte(team::State::Hidden))
+      .order_by_asc(Column::ChallengeId)
+      .order_by_asc(Column::TeamId)
+      .order_by_desc(Column::CreatedAt)
+      .order_by_desc(Column::Id)
       .distinct_on([(Entity, Column::ChallengeId), (Entity, Column::TeamId)]);
   } else if only_solved {
-    sql = sql.distinct_on([(Entity, Column::ChallengeId), (Entity, Column::UserId)]);
+    sql = sql
+      .order_by_asc(Column::ChallengeId)
+      .order_by_asc(Column::UserId)
+      .order_by_desc(Column::CreatedAt)
+      .order_by_desc(Column::Id)
+      .distinct_on([(Entity, Column::ChallengeId), (Entity, Column::UserId)]);
   }
   sql = sql.column_as(challenge::Column::Score, "score");
 
@@ -236,9 +245,18 @@ where
     sql = sql
       .filter(Column::TeamId.is_not_null())
       .filter(team::Column::State.gte(team::State::Hidden))
+      .order_by_asc(Column::ChallengeId)
+      .order_by_asc(Column::TeamId)
+      .order_by_desc(Column::CreatedAt)
+      .order_by_desc(Column::Id)
       .distinct_on([(Entity, Column::ChallengeId), (Entity, Column::TeamId)]);
   } else if only_solved {
-    sql = sql.distinct_on([(Entity, Column::ChallengeId), (Entity, Column::UserId)]);
+    sql = sql
+      .order_by_asc(Column::ChallengeId)
+      .order_by_asc(Column::UserId)
+      .order_by_desc(Column::CreatedAt)
+      .order_by_desc(Column::Id)
+      .distinct_on([(Entity, Column::ChallengeId), (Entity, Column::UserId)]);
   }
   sql = sql.column_as(challenge::Column::Score, "score");
 
@@ -291,7 +309,17 @@ where
     sql = sql.filter(Column::Solved.eq(true));
   }
   sql = sql.column_as(challenge::Column::Score, "score");
-  sql = sql.order_by_desc(Column::CreatedAt);
+  if only_solved {
+    sql = sql
+      .distinct_on([Column::ChallengeId, Column::TeamId, Column::UserId])
+      .order_by_asc(Column::ChallengeId)
+      .order_by_asc(Column::TeamId)
+      .order_by_asc(Column::UserId)
+      .order_by_asc(Column::CreatedAt)
+      .order_by_asc(Column::Id);
+  } else {
+    sql = sql.order_by_desc(Column::CreatedAt);
+  }
   let paginator = sql.into_model().paginate(db, page_size);
   let total = paginator.num_items().await?;
   let submissions = paginator.fetch_page(page - 1).await?;
@@ -308,6 +336,144 @@ where
     submissions
   };
   Ok((submissions, total))
+}
+
+#[derive(Debug, Serialize, FromQueryResult)]
+pub struct ChallengeStat {
+  pub challenge_id: i64,
+  pub challenge_name: String,
+  pub total: i64,
+  pub solved: i64,
+}
+
+#[derive(Debug, Serialize, FromQueryResult)]
+pub struct GameStat {
+  pub game_id: i64,
+  pub game_name: String,
+  pub total: i64,
+  pub solved: i64,
+}
+
+pub async fn get_user_challenge_stats<C>(
+  db: &C, game_id: i64, user_id: i64,
+) -> Result<Vec<ChallengeStat>, DbErr>
+where
+  C: ConnectionTrait, {
+  #[derive(FromQueryResult)]
+  struct ChallengeTotal {
+    challenge_id: i64,
+    challenge_name: String,
+    total: i64,
+  }
+
+  #[derive(FromQueryResult)]
+  struct ChallengeSolved {
+    challenge_id: i64,
+    solved: i64,
+  }
+
+  let totals = Entity::find()
+    .join(JoinType::InnerJoin, Relation::Challenge.def())
+    .filter(Column::UserId.eq(user_id))
+    .filter(challenge::Column::GameId.eq(game_id))
+    .select_only()
+    .column_as(Column::ChallengeId, "challenge_id")
+    .column_as(challenge::Column::Name, "challenge_name")
+    .column_as(Column::Id.count(), "total")
+    .group_by(Column::ChallengeId)
+    .group_by(challenge::Column::Name)
+    .order_by_asc(Column::ChallengeId)
+    .into_model::<ChallengeTotal>()
+    .all(db)
+    .await?;
+
+  let solved_rows = Entity::find()
+    .join(JoinType::InnerJoin, Relation::Challenge.def())
+    .filter(Column::UserId.eq(user_id))
+    .filter(Column::Solved.eq(true))
+    .filter(challenge::Column::GameId.eq(game_id))
+    .select_only()
+    .column_as(Column::ChallengeId, "challenge_id")
+    .column_as(Column::Id.count(), "solved")
+    .group_by(Column::ChallengeId)
+    .into_model::<ChallengeSolved>()
+    .all(db)
+    .await?;
+
+  let solved_map: std::collections::HashMap<i64, i64> = solved_rows
+    .into_iter()
+    .map(|r| (r.challenge_id, r.solved))
+    .collect();
+
+  let stats = totals
+    .into_iter()
+    .map(|t| ChallengeStat {
+      challenge_id: t.challenge_id,
+      challenge_name: t.challenge_name,
+      total: t.total,
+      solved: solved_map.get(&t.challenge_id).copied().unwrap_or(0),
+    })
+    .collect();
+
+  Ok(stats)
+}
+
+pub async fn get_user_game_stats<C>(db: &C, user_id: i64) -> Result<Vec<GameStat>, DbErr>
+where
+  C: ConnectionTrait, {
+  #[derive(FromQueryResult)]
+  struct GameRow {
+    game_id: i64,
+    game_name: String,
+    challenge_id: i64,
+    solved: bool,
+  }
+
+  let rows = Entity::find()
+    .join(JoinType::InnerJoin, Relation::Challenge.def())
+    .join(JoinType::InnerJoin, challenge::Relation::Game.def())
+    .filter(Column::UserId.eq(user_id))
+    .select_only()
+    .column_as(challenge::Column::GameId, "game_id")
+    .column_as(game::Column::Name, "game_name")
+    .column_as(Column::ChallengeId, "challenge_id")
+    .column_as(Column::Solved, "solved")
+    .into_model::<GameRow>()
+    .all(db)
+    .await?;
+
+  use std::collections::{HashMap, HashSet};
+  let mut game_challenges: HashMap<i64, (String, HashSet<i64>)> = HashMap::new();
+  let mut game_solved: HashMap<i64, HashSet<i64>> = HashMap::new();
+
+  for row in &rows {
+    game_challenges
+      .entry(row.game_id)
+      .or_insert_with(|| (row.game_name.clone(), HashSet::new()))
+      .1
+      .insert(row.challenge_id);
+    if row.solved {
+      game_solved
+        .entry(row.game_id)
+        .or_default()
+        .insert(row.challenge_id);
+    }
+  }
+
+  let mut stats: Vec<GameStat> = game_challenges
+    .into_iter()
+    .map(|(game_id, (game_name, challenges))| GameStat {
+      game_id,
+      game_name,
+      total: challenges.len() as i64,
+      solved: game_solved
+        .get(&game_id)
+        .map(|s| s.len() as i64)
+        .unwrap_or(0),
+    })
+    .collect();
+  stats.sort_by_key(|g| g.game_id);
+  Ok(stats)
 }
 
 #[allow(clippy::too_many_arguments)]

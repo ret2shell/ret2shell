@@ -1,6 +1,6 @@
 use k8s_openapi::api::core::v1::{Pod, Service};
 use kube::ResourceExt;
-use r2s_engine::{DiagnosticMarker, Engine, EngineError};
+use r2s_engine::{DiagnosticMarker, Engine, EngineError, parse_value, script_error_from_value};
 use rune::{Any, ContextError, Module, Value, alloc::clone::TryClone, runtime::Object};
 use serde::{Deserialize, Serialize};
 
@@ -139,22 +139,22 @@ impl TrafficMapper {
       .node_name
       .ok_or(ClusterError::MissingField("pod::node_name".to_owned()))?;
 
-    let output = engine
-      .execute(key, "expose", (node_name, service_info))
+    let output: Result<Value, Value> = engine
+      .execute_as(key, "expose", (node_name, service_info), "`Result`")
       .await?;
-
-    let output: Result<Object, Value> = rune::from_value(output).map_err(EngineError::from)?;
     let mut result = Vec::new();
-    if let Ok(object) = output {
-      for (key, value) in object.iter() {
-        result.push(MappedPort {
-          name: key.to_string(),
-          address: rune::from_value(value.clone()).map_err(EngineError::from)?,
-        });
+    match output {
+      Ok(value) => {
+        let object: Object = parse_value(value, "`Object` inside `Ok`")?;
+        for (key, value) in object.iter() {
+          result.push(MappedPort {
+            name: key.to_string(),
+            address: parse_value(value.clone(), "a `String` address")?,
+          });
+        }
+        Ok(result)
       }
-      Ok(result)
-    } else {
-      Err(EngineError::ScriptError("early returns from script".to_owned()).into())
+      Err(error) => Err(script_error_from_value(error)),
     }
   }
 }

@@ -127,7 +127,7 @@ pub async fn up(config: GlobalConfig) -> anyhow::Result<()> {
     .server
     .ok_or(anyhow::anyhow!("server configuration not found"))?;
 
-  let addr_str = format!("{}:{}", &server_config.host, &server_config.port);
+  let addr_str = format!("{}:{}", server_config.host, server_config.port);
 
   let addr = tokio::net::TcpListener::bind(addr_str.clone())
     .await

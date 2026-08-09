@@ -218,3 +218,55 @@ export function useUserOAuthList({
     () => inflyClient
   );
 }
+
+export type ChallengeStat = {
+  challenge_id: number;
+  challenge_name: string;
+  total: number;
+  solved: number;
+};
+
+export type GameStat = {
+  game_id: number;
+  game_name: string;
+  total: number;
+  solved: number;
+};
+
+export async function getUserSubmissionStats(id: number, game_id?: number) {
+  return await api
+    .get(`${api_root}/user/${id}/stats`, {
+      searchParams: JSON.parse(
+        JSON.stringify({
+          game_id,
+        })
+      ) as SearchParamsOption,
+    })
+    .json<ChallengeStat[] | GameStat[]>();
+}
+
+export function useUserSubmissionStats({
+  id,
+  game_id,
+  enabled,
+  onError,
+}: {
+  id: () => number;
+  game_id?: () => number | null;
+  enabled?: () => boolean;
+  onError?: (err: Error) => boolean;
+}) {
+  const keys = createMemo(() => ["user", id(), "submission-stats", game_id?.()]);
+  return useQuery(
+    () => ({
+      queryKey: keys(),
+      queryFn: async () => await getUserSubmissionStats(id(), game_id?.() ?? undefined),
+      enabled: enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("user.errors.fetchStats.title"));
+        return onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
+}

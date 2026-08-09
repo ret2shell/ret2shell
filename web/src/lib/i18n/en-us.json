@@ -708,12 +708,18 @@
       },
       "teamSize": {
         "label": "Team size",
-        "placeholder": "Please enter the team size",
+        "placeholder": "Enter team size, 0 for unlimited",
         "required": "Team size cannot be empty",
         "mustBeNumber": "Team size must be a number",
         "mustBePositiveNumber": "Team size must be a positive number",
-        "minimum": "Team size cannot be less than 1",
+        "minimum": "Team size cannot be less than 0",
         "maximum": "Team size cannot be more than 99"
+      },
+      "envLimit": {
+        "label": "Env limit",
+        "placeholder": "Leave empty to fall back to team size (1 if unlimited)",
+        "minimum": "Env limit cannot be less than 1",
+        "maximum": "Env limit cannot be more than 99"
       },
       "enableTeamAudit": {
         "label": "Enable team audit",
@@ -1171,6 +1177,7 @@
       "delete": "After deleting the instance configuration, the challenge will revert to an attachment-based challenge.",
       "internet": "Allow Internet access",
       "restrict": "Restrict root privileges",
+      "privileged": "Run as privileged",
       "registrySecret": "Registry secret (must be configured in cluster)",
       "runningContainers": "Running instances",
       "status": {
@@ -1196,7 +1203,7 @@
             "label": "Container name",
             "placeholder": "Please enter the container name",
             "required": "Container name cannot be empty",
-            "mustBeValidName": "The container name must be a combination of lowercase letters, numbers, and underscores, and must start with a lowercase letter"
+            "mustBeValidName": "Use 3-40 characters, start with a lowercase letter, only use lowercase letters, numbers, or hyphens (-), and do not end with a hyphen"
           },
           "tag": {
             "label": "Image tag",
@@ -1513,6 +1520,9 @@
       },
       "fetch": {
         "title": "Failed to fetch user information"
+      },
+      "fetchStats": {
+        "title": "Failed to fetch stats"
       }
     },
     "description": {
@@ -1522,6 +1532,20 @@
     "joinedGames": "Joined games",
     "gameJournal": "Joined in {{game}} as a member of {{team}}.",
     "moreJournal": "Life continues, exploration never stops...",
+    "solvedProblems": "Solved Problems",
+    "stats": {
+      "title": "Career Stats",
+      "allGames": "All Games",
+      "empty": "No submission records yet",
+      "solved": "Solved",
+      "failed": "Failed"
+    },
+    "statusFilter": {
+      "all": "All Challenges",
+      "notAttempted": "Not Attempted",
+      "attempted": "Attempted",
+      "solved": "Solved"
+    },
     "gotoAdminPanel": "Go to User Management",
     "registeredAt": "Registered at {{time}}",
     "title": "Users",
@@ -2010,6 +2034,7 @@
     },
     "solo": "Solo game",
     "collab": "{{size}}-person collab game",
+    "unlimited": "Unlimited team game",
     "list": {
       "title": "Teams",
       "selectInstitute": "Select Institute...",

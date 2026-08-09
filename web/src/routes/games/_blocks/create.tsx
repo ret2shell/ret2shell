@@ -21,6 +21,7 @@ type CreateGameForm = {
   archive_at: number;
   offline: boolean;
   team_size: number;
+  env_limit?: number;
   enable_audit: boolean;
   can_register_after_started: boolean;
   weight: number;
@@ -75,6 +76,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
   async function onSubmit(result: CreateGameForm) {
     const req: Game = {
       ...result,
+      env_limit: result.env_limit ?? null,
       start_at: DateTime.fromSeconds(result.start_at),
       end_at: DateTime.fromSeconds(result.end_at),
       register_at: DateTime.fromSeconds(result.register_at),
@@ -132,7 +134,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
           type="number"
           validate={[
             required(t("game.form.teamSize.required")),
-            minRange(1, t("game.form.teamSize.minimum")),
+            minRange(0, t("game.form.teamSize.minimum")),
             maxRange(99, t("game.form.teamSize.maximum")),
           ]}
         >
@@ -146,6 +148,26 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
               type="number"
               error={field.error}
               required
+              class="min-w-48"
+              min={0}
+              max={99}
+            />
+          )}
+        </Field>
+        <Field
+          name="env_limit"
+          type="number"
+          validate={[minRange(1, t("game.form.envLimit.minimum")), maxRange(99, t("game.form.envLimit.maximum"))]}
+        >
+          {(field, props) => (
+            <Input
+              icon={<span class="shrink-0 icon-[fluent--box-20-regular] w-5 h-5" />}
+              placeholder={t("game.form.envLimit.placeholder")}
+              title={t("game.form.envLimit.label")}
+              {...props}
+              value={field.value}
+              type="number"
+              error={field.error}
               class="min-w-48"
               min={1}
               max={99}

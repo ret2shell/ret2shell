@@ -136,7 +136,10 @@ pub fn validate_game_model(game: &game::Model) -> Result<(), ResponseError> {
   }
 
   if game.host_type == game::HostType::Game {
-    validate_range(game.team_size, "team size", 1, 99)?;
+    validate_range(game.team_size, "team size", 0, 99)?;
+  }
+  if let Some(env_limit) = game.env_limit {
+    validate_range(env_limit, "env limit", 1, 99)?;
   }
   validate_range(game.award_rate, "award rate", 0, 100)?;
   if let Some(award_rates) = &game.award_rates {
@@ -185,7 +188,7 @@ pub fn validate_challenge_model(challenge: &challenge::Model) -> Result<(), Resp
   }
   validate_range(challenge.score_rule.initial, "initial score", 0, 1500)?;
   validate_range(challenge.score_rule.minimum, "minimum score", 0, 1500)?;
-  validate_range(challenge.score_rule.decay, "score decay", 1, 50)?;
+  validate_range(challenge.score_rule.decay, "score decay", 1, 200)?;
   if challenge.score_rule.minimum > challenge.score_rule.initial {
     return Err(ResponseError::BadRequest(
       "minimum score must not exceed initial score".to_owned(),

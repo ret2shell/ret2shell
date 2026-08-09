@@ -5,9 +5,19 @@ use serde::{Deserialize, Serialize};
 use crate::traits::Merge;
 
 /// Represents the configuration for a cache.
+///
+/// Supported URL schemes:
+/// - `redis://host:port` — standalone (single-node) Redis.
+/// - `rediss://host:port` — standalone Redis over TLS.
+/// - `redis-cluster://host:port,host:port,…` — Redis cluster.
+/// - `rediss-cluster://host:port,host:port,…` — Redis cluster over TLS.
+///
+/// Sentinel (`redis-sentinel://` / `rediss-sentinel://`) is not yet
+/// supported.
 #[derive(Serialize, Deserialize, Clone, Debug, FromJsonQueryResult, PartialEq, Eq)]
 pub struct Config {
-  /// The url of the cache server.
+  /// The URL of the cache server. See the struct-level documentation for
+  /// supported schemes.
   pub url: String,
 }
 

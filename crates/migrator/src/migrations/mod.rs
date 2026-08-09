@@ -30,3 +30,4 @@ pub mod m_20250330_000001_create_team_tag;
 pub mod m_20250622_000001_create_game_hammer_policy;
 pub mod m_20250721_000001_create_ip_time_info;
 pub mod m_20260307_000001_game_lifecycle;
+pub mod m_20260704_000001_game_env_limit;

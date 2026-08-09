@@ -3,7 +3,7 @@ import { mergeRefs } from "@solid-primitives/refs";
 import { createElementSize, type Size } from "@solid-primitives/resize-observer";
 import { fullTheme } from "@storage/theme";
 import clsx from "clsx";
-import { BarChart, GaugeChart, LineChart, RadarChart, SunburstChart } from "echarts/charts";
+import { BarChart, GaugeChart, LineChart, PieChart, RadarChart, SunburstChart } from "echarts/charts";
 import {
   DatasetComponent,
   DataZoomComponent,
@@ -36,6 +36,7 @@ use([
 
   LineChart,
   BarChart,
+  PieChart,
   SunburstChart,
   RadarChart,
   GaugeChart,
@@ -160,7 +161,6 @@ export default function Chart(props: EChartsBaseProps) {
           width: size.width ?? 0,
           height: size.height ?? 0,
           renderer: isMobile ? "svg" : "canvas",
-          useDirtyRect: true,
           ...(props.initOptions ?? {}),
         });
         chartInstance.setOption(props.option, props.notMerge, props.lazyUpdate);

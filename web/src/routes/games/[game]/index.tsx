@@ -309,7 +309,10 @@ export default function () {
           <div class="flex-1 hidden lg:flex flex-col print:hidden">
             <div class="flex flex-row flex-wrap items-start justify-center">
               <Tag level="info" class="m-2">
-                <Show when={game.data?.team_size && game.data.team_size > 1} fallback={<span>{t("team.solo")}</span>}>
+                <Show
+                  when={game.data?.team_size && game.data.team_size > 1}
+                  fallback={<span>{game.data?.team_size === 0 ? t("team.unlimited") : t("team.solo")}</span>}
+                >
                   <span>
                     {t("team.collab", {
                       size: game.data?.team_size || 0,

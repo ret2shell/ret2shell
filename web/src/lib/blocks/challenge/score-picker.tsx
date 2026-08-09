@@ -24,7 +24,7 @@ export default function ScorePicker(props: {
   }
   function getFunctionPlots() {
     const data = [];
-    for (let i = 0; i <= 50; i += 1) {
+    for (let i = 0; i <= 200; i += 1) {
       data.push([i, getScore(i)]);
     }
     return data;
@@ -76,7 +76,7 @@ export default function ScorePicker(props: {
               xAxis: {
                 name: "",
                 min: 0,
-                max: 50,
+                max: 200,
                 minorTick: {
                   show: false,
                 },
@@ -138,7 +138,7 @@ export default function ScorePicker(props: {
           <Slider
             class="flex-1 flex-col-reverse pl-10"
             label={t("challenge.form.scoreRule.decay.label")}
-            max={50}
+            max={200}
             min={1}
             step={1}
             value={[props.decay]}

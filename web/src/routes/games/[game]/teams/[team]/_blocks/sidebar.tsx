@@ -1,7 +1,7 @@
 import { mediaPath } from "@lib/utils/media";
 import type { Team } from "@models/team";
 import type { User } from "@models/user";
-import { A } from "@solidjs/router";
+import { A, useParams } from "@solidjs/router";
 import { fullTheme, t } from "@storage/theme";
 import Avatar from "@widgets/avatar";
 import Divider from "@widgets/divider";
@@ -10,6 +10,9 @@ import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show } from "solid-js";
 
 export default function (props: { team: Team | null; members: User[]; loading?: boolean }) {
+  const params = useParams();
+  const gameId = () => params.game;
+
   return (
     <div class="w-full h-full overflow-hidden">
       <OverlayScrollbarsComponent
@@ -51,7 +54,7 @@ export default function (props: { team: Team | null; members: User[]; loading?: 
               <>
                 <A
                   class="px-2 py-2 flex items-center font-bold space-x-4 group cursor-pointer"
-                  href={`/users/${member.id}`}
+                  href={`/users/${member.id}?game=${gameId()}`}
                 >
                   <Avatar
                     class="w-6 h-6"

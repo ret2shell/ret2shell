@@ -28,6 +28,7 @@ pub enum Game {
   Offline,
   HostType,
   TeamSize,
+  EnvLimit,
   AccessPolicy,
   ArchivePolicy,
   HammerPolicy,

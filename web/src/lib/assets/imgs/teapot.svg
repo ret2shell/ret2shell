@@ -1,16 +1,15 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   t="1718224910236"
-   class="icon"
-   viewBox="0 0 1310.72 1310.72"
-   version="1.1"
-   p-id="3417"
-   width="256"
-   height="256"
-   id="svg8"
-   xml:space="preserve"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg"><defs
+  t="1718224910236"
+  class="icon"
+  viewBox="0 0 1310.72 1310.72"
+  version="1.1"
+  p-id="3417"
+  width="256"
+  height="256"
+  id="svg8"
+  xml:space="preserve"
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:svg="http://www.w3.org/2000/svg"><defs
      id="defs8" /><path
      d="m 421.53072,959.08176 c -23.468,0 -52.562,16.438 -64.624,36.56 l -20.094,33.50004 c -12.094,20.124 -2.75,36.562 20.718,36.562 h 469.3 c 23.498,0 32.81,-16.438 20.748,-36.562 l -20.124,-33.50004 c -12.062,-20.124 -41.124,-36.56 -64.624,-36.56 z"
      fill="#a0d468"

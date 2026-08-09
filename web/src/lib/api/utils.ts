@@ -17,13 +17,15 @@ export function toastError(description: string, duration = 5000) {
   });
 }
 
-export async function handleHttpError(err: Error, tip: string) {
+export async function handleHttpError(err: unknown, tip: string) {
   if (err instanceof HTTPError) {
     try {
       const text = typeof err.data === "string" ? err.data : JSON.stringify(err.data);
       toastError(`${tip}: ${text}`);
     } catch {}
+  } else if (err instanceof Error) {
+    toastError(err.toString());
   } else {
-    toastError((err as Error).toString());
+    toastError(`${tip}: ${String(err)}`);
   }
 }

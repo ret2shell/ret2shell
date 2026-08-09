@@ -4,24 +4,28 @@
   </a>
   <p><em>A feature-riches CTF challenge platform</em></p>
 
-[![MSRV 1.94.0+](https://img.shields.io/badge/MSRV-1.94.0+-blue)](https://releases.rs/docs/1.94.0/)
+[![MSRV 1.95.0+](https://img.shields.io/badge/MSRV-1.95.0+-blue)](https://releases.rs/docs/1.95.0/)
 [![Solid.js 1.9+](https://img.shields.io/badge/Solid.js-1.9+-orange)](https://www.solidjs.com/)
 
 </div>
 
-## Support
+## 📣 Support
 
-QQ Group: 1104642385
+QQ Group: [1104642385](https://qm.qq.com/q/u0BUcpU6l2)
 
-Telegram: https://t.me/ret2shell 
+Telegram: [t.me/ret2shell](https://t.me/ret2shell)
 
-## Deployment
+## Preview
+
+![Training Ground](arts/training-dark-en-us.webp)
+
+## 🚀 Deployment
 
 Ret2Shell is single binary with requirements of `redis/valkey 8+`, `postgres 18+`, `nats 2+` and optional `VictoriaLog` and `registry`.
 
 All the components could be deploy anywhere, so you can deploy ret2shell as you like.
 
-## Development
+## 🛠️ Development
 
 ### 1. Install Toolchains
 
@@ -52,10 +56,6 @@ corepack enable pnpm
 ```
 
 ### 2. Setup Development Environment
-
-#### License notice
-
-Ret2Shell is distributed under a GPL-3.0-derived custom copyleft license that incorporates GPL-3.0 in Appendix A and adds user-facing monetization restrictions. See [LICENSE](LICENSE) for the binding license text and [COMMERCIAL_POLICY.md](COMMERCIAL_POLICY.md) for plain-language guidance.
 
 #### Setup frontend
 
@@ -99,7 +99,7 @@ Or run `pnpm --prefix=web dev --host` at the root directory.
 >
 > This would be helpful if you only focus on frontend development.
 
-### Backend
+#### Backend
 
 Run the following command to start the backend server:
 
@@ -107,7 +107,7 @@ Run the following command to start the backend server:
 cargo run --bin r2s-server
 ```
 
-## Build
+### 4. Build
 
 Make sure you have installed the toolchains.
 
@@ -140,7 +140,17 @@ You can also build the docker image:
 ./release-image.sh
 ```
 
-## License
+## 🤝 Contributing
+
+We welcome and appreciate your contributions to Ret2Shell! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to submit changes, commit conventions, pull request practices, and code style expectations.
+
+If you have interesting derivative projects or extensions related to Ret2Shell, feel free to share them in [Discussions](https://github.com/ret2shell/ret2shell/discussions/categories/show-and-tell).
+
+For general discussions and questions about Ret2Shell, you can also post in [Discussions](https://github.com/ret2shell/ret2shell/discussions).
+
+## 📄 License
+
+Ret2Shell is distributed under a GPL-3.0-derived custom copyleft license that incorporates GPL-3.0 in Appendix A and adds user-facing monetization restrictions. See [LICENSE](LICENSE) for the binding license text and [COMMERCIAL_POLICY.md](COMMERCIAL_POLICY.md) for plain-language guidance.
 
 Ret2Shell is licensed under:
 

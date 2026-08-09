@@ -1,6 +1,6 @@
 import { useAccountProfile, useLogoutMutation } from "@api/account";
 import { mediaPath } from "@lib/utils/media";
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, useParams } from "@solidjs/router";
 import { accountStore, resetUser } from "@storage/account";
 import { t } from "@storage/theme";
 import { clearToasts } from "@storage/toast";
@@ -15,6 +15,7 @@ import UserCodeDialog from "./user-code-dialog";
 
 export default function UserBox() {
   const navigate = useNavigate();
+  const params = useParams();
 
   const profile = useAccountProfile({ enabled: () => !!accountStore.token });
   const userId = createMemo(() => profile.data?.id ?? accountStore.id ?? null);
@@ -24,7 +25,9 @@ export default function UserBox() {
 
   const userHref = createMemo(() => {
     const id = userId();
-    return id == null ? "/users" : `/users/${id}`;
+    if (id == null) return "/users";
+    const gameId = params.game;
+    return gameId ? `/users/${id}?game=${gameId}` : `/users/${id}`;
   });
 
   const userIdHex = createMemo(() => {

@@ -1,7 +1,7 @@
 use chrono::Utc;
 use r2s_cache::Cache;
 use r2s_cluster::{
-  ChallengeEnvSnapshot, Cluster, Pod,
+  CHALLENGE_NS, ChallengeEnvSnapshot, Cluster, Pod,
   lifecycle::{
     LifecycleChallengeInfo, LifecycleEvent, LifecycleExecutionRequest, LifecycleExecutionStatus,
     LifecycleStopReason, LifecycleTeamInfo, LifecycleUserInfo,
@@ -487,6 +487,91 @@ pub fn spawn_timeout_stop_hooks(state: GlobalState, snapshots: Vec<ChallengeEnvS
         LifecycleEvent::Stop(LifecycleStopReason::Timeout),
       )
       .await;
+    }
+  });
+}
+
+pub fn spawn_admin_stop_hooks(
+  state: GlobalState, game: game::Model, challenge: challenge::Model,
+  snapshots: Vec<ChallengeEnvSnapshot>, trace_id: String,
+) {
+  if snapshots.is_empty() {
+    return;
+  }
+  tokio::spawn(async move {
+    cleanup_traffic_cache(state.cache.clone(), &snapshots).await;
+    let Some(config) = load_platform_config(&state).await else {
+      return;
+    };
+    let challenge = challenge_info_from_model(&challenge);
+    for snapshot in snapshots {
+      let user = match pod_label(&snapshot.pod, "ret.sh.cn/user")
+        .and_then(|value| value.parse::<i64>().ok())
+      {
+        Some(user_id) => match user::get(&state.db.conn, user_id).await {
+          Ok(Some(user)) => user_info_from_model(&user),
+          Ok(None) => fallback_user_info(&snapshot),
+          Err(err) => {
+            error!(user_id, challenge_id=%challenge.id, pod=?snapshot.pod.metadata.name, error=?err, "failed to load user for admin stop lifecycle hook");
+            fallback_user_info(&snapshot)
+          }
+        },
+        None => fallback_user_info(&snapshot),
+      };
+      let team = match pod_label(&snapshot.pod, "ret.sh.cn/team")
+        .and_then(|value| value.parse::<i64>().ok())
+        .filter(|value| *value > 0)
+      {
+        Some(team_id) => match team::get(&state.db.conn, team_id).await {
+          Ok(Some(team)) => Some(team_info_from_model(&team)),
+          Ok(None) => fallback_team_info(&snapshot),
+          Err(err) => {
+            error!(team_id, challenge_id=%challenge.id, pod=?snapshot.pod.metadata.name, error=?err, "failed to load team for admin stop lifecycle hook");
+            fallback_team_info(&snapshot)
+          }
+        },
+        None => None,
+      };
+      trigger_lifecycle_for_snapshots(
+        LifecycleHookContext {
+          cluster: state.cluster.clone(),
+          engine: state.engine.clone(),
+          config: config.clone(),
+          game: game.clone(),
+          challenge: challenge.clone(),
+          user,
+          team,
+          trace_id: Some(trace_id.clone()),
+        },
+        vec![snapshot],
+        LifecycleEvent::Stop(LifecycleStopReason::Admin),
+      )
+      .await;
+    }
+  });
+}
+
+pub fn spawn_challenge_stop(
+  state: GlobalState, game: game::Model, challenge: challenge::Model, trace_id: String,
+) {
+  tokio::spawn(async move {
+    match state
+      .cluster
+      .at(CHALLENGE_NS)
+      .stop_challenge_env(challenge.id)
+      .await
+    {
+      Ok(snapshots) if !snapshots.is_empty() => {
+        spawn_admin_stop_hooks(state, game, challenge, snapshots, trace_id);
+      }
+      Ok(_) => {}
+      Err(err) => {
+        error!(
+          challenge_id=%challenge.id,
+          error=?err,
+          "failed to stop challenge env asynchronously"
+        );
+      }
     }
   });
 }

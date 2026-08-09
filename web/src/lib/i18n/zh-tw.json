@@ -708,12 +708,18 @@
       },
       "teamSize": {
         "label": "隊伍人數",
-        "placeholder": "請輸入隊伍人數",
+        "placeholder": "請輸入隊伍人數，0 表示不限制",
         "required": "隊伍人數不能為空",
         "mustBeNumber": "隊伍人數必須是數字",
         "mustBePositiveNumber": "隊伍人數必須是正數",
-        "minimum": "人數不能少於 1",
+        "minimum": "人數不能少於 0",
         "maximum": "人數不能多於 99"
+      },
+      "envLimit": {
+        "label": "容器限制",
+        "placeholder": "留空則默認跟隨隊伍人數（無限制時為 1）",
+        "minimum": "容器限制不能少於 1",
+        "maximum": "容器限制不能多於 99"
       },
       "enableTeamAudit": {
         "label": "啟用隊伍審核",
@@ -1171,6 +1177,7 @@
       "delete": "刪除環境配置後，題目將變回附件類題目。",
       "internet": "允許容器內訪問互聯網",
       "restrict": "限制 Root 權限",
+      "privileged": "以特權執行",
       "registrySecret": "倉庫密鑰（需預先配置資源）",
       "runningContainers": "運行中的環境",
       "status": {
@@ -1196,7 +1203,7 @@
             "label": "容器名稱",
             "placeholder": "請輸入容器名稱",
             "required": "容器名稱不能為空",
-            "mustBeValidName": "容器名稱必須是小寫字母、數字和下劃線的組合，且以小寫字母開頭"
+            "mustBeValidName": "容器名稱需為 3-40 位，以小寫字母開頭，僅含小寫字母、數字或連字號(-)，且不能以連字號結尾"
           },
           "tag": {
             "label": "鏡像標籤",
@@ -1513,6 +1520,9 @@
       },
       "fetch": {
         "title": "獲取用戶信息失敗"
+      },
+      "fetchStats": {
+        "title": "獲取生涯數據失敗"
       }
     },
     "description": {
@@ -1522,6 +1532,20 @@
     "joinedGames": "參與賽事",
     "gameJournal": "作為 {{team}} 成員參與了 {{game}}。",
     "moreJournal": "生命不息，探索不止……",
+    "solvedProblems": "解題情況",
+    "stats": {
+      "title": "生涯數據",
+      "allGames": "全部賽事",
+      "empty": "暫無解題記錄",
+      "solved": "已解出",
+      "failed": "未解出"
+    },
+    "statusFilter": {
+      "all": "所有題目",
+      "notAttempted": "待完成",
+      "attempted": "嘗試過",
+      "solved": "已解答"
+    },
     "gotoAdminPanel": "轉至用戶管理",
     "registeredAt": "註冊於 {{time}}",
     "title": "用戶",
@@ -2010,6 +2034,7 @@
     },
     "solo": "單人賽",
     "collab": "{{size}} 人組隊賽",
+    "unlimited": "不限人數組隊賽",
     "list": {
       "title": "隊伍列表",
       "selectInstitute": "選擇組織...",

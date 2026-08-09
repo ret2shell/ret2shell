@@ -6,9 +6,8 @@ use chrono::{DateTime, Utc, serde::ts_seconds};
 use num_derive::{FromPrimitive, ToPrimitive};
 use sea_orm::{
   ActiveValue, Condition, FromJsonQueryResult, FromQueryResult, IntoActiveModel, Iterable,
-  JoinType, Order, QueryOrder, QuerySelect, entity::prelude::*,
+  JoinType, Order, QueryOrder, QuerySelect, entity::prelude::*, sea_query::Func,
 };
-use sea_query::Func;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 

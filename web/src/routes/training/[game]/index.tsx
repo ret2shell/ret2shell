@@ -186,7 +186,7 @@ export default function () {
                   class="relative w-full h-full print:h-auto print:overflow-auto"
                   defer
                 >
-                  <div class="w-full flex flex-col p-3 lg:p-6 items-center">
+                  <div class="w-full flex flex-col h-full p-3 lg:p-6 items-center">
                     <GameDocForm gameId={gameId()} docType="training" onDone={onEditTrainingDoc} />
                   </div>
                 </OverlayScrollbarsComponent>

@@ -158,8 +158,11 @@ validator = {{ .Values.platform.config.captcha.validator | quote }}
 
 [cluster]
 enabled = {{ .Values.platform.config.cluster.enabled }}
-try_default = true
+try_default = {{ .Values.platform.config.cluster.tryDefault }}
 auto_infer = false
+{{- if .Values.platform.config.cluster.kubeConfigPath }}
+kube_config_path = {{ .Values.platform.config.cluster.kubeConfigPath | quote }}
+{{- end }}
 node_selector = {{ .Values.platform.config.cluster.nodeSelector | quote }}
 enable_capture = {{ .Values.platform.config.cluster.enableCapture }}
 capture_directory = '/var/lib/ret2shell/captures'

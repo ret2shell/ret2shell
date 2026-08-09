@@ -84,14 +84,15 @@ pub(super) async fn start_challenge_instance(
         .at(CHALLENGE_NS)
         .get_challenge_env_by_team(team.id)
         .await?;
-      if pods.len() >= game.team_size as usize {
+      let env_limit = game.env_limit();
+      if pods.len() >= env_limit as usize {
         warn!(
-          limit=%game.team_size,
+          limit=%env_limit,
           "team tried to start more instances at the same time",
         );
         return Err(ResponseError::PreconditionFailed(format!(
           "your team can only start {} instance(s) at the same time",
-          game.team_size
+          env_limit
         )));
       }
       for pod in pods.iter() {
@@ -162,7 +163,7 @@ pub(super) async fn start_challenge_instance(
     } else {
       config.node_selector.clone()
     }
-    .and_then(|ns| if ns.is_empty() { None } else { Some(ns) });
+    .filter(|ns| !ns.is_empty());
 
     let need_expose = if game.archive_at > Utc::now() {
       game.traffic.is_some() || config.traffic.is_some()

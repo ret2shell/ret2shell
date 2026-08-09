@@ -150,7 +150,7 @@ export function FormBare(
                             error={decayField.error}
                             type="number"
                             min={1}
-                            max={50}
+                            max={200}
                             required
                           />
                         </div>
