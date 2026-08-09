@@ -18,17 +18,7 @@
 
 > 出题人也会犯错，如有问题请自信地反馈问题，🔨锤一下出题人。
 
-| 邮箱 | QQ 群 |
-|-----|-----|
-| 战队 [bxsteam@cumt.edu.cn](mailto:ctf@cumt.edu.cn) | 战队 [855653009](https://qm.qq.com/q/Aa5pOVtL1u)
-| 平台 [ctf@cumt.edu.cn](mailto:ctf@cumt.edu.cn) | |
-
-```plaintext
-  _____   _          __   __
- / ___/  (_) ___ _  / /  / / ___
-/ /__   / / / _ `/ / /  / / / _ \
-\___/  /_/  \_,_/ /_/  /_/  \___/
-```
+平台邮箱：<mailto:ctf@cumt.edu.cn>
 
 ## 🍀祝你好运 Ciallo～ (∠・ω< )⌒☆
 

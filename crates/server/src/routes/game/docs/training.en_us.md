@@ -18,17 +18,7 @@ Sometimes you might encounter the following issues:
 
 > Problem setters/authors can also make mistakes. If you find any issues, please confidently report them and 🔨 give the problem setter a little nudge.
 
-| Email | QQ Group |
-|-----|-----|
-| Team [bxsteam@cumt.edu.cn](mailto:bxsteam@cumt.edu.cn) | Team [855653009](https://qm.qq.com/q/Aa5pOVtL1u)
-| Platform [ctf@cumt.edu.cn](mailto:ctf@cumt.edu.cn) | |
-
-```plaintext
-  _____   _          __   __
- / ___/  (_) ___ _  / /  / / ___
-/ /__   / / / _ `/ / /  / / / _ \
-\___/  /_/  \_,_/ /_/  /_/  \___/
-```
+Platform Email: <mailto:ctf@cumt.edu.cn>
 
 ## 🍀 Ciallo～ (∠・ω< )⌒☆
 
