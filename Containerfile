@@ -3,18 +3,22 @@ FROM rust:1.95-alpine AS server
 # hadolint ignore=DL3018
 RUN apk add --update --no-cache musl-dev clang lld
 
-COPY ./.cargo/config.toml /var/lib/ret2shell/.cargo/config.toml
-COPY ./Cargo.toml /var/lib/ret2shell/Cargo.toml
-COPY ./LICENSE /var/lib/ret2shell/LICENSE
-COPY ./crates /var/lib/ret2shell/crates
 WORKDIR /var/lib/ret2shell
+
+COPY ./.cargo/config.toml ./.cargo/config.toml
+COPY ./Cargo.* ./
+COPY ./crates ./crates
+
+COPY ./LICENSE ./LICENSE
 
 ARG R2S_GIT_VERSION=DEADBEEF
 ENV R2S_GIT_VERSION=${R2S_GIT_VERSION}
 
-RUN --mount=type=cache,target=/var/lib/ret2shell/target cargo update && \
-    cargo build --release --bin r2s-server --target x86_64-unknown-linux-musl && \
-    cp /var/lib/ret2shell/target/x86_64-unknown-linux-musl/release/r2s-server /usr/local/bin/r2s-server
+ARG R2S_BUILD_TARGET=x86_64-unknown-linux-musl
+
+RUN --mount=type=cache,target=/var/lib/ret2shell/target \
+    cargo build --locked --release --bin r2s-server --target "$R2S_BUILD_TARGET" && \
+    cp "/var/lib/ret2shell/target/$R2S_BUILD_TARGET/release/r2s-server" /usr/local/bin/r2s-server
 
 FROM node:lts-alpine AS frontend
 

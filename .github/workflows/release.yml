@@ -4,22 +4,31 @@ on:
   push:
     tags:
       - "*"
+  # Manual releases are allowed, but prepare will fail unless the selected ref resolves to a tag.
+  workflow_dispatch:
 
 permissions:
   contents: write
-  packages: write
 
 concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  CHART_DIR: deploy/helm/ret2shell
+
 jobs:
-  release:
-    name: Publish Release
+  prepare:
+    name: Prepare Release
     runs-on: ubuntu-latest
-    timeout-minutes: 120
-    env:
-      CHART_DIR: deploy/helm/ret2shell
+    timeout-minutes: 20
+    outputs:
+      cargo_version: ${{ steps.vars.outputs.cargo_version }}
+      commit_sha: ${{ steps.vars.outputs.commit_sha }}
+      previous_display: ${{ steps.vars.outputs.previous_display }}
+      previous_tag: ${{ steps.vars.outputs.previous_tag }}
+      prerelease: ${{ steps.vars.outputs.prerelease }}
+      release_version: ${{ steps.vars.outputs.release_version }}
     defaults:
       run:
         shell: bash -leo pipefail {0}
@@ -68,64 +77,80 @@ jobs:
         with:
           cmd: yq '.platform.image.tag' '${{ env.CHART_DIR }}/values.yaml'
 
-      - name: Set Helm temp paths
-        run: |
-          echo "HELM_RENDER_DIR=${RUNNER_TEMP}/helm-render-${GITHUB_JOB}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_ENV"
-
+      # Resolve the release tag and keep the version consistency checks in one place.
       - name: Resolve release metadata
         id: vars
-        env:
-          CARGO_VERSION: ${{ steps.cargo-version.outputs.value }}
-          CHART_APP_VERSION: ${{ steps.chart-app-version.outputs.result }}
-          CHART_IMAGE_TAG: ${{ steps.chart-image-tag.outputs.result }}
-          CHART_VERSION: ${{ steps.chart-version.outputs.result }}
-          RELEASE_VERSION: ${{ github.ref_name }}
         run: |
-          cargo_version="$CARGO_VERSION"
-          chart_version="$CHART_VERSION"
-          chart_app_version="$CHART_APP_VERSION"
-          chart_image_tag="$CHART_IMAGE_TAG"
+          if [ "${{ github.event_name }}" = "push" ] || [ "${{ github.ref_type }}" = "tag" ]; then
+            release_version="${{ github.ref_name }}"
+          else
+            mapfile -t release_tags < <(git tag --points-at HEAD | sort -V)
+            if [ "${#release_tags[@]}" -eq 0 ]; then
+              echo "workflow_dispatch must run on a tag or on a branch whose HEAD has a tag" >&2
+              exit 1
+            fi
+            release_version="${release_tags[$((${#release_tags[@]} - 1))]}"
+          fi
 
-          if [ "$cargo_version" != "$RELEASE_VERSION" ]; then
-            echo "tag $RELEASE_VERSION does not match Cargo.toml version $cargo_version" >&2
+          cargo_version="${{ steps.cargo-version.outputs.value }}"
+          chart_version="${{ steps.chart-version.outputs.result }}"
+          chart_app_version="${{ steps.chart-app-version.outputs.result }}"
+          chart_image_tag="${{ steps.chart-image-tag.outputs.result }}"
+
+          if [ "$cargo_version" != "$release_version" ]; then
+            echo "tag $release_version does not match Cargo.toml version $cargo_version" >&2
             exit 1
           fi
 
-          if [ "$chart_version" != "$RELEASE_VERSION" ]; then
-            echo "tag $RELEASE_VERSION does not match Chart.yaml version $chart_version" >&2
+          if [ "$chart_version" != "$release_version" ]; then
+            echo "tag $release_version does not match Chart.yaml version $chart_version" >&2
             exit 1
           fi
 
-          if [ "$chart_app_version" != "$RELEASE_VERSION" ]; then
-            echo "tag $RELEASE_VERSION does not match Chart.yaml appVersion $chart_app_version" >&2
+          if [ "$chart_app_version" != "$release_version" ]; then
+            echo "tag $release_version does not match Chart.yaml appVersion $chart_app_version" >&2
             exit 1
           fi
 
-          if [ "$chart_image_tag" != "$RELEASE_VERSION" ]; then
-            echo "tag $RELEASE_VERSION does not match values.yaml platform.image.tag $chart_image_tag" >&2
+          if [ "$chart_image_tag" != "$release_version" ]; then
+            echo "tag $release_version does not match values.yaml platform.image.tag $chart_image_tag" >&2
             exit 1
           fi
 
-          previous_tag="$(git describe --tags --abbrev=0 "${RELEASE_VERSION}^" 2>/dev/null || true)"
+          previous_tag="$(git describe --tags --abbrev=0 "${release_version}^" 2>/dev/null || true)"
           previous_display="${previous_tag:-n/a}"
           prerelease=false
 
-          if [[ "$RELEASE_VERSION" == *-* ]]; then
+          if [[ "$release_version" == *-* ]]; then
             prerelease=true
           fi
 
           commit_sha="$(git rev-parse --short=8 HEAD)"
-          image_repo="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/ret2shell"
 
           {
-            echo "release_version=$RELEASE_VERSION"
+            echo "release_version=$release_version"
             echo "cargo_version=$cargo_version"
             echo "previous_tag=$previous_tag"
             echo "previous_display=$previous_display"
             echo "prerelease=$prerelease"
             echo "commit_sha=$commit_sha"
-            echo "image_repo=$image_repo"
           } >> "$GITHUB_OUTPUT"
+
+  # Build and validate the Helm chart as a release asset.
+  chart:
+    name: Package Helm Chart
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash -leo pipefail {0}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.prepare.outputs.release_version }}
 
       - name: Setup Helm
         uses: azure/setup-helm@v4
@@ -135,19 +160,21 @@ jobs:
 
       - name: Render release chart
         run: |
-          rm -rf "$HELM_RENDER_DIR"
-          mkdir -p "$HELM_RENDER_DIR"
-          helm template ret2shell "$CHART_DIR" --namespace ret2shell-platform > "$HELM_RENDER_DIR/ret2shell-default.yaml"
+          helm_render_dir="${{ runner.temp }}/helm-render-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}"
+          rm -rf "$helm_render_dir"
+          mkdir -p "$helm_render_dir"
+          helm template ret2shell "$CHART_DIR" --namespace ret2shell-platform > "$helm_render_dir/ret2shell-default.yaml"
           for values in "$CHART_DIR"/examples/*.yaml; do
             name="$(basename "$values" .yaml)"
-            helm template ret2shell "$CHART_DIR" --namespace ret2shell-platform -f "$values" > "$HELM_RENDER_DIR/${name}.yaml"
+            helm template ret2shell "$CHART_DIR" --namespace ret2shell-platform -f "$values" > "$helm_render_dir/${name}.yaml"
           done
 
       - name: Verify fixed namespace guard
         run: |
-          mkdir -p "$HELM_RENDER_DIR"
-          wrong_ns_out="$HELM_RENDER_DIR/ret2shell-wrong-ns.out"
-          wrong_ns_err="$HELM_RENDER_DIR/ret2shell-wrong-ns.err"
+          helm_render_dir="${{ runner.temp }}/helm-render-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}"
+          mkdir -p "$helm_render_dir"
+          wrong_ns_out="$helm_render_dir/ret2shell-wrong-ns.out"
+          wrong_ns_err="$helm_render_dir/ret2shell-wrong-ns.err"
 
           if helm template ret2shell "$CHART_DIR" --namespace default >"$wrong_ns_out" 2>"$wrong_ns_err"; then
             echo "chart unexpectedly rendered outside ret2shell-platform" >&2
@@ -157,17 +184,15 @@ jobs:
           grep -q "ret2shell chart must be installed into namespace ret2shell-platform" "$wrong_ns_err"
 
       - name: Package release chart
-        id: package-chart
-        env:
-          DIST_DIR: ${{ runner.temp }}/helm-dist
-          RELEASE_VERSION: ${{ steps.vars.outputs.release_version }}
         run: |
-          rm -rf "$DIST_DIR"
-          mkdir -p "$DIST_DIR"
-          helm package "$CHART_DIR" --destination "$DIST_DIR"
+          asset_dir="${{ runner.temp }}/release-assets"
+          asset_name="helm-chart-${{ needs.prepare.outputs.release_version }}.tgz"
+          rm -rf "$asset_dir"
+          mkdir -p "$asset_dir"
+          helm package "$CHART_DIR" --destination "$asset_dir"
 
           shopt -s nullglob
-          chart_packages=("$DIST_DIR"/*.tgz)
+          chart_packages=("$asset_dir"/*.tgz)
           shopt -u nullglob
 
           if [ "${#chart_packages[@]}" -ne 1 ]; then
@@ -175,170 +200,318 @@ jobs:
             exit 1
           fi
 
-          chart_package="${chart_packages[0]}"
-          chart_filename="$(basename "$chart_package")"
-          chart_digest_file="${chart_package}.sha256"
-          sha256sum "$chart_package" > "$chart_digest_file"
+          mv "${chart_packages[0]}" "$asset_dir/$asset_name"
+          sha256sum "$asset_dir/$asset_name" | cut -d ' ' -f 1 | tr -cd '0-9a-f' > "$asset_dir/$asset_name.sha256"
 
-          {
-            echo "chart_package=$chart_package"
-            echo "chart_filename=$chart_filename"
-            echo "chart_digest_file=$chart_digest_file"
-            echo "chart_download_url=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/download/${RELEASE_VERSION}/${chart_filename}"
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Log in to GHCR
-        if: ${{ env.ACT != 'true' }}
-        uses: docker/login-action@v4
+      - name: Upload chart assets
+        uses: actions/upload-artifact@v7
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
+          if-no-files-found: error
+          name: release-chart
+          path: ${{ runner.temp }}/release-assets/*
+          retention-days: 1
 
-      - name: Prepare image metadata
-        if: ${{ env.ACT != 'true' }}
-        id: image-meta
-        uses: docker/metadata-action@v6
+  # Build the frontend once and publish the static dist as a versioned web-dist tgz.
+  web:
+    name: Package Web Dist
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash -leo pipefail {0}
+
+    steps:
+      - uses: actions/checkout@v6
         with:
-          images: ${{ steps.vars.outputs.image_repo }}
-          tags: |
-            type=raw,value=${{ steps.vars.outputs.release_version }}
-            type=raw,value=latest,enable=${{ steps.vars.outputs.prerelease != 'true' }}
-          labels: |
-            org.opencontainers.image.title=ret2shell
-            org.opencontainers.image.description=Ret2Shell platform container image
-            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
-            org.opencontainers.image.version=${{ steps.vars.outputs.release_version }}
-            org.opencontainers.image.revision=${{ github.sha }}
+          fetch-depth: 0
+          ref: ${{ needs.prepare.outputs.release_version }}
 
-      - name: Build and push container image
-        if: ${{ env.ACT != 'true' }}
-        id: build-image
-        env:
-          IMAGE_LABELS: ${{ steps.image-meta.outputs.labels }}
-          IMAGE_REPO: ${{ steps.vars.outputs.image_repo }}
-          IMAGE_TAGS: ${{ steps.image-meta.outputs.tags }}
-          PRIMARY_TAG: ${{ steps.vars.outputs.image_repo }}:${{ steps.vars.outputs.release_version }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.0
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: web
         run: |
-          declare -a build_args=(
-            --build-arg "R2S_GIT_VERSION=${{ steps.vars.outputs.commit_sha }}"
-            -f Containerfile
-          )
+          if [ -n '${{ vars.NPM_REGISTRY }}' ]; then
+            export NPM_CONFIG_REGISTRY='${{ vars.NPM_REGISTRY }}'
+          fi
+          pnpm install --frozen-lockfile
 
-          while IFS= read -r label; do
-            if [ -n "$label" ]; then
-              build_args+=(--label "$label")
-            fi
-          done <<< "$IMAGE_LABELS"
+      - name: Build web dist
+        working-directory: web
+        run: pnpm build
 
-          while IFS= read -r tag; do
-            if [ -n "$tag" ]; then
-              build_args+=(-t "$tag")
-            fi
-          done <<< "$IMAGE_TAGS"
+      - name: Package web dist
+        run: |
+          asset_dir="${{ runner.temp }}/release-assets"
+          rm -rf "$asset_dir"
+          mkdir -p "$asset_dir"
+          asset_name="web-dist-${{ needs.prepare.outputs.release_version }}.tgz"
+          tar -czf "$asset_dir/$asset_name" -C web/dist .
+          sha256sum "$asset_dir/$asset_name" | cut -d ' ' -f 1 | tr -cd '0-9a-f' > "$asset_dir/$asset_name.sha256"
 
-          docker build "${build_args[@]}" .
+      - name: Upload web assets
+        uses: actions/upload-artifact@v7
+        with:
+          if-no-files-found: error
+          name: release-web
+          path: ${{ runner.temp }}/release-assets/*
+          retention-days: 1
 
-          while IFS= read -r tag; do
-            if [ -n "$tag" ]; then
-              docker push "$tag"
-            fi
-          done <<< "$IMAGE_TAGS"
+  # Build target-specific r2s-server binaries and upload direct executable assets for the final release job.
+  binary:
+    name: Build ${{ matrix.target }}
+    needs: prepare
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            binary_ext: ""
+          - os: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-musl
+            binary_ext: ""
+          - os: macos-15-intel
+            target: x86_64-apple-darwin
+            binary_ext: ""
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            binary_ext: ""
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            binary_ext: .exe
+    defaults:
+      run:
+        shell: bash -leo pipefail {0}
 
-          digest=""
-          while IFS= read -r repo_digest; do
-            case "$repo_digest" in
-              "${IMAGE_REPO}"@sha256:*)
-                digest="${repo_digest#*@}"
-                break
-                ;;
-            esac
-          done < <(docker image inspect "$PRIMARY_TAG" --format '{{join .RepoDigests "\n"}}')
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.prepare.outputs.release_version }}
 
-          if [ -z "$digest" ]; then
-            echo "failed to resolve pushed image digest for $PRIMARY_TAG" >&2
+      - uses: chetan/git-restore-mtime-action@v2
+
+      - name: Install Linux linker toolchain
+        if: ${{ runner.os == 'Linux' }}
+        run: |
+          if ! command -v musl-gcc >/dev/null 2>&1 || ! command -v clang >/dev/null 2>&1 || ! command -v ld.lld >/dev/null 2>&1; then
+            sudo apt update
+            sudo apt install -y musl-tools musl-dev clang lld
+          fi
+
+      - name: Install macOS LLVM linker toolchain
+        if: ${{ runner.os == 'macOS' }}
+        run: |
+          if ! brew list llvm >/dev/null 2>&1 || ! brew list lld >/dev/null 2>&1; then
+            brew update
+            brew install llvm lld
+          fi
+
+          llvm_prefix="$(brew --prefix llvm)"
+          lld_prefix="$(brew --prefix lld)"
+          echo "$llvm_prefix/bin" >> "$GITHUB_PATH"
+          echo "$lld_prefix/bin" >> "$GITHUB_PATH"
+          echo "CARGO_TARGET_X86_64_APPLE_DARWIN_LINKER=$llvm_prefix/bin/clang" >> "$GITHUB_ENV"
+          echo "CARGO_TARGET_AARCH64_APPLE_DARWIN_LINKER=$llvm_prefix/bin/clang" >> "$GITHUB_ENV"
+
+      - name: Setup release environment
+        id: setup-env
+        run: bash .github/setup-env.sh
+
+      - name: Setup rust
+        uses: dtolnay/rust-toolchain@1.95.0
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache cargo registry
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            ~/.cargo/git/checkouts/
+          key: cargo-${{ runner.os }}-${{ matrix.target }}-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            cargo-${{ runner.os }}-${{ matrix.target }}-
+            cargo-${{ runner.os }}-
+
+      - name: Cache build target
+        uses: actions/cache@v5
+        with:
+          path: target/
+          key: cargo-target-${{ runner.os }}-${{ matrix.target }}-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            cargo-target-${{ runner.os }}-${{ matrix.target }}-
+            cargo-target-${{ runner.os }}-
+
+      - name: Build binary
+        run: cargo build --locked --bin r2s-server --release --target '${{ matrix.target }}'
+
+      - name: Package binary
+        run: |
+          asset_dir="${{ runner.temp }}/release-assets"
+          asset_name="r2s-server-${{ needs.prepare.outputs.release_version }}-${{ matrix.target }}${{ matrix.binary_ext }}"
+          binary="target/${{ matrix.target }}/release/r2s-server${{ matrix.binary_ext }}"
+
+          rm -rf "$asset_dir"
+          mkdir -p "$asset_dir"
+          cp "$binary" "$asset_dir/$asset_name"
+          chmod +x "$asset_dir/$asset_name" || true
+
+          if command -v sha256sum >/dev/null 2>&1; then
+            sha256sum "$asset_dir/$asset_name" | cut -d ' ' -f 1 | tr -cd '0-9a-f' > "$asset_dir/$asset_name.sha256"
+          else
+            shasum -a 256 "$asset_dir/$asset_name" | cut -d ' ' -f 1 | tr -cd '0-9a-f' > "$asset_dir/$asset_name.sha256"
+          fi
+
+      - name: Upload binary assets
+        uses: actions/upload-artifact@v7
+        with:
+          if-no-files-found: error
+          name: release-binary-${{ matrix.target }}
+          path: ${{ runner.temp }}/release-assets/*
+          retention-days: 1
+
+  # Collect assets, render .github/release-notes.md with replace-env.js, then publish the GitHub Release.
+  release:
+    name: Publish Release
+    if: ${{ always() && needs.prepare.result == 'success' }}
+    needs:
+      - prepare
+      - chart
+      - web
+      - binary
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash -leo pipefail {0}
+
+    steps:
+      # Checkout is needed here for .github/release-notes.md and .github/replace-env.js.
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          ref: ${{ needs.prepare.outputs.release_version }}
+
+      - name: Download release assets
+        continue-on-error: true
+        uses: actions/download-artifact@v6
+        with:
+          merge-multiple: true
+          path: ${{ runner.temp }}/release-assets
+          pattern: release-*
+
+      # The note body lives in .github/release-notes.md; replace-env.js expands ${UPPERCASE_ENV} placeholders.
+      - name: Render release notes
+        id: notes
+        run: |
+          assets_dir="${{ runner.temp }}/release-assets"
+          notes_file="${{ runner.temp }}/release-notes.md"
+          release_version="${{ needs.prepare.outputs.release_version }}"
+          mkdir -p "$assets_dir"
+
+          shopt -s nullglob
+          chart_packages=("$assets_dir"/helm-chart-*.tgz)
+          web_dist_assets=("$assets_dir"/web-dist-*.tgz)
+          binary_assets=("$assets_dir"/r2s-server-*)
+          shopt -u nullglob
+
+          if [ "${#chart_packages[@]}" -gt 1 ]; then
+            echo "expected at most one chart package, found ${#chart_packages[@]}" >&2
             exit 1
           fi
 
-          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          if [ "${#web_dist_assets[@]}" -gt 1 ]; then
+            echo "expected at most one web dist asset, found ${#web_dist_assets[@]}" >&2
+            exit 1
+          fi
 
-      - name: Set act image digest
-        if: ${{ env.ACT == 'true' }}
-        id: act-image
-        run: echo "digest=act-local" >> "$GITHUB_OUTPUT"
-
-      - name: Write release notes
-        id: notes
-        env:
-          CHART_DIGEST_FILE: ${{ steps.package-chart.outputs.chart_digest_file }}
-          CHART_DOWNLOAD_URL: ${{ steps.package-chart.outputs.chart_download_url }}
-          CHART_FILENAME: ${{ steps.package-chart.outputs.chart_filename }}
-          IMAGE_DIGEST: ${{ steps.build-image.outputs.digest || steps.act-image.outputs.digest }}
-          IMAGE_REPO: ${{ steps.vars.outputs.image_repo }}
-          PREVIOUS_VERSION: ${{ steps.vars.outputs.previous_display }}
-          PRERELEASE: ${{ steps.vars.outputs.prerelease }}
-          RELEASE_VERSION: ${{ steps.vars.outputs.release_version }}
-        run: |
-          notes_file="${RUNNER_TEMP}/release-notes.md"
-          chart_digest_name="$(basename "$CHART_DIGEST_FILE")"
-
-          {
-            echo "## Version Changes"
-            echo
-            echo "| Component | Previous | Current |"
-            echo "| --- | --- | --- |"
-            echo "| Release tag | ${PREVIOUS_VERSION} | ${RELEASE_VERSION} |"
-            echo "| Application version | ${PREVIOUS_VERSION} | ${RELEASE_VERSION} |"
-            echo "| Helm chart package | ${PREVIOUS_VERSION} | ${RELEASE_VERSION} |"
-            echo "| Helm chart appVersion | ${PREVIOUS_VERSION} | ${RELEASE_VERSION} |"
-            echo "| Helm default image tag | ${PREVIOUS_VERSION} | ${RELEASE_VERSION} |"
-            echo
-            echo "## Helm Chart"
-            echo
-            echo "- Asset: \`${CHART_FILENAME}\`"
-            echo "- SHA256: \`${chart_digest_name}\`"
-            echo "- Download: ${CHART_DOWNLOAD_URL}"
-            echo
-            echo "This chart package is published directly from the repository, so \`version\`, \`appVersion\`, and \`platform.image.tag\` already match the release tag."
-            echo
-            echo '```bash'
-            echo "helm install ret2shell ${CHART_DOWNLOAD_URL} -n ret2shell-platform --create-namespace"
-            echo '```'
-            echo
-            echo "## Container Image"
-            echo
-            echo "- Image: \`${IMAGE_REPO}:${RELEASE_VERSION}\`"
-            if [ "$PRERELEASE" != "true" ]; then
-              echo "- Stable alias: \`${IMAGE_REPO}:latest\`"
+          read_sha256() {
+            local sha_file="$1"
+            if [ ! -f "$sha_file" ]; then
+              echo "missing checksum: $sha_file" >&2
+              exit 1
             fi
-            echo "- Digest: \`${IMAGE_DIGEST}\`"
-            echo
-            echo '```bash'
-            echo "docker pull ${IMAGE_REPO}:${RELEASE_VERSION}"
-            echo '```'
-          } > "$notes_file"
+            tr -cd '0-9a-f' < "$sha_file"
+          }
 
+          helm_chart_section=""
+          if [ "${#chart_packages[@]}" -eq 1 ]; then
+            chart_filename="$(basename "${chart_packages[0]}")"
+            chart_sha256="$(read_sha256 "${chart_packages[0]}.sha256")"
+            chart_download_url="${{ github.server_url }}/${{ github.repository }}/releases/download/${release_version}/${chart_filename}"
+            printf -v helm_chart_section '## Helm Chart\n\n| Asset | Digest |\n| --- | --- |\n| [`%s`](%s) | `sha256:%s` |\n\nThis chart package is published directly from the repository, so `version`, `appVersion`, and `platform.image.tag` already match the release tag.\n\n```bash\nhelm install ret2shell %s -n ret2shell-platform --create-namespace\n```\n\n' "$chart_filename" "$chart_download_url" "$chart_sha256" "$chart_download_url"
+          fi
+
+          image_repository="ghcr.io/${{ github.repository }}"
+          image_repository="${image_repository,,}"
+          image_tag="$release_version"
+          image_ref="$image_repository:$image_tag"
+          stable_image_ref="$image_repository:latest"
+          printf -v container_image_section '## Container Image\n\n- Image: `%s`\n- Stable Alias: `%s`\n\n```bash\ndocker pull %s\n```\n\n' "$image_ref" "$stable_image_ref" "$image_ref"
+
+          web_dist_section=""
+          if [ "${#web_dist_assets[@]}" -eq 1 ]; then
+            web_dist_filename="$(basename "${web_dist_assets[0]}")"
+            web_dist_sha256="$(read_sha256 "${web_dist_assets[0]}.sha256")"
+            web_dist_download_url="${{ github.server_url }}/${{ github.repository }}/releases/download/${release_version}/${web_dist_filename}"
+            printf -v web_dist_section '## Web Distribution\n\n| Asset | Digest |\n| --- | --- |\n| [`%s`](%s) | `sha256:%s` |\n\n' "$web_dist_filename" "$web_dist_download_url" "$web_dist_sha256"
+          fi
+
+          binary_rows=""
+          for binary_asset in "${binary_assets[@]}"; do
+            filename="$(basename "$binary_asset")"
+            if [[ "$filename" == *.sha256 ]]; then
+              continue
+            fi
+            binary_sha256="$(read_sha256 "$binary_asset.sha256")"
+            binary_download_url="${{ github.server_url }}/${{ github.repository }}/releases/download/${release_version}/${filename}"
+            printf -v row -- '| [`%s`](%s) | `sha256:%s` |\n' "$filename" "$binary_download_url" "$binary_sha256"
+            binary_rows+="$row"
+          done
+
+          binaries_section=""
+          if [ -n "$binary_rows" ]; then
+            printf -v binaries_section '## Binaries\n\n| Asset | Digest |\n| --- | --- |\n%s\n' "$binary_rows"
+          fi
+
+          export PREVIOUS_VERSION="${{ needs.prepare.outputs.previous_display }}"
+          export RELEASE_VERSION="$release_version"
+          export HELM_CHART_SECTION="$helm_chart_section"
+          export CONTAINER_IMAGE_SECTION="$container_image_section"
+          export WEB_DIST_SECTION="$web_dist_section"
+          export BINARIES_SECTION="$binaries_section"
+
+          node .github/replace-env.js .github/release-notes.md > "$notes_file"
           echo "notes_file=$notes_file" >> "$GITHUB_OUTPUT"
 
-      - name: Verify act release bundle
-        if: ${{ env.ACT == 'true' }}
-        run: |
-          test -f '${{ steps.package-chart.outputs.chart_package }}'
-          test -f '${{ steps.package-chart.outputs.chart_digest_file }}'
-          test -f '${{ steps.notes.outputs.notes_file }}'
-
       - name: Create GitHub release
-        if: ${{ env.ACT != 'true' }}
         id: release
         uses: softprops/action-gh-release@v2
         with:
           body_path: ${{ steps.notes.outputs.notes_file }}
-          fail_on_unmatched_files: true
+          fail_on_unmatched_files: false
           files: |
-            ${{ steps.package-chart.outputs.chart_package }}
-            ${{ steps.package-chart.outputs.chart_digest_file }}
+            ${{ runner.temp }}/release-assets/*
+          # Keep GitHub-generated "What's Changed" and contributor sections after the custom body.
           generate_release_notes: true
-          name: ${{ steps.vars.outputs.release_version }}
+          name: ${{ needs.prepare.outputs.release_version }}
           overwrite_files: true
-          prerelease: ${{ steps.vars.outputs.prerelease == 'true' }}
-          tag_name: ${{ steps.vars.outputs.release_version }}
+          prerelease: ${{ needs.prepare.outputs.prerelease == 'true' }}
+          tag_name: ${{ needs.prepare.outputs.release_version }}
