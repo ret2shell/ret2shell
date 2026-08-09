@@ -1,8 +1,6 @@
 import { handleHttpError } from "@api";
-import { getProfile } from "@api/account";
 import { getVersion, usePlatformInfo } from "@api/platform";
 import Background from "@blocks/background";
-import { hashToHexSync } from "@lib/utils/hash";
 import { Permission } from "@models/user";
 import { useLocation, useNavigate, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
@@ -39,27 +37,6 @@ function checkCookiePolicy() {
   }
 }
 
-const forceLoginWhiteList = [/^\/account(\/|$)/, /^\/wiki(\/|$)/];
-
-function forceLogin() {
-  if (forceLoginWhiteList.some((regex) => regex.test(window.location.pathname))) return;
-  const magic = new URLSearchParams(window.location.search).get("magic");
-  const magicSha256 = import.meta.env.VITE_MAGIC_SHA256;
-  if (magic && magicSha256) {
-    if (hashToHexSync(new TextEncoder().encode(magic)) === magicSha256) {
-      console.info("Magic match!");
-      return;
-    }
-  }
-  if (!accountStore.token) {
-    window.location.replace(import.meta.env.VITE_FORCE_LOGIN_URL);
-    return;
-  }
-  getProfile().catch((_) => {
-    window.location.replace(import.meta.env.VITE_FORCE_LOGIN_URL);
-  });
-}
-
 export default function (props: { children?: JSX.Element }) {
   const platformInfo = usePlatformInfo();
   const platformName = createMemo(() => `\xa0\xa0[\xa0${platformInfo.data?.name || t("platform.name")}\xa0]\xa0`);
@@ -81,7 +58,6 @@ export default function (props: { children?: JSX.Element }) {
   }
 
   onMount(async () => {
-    if (JSON.parse((import.meta.env.VITE_FORCE_LOGIN as string) || "0")) forceLogin(); // force login, forbid access to the platform without login
     try {
       await loadVersion();
     } catch (err) {

@@ -171,7 +171,7 @@ export default function () {
             <div class="flex-1 flex flex-col items-center justify-center">
               <LogoAnimate class="w-36 h-36 hidden md:inline-block my-6" />
             </div>
-            <Link class="w-full" href={import.meta.env.VITE_FORCE_LOGIN_URL || "/account/register"}>
+            <Link class="w-full" href="/account/register">
               {t("account.register.tips")}
             </Link>
             <Switch>
