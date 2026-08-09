@@ -115,12 +115,12 @@ export default function () {
                       <span class="shrink-0 icon-[fluent--mail-20-regular] w-5 h-5" />
                       <span class="font-normal opacity-60">ctf@cumt.edu.cn</span>
                     </a>
-                    <Link
-                      href="https://qm.qq.com/q/Aa5pOVtL1u"
+                    {/* <Link
+                      href="https://qm.qq.com/q/3Mf4STMTtS"
                       ghost
                       size="sm"
                       square
-                      title={"QQ Group: 855653009"}
+                      title={"QQ Group: 1104642385"}
                       target="_blank"
                     >
                       <span class="inline-block w-5 h-5">
@@ -134,7 +134,7 @@ export default function () {
                           />
                         </svg>
                       </span>
-                    </Link>
+                    </Link> */}
                     <a
                       href="mailto:support@ret.sh.cn"
                       class="btn btn-sm btn-ghost justify-center btn-square"
@@ -144,6 +144,16 @@ export default function () {
                     >
                       <span class="shrink-0 icon-[fluent--person-support-20-regular] w-5 h-5" />
                     </a>
+                    <Link
+                      href="https://github.com/Reverier-Xu"
+                      ghost
+                      size="sm"
+                      square
+                      title={t("about.donate")}
+                      target="_blank"
+                    >
+                      <span class="shrink-0 icon-[fluent--flash-sparkle-20-regular] w-5 h-5" />
+                    </Link>
                     <Link
                       href="https://github.com/ret2shell"
                       ghost
