@@ -18,7 +18,7 @@
 
 > 出題人也會犯錯，如有問題請自信地回報問題，🔨敲打一下出題人。
 
-平台電子郵件：<mailto:ctf@cumt.edu.cn>
+平台電子郵件：[ctf@cumt.edu.cn](mailto:ctf@cumt.edu.cn)
 
 ## 🍀祝你好運 Ciallo～ (∠・ω< )⌒☆
 

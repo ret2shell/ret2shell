@@ -18,7 +18,7 @@ Sometimes you might encounter the following issues:
 
 > Problem setters/authors can also make mistakes. If you find any issues, please confidently report them and 🔨 give the problem setter a little nudge.
 
-Platform Email: <mailto:ctf@cumt.edu.cn>
+Platform Email: [ctf@cumt.edu.cn](mailto:ctf@cumt.edu.cn)
 
 ## 🍀 Ciallo～ (∠・ω< )⌒☆
 
