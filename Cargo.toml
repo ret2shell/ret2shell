@@ -56,7 +56,7 @@ rune               = { version = "0.14", features = ["tokio", "cli"] }
 rune-modules       = { version = "0.14", features = ["full"] }
 rustc_version      = "0.4"
 rustls             = { version = "0.23", features = ["ring"] }
-sea-orm            = "1.1"
+sea-orm            = "2.0"
 sea-orm-migration  = "1.1"
 serde              = { version = "1.0", features = ["derive"] }
 serde_json         = "1.0"
