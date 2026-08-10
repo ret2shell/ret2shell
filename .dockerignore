@@ -1,6 +1,6 @@
 target/
 web/dist/
-node_modules/
+web/node_modules/
 build/
 
 /package
