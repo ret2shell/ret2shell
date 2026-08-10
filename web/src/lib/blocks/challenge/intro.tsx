@@ -420,119 +420,81 @@ export default function (props: ChallengeWidgetProps) {
               </section>
               <Show when={instance()}>
                 <For each={env.data?.images}>
-                  {(image) => {
-                    const ep =
-                      instance()!.exposed_ports?.map((p) => {
-                        const m = p.name.match(/(^.*:)(.+)$/);
-                        const tag = m ? m[1].slice(0, -1) : "";
-                        const name = m ? m[2] : p.name;
-                        return { ...p, tag: tag, name: name };
-                      }) ?? [];
-                    const tagColorMap = new Map<(string | RegExp)[], string>([
-                      [["公", /公网/], "bg-warning"],
-                      [["内", /内网/], "bg-info"],
-                    ]);
-
-                    function findColorClass(tag: string | undefined) {
-                      if (!tag) return "bg-layer-content";
-                      for (const [patterns, color] of tagColorMap.entries()) {
-                        const matched = patterns.some((p) => (typeof p === "string" ? p === tag : p.test(tag)));
-                        if (matched) return color;
-                      }
-                      return "bg-layer-content";
-                    }
-                    return (
-                      <Show when={image.port}>
-                        <section
-                          class={clsx(
-                            "min-h-12 border-b border-b-layer-content/15 space-x-2 relative",
-                            "flex flex-row items-center flex-wrap justify-end py-2 gap-y-2"
-                          )}
-                        >
-                          <div class="flex flex-row items-center space-x-2 flex-nowrap whitespace-nowrap text-nowrap">
-                            <span class="shrink-0 icon-[fluent--cube-20-regular] w-5 h-5 text-info" />
-                            <span class="text-start space-x-2">
-                              <span>{image.name}.service</span>
-                              <span>-</span>
-                              <span>{image.description}</span>
+                  {(image) => (
+                    <Show when={image.port}>
+                      <section
+                        class={clsx(
+                          "min-h-12 border-b border-b-layer-content/15 space-x-2 relative",
+                          "flex flex-row items-center flex-wrap justify-end py-2 gap-y-2"
+                        )}
+                      >
+                        <div class="flex flex-row items-center space-x-2 flex-nowrap whitespace-nowrap text-nowrap">
+                          <span class="shrink-0 icon-[fluent--cube-20-regular] w-5 h-5 text-info" />
+                          <span class="text-start space-x-2">
+                            <span>{image.name}.service</span>
+                            <span>-</span>
+                            <span>{image.description}</span>
+                          </span>
+                          <Tag level="info">
+                            <span>
+                              {image.protocol || image.service_type || "tcp"}({image.app_protocol || "raw"})
                             </span>
-                            <Tag level="info">
-                              <span>
-                                {image.protocol || image.service_type || "tcp"}({image.app_protocol || "raw"})
-                              </span>
-                            </Tag>
-                          </div>
-                          <span class="flex-1" />
-                          <Show when={wsrx.state() === WsrxState.Usable}>
-                            <For each={wsrx.getTrafficLocal(instance()!, image.port!)}>
-                              {(local) => (
-                                <div class="flex">
-                                  <ClipboardBtn
-                                    size="sm"
-                                    class="!rounded-r-none"
-                                    title={t("wsrx.actions.copyLocal.title")}
-                                    value={local.local}
-                                    label={local.local}
-                                  />
-                                  <Button size="sm" class="!rounded-l-none">
-                                    <span
-                                      class={clsx(
-                                        (local.latency &&
-                                          (local.latency < 0
-                                            ? "text-error"
-                                            : local.latency > 100
-                                              ? "text-warning"
-                                              : "text-success")) ??
-                                          "text-error"
-                                      )}
-                                    >
-                                      {(local.latency ?? -1) < 0 ? "--" : local.latency} ms
-                                    </span>
-                                  </Button>
-                                </div>
-                              )}
-                            </For>
-                          </Show>
-                          <Show
-                            when={ep.find((v) => v.name === image.name)}
-                            fallback={
-                              <ClipboardBtn
-                                size="sm"
-                                icon="icon-[fluent--copy-add-20-regular]"
-                                iconCopied="icon-[fluent--checkmark-circle-20-regular]"
-                                title={t("wsrx.actions.copy.title")}
-                                value={getWsrxLink(instance()!.traffic, image.port!)}
-                                label="WSRX"
-                              />
-                            }
-                          >
-                            <For each={ep.filter((v) => v.name === image.name)}>
-                              {(v) => (
+                          </Tag>
+                        </div>
+                        <span class="flex-1" />
+                        <Show when={wsrx.state() === WsrxState.Usable}>
+                          <For each={wsrx.getTrafficLocal(instance()!, image.port!)}>
+                            {(local) => (
+                              <div class="flex">
                                 <ClipboardBtn
                                   size="sm"
-                                  title={t("challenge.instance.actions.copy.title")}
-                                  icon={
-                                    v.tag ? (
-                                      <div
-                                        class={clsx(
-                                          "text-xs text-layer rounded-full h-5 flex text-center justify-center items-center px-1.5",
-                                          findColorClass(v.tag)
-                                        )}
-                                      >
-                                        {v.tag}
-                                      </div>
-                                    ) : undefined
-                                  }
-                                  value={v.address}
-                                  label={v.address}
+                                  class="rounded-r-none!"
+                                  title={t("wsrx.actions.copyLocal.title")}
+                                  value={local.local}
+                                  label={local.local}
                                 />
-                              )}
-                            </For>
-                          </Show>
-                        </section>
-                      </Show>
-                    );
-                  }}
+                                <Button size="sm" class="rounded-l-none!">
+                                  <span
+                                    class={clsx(
+                                      (local.latency &&
+                                        (local.latency < 0
+                                          ? "text-error"
+                                          : local.latency > 100
+                                            ? "text-warning"
+                                            : "text-success")) ??
+                                        "text-error"
+                                    )}
+                                  >
+                                    {(local.latency ?? -1) < 0 ? "--" : local.latency} ms
+                                  </span>
+                                </Button>
+                              </div>
+                            )}
+                          </For>
+                        </Show>
+                        <Show
+                          when={instance()?.exposed_ports?.find((v) => v.name === image.name)}
+                          fallback={
+                            <ClipboardBtn
+                              size="sm"
+                              icon="icon-[fluent--copy-add-20-regular]"
+                              iconCopied="icon-[fluent--checkmark-circle-20-regular]"
+                              title={t("wsrx.actions.copy.title")}
+                              value={getWsrxLink(instance()!.traffic, image.port!)}
+                              label="WSRX"
+                            />
+                          }
+                        >
+                          <ClipboardBtn
+                            size="sm"
+                            title={t("challenge.instance.actions.copy.title")}
+                            value={instance()?.exposed_ports?.find((v) => v.name === image.name)?.address}
+                            label={instance()?.exposed_ports?.find((v) => v.name === image.name)?.address}
+                          />
+                        </Show>
+                      </section>
+                    </Show>
+                  )}
                 </For>
               </Show>
             </Show>

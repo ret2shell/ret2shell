@@ -242,19 +242,11 @@ export class Service implements Command {
         );
         if (image.port) {
           // remote address
-          const exposed_ports =
-            inst.exposed_ports?.map((p) => {
-              const m = p.name.match(/(^.*:)(.+)$/);
-              const tag = m ? m[1].slice(0, -1) : "";
-              const name = m ? m[2] : p.name;
-              return { ...p, tag: tag, name: name };
-            }) ?? [];
-          if (exposed_ports.length > 0) {
-            for (const ep of exposed_ports) {
-              io.println(
-                `          ${ansiColors.dim("Connection")}: ${ep.tag ? `${ansiColors.dim(ansiColors.blue(`(${ep.tag})`))} ` : ""}${ansiColors.blue(link(`${image.service_type}://${ep.address}`, `${image.service_type}://${ep.address}`))}`
-              );
-            }
+          if (inst.exposed_ports?.find((p) => p.name === image.name)) {
+            const scheme = getImageScheme(image);
+            io.println(
+              `          ${ansiColors.dim("Connection")}: ${ansiColors.blue(link(`${scheme}://${inst.exposed_ports.find((p) => p.name === image.name)?.address}`, `${scheme}://${inst.exposed_ports.find((p) => p.name === image.name)?.address}`))}`
+            );
           }
           // local address
           const locals = wsrx.getTrafficLocal(inst, image.port!);
