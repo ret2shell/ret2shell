@@ -433,6 +433,7 @@ function normalizeChallengeImage(image: ChallengeImage): ChallengeImage {
     const next = inferProtocolByServiceType(image.service_type);
     return {
       ...image,
+      pull_policy: image.pull_policy ?? "Always",
       protocol: next.protocol,
       app_protocol: next.app_protocol,
     };
@@ -440,6 +441,7 @@ function normalizeChallengeImage(image: ChallengeImage): ChallengeImage {
 
   return {
     ...image,
+    pull_policy: image.pull_policy ?? "Always",
     protocol: image.protocol ?? null,
     app_protocol: image.app_protocol ?? null,
   };

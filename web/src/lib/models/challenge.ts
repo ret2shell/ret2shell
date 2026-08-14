@@ -18,6 +18,7 @@ export type Challenge = {
 export type ChallengeImage = {
   name: string;
   tag: string;
+  pull_policy?: "Always" | "IfNotPresent" | "Never";
   cpu: number;
   cpu_req: number;
   mem: string;

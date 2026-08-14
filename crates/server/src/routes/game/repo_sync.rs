@@ -865,7 +865,7 @@ fn convert_score_rule(
 
 #[cfg(test)]
 mod tests {
-  use r2s_config::cluster::{ChallengeEnv, ChallengeImage};
+  use r2s_config::cluster::{ChallengeEnv, ChallengeImage, ImagePullPolicy};
 
   use super::{
     ChallengeChangeSet, classify_path, display_ref_name, parse_post_receive_updates, short_oid,
@@ -878,6 +878,7 @@ mod tests {
     ChallengeImage {
       name: name.to_owned(),
       tag: "latest".to_owned(),
+      pull_policy: ImagePullPolicy::Always,
       cpu: 1.0,
       cpu_req: 0.5,
       mem: "256Mi".to_owned(),
