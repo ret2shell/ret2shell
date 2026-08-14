@@ -40,6 +40,7 @@ const CONTAINER_NAME_PATTERN = /^(?=.{3,40}$)[a-z](?:[a-z0-9-]*[a-z0-9])$/;
 function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () => void }) {
   const [form, { Form, Field }] = createForm<ChallengeImage>({
     initialValues: {
+      pull_policy: "Always",
       cpu: 0.5,
       cpu_req: 0.01,
       mem: "128Mi",
@@ -86,6 +87,7 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
       setValues(form, {
         name: "",
         tag: "",
+        pull_policy: "Always",
         cpu: 0.5,
         cpu_req: 0.01,
         mem: "128Mi",
@@ -299,6 +301,36 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
                 </Field>
               </div>
             </Show>
+          )}
+        </Field>
+      </div>
+      <div class="flex flex-row space-x-2">
+        <Field name="pull_policy">
+          {(field, props) => (
+            <Select
+              label={t("challenge.instance.image.form.pullPolicy.label")}
+              class="flex-1"
+              placeholder={t("challenge.instance.image.form.pullPolicy.placeholder")}
+              items={[
+                {
+                  value: "Always",
+                  label: t("challenge.instance.image.form.pullPolicy.items.always"),
+                  icon: "icon-[fluent--arrow-sync-20-regular]",
+                },
+                {
+                  value: "IfNotPresent",
+                  label: t("challenge.instance.image.form.pullPolicy.items.ifNotPresent"),
+                  icon: "icon-[fluent--box-20-regular]",
+                },
+                {
+                  value: "Never",
+                  label: t("challenge.instance.image.form.pullPolicy.items.never"),
+                  icon: "icon-[fluent--block-20-regular]",
+                },
+              ]}
+              value={field.value ? [field.value as string] : ["Always"]}
+              inputProps={props}
+            />
           )}
         </Field>
       </div>
@@ -858,6 +890,7 @@ export default function (props: ChallengeWidgetProps) {
               <span class="opacity-60 flex-1 text-end truncate" title={image.tag}>
                 {image.tag}
               </span>
+              <span class="opacity-60">{image.pull_policy ?? "Always"}</span>
               <Popover
                 level="error"
                 ghost

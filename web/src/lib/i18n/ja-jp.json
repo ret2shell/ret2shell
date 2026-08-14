@@ -1214,6 +1214,15 @@
             "label": "イメージバージョン",
             "placeholder": "イメージバージョンを入力してください"
           },
+          "pullPolicy": {
+            "label": "イメージのプルポリシー",
+            "placeholder": "イメージのプルポリシーを選択してください",
+            "items": {
+              "always": "Always（常に取得）",
+              "ifNotPresent": "IfNotPresent（ローカルにない場合に取得）",
+              "never": "Never（取得しない）"
+            }
+          },
           "restrict": {
             "label": "Root権限の制限",
             "placeholder": "Root権限を制限しますか",

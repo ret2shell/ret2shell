@@ -1214,6 +1214,15 @@
             "label": "鏡像版本",
             "placeholder": "請輸入鏡像版本"
           },
+          "pullPolicy": {
+            "label": "鏡像拉取策略",
+            "placeholder": "請選擇鏡像拉取策略",
+            "items": {
+              "always": "Always（始終拉取）",
+              "ifNotPresent": "IfNotPresent（本地不存在時拉取）",
+              "never": "Never（從不拉取）"
+            }
+          },
           "restrict": {
             "label": "限制 Root 權限",
             "placeholder": "是否限制 Root 權限",

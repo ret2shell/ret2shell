@@ -567,7 +567,7 @@ impl Cluster {
           .map(|image| Container {
             name: image.name.clone(),
             image: Some(image.tag.clone()),
-            image_pull_policy: Some(String::from("Always")),
+            image_pull_policy: Some(image.pull_policy.as_str().to_owned()),
             env: Some(
               envs
                 .clone()

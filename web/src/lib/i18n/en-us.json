@@ -1214,6 +1214,15 @@
             "label": "Image version",
             "placeholder": "Please enter the image version"
           },
+          "pullPolicy": {
+            "label": "Image pull policy",
+            "placeholder": "Please select an image pull policy",
+            "items": {
+              "always": "Always",
+              "ifNotPresent": "IfNotPresent",
+              "never": "Never"
+            }
+          },
           "restrict": {
             "label": "Restrict root privileges",
             "placeholder": "Whether to restrict root privileges",
