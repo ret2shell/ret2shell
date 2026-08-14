@@ -330,6 +330,9 @@ function CreateForm(fnProps: { gameId: number; challengeId: number; onDone?: () 
               ]}
               value={field.value ? [field.value as string] : ["Always"]}
               inputProps={props}
+              onValueChange={(e) => {
+                setValue(form, "pull_policy", e.value.at(0) || "Always");
+              }}
             />
           )}
         </Field>

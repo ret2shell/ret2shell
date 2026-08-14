@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use chrono::Utc;
 use deunicode::deunicode_with_tofu;
 use r2s_config::cluster::RegistryConfig;
 use regex::Regex;
@@ -140,10 +141,11 @@ impl Registry {
     tokio::io::copy(&mut stdin, &mut file).await?;
     // get tag name without file extension
     let repo = to_image_name(name.split('.').next().unwrap());
+    let version = Utc::now().timestamp();
     let mut args = vec![
       "copy".to_string(),
       format!("docker-archive:{}", name),
-      format!("docker://{}/{org}/{repo}:latest", self.base()?),
+      format!("docker://{}/{org}/{repo}:{version}", self.base()?),
     ];
     if self.credentials.clone().is_some_and(|c| c.insecure) {
       args.push("--dest-tls-verify=false".to_string());
@@ -154,7 +156,7 @@ impl Registry {
       .output()
       .await?;
     if output.status.success() {
-      info!(?name, ?org, ?repo, "uploaded image");
+      info!(?name, ?org, ?repo, ?version, "uploaded image");
       Ok(())
     } else {
       let error = String::from_utf8_lossy(&output.stderr).to_string();
