@@ -205,6 +205,9 @@ spec:
               mountPath: /etc/ret2shell/blocked.txt
               subPath: blocked.txt
               readOnly: true
+          {{- with .Values.platform.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           {{- with .Values.platform.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
@@ -224,6 +227,9 @@ spec:
         - name: data
           emptyDir: {}
         {{- end }}
+      {{- with .Values.platform.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.platform.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

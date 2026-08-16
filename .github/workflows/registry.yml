@@ -1,0 +1,305 @@
+name: Registry
+
+on:
+  # Manual builds may target any branch, tag, or commit. When ref is empty,
+  # GitHub keeps the workflow on the ref selected in the Run workflow UI.
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch, tag, or commit to build (default: current ref)"
+        required: false
+        default: ""
+      publish_tag:
+        description: "Comma-separated image tags"
+        required: true
+        default: nightly
+  # Any pushed Git tag publishes an image tagged with the same name.
+  push:
+    tags:
+      - "*"
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: registry-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    name: Prepare Parameters
+    runs-on: ubuntu-latest
+    outputs:
+      checkout_ref: ${{ steps.param.outputs.checkout_ref }}
+      commit_sha: ${{ steps.param.outputs.commit_sha }}
+      git_version: ${{ steps.param.outputs.git_version }}
+      image: ${{ steps.param.outputs.image }}
+      metadata_tags: ${{ steps.param.outputs.metadata_tags }}
+      publish_tags: ${{ steps.param.outputs.publish_tags }}
+      ref: ${{ steps.param.outputs.ref }}
+    steps:
+      # Fetch full history so git describe can produce a useful build version.
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.ref || github.ref }}
+
+      - name: Resolve workflow parameters
+        id: param
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # GHCR image names must be lowercase even when the repository name is not.
+          image="ghcr.io/${{ github.repository }}"
+          image="${image,,}"
+
+          if [ "${{ github.event_name }}" = "push" ]; then
+            # A tag push should build exactly the commit that the tag points to.
+            checkout_ref="${{ github.sha }}"
+            ref="${{ github.ref_name }}"
+            raw_publish_tags="$(cat <<'R2S_REF_NAME'
+          ${{ github.ref_name }}
+          R2S_REF_NAME
+          )"
+          else
+            # Manual builds use the chosen ref, or the current workflow ref when empty.
+            ref="$(cat <<'R2S_MANUAL_REF'
+          ${{ inputs.ref || github.ref_name }}
+          R2S_MANUAL_REF
+          )"
+            checkout_ref="$ref"
+            raw_publish_tags="$(cat <<'R2S_PUBLISH_TAGS'
+          ${{ inputs.publish_tag || 'nightly' }}
+          R2S_PUBLISH_TAGS
+          )"
+          fi
+
+          # Manual publish_tag accepts comma-separated tags; tag pushes use one tag.
+          declare -a publish_tags=()
+          declare -a requested_tags=()
+          if [ "${{ github.event_name }}" = "push" ]; then
+            requested_tags=("$raw_publish_tags")
+          else
+            IFS=',' read -ra requested_tags <<< "$raw_publish_tags"
+          fi
+          for requested_tag in "${requested_tags[@]}"; do
+            tag="${requested_tag#"${requested_tag%%[![:space:]]*}"}"
+            tag="${tag%"${tag##*[![:space:]]}"}"
+            if [ -n "$tag" ]; then
+              publish_tags+=("$tag")
+            fi
+          done
+          if [ "${#publish_tags[@]}" -eq 0 ]; then
+            echo "At least one non-empty publish tag is required." >&2
+            exit 1
+          fi
+
+          publish_tags_csv="$(IFS=,; echo "${publish_tags[*]}")"
+          commit_sha="$(git rev-parse HEAD)"
+          git_version="$(git describe --abbrev=8 --always --dirty='*' --match='' 2>/dev/null || echo unknown)"
+
+          # metadata_tags is formatted for docker/metadata-action's raw tag input.
+          {
+            echo "checkout_ref=$checkout_ref"
+            echo "commit_sha=$commit_sha"
+            echo "git_version=$git_version"
+            echo "image=$image"
+            echo "publish_tags=$publish_tags_csv"
+            echo "ref=$ref"
+            echo "metadata_tags<<EOF"
+            printf 'type=raw,value=%s\n' "${publish_tags[@]}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### Registry parameters"
+            echo
+            echo "- Source ref: \`$ref\`"
+            echo "- Source commit: \`$commit_sha\`"
+            echo "- Image: \`$image\`"
+            echo "- Publish tags:"
+            printf '  - `%s`\n' "${publish_tags[@]}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  build:
+    name: Build ${{ matrix.platform }}
+    needs: prepare
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      # Build each platform on a native runner and upload its digest for the merge job.
+      matrix:
+        include:
+          - platform: linux/amd64
+            os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+          - platform: linux/arm64
+            os: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-musl
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.prepare.outputs.checkout_ref }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Prepare image metadata
+        id: metadata
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ needs.prepare.outputs.image }}
+          labels: |
+            org.opencontainers.image.title=ret2shell
+            org.opencontainers.image.description=Ret2Shell platform container image
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ needs.prepare.outputs.commit_sha }}
+
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          build-args: |
+            R2S_GIT_VERSION=${{ needs.prepare.outputs.git_version }}
+            R2S_BUILD_TARGET=${{ matrix.target }}
+          context: .
+          file: ./Containerfile
+          labels: ${{ steps.metadata.outputs.labels }}
+          # Push platform images by digest only; tags are attached to the manifest list later.
+          outputs: type=image,name=${{ needs.prepare.outputs.image }},push-by-digest=true,name-canonical=true,push=true
+          platforms: ${{ matrix.platform }}
+
+      - name: Export digest
+        run: |
+          # upload-artifact needs files, so encode the sha256 digest as an empty filename.
+          digest="${{ steps.build.outputs.digest }}"
+          mkdir -p "${{ runner.temp }}/digests"
+          touch "${{ runner.temp }}/digests/${digest#sha256:}"
+
+      - name: Resolve platform pair
+        id: platform
+        run: |
+          platform="${{ matrix.platform }}"
+          echo "pair=${platform//\//-}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          name: digests-${{ steps.platform.outputs.pair }}
+          path: ${{ runner.temp }}/digests/*
+          retention-days: 1
+
+  merge:
+    name: Publish Multi-Platform Image
+    needs:
+      - prepare
+      - build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          path: ${{ runner.temp }}/digests
+          pattern: digests-*
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Prepare publish tags
+        id: metadata
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ needs.prepare.outputs.image }}
+          tags: ${{ needs.prepare.outputs.metadata_tags }}
+
+      - name: Create manifest list and push
+        id: manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          digests_dir="${{ runner.temp }}/digests"
+          image="${{ needs.prepare.outputs.image }}"
+          image_tags="$(cat <<'R2S_IMAGE_TAGS'
+          ${{ steps.metadata.outputs.tags }}
+          R2S_IMAGE_TAGS
+          )"
+
+          declare -a tag_args=()
+          while IFS= read -r tag; do
+            if [ -n "$tag" ]; then
+              tag_args+=(-t "$tag")
+            fi
+          done <<< "$image_tags"
+
+          # Rebuild digest references from artifact filenames produced by build jobs.
+          declare -a digest_args=()
+          while IFS= read -r digest_file; do
+            digest_args+=("$image@sha256:$(basename "$digest_file")")
+          done < <(find "$digests_dir" -maxdepth 1 -type f | sort)
+
+          if [ "${#tag_args[@]}" -eq 0 ] || [ "${#digest_args[@]}" -eq 0 ]; then
+            echo "Image tags or platform digests are missing." >&2
+            exit 1
+          fi
+
+          docker buildx imagetools create "${tag_args[@]}" "${digest_args[@]}"
+
+          primary_tag="${image_tags%%$'\n'*}"
+          digest="$(docker buildx imagetools inspect "$primary_tag" --format '{{json .Manifest.Digest}}' | tr -d '"')"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+
+      - name: Inspect published images
+        run: |
+          image_tags="$(cat <<'R2S_IMAGE_TAGS'
+          ${{ steps.metadata.outputs.tags }}
+          R2S_IMAGE_TAGS
+          )"
+
+          while IFS= read -r tag; do
+            if [ -n "$tag" ]; then
+              docker buildx imagetools inspect "$tag"
+            fi
+          done <<< "$image_tags"
+
+      - name: Publish summary
+        run: |
+          source_ref="${{ needs.prepare.outputs.ref }}"
+          manifest_digest="${{ steps.manifest.outputs.digest }}"
+          image_tags="$(cat <<'R2S_IMAGE_TAGS'
+          ${{ steps.metadata.outputs.tags }}
+          R2S_IMAGE_TAGS
+          )"
+
+          {
+            echo "### Published image"
+            echo
+            echo "- Source ref: \`$source_ref\`"
+            echo "- Manifest digest: \`$manifest_digest\`"
+            while IFS= read -r tag; do
+              if [ -n "$tag" ]; then
+                echo "- Tag: \`$tag\`"
+              fi
+            done <<< "$image_tags"
+          } >> "$GITHUB_STEP_SUMMARY"

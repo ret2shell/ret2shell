@@ -22,6 +22,8 @@ platform:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  extraVolumes: []
+  extraVolumeMounts: []
   serviceAccount:
     create: true
     name: ""
@@ -77,6 +79,10 @@ platform:
       level: info,tower_http=info,sqlx=warn
     cluster:
       enabled: true
+      # tryDefault=true: use the in-cluster service account (same cluster as the platform pod)
+      # tryDefault=false: use kubeConfigPath to point at an explicit kubeconfig for a separate cluster
+      tryDefault: true
+      kubeConfigPath: ""
       nodeSelector: ""
       traffic: ""
       lifecycle: ""

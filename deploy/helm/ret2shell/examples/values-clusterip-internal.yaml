@@ -1,0 +1,13 @@
+platform:
+  exposure:
+    type: clusterIP
+  config:
+    server:
+      # Public hostname served by your Gateway / HTTPRoute.
+      externalDomain: ctf.example.com
+
+registry:
+  mode: internal
+  externalAccess:
+    # Registry still needs a node-reachable or separately routed address.
+    host: registry.example.com:30310

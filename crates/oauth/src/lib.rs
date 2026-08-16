@@ -3,7 +3,7 @@ mod utility;
 use std::collections::HashMap;
 
 use r2s_config::auth::Config;
-use r2s_engine::{DiagnosticMarker, Engine, EngineError};
+use r2s_engine::{DiagnosticMarker, Engine, EngineError, parse_value, script_error_from_value};
 use rune::{Any, ContextError, Module, Value, runtime::Object};
 pub use traits::OAuthError;
 
@@ -24,6 +24,25 @@ pub fn module(_stdio: bool) -> Result<Module, ContextError> {
   module.ty::<RuneMap>()?;
   module.function_meta(RuneMap::get)?;
   Ok(module)
+}
+
+fn parse_output(output: Result<Value, Value>) -> Result<HashMap<String, String>, OAuthError> {
+  let value = match output {
+    Ok(value) => value,
+    Err(error) => return Err(script_error_from_value(error)),
+  };
+  let object: Object = parse_value(value, "`Object` inside `Ok`")?;
+  let _ = object
+    .get("auth_key")
+    .ok_or_else(|| OAuthError::MissingField("auth_key".to_owned()))?;
+  let mut data = HashMap::new();
+  for (key, value) in object.iter() {
+    data.insert(
+      key.to_string(),
+      parse_value(value.clone(), format!("a `String` value for `{key}`"))?,
+    );
+  }
+  Ok(data)
 }
 
 #[derive(Debug, Clone, Default)]
@@ -64,25 +83,10 @@ impl OAuth {
     let key = key.as_ref();
     let key = format!("oauth-{}", key);
     let params_object = RuneMap(params.clone());
-    let result = engine.execute(key, "login", (params_object,)).await?;
-    let output: Result<Object, Value> = rune::from_value(result).map_err(EngineError::from)?;
-    if let Ok(object) = output {
-      let _ = object
-        .get("auth_key")
-        .ok_or_else(|| OAuthError::MissingField("auth_key".to_owned()))?;
-      let mut data: HashMap<String, String> = HashMap::new();
-      for (key, value) in object.iter() {
-        data.insert(
-          key.to_string(),
-          rune::from_value(value.clone()).map_err(EngineError::from)?,
-        );
-      }
-      Ok(data)
-    } else {
-      Err(OAuthError::ScriptError(
-        "unexpected value in oauth script".to_owned(),
-      ))
-    }
+    let output: Result<Value, Value> = engine
+      .execute_as(key, "login", (params_object,), "`Result`")
+      .await?;
+    parse_output(output)
   }
 
   pub async fn bind(
@@ -93,27 +97,10 @@ impl OAuth {
     let key = format!("oauth-{}", key);
     let params_object = RuneMap(params.clone());
     let user_object = RuneMap(user.clone());
-    let result = engine
-      .execute(key, "bind", (params_object, user_object))
+    let output: Result<Value, Value> = engine
+      .execute_as(key, "bind", (params_object, user_object), "`Result`")
       .await?;
-    let output: Result<Object, Value> = rune::from_value(result).map_err(EngineError::from)?;
-    if let Ok(object) = output {
-      let _ = object
-        .get("auth_key")
-        .ok_or_else(|| OAuthError::MissingField("auth_key".to_owned()))?;
-      let mut data: HashMap<String, String> = HashMap::new();
-      for (key, value) in object.iter() {
-        data.insert(
-          key.to_string(),
-          rune::from_value(value.clone()).map_err(EngineError::from)?,
-        );
-      }
-      Ok(data)
-    } else {
-      Err(OAuthError::ScriptError(
-        "unexpected value in oauth script".to_owned(),
-      ))
-    }
+    parse_output(output)
   }
 }
 
