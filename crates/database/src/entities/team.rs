@@ -5,8 +5,8 @@ use std::str::FromStr;
 use chrono::{DateTime, Utc, serde::ts_seconds};
 use num_derive::{FromPrimitive, ToPrimitive};
 use sea_orm::{
-  ActiveValue, Condition, FromJsonQueryResult, FromQueryResult, IntoActiveModel, Iterable,
-  JoinType, Order, QueryOrder, QuerySelect, entity::prelude::*, sea_query::Func,
+  ActiveValue, Condition, ExprTrait, FromJsonQueryResult, FromQueryResult, IntoActiveModel,
+  Iterable, JoinType, Order, QueryOrder, QuerySelect, entity::prelude::*, sea_query::Func,
 };
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
@@ -300,8 +300,8 @@ pub async fn get_page<C>(
 ) -> Result<(Vec<Model>, u64), DbErr>
 where
   C: ConnectionTrait, {
-  let page_size = page_size.max(1);
-  let page = page.max(1);
+  let page_size = Ord::max(page_size, 1);
+  let page = Ord::max(page, 1);
   let state = min_state.unwrap_or(State::Passed);
   let mut sql = Entity::find()
     .filter(Column::GameId.eq(game_id))
@@ -333,8 +333,8 @@ pub async fn get_page_ex<C>(
 ) -> Result<(Vec<ExModel>, u64), DbErr>
 where
   C: ConnectionTrait, {
-  let page_size = page_size.max(1);
-  let page = page.max(1);
+  let page_size = Ord::max(page_size, 1);
+  let page = Ord::max(page, 1);
   let state = min_state.unwrap_or(State::Passed);
   let mut sql = Entity::find()
     .join(JoinType::LeftJoin, Relation::Institute.def())
