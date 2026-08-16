@@ -37,7 +37,7 @@ export default function (props: { gameId: number }) {
     const currentPath = path();
     if (currentGame && currentPath) {
       let disposed = false;
-      let retryTimer: ReturnType<typeof window.setTimeout> | undefined;
+      let retryTimer: number | undefined;
 
       const loadRepo = async () => {
         if (disposed) {

@@ -251,7 +251,6 @@ function i2hex(i: number) {
 
 export async function hashToHex(data: Uint8Array) {
   if (crypto?.subtle?.digest) {
-    // @ts-expect-error crypto.subtle is widely supported
     return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", data)))
       .map((b) => i2hex(b))
       .join("");

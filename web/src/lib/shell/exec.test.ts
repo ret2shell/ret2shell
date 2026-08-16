@@ -1,3 +1,4 @@
+import type { Game } from "@models/game";
 import type { ParseEntry } from "shell-quote";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Stdio } from "./stdio";
@@ -47,7 +48,7 @@ describe("Exec", () => {
   it("dispatches known commands and forwards sliced arguments", async () => {
     const exec = new Exec();
     const io = createIo();
-    const env = { game: { id: 1 } };
+    const env = { game: { id: 1 } as Game };
 
     const result = await exec.exec(io, [" echo ", "hello", "world"] as ParseEntry[], "echo hello world", env);
 

@@ -48,8 +48,8 @@ importers:
         specifier: ^2.2.0
         version: 2.2.0(solid-js@1.9.14)
       '@solid-primitives/storage':
-        specifier: ^4.4.0
-        version: 4.4.0(solid-js@1.9.14)
+        specifier: 4.3.3
+        version: 4.3.3(solid-js@1.9.14)
       '@solidjs/router':
         specifier: ^0.16.3
         version: 0.16.3(solid-js@1.9.14)
@@ -795,8 +795,8 @@ packages:
     peerDependencies:
       solid-js: ^1.6.12
 
-  '@solid-primitives/storage@4.4.0':
-    resolution: {integrity: sha512-+u0dpTqrUG7h+IMfmGLCx7vx2Q0Eon6paBgzcWhEP/dauElpGU3ElpZZOZgw8YKR1+J4X4ENiAL0na3VH8RWMg==}
+  '@solid-primitives/storage@4.3.3':
+    resolution: {integrity: sha512-ACbNwMZ1s8VAvld6EUXkDkX/US3IhtlPLxg6+B2s9MwNUugwdd51I98LPEaHrdLpqPmyzqgoJe0TxEFlf3Dqrw==}
     peerDependencies:
       '@tauri-apps/plugin-store': '*'
       solid-js: ^1.6.12
@@ -2893,7 +2893,7 @@ snapshots:
       '@solid-primitives/utils': 6.4.1(solid-js@1.9.14)
       solid-js: 1.9.14
 
-  '@solid-primitives/storage@4.4.0(solid-js@1.9.14)':
+  '@solid-primitives/storage@4.3.3(solid-js@1.9.14)':
     dependencies:
       '@solid-primitives/utils': 6.4.1(solid-js@1.9.14)
       solid-js: 1.9.14
