@@ -51,8 +51,8 @@ importers:
         specifier: 4.3.3
         version: 4.3.3(solid-js@1.9.14)
       '@solidjs/router':
-        specifier: ^0.16.3
-        version: 0.16.3(solid-js@1.9.14)
+        specifier: ^1.0.0
+        version: 1.0.0(solid-js@1.9.14)
       '@tanstack/query-persist-client-core':
         specifier: ^5.101.4
         version: 5.101.4
@@ -191,7 +191,7 @@ importers:
         version: 2.5.8
       '@iconify-json/fluent':
         specifier: ^1.2.55
-        version: 1.2.55
+        version: 1.2.56
       '@iconify-json/fluent-emoji-flat':
         specifier: ^1.2.5
         version: 1.2.5
@@ -561,8 +561,8 @@ packages:
   '@iconify-json/fluent-emoji-flat@1.2.5':
     resolution: {integrity: sha512-5ShoOHJ0ezYEIMfp2zvbRiZpL1Af8Prg5v9pElaIQhfqwbyD57pzrp70g/rK2EjigajBq9/cPrJXh224HaP3TQ==}
 
-  '@iconify-json/fluent@1.2.55':
-    resolution: {integrity: sha512-oe4kUO6LRfRcDVusNOzDUMWdo/Uh/CLHa+EGJrAfLA04HMv82cFCteZJim4NyLaEb15zgsn7gb182Inb0k/Oeg==}
+  '@iconify-json/fluent@1.2.56':
+    resolution: {integrity: sha512-WqP0v2J5qs/VJcCaRWCgCvdOwq+vV7OPENlJVczc1aUXCfBtLdl/A4ohYlJEopAUAfVyTKadj2kYNODJapRBNw==}
 
   '@iconify-json/meteocons@1.2.4':
     resolution: {integrity: sha512-E7YV02ql5WmJgAOpXU/hoF9Mdshq73KjwR6fBxZ5SrqMJghMa3CIcRG6NQGwP4I1uBOhIjOFlAikYoPAKuT56A==}
@@ -817,8 +817,8 @@ packages:
     peerDependencies:
       solid-js: ^1.6.12
 
-  '@solidjs/router@0.16.3':
-    resolution: {integrity: sha512-WWQkmSmSpl+15HgUktGPbeXkgWmonj4XwPOcZVHJz1EQV3dz5qWHIyQ/BKXFevor6u/0dKvC9FlUmKmDwE1QHw==}
+  '@solidjs/router@1.0.0':
+    resolution: {integrity: sha512-cCSk1hvgCowiMa9bzzYWHiLu1U4E22+DfJe6/rOwAyECKrxc3jrd5QnoW3sDDJtW+e077cz/M67bPl3DqOBw1Q==}
     peerDependencies:
       solid-js: ^1.8.6
 
@@ -2675,7 +2675,7 @@ snapshots:
     dependencies:
       '@iconify/types': 2.0.0
 
-  '@iconify-json/fluent@1.2.55':
+  '@iconify-json/fluent@1.2.56':
     dependencies:
       '@iconify/types': 2.0.0
 
@@ -2906,7 +2906,7 @@ snapshots:
     dependencies:
       solid-js: 1.9.14
 
-  '@solidjs/router@0.16.3(solid-js@1.9.14)':
+  '@solidjs/router@1.0.0(solid-js@1.9.14)':
     dependencies:
       solid-js: 1.9.14
 
