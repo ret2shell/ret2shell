@@ -31,3 +31,4 @@ pub mod m_20250622_000001_create_game_hammer_policy;
 pub mod m_20250721_000001_create_ip_time_info;
 pub mod m_20260307_000001_game_lifecycle;
 pub mod m_20260704_000001_game_env_limit;
+pub mod m_20260823_000001_oauth_provider_portal_text;
