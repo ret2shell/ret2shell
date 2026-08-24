@@ -1,12 +1,13 @@
 use axum::{
   Extension, Router,
   extract::{Request, State},
-  http::{HeaderMap, HeaderValue, Uri},
+  http::{HeaderMap, HeaderValue, Uri, header},
   middleware,
   response::IntoResponse,
   routing::any,
 };
-use r2s_config::GlobalConfig;
+use base64::Engine;
+use r2s_config::{GlobalConfig, cluster::RegistryConfig};
 use r2s_database::{game, user::Permission};
 use r2s_migrator::Database;
 use tracing::{debug, info, warn};
@@ -77,26 +78,34 @@ fn infer_origin(headers: &HeaderMap) -> Result<String, ResponseError> {
   ))
 }
 
+fn apply_registry_authorization(
+  headers: &mut HeaderMap, registry: &RegistryConfig,
+) -> Result<(), ResponseError> {
+  headers.remove(header::AUTHORIZATION);
+  let Some((username, password)) = registry.basic_auth() else {
+    return Ok(());
+  };
+  let encoded = base64::engine::general_purpose::STANDARD.encode(format!("{username}:{password}"));
+  let mut value = HeaderValue::from_str(&format!("Basic {encoded}")).map_err(|err| {
+    ResponseError::InternalServerError(format!("invalid registry basic auth header: {err}"))
+  })?;
+  value.set_sensitive(true);
+  headers.insert(header::AUTHORIZATION, value);
+  Ok(())
+}
+
 async fn proxy_to_registry(
   State(config): State<GlobalConfig>, State(ref db): State<Database>,
   State(client): State<HTTPClient>, Extension(token): Extension<Token>, mut req: Request,
 ) -> Result<impl IntoResponse, ResponseError> {
   debug!(?req, "proxying frontend request");
-  let registry_config = config.cluster.clone().and_then(|v| v.registry);
-  let (protocol, registry_url) = match registry_config {
-    Some(c) => {
-      if c.insecure {
-        ("http", c.server)
-      } else {
-        ("https", c.server)
-      }
-    }
-    None => {
-      return Err(ResponseError::PreconditionFailed(String::from(
-        "internal registry is not enabled, please contact the website devops",
-      )));
-    }
+  let Some(registry) = config.cluster.clone().and_then(|v| v.registry) else {
+    return Err(ResponseError::PreconditionFailed(String::from(
+      "internal registry is not enabled, please contact the website devops",
+    )));
   };
+  let protocol = if registry.insecure { "http" } else { "https" };
+  let registry_url = registry.server.clone();
   let path = req.uri().path();
   let path_query = req
     .uri()
@@ -170,6 +179,7 @@ async fn proxy_to_registry(
   debug!(?uri, "proxying to registry url");
   *req.uri_mut() = Uri::try_from(uri)
     .map_err(|err| ResponseError::BadRequest(format!("invalid registry uri: {err}")))?;
+  apply_registry_authorization(req.headers_mut(), &registry)?;
   //req.headers_mut().remove("host");
 
   let mut resp = client

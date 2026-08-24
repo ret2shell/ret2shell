@@ -14,6 +14,18 @@ pub struct RegistryConfig {
   pub enabled: Option<bool>,
 }
 
+impl RegistryConfig {
+  /// HTTP Basic credentials for registry API calls, when both are configured.
+  pub fn basic_auth(&self) -> Option<(&str, &str)> {
+    let username = self
+      .username
+      .as_deref()
+      .filter(|username| !username.is_empty())?;
+    let password = self.password.as_deref()?;
+    Some((username, password))
+  }
+}
+
 /// `ClusterConfig` is a configuration struct for managing service settings.
 #[derive(Serialize, Deserialize, Clone, Debug, Default, FromJsonQueryResult, PartialEq, Eq)]
 pub struct Config {
@@ -266,6 +278,19 @@ mod tests {
       Some("/var/lib/r2s/capture")
     );
     assert_eq!(merged.registry, Some(registry()));
+  }
+
+  #[test]
+  fn basic_auth_requires_username_and_password() {
+    let mut config = registry();
+    assert_eq!(config.basic_auth(), Some(("ci", "secret")));
+
+    config.username = Some(String::new());
+    assert_eq!(config.basic_auth(), None);
+
+    config.username = Some("ci".to_owned());
+    config.password = None;
+    assert_eq!(config.basic_auth(), None);
   }
 
   #[test]
