@@ -51,3 +51,67 @@ pub async fn check(
     ValidatorType::HCaptcha => hcaptcha::HCaptchaValidator::check_captcha(captcha, answer).await,
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use r2s_config::captcha::ValidatorType;
+
+  use super::{Captcha, check, generate};
+  use crate::traits::{CaptchaError, CaptchaValidator};
+
+  fn captcha(validator: ValidatorType, challenge: &str, criteria: Option<&str>) -> Captcha {
+    Captcha {
+      id: "captcha-id".to_owned(),
+      validator,
+      challenge: challenge.to_owned(),
+      criteria: criteria.map(str::to_owned),
+    }
+  }
+
+  #[tokio::test]
+  async fn none_validator_accepts_everything_without_challenge() {
+    let generated = generate(&ValidatorType::None, 1).await.unwrap();
+
+    assert_eq!(generated.validator, ValidatorType::None);
+    assert!(generated.challenge.is_empty());
+    assert_eq!(generated.criteria, None);
+    assert!(
+      check(&ValidatorType::None, &generated, "anything")
+        .await
+        .unwrap()
+    );
+  }
+
+  #[tokio::test]
+  async fn image_validator_checks_answers_case_insensitively_and_trimmed() {
+    let captcha = generate(&ValidatorType::Image, 2).await.unwrap();
+    let answer = captcha.criteria.clone().unwrap();
+
+    assert!(
+      check(
+        &ValidatorType::Image,
+        &captcha,
+        &format!(" {} ", answer.to_uppercase())
+      )
+      .await
+      .unwrap()
+    );
+    assert!(
+      !check(&ValidatorType::Image, &captcha, "wrong")
+        .await
+        .unwrap()
+    );
+  }
+
+  #[tokio::test]
+  async fn image_validator_requires_criteria() {
+    let err = super::image::ImageValidator::check_captcha(
+      &captcha(ValidatorType::Image, "challenge", None),
+      "answer",
+    )
+    .await
+    .unwrap_err();
+
+    assert!(matches!(err, CaptchaError::MissingFields(field) if field == "criteria"));
+  }
+}

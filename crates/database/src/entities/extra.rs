@@ -132,3 +132,29 @@ where
   C: ConnectionTrait, {
   Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }
+
+#[cfg(test)]
+mod tests {
+  use chrono::Utc;
+
+  use super::ExModel;
+
+  #[test]
+  fn ex_model_desensitize_hides_hint_reference() {
+    let extra = ExModel {
+      id: 1,
+      created_at: Utc::now(),
+      reason: "adjustment".to_owned(),
+      score: 50,
+      hint_id: Some(4),
+      team_id: 3,
+      team_name: "r3kapig".to_owned(),
+      challenge_id: None,
+      challenge_name: None,
+    };
+    let view = extra.desensitize();
+    assert_eq!(view.hint_id, None);
+    assert_eq!(view.score, 50);
+    assert_eq!(view.team_name, "r3kapig");
+  }
+}

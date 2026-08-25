@@ -423,3 +423,46 @@ where
   C: ConnectionTrait, {
   Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }
+
+#[cfg(test)]
+mod tests {
+  use chrono::Utc;
+
+  use super::{ExModel, Model, Permissions};
+
+  fn user() -> Model {
+    Model {
+      id: 1,
+      registered_at: Utc::now(),
+      account: "tester".to_owned(),
+      nickname: "Tester".to_owned(),
+      password: Some("$argon2id$hash".to_owned()),
+      email: Some("tester@example.com".to_owned()),
+      description: None,
+      avatar: None,
+      institute_id: Some(3),
+      permissions: Permissions(vec![super::Permission::Basic]),
+      hidden: false,
+      banned: false,
+    }
+  }
+
+  #[test]
+  fn desensitize_clears_password_and_email_but_keeps_identity() {
+    let view = user().desensitize();
+    assert_eq!(view.password, None);
+    assert_eq!(view.email, None);
+    assert_eq!(view.account, "tester");
+    assert_eq!(view.nickname, "Tester");
+    assert_eq!(view.institute_id, Some(3));
+  }
+
+  #[test]
+  fn ex_model_desensitize_clears_password_and_email() {
+    let extended: ExModel = user().into();
+    let view = extended.desensitize();
+    assert_eq!(view.password, None);
+    assert_eq!(view.email, None);
+    assert_eq!(view.account, "tester");
+  }
+}

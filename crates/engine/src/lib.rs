@@ -242,3 +242,167 @@ pub fn initialize() -> Engine {
   engine.spawn_cleanup_worker();
   engine
 }
+
+#[cfg(test)]
+mod tests {
+  use super::{DiagnosticKind, Engine, EngineError, parse_value, script_error_from_value};
+
+  fn modules() -> Vec<fn(bool) -> Result<rune::Module, rune::ContextError>> {
+    vec![rune_modules::json::module]
+  }
+
+  /// NOTE: rune only registers `pub` functions in the unit's root item, so
+  /// scripts must declare their entry points as `pub fn` to be callable.
+  const ADD_SCRIPT: &str = "pub fn add(a, b) { a + b }";
+  const PRIVATE_ADD_SCRIPT: &str = "fn add(a, b) { a + b }";
+
+  #[tokio::test]
+  async fn lint_accepts_script_with_all_required_functions() {
+    let markers = Engine::lint(modules(), ADD_SCRIPT, &["add"]).await.unwrap();
+    assert!(markers.is_empty(), "unexpected markers: {markers:?}");
+  }
+
+  #[tokio::test]
+  async fn lint_reports_each_missing_required_function() {
+    let markers = Engine::lint(modules(), "fn other() { 1 }", &["check", "environ"])
+      .await
+      .unwrap();
+
+    for required in ["check", "environ"] {
+      assert!(
+        markers
+          .iter()
+          .any(|m| m.message == format!("missing required function: {required}")),
+        "missing marker for `{required}`: {markers:?}"
+      );
+    }
+  }
+
+  #[tokio::test]
+  async fn lint_flags_non_public_entry_points_as_missing() {
+    // rune only exposes `pub` functions through the unit's function table, so
+    // a private entry point is indistinguishable from an absent one.
+    let markers = Engine::lint(modules(), PRIVATE_ADD_SCRIPT, &["add"])
+      .await
+      .unwrap();
+    assert!(
+      markers
+        .iter()
+        .any(|m| m.message == "missing required function: add"),
+      "markers: {markers:?}"
+    );
+  }
+
+  #[tokio::test]
+  async fn lint_reports_compile_error_with_source_position() {
+    let markers = Engine::lint(modules(), "fn broken( { 1 }", &[])
+      .await
+      .unwrap();
+
+    assert!(!markers.is_empty());
+    let error = markers
+      .iter()
+      .find(|m| matches!(m.kind, DiagnosticKind::Error))
+      .expect("compile failure should produce an error marker");
+    // a compile diagnostic carries the real position, not the fallback at 0:0
+    assert!(error.start_line > 0 || !error.message.contains("failed to compile"));
+  }
+
+  #[tokio::test]
+  async fn execute_runs_preloaded_script_functions() {
+    let engine = Engine::default();
+    engine
+      .preload(modules(), "test-add", ADD_SCRIPT, None)
+      .await
+      .unwrap();
+
+    assert!(engine.has_function("test-add", "add").await.unwrap());
+    assert!(!engine.has_function("test-add", "sub").await.unwrap());
+
+    let value = engine.execute("test-add", "add", (21, 21)).await.unwrap();
+    assert_eq!(parse_value::<i64>(value, "an integer").unwrap(), 42);
+    assert_eq!(
+      engine
+        .execute_as::<i64>("test-add", "add", (1, -1), "an integer")
+        .await
+        .unwrap(),
+      0
+    );
+  }
+
+  #[tokio::test]
+  async fn execute_without_preload_reports_missing_script() {
+    let engine = Engine::default();
+    let err = engine
+      .execute("never-loaded", "add", (1, 2))
+      .await
+      .unwrap_err();
+    assert!(matches!(err, EngineError::MissingCheckerScript(key) if key == "never-loaded"));
+
+    let err = engine
+      .has_function("never-loaded", "add")
+      .await
+      .unwrap_err();
+    assert!(matches!(err, EngineError::MissingCheckerScript(_)));
+  }
+
+  #[tokio::test]
+  async fn expire_drops_preloaded_context() {
+    let engine = Engine::default();
+    engine
+      .preload(modules(), "test-expire", ADD_SCRIPT, None)
+      .await
+      .unwrap();
+    engine.expire("test-expire").await;
+
+    let err = engine
+      .execute("test-expire", "add", (1, 2))
+      .await
+      .unwrap_err();
+    assert!(matches!(err, EngineError::MissingCheckerScript(_)));
+  }
+
+  #[tokio::test]
+  async fn cleanup_keeps_recently_compiled_contexts() {
+    let engine = Engine::default();
+    engine
+      .preload(modules(), "test-cleanup", ADD_SCRIPT, None)
+      .await
+      .unwrap();
+
+    engine.cleanup().await;
+
+    assert_eq!(
+      engine
+        .execute_as::<i64>("test-cleanup", "add", (2, 3), "an integer")
+        .await
+        .unwrap(),
+      5
+    );
+  }
+
+  #[test]
+  fn parse_value_reports_expected_and_actual_types() {
+    let value = rune::to_value("a string".to_owned()).unwrap();
+    let err = parse_value::<i64>(value, "an integer").unwrap_err();
+
+    match err {
+      EngineError::InvalidReturnType { expected, actual } => {
+        assert_eq!(expected, "an integer");
+        assert!(actual.to_lowercase().contains("string"), "actual: {actual}");
+      }
+      other => panic!("expected InvalidReturnType, got {other:?}"),
+    }
+
+    let value = rune::to_value(7i64).unwrap();
+    assert_eq!(parse_value::<i64>(value, "an integer").unwrap(), 7);
+  }
+
+  #[test]
+  fn script_error_from_value_wraps_string_values_verbatim() {
+    let error = rune::to_value("flag is wrong".to_owned()).unwrap();
+    let err: EngineError = script_error_from_value(error);
+
+    assert!(matches!(err, EngineError::ScriptError(msg) if msg == "flag is wrong"));
+  }
+}

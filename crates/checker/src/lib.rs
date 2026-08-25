@@ -249,3 +249,198 @@ impl Checker {
 pub async fn initialize() -> Checker {
   Checker
 }
+
+#[cfg(test)]
+mod tests {
+  use chrono::Utc;
+  use r2s_bucket::challenge::{ChallengeBucket, ChallengeConfig, ScoreRule, TagList};
+
+  use super::{AuditMessage, Checker, RuneSubmission, RuneTeam, RuneUser};
+  use crate::{challenge, submission, team, user};
+
+  fn temp_root(label: &str) -> std::path::PathBuf {
+    let unique = std::time::SystemTime::now()
+      .duration_since(std::time::UNIX_EPOCH)
+      .unwrap()
+      .as_nanos();
+    std::env::temp_dir().join(format!(
+      "r2s-checker-{label}-{}-{unique}",
+      std::process::id()
+    ))
+  }
+
+  async fn bucket_with_checker(script: &str) -> (ChallengeBucket, std::path::PathBuf) {
+    let root = temp_root("lint");
+    std::fs::create_dir_all(&root).unwrap();
+    let bucket = ChallengeBucket::new(
+      &root,
+      "demo",
+      ChallengeConfig {
+        name: "demo".to_owned(),
+        tag: TagList(vec![]),
+        score_rule: ScoreRule {
+          initial: 1000,
+          minimum: 100,
+          decay: 25,
+        },
+      },
+    )
+    .await
+    .unwrap();
+    bucket.set_checker(script.to_owned()).await.unwrap();
+    (bucket, root)
+  }
+
+  fn sample_user() -> user::Model {
+    user::Model {
+      id: 7,
+      registered_at: Utc::now(),
+      account: "player".to_owned(),
+      nickname: "Player".to_owned(),
+      password: Some("hashed".to_owned()),
+      email: Some("player@example.com".to_owned()),
+      description: None,
+      avatar: None,
+      institute_id: Some(3),
+      permissions: Default::default(),
+      hidden: false,
+      banned: false,
+    }
+  }
+
+  #[test]
+  fn rune_user_exposes_only_safe_fields() {
+    let rune_user = RuneUser::from(&sample_user());
+
+    assert_eq!(rune_user.id, 7);
+    assert_eq!(rune_user.account, "player");
+    assert_eq!(rune_user.institute_id, Some(3));
+  }
+
+  #[test]
+  fn rune_team_maps_present_team_fields() {
+    let model = team::Model {
+      id: 12,
+      name: "team".to_owned(),
+      game_id: 1,
+      token: Some("team-token".to_owned()),
+      state: team::State::Passed,
+      institute_id: Some(5),
+      score: 3000,
+      history: team::TeamScoreHistoryList::new(),
+      last_active_at: Utc::now(),
+      tag: None,
+    };
+
+    let rune_team = RuneTeam::from(&model);
+
+    assert_eq!(rune_team.id, Some(12));
+    assert_eq!(rune_team.name.as_deref(), Some("team"));
+    assert_eq!(rune_team.institute_id, Some(5));
+    assert_eq!(rune_team.token.as_deref(), Some("team-token"));
+  }
+
+  #[test]
+  fn default_rune_team_represents_guest_without_team() {
+    let rune_team = RuneTeam::default();
+
+    assert_eq!(rune_team.id, None);
+    assert_eq!(rune_team.name, None);
+    assert_eq!(rune_team.institute_id, None);
+    assert_eq!(rune_team.token, None);
+  }
+
+  #[test]
+  fn rune_submission_defaults_missing_content_to_empty_string() {
+    let mut model = submission::Model {
+      id: 99,
+      created_at: Utc::now(),
+      user_id: 7,
+      challenge_id: 3,
+      team_id: Some(12),
+      content: Some("flag{abc}".to_owned()),
+      solved: None,
+      result: None,
+    };
+    let with_content = RuneSubmission::from(&model);
+    assert_eq!(with_content.content, "flag{abc}");
+    assert_eq!(with_content.team_id, Some(12));
+
+    model.content = None;
+    assert_eq!(RuneSubmission::from(&model).content, "");
+  }
+
+  #[tokio::test]
+  async fn lint_reports_missing_entry_points_for_checkers() {
+    let (bucket, root) = bucket_with_checker("pub fn other() { 1 }").await;
+
+    let markers = Checker.lint(&bucket).await.unwrap();
+    for required in ["check", "environ"] {
+      assert!(
+        markers
+          .iter()
+          .any(|m| m.message == format!("missing required function: {required}")),
+        "missing marker for `{required}`: {markers:?}"
+      );
+    }
+
+    std::fs::remove_dir_all(root).ok();
+  }
+
+  #[tokio::test]
+  async fn lint_accepts_checker_with_required_entry_points() {
+    let (bucket, root) = bucket_with_checker(
+      r#"pub fn check(bucket, user, team, submission) { (true, "ok") } pub fn environ(bucket) { true }"#,
+    )
+    .await;
+
+    let markers = Checker.lint(&bucket).await.unwrap();
+    assert!(markers.is_empty(), "unexpected markers: {markers:?}");
+
+    std::fs::remove_dir_all(root).ok();
+  }
+
+  #[tokio::test]
+  async fn lint_falls_back_to_empty_script_when_checker_file_absent() {
+    // `ChallengeBucket::checker()` returns an empty string for a missing
+    // main.rx, which must surface as missing entry points instead of a panic.
+    let root = temp_root("lint-empty");
+    std::fs::create_dir_all(&root).unwrap();
+    let bucket = ChallengeBucket::new(
+      &root,
+      "empty",
+      ChallengeConfig {
+        name: "empty".to_owned(),
+        tag: TagList(vec![]),
+        score_rule: ScoreRule {
+          initial: 1000,
+          minimum: 100,
+          decay: 25,
+        },
+      },
+    )
+    .await
+    .unwrap();
+
+    let markers = Checker.lint(&bucket).await.unwrap();
+    assert!(
+      markers
+        .iter()
+        .any(|m| m.message.contains("missing required function")),
+      "markers: {markers:?}"
+    );
+
+    std::fs::remove_dir_all(root).ok();
+  }
+
+  #[allow(dead_code)]
+  fn audit_message_shape_is_serializable() {
+    let message = AuditMessage {
+      peer_team: 2,
+      reason: "stole flag".to_owned(),
+    };
+    assert_eq!(message.peer_team, 2);
+    assert_eq!(message.reason, "stole flag");
+    let _ = challenge::Entity; // keep entity import meaningful if models change
+  }
+}

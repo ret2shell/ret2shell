@@ -42,3 +42,48 @@ impl Merge for Option<Config> {
     }
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::Config;
+  use crate::traits::Merge;
+
+  fn config(host: &str, port: Option<u16>) -> Option<Config> {
+    Some(Config {
+      host: host.to_owned(),
+      port,
+      token: None,
+      user: None,
+      password: None,
+      ping_interval: None,
+      tls: None,
+    })
+  }
+
+  #[test]
+  fn addr_defaults_to_nats_port_when_unset() {
+    assert_eq!(
+      config("nats.internal", None).unwrap().addr(),
+      "nats.internal:4222"
+    );
+    assert_eq!(
+      config("nats.internal", Some(4223)).unwrap().addr(),
+      "nats.internal:4223"
+    );
+  }
+
+  #[test]
+  fn merge_prefers_static_config_and_falls_back_to_database_config() {
+    assert_eq!(
+      config("static", None).merge(config("database", None)),
+      config("static", None)
+    );
+    assert_eq!(config("static", None).merge(None), config("static", None));
+    assert_eq!(
+      None.merge(config("database", None)),
+      config("database", None)
+    );
+    let none: Option<Config> = None;
+    assert_eq!(none.merge(None), None);
+  }
+}

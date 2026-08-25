@@ -67,3 +67,59 @@ async fn send_email_impl(config: &email::Config, email: &EmailCtx) -> Result<(),
 pub async fn send(req: &EmailRequest) -> Result<(), EmailError> {
   send_email_impl(&req.config, &req.email).await
 }
+
+#[cfg(test)]
+mod tests {
+  use r2s_config::email::Config;
+
+  use super::{EmailCtx, construct_email, send};
+
+  fn email_config(tls: &str) -> Config {
+    Config {
+      enabled: true,
+      host: "smtp.example.com".to_owned(),
+      port: 465,
+      sender: "Ret2Shell".to_owned(),
+      sender_address: Some("no-reply@example.com".to_owned()),
+      username: "no-reply@example.com".to_owned(),
+      password: "secret".to_owned(),
+      tls: tls.to_owned(),
+      reset_password_email_body: None,
+      reset_password_email_subject: None,
+      verify_email_body: None,
+      verify_email_subject: None,
+    }
+  }
+
+  fn email_ctx() -> EmailCtx {
+    EmailCtx {
+      name: "Player".to_owned(),
+      email: "player@example.com".to_owned(),
+      subject: "verify".to_owned(),
+      content: "code: 114514".to_owned(),
+    }
+  }
+
+  #[test]
+  fn construct_email_builds_envelope_with_sender_fallback() {
+    let envelope = construct_email(&email_ctx(), "Ret2Shell", "no-reply@example.com").unwrap();
+    let headers = envelope.headers();
+    assert!(format!("{headers:?}").contains("player@example.com"));
+  }
+
+  #[tokio::test]
+  async fn send_rejects_unknown_tls_mode_before_any_network_io() {
+    let request = crate::EmailRequest {
+      email: email_ctx(),
+      config: email_config("not-a-tls-mode"),
+      email_type: crate::EmailType::Verify,
+    };
+
+    let err = send(&request).await.unwrap_err();
+
+    assert!(matches!(
+      err,
+      crate::EmailError::InvalidEmailTlsConfiguration(mode) if mode == "not-a-tls-mode"
+    ));
+  }
+}
