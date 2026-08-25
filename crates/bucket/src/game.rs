@@ -295,7 +295,7 @@ impl Drop for GameBucket {
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
   use std::time::{SystemTime, UNIX_EPOCH};
 
   use chrono::{Duration, Utc};
@@ -304,7 +304,28 @@ mod tests {
   use super::{GameBucket, GameConfig, GameDocument, RepoLock};
   use crate::traits::BucketError;
 
+  /// Child `git` processes spawned by [`crate::git::Git`] inherit these
+  /// variables. CI images usually have no global git identity configured,
+  /// which makes `git commit` fail inside [`GameBucket::new`]. Every caller
+  /// writes the same constant values, so concurrent initialization is
+  /// benign.
+  pub(crate) fn ensure_git_identity_env() {
+    for (key, value) in [
+      ("GIT_AUTHOR_NAME", "Tester"),
+      ("GIT_AUTHOR_EMAIL", "tester@example.com"),
+      ("GIT_COMMITTER_NAME", "Tester"),
+      ("GIT_COMMITTER_EMAIL", "tester@example.com"),
+    ] {
+      if std::env::var_os(key).is_none() {
+        // SAFETY: test-only initialization with constant values shared by
+        // every caller; readers only ever observe one of the constants.
+        unsafe { std::env::set_var(key, value) };
+      }
+    }
+  }
+
   fn temp_root(label: &str) -> std::path::PathBuf {
+    ensure_git_identity_env();
     let nanos = SystemTime::now()
       .duration_since(UNIX_EPOCH)
       .unwrap()

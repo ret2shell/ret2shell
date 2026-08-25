@@ -147,6 +147,7 @@ mod tests {
   use crate::traits::BucketError;
 
   fn temp_root(label: &str) -> std::path::PathBuf {
+    crate::game::tests::ensure_git_identity_env();
     let nanos = SystemTime::now()
       .duration_since(UNIX_EPOCH)
       .unwrap()
