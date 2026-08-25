@@ -23,7 +23,7 @@ pub struct Config {
 
 impl Merge for Option<Config> {
   fn merge(self, _: Self) -> Self {
-    // prefers return other if it is Some
+    // static config wins; this section cannot be overridden from the database.
     self
   }
 }

@@ -50,13 +50,16 @@ impl RuneServiceInfo {
       .unwrap_or_default()
       .get("ret.sh.cn/renew")
       .map(|v| v.parse::<i32>().unwrap_or(0))
-      .unwrap_or(0);
+      .unwrap_or(0)
+      .max(0);
     let lifetime: u64 = ((renew + 1) * 3600) as u64;
     let created_at = pod
       .metadata
       .creation_timestamp
       .clone()
-      .unwrap()
+      .ok_or(ClusterError::MissingField(
+        "pod::creation_timestamp".to_owned(),
+      ))?
       .0
       .as_second();
     let mut ports_info = Vec::new();
@@ -182,6 +185,10 @@ mod tests {
   }
 
   fn pod(renew: Option<&str>) -> Pod {
+    pod_with_timestamp(renew, Some(creation_time(1_700_000_000)))
+  }
+
+  fn pod_with_timestamp(renew: Option<&str>, created_at: Option<Time>) -> Pod {
     let mut annotations = BTreeMap::new();
     if let Some(renew) = renew {
       annotations.insert("ret.sh.cn/renew".to_owned(), renew.to_owned());
@@ -191,7 +198,7 @@ mod tests {
         name: Some("challenge-web-0".to_owned()),
         namespace: Some("ret2shell".to_owned()),
         annotations: Some(annotations),
-        creation_timestamp: Some(creation_time(1_700_000_000)),
+        creation_timestamp: created_at,
         ..Default::default()
       },
       spec: Some(PodSpec {
@@ -263,5 +270,19 @@ mod tests {
   fn service_info_requires_traffic_label_on_service() {
     let err = RuneServiceInfo::try_from_service(&service(None, false), &pod(None)).unwrap_err();
     assert!(matches!(err, ClusterError::MissingField(field) if field == "traffic"));
+  }
+
+  #[test]
+  fn service_info_clamps_negative_renew_annotation_to_one_hour() {
+    let info = RuneServiceInfo::try_from_service(&service(None, true), &pod(Some("-5"))).unwrap();
+    assert_eq!(info.lifetime, 3600);
+  }
+
+  #[test]
+  fn service_info_reports_missing_creation_timestamp_instead_of_panicking() {
+    let err =
+      RuneServiceInfo::try_from_service(&service(None, true), &pod_with_timestamp(None, None))
+        .unwrap_err();
+    assert!(matches!(err, ClusterError::MissingField(field) if field == "pod::creation_timestamp"));
   }
 }

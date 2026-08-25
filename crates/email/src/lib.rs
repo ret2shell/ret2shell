@@ -37,11 +37,13 @@ async fn send_email_impl(config: &email::Config, email: &EmailCtx) -> Result<(),
   debug!(?config, "connect smtp server with smtp_credentials");
   let mailer: AsyncSmtpTransport<Tokio1Executor> = match config.tls.as_str() {
     "starttls" => AsyncSmtpTransport::<Tokio1Executor>::starttls_relay(&config.host),
-    "tls" => Ok(
-      AsyncSmtpTransport::<Tokio1Executor>::relay(&config.host)?.tls(Tls::Wrapper(
-        TlsParameters::builder(config.host.clone()).build().unwrap(),
-      )),
-    ),
+    "tls" => {
+      let tls_parameters = TlsParameters::builder(config.host.clone()).build()?;
+      Ok(
+        AsyncSmtpTransport::<Tokio1Executor>::relay(&config.host)?
+          .tls(Tls::Wrapper(tls_parameters)),
+      )
+    }
     "none" => Ok(AsyncSmtpTransport::<Tokio1Executor>::builder_dangerous(
       &config.host,
     )),

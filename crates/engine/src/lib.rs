@@ -112,7 +112,10 @@ impl Engine {
 
     for func in required_funcs {
       if vm.lookup_function([func]).is_err() {
-        let msg = format!("missing required function: {}", func);
+        let msg = format!(
+          "missing required function: {} (entry functions must be declared as `pub fn`)",
+          func
+        );
         if markers_set.insert(msg.clone()) {
           markers.push(DiagnosticMarker {
             kind: DiagnosticKind::Error,
@@ -270,9 +273,9 @@ mod tests {
 
     for required in ["check", "environ"] {
       assert!(
-        markers
-          .iter()
-          .any(|m| m.message == format!("missing required function: {required}")),
+        markers.iter().any(|m| m
+          .message
+          .contains(&format!("missing required function: {required}"))),
         "missing marker for `{required}`: {markers:?}"
       );
     }
@@ -288,7 +291,7 @@ mod tests {
     assert!(
       markers
         .iter()
-        .any(|m| m.message == "missing required function: add"),
+        .any(|m| m.message.contains("missing required function: add")),
       "markers: {markers:?}"
     );
   }

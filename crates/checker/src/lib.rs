@@ -377,9 +377,10 @@ mod tests {
     let markers = Checker.lint(&bucket).await.unwrap();
     for required in ["check", "environ"] {
       assert!(
-        markers
-          .iter()
-          .any(|m| m.message == format!("missing required function: {required}")),
+        markers.iter().any(|m| {
+          m.message
+            .contains(&format!("missing required function: {required}"))
+        }),
         "missing marker for `{required}`: {markers:?}"
       );
     }

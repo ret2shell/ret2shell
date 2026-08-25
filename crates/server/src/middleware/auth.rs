@@ -309,7 +309,9 @@ pub async fn create_auth_header_by_user_agent(
           WWW_AUTHENTICATE,
           header::HeaderValue::from_static("Bearer realm=\"ret2shell\""),
         );
-        resp_headers.insert(
+        // NOTE: `insert` would replace the Bearer challenge above, use
+        // `append` so curl receives both challenges.
+        resp_headers.append(
           WWW_AUTHENTICATE,
           header::HeaderValue::from_static("Basic realm=\"ret2shell\""),
         );
@@ -895,10 +897,10 @@ mod tests {
         "{user_agent} should receive a basic challenge"
       );
     }
-    // NOTE: the handler intends to offer both bearer and basic challenges for
-    // curl, but `HeaderMap::insert` overwrites same-name headers, so only one
-    // value survives. Asserted against the actual single-value behavior.
+    // NOTE: the handler offers both bearer and basic challenges for curl via
+    // `append`.
     let challenges = run_user_agent_probe(StatusCode::UNAUTHORIZED, "curl/8.0").await;
+    assert!(challenges.contains(&"Bearer realm=\"ret2shell\"".to_owned()));
     assert!(challenges.contains(&"Basic realm=\"ret2shell\"".to_owned()));
   }
 

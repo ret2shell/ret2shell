@@ -116,7 +116,7 @@ impl IntoResponse for ResponseError {
         DbErr::RecordNotFound(s) => (StatusCode::NOT_FOUND, format!("record not found: {s}")),
         DbErr::Json(_) => (
           StatusCode::INTERNAL_SERVER_ERROR,
-          "data cruptted".to_owned(),
+          "data corrupted".to_owned(),
         ),
         _ => log_with_resp!(
           StatusCode::INTERNAL_SERVER_ERROR,
@@ -334,8 +334,8 @@ impl IntoResponse for ResponseError {
         r2s_oauth::OAuthError::NetworkError(_) => {
           log_with_resp!(
             StatusCode::INTERNAL_SERVER_ERROR,
-            "missing OAuth config".to_owned(),
-            "OAuth config is not set yet"
+            "failed to reach oauth provider".to_owned(),
+            format!("failed to reach oauth provider: {e:?}")
           )
         }
         _ => log_with_resp!(

@@ -143,9 +143,10 @@ mod tests {
     let markers = OAuth.lint("pub fn other() { 1 }").await.unwrap();
     for required in ["login", "bind"] {
       assert!(
-        markers
-          .iter()
-          .any(|m| m.message == format!("missing required function: {required}")),
+        markers.iter().any(|m| {
+          m.message
+            .contains(&format!("missing required function: {required}"))
+        }),
         "missing marker for `{required}`: {markers:?}"
       );
     }
