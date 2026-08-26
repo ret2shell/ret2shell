@@ -13,6 +13,7 @@ pub struct Model {
   pub provider: String,
   #[sea_orm(column_type = "Text", nullable)]
   pub script: String,
+  #[sea_orm(column_type = "Text", nullable)]
   pub portal: Option<String>,
 }
 
