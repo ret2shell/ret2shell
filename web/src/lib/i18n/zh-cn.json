@@ -570,6 +570,8 @@
     "scoreboard": {
       "title": "积分板",
       "empty": "暂无参赛队伍",
+      "blackout": "黑灯模式已开启，仅显示本队积分和排名",
+      "blackoutSpectator": "黑灯模式已开启，暂不公开积分和排名",
       "selectInstitute": "选择组织...",
       "currentPeriod": "本周目",
       "errors": {
@@ -705,6 +707,9 @@
       },
       "offline": {
         "label": "启用线下赛事特性"
+      },
+      "blackout": {
+        "label": "黑灯模式"
       },
       "teamSize": {
         "label": "队伍人数",

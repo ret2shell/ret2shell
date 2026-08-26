@@ -570,6 +570,8 @@
     "scoreboard": {
       "title": "Scoreboard",
       "empty": "No participating teams yet",
+      "blackout": "Blackout mode is enabled. Only your team's score and rank are shown.",
+      "blackoutSpectator": "Blackout mode is enabled. Scores and ranks are not public.",
       "selectInstitute": "Select an institute...",
       "currentPeriod": "Current time period",
       "errors": {
@@ -705,6 +707,9 @@
       },
       "offline": {
         "label": "Enable offline game features"
+      },
+      "blackout": {
+        "label": "Blackout mode"
       },
       "teamSize": {
         "label": "Team size",

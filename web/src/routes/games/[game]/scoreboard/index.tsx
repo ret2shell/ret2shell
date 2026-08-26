@@ -1,13 +1,13 @@
 import { useInstitutes } from "@api/account";
 import { useChallenges } from "@api/challenge";
 import { useGame, useGameScoreboard } from "@api/game";
-import { useSelfTeam } from "@api/team";
+import { useSelfTeam, useTeamRank } from "@api/team";
 import type { Team } from "@models/team";
 import { createBreakpoints } from "@solid-primitives/media";
 import { createElementSize, type Size } from "@solid-primitives/resize-observer";
 import { useParams, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
-import { isGameInArchived, isPlayerCanAccessChallenges } from "@storage/game";
+import { isAdminOfGame, isGameInArchived, isPlayerCanAccessChallenges } from "@storage/game";
 import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
 import Button from "@widgets/button";
@@ -131,6 +131,13 @@ export default function () {
     silenced: true,
   });
 
+  const blackout = createMemo(() => game.data?.blackout === true && !isAdminOfGame(game.data));
+  const selfRank = useTeamRank({
+    game_id: () => gameId(),
+    team_id: () => selfTeam.data?.id ?? 0,
+    enabled: () => blackout() && !!selfTeam.data,
+  });
+
   const canAccessChallenges = createMemo(() => {
     return isPlayerCanAccessChallenges(game.data, selfTeam.data ?? null);
   });
@@ -139,7 +146,7 @@ export default function () {
 
   const challenges = useChallenges({
     game_id: () => gameId(),
-    enabled: () => gameId() > 0 && canAccessChallenges()[0],
+    enabled: () => gameId() > 0 && canAccessChallenges()[0] && !blackout(),
   });
 
   const topTeamsQueryAll = useGameScoreboard({
@@ -147,7 +154,7 @@ export default function () {
     page: () => 1,
     page_size: () => 10,
     with_hidden: () => showHiddenTeams(),
-    enabled: () => gameId() > 0 && !selectedInstituteId(),
+    enabled: () => gameId() > 0 && !selectedInstituteId() && !blackout(),
   });
 
   const topTeamsQueryByInstitute = useGameScoreboard({
@@ -156,7 +163,7 @@ export default function () {
     page_size: () => 10,
     with_hidden: () => showHiddenTeams(),
     institute_id: () => selectedInstituteId()!,
-    enabled: () => gameId() > 0 && !!selectedInstituteId(),
+    enabled: () => gameId() > 0 && !!selectedInstituteId() && !blackout(),
   });
 
   const teamsQueryAll = useGameScoreboard({
@@ -164,7 +171,7 @@ export default function () {
     page: () => page(),
     page_size: () => pageSize() ?? 15,
     with_hidden: () => showHiddenTeams(),
-    enabled: () => gameId() > 0 && !!pageSize() && !selectedInstituteId(),
+    enabled: () => gameId() > 0 && !!pageSize() && !selectedInstituteId() && !blackout(),
   });
 
   const teamsQueryByInstitute = useGameScoreboard({
@@ -173,7 +180,7 @@ export default function () {
     page_size: () => pageSize() ?? 15,
     with_hidden: () => showHiddenTeams(),
     institute_id: () => selectedInstituteId()!,
-    enabled: () => gameId() > 0 && !!pageSize() && !!selectedInstituteId(),
+    enabled: () => gameId() > 0 && !!pageSize() && !!selectedInstituteId() && !blackout(),
   });
 
   const activeTopTeamsQuery = createMemo(() => (selectedInstituteId() ? topTeamsQueryByInstitute : topTeamsQueryAll));
@@ -246,9 +253,28 @@ export default function () {
   return (
     <>
       <Title page={t("game.scoreboard.title")} route={`/games/${gameId()}/scoreboard`} />
-      <div class="flex flex-col lg:flex-row flex-1 min-w-min">
-        <div ref={autoPageSizeWatcher!} class="fixed h-[calc(100vh-24rem)]" />
-        <Show when={topTeams().length > 0}>
+      <Show when={blackout()}>
+        <div class="flex-1 flex items-center justify-center p-3 lg:p-6">
+          <div class="w-full max-w-lg border border-layer-content/10 rounded-lg p-6 flex flex-col items-center space-y-4">
+            <span class="icon-[fluent--lightbulb-filament-20-regular] w-12 h-12 text-warning" />
+            <h1 class="text-2xl font-bold">{t("game.scoreboard.title")}</h1>
+            <Show
+              when={selfTeam.data}
+              fallback={<p class="opacity-60 text-center">{t("game.scoreboard.blackoutSpectator")}</p>}
+            >
+              <p class="opacity-60 text-center">{t("game.scoreboard.blackout")}</p>
+              <div class="flex flex-row items-center space-x-8 text-xl">
+                <span class="font-bold text-success">{selfTeam.data?.score ?? 0} pts</span>
+                <span class="font-bold text-warning">#{selfRank.data ?? "-"}</span>
+              </div>
+            </Show>
+          </div>
+        </div>
+      </Show>
+      <Show when={!blackout()}>
+        <div class="flex flex-col lg:flex-row flex-1 min-w-min">
+          <div ref={autoPageSizeWatcher!} class="fixed h-[calc(100vh-24rem)]" />
+          <Show when={topTeams().length > 0}>
           <div
             class={clsx(
               "lg:sticky w-full top-0 left-0",
@@ -420,8 +446,8 @@ export default function () {
               </Match>
             </Switch>
           </div>
-        </Show>
-        <div class="flex-1 min-w-fit p-3 lg:p-6 flex flex-col">
+          </Show>
+          <div class="flex-1 min-w-fit p-3 lg:p-6 flex flex-col">
           <Show
             when={showChallengeDetail()}
             fallback={
@@ -444,8 +470,9 @@ export default function () {
           >
             <TeamSolves game={game.data} teams={teams()} challenges={challengeList()} />
           </Show>
+          </div>
         </div>
-      </div>
+      </Show>
     </>
   );
 }

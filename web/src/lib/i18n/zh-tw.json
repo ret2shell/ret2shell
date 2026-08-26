@@ -570,6 +570,8 @@
     "scoreboard": {
       "title": "積分板",
       "empty": "暫無參賽隊伍",
+      "blackout": "黑燈模式已開啟，僅顯示本隊積分和排名",
+      "blackoutSpectator": "黑燈模式已開啟，暫不公開積分和排名",
       "selectInstitute": "選擇組織...",
       "currentPeriod": "本週目",
       "errors": {
@@ -705,6 +707,9 @@
       },
       "offline": {
         "label": "啟用線下賽事特性"
+      },
+      "blackout": {
+        "label": "黑燈模式"
       },
       "teamSize": {
         "label": "隊伍人數",

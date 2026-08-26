@@ -38,6 +38,7 @@ export type Game = {
   archive_at: DateTime;
   hidden: boolean;
   offline: boolean;
+  blackout: boolean;
   frozen: boolean;
   host_type: HostType;
   team_size: number;

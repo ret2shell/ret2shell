@@ -84,6 +84,7 @@ export default function CreateGame(props: { onDone: (game: Game) => void }) {
       host_type: HostType.Game,
       id: 0,
       hidden: true,
+      blackout: false,
       frozen: false,
       updated_at: DateTime.now(),
       introduction_id: null,

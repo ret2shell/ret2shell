@@ -570,6 +570,8 @@
     "scoreboard": {
       "title": "ポイントボード",
       "empty": "参加チームなし",
+      "blackout": "ブラックアウトモードが有効です。自チームの得点と順位のみ表示されます。",
+      "blackoutSpectator": "ブラックアウトモードが有効です。得点と順位は公開されていません。",
       "selectInstitute": "組織を選択...",
       "currentPeriod": "今週目",
       "errors": {
@@ -705,6 +707,9 @@
       },
       "offline": {
         "label": "オフライン大会の特徴を有効にする"
+      },
+      "blackout": {
+        "label": "ブラックアウトモード"
       },
       "teamSize": {
         "label": "チーム人数",

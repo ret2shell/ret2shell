@@ -18,6 +18,7 @@ export type GameForm = {
   archive_at?: number;
   hidden: boolean;
   offline?: boolean;
+  blackout?: boolean;
   frozen?: boolean;
   team_size?: number;
   env_limit?: number;
@@ -188,6 +189,18 @@ export default function GameEdit(props: { onDone: (result: GameForm) => void; ga
                 error={field.error}
               >
                 <span class="flex-1 text-start truncate">{t("game.form.offline.label")}</span>
+              </Checkbox>
+            )}
+          </Field>
+          <Field name="blackout" type="boolean">
+            {(field, props) => (
+              <Checkbox
+                title={t("game.form.blackout.label")}
+                inputProps={props}
+                checked={field.value ?? false}
+                error={field.error}
+              >
+                <span class="flex-1 text-start truncate">{t("game.form.blackout.label")}</span>
               </Checkbox>
             )}
           </Field>
