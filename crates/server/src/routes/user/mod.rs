@@ -7,12 +7,12 @@ use axum::{
 };
 use r2s_cache::Cache;
 use r2s_database::{
-  ip, oauth, submission, team,
+  game, ip, oauth, submission, team,
   user::{self, Permission},
 };
 use r2s_migrator::Database;
 use serde::Deserialize;
-use tracing::info;
+use tracing::{info, warn};
 
 use crate::{
   middleware::{
@@ -103,14 +103,21 @@ async fn get_user(
 
 async fn get_teams(
   State(ref db): State<Database>, Extension(user): Extension<user::Model>,
+  Extension(token): Extension<Token>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  let teams = team::get_list_by_user_id_ex(&db.conn, user.id).await?;
-  Ok(Json(
-    teams
-      .into_iter()
-      .map(|t| t.desensitize())
-      .collect::<Vec<_>>(),
-  ))
+  let teams = team::get_list_by_user_id_ex_with_games(&db.conn, user.id).await?;
+  let mut result = Vec::with_capacity(teams.len());
+  for (team, game) in teams {
+    if token.id != user.id
+      && game
+        .as_ref()
+        .is_some_and(|game| game.blackout && !auth::is_game_admin!(&token, game))
+    {
+      continue;
+    }
+    result.push(team.desensitize());
+  }
+  Ok(Json(result))
 }
 
 async fn logout_user(cache: &Cache, user_id: i64) -> Result<(), ResponseError> {
@@ -212,12 +219,41 @@ async fn get_user_stats(
   }
   match query.game_id {
     Some(game_id) => {
+      let game = game::get(&db.conn, game_id).await?;
+      if game.as_ref().is_some_and(|game| {
+        game.blackout && token.id != user.id && !auth::is_game_admin!(&token, game)
+      }) {
+        warn!(
+          user_id = token.id,
+          game_id,
+          target_user_id = user.id,
+          "user tried to access another user's game statistics during blackout",
+        );
+        return Err(ResponseError::Forbidden("permission denied".to_owned()));
+      }
       let stats = submission::get_user_challenge_stats(&db.conn, game_id, user.id).await?;
       Ok(Json(stats).into_response())
     }
     None => {
       let stats = submission::get_user_game_stats(&db.conn, user.id).await?;
-      Ok(Json(stats).into_response())
+      if token.id == user.id {
+        return Ok(Json(stats).into_response());
+      }
+      let games = game::get_multiple(&db.conn, stats.iter().map(|stat| stat.game_id).collect())
+        .await?
+        .into_iter()
+        .map(|game| (game.id, game))
+        .collect::<std::collections::HashMap<_, _>>();
+      let mut result = Vec::with_capacity(stats.len());
+      for stat in stats {
+        if games
+          .get(&stat.game_id)
+          .is_none_or(|game| !game.blackout || auth::is_game_admin!(&token, game))
+        {
+          result.push(stat);
+        }
+      }
+      Ok(Json(result).into_response())
     }
   }
 }

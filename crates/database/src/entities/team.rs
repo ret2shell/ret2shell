@@ -280,6 +280,28 @@ where
     .await
 }
 
+pub async fn get_list_by_user_id_ex_with_games<C>(
+  db: &C, user_id: i64,
+) -> Result<Vec<(ExModel, Option<game::Model>)>, DbErr>
+where
+  C: ConnectionTrait, {
+  let teams = get_list_by_user_id_ex(db, user_id).await?;
+  let games = game::get_multiple(db, teams.iter().map(|team| team.game_id).collect()).await?;
+  let games = games
+    .into_iter()
+    .map(|game| (game.id, game))
+    .collect::<std::collections::HashMap<_, _>>();
+  Ok(
+    teams
+      .into_iter()
+      .map(|team| {
+        let game = games.get(&team.game_id).cloned();
+        (team, game)
+      })
+      .collect(),
+  )
+}
+
 pub async fn get_members<C>(db: &C, id: i64) -> Result<Vec<user::Model>, DbErr>
 where
   C: ConnectionTrait, {

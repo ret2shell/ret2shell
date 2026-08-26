@@ -123,6 +123,8 @@ pub struct Model {
   pub archive_at: DateTime<Utc>,
   pub hidden: bool,
   pub offline: bool,
+  #[serde(default)]
+  pub blackout: bool,
   pub frozen: bool,
   pub host_type: HostType,
   pub team_size: i32,
@@ -254,6 +256,12 @@ pub async fn get<C>(db: &C, game_id: i64) -> Result<Option<Model>, DbErr>
 where
   C: ConnectionTrait, {
   Entity::find_by_id(game_id).one(db).await
+}
+
+pub async fn get_multiple<C>(db: &C, game_ids: Vec<i64>) -> Result<Vec<Model>, DbErr>
+where
+  C: ConnectionTrait, {
+  Entity::find().filter(Column::Id.is_in(game_ids)).all(db).await
 }
 
 pub async fn get_by_bucket<C>(db: &C, bucket: &str) -> Result<Option<Model>, DbErr>
@@ -401,6 +409,7 @@ mod tests {
       archive_at: now + Duration::seconds(archive_offset_seconds),
       hidden: false,
       offline: false,
+      blackout: false,
       frozen: false,
       host_type,
       team_size: 4,

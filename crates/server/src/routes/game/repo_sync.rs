@@ -513,6 +513,7 @@ async fn sync_game_config(
         archive_at: bucket_config.archive_at,
         hidden: game.hidden,
         offline: game.offline,
+        blackout: game.blackout,
         frozen: game.frozen,
         host_type: convert_game_host_type(bucket_config.host_type)?,
         team_size: bucket_config.team_size,

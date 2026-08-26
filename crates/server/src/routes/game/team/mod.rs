@@ -183,9 +183,19 @@ struct TeamInfoQuery {
 async fn get_team_info(
   State(ref db): State<Database>, Extension(game): Extension<game::Model>,
   Extension(team): Extension<team::Model>, Extension(token): Extension<auth::Token>,
-  Query(query): Query<TeamInfoQuery>,
+  Extension(self_team): Extension<Option<team::Model>>, Query(query): Query<TeamInfoQuery>,
 ) -> Result<impl IntoResponse, ResponseError> {
   ensure_team_in_game(&game, &team)?;
+  let is_admin = auth::is_game_admin!(token, game);
+  if game.blackout && !is_admin && self_team.is_none_or(|self_team| self_team.id != team.id) {
+    warn!(
+      user_id = token.id,
+      game_id = game.id,
+      team_id = team.id,
+      "user tried to access another team's information during blackout",
+    );
+    return Err(ResponseError::Forbidden("permission denied".to_owned()));
+  }
   let result = if query.ex.unwrap_or(false) {
     team::get_ex(&db.conn, team.id)
       .await?
@@ -193,7 +203,7 @@ async fn get_team_info(
   } else {
     team.into()
   };
-  if auth::is_game_admin!(token, game) {
+  if is_admin {
     Ok(Json(result))
   } else {
     Ok(Json(result.desensitize()))
@@ -202,9 +212,22 @@ async fn get_team_info(
 
 async fn get_team_solves(
   State(ref db): State<Database>, Extension(game): Extension<game::Model>,
-  Extension(team): Extension<team::Model>,
+  Extension(team): Extension<team::Model>, Extension(token): Extension<auth::Token>,
+  Extension(self_team): Extension<Option<team::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
   ensure_team_in_game(&game, &team)?;
+  if game.blackout
+    && !auth::is_game_admin!(token, game)
+    && self_team.is_none_or(|self_team| self_team.id != team.id)
+  {
+    warn!(
+      user_id = token.id,
+      game_id = game.id,
+      team_id = team.id,
+      "user tried to access another team's solves during blackout",
+    );
+    return Err(ResponseError::Forbidden("permission denied".to_owned()));
+  }
   Ok(Json(
     submission::get_list_ex(
       &db.conn,
@@ -222,9 +245,22 @@ async fn get_team_solves(
 
 async fn get_team_rank(
   State(ref db): State<Database>, Extension(game): Extension<game::Model>,
-  Extension(team): Extension<team::Model>,
+  Extension(team): Extension<team::Model>, Extension(token): Extension<auth::Token>,
+  Extension(self_team): Extension<Option<team::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
   ensure_team_in_game(&game, &team)?;
+  if game.blackout
+    && !auth::is_game_admin!(token, game)
+    && self_team.is_none_or(|self_team| self_team.id != team.id)
+  {
+    warn!(
+      user_id = token.id,
+      game_id = game.id,
+      team_id = team.id,
+      "user tried to access another team's rank during blackout",
+    );
+    return Err(ResponseError::Forbidden("permission denied".to_owned()));
+  }
   if team.state < team::State::Hidden {
     warn!("user try to get rank of invalid team");
     return Err(ResponseError::PreconditionFailed(
@@ -269,7 +305,21 @@ struct TeamListQuery {
 async fn get_team_list(
   State(ref db): State<Database>, Extension(game): Extension<game::Model>,
   Extension(token): Extension<auth::Token>, Query(query): Query<TeamListQuery>,
+  Extension(self_team): Extension<Option<team::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  if game.blackout && !auth::is_game_admin!(token, game) {
+    warn!(
+      user_id = token.id,
+      game_id = game.id,
+      "user accessed the team list during blackout; returning only their own team",
+    );
+    let self_team = self_team
+      .map(|team| team.desensitize())
+      .into_iter()
+      .collect::<Vec<_>>();
+    let total = self_team.len() as u64;
+    return Ok(Json((self_team, total)));
+  }
   let min_state = if query
     .min_state
     .clone()
@@ -303,13 +353,23 @@ async fn get_team_list(
 async fn get_team_extra(
   State(ref db): State<Database>, Extension(token): Extension<auth::Token>,
   Extension(game): Extension<game::Model>, Extension(team): Extension<team::Model>,
+  Extension(self_team): Extension<Option<team::Model>>,
 ) -> Result<impl IntoResponse, ResponseError> {
   ensure_team_in_game(&game, &team)?;
+  let is_admin = is_game_admin!(&token, &game);
+  if game.blackout && !is_admin && self_team.as_ref().is_none_or(|t| t.id != team.id) {
+    warn!(
+      user_id = token.id,
+      game_id = game.id,
+      team_id = team.id,
+      "user tried to access another team's extras during blackout",
+    );
+    return Err(ResponseError::Forbidden("permission denied".to_owned()));
+  }
   let resp = extra::get_list_ex(&db.conn, team.id).await?;
-  if is_game_admin!(&token, &game) {
+  if is_admin {
     Ok(Json(resp))
   } else {
-    let self_team = team::get_by_user_id(&db.conn, team.game_id, token.id).await?;
     if self_team.is_none_or(|t| t.id != team.id) {
       Ok(Json(resp.into_iter().map(|e| e.desensitize()).collect()))
     } else {
