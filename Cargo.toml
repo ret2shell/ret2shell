@@ -6,10 +6,10 @@ resolver = "3"
 authors      = ["Reverier-Xu <reverier.xu@woooo.tech>"]
 edition      = "2024"
 homepage     = "https://ret.sh.cn/"
-publish      = false
+publish      = true
 repository   = "https://github.com/ret2shell/ret2shell"
 rust-version = "1.95.0"
-version      = "3.11.3"
+version      = "3.12.0"
 
 [profile.release]
 codegen-units = 1
@@ -21,7 +21,7 @@ strip         = true
 [workspace.dependencies]
 aho-corasick       = "1.1"
 anyhow             = "1.0"
-argon2             = "0.5"
+argon2             = "0.6"
 async-nats         = "0.50"
 async-trait        = "0.1"
 base64             = "0.23"
@@ -89,6 +89,7 @@ r2s-media    = { path = "crates/media" }
 r2s-migrator = { path = "crates/migrator" }
 r2s-oauth    = { path = "crates/oauth" }
 r2s-queue    = { path = "crates/queue" }
+r2s-server   = { path = "crates/server" }
 
 [workspace.dependencies.axum]
 features = ["ws", "http2", "tower-log", "tracing", "multipart", "macros"]
