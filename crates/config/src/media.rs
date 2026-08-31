@@ -23,3 +23,29 @@ impl Merge for Option<Config> {
     other.or(self)
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::Config;
+  use crate::traits::Merge;
+
+  fn config(path: &str) -> Option<Config> {
+    Some(Config {
+      path: path.to_owned(),
+      anti_theft: true,
+      limit: 100,
+    })
+  }
+
+  #[test]
+  fn merge_prefers_database_config_over_static_config() {
+    assert_eq!(
+      config("/static").merge(config("/database")),
+      config("/database")
+    );
+    assert_eq!(config("/database").merge(None), config("/database"));
+    assert_eq!(None.merge(config("/static")), config("/static"));
+    let none: Option<Config> = None;
+    assert_eq!(none.merge(None), None);
+  }
+}

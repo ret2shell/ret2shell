@@ -40,3 +40,63 @@ impl Merge for Option<Config> {
     }
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::{Config, ValidatorType};
+  use crate::traits::Merge;
+
+  fn config(enabled: bool, difficulty: Option<u16>, validator: ValidatorType) -> Option<Config> {
+    Some(Config {
+      enabled,
+      difficulty,
+      validator,
+    })
+  }
+
+  #[test]
+  fn merge_takes_overlay_switch_and_validator_with_base_difficulty_fallback() {
+    let merged = config(true, Some(3), ValidatorType::Pow)
+      .merge(config(false, None, ValidatorType::Image))
+      .unwrap();
+
+    assert!(!merged.enabled);
+    assert_eq!(merged.validator, ValidatorType::Image);
+    assert_eq!(merged.difficulty, Some(3));
+  }
+
+  #[test]
+  fn merge_falls_back_to_the_other_side_when_one_side_is_missing() {
+    assert!(
+      config(true, None, ValidatorType::Pow)
+        .merge(None)
+        .unwrap()
+        .enabled
+    );
+    assert_eq!(
+      None
+        .merge(config(false, Some(5), ValidatorType::None))
+        .unwrap()
+        .difficulty,
+      Some(5)
+    );
+    let none: Option<Config> = None;
+    assert_eq!(none.merge(None), None);
+  }
+
+  #[test]
+  fn validator_type_serializes_as_snake_case_tags() {
+    assert_eq!(
+      serde_json::to_value(ValidatorType::RecaptchaV3).unwrap(),
+      "recaptcha_v3"
+    );
+    assert_eq!(
+      serde_json::to_value(ValidatorType::HCaptcha).unwrap(),
+      "h_captcha"
+    );
+    assert_eq!(
+      serde_json::from_str::<ValidatorType>("\"recaptcha_v3\"").unwrap(),
+      ValidatorType::RecaptchaV3
+    );
+  }
+}

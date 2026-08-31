@@ -70,7 +70,51 @@ pub fn check_text(ac: &AhoCorasick, src: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-  use super::check_text;
+  use std::time::{SystemTime, UNIX_EPOCH};
+
+  use super::{check_text, initialize, read_sensitive_word_file};
+
+  async fn temp_word_file(lines: &[&str]) -> String {
+    let path = std::env::temp_dir().join(format!(
+      "r2s-auditor-test-{}-{}",
+      std::process::id(),
+      SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_nanos()
+    ));
+    tokio::fs::write(&path, lines.join("\n")).await.unwrap();
+    path.to_string_lossy().to_string()
+  }
+
+  #[tokio::test]
+  async fn read_sensitive_word_file_deduplicates_lines() {
+    let path = temp_word_file(&["flag", "admin", "admin", "root"]).await;
+
+    let words = read_sensitive_word_file(&path).await.unwrap();
+
+    let words: Vec<String> = words.into_iter().collect();
+    assert_eq!(words, vec!["admin", "flag", "root"]);
+    tokio::fs::remove_file(path).await.ok();
+  }
+
+  #[tokio::test]
+  async fn initialize_builds_filter_from_file_and_none_without_config() {
+    assert!(initialize(&None).await.unwrap().is_none());
+
+    let path = temp_word_file(&["sensitive"]).await;
+    let ac = initialize(&Some(path.clone())).await.unwrap().unwrap();
+
+    assert!(check_text(&ac, "this is a sensitive message"));
+    assert!(!check_text(&ac, "nothing special here"));
+    tokio::fs::remove_file(path).await.ok();
+  }
+
+  #[tokio::test]
+  async fn read_missing_word_file_fails_with_io_error() {
+    let result = read_sensitive_word_file("/nonexistent/words.txt").await;
+    assert!(matches!(result, Err(super::WordFilterError::IOError(_))));
+  }
 
   #[test]
   fn test_aho_corasick_cjk() {

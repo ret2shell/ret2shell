@@ -297,3 +297,19 @@ where
   C: ConnectionTrait, {
   Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }
+
+#[cfg(test)]
+mod tests {
+  use super::Model;
+
+  #[test]
+  fn desensitize_clears_bucket_reference_but_keeps_challenge_fields() {
+    let challenge = Model {
+      bucket: Some("babystack_ab12cd".to_owned()),
+      ..Model::default()
+    };
+    let view = challenge.desensitize();
+    assert_eq!(view.bucket, None);
+    assert_eq!(view.id, 0);
+  }
+}

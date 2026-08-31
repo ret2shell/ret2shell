@@ -465,4 +465,282 @@ mod tests {
     ));
     std::fs::remove_dir_all(bucket.path).ok();
   }
+
+  fn challenge_config(name: &str) -> ChallengeConfig {
+    ChallengeConfig {
+      name: name.to_owned(),
+      tag: TagList(vec![Tag {
+        name: "pwn".to_owned(),
+        primary: true,
+      }]),
+      score_rule: ScoreRule {
+        initial: 1000,
+        minimum: 100,
+        decay: 20,
+      },
+    }
+  }
+
+  fn temp_root(label: &str) -> PathBuf {
+    let nanos = std::time::SystemTime::now()
+      .duration_since(std::time::UNIX_EPOCH)
+      .unwrap()
+      .as_nanos();
+    std::env::temp_dir().join(format!(
+      "r2s-challenge-test-{label}-{}-{nanos}",
+      std::process::id()
+    ))
+  }
+
+  #[tokio::test]
+  async fn new_creates_layout_and_open_rejects_missing_or_conflicting_paths() {
+    let root = temp_root("layout");
+
+    std::fs::create_dir_all(&root).unwrap();
+    let bucket = ChallengeBucket::new(&root, "hello_world", challenge_config("Hello World"))
+      .await
+      .unwrap();
+
+    for entry in ["config.toml", "mapped", "checker", "src", "static"] {
+      assert!(bucket.path.join(entry).exists(), "missing {entry}");
+    }
+    let saved: ChallengeConfig = toml::from_str(
+      &tokio::fs::read_to_string(bucket.path.join("config.toml"))
+        .await
+        .unwrap(),
+    )
+    .unwrap();
+    assert_eq!(saved.name, "Hello World");
+
+    // opening a missing bucket fails with the full path in the error.
+    let err = ChallengeBucket::open(&root, "no_such", true)
+      .await
+      .unwrap_err();
+    assert!(matches!(err, BucketError::PathDoesNotExist(path) if path.ends_with("no_such")));
+
+    // creating over an existing path conflicts.
+    let err = ChallengeBucket::new(&root, "hello_world", challenge_config("again"))
+      .await
+      .unwrap_err();
+    assert!(matches!(err, BucketError::PathConflict(_)));
+
+    std::fs::remove_dir_all(root).ok();
+  }
+
+  #[tokio::test]
+  async fn config_env_hints_round_trip_with_defaults() {
+    let root = temp_root("round-trip");
+    std::fs::create_dir_all(&root).unwrap();
+    let bucket = ChallengeBucket::new(&root, "demo", challenge_config("Demo"))
+      .await
+      .unwrap();
+
+    // config round-trips through set_config.
+    let updated = challenge_config("Renamed");
+    bucket
+      .set_config(serde_json::to_value(&updated).unwrap())
+      .await
+      .unwrap();
+    assert_eq!(bucket.config().await.unwrap().name, "Renamed");
+
+    // env is optional and round-trips; delete removes it again.
+    assert!(bucket.env().await.unwrap().is_none());
+    let env_json = serde_json::json!({
+      "internet": true,
+      "images": [{ "name": "web", "tag": "latest", "cpu": 1.0, "mem": "512Mi" }],
+    });
+    bucket.set_env(env_json).await.unwrap();
+    let env = bucket.env().await.unwrap().unwrap();
+    assert!(env.internet);
+    assert_eq!(env.images[0].name, "web");
+    bucket.delete_env().await.unwrap();
+    assert!(bucket.env().await.unwrap().is_none());
+
+    // hints default to empty and round-trip.
+    assert!(bucket.hints().await.unwrap().hints.is_empty());
+    bucket
+      .set_hints(Hints {
+        hints: vec![Hint {
+          content: "look at the binary".to_owned(),
+          cost: 50,
+        }],
+      })
+      .await
+      .unwrap();
+    let hints = bucket.hints().await.unwrap();
+    assert_eq!(hints.hints.len(), 1);
+    assert_eq!(hints.hints[0].cost, 50);
+
+    // text documents default to empty content when never written.
+    assert_eq!(bucket.description().await.unwrap(), "");
+    assert_eq!(bucket.answer().await.unwrap(), "");
+    assert_eq!(bucket.checker().await.unwrap(), "");
+    bucket.set_description("# demo".to_owned()).await.unwrap();
+    bucket.set_answer("flag{demo}".to_owned()).await.unwrap();
+    bucket
+      .set_checker("pub fn check() {}".to_owned())
+      .await
+      .unwrap();
+    assert_eq!(bucket.description().await.unwrap(), "# demo");
+    assert_eq!(bucket.answer().await.unwrap(), "flag{demo}");
+    assert_eq!(bucket.checker().await.unwrap(), "pub fn check() {}");
+
+    std::fs::remove_dir_all(root).ok();
+  }
+
+  #[tokio::test]
+  async fn write_operations_require_locking() {
+    let root = temp_root("locked");
+    std::fs::create_dir_all(&root).unwrap();
+    let bucket = ChallengeBucket::new(&root, "locked_demo", challenge_config("Locked"))
+      .await
+      .unwrap();
+
+    let unlocked = ChallengeBucket::open(&root, "locked_demo", false)
+      .await
+      .unwrap();
+    assert!(!unlocked.locked);
+
+    let config_json = serde_json::to_value(challenge_config("x")).unwrap();
+    let env_json = serde_json::json!({ "internet": false, "images": [] });
+    assert!(matches!(
+      unlocked.set_config(config_json.clone()).await,
+      Err(BucketError::NeedLocking)
+    ));
+    assert!(matches!(
+      unlocked.set_env(env_json.clone()).await,
+      Err(BucketError::NeedLocking)
+    ));
+    assert!(matches!(
+      unlocked.delete_env().await,
+      Err(BucketError::NeedLocking)
+    ));
+    assert!(matches!(
+      unlocked.set_hints(Hints { hints: vec![] }).await,
+      Err(BucketError::NeedLocking)
+    ));
+    assert!(matches!(
+      unlocked.set_description("d".to_owned()).await,
+      Err(BucketError::NeedLocking)
+    ));
+    assert!(matches!(
+      unlocked.set_answer("a".to_owned()).await,
+      Err(BucketError::NeedLocking)
+    ));
+    assert!(matches!(
+      unlocked.set_checker("c".to_owned()).await,
+      Err(BucketError::NeedLocking)
+    ));
+    assert!(matches!(
+      unlocked.upload_static("f.txt", "data".as_bytes()).await,
+      Err(BucketError::NeedLocking)
+    ));
+    assert!(matches!(
+      unlocked.delete_static("ok.txt").await,
+      Err(BucketError::NeedLocking)
+    ));
+
+    // the locked handle can perform the same operations.
+    bucket.set_config(config_json).await.unwrap();
+    bucket.set_env(env_json).await.unwrap();
+
+    std::fs::remove_dir_all(root).ok();
+  }
+
+  #[tokio::test]
+  async fn file_listing_upload_and_delete_normalize_names_and_skip_dotfiles() {
+    let root = temp_root("files");
+    std::fs::create_dir_all(&root).unwrap();
+    let bucket = ChallengeBucket::new(&root, "file_demo", challenge_config("Files"))
+      .await
+      .unwrap();
+
+    bucket
+      .upload_static("attachment file.zip", "data".as_bytes())
+      .await
+      .unwrap();
+    bucket
+      .upload_static(".hidden", "secret".as_bytes())
+      .await
+      .unwrap();
+    bucket
+      .upload_mapped("mapped.bin", "m".as_bytes())
+      .await
+      .unwrap();
+    bucket
+      .upload_checker("main.rx", "script".as_bytes())
+      .await
+      .unwrap();
+    bucket
+      .upload_src("pwn.c", "int main(){}".as_bytes())
+      .await
+      .unwrap();
+
+    // uploaded names are sanitized to filesystem-safe identifiers.
+    assert_eq!(
+      bucket.get_static_files().await.unwrap(),
+      vec!["attachment_file.zip"]
+    );
+    assert_eq!(bucket.get_mapped_files().await.unwrap(), vec!["mapped.bin"]);
+    assert_eq!(bucket.get_checker_files().await.unwrap(), vec!["main.rx"]);
+
+    // downloads are restricted to the requested subfolder.
+    let mut static_content = String::new();
+    tokio::io::AsyncReadExt::read_to_string(
+      &mut bucket.download_static("attachment_file.zip").await.unwrap(),
+      &mut static_content,
+    )
+    .await
+    .unwrap();
+    assert_eq!(static_content, "data");
+
+    // an existing sibling file is unreachable through a relative escape.
+    std::fs::write(bucket.path.join("outside.txt"), "secret").unwrap();
+    let err = bucket.download_static("../outside.txt").await.unwrap_err();
+    assert!(matches!(err, BucketError::PathTraversal));
+
+    bucket.delete_static("attachment_file.zip").await.unwrap();
+    assert!(bucket.get_static_files().await.unwrap().is_empty());
+
+    std::fs::remove_dir_all(root).ok();
+  }
+
+  #[tokio::test]
+  async fn get_mapped_file_is_none_when_empty_and_rotates_by_requested_id() {
+    let root = temp_root("mapped-rotation");
+    std::fs::create_dir_all(&root).unwrap();
+    let bucket = ChallengeBucket::new(&root, "rot_demo", challenge_config("Rot"))
+      .await
+      .unwrap();
+
+    assert!(bucket.get_mapped_file(1).await.unwrap().is_none());
+
+    for name in ["b.bin", "a.bin"] {
+      bucket.upload_mapped(name, "x".as_bytes()).await.unwrap();
+    }
+
+    // files are sorted before indexing so rotation order is deterministic.
+    assert_eq!(
+      bucket.get_mapped_file(0).await.unwrap().as_deref(),
+      Some("a.bin")
+    );
+    assert_eq!(
+      bucket.get_mapped_file(1).await.unwrap().as_deref(),
+      Some("b.bin")
+    );
+    assert_eq!(
+      bucket.get_mapped_file(2).await.unwrap().as_deref(),
+      Some("a.bin")
+    );
+
+    std::fs::remove_dir_all(root).ok();
+  }
+
+  #[test]
+  fn hash_is_deterministic_for_the_same_path() {
+    let bucket = test_bucket();
+    assert_eq!(bucket.hash(), bucket.hash());
+    assert_eq!(bucket.hash().len(), 64);
+    std::fs::remove_dir_all(bucket.path).ok();
+  }
 }
