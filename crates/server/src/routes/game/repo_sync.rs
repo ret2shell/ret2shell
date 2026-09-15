@@ -17,7 +17,7 @@ use chrono::Utc;
 use futures::TryStreamExt;
 use r2s_bucket::{challenge::ChallengeBucket, game::GameBucket, git::DiffEntry};
 use r2s_config::cluster::ChallengeEnv;
-use r2s_database::{challenge, game, hint};
+use r2s_database::{challenge, challenge_milestone, game, hint, team};
 use sea_orm::{DatabaseTransaction, TransactionTrait};
 use serde::Deserialize;
 use tokio::{fs, sync::mpsc};
@@ -30,10 +30,11 @@ use super::{
     GIT_HOOK_AUTH_DOMAIN, GIT_HOOK_SESSION_DOMAIN, GitHookFormatter, GitHookMessageLevel,
     GitHookSession, strip_git_hook_ansi,
   },
+  worker,
 };
 use crate::{
   traits::{GlobalState, ResponseError},
-  utility::game_repo::schedule_game_repo_index_refresh,
+  utility::{game_repo::schedule_game_repo_index_refresh, prerequisites::topological_sort},
 };
 
 const ZERO_OID: &str = "0000000000000000000000000000000000000000";
@@ -61,6 +62,7 @@ struct SyncOutcome {
   invalidate_game_docs: bool,
   challenge_ids: BTreeSet<i64>,
   scoreboard_updates: Vec<challenge::Model>,
+  milestones_changed: bool,
 }
 
 #[derive(Default)]
@@ -345,6 +347,14 @@ async fn execute_post_receive(
       .await
       .ok();
   }
+  if outcome.milestones_changed {
+    logger
+      .info("Recalculating team scores after milestone changes...")
+      .await;
+    for team in team::get_list_by_game_id(&state.db.conn, game.id).await? {
+      worker::game::update_team_state(&state.db, team).await.ok();
+    }
+  }
   schedule_game_repo_index_refresh(&state, game.id, &session.game_bucket).await;
 
   logger
@@ -361,12 +371,14 @@ async fn synchronize_repository(
   let mut challenge_changes = ChallengeChangeSet::default();
   let mut game_config_changed = false;
   let mut doc_changed = false;
+  let mut milestones_changed = false;
 
   for entry in diff {
     classify_path(
       &entry.path,
       &mut game_config_changed,
       &mut doc_changed,
+      &mut milestones_changed,
       &mut challenge_changes,
     );
     if let Some(old_path) = &entry.old_path {
@@ -374,6 +386,7 @@ async fn synchronize_repository(
         old_path,
         &mut game_config_changed,
         &mut doc_changed,
+        &mut milestones_changed,
         &mut challenge_changes,
       );
     }
@@ -396,6 +409,13 @@ async fn synchronize_repository(
   let known_buckets: BTreeSet<String> = challenge_map.keys().cloned().collect();
   let new_buckets: BTreeSet<String> = challenge_dirs.difference(&known_buckets).cloned().collect();
 
+  // bucket name -> challenge id, extended as new challenges are created so
+  // that prerequisites can be resolved with get-or-create semantics
+  let mut bucket_to_id: BTreeMap<String, i64> = challenge_map
+    .iter()
+    .map(|(bucket, challenge)| (bucket.clone(), challenge.id))
+    .collect();
+
   let mut current_game = game.clone();
   if game_config_changed {
     logger.info("Synchronizing game config...").await;
@@ -407,7 +427,26 @@ async fn synchronize_repository(
     outcome.invalidate_game_docs = true;
   }
 
+  // Challenge ids are not persistent, so new challenges must be created in
+  // prerequisite order: the prerequisites of a challenge can reference any
+  // challenge of the same repository push that is created earlier in the
+  // topological order. Cycles are rejected before any database write.
+  let mut new_bucket_graph: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
   for bucket_name in &new_buckets {
+    let challenge_bucket = game_bucket.at(bucket_name).await?;
+    let config = challenge_bucket.config().await?;
+    let prerequisites: BTreeSet<String> = config
+      .prerequisites
+      .iter()
+      .filter(|name| new_buckets.contains(*name))
+      .cloned()
+      .collect();
+    new_bucket_graph.insert(bucket_name.clone(), prerequisites);
+  }
+  let new_bucket_order =
+    topological_sort(&new_bucket_graph).map_err(|err| anyhow::anyhow!("Rejecting push: {err}"))?;
+
+  for bucket_name in &new_bucket_order {
     logger
       .info(format!(
         "Creating challenge `{}` from the repository.",
@@ -415,7 +454,10 @@ async fn synchronize_repository(
       ))
       .await;
     let challenge_bucket = game_bucket.at(bucket_name).await?;
-    let created = create_challenge_from_bucket(txn, &current_game, &challenge_bucket).await?;
+    let created =
+      create_challenge_from_bucket(txn, &current_game, &challenge_bucket, &bucket_to_id).await?;
+    bucket_to_id.insert(bucket_name.clone(), created.id);
+    outcome.challenge_ids.insert(created.id);
     if challenge_changes.checker.contains(bucket_name) {
       lint_checker(state, &challenge_bucket, logger).await?;
       state.checker.expire(&state.engine, &challenge_bucket).await;
@@ -433,7 +475,6 @@ async fn synchronize_repository(
       validate_env(&challenge_bucket).await?;
     }
     sync_hints_from_bucket(txn, created.id, &challenge_bucket, None).await?;
-    outcome.challenge_ids.insert(created.id);
   }
 
   let mut affected_existing_buckets: BTreeSet<String> = challenge_changes
@@ -472,7 +513,7 @@ async fn synchronize_repository(
       state.checker.expire(&state.engine, &challenge_bucket).await;
     }
     if challenge_changes.db_backed.contains(&bucket_name) {
-      let synced = sync_challenge_record(txn, existing, &challenge_bucket).await?;
+      let synced = sync_challenge_record(txn, existing, &challenge_bucket, &bucket_to_id).await?;
       if synced.score_rule != existing.score_rule {
         let (changed, _, synced) = challenge::maintain_score(txn, synced).await?;
         if changed {
@@ -488,6 +529,13 @@ async fn synchronize_repository(
     if challenge_changes.hints.contains(&bucket_name) {
       sync_hints_from_bucket(txn, existing.id, &challenge_bucket, Some(existing)).await?;
       outcome.challenge_ids.insert(existing.id);
+    }
+  }
+
+  if milestones_changed {
+    logger.info("Synchronizing milestones...").await;
+    if sync_milestones_from_bucket(txn, &current_game, game_bucket, &bucket_to_id, logger).await? {
+      outcome.milestones_changed = true;
     }
   }
 
@@ -545,9 +593,11 @@ async fn sync_game_config(
 
 async fn create_challenge_from_bucket(
   txn: &DatabaseTransaction, game: &game::Model, challenge_bucket: &ChallengeBucket,
+  bucket_to_id: &BTreeMap<String, i64>,
 ) -> anyhow::Result<challenge::Model> {
   let config = challenge_bucket.config().await?;
   let content = challenge_bucket.description().await?;
+  let prerequisites = resolve_bucket_prerequisites(&config, challenge_bucket, bucket_to_id)?;
   Ok(
     challenge::create(
       txn,
@@ -565,17 +615,35 @@ async fn create_challenge_from_bucket(
         ref_id: None,
         release_at: None,
         archive_at: None,
+        prerequisites: challenge::PrerequisiteList(prerequisites),
+        avatar: config.avatar,
       },
     )
     .await?,
   )
 }
 
+fn resolve_bucket_prerequisites(
+  config: &r2s_bucket::challenge::ChallengeConfig, challenge_bucket: &ChallengeBucket,
+  bucket_to_id: &BTreeMap<String, i64>,
+) -> anyhow::Result<Vec<i64>> {
+  crate::utility::prerequisites::resolve_prerequisite_ids(bucket_to_id, &config.prerequisites)
+    .map_err(anyhow::Error::msg)
+    .with_context(|| {
+      format!(
+        "invalid prerequisites for challenge bucket `{}`",
+        challenge_bucket.name
+      )
+    })
+}
+
 async fn sync_challenge_record(
   txn: &DatabaseTransaction, previous: &challenge::Model, challenge_bucket: &ChallengeBucket,
+  bucket_to_id: &BTreeMap<String, i64>,
 ) -> anyhow::Result<challenge::Model> {
   let config = challenge_bucket.config().await?;
   let content = challenge_bucket.description().await?;
+  let prerequisites = resolve_bucket_prerequisites(&config, challenge_bucket, bucket_to_id)?;
   Ok(
     challenge::update(
       txn,
@@ -593,10 +661,131 @@ async fn sync_challenge_record(
         ref_id: previous.ref_id,
         release_at: previous.release_at,
         archive_at: previous.archive_at,
+        prerequisites: challenge::PrerequisiteList(prerequisites),
+        avatar: config.avatar,
       },
     )
     .await?,
   )
+}
+
+/// Synchronizes the milestones declared in `milestones.toml` into the
+/// database. The file is the source of truth while it is part of the push:
+/// milestones are upserted by name and milestones missing from the file are
+/// removed. Returns whether any milestone was created, updated or deleted.
+async fn sync_milestones_from_bucket(
+  txn: &DatabaseTransaction, game: &game::Model, game_bucket: &GameBucket,
+  bucket_to_id: &BTreeMap<String, i64>, logger: &StreamLogger,
+) -> anyhow::Result<bool> {
+  let bucket_milestones = game_bucket.milestones().await?;
+  let existing = challenge_milestone::get_list(txn, game.id).await?;
+  let mut changed = false;
+  let mut seen = HashSet::new();
+
+  for bucket_milestone in &bucket_milestones.milestones {
+    if bucket_milestone.name.trim().is_empty() || bucket_milestone.name.chars().count() > 127 {
+      bail!("Milestone names must be between 1 and 127 characters long.");
+    }
+    if bucket_milestone.bonus_score < 0 {
+      bail!(
+        "Milestone `{}` has a negative bonus score.",
+        bucket_milestone.name
+      );
+    }
+    if bucket_milestone.prerequisites.is_empty() {
+      bail!(
+        "Milestone `{}` has no prerequisites, it would never be achieved.",
+        bucket_milestone.name
+      );
+    }
+    if !seen.insert(bucket_milestone.name.as_str()) {
+      bail!(
+        "Milestone `{}` is declared more than once.",
+        bucket_milestone.name
+      );
+    }
+    let prerequisites = crate::utility::prerequisites::resolve_prerequisite_ids(
+      bucket_to_id,
+      &bucket_milestone.prerequisites,
+    )
+    .map_err(anyhow::Error::msg)
+    .with_context(|| {
+      format!(
+        "invalid prerequisites for milestone `{}`",
+        bucket_milestone.name
+      )
+    })?;
+
+    if let Some(previous) = existing.iter().find(|m| m.name == bucket_milestone.name) {
+      let next = challenge_milestone::Model {
+        id: previous.id,
+        created_at: previous.created_at,
+        updated_at: previous.updated_at,
+        game_id: previous.game_id,
+        prerequisites: challenge::PrerequisiteList(prerequisites),
+        avatar: bucket_milestone.avatar.clone(),
+        bonus_score: bucket_milestone.bonus_score,
+        name: bucket_milestone.name.clone(),
+        description: bucket_milestone.description.clone(),
+      };
+      if next.prerequisites != previous.prerequisites
+        || next.avatar != previous.avatar
+        || next.bonus_score != previous.bonus_score
+        || next.description != previous.description
+      {
+        challenge_milestone::update(txn, next).await?;
+        changed = true;
+        logger
+          .info(format!(
+            "Updated milestone `{}`.",
+            logger.name(&bucket_milestone.name)
+          ))
+          .await;
+      }
+    } else {
+      challenge_milestone::create(
+        txn,
+        challenge_milestone::Model {
+          id: 0,
+          created_at: Utc::now(),
+          updated_at: Utc::now(),
+          game_id: game.id,
+          prerequisites: challenge::PrerequisiteList(prerequisites),
+          avatar: bucket_milestone.avatar.clone(),
+          bonus_score: bucket_milestone.bonus_score,
+          name: bucket_milestone.name.clone(),
+          description: bucket_milestone.description.clone(),
+        },
+      )
+      .await?;
+      changed = true;
+      logger
+        .info(format!(
+          "Created milestone `{}`.",
+          logger.name(&bucket_milestone.name)
+        ))
+        .await;
+    }
+  }
+
+  for previous in &existing {
+    if !bucket_milestones
+      .milestones
+      .iter()
+      .any(|m| m.name == previous.name)
+    {
+      challenge_milestone::delete(txn, previous.id).await?;
+      changed = true;
+      logger
+        .info(format!(
+          "Deleted milestone `{}`.",
+          logger.name(&previous.name)
+        ))
+        .await;
+    }
+  }
+
+  Ok(changed)
 }
 
 async fn sync_hints_from_bucket(
@@ -730,11 +919,15 @@ async fn rollback_repository(
 
 fn classify_path(
   path: &str, game_config_changed: &mut bool, doc_changed: &mut bool,
-  challenge_changes: &mut ChallengeChangeSet,
+  milestones_changed: &mut bool, challenge_changes: &mut ChallengeChangeSet,
 ) {
   match path {
     "config.toml" => {
       *game_config_changed = true;
+      return;
+    }
+    "milestones.toml" => {
+      *milestones_changed = true;
       return;
     }
     "README.md" | "TRAINING.md" | "RULES.md" => {
@@ -915,10 +1108,12 @@ mod tests {
   fn classify_path_tracks_repo_changes_for_game_and_challenges() {
     let mut game_config_changed = false;
     let mut doc_changed = false;
+    let mut milestones_changed = false;
     let mut challenge_changes = ChallengeChangeSet::default();
 
     for path in [
       "config.toml",
+      "milestones.toml",
       "README.md",
       "challenges/web/README.md",
       "challenges/web/hints.toml",
@@ -931,12 +1126,14 @@ mod tests {
         path,
         &mut game_config_changed,
         &mut doc_changed,
+        &mut milestones_changed,
         &mut challenge_changes,
       );
     }
 
     assert!(game_config_changed);
     assert!(doc_changed);
+    assert!(milestones_changed);
     assert!(challenge_changes.buckets.contains("web"));
     assert!(challenge_changes.db_backed.contains("web"));
     assert!(challenge_changes.hints.contains("web"));

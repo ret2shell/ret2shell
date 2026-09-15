@@ -1,4 +1,4 @@
-use r2s_database::{challenge, game, oauth_provider};
+use r2s_database::{challenge, challenge_milestone, game, oauth_provider};
 
 use crate::{traits::ResponseError, utility::string::account_str};
 
@@ -199,6 +199,27 @@ pub fn validate_challenge_model(challenge: &challenge::Model) -> Result<(), Resp
   {
     return Err(ResponseError::BadRequest(
       "challenge release time must be before archive time".to_owned(),
+    ));
+  }
+  if let Some(avatar) = &challenge.avatar {
+    validate_max_len(avatar, "challenge avatar", 255)?;
+  }
+  Ok(())
+}
+
+pub fn validate_challenge_milestone_model(
+  milestone: &challenge_milestone::Model,
+) -> Result<(), ResponseError> {
+  validate_required(&milestone.name, "milestone name")?;
+  validate_max_len(&milestone.name, "milestone name", 127)?;
+  validate_required(&milestone.description, "milestone description")?;
+  validate_range(milestone.bonus_score, "milestone bonus score", 0, 10000)?;
+  if let Some(avatar) = &milestone.avatar {
+    validate_max_len(avatar, "milestone avatar", 255)?;
+  }
+  if milestone.prerequisites.0.is_empty() {
+    return Err(ResponseError::BadRequest(
+      "milestone prerequisites must not be empty".to_owned(),
     ));
   }
   Ok(())

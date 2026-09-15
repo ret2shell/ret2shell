@@ -22,6 +22,7 @@ mod chat;
 mod core;
 pub(crate) mod hook;
 pub(crate) mod lifecycle;
+mod milestone;
 mod notification;
 mod participant;
 mod registry;
@@ -114,6 +115,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .route("/solve", get(participant::get_self_solves))
         .route("/instance", get(participant::get_self_instances))
         .nest("/challenge", challenge::router(state))
+        .nest("/milestone", milestone::router(state))
         .nest("/team", team::router(state))
         .nest("/notification", notification::router(state))
         .nest("/chat", chat::router(state))
