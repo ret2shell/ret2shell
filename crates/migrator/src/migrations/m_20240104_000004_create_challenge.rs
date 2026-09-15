@@ -26,6 +26,8 @@ pub enum Challenge {
   RefId,
   ReleaseAt,
   ArchiveAt,
+  Prerequisites,
+  Avatar,
 }
 
 #[async_trait::async_trait]
