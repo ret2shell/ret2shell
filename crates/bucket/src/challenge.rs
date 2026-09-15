@@ -41,6 +41,13 @@ pub struct ChallengeConfig {
   pub name: String,
   pub tag: TagList,
   pub score_rule: ScoreRule,
+  /// Media hash of the challenge avatar, same convention as `game.logo`.
+  pub avatar: Option<String>,
+  /// Bucket names of the prerequisite challenges. Challenge ids are not
+  /// persistent, so the git repository always refers to challenges by their
+  /// bucket names.
+  #[serde(default)]
+  pub prerequisites: Vec<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -417,6 +424,37 @@ fn to_file_name(file: &str) -> String {
 #[cfg(test)]
 mod tests {
   use super::*;
+
+  #[test]
+  fn challenge_config_round_trips_avatar_and_prerequisites() {
+    let config = ChallengeConfig {
+      name: "test".to_owned(),
+      tag: TagList(vec![]),
+      score_rule: ScoreRule {
+        initial: 1000,
+        minimum: 100,
+        decay: 10,
+      },
+      avatar: Some("avatar-hash".to_owned()),
+      prerequisites: vec!["web_1700000000".to_owned()],
+    };
+    let value = serde_json::to_value(&config).unwrap();
+    let parsed: ChallengeConfig = serde_json::from_value(value).unwrap();
+    assert_eq!(parsed.avatar.as_deref(), Some("avatar-hash"));
+    assert_eq!(parsed.prerequisites, vec!["web_1700000000".to_owned()]);
+  }
+
+  #[test]
+  fn challenge_config_tolerates_legacy_files_without_new_fields() {
+    let value = serde_json::json!({
+      "name": "legacy",
+      "tag": [],
+      "score_rule": {"initial": 1000, "minimum": 100, "decay": 10}
+    });
+    let parsed: ChallengeConfig = serde_json::from_value(value).unwrap();
+    assert_eq!(parsed.avatar, None);
+    assert!(parsed.prerequisites.is_empty());
+  }
 
   fn test_bucket() -> ChallengeBucket {
     let root = std::env::temp_dir().join(format!(

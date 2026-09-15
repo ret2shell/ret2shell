@@ -79,6 +79,24 @@ pub struct AccessPolicy {
   pub sync: i32,
 }
 
+/// A game milestone persisted in `milestones.toml` at the game bucket root.
+/// Prerequisites refer to challenges by their bucket names.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Milestone {
+  pub name: String,
+  pub description: String,
+  pub avatar: Option<String>,
+  pub bonus_score: i32,
+  #[serde(default)]
+  pub prerequisites: Vec<String>,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct Milestones {
+  #[serde(default)]
+  pub milestones: Vec<Milestone>,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct GameConfig {
   pub name: String,
@@ -234,6 +252,27 @@ impl GameBucket {
     Ok(config)
   }
 
+  pub async fn set_milestones(&self, milestones: Milestones) -> Result<(), BucketError> {
+    if self.lock.is_none() {
+      return Err(BucketError::NeedLocking);
+    }
+    write(
+      self.path.join("milestones.toml"),
+      toml::to_string_pretty(&milestones)?,
+    )
+    .await?;
+    Ok(())
+  }
+
+  pub async fn milestones(&self) -> Result<Milestones, BucketError> {
+    let path = self.path.join("milestones.toml");
+    if !path.exists() {
+      return Ok(Milestones::default());
+    }
+    let config = toml::from_str(&read_to_string(&path).await?)?;
+    Ok(config)
+  }
+
   pub async fn create(&self, challenge: Value) -> Result<challenge::ChallengeBucket, BucketError> {
     if self.lock.is_none() {
       return Err(BucketError::NeedLocking);
@@ -291,5 +330,47 @@ impl Drop for GameBucket {
     if self.cleanup_on_drop && self.lock.is_some() {
       self.git.cleanup_sync().ok();
     }
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::{Milestone, Milestones};
+
+  #[test]
+  fn milestones_round_trips_through_toml() {
+    let milestones = Milestones {
+      milestones: vec![Milestone {
+        name: "half-way".to_owned(),
+        description: "solve the first half".to_owned(),
+        avatar: Some("avatar-hash".to_owned()),
+        bonus_score: 200,
+        prerequisites: vec!["web_1700000000".to_owned(), "pwn_1700000001".to_owned()],
+      }],
+    };
+    let serialized = toml::to_string_pretty(&milestones).unwrap();
+    let parsed: Milestones = toml::from_str(&serialized).unwrap();
+    assert_eq!(parsed.milestones.len(), 1);
+    let milestone = &parsed.milestones[0];
+    assert_eq!(milestone.name, "half-way");
+    assert_eq!(milestone.bonus_score, 200);
+    assert_eq!(milestone.avatar.as_deref(), Some("avatar-hash"));
+    assert_eq!(milestone.prerequisites.len(), 2);
+  }
+
+  #[test]
+  fn milestones_tolerates_legacy_files_without_prerequisites() {
+    let parsed: Milestones = toml::from_str(
+      r#"
+[[milestones]]
+name = "legacy"
+description = "legacy milestone"
+avatar = "hash"
+bonus_score = 100
+"#,
+    )
+    .unwrap();
+    assert_eq!(parsed.milestones.len(), 1);
+    assert!(parsed.milestones[0].prerequisites.is_empty());
   }
 }

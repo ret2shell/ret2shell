@@ -1,11 +1,18 @@
+use std::collections::BTreeMap;
+
 use axum::{
   Router,
   extract::DefaultBodyLimit,
   middleware,
   routing::{get, patch, post},
 };
-use r2s_bucket::{Bucket, challenge::ChallengeBucket, game::GameBucket};
-use r2s_database::{challenge, game, user::Permission};
+use r2s_bucket::{
+  Bucket,
+  challenge::{ChallengeBucket, ChallengeConfig},
+  game::GameBucket,
+};
+use r2s_database::{challenge, challenge_milestone, game, user::Permission};
+use sea_orm::ConnectionTrait;
 
 use crate::{
   middleware::{
@@ -13,6 +20,7 @@ use crate::{
     data::{self},
   },
   traits::{GlobalState, ResponseError},
+  utility::prerequisites::find_cycle,
 };
 
 mod attachment;
@@ -170,6 +178,116 @@ pub(super) fn check_challenge_publishing(prev: &challenge::Model) -> Result<(), 
     return Err(ResponseError::PreconditionFailed(
       "please hidden challenge before update it".to_owned(),
     ));
+  }
+  Ok(())
+}
+
+/// Loads the models of the challenges referenced by `prerequisites` and
+/// validates that every reference exists, belongs to the same game and is not
+/// the challenge itself.
+pub(super) async fn resolve_prerequisite_models<C>(
+  db: &C, game_id: i64, exclude_id: Option<i64>, prerequisites: &challenge::PrerequisiteList,
+) -> Result<Vec<challenge::Model>, ResponseError>
+where
+  C: ConnectionTrait, {
+  let mut models = Vec::with_capacity(prerequisites.0.len());
+  for &id in &prerequisites.0 {
+    if Some(id) == exclude_id {
+      return Err(ResponseError::BadRequest(
+        "a challenge cannot be its own prerequisite".to_owned(),
+      ));
+    }
+    let model = challenge::get(db, id).await?.ok_or_else(|| {
+      ResponseError::BadRequest(format!("prerequisite challenge {id} does not exist"))
+    })?;
+    if model.game_id != game_id {
+      return Err(ResponseError::BadRequest(format!(
+        "prerequisite challenge {id} does not belong to this game"
+      )));
+    }
+    models.push(model);
+  }
+  Ok(models)
+}
+
+/// Maps the given prerequisite models to their bucket names, the persistent
+/// reference used inside the game repository.
+pub(super) fn prerequisite_bucket_names(
+  models: &[challenge::Model],
+) -> Result<Vec<String>, ResponseError> {
+  models
+    .iter()
+    .map(|model| {
+      model.bucket.clone().ok_or_else(|| {
+        ResponseError::InternalServerError(format!(
+          "challenge {}:{} does not have a valid bucket",
+          model.id, model.name
+        ))
+      })
+    })
+    .collect()
+}
+
+/// Builds the bucket config persisted in the challenge repository. Note that
+/// prerequisites must already be converted to bucket names: challenge ids are
+/// not persistent across databases.
+pub(super) fn challenge_bucket_config(
+  challenge: &challenge::Model, prerequisite_buckets: Vec<String>,
+) -> Result<ChallengeConfig, ResponseError> {
+  Ok(ChallengeConfig {
+    name: challenge.name.clone(),
+    tag: serde_json::from_value(serde_json::to_value(&challenge.tag)?)?,
+    score_rule: serde_json::from_value(serde_json::to_value(&challenge.score_rule)?)?,
+    avatar: challenge.avatar.clone(),
+    prerequisites: prerequisite_buckets,
+  })
+}
+
+/// Ensures that the prerequisite graph of the game stays acyclic when the
+/// given challenge is assigned the provided prerequisites.
+pub(super) async fn ensure_acyclic_prerequisites<C>(
+  db: &C, game: &game::Model, challenge_id: i64, prerequisites: &challenge::PrerequisiteList,
+) -> Result<(), ResponseError>
+where
+  C: ConnectionTrait, {
+  let challenges = challenge::get_full_list(db, game.id).await?;
+  let mut graph: BTreeMap<i64, Vec<i64>> = challenges
+    .iter()
+    .map(|c| (c.id, c.prerequisites.0.clone()))
+    .collect();
+  graph.insert(challenge_id, prerequisites.0.clone());
+  if let Some(cycle) = find_cycle(&graph) {
+    return Err(ResponseError::BadRequest(format!(
+      "challenge prerequisites contain a cycle: {cycle}"
+    )));
+  }
+  Ok(())
+}
+
+/// Ensures that no other challenge or milestone references the given
+/// challenge before it is deleted.
+pub(super) async fn ensure_challenge_unreferenced<C>(
+  db: &C, game: &game::Model, challenge: &challenge::Model,
+) -> Result<(), ResponseError>
+where
+  C: ConnectionTrait, {
+  let challenges = challenge::get_full_list(db, game.id).await?;
+  for other in &challenges {
+    if other.id != challenge.id && other.prerequisites.0.contains(&challenge.id) {
+      return Err(ResponseError::PreconditionFailed(format!(
+        "challenge {}:{} is a prerequisite of {}:{}, remove the reference first",
+        challenge.id, challenge.name, other.id, other.name
+      )));
+    }
+  }
+  let milestones = challenge_milestone::get_list(db, game.id).await?;
+  for milestone in &milestones {
+    if milestone.prerequisites.0.contains(&challenge.id) {
+      return Err(ResponseError::PreconditionFailed(format!(
+        "challenge {}:{} is a prerequisite of milestone {}, remove the reference first",
+        challenge.id, challenge.name, milestone.name
+      )));
+    }
   }
   Ok(())
 }

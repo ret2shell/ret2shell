@@ -407,7 +407,8 @@ impl Cluster {
     );
     let services = api.list(&ListParams::default()).await?;
     for service in services.items {
-      // get service's label `ret.sh.cn/traffic`, and check the pod is still alive
+      // get service's label `ret.sh.cn/traffic`, and check the pod is still
+      // alive
       let traffic_label = service
         .metadata
         .labels

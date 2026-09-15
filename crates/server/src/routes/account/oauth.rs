@@ -203,8 +203,8 @@ async fn login_with_oauth_account(
           .at("oauth")
           .set_ex(&temp_token, cached_token, 30 * 60)
           .await?;
-        // info!("OAuth user {auth_key} not found, temp token {temp_token} generated for
-        // register");
+        // info!("OAuth user {auth_key} not found, temp token {temp_token}
+        // generated for register");
         info!(
           ?auth_key,
           ?temp_token,

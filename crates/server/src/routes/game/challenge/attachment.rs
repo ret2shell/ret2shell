@@ -8,6 +8,7 @@ use axum::{
 use futures::TryStreamExt;
 use r2s_bucket::{Bucket, challenge::ChallengeBucket};
 use r2s_database::{challenge, game, team, user::Permission};
+use r2s_migrator::Database;
 use serde::{Deserialize, Serialize};
 use tokio_util::io::{ReaderStream, StreamReader};
 use tracing::{debug, info, warn};
@@ -42,11 +43,13 @@ pub(super) struct FileResponse {
 }
 
 pub(super) async fn get_player_attachment(
-  State(ref bucket): State<Bucket>, Extension(game): Extension<game::Model>,
-  Extension(challenge): Extension<challenge::Model>, Extension(token): Extension<Token>,
-  team_ext: Extension<Option<team::Model>>, Query(query): Query<FileRequest>,
+  State(ref db): State<Database>, State(ref bucket): State<Bucket>,
+  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
+  Extension(token): Extension<Token>, team_ext: Extension<Option<team::Model>>,
+  Query(query): Query<FileRequest>,
 ) -> Result<Response, ResponseError> {
   let team = extract_team!(game, team_ext, token);
+  let gating_team_id = team.as_ref().map(|t| t.id);
   let challenge_bucket = super::get_challenge_bucket(bucket, &game, &challenge).await?;
   if !is_game_admin!(token, game)
     && (query.all == Some(true) || query.folder == Some(FileType::Checker))
@@ -84,6 +87,21 @@ pub(super) async fn get_player_attachment(
   .await?;
 
   if let (Some(folder), Some(file_name)) = (query.folder, query.file.clone()) {
+    // game admins are exempt from prerequisite gating
+    if !is_game_admin!(token, game) {
+      let unsatisfied =
+        challenge::unsatisfied_prerequisites(&db.conn, &challenge, gating_team_id, token.id)
+          .await?;
+      if !unsatisfied.is_empty() {
+        info!(
+          count = unsatisfied.len(),
+          "player tried to download attachment before solving the prerequisite challenges"
+        );
+        return Err(ResponseError::Forbidden(
+          "please solve the prerequisite challenges first".to_owned(),
+        ));
+      }
+    }
     let checked_file = files
       .into_iter()
       .find(|f| f.folder == folder && f.file == file_name);

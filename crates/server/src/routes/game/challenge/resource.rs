@@ -101,6 +101,9 @@ pub(super) async fn create_challenge(
 ) -> Result<impl IntoResponse, ResponseError> {
   validate_challenge_model(&challenge)?;
   let txn = db.conn.begin().await?;
+  let referenced =
+    super::resolve_prerequisite_models(&txn, game.id, None, &challenge.prerequisites).await?;
+  let prerequisite_buckets = super::prerequisite_bucket_names(&referenced)?;
   let game_bucket = bucket
     .at_mut(
       game
@@ -112,7 +115,10 @@ pub(super) async fn create_challenge(
     )
     .await?;
   let challenge_bucket = game_bucket
-    .create(serde_json::to_value(&challenge)?)
+    .create(serde_json::to_value(super::challenge_bucket_config(
+      &challenge,
+      prerequisite_buckets,
+    )?)?)
     .await?;
   challenge_bucket
     .set_description(challenge.content.clone().unwrap_or_default())
@@ -149,6 +155,16 @@ pub(super) async fn update_challenge(
   validate_challenge_model(&challenge)?;
   super::check_challenge_publishing(&prev_challenge)?;
   let txn = db.conn.begin().await?;
+  let referenced = super::resolve_prerequisite_models(
+    &txn,
+    game.id,
+    Some(prev_challenge.id),
+    &challenge.prerequisites,
+  )
+  .await?;
+  super::ensure_acyclic_prerequisites(&txn, &game, prev_challenge.id, &challenge.prerequisites)
+    .await?;
+  let prerequisite_buckets = super::prerequisite_bucket_names(&referenced)?;
   let score_changed = prev_challenge.score_rule != challenge.score_rule;
   let challenge = challenge::update(
     &txn,
@@ -176,7 +192,10 @@ pub(super) async fn update_challenge(
   let (game_bucket, challenge_bucket) =
     super::get_challenge_bucket_mut(&bucket, &game, &challenge).await?;
   challenge_bucket
-    .set_config(serde_json::to_value(&challenge)?)
+    .set_config(serde_json::to_value(super::challenge_bucket_config(
+      &challenge,
+      prerequisite_buckets,
+    )?)?)
     .await?;
   challenge_bucket
     .set_description(challenge.content.clone().unwrap_or_default())
@@ -231,7 +250,7 @@ pub(super) async fn up_challenge(
   cache.at("challenge").del(challenge.id).await.ok();
   let event = EventContainer {
     game_id: challenge.game_id,
-    event: Event::Challenge(ChallengeEvent {
+    event: Event::Challenge(Box::new(ChallengeEvent {
       event_type: ChallengeEventType::Up,
       challenge: challenge.clone(),
       operator: user::Model {
@@ -240,7 +259,7 @@ pub(super) async fn up_challenge(
         account: token.account.clone(),
         ..Default::default()
       },
-    }),
+    })),
   };
   queue
     .publish(
@@ -286,7 +305,7 @@ pub(super) async fn down_challenge(
   cache.at("challenge").del(challenge.id).await.ok();
   let event = EventContainer {
     game_id: challenge.game_id,
-    event: Event::Challenge(ChallengeEvent {
+    event: Event::Challenge(Box::new(ChallengeEvent {
       event_type: ChallengeEventType::Down,
       challenge: challenge.clone(),
       operator: user::Model {
@@ -295,7 +314,7 @@ pub(super) async fn down_challenge(
         account: token.account.clone(),
         ..Default::default()
       },
-    }),
+    })),
   };
   queue
     .publish(
@@ -327,6 +346,7 @@ pub(super) async fn delete_challenge(
   );
 
   let txn = db.conn.begin().await?;
+  super::ensure_challenge_unreferenced(&txn, &game, &challenge).await?;
   challenge::delete(&txn, challenge.id).await?;
   let game_bucket = bucket
     .at_mut(

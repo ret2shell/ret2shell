@@ -108,6 +108,7 @@ pub(super) async fn submit_flag(
   Extension(challenge): Extension<challenge::Model>, Json(req): Json<SubmitRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let team = extract_team!(game, team_ext, token);
+  let gating_team_id = team.as_ref().map(|t| t.id);
   let team = if team.is_some()
     && game.in_progress()
     && challenge.archive_at.is_none_or(|t| t > Utc::now())
@@ -168,6 +169,20 @@ pub(super) async fn submit_flag(
 
     cache.at("submission").incr(token.id).await?;
     cache.at("submission").expire(token.id, 5 * 60).await?;
+  }
+  // game admins are exempt from prerequisite gating
+  if !is_game_admin!(token, game) {
+    let unsatisfied =
+      challenge::unsatisfied_prerequisites(&db.conn, &challenge, gating_team_id, token.id).await?;
+    if !unsatisfied.is_empty() {
+      info!(
+        count = unsatisfied.len(),
+        "player tried to submit before solving the prerequisite challenges"
+      );
+      return Err(ResponseError::Forbidden(
+        "please solve the prerequisite challenges first".to_owned(),
+      ));
+    }
   }
   info!(content = ?req.content, "submit flag");
   let submission = submission::create(&db.conn, submission).await?;
