@@ -8,7 +8,7 @@ use r2s_bucket::{
   Bucket,
   challenge::{ChallengeBucket, Hints},
 };
-use r2s_database::{challenge, extra, game, hint, team, user};
+use r2s_database::{challenge, extra, game, hint, team, user, user::Permission};
 use r2s_event::{
   Event,
   events::{ChallengeEvent, ChallengeEventType, EventContainer},
@@ -21,7 +21,10 @@ use tower_http::request_id::RequestId;
 use tracing::{info, warn};
 
 use crate::{
-  middleware::{auth::Token, data::extract_team},
+  middleware::{
+    auth::{Token, is_game_admin},
+    data::extract_team,
+  },
   routes::game::worker,
   traits::ResponseError,
 };
@@ -70,9 +73,9 @@ pub(super) struct UnlockHintRequest {
 }
 
 pub(super) async fn unlock_hint(
-  State(db): State<Database>, Extension(team): Extension<Option<team::Model>>,
-  Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
-  Json(req): Json<UnlockHintRequest>,
+  State(db): State<Database>, Extension(token): Extension<Token>,
+  Extension(team): Extension<Option<team::Model>>, Extension(game): Extension<game::Model>,
+  Extension(challenge): Extension<challenge::Model>, Json(req): Json<UnlockHintRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   if !game.in_progress() {
     warn!("user tried to unlock hint when the game is not in progress");
@@ -95,6 +98,20 @@ pub(super) async fn unlock_hint(
   }
 
   let team = team.ok_or_else(|| ResponseError::NotFound("team not found".to_owned()))?;
+  // game admins are exempt from prerequisite gating
+  if !is_game_admin!(token, game) {
+    let unsatisfied =
+      challenge::unsatisfied_prerequisites(&db.conn, &challenge, Some(team.id), token.id).await?;
+    if !unsatisfied.is_empty() {
+      info!(
+        count = unsatisfied.len(),
+        "player tried to unlock hint before solving the prerequisite challenges"
+      );
+      return Err(ResponseError::Forbidden(
+        "please solve the prerequisite challenges first".to_owned(),
+      ));
+    }
+  }
   let txn = db.conn.begin().await?;
   let hint = hint::get(&txn, req.id).await?;
   if let Some(hint) = hint {
