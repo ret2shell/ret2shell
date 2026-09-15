@@ -119,13 +119,10 @@ pub(super) async fn update_milestone(
   ensure_milestone_in_game(&game, &prev_milestone)?;
   validate_challenge_milestone_model(&milestone)?;
   let txn = db.conn.begin().await?;
-  super::challenge::resolve_prerequisite_models(
-    &txn,
-    game.id,
-    Some(prev_milestone.id),
-    &milestone.prerequisites,
-  )
-  .await?;
+  // milestones are not challenges, so the self-reference exclusion of the
+  // challenge id space does not apply here
+  super::challenge::resolve_prerequisite_models(&txn, game.id, None, &milestone.prerequisites)
+    .await?;
   ensure_name_available(&txn, game.id, Some(prev_milestone.id), &milestone.name).await?;
   let milestone = challenge_milestone::update(
     &txn,
