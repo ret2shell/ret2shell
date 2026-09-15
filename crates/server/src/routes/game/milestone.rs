@@ -93,12 +93,30 @@ pub(super) async fn create_milestone(
   Ok(Json(milestone))
 }
 
+/// Rejects the request when the milestone belongs to another game than the one
+/// addressed by the URL, mirroring the cross-game guard on challenge routes.
+fn ensure_milestone_in_game(
+  game: &game::Model, milestone: &challenge_milestone::Model,
+) -> Result<(), ResponseError> {
+  if milestone.game_id != game.id {
+    tracing::warn!(
+      milestone_id = milestone.id,
+      milestone_game_id = milestone.game_id,
+      game_id = game.id,
+      "user wants to access cross-game milestone"
+    );
+    return Err(ResponseError::Forbidden("permission denied".to_owned()));
+  }
+  Ok(())
+}
+
 pub(super) async fn update_milestone(
   State(ref db): State<Database>, State(bucket): State<Bucket>, Extension(token): Extension<Token>,
   Extension(game): Extension<game::Model>,
   Extension(prev_milestone): Extension<challenge_milestone::Model>,
   Json(milestone): Json<challenge_milestone::Model>,
 ) -> Result<impl IntoResponse, crate::traits::ResponseError> {
+  ensure_milestone_in_game(&game, &prev_milestone)?;
   validate_challenge_milestone_model(&milestone)?;
   let txn = db.conn.begin().await?;
   super::challenge::resolve_prerequisite_models(
@@ -137,6 +155,7 @@ pub(super) async fn delete_milestone(
   Extension(game): Extension<game::Model>,
   Extension(milestone): Extension<challenge_milestone::Model>,
 ) -> Result<impl IntoResponse, crate::traits::ResponseError> {
+  ensure_milestone_in_game(&game, &milestone)?;
   let txn = db.conn.begin().await?;
   challenge_milestone::delete(&txn, milestone.id).await?;
   write_milestones_to_bucket(
