@@ -34,7 +34,10 @@ use super::{
 };
 use crate::{
   traits::{GlobalState, ResponseError},
-  utility::{game_repo::schedule_game_repo_index_refresh, prerequisites::topological_sort},
+  utility::{
+    game_repo::schedule_game_repo_index_refresh,
+    prerequisites::{find_cycle, topological_sort},
+  },
 };
 
 const ZERO_OID: &str = "0000000000000000000000000000000000000000";
@@ -530,6 +533,18 @@ async fn synchronize_repository(
       sync_hints_from_bucket(txn, existing.id, &challenge_bucket, Some(existing)).await?;
       outcome.challenge_ids.insert(existing.id);
     }
+  }
+
+  // the web client validates the graph per challenge, but a push updates
+  // several challenges at once, so the whole prerequisite graph is re-checked
+  // before anything is committed
+  let challenges = challenge::get_full_list(txn, current_game.id).await?;
+  let graph: BTreeMap<i64, Vec<i64>> = challenges
+    .iter()
+    .map(|c| (c.id, c.prerequisites.0.clone()))
+    .collect();
+  if let Some(cycle) = find_cycle(&graph) {
+    bail!("Rejecting push: prerequisite graph contains a cycle: {cycle}");
   }
 
   if milestones_changed {
