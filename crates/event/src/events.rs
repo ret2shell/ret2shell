@@ -85,9 +85,9 @@ pub struct DevopsEvent {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Event {
-  Challenge(ChallengeEvent),
+  Challenge(Box<ChallengeEvent>),
   Submission(Box<SubmissionEvent>),
-  Game(GameEvent),
+  Game(Box<GameEvent>),
   Chat(Box<ChatEvent>),
   Devops(Box<DevopsEvent>),
 }

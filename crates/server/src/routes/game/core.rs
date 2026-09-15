@@ -335,7 +335,7 @@ pub(super) async fn update_game(
     );
     let payload = EventContainer {
       game_id: game.id,
-      event: Event::Game(GameEvent {
+      event: Event::Game(Box::new(GameEvent {
         event_type: if model.frozen {
           GameEventType::Freeze
         } else {
@@ -351,7 +351,7 @@ pub(super) async fn update_game(
           "{} the game",
           if model.frozen { "Freeze" } else { "Unfreeze" }
         ),
-      }),
+      })),
     };
     queue
       .publish(

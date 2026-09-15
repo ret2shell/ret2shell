@@ -250,7 +250,7 @@ pub(super) async fn up_challenge(
   cache.at("challenge").del(challenge.id).await.ok();
   let event = EventContainer {
     game_id: challenge.game_id,
-    event: Event::Challenge(ChallengeEvent {
+    event: Event::Challenge(Box::new(ChallengeEvent {
       event_type: ChallengeEventType::Up,
       challenge: challenge.clone(),
       operator: user::Model {
@@ -259,7 +259,7 @@ pub(super) async fn up_challenge(
         account: token.account.clone(),
         ..Default::default()
       },
-    }),
+    })),
   };
   queue
     .publish(
@@ -305,7 +305,7 @@ pub(super) async fn down_challenge(
   cache.at("challenge").del(challenge.id).await.ok();
   let event = EventContainer {
     game_id: challenge.game_id,
-    event: Event::Challenge(ChallengeEvent {
+    event: Event::Challenge(Box::new(ChallengeEvent {
       event_type: ChallengeEventType::Down,
       challenge: challenge.clone(),
       operator: user::Model {
@@ -314,7 +314,7 @@ pub(super) async fn down_challenge(
         account: token.account.clone(),
         ..Default::default()
       },
-    }),
+    })),
   };
   queue
     .publish(

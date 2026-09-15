@@ -188,7 +188,7 @@ pub(super) async fn create_challenge_hint(
   );
   let event = EventContainer {
     game_id: game.id,
-    event: Event::Challenge(ChallengeEvent {
+    event: Event::Challenge(Box::new(ChallengeEvent {
       event_type: ChallengeEventType::NewHint,
       challenge: challenge.clone(),
       operator: user::Model {
@@ -197,7 +197,7 @@ pub(super) async fn create_challenge_hint(
         account: token.account.clone(),
         ..Default::default()
       },
-    }),
+    })),
   };
   queue
     .publish(
