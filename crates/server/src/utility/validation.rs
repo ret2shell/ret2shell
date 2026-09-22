@@ -13,7 +13,7 @@ fn validate_required(value: &str, field: &str) -> Result<(), ResponseError> {
   Ok(())
 }
 
-fn validate_max_len(value: &str, field: &str, max: usize) -> Result<(), ResponseError> {
+pub fn validate_max_len(value: &str, field: &str, max: usize) -> Result<(), ResponseError> {
   if char_len(value) > max {
     return Err(ResponseError::BadRequest(format!(
       "{field} must be at most {max} characters"
@@ -216,11 +216,6 @@ pub fn validate_challenge_milestone_model(
   validate_range(milestone.bonus_score, "milestone bonus score", 0, 10000)?;
   if let Some(avatar) = &milestone.avatar {
     validate_max_len(avatar, "milestone avatar", 255)?;
-  }
-  if milestone.prerequisites.0.is_empty() {
-    return Err(ResponseError::BadRequest(
-      "milestone prerequisites must not be empty".to_owned(),
-    ));
   }
   Ok(())
 }

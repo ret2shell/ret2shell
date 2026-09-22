@@ -37,6 +37,8 @@ export default function (props: ChallengeWidgetProps) {
       },
       release_at: result.release_at ? DateTime.fromSeconds(result.release_at) : null,
       archive_at: result.archive_at ? DateTime.fromSeconds(result.archive_at) : null,
+      prerequisites: challenge.data?.prerequisites ?? [],
+      avatar: challenge.data?.avatar ?? null,
     };
     await updateChallengeMutation.mutateAsync({ game_id: props.gameId, challenge: data });
   }

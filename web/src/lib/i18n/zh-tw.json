@@ -956,6 +956,11 @@
         "title": "已隱藏",
         "message": "題目已隱藏，僅供管理員測試。",
         "alert": "請在題目準備好後點擊“公開”按鈕公開題目。平臺不會主動更改題目可見性，自動放題功能會使用時間節點與隱藏狀態來計算題目的最終可見性。"
+      },
+      "locked": {
+        "message": "本題已鎖定",
+        "hint": "完成以下前置題目後解鎖",
+        "dismiss": "自己人，別開槍"
       }
     },
     "actions": {
@@ -1386,7 +1391,44 @@
       "title": "設置"
     },
     "inGame": "賽中題目",
-    "total": "所有題目"
+    "total": "所有題目",
+    "milestone": {
+      "title": "里程碑",
+      "empty": "暫無里程碑",
+      "achieved": "已達成",
+      "prerequisites": "前置題目",
+      "form": {
+        "name": {
+          "label": "里程碑名稱",
+          "placeholder": "請輸入名稱",
+          "required": "名稱不能為空"
+        },
+        "description": {
+          "label": "里程碑描述",
+          "placeholder": "請輸入描述",
+          "required": "描述不能為空"
+        },
+        "bonusScore": {
+          "label": "獎勵分數",
+          "placeholder": "請輸入獎勵分數"
+        }
+      },
+      "editor": {
+        "hint": "拖曳連接埠以連線，點擊連線後可刪除",
+        "unsaved": "有未儲存的更改",
+        "saved": "已儲存 {{count}} 項更改",
+        "cycle": "無法連線：會產生循環依賴",
+        "duplicate": "該依賴已存在",
+        "emptyPrerequisites": "里程碑 {{name}} 至少需要一個前置題目",
+        "deleteEdge": "刪除連線",
+        "fit": "適應畫布"
+      },
+      "errors": {
+        "fetchList": {
+          "title": "取得里程碑列表失敗"
+        }
+      }
+    }
   },
   "wsrx": {
     "title": "WebSocket Reflector X",

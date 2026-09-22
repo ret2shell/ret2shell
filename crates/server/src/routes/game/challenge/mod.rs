@@ -71,6 +71,11 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
           post(hint::create_challenge_hint).delete(hint::delete_challenge_hint),
         )
         .route("/answer", patch(resource::update_answer))
+        .route("/avatar", patch(resource::update_challenge_avatar))
+        .route(
+          "/prerequisites",
+          patch(resource::update_challenge_prerequisites),
+        )
         .route(
           "/",
           patch(resource::update_challenge).delete(resource::delete_challenge),

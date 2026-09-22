@@ -24,6 +24,7 @@ import Hammer from "./hammer";
 import Hints from "./hints";
 import Instances from "./instances";
 import Intro from "./intro";
+import { usePrerequisiteGating } from "./prerequisites";
 import Settings from "./settings";
 import Statistics from "./statistics";
 import Terminal from "./terminal";
@@ -34,6 +35,15 @@ export type ChallengeWidgetProps = {
   gameId: number;
   challengeId: number;
 };
+
+function LockedPanel() {
+  return (
+    <div class="w-full h-full flex flex-col space-y-2 items-center justify-center opacity-60">
+      <span class="shrink-0 icon-[fluent--lock-closed-20-regular] w-8 h-8" />
+      <span>{t("challenge.status.locked.message")}</span>
+    </div>
+  );
+}
 
 function BottomPanel(props: ChallengeWidgetProps) {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -53,9 +63,13 @@ function BottomPanel(props: ChallengeWidgetProps) {
     return Object.keys(pages).includes(key) ? key : "terminal";
   });
   const game = useGame({ id: () => props.gameId });
+  const gating = usePrerequisiteGating({ gameId: () => props.gameId, challengeId: () => props.challengeId });
   const pageComponent = () => {
     if (!isAdminOfGame(game.data) && ["statistics", "instances", "checker", "settings"].includes(page())) {
       return pages.terminal;
+    }
+    if (gating.gated() && ["terminal", "hints", "files"].includes(page())) {
+      return LockedPanel;
     }
     if (props.training && page() === "hammer") {
       return pages.terminal;
@@ -105,11 +119,19 @@ function BottomPanel(props: ChallengeWidgetProps) {
         defer
       >
         <div class="h-full flex px-2 py-0 items-center space-x-2 min-w-max w-max">
-          <Button onClick={() => setSearchParams({ tab: "terminal" })} ghost={page() !== "terminal"}>
+          <Button
+            onClick={() => setSearchParams({ tab: "terminal" })}
+            ghost={page() !== "terminal"}
+            disabled={gating.gated()}
+          >
             <span class="shrink-0 icon-[fluent--code-20-regular] w-5 h-5" />
             <span>{t("challenge.terminal.title")}</span>
           </Button>
-          <Button onClick={() => setSearchParams({ tab: "hints" })} ghost={page() !== "hints"}>
+          <Button
+            onClick={() => setSearchParams({ tab: "hints" })}
+            ghost={page() !== "hints"}
+            disabled={gating.gated()}
+          >
             <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5" />
             <span>{t("challenge.hint.title")}</span>
           </Button>

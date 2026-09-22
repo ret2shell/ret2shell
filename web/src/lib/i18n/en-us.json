@@ -956,6 +956,11 @@
         "title": "Hidden",
         "message": "This challenge is hidden, only for admin testing.",
         "alert": "Please click the \"Up\" button when the challenge is ready. The platform will not automatically change the visibility of the challenge. The auto-publishing function will use time points and the hidden state to calculate the final visibility for players."
+      },
+      "locked": {
+        "message": "This challenge is locked",
+        "hint": "Solve the following prerequisite challenges to unlock",
+        "dismiss": "Friendly, don't shoot!"
       }
     },
     "actions": {
@@ -1386,7 +1391,44 @@
       "title": "Settings"
     },
     "inGame": "In-game challenges",
-    "total": "All challenges"
+    "total": "All challenges",
+    "milestone": {
+      "title": "Milestones",
+      "empty": "No milestones yet",
+      "achieved": "Achieved",
+      "prerequisites": "Prerequisites",
+      "form": {
+        "name": {
+          "label": "Milestone Name",
+          "placeholder": "Please enter a name",
+          "required": "Name is required"
+        },
+        "description": {
+          "label": "Milestone Description",
+          "placeholder": "Please enter a description",
+          "required": "Description is required"
+        },
+        "bonusScore": {
+          "label": "Bonus Score",
+          "placeholder": "Please enter the bonus score"
+        }
+      },
+      "editor": {
+        "hint": "Drag from a port to connect; click an edge to delete it",
+        "unsaved": "Unsaved changes",
+        "saved": "Saved {{count}} change(s)",
+        "cycle": "Cannot connect: this would create a dependency cycle",
+        "duplicate": "This dependency already exists",
+        "emptyPrerequisites": "Milestone {{name}} needs at least one prerequisite challenge",
+        "deleteEdge": "Delete edge",
+        "fit": "Fit to view"
+      },
+      "errors": {
+        "fetchList": {
+          "title": "Failed to fetch milestones"
+        }
+      }
+    }
   },
   "wsrx": {
     "title": "WebSocket Reflector X",

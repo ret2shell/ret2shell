@@ -30,7 +30,7 @@ use crate::{
   traits::{GlobalState, ResponseError},
   utility::{
     pagination::{DEFAULT_PAGE_SIZE, DEFAULT_SUBMISSION_PAGE_SIZE, page, page_size},
-    validation::validate_challenge_model,
+    validation::{validate_challenge_model, validate_max_len},
   },
 };
 
@@ -221,6 +221,95 @@ pub(super) async fn update_challenge(
       .await
       .ok();
   }
+  cache.at("challenge").del(challenge.id).await.ok();
+
+  Ok(Json(challenge))
+}
+
+/// Updates only the prerequisites of a challenge. Unlike `update_challenge`,
+/// this endpoint does not require the full challenge model (content etc.) and
+/// is allowed on published challenges, since prerequisites do not alter the
+/// scoring configuration.
+pub(super) async fn update_challenge_prerequisites(
+  State(ref db): State<Database>, State(cache): State<Cache>, State(bucket): State<Bucket>,
+  Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
+  Extension(prev_challenge): Extension<challenge::Model>,
+  Json(prerequisites): Json<challenge::PrerequisiteList>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let txn = db.conn.begin().await?;
+  let referenced =
+    super::resolve_prerequisite_models(&txn, game.id, Some(prev_challenge.id), &prerequisites)
+      .await?;
+  super::ensure_acyclic_prerequisites(&txn, &game, prev_challenge.id, &prerequisites).await?;
+  let prerequisite_buckets = super::prerequisite_bucket_names(&referenced)?;
+  let challenge = challenge::update(
+    &txn,
+    challenge::Model {
+      prerequisites,
+      ..prev_challenge
+    },
+  )
+  .await?;
+  let (game_bucket, challenge_bucket) =
+    super::get_challenge_bucket_mut(&bucket, &game, &challenge).await?;
+  challenge_bucket
+    .set_config(serde_json::to_value(super::challenge_bucket_config(
+      &challenge,
+      prerequisite_buckets,
+    )?)?)
+    .await?;
+  game_bucket
+    .commit(
+      format!(":link: update challenge prerequisites {}", challenge.name),
+      &token.account,
+      format!("{}@private.ret.sh.cn", token.account),
+    )
+    .await?;
+  txn.commit().await?;
+  cache.at("challenge").del(challenge.id).await.ok();
+
+  Ok(Json(challenge))
+}
+
+/// Updates only the avatar of a challenge. Like
+/// `update_challenge_prerequisites`, this endpoint does not require the full
+/// challenge model and is allowed on published challenges.
+pub(super) async fn update_challenge_avatar(
+  State(ref db): State<Database>, State(cache): State<Cache>, State(bucket): State<Bucket>,
+  Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
+  Extension(prev_challenge): Extension<challenge::Model>, Json(avatar): Json<Option<String>>,
+) -> Result<impl IntoResponse, ResponseError> {
+  if let Some(avatar) = &avatar {
+    validate_max_len(avatar, "challenge avatar", 255)?;
+  }
+  let txn = db.conn.begin().await?;
+  let challenge = challenge::update(
+    &txn,
+    challenge::Model {
+      avatar,
+      ..prev_challenge
+    },
+  )
+  .await?;
+  let referenced =
+    super::resolve_prerequisite_models(&txn, game.id, None, &challenge.prerequisites).await?;
+  let prerequisite_buckets = super::prerequisite_bucket_names(&referenced)?;
+  let (game_bucket, challenge_bucket) =
+    super::get_challenge_bucket_mut(&bucket, &game, &challenge).await?;
+  challenge_bucket
+    .set_config(serde_json::to_value(super::challenge_bucket_config(
+      &challenge,
+      prerequisite_buckets,
+    )?)?)
+    .await?;
+  game_bucket
+    .commit(
+      format!(":art: update challenge avatar {}", challenge.name),
+      &token.account,
+      format!("{}@private.ret.sh.cn", token.account),
+    )
+    .await?;
+  txn.commit().await?;
   cache.at("challenge").del(challenge.id).await.ok();
 
   Ok(Json(challenge))

@@ -13,6 +13,7 @@ import { useGame, useGameInstances } from "@api/game";
 import { useSelfTeam } from "@api/team";
 import Spin from "@assets/animates/spin";
 import { getWsrxLink, wsrx } from "@lib/wsrx";
+import { A } from "@solidjs/router";
 import { isAdminOfGame, isGameInProgress } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";
 import Article from "@widgets/article";
@@ -30,6 +31,7 @@ import { passiveSupport } from "passive-events-support/src/utils";
 import { createEffect, createMemo, createSignal, For, Match, onCleanup, Show, Switch, untrack } from "solid-js";
 import DownloadButton from "../download-button";
 import type { ChallengeWidgetProps } from ".";
+import { usePrerequisiteGating } from "./prerequisites";
 
 passiveSupport({
   events: ["mousewheel", "wheel"],
@@ -67,6 +69,12 @@ export default function (props: ChallengeWidgetProps) {
   const team = useSelfTeam({
     game_id: () => props.gameId,
     enabled: () => !props.training && !!game.data && isGameInProgress(game.data) && !isAdminOfGame(game.data),
+  });
+  const gating = usePrerequisiteGating({ gameId: () => props.gameId, challengeId: () => props.challengeId });
+  const [layerDismissed, setLayerDismissed] = createSignal(false);
+  createEffect(() => {
+    props.challengeId;
+    setLayerDismissed(false);
   });
 
   let instanceStateIter = 0;
@@ -159,7 +167,7 @@ export default function (props: ChallengeWidgetProps) {
   }
 
   return (
-    <div class="w-full h-full overflow-hidden flex flex-col">
+    <div class="w-full h-full overflow-hidden flex flex-col relative">
       <OverlayScrollbarsComponent
         options={{
           scrollbars: {
@@ -272,6 +280,7 @@ export default function (props: ChallengeWidgetProps) {
                       icon="icon-[fluent--arrow-download-20-regular]"
                       url={`${api_root}/game/${challenge.data!.game_id}/challenge/${challenge.data!.id}/file`}
                       searchParams={{ file: file.file, folder: file.folder }}
+                      disabled={gating.gated()}
                     />
                   )}
                 </For>
@@ -321,6 +330,7 @@ export default function (props: ChallengeWidgetProps) {
                       loading={startInstanceMutation.isPending}
                       disabled={
                         startInstanceMutation.isPending ||
+                        gating.gated() ||
                         !!calmdownStatus.data ||
                         env.data?.images.every((image) => !image.port)
                       }
@@ -513,6 +523,35 @@ export default function (props: ChallengeWidgetProps) {
           </div>
         </div>
       </OverlayScrollbarsComponent>
+      <Show when={gating.locked() && !layerDismissed()}>
+        <div class="absolute inset-0 z-10 backdrop-blur-md bg-layer/60 flex flex-col items-center justify-center space-y-4 p-6">
+          <span class="shrink-0 icon-[fluent--lock-closed-20-regular] w-10 h-10 text-warning" />
+          <span class="font-bold text-lg">{t("challenge.status.locked.message")}</span>
+          <span class="flex flex-row flex-wrap items-center justify-center gap-x-2 gap-y-1">
+            <span class="opacity-60">{t("challenge.status.locked.hint")}:</span>
+            <For each={gating.lockedChallenges()}>
+              {(prerequisite) => (
+                <A
+                  class="text-warning hover:underline font-bold"
+                  href={
+                    props.training
+                      ? `/training/${props.gameId}?challenge=${prerequisite.id}`
+                      : `/games/${props.gameId}/challenges?challenge=${prerequisite.id}`
+                  }
+                >
+                  {prerequisite.name}
+                </A>
+              )}
+            </For>
+          </span>
+          <Show when={isAdminOfGame(game.data)}>
+            <Button onClick={() => setLayerDismissed(true)}>
+              <span class="shrink-0 icon-[fluent--eye-20-regular] w-5 h-5" />
+              <span>{t("challenge.status.locked.dismiss")}</span>
+            </Button>
+          </Show>
+        </div>
+      </Show>
     </div>
   );
 }
