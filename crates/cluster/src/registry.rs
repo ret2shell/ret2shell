@@ -242,4 +242,52 @@ mod tests {
   fn catalog_requests_stay_anonymous_without_credentials() {
     assert_eq!(authorization(config(None, None)), None);
   }
+  #[test]
+  fn to_image_name_normalizes_case_separators_and_non_printables() {
+    assert_eq!(to_image_name("Hello World"), "hello_world");
+    assert_eq!(to_image_name("pwn:challenge?"), "pwn_challenge_");
+    assert_eq!(to_image_name("a/b\\c|d<e>f\"g*h"), "a_b_c_d_e_f_g_h");
+    // tab is not printable and not in the filesystem escape set, so it is dropped.
+    assert_eq!(to_image_name("ab\tcd"), "abcd");
+  }
+
+  #[test]
+  fn base_builds_credential_prefix_only_when_both_parts_exist() {
+    assert_eq!(
+      Registry::new(config(Some("ci"), Some("secret")))
+        .base()
+        .unwrap(),
+      "ci:secret@registry.example.com"
+    );
+    assert_eq!(
+      Registry::new(config(None, None)).base().unwrap(),
+      "registry.example.com"
+    );
+    let err = Registry::new(config(Some("ci"), None)).base().unwrap_err();
+    assert!(matches!(err, ClusterError::MissingField(field) if field == "password"));
+  }
+
+  #[test]
+  fn api_base_switches_scheme_on_insecure_flag() {
+    assert_eq!(
+      Registry::new(config(None, None)).api_base().unwrap(),
+      "http://registry.example.com/v2"
+    );
+    let mut secure = config(None, None);
+    secure.insecure = false;
+    assert_eq!(
+      Registry::new(secure).api_base().unwrap(),
+      "https://registry.example.com/v2"
+    );
+  }
+
+  #[tokio::test]
+  async fn upload_image_rejects_unsupported_archives_before_any_io() {
+    let err = Registry::new(config(None, None))
+      .upload_image("org", "image.zip", tokio::io::empty())
+      .await
+      .unwrap_err();
+
+    assert!(matches!(err, ClusterError::InvalidImageFileType(_)));
+  }
 }

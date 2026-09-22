@@ -196,6 +196,27 @@ mod tests {
   }
 
   #[tokio::test]
+  async fn try_open_creates_storage_layout_and_delete_removes_hashed_file() {
+    let path = temp_path("layout");
+    assert!(Media::try_open(&path).await.is_ok());
+    assert!(path.join(".temp").is_dir());
+    assert!(path.join("thumbnails").is_dir());
+
+    let media = Media::try_open(&path).await.unwrap();
+    assert!(!media.is_image("text/plain"));
+    assert!(media.is_image("image/png"));
+
+    let model = media.save(PNG).await.unwrap();
+    assert_eq!(media.get_mime_type(&model.hash).unwrap(), "image/png");
+    media.get(&model.hash).await.unwrap();
+
+    media.delete(&model.hash).await.unwrap();
+    assert!(media.get(&model.hash).await.is_err());
+
+    fs::remove_dir_all(path).ok();
+  }
+
+  #[tokio::test]
   async fn save_rejects_non_images_without_storing_hashed_file() {
     let path = temp_path("text");
     let media = Media::try_open(&path).await.unwrap();

@@ -38,3 +38,41 @@ impl Merge for Option<Config> {
     other.or(self)
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::Config;
+  use crate::traits::Merge;
+
+  fn config(host: &str) -> Option<Config> {
+    Some(Config {
+      db: "ret2shell".to_owned(),
+      host: host.to_owned(),
+      port: 5432,
+      user: "postgres".to_owned(),
+      password: "secret".to_owned(),
+      ssl_mode: "prefer".to_owned(),
+    })
+  }
+
+  #[test]
+  fn dsn_builds_postgresql_connection_string() {
+    let dsn = config("db.internal").unwrap().dsn();
+    assert_eq!(
+      dsn,
+      "postgresql://postgres:secret@db.internal:5432/ret2shell?sslmode=prefer"
+    );
+  }
+
+  #[test]
+  fn merge_prefers_database_config_over_static_config() {
+    assert_eq!(
+      config("static").merge(config("database")),
+      config("database")
+    );
+    assert_eq!(config("database").merge(None), config("database"));
+    assert_eq!(None.merge(config("static")), config("static"));
+    let none: Option<Config> = None;
+    assert_eq!(none.merge(None), None);
+  }
+}

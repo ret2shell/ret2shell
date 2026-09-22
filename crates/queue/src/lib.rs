@@ -106,3 +106,29 @@ pub async fn initialize(config: &Option<queue::Config>) -> Result<Queue, QueueEr
   let client = options.connect(&addr).await?;
   Ok(Queue::new(jetstream::new(client)))
 }
+
+#[cfg(test)]
+mod tests {
+  use chrono::Utc;
+
+  use super::TracedMessage;
+
+  #[test]
+  fn traced_message_round_trips_through_json() {
+    let message = TracedMessage {
+      trace: "trace-id".to_owned(),
+      created_at: Utc::now(),
+      payload: vec!["flag-a", "flag-b"],
+    };
+
+    let encoded = serde_json::to_string(&message).unwrap();
+    let decoded: TracedMessage<Vec<String>> = serde_json::from_str(&encoded).unwrap();
+
+    assert_eq!(decoded.trace, "trace-id");
+    assert_eq!(decoded.created_at, message.created_at);
+    assert_eq!(
+      decoded.payload,
+      vec!["flag-a".to_owned(), "flag-b".to_owned()]
+    );
+  }
+}

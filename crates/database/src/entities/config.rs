@@ -87,3 +87,83 @@ where
     }
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use r2s_config::{GlobalConfig, captcha, database as database_config};
+
+  use super::Model;
+
+  fn dynamic_config() -> Model {
+    Model {
+      id: 7,
+      auditor: None,
+      auth: None,
+      bucket: None,
+      cache: None,
+      captcha: Some(captcha::Config {
+        enabled: true,
+        difficulty: None,
+        validator: captcha::ValidatorType::Pow,
+      }),
+      cluster: None,
+      database: Some(database_config::Config {
+        db: "dynamic-db".to_owned(),
+        host: "db.internal".to_owned(),
+        port: 5432,
+        user: "postgres".to_owned(),
+        password: "secret".to_owned(),
+        ssl_mode: "prefer".to_owned(),
+      }),
+      email: None,
+      logging: None,
+      media: None,
+      queue: None,
+      server: None,
+    }
+  }
+
+  fn global_config() -> GlobalConfig {
+    GlobalConfig {
+      auditor: None,
+      auth: None,
+      bucket: None,
+      cache: None,
+      captcha: Some(captcha::Config {
+        enabled: false,
+        difficulty: Some(3),
+        validator: captcha::ValidatorType::Image,
+      }),
+      cluster: None,
+      database: Some(database_config::Config {
+        db: "static-db".to_owned(),
+        host: "localhost".to_owned(),
+        port: 5432,
+        user: "postgres".to_owned(),
+        password: "secret".to_owned(),
+        ssl_mode: "prefer".to_owned(),
+      }),
+      email: None,
+      logging: None,
+      media: None,
+      queue: None,
+      server: None,
+    }
+  }
+
+  #[test]
+  fn merge_keeps_dynamic_row_id_and_merges_field_wise() {
+    let merged = dynamic_config().merge(global_config());
+
+    assert_eq!(merged.id, 7);
+    // captcha merges per field: database switch/validator win, static
+    // difficulty fills the gap left by the database row.
+    let captcha = merged.captcha.unwrap();
+    assert!(captcha.enabled);
+    assert_eq!(captcha.validator, captcha::ValidatorType::Pow);
+    assert_eq!(captcha.difficulty, Some(3));
+    // database prefers the dynamic (database side) config.
+    assert_eq!(merged.database.unwrap().db, "dynamic-db");
+    assert!(merged.auth.is_none());
+  }
+}

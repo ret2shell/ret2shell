@@ -74,3 +74,65 @@ pub fn leet_str(s: impl AsRef<str>) -> String {
   }
   result
 }
+
+#[cfg(test)]
+mod tests {
+  use std::collections::HashSet;
+
+  use super::{account_str, deunicode_str, leet_str};
+
+  #[test]
+  fn deunicode_keeps_ascii_layout_for_keep_case_and_snake_cases_otherwise() {
+    assert_eq!(deunicode_str("Hello World", true), "Hello_World");
+    assert_eq!(deunicode_str("Hello World", false), "hello_world");
+    // plain ASCII passes through unchanged.
+    assert_eq!(deunicode_str("padded", true), "padded");
+    assert!(deunicode_str("", true).is_empty());
+  }
+
+  #[test]
+  fn account_str_keeps_only_alphanumerics_and_underscores() {
+    let filtered = account_str("User.Name-x +01!");
+    assert!(!filtered.is_empty());
+    assert!(
+      filtered
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() || c == '_'),
+      "unexpected chars in {filtered}"
+    );
+    assert_eq!(account_str("plain_1"), "plain_1");
+  }
+
+  #[test]
+  fn leet_str_preserves_length_and_stays_within_candidate_sets() {
+    let candidates: [(u8, &[u8]); 11] = [
+      (b'l', b"lL1"),
+      (b'e', b"eE3"),
+      (b'e', b"eE3"),
+      (b't', b"tT7"),
+      (b'0', b"0Oo"),
+      (b'1', b"1Il"),
+      (b'2', b"2Zz"),
+      (b'3', b"3Ee"),
+      (b'z', b"zZ2"),
+      (b'-', b"-"),
+      (b'=', b"="),
+    ];
+    let input = "leet0123z-=";
+    for _ in 0..32 {
+      let output = leet_str(input);
+      assert_eq!(output.len(), input.len());
+      for (i, out_char) in output.bytes().enumerate() {
+        assert!(
+          candidates[i].1.contains(&out_char),
+          "byte {out_char} at {i} not in candidate set"
+        );
+      }
+    }
+    let mut outputs = HashSet::new();
+    for _ in 0..64 {
+      outputs.insert(leet_str("leet"));
+    }
+    assert!(outputs.len() > 1, "leet_str should be randomized");
+  }
+}

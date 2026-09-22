@@ -456,3 +456,45 @@ where
     .await?;
   Ok(count as i64 + 1)
 }
+
+#[cfg(test)]
+mod tests {
+  use chrono::Utc;
+
+  use super::{ExModel, Model, State, TeamScoreHistoryList};
+
+  fn team() -> Model {
+    Model {
+      id: 5,
+      name: "r3kapig".to_owned(),
+      game_id: 1,
+      token: Some("team-invite-token".to_owned()),
+      state: State::Passed,
+      institute_id: None,
+      score: 1000,
+      history: TeamScoreHistoryList::new(),
+      last_active_at: Utc::now(),
+      tag: Some("cn".to_owned()),
+    }
+  }
+
+  #[test]
+  fn desensitize_clears_invite_token_but_keeps_team_fields() {
+    let view = team().desensitize();
+    assert_eq!(view.token, None);
+    assert_eq!(view.name, "r3kapig");
+    assert_eq!(view.state, State::Passed);
+    assert_eq!(view.score, 1000);
+  }
+
+  #[test]
+  fn new_score_history_starts_with_a_single_entry() {
+    let history = TeamScoreHistoryList::new();
+    assert_eq!(history.0.len(), 1);
+
+    let extended: ExModel = team().into();
+    let view = extended.desensitize();
+    assert_eq!(view.token, None);
+    assert_eq!(view.name, "r3kapig");
+  }
+}

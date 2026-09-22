@@ -549,3 +549,53 @@ where
   C: ConnectionTrait, {
   Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }
+
+#[cfg(test)]
+mod tests {
+  use chrono::Utc;
+
+  use super::{ExModel, Model};
+
+  fn submission() -> Model {
+    Model {
+      id: 9,
+      created_at: Utc::now(),
+      user_id: 1,
+      challenge_id: 2,
+      team_id: Some(3),
+      content: Some("flag{secret}".to_owned()),
+      solved: Some(true),
+      result: Some("correct".to_owned()),
+    }
+  }
+
+  #[test]
+  fn desensitize_clears_flag_content_but_keeps_verdict() {
+    let view = submission().desensitize();
+    assert_eq!(view.content, None);
+    assert_eq!(view.solved, Some(true));
+    assert_eq!(view.team_id, Some(3));
+  }
+
+  #[test]
+  fn ex_model_desensitize_clears_flag_content() {
+    let extended = ExModel {
+      id: 9,
+      created_at: Utc::now(),
+      user_id: 1,
+      user_name: Some("tester".to_owned()),
+      challenge_id: 2,
+      challenge_name: Some("babystack".to_owned()),
+      team_id: Some(3),
+      team_name: Some("r3kapig".to_owned()),
+      content: Some("flag{secret}".to_owned()),
+      solved: Some(true),
+      score: 100,
+      result: None,
+    };
+    let view = extended.desensitize();
+    assert_eq!(view.content, None);
+    assert_eq!(view.challenge_name.as_deref(), Some("babystack"));
+    assert_eq!(view.score, 100);
+  }
+}

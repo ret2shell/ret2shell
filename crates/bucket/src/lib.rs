@@ -135,3 +135,152 @@ pub async fn down(config: &Option<bucket::Config>) -> Result<(), BucketError> {
     Err(BucketError::ConfigNotFound)
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use std::time::{SystemTime, UNIX_EPOCH};
+
+  use chrono::{Duration, Utc};
+  use serde_json::json;
+
+  use super::Bucket;
+  use crate::traits::BucketError;
+
+  fn temp_root(label: &str) -> std::path::PathBuf {
+    crate::game::tests::ensure_git_identity_env();
+    let nanos = SystemTime::now()
+      .duration_since(UNIX_EPOCH)
+      .unwrap()
+      .as_nanos();
+    std::env::temp_dir().join(format!(
+      "r2s-bucket-test-{label}-{}-{nanos}",
+      std::process::id()
+    ))
+  }
+
+  fn game_json(name: &str, start_offset_seconds: i64) -> serde_json::Value {
+    let now = Utc::now();
+    json!({
+      "name": name,
+      "updated_at": now.timestamp(),
+      "brief": "test game",
+      "start_at": (now + Duration::seconds(start_offset_seconds)).timestamp(),
+      "end_at": (now + Duration::days(2)).timestamp(),
+      "register_at": now.timestamp(),
+      "archive_at": (now + Duration::days(3)).timestamp(),
+      "host_type": 1,
+      "team_size": 4,
+      "env_limit": null,
+      "access_policy": { "sync": 0 },
+      "cover": null,
+      "logo": null,
+      "can_register_after_started": false,
+      "award_rate": 100,
+      "weight": 1,
+    })
+  }
+
+  #[tokio::test]
+  async fn create_derives_snake_case_bucket_names_with_timestamp_suffix() {
+    let root = temp_root("create");
+    let bucket = Bucket { path: root.clone() };
+
+    let start_at = Utc::now() + Duration::days(1);
+    let created = bucket
+      .create(game_json_with_start("My Cool Game", start_at))
+      .await
+      .unwrap();
+
+    assert_eq!(
+      created.name,
+      format!("my_cool_game_{:x}", start_at.timestamp())
+    );
+    assert!(root.join(&created.name).join("config.toml").exists());
+
+    // the same name at the same timestamp collides with the first bucket.
+    let err = bucket
+      .create(game_json_with_start("My Cool Game", start_at))
+      .await
+      .unwrap_err();
+    assert!(matches!(err, BucketError::PathConflict(_)));
+
+    // names longer than 72 bytes are truncated before the suffix.
+    let long = bucket
+      .create(game_json_with_start("a".repeat(100).as_str(), start_at))
+      .await
+      .unwrap();
+    assert!(long.name.starts_with(&"a".repeat(72)));
+    assert_eq!(long.name[73..], format!("{:x}", start_at.timestamp()));
+
+    std::fs::remove_dir_all(root).ok();
+  }
+
+  fn game_json_with_start(name: &str, start_at: chrono::DateTime<Utc>) -> serde_json::Value {
+    let mut value = game_json(name, 0);
+    value["start_at"] = json!(start_at.timestamp());
+    value["updated_at"] = json!(Utc::now().timestamp());
+    value
+  }
+
+  #[tokio::test]
+  async fn open_lock_and_delete_round_trip() {
+    let root = temp_root("open");
+    let bucket = Bucket { path: root.clone() };
+    let created = bucket.create(game_json("Readable Game", 0)).await.unwrap();
+
+    // read-only handle works without a lock file.
+    let handle = bucket.at(created.name.as_str()).await.unwrap();
+    assert_eq!(handle.name, created.name);
+    drop(handle);
+
+    // only one writer can hold the lock at a time; dropping releases it.
+    let writer = bucket.at_mut(created.name.as_str()).await.unwrap();
+    let second = bucket.at_mut(created.name.as_str()).await;
+    assert!(matches!(second, Err(BucketError::LockError)));
+    assert!(matches!(
+      bucket.lock(created.name.as_str()),
+      Err(BucketError::LockError)
+    ));
+    drop(writer);
+    let writer = bucket.at_mut(created.name.as_str()).await.unwrap();
+    drop(writer);
+
+    bucket.delete(created.name.as_str()).await.unwrap();
+    assert!(!root.join(created.name.as_str()).exists());
+
+    // deleting an unknown bucket reports it as missing instead of removing
+    // anything.
+    let err = bucket.delete("no_such_bucket").await.unwrap_err();
+    assert!(matches!(err, BucketError::PathDoesNotExist(_)));
+
+    std::fs::remove_dir_all(root).ok();
+  }
+
+  #[tokio::test]
+  async fn initialize_requires_config_and_down_is_idempotent_for_missing_paths() {
+    let missing = r2s_config::bucket::Config {
+      path: "/nonexistent/ret2shell-bucket-test".to_owned(),
+    };
+
+    assert!(matches!(
+      super::initialize(&None).await,
+      Err(BucketError::ConfigNotFound)
+    ));
+
+    let root = temp_root("initialize");
+    let initialized = super::initialize(&Some(missing)).await;
+    assert!(initialized.is_err()); // sanity: nonexistent paths cannot be scanned
+
+    // down on a missing path succeeds; on an existing path it removes the tree.
+    assert!(super::down(&None).await.is_err());
+    std::fs::create_dir_all(&root).unwrap();
+    let config = Some(r2s_config::bucket::Config {
+      path: root.to_string_lossy().to_string(),
+    });
+    super::down(&config).await.unwrap();
+    assert!(!root.exists());
+    assert!(super::down(&config).await.is_ok());
+
+    std::fs::remove_dir_all(root).ok();
+  }
+}

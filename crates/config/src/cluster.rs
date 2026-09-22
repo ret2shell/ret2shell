@@ -16,11 +16,9 @@ pub struct RegistryConfig {
 
 impl RegistryConfig {
   /// HTTP Basic credentials for registry API calls, when both are configured.
+  /// An empty username is allowed: some registries accept a bare password.
   pub fn basic_auth(&self) -> Option<(&str, &str)> {
-    let username = self
-      .username
-      .as_deref()
-      .filter(|username| !username.is_empty())?;
+    let username = self.username.as_deref()?;
     let password = self.password.as_deref()?;
     Some((username, password))
   }
@@ -281,11 +279,16 @@ mod tests {
   }
 
   #[test]
-  fn basic_auth_requires_username_and_password() {
+  fn basic_auth_requires_both_fields_and_allows_empty_username() {
     let mut config = registry();
     assert_eq!(config.basic_auth(), Some(("ci", "secret")));
 
+    // NOTE: an empty username is intentional: some registries accept a bare
+    // password, matching the `Registry::base` behavior.
     config.username = Some(String::new());
+    assert_eq!(config.basic_auth(), Some(("", "secret")));
+
+    config.username = None;
     assert_eq!(config.basic_auth(), None);
 
     config.username = Some("ci".to_owned());

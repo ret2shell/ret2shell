@@ -273,3 +273,336 @@ mod tests {
     assert!(validate_password("Aa1".repeat(14).as_str()).is_err());
   }
 }
+
+#[cfg(test)]
+mod model_validation_tests {
+  use chrono::{Duration, Utc};
+  use r2s_database::{challenge, game, oauth_provider};
+
+  use super::{
+    validate_challenge_model, validate_game_model, validate_oauth_provider_model,
+    validate_team_form,
+  };
+
+  fn hours(n: i64) -> chrono::DateTime<Utc> {
+    Utc::now() + Duration::hours(n)
+  }
+
+  fn valid_game() -> game::Model {
+    game::Model {
+      id: 1,
+      updated_at: Utc::now(),
+      name: "test game".to_owned(),
+      brief: "a brief".to_owned(),
+      introduction_id: None,
+      register_at: hours(-48),
+      start_at: hours(-24),
+      end_at: hours(24),
+      archive_at: hours(48),
+      hidden: false,
+      offline: false,
+      frozen: false,
+      host_type: game::HostType::Game,
+      team_size: 4,
+      env_limit: Some(2),
+      access_policy: game::AccessPolicy {
+        restrict: false,
+        institutes: vec![],
+        sync: 0,
+      },
+      archive_policy: game::ArchivePolicy::default(),
+      hammer_policy: game::HammerPolicy {
+        enabled: true,
+        outer_label: Some("mirror".to_owned()),
+        outer_url: Some("https://hammer.example.com".to_owned()),
+      },
+      cover: None,
+      logo: None,
+      enable_audit: true,
+      can_register_after_started: false,
+      award_rate: 30,
+      award_rates: Some(game::AwardRates(vec![10, 20])),
+      admins: game::Admins(vec![1]),
+      weight: 0,
+      bucket: None,
+      token: None,
+      timeline_presets: Some(game::TimelinePresets(vec![game::TimelinePreset {
+        label: "warmup".to_owned(),
+        start_at: hours(-24),
+        end_at: hours(-12),
+      }])),
+      node_selector: None,
+      traffic: None,
+      lifecycle: None,
+    }
+  }
+
+  fn assert_error_contains(result: Result<(), crate::traits::ResponseError>, needle: &str) {
+    let message = result.expect_err("expected validation failure").to_string();
+    assert!(message.contains(needle), "unexpected error: {message}");
+  }
+
+  #[test]
+  fn complete_game_config_passes_validation() {
+    assert!(validate_game_model(&valid_game()).is_ok());
+  }
+
+  #[test]
+  fn training_games_skip_team_size_limits() {
+    let mut game = valid_game();
+    game.host_type = game::HostType::Training;
+    game.team_size = 999;
+    assert!(validate_game_model(&game).is_ok());
+  }
+
+  #[test]
+  fn game_time_windows_must_be_chronological() {
+    let mut game = valid_game();
+    game.register_at = game.start_at + Duration::seconds(1);
+    assert_error_contains(validate_game_model(&game), "register time");
+
+    let mut game = valid_game();
+    game.end_at = game.start_at;
+    assert_error_contains(validate_game_model(&game), "start time");
+
+    let mut game = valid_game();
+    game.archive_at = game.end_at - Duration::seconds(1);
+    assert_error_contains(validate_game_model(&game), "archive time");
+  }
+
+  #[test]
+  fn numeric_fields_must_stay_within_bounds() {
+    for team_size in [-1, 100] {
+      let mut game = valid_game();
+      game.team_size = team_size;
+      assert_error_contains(validate_game_model(&game), "team size");
+    }
+    for env_limit in [0, 100] {
+      let mut game = valid_game();
+      game.env_limit = Some(env_limit);
+      assert_error_contains(validate_game_model(&game), "env limit");
+    }
+    for award_rate in [-1, 101] {
+      let mut game = valid_game();
+      game.award_rate = award_rate;
+      assert_error_contains(validate_game_model(&game), "award rate");
+    }
+    let mut game = valid_game();
+    game.award_rates = Some(game::AwardRates(vec![10, 999]));
+    assert_error_contains(validate_game_model(&game), "award rate");
+  }
+
+  #[test]
+  fn missing_required_texts_are_reported() {
+    let mut game = valid_game();
+    game.name = "   ".to_owned();
+    assert_error_contains(validate_game_model(&game), "name");
+
+    let mut game = valid_game();
+    game.brief = String::new();
+    assert_error_contains(validate_game_model(&game), "brief");
+  }
+
+  #[test]
+  fn timeline_presets_must_have_labels_and_fit_inside_the_game() {
+    let mut game = valid_game();
+
+    game.timeline_presets = Some(game::TimelinePresets(vec![game::TimelinePreset {
+      label: String::new(),
+      ..game.timeline_presets.as_ref().unwrap().0[0].clone()
+    }]));
+    assert_error_contains(validate_game_model(&game), "timeline label");
+
+    game.timeline_presets = Some(game::TimelinePresets(vec![game::TimelinePreset {
+      label: "backwards".to_owned(),
+      start_at: hours(-12),
+      end_at: hours(-24),
+    }]));
+    assert_error_contains(validate_game_model(&game), "timeline start time");
+
+    game.timeline_presets = Some(game::TimelinePresets(vec![game::TimelinePreset {
+      label: "too early".to_owned(),
+      start_at: hours(-72),
+      end_at: hours(-48),
+    }]));
+    assert_error_contains(
+      validate_game_model(&game),
+      "timeline must be inside game time range",
+    );
+  }
+
+  #[test]
+  fn hammer_outer_urls_must_be_http_links_without_whitespace() {
+    for url in ["ftp://hammer.example.com", "https://hammer.example.com/a b"] {
+      let mut game = valid_game();
+      game.hammer_policy.outer_url = Some(url.to_owned());
+      assert_error_contains(validate_game_model(&game), "invalid hammer url");
+    }
+    // Blank or absent urls are allowed.
+    let mut blank = valid_game();
+    blank.hammer_policy.outer_url = Some("   ".to_owned());
+    assert!(validate_game_model(&blank).is_ok());
+    let mut absent = valid_game();
+    absent.hammer_policy.outer_url = None;
+    assert!(validate_game_model(&absent).is_ok());
+  }
+
+  fn valid_challenge() -> challenge::Model {
+    challenge::Model {
+      id: 1,
+      name: "babypwn".to_owned(),
+      updated_at: Utc::now(),
+      content: Some("<p>find the flag</p>".to_owned()),
+      hidden: false,
+      game_id: 1,
+      // `Tag` fields are private, an empty default tag stands in for a real one.
+      tag: challenge::TagList(vec![challenge::Tag::default()]),
+      score_rule: challenge::ScoreRule {
+        initial: 1000,
+        minimum: 100,
+        decay: 25,
+      },
+      score: 1000,
+      bucket: None,
+      ref_id: None,
+      release_at: Some(hours(-24)),
+      archive_at: Some(hours(24)),
+    }
+  }
+
+  #[test]
+  fn standard_challenge_config_passes_validation() {
+    assert!(validate_challenge_model(&valid_challenge()).is_ok());
+  }
+
+  #[test]
+  fn challenges_require_name_content_and_tags() {
+    let mut challenge = valid_challenge();
+    challenge.name = String::new();
+    assert_error_contains(validate_challenge_model(&challenge), "name");
+
+    let mut challenge = valid_challenge();
+    challenge.content = None;
+    assert_error_contains(validate_challenge_model(&challenge), "content");
+
+    let mut challenge = valid_challenge();
+    challenge.tag = challenge::TagList(vec![]);
+    assert_error_contains(validate_challenge_model(&challenge), "tag");
+  }
+
+  #[test]
+  fn score_rules_must_decay_from_initial_to_minimum() {
+    let mut challenge = valid_challenge();
+    challenge.score_rule.initial = -1;
+    assert_error_contains(validate_challenge_model(&challenge), "initial score");
+
+    let mut challenge = valid_challenge();
+    challenge.score_rule.minimum = 1501;
+    assert_error_contains(validate_challenge_model(&challenge), "minimum score");
+
+    for decay in [0, 201] {
+      let mut challenge = valid_challenge();
+      challenge.score_rule.decay = decay;
+      assert_error_contains(validate_challenge_model(&challenge), "score decay");
+    }
+
+    let mut challenge = valid_challenge();
+    challenge.score_rule.minimum = 1001;
+    assert_error_contains(
+      validate_challenge_model(&challenge),
+      "minimum score must not exceed initial score",
+    );
+  }
+
+  #[test]
+  fn challenges_cannot_archive_before_release() {
+    let mut challenge = valid_challenge();
+    challenge.archive_at = challenge.release_at;
+    assert_error_contains(
+      validate_challenge_model(&challenge),
+      "release time must be before archive time",
+    );
+
+    let mut challenge = valid_challenge();
+    challenge.release_at = Some(hours(48));
+    assert_error_contains(
+      validate_challenge_model(&challenge),
+      "release time must be before archive time",
+    );
+  }
+
+  fn valid_provider() -> oauth_provider::Model {
+    oauth_provider::Model {
+      id: 1,
+      name: "GitHub".to_owned(),
+      avatar: None,
+      provider: "github".to_owned(),
+      script: "pub async fn login(params) { ... }".to_owned(),
+      portal: Some("https://github.com/login".to_owned()),
+    }
+  }
+
+  #[test]
+  fn canonical_oauth_provider_passes_validation() {
+    assert!(validate_oauth_provider_model(&valid_provider()).is_ok());
+
+    let mut no_portal = valid_provider();
+    no_portal.portal = None;
+    assert!(validate_oauth_provider_model(&no_portal).is_ok());
+  }
+
+  #[test]
+  fn oauth_provider_identifiers_are_restricted_to_lowercase_slug_charset() {
+    let mut provider = valid_provider();
+    provider.name = String::new();
+    assert_error_contains(
+      validate_oauth_provider_model(&provider),
+      "oauth provider name",
+    );
+
+    for bad in ["a", &"a".repeat(33), "GitHub", "git-hub"] {
+      let mut provider = valid_provider();
+      provider.provider = bad.to_owned();
+      assert_error_contains(
+        validate_oauth_provider_model(&provider),
+        "invalid characters",
+      );
+    }
+  }
+
+  #[test]
+  fn oauth_providers_require_scripts_and_valid_portals() {
+    let mut provider = valid_provider();
+    provider.script = String::new();
+    assert_error_contains(
+      validate_oauth_provider_model(&provider),
+      "oauth provider script",
+    );
+
+    for portal in ["ftp://github.com/login", "https://github.com/with space"] {
+      let mut provider = valid_provider();
+      provider.portal = Some(portal.to_owned());
+      assert_error_contains(
+        validate_oauth_provider_model(&provider),
+        "portal is invalid",
+      );
+    }
+
+    let mut blank_portal = valid_provider();
+    blank_portal.portal = Some(String::new());
+    assert!(validate_oauth_provider_model(&blank_portal).is_ok());
+  }
+
+  #[test]
+  fn team_forms_need_short_names_and_optional_short_tags() {
+    assert!(validate_team_form("team rocket", None).is_ok());
+    assert!(validate_team_form("team rocket", Some("RKT")).is_ok());
+
+    assert_error_contains(validate_team_form("   ", None), "team name is required");
+    assert_error_contains(validate_team_form(&"x".repeat(33), None), "at most 32");
+    assert_error_contains(
+      validate_team_form("team rocket", Some(&"y".repeat(33))),
+      "at most 32",
+    );
+  }
+}

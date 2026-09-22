@@ -42,3 +42,38 @@ impl Merge for Option<Config> {
     }
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::Config;
+  use crate::traits::Merge;
+
+  fn config(host: &str) -> Option<Config> {
+    Some(Config {
+      enabled: true,
+      host: host.to_owned(),
+      port: 465,
+      sender: "Ret2Shell".to_owned(),
+      sender_address: None,
+      username: "smtp".to_owned(),
+      password: "secret".to_owned(),
+      tls: "tls".to_owned(),
+      reset_password_email_body: None,
+      reset_password_email_subject: None,
+      verify_email_body: None,
+      verify_email_subject: None,
+    })
+  }
+
+  #[test]
+  fn merge_prefers_database_config_and_falls_back_to_static_config() {
+    assert_eq!(
+      config("static").merge(config("database")),
+      config("database")
+    );
+    assert_eq!(config("database").merge(None), config("database"));
+    assert_eq!(None.merge(config("static")), config("static"));
+    let none: Option<Config> = None;
+    assert_eq!(none.merge(None), None);
+  }
+}

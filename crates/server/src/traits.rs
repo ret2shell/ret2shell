@@ -116,7 +116,7 @@ impl IntoResponse for ResponseError {
         DbErr::RecordNotFound(s) => (StatusCode::NOT_FOUND, format!("record not found: {s}")),
         DbErr::Json(_) => (
           StatusCode::INTERNAL_SERVER_ERROR,
-          "data cruptted".to_owned(),
+          "data corrupted".to_owned(),
         ),
         _ => log_with_resp!(
           StatusCode::INTERNAL_SERVER_ERROR,
@@ -334,8 +334,8 @@ impl IntoResponse for ResponseError {
         r2s_oauth::OAuthError::NetworkError(_) => {
           log_with_resp!(
             StatusCode::INTERNAL_SERVER_ERROR,
-            "missing OAuth config".to_owned(),
-            "OAuth config is not set yet"
+            "failed to reach oauth provider".to_owned(),
+            format!("failed to reach oauth provider: {e:?}")
           )
         }
         _ => log_with_resp!(
@@ -437,5 +437,268 @@ impl IntoResponse for ResponseError {
       .header("Content-Type", "text/plain")
       .body(message.into())
       .unwrap()
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use axum::{body::to_bytes, http::StatusCode, response::IntoResponse};
+  use r2s_bucket::BucketError;
+  use r2s_cache::CacheError;
+  use r2s_captcha::CaptchaError;
+  use r2s_cluster::ClusterError;
+  use r2s_database::DbErr;
+  use r2s_engine::EngineError;
+  use r2s_media::MediaError;
+  use r2s_oauth::OAuthError;
+  use r2s_queue::QueueError;
+
+  use super::ResponseError;
+
+  fn status_of(err: ResponseError) -> StatusCode {
+    err.into_response().status()
+  }
+
+  #[tokio::test]
+  async fn explicit_variants_map_to_matching_status_codes() {
+    let cases = [
+      (
+        ResponseError::InternalServerError("x".into()),
+        StatusCode::INTERNAL_SERVER_ERROR,
+      ),
+      (
+        ResponseError::Unauthorized("x".into()),
+        StatusCode::UNAUTHORIZED,
+      ),
+      (
+        ResponseError::BadRequest("x".into()),
+        StatusCode::BAD_REQUEST,
+      ),
+      (ResponseError::Forbidden("x".into()), StatusCode::FORBIDDEN),
+      (ResponseError::NotFound("x".into()), StatusCode::NOT_FOUND),
+      (ResponseError::Gone("x".into()), StatusCode::GONE),
+      (ResponseError::Conflict("x".into()), StatusCode::CONFLICT),
+      (
+        ResponseError::PreconditionFailed("x".into()),
+        StatusCode::PRECONDITION_FAILED,
+      ),
+      (
+        ResponseError::TooManyRequests("x".into()),
+        StatusCode::TOO_MANY_REQUESTS,
+      ),
+    ];
+    for (err, expected) in cases {
+      assert_eq!(status_of(err), expected);
+    }
+  }
+
+  #[test]
+  fn database_errors_map_record_not_found_to_404_and_rest_to_500() {
+    assert_eq!(
+      status_of(DbErr::RecordNotFound("game".into()).into()),
+      StatusCode::NOT_FOUND
+    );
+    assert_eq!(
+      status_of(DbErr::Json("bad json".into()).into()),
+      StatusCode::INTERNAL_SERVER_ERROR
+    );
+    assert_eq!(
+      status_of(DbErr::Custom("boom".into()).into()),
+      StatusCode::INTERNAL_SERVER_ERROR
+    );
+  }
+
+  #[test]
+  fn cache_errors_map_domain_needed_to_400_and_the_rest_to_500() {
+    let json_error = serde_json::from_str::<serde_json::Value>("not json").unwrap_err();
+    let cases = [
+      (
+        CacheError::DomainNeeded("key".into()),
+        StatusCode::BAD_REQUEST,
+      ),
+      (CacheError::ConfigNeeded, StatusCode::INTERNAL_SERVER_ERROR),
+      (
+        CacheError::Serde(json_error),
+        StatusCode::INTERNAL_SERVER_ERROR,
+      ),
+      (
+        CacheError::Other("down".into()),
+        StatusCode::INTERNAL_SERVER_ERROR,
+      ),
+    ];
+    for (err, expected) in cases {
+      assert_eq!(status_of(err.into()), expected);
+    }
+  }
+
+  #[test]
+  fn queue_and_captcha_and_password_and_serialize_errors_are_server_faults() {
+    assert_eq!(
+      status_of(QueueError::ConfigNotFound.into()),
+      StatusCode::INTERNAL_SERVER_ERROR
+    );
+    assert_eq!(
+      status_of(CaptchaError::Unknown.into()),
+      StatusCode::INTERNAL_SERVER_ERROR
+    );
+    let bcrypt_error = bcrypt::verify("password", "not-a-bcrypt-hash").unwrap_err();
+    assert_eq!(
+      status_of(crate::utility::password::PasswordHashingError::BcryptError(bcrypt_error).into()),
+      StatusCode::INTERNAL_SERVER_ERROR
+    );
+    let serialize_error = serde_json::from_str::<serde_json::Value>("<xml>").unwrap_err();
+    assert_eq!(
+      status_of(serialize_error.into()),
+      StatusCode::INTERNAL_SERVER_ERROR
+    );
+    assert_eq!(
+      status_of(std::io::Error::other("disk").into()),
+      StatusCode::INTERNAL_SERVER_ERROR
+    );
+  }
+
+  #[test]
+  fn bucket_errors_follow_resource_semantics() {
+    let utf8_error = String::from_utf8(vec![0xFF, 0xFE]).unwrap_err();
+    let cases = [
+      (
+        BucketError::PathDoesNotExist("p".into()),
+        StatusCode::NOT_FOUND,
+      ),
+      (BucketError::PathConflict("p".into()), StatusCode::CONFLICT),
+      (BucketError::LockError, StatusCode::INTERNAL_SERVER_ERROR),
+      (
+        BucketError::DataConvertError(utf8_error),
+        StatusCode::INTERNAL_SERVER_ERROR,
+      ),
+      (BucketError::PathTraversal, StatusCode::BAD_REQUEST),
+      (BucketError::NeedLocking, StatusCode::INTERNAL_SERVER_ERROR),
+    ];
+    for (err, expected) in cases {
+      assert_eq!(status_of(err.into()), expected);
+    }
+  }
+
+  #[test]
+  fn media_errors_reject_unsupported_types_with_400() {
+    assert_eq!(
+      status_of(MediaError::UnsupportedFileType("exe".into()).into()),
+      StatusCode::BAD_REQUEST
+    );
+    assert_eq!(
+      status_of(MediaError::MediaStoragePathNotConfigured.into()),
+      StatusCode::INTERNAL_SERVER_ERROR
+    );
+    assert_eq!(
+      status_of(std::io::Error::other("io").into()),
+      StatusCode::INTERNAL_SERVER_ERROR
+    );
+  }
+
+  #[test]
+  fn cluster_errors_map_client_faults_to_4xx_and_infra_to_500() {
+    let cases = [
+      (
+        ClusterError::NeedNamespace("ns".into()),
+        StatusCode::BAD_REQUEST,
+      ),
+      (
+        ClusterError::ConfigNeeded,
+        StatusCode::INTERNAL_SERVER_ERROR,
+      ),
+      (ClusterError::ClusterDisabled, StatusCode::NOT_FOUND),
+      (
+        ClusterError::PodRenewExceedLimit("renew".into()),
+        StatusCode::TOO_MANY_REQUESTS,
+      ),
+      (
+        ClusterError::InvalidImageFileType("zip".into()),
+        StatusCode::BAD_REQUEST,
+      ),
+      (
+        ClusterError::MissingField("traffic".into()),
+        StatusCode::BAD_REQUEST,
+      ),
+      (
+        ClusterError::PodNotFound("pod".into()),
+        StatusCode::NOT_FOUND,
+      ),
+      (
+        ClusterError::TrafficMapperNotFound("script".into()),
+        StatusCode::NOT_FOUND,
+      ),
+      (
+        ClusterError::UploadFailed("denied".into()),
+        StatusCode::BAD_REQUEST,
+      ),
+      (
+        ClusterError::PathTraversalDetected("../".into()),
+        StatusCode::INTERNAL_SERVER_ERROR,
+      ),
+    ];
+    for (err, expected) in cases {
+      assert_eq!(status_of(err.into()), expected);
+    }
+  }
+
+  #[test]
+  fn oauth_script_failures_are_forbidden_to_clients() {
+    assert_eq!(
+      status_of(OAuthError::MissingField("auth_key".into()).into()),
+      StatusCode::FORBIDDEN
+    );
+    assert_eq!(
+      status_of(OAuthError::ScriptError("script failed".into()).into()),
+      StatusCode::FORBIDDEN
+    );
+    assert_eq!(
+      status_of(OAuthError::AdapterUnavailable("github".into()).into()),
+      StatusCode::FORBIDDEN
+    );
+  }
+
+  #[test]
+  fn engine_errors_distinguish_checker_failures_from_infra_faults() {
+    let precondition_cases = [
+      EngineError::MissingCheckerScript("challenge-x".into()),
+      EngineError::MissingFunction("check".into()),
+      EngineError::CompileError("syntax".into()),
+      EngineError::ScriptError("flag mismatch".into()),
+    ];
+    for err in precondition_cases {
+      assert_eq!(status_of(err.into()), StatusCode::PRECONDITION_FAILED);
+    }
+    let server_cases = [
+      EngineError::IoError(std::io::Error::other("io")),
+      EngineError::MissingResultField("result".into()),
+      EngineError::InvalidReturnType {
+        expected: "`Result`".into(),
+        actual: "Null".into(),
+      },
+    ];
+    for err in server_cases {
+      assert_eq!(status_of(err.into()), StatusCode::INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  #[test]
+  fn string_decode_errors_report_internal_faults() {
+    let utf8_error = String::from_utf8(vec![0xFF]).unwrap_err();
+    assert_eq!(
+      status_of(utf8_error.into()),
+      StatusCode::INTERNAL_SERVER_ERROR
+    );
+  }
+
+  #[tokio::test]
+  async fn responses_are_plain_text_bodies() {
+    let response = ResponseError::BadRequest("invalid input".to_owned()).into_response();
+    assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+    assert_eq!(
+      response.headers().get("Content-Type").unwrap(),
+      "text/plain"
+    );
+    let body = to_bytes(response.into_body(), usize::MAX).await.unwrap();
+    assert_eq!(body.as_ref(), b"invalid input");
   }
 }

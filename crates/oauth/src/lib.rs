@@ -107,3 +107,131 @@ impl OAuth {
 pub async fn initialize(_config: &Option<Config>) -> OAuth {
   OAuth
 }
+
+#[cfg(test)]
+mod tests {
+  use std::collections::HashMap;
+
+  use r2s_engine::Engine;
+
+  use super::{OAuth, RuneMap};
+
+  const LOGIN_SCRIPT: &str = r#"pub fn login(params) { Ok(#{ auth_key: params.get("code").unwrap(), provider: "example" }) } pub fn bind(params, user) { Ok(#{ auth_key: user.get("id").unwrap(), bound: params.get("state").unwrap() }) }"#;
+
+  fn params(entries: &[(&str, &str)]) -> HashMap<String, String> {
+    entries
+      .iter()
+      .map(|(k, v)| (k.to_string(), v.to_string()))
+      .collect()
+  }
+
+  #[test]
+  fn rune_map_get_returns_cloned_values() {
+    let map = RuneMap(params(&[("code", "xyz"), ("state", "ok")]));
+    assert_eq!(map.0.get("code").map(String::as_str), Some("xyz"));
+    assert!(!map.0.contains_key("missing"));
+  }
+
+  #[tokio::test]
+  async fn lint_accepts_scripts_with_login_and_bind() {
+    let markers = OAuth.lint(LOGIN_SCRIPT).await.unwrap();
+    assert!(markers.is_empty(), "unexpected markers: {markers:?}");
+  }
+
+  #[tokio::test]
+  async fn lint_reports_missing_entry_points() {
+    let markers = OAuth.lint("pub fn other() { 1 }").await.unwrap();
+    for required in ["login", "bind"] {
+      assert!(
+        markers.iter().any(|m| {
+          m.message
+            .contains(&format!("missing required function: {required}"))
+        }),
+        "missing marker for `{required}`: {markers:?}"
+      );
+    }
+  }
+
+  #[tokio::test]
+  async fn login_maps_script_output_into_plain_strings() {
+    let engine = Engine::default();
+    OAuth
+      .preload(&engine, "example", LOGIN_SCRIPT)
+      .await
+      .unwrap();
+
+    let data = OAuth
+      .login(&engine, "example", &params(&[("code", "auth-code-1")]))
+      .await
+      .unwrap();
+
+    assert_eq!(
+      data.get("auth_key").map(String::as_str),
+      Some("auth-code-1")
+    );
+    assert_eq!(data.get("provider").map(String::as_str), Some("example"));
+  }
+
+  #[tokio::test]
+  async fn bind_receives_params_and_user_maps() {
+    let engine = Engine::default();
+    OAuth
+      .preload(&engine, "example", LOGIN_SCRIPT)
+      .await
+      .unwrap();
+
+    let data = OAuth
+      .bind(
+        &engine,
+        "example",
+        &params(&[("state", "pending")]),
+        &params(&[("id", "user-42")]),
+      )
+      .await
+      .unwrap();
+
+    assert_eq!(data.get("auth_key").map(String::as_str), Some("user-42"));
+    assert_eq!(data.get("bound").map(String::as_str), Some("pending"));
+  }
+
+  #[tokio::test]
+  async fn login_propagates_script_errors() {
+    let engine = Engine::default();
+    OAuth
+      .preload(
+        &engine,
+        "boom",
+        r#"pub fn login(params) { Err("upstream down") }"#,
+      )
+      .await
+      .unwrap();
+
+    let err = OAuth
+      .login(&engine, "boom", &HashMap::new())
+      .await
+      .unwrap_err();
+    assert!(err.to_string().contains("upstream down"), "error: {err:?}");
+  }
+
+  #[tokio::test]
+  async fn login_requires_auth_key_in_script_result() {
+    let engine = Engine::default();
+    OAuth
+      .preload(
+        &engine,
+        "no-key",
+        r#"pub fn login(params) { Ok(#{ provider: "example" }) }"#,
+      )
+      .await
+      .unwrap();
+
+    let err = OAuth
+      .login(&engine, "no-key", &HashMap::new())
+      .await
+      .unwrap_err();
+    assert!(
+      matches!(&err, super::OAuthError::MissingField(field) if field == "auth_key"),
+      "error: {err:?}"
+    );
+  }
+}

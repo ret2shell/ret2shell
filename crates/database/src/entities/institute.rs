@@ -107,3 +107,24 @@ where
   C: ConnectionTrait, {
   Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }
+
+#[cfg(test)]
+mod tests {
+  use super::Model;
+
+  #[test]
+  fn desensitize_clears_provider_token_but_keeps_name() {
+    let institute = Model {
+      id: 1,
+      name: "CTF Club".to_owned(),
+      description: None,
+      logo: None,
+      provider: Some("github".to_owned()),
+      token: Some("provider-secret".to_owned()),
+    };
+    let view = institute.desensitize();
+    assert_eq!(view.token, None);
+    assert_eq!(view.provider.as_deref(), Some("github"));
+    assert_eq!(view.name, "CTF Club");
+  }
+}

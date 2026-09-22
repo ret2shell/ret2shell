@@ -87,3 +87,25 @@ where
   C: ConnectionTrait, {
   Entity::delete_by_id(hint_id).exec(db).await.map(|_| ())
 }
+
+#[cfg(test)]
+mod tests {
+  use chrono::Utc;
+
+  use super::Model;
+
+  #[test]
+  fn desensitize_empties_hint_content_but_keeps_cost() {
+    let hint = Model {
+      id: 4,
+      created_at: Utc::now(),
+      challenge_id: 2,
+      content: "the flag is in the stack".to_owned(),
+      cost: 200,
+    };
+    let view = hint.desensitize();
+    assert_eq!(view.content, "");
+    assert_eq!(view.cost, 200);
+    assert_eq!(view.challenge_id, 2);
+  }
+}
