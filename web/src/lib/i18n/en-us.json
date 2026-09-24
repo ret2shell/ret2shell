@@ -1414,7 +1414,7 @@
         }
       },
       "editor": {
-        "hint": "Drag from a port to connect; click an edge to delete it",
+        "hint": "Drag ports to connect, click an edge to delete; click a node to highlight its prerequisite chain, double-click for details",
         "unsaved": "Unsaved changes",
         "saved": "Saved {{count}} change(s)",
         "cycle": "Cannot connect: this would create a dependency cycle",

@@ -104,6 +104,28 @@ const WHEEL_ZOOM_SPEED = 0.0015;
 const DRAG_THRESHOLD_PX = 4;
 // how far from an edge a click still selects it
 const EDGE_HIT_TOLERANCE_PX = 8;
+// stroke width of all edges, in world px
+const EDGE_WIDTH = 8;
+// arrowheads are drawn at the target end of every edge
+const EDGE_ARROW_LEN = EDGE_WIDTH * 2.2;
+const EDGE_ARROW_HALF_H = EDGE_WIDTH * 1.5;
+// edges entering the same column gap run on parallel tracks spaced this far
+// apart instead of overlapping on the gap center line; the same spacing fans
+// edges out of a shared source port
+const EDGE_TRACK_SPACING = EDGE_WIDTH + 4;
+// direction chevrons are drawn at the midpoint of segments longer than this
+const CHEVRON_MIN_LEN = 80;
+const CHEVRON_LEN = EDGE_WIDTH * 1.8;
+const CHEVRON_HALF_W = EDGE_WIDTH / 2 + 2.5;
+// non-ancestor edges fade to this alpha while a node is selected
+const DIM_ALPHA = 0.12;
+// the port hit zone is a vertical strip of this width spanning the full node
+// height, centered on the node border
+const PORT_STRIP_W = 16;
+// the inner port square matches the edge corner squares
+const PORT_SQUARE = EDGE_WIDTH + 2;
+// connection drags snap to in-ports within this world-px radius
+const PORT_SNAP_RADIUS = 40;
 // keep horizontal edge segments this far away from node boxes
 const EDGE_NODE_MARGIN_PX = 8;
 // upper bound for the monotone edge/node overlap resolution loop
@@ -519,6 +541,31 @@ export default function Milestones(props: { gameId: number }) {
     return map;
   });
 
+  // the transitive ancestor chain of the selected node: every predecessor
+  // node that can reach it, plus the edges along those chains
+  const ancestorChain = createMemo(() => {
+    const sel = selectedNode();
+    if (!sel) return null;
+    const edgeList = validEdges();
+    const predsByTarget = new Map<string, string[]>();
+    for (const edge of edgeList) pushTo(predsByTarget, edge.to, edge.from);
+    const nodes = new Set<string>();
+    const stack = [sel];
+    while (stack.length > 0) {
+      const current = stack.pop()!;
+      for (const pred of predsByTarget.get(current) ?? []) {
+        if (nodes.has(pred)) continue;
+        nodes.add(pred);
+        stack.push(pred);
+      }
+    }
+    const edges = new Set<string>();
+    for (const edge of edgeList) {
+      if ((nodes.has(edge.to) || edge.to === sel) && nodes.has(edge.from)) edges.add(edgeKey(edge));
+    }
+    return { nodes, edges, selected: sel };
+  });
+
   const dirty = createMemo(() => {
     const pack = (list: Edge[]) => list.map(edgeKey).sort().join("|");
     return pack(validEdges()) !== pack(baseline().filter((e) => nodeSet().has(e.from) && nodeSet().has(e.to)));
@@ -557,7 +604,10 @@ export default function Milestones(props: { gameId: number }) {
   const [pan, setPan] = createSignal({ x: 0, y: 0 });
   const [zoom, setZoom] = createSignal(1);
   const [connecting, setConnecting] = createSignal<{ from: string; x: number; y: number } | null>(null);
+  // the in-port closest to an in-progress connection, snapped on drop
+  const [nearPort, setNearPort] = createSignal<string | null>(null);
   const [selectedEdge, setSelectedEdge] = createSignal<string | null>(null);
+  const [selectedNode, setSelectedNode] = createSignal<string | null>(null);
   const [saving, setSaving] = createSignal(false);
   const [detailId, setDetailId] = createSignal<number | null>(null);
   const [formOpen, setFormOpen] = createSignal(false);
@@ -638,11 +688,14 @@ export default function Milestones(props: { gameId: number }) {
     const from = nodeMap().get(edge.from);
     const to = nodeMap().get(edge.to);
     if (!from || !to || !pos[from.key] || !pos[to.key]) return null;
+    const key = edgeKey(edge);
     return {
       x1: pos[from.key].x + NODE_W,
-      y1: pos[from.key].y + from.h / 2,
+      // edges fan out from the source port so parallel departures stay apart
+      y1: pos[from.key].y + from.h / 2 + (edgeFans().get(key) ?? 0),
       x2: pos[to.key].x,
       y2: pos[to.key].y + to.h / 2,
+      lane: edgeLanes().get(key) ?? 0,
     };
   }
 
@@ -656,8 +709,8 @@ export default function Milestones(props: { gameId: number }) {
    * The vertical segment runs at the center of the column gap right before
    * the target column; since node x positions snap to the column grid, this
    * always lands on the vertical grid line of the gap. */
-  function elbowSegments(g: { x1: number; y1: number; x2: number; y2: number }) {
-    const mx = g.x2 - GAP_X / 2;
+  function elbowSegments(g: { x1: number; y1: number; x2: number; y2: number; lane?: number }) {
+    const mx = g.x2 - GAP_X / 2 + (g.lane ?? 0);
     if (Math.abs(g.y2 - g.y1) < 1) {
       return { segments: [{ ax: g.x1, ay: g.y1, bx: g.x2, by: g.y2 }], corners: [] as { x: number; y: number }[] };
     }
@@ -673,6 +726,63 @@ export default function Milestones(props: { gameId: number }) {
       ],
     };
   }
+
+  // corridor tracks: edges entering the same column gap get parallel lane
+  // offsets (per target, since edges sharing a target are one logical
+  // corridor), ordered by target y so adjacent targets take adjacent lanes
+  const edgeLanes = createMemo(() => {
+    const lanes = new Map<string, number>();
+    const pos = positions();
+    const targetsByCorridor = new Map<number, string[]>();
+    for (const edge of validEdges()) {
+      const target = pos[edge.to];
+      if (!target) continue;
+      const corridor = columnOf(target.x);
+      const list = targetsByCorridor.get(corridor) ?? [];
+      if (!list.includes(edge.to)) {
+        list.push(edge.to);
+        targetsByCorridor.set(corridor, list);
+      }
+    }
+    for (const [corridor, targets] of targetsByCorridor) {
+      targets.sort((a, b) => (pos[a]?.y ?? 0) - (pos[b]?.y ?? 0) || a.localeCompare(b));
+      const n = targets.length;
+      for (const [i, target] of targets.entries()) {
+        const offset = (i - (n - 1) / 2) * EDGE_TRACK_SPACING;
+        for (const edge of validEdges()) {
+          if (edge.to === target && columnOf(pos[edge.to]?.x ?? 0) === corridor) {
+            lanes.set(edgeKey(edge), offset);
+          }
+        }
+      }
+    }
+    return lanes;
+  });
+
+  // fan-out: edges leaving the same source port start at staggered heights
+  // so their first horizontal runs stay parallel instead of stacked
+  const edgeFans = createMemo(() => {
+    const fans = new Map<string, number>();
+    const pos = positions();
+    const bySource = new Map<string, Edge[]>();
+    for (const edge of validEdges()) {
+      if (!pos[edge.from] || !pos[edge.to]) continue;
+      const list = bySource.get(edge.from) ?? [];
+      list.push(edge);
+      bySource.set(edge.from, list);
+    }
+    for (const [source, edges] of bySource) {
+      edges.sort((a, b) => (pos[a.to]?.y ?? 0) - (pos[b.to]?.y ?? 0) || a.to.localeCompare(b.to));
+      const from = nodeMap().get(source);
+      const maxFan = from ? from.h / 2 - EDGE_WIDTH : 0;
+      const n = edges.length;
+      for (const [i, edge] of edges.entries()) {
+        const raw = (i - (n - 1) / 2) * EDGE_TRACK_SPACING;
+        fans.set(edgeKey(edge), Math.max(-maxFan, Math.min(maxFan, raw)));
+      }
+    }
+    return fans;
+  });
 
   function hitTestEdge(world: { x: number; y: number }): string | null {
     const threshold = EDGE_HIT_TOLERANCE_PX / zoom();
@@ -826,11 +936,39 @@ export default function Milestones(props: { gameId: number }) {
       if (!byTarget.has(edge.to)) byTarget.set(edge.to, []);
       byTarget.get(edge.to)?.push(edge);
     }
+    const chain = ancestorChain();
     const isSolved = (edge: Edge) => nodeKindOf(edge.from) === "challenge" && solved.has(nodeIdOf(edge.from));
     const styleOf = (isSelected: boolean, solvedFlag: boolean) => {
-      if (isSelected) return { color: c.primary, alpha: 1, width: 3 };
-      if (solvedFlag) return { color: c.success, alpha: 0.6, width: 2 };
-      return { color: c.muted, alpha: 1, width: 2 };
+      if (isSelected) return { color: c.primary, alpha: 1 };
+      if (solvedFlag) return { color: c.success, alpha: 0.75 };
+      return { color: c.muted, alpha: 1 };
+    };
+    // while a node is selected, edges outside its ancestor chain fade out
+    const alphaOf = (key: string, base: number) => (chain ? (chain.edges.has(key) ? base : DIM_ALPHA) : base);
+
+    // filled arrowhead in screen coords; (x, y) is its center and the tip
+    // points half the length forward along (dirX, dirY)
+    const drawArrowHead = (
+      x: number,
+      y: number,
+      dirX: number,
+      dirY: number,
+      color: string,
+      alpha: number,
+      len: number,
+      halfW: number
+    ) => {
+      const perpX = -dirY;
+      const perpY = dirX;
+      ctx.beginPath();
+      ctx.moveTo(x + dirX * len * 0.5, y + dirY * len * 0.5);
+      ctx.lineTo(x - dirX * len * 0.5 + perpX * halfW, y - dirY * len * 0.5 + perpY * halfW);
+      ctx.lineTo(x - dirX * len * 0.5 - perpX * halfW, y - dirY * len * 0.5 - perpY * halfW);
+      ctx.closePath();
+      ctx.fillStyle = color;
+      ctx.globalAlpha = alpha;
+      ctx.fill();
+      ctx.globalAlpha = 1;
     };
 
     const drawMember = (edge: Edge) => {
@@ -843,26 +981,60 @@ export default function Milestones(props: { gameId: number }) {
       // drawn in full — the trunk simply overlays it
       const segments = bundled && elbow.segments.length > 1 ? elbow.segments.slice(0, -1) : elbow.segments;
       if (segments.length === 0) return;
-      const isSelected = edgeKey(edge) === selected;
-      const style = styleOf(isSelected, isSolved(edge));
+      const key = edgeKey(edge);
+      const style = styleOf(key === selected, isSolved(edge));
+      const alpha = alphaOf(key, style.alpha);
       ctx.beginPath();
       ctx.moveTo(g.x1 * z + p.x, g.y1 * z + p.y);
       for (const seg of segments) {
         ctx.lineTo(seg.bx * z + p.x, seg.by * z + p.y);
       }
       ctx.strokeStyle = style.color;
-      ctx.globalAlpha = style.alpha;
-      ctx.lineWidth = style.width;
+      ctx.globalAlpha = alpha;
+      ctx.lineWidth = EDGE_WIDTH;
       ctx.stroke();
-      // small squares at the right-angle corners (the junction square at the
+      // direction chevrons at the midpoint of long segments, so stacked or
+      // crossing paths still show which way each one flows
+      for (const seg of segments) {
+        const dx = seg.bx - seg.ax;
+        const dy = seg.by - seg.ay;
+        const len = Math.hypot(dx, dy);
+        if (len < CHEVRON_MIN_LEN) continue;
+        drawArrowHead(
+          ((seg.ax + seg.bx) / 2) * z + p.x,
+          ((seg.ay + seg.by) / 2) * z + p.y,
+          dx / len,
+          dy / len,
+          style.color,
+          alpha,
+          CHEVRON_LEN * z,
+          CHEVRON_HALF_W * z
+        );
+      }
+      // squares at the right-angle corners (the junction square at the
       // target side is owned by the trunk)
       ctx.fillStyle = style.color;
       const corners = bundled ? elbow.corners.slice(0, -1) : elbow.corners;
+      const halfCorner = EDGE_WIDTH / 2 + 1;
       for (const corner of corners) {
         const cx = corner.x * z + p.x;
         const cy = corner.y * z + p.y;
-        const size = isSelected ? 4 : 3;
-        ctx.fillRect(cx - size, cy - size, size * 2, size * 2);
+        ctx.globalAlpha = alpha;
+        ctx.fillRect(cx - halfCorner, cy - halfCorner, halfCorner * 2, halfCorner * 2);
+      }
+      // terminal arrowhead points into the target; bundled edges share the
+      // one drawn by the trunk
+      if (!bundled) {
+        drawArrowHead(
+          g.x2 * z + p.x - 1 - (EDGE_ARROW_LEN * z) / 2,
+          g.y2 * z + p.y,
+          1,
+          0,
+          style.color,
+          alpha,
+          EDGE_ARROW_LEN * z,
+          EDGE_ARROW_HALF_H * z
+        );
       }
       ctx.globalAlpha = 1;
     };
@@ -875,22 +1047,33 @@ export default function Milestones(props: { gameId: number }) {
     for (const members of byTarget.values()) {
       if (members.length < 2) continue;
       const g = edgeGeometry(members[0]);
-      if (!g) continue;
+      if (!g) return;
       const anySelected = members.some((e) => edgeKey(e) === selected);
       const style = styleOf(anySelected, members.every(isSolved));
-      const mx = (g.x2 - GAP_X / 2) * z + p.x;
+      const alpha = alphaOf(edgeKey(members[0]), style.alpha);
+      const mx = (g.x2 - GAP_X / 2 + g.lane) * z + p.x;
       const y2 = g.y2 * z + p.y;
       ctx.beginPath();
       ctx.moveTo(mx, y2);
       ctx.lineTo(g.x2 * z + p.x, y2);
       ctx.strokeStyle = style.color;
-      ctx.globalAlpha = style.alpha;
-      ctx.lineWidth = style.width;
+      ctx.globalAlpha = alpha;
+      ctx.lineWidth = EDGE_WIDTH;
       ctx.stroke();
       ctx.fillStyle = style.color;
-      const size = anySelected ? 4.5 : 3.5;
-      ctx.fillRect(mx - size, y2 - size, size * 2, size * 2);
+      const halfJunction = EDGE_WIDTH / 2 + 1;
+      ctx.fillRect(mx - halfJunction, y2 - halfJunction, halfJunction * 2, halfJunction * 2);
       ctx.globalAlpha = 1;
+      drawArrowHead(
+        g.x2 * z + p.x - 1 - (EDGE_ARROW_LEN * z) / 2,
+        y2,
+        1,
+        0,
+        style.color,
+        alpha,
+        EDGE_ARROW_LEN * z,
+        EDGE_ARROW_HALF_H * z
+      );
     }
 
     if (conn) {
@@ -906,8 +1089,22 @@ export default function Milestones(props: { gameId: number }) {
           ctx.lineTo(seg.bx * z + p.x, seg.by * z + p.y);
         }
         ctx.strokeStyle = c.primary;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = EDGE_WIDTH;
         ctx.stroke();
+        const last = elbow.segments[elbow.segments.length - 1];
+        const dx = last.bx - last.ax;
+        const dy = last.by - last.ay;
+        const len = Math.hypot(dx, dy) || 1;
+        drawArrowHead(
+          conn.x * z + p.x - (dx / len) * ((EDGE_ARROW_LEN * z) / 2),
+          conn.y * z + p.y - (dy / len) * ((EDGE_ARROW_LEN * z) / 2),
+          dx / len,
+          dy / len,
+          c.primary,
+          1,
+          EDGE_ARROW_LEN * z,
+          EDGE_ARROW_HALF_H * z
+        );
       }
     }
   }
@@ -946,12 +1143,15 @@ export default function Milestones(props: { gameId: number }) {
 
   onMount(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (!admin()) return;
       if (e.key === "Escape") {
-        setSelectedEdge(null);
-        setConnecting(null);
+        setSelectedNode(null);
+        if (admin()) {
+          setSelectedEdge(null);
+          setConnecting(null);
+        }
         return;
       }
+      if (!admin()) return;
       if ((e.key === "Delete" || e.key === "Backspace") && selectedEdge()) {
         if ((e.target as HTMLElement | null)?.closest("input, textarea, [contenteditable]")) return;
         e.preventDefault();
@@ -1006,9 +1206,12 @@ export default function Milestones(props: { gameId: number }) {
     const onUp = (ev: PointerEvent) => {
       el.removeEventListener("pointermove", onMove);
       el.removeEventListener("pointerup", onUp);
-      if (!moved && admin()) {
-        const hit = hitTestEdge(toWorld(ev.clientX, ev.clientY));
-        setSelectedEdge(hit);
+      if (!moved) {
+        setSelectedNode(null);
+        if (admin()) {
+          const hit = hitTestEdge(toWorld(ev.clientX, ev.clientY));
+          setSelectedEdge(hit);
+        }
       }
     };
     el.addEventListener("pointermove", onMove);
@@ -1040,11 +1243,10 @@ export default function Milestones(props: { gameId: number }) {
       el.removeEventListener("pointerup", onUp);
       draggingKey = null;
       if (!moved) {
-        if (node.kind === "milestone") {
-          setDetailId(node.id);
-        } else {
-          navigate(`/games/${props.gameId}/challenges?challenge=${node.id}`);
-        }
+        // a click selects the node and highlights its ancestor chain; the
+        // former click action (detail dialog / challenge page) moved to
+        // double click
+        setSelectedNode(node.key);
       }
     };
     el.addEventListener("pointermove", onMove);
@@ -1060,15 +1262,29 @@ export default function Milestones(props: { gameId: number }) {
     const onMove = (ev: PointerEvent) => {
       const w = toWorld(ev.clientX, ev.clientY);
       setConnecting({ from, x: w.x, y: w.y });
+      // snap feedback: highlight the nearest in-port within reach
+      let nearest: string | null = null;
+      let nearestDist = PORT_SNAP_RADIUS;
+      for (const node of nodes()) {
+        if (node.key === from) continue;
+        const p = positions()[node.key];
+        if (!p) continue;
+        const dist = Math.hypot(w.x - p.x, w.y - (p.y + node.h / 2));
+        if (dist < nearestDist) {
+          nearest = node.key;
+          nearestDist = dist;
+        }
+      }
+      setNearPort(nearest);
     };
     const onUp = (ev: PointerEvent) => {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
       setConnecting(null);
-      const target = document
-        .elementFromPoint(ev.clientX, ev.clientY)
-        ?.closest("[data-port-in]")
-        ?.getAttribute("data-port-in");
+      const target =
+        nearPort() ??
+        document.elementFromPoint(ev.clientX, ev.clientY)?.closest("[data-port-in]")?.getAttribute("data-port-in");
+      setNearPort(null);
       if (target) tryConnect(from, target);
     };
     window.addEventListener("pointermove", onMove);
@@ -1305,11 +1521,19 @@ export default function Milestones(props: { gameId: number }) {
                     return (
                       <Switch>
                         <Match when={node.kind === "challenge"}>
+                          {/* biome-ignore lint/a11y/noStaticElementInteractions: canvas graph node, pointer-driven like the canvas itself */}
                           <div
                             title={node.name}
                             class={clsx(
-                              "absolute flex items-center gap-2 px-3 rounded-lg border-2 backdrop-blur-sm cursor-pointer transition-colors pointer-events-auto",
+                              "absolute flex items-center gap-2 px-3 rounded-lg border-2 backdrop-blur-sm cursor-pointer transition-all pointer-events-auto",
                               "bg-layer/80",
+                              // while a node is selected, everything outside
+                              // its ancestor chain fades out
+                              ancestorChain() &&
+                                !ancestorChain()!.nodes.has(node.key) &&
+                                node.key !== ancestorChain()!.selected &&
+                                "opacity-40",
+                              node.key === selectedNode() && "ring-2 ring-primary/70",
                               // solved: success border; locked while any
                               // predecessor is unsolved; unlocked (primary
                               // border) otherwise, including no predecessors
@@ -1327,6 +1551,10 @@ export default function Milestones(props: { gameId: number }) {
                               height: `${CHALLENGE_H}px`,
                             }}
                             onPointerDown={(e) => onNodePointerDown(e, node)}
+                            onDblClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/games/${props.gameId}/challenges?challenge=${node.id}`);
+                            }}
                           >
                             <NodeAvatar
                               nodeKey={node.key}
@@ -1345,16 +1573,12 @@ export default function Milestones(props: { gameId: number }) {
                             <span class="flex-1 truncate text-left font-bold">{node.name}</span>
                             <span class="shrink-0 opacity-60">{challengeMap().get(node.id)?.score} pts</span>
                             <Show when={admin()}>
-                              <div
-                                data-port-in={node.key}
-                                class="absolute w-3 h-3 rounded-full bg-layer-content/30 hover:bg-primary! cursor-crosshair"
-                                style={{ left: "-6px", top: "50%", transform: "translateY(-50%)" }}
-                              />
-                              <div
-                                data-port-out={node.key}
-                                class="absolute w-3 h-3 rounded-full bg-layer-content/30 hover:bg-primary! cursor-crosshair"
-                                style={{ right: "-6px", top: "50%", transform: "translateY(-50%)" }}
-                                onPointerDown={(e) => onPortPointerDown(e, node.key)}
+                              <PortMarker nodeKey={node.key} side="in" active={nearPort() === node.key} />
+                              <PortMarker
+                                nodeKey={node.key}
+                                side="out"
+                                active={connecting()?.from === node.key}
+                                onPointerDown={onPortPointerDown}
                               />
                             </Show>
                           </div>
@@ -1370,11 +1594,17 @@ export default function Milestones(props: { gameId: number }) {
                                 () => prereqs().length > 0 && prereqs().every((id) => solvedIds().has(id))
                               );
                               return (
+                                // biome-ignore lint/a11y/noStaticElementInteractions: canvas graph node, pointer-driven like the canvas itself
                                 <div
                                   title={milestone().name}
                                   class={clsx(
-                                    "absolute flex flex-col justify-center gap-1 px-3 rounded-lg border-2 backdrop-blur-sm cursor-pointer transition-colors pointer-events-auto",
+                                    "absolute flex flex-col justify-center gap-1 px-3 rounded-lg border-2 backdrop-blur-sm cursor-pointer transition-all pointer-events-auto",
                                     "bg-layer/80 hover:border-primary/60",
+                                    ancestorChain() &&
+                                      !ancestorChain()!.nodes.has(node.key) &&
+                                      node.key !== ancestorChain()!.selected &&
+                                      "opacity-40",
+                                    node.key === selectedNode() && "ring-2 ring-primary/70",
                                     achieved() ? "border-success/60" : "border-layer-content/10"
                                   )}
                                   style={{
@@ -1384,6 +1614,10 @@ export default function Milestones(props: { gameId: number }) {
                                     height: `${MILESTONE_H}px`,
                                   }}
                                   onPointerDown={(e) => onNodePointerDown(e, node)}
+                                  onDblClick={(e) => {
+                                    e.stopPropagation();
+                                    setDetailId(node.id);
+                                  }}
                                 >
                                   <div class="flex items-center gap-2 w-full">
                                     <NodeAvatar
@@ -1423,11 +1657,7 @@ export default function Milestones(props: { gameId: number }) {
                                     />
                                   </div>
                                   <Show when={admin()}>
-                                    <div
-                                      data-port-in={node.key}
-                                      class="absolute w-3 h-3 rounded-full bg-layer-content/30 hover:bg-primary! cursor-crosshair"
-                                      style={{ left: "-6px", top: "50%", transform: "translateY(-50%)" }}
-                                    />
+                                    <PortMarker nodeKey={node.key} side="in" active={nearPort() === node.key} />
                                   </Show>
                                 </div>
                               );
@@ -1456,6 +1686,65 @@ export default function Milestones(props: { gameId: number }) {
         }}
       />
       <MilestoneFormDialog gameId={props.gameId} milestone={editing()} open={formOpen()} onOpenChange={setFormOpen} />
+    </div>
+  );
+}
+
+/** The connection port. The hit zone is a full-height strip on the node
+ * border; the marker is an inner square the size of the edge corner squares
+ * framed by four corner brackets, and it lights up and grows slightly while
+ * a connection drag is near. */
+function PortMarker(props: {
+  nodeKey: string;
+  side: "in" | "out";
+  active: boolean;
+  onPointerDown?: (e: PointerEvent, key: string) => void;
+}) {
+  return (
+    <div
+      data-port-in={props.side === "in" ? props.nodeKey : undefined}
+      class="absolute top-0 h-full flex items-center justify-center cursor-crosshair group/port"
+      style={{
+        width: `${PORT_STRIP_W}px`,
+        [props.side === "in" ? "left" : "right"]: `${-PORT_STRIP_W / 2}px`,
+      }}
+      onPointerDown={(e) => {
+        if (props.side === "out") props.onPointerDown?.(e, props.nodeKey);
+      }}
+    >
+      <div class={clsx("relative transition-transform", props.active ? "scale-125" : "group-hover/port:scale-110")}>
+        <div
+          class={clsx(
+            "transition-colors",
+            props.active ? "bg-primary" : "bg-layer-content/30 group-hover/port:bg-primary/60"
+          )}
+          style={{ width: `${PORT_SQUARE}px`, height: `${PORT_SQUARE}px` }}
+        />
+        <div
+          class={clsx(
+            "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-colors",
+            props.active ? "text-primary" : "text-layer-content/30 group-hover/port:text-primary/60"
+          )}
+          style={{ width: `${PORT_SQUARE * 2}px`, height: `${PORT_SQUARE * 2}px` }}
+        >
+          <div
+            class="absolute left-0 top-0 border-t-2 border-l-2 border-current"
+            style={{ width: "7px", height: "7px" }}
+          />
+          <div
+            class="absolute right-0 top-0 border-t-2 border-r-2 border-current"
+            style={{ width: "7px", height: "7px" }}
+          />
+          <div
+            class="absolute left-0 bottom-0 border-b-2 border-l-2 border-current"
+            style={{ width: "7px", height: "7px" }}
+          />
+          <div
+            class="absolute right-0 bottom-0 border-b-2 border-r-2 border-current"
+            style={{ width: "7px", height: "7px" }}
+          />
+        </div>
+      </div>
     </div>
   );
 }
