@@ -4,7 +4,6 @@ use std::{
   net::SocketAddr,
 };
 
-use anyhow::{Context, anyhow, bail};
 use axum::{
   Router,
   body::{Body, Bytes},
@@ -31,6 +30,7 @@ use super::{
     GIT_HOOK_AUTH_DOMAIN, GIT_HOOK_SESSION_DOMAIN, GitHookFormatter, GitHookMessageLevel,
     GitHookSession, strip_git_hook_ansi,
   },
+  sync_error::SyncError,
   worker,
 };
 use crate::{
@@ -217,7 +217,7 @@ pub(crate) async fn post_receive(
 
 async fn execute_post_receive(
   state: GlobalState, session: GitHookSession, updates: Vec<UpdatedRef>, logger: StreamLogger,
-) -> anyhow::Result<()> {
+) -> Result<(), SyncError> {
   let game_bucket = state.bucket.at(&session.game_bucket).await?;
   let head_ref = game_bucket.git.get_head_ref().await?;
 
@@ -231,12 +231,12 @@ async fn execute_post_receive(
   let (game, outcome) = match async {
     let game = game::get_by_bucket(&state.db.conn, &session.game_bucket)
       .await?
-      .ok_or_else(|| anyhow!("game bucket `{}` no longer exists", session.game_bucket))?;
+      .ok_or_else(|| SyncError::GameBucketMissing(session.game_bucket.clone()))?;
     if game.id != session.game_id {
-      bail!("git hook session does not match the target game");
+      return Err(SyncError::SessionMismatch);
     }
     if !game.hidden {
-      bail!("The repository is read-only while the game is visible to players.");
+      return Err(SyncError::ReadOnlyRepository);
     }
 
     info!(game=%game.name, "git push sync started");
@@ -255,7 +255,7 @@ async fn execute_post_receive(
       logger
         .error("Rejecting push: pushing multiple refs is not supported.")
         .await;
-      bail!("pushing multiple refs is not supported");
+      return Err(SyncError::MultipleRefs);
     }
 
     let update = &updates[0];
@@ -280,13 +280,13 @@ async fn execute_post_receive(
           logger.reference(&head_ref)
         ))
         .await;
-      bail!("only the current branch can be pushed");
+      return Err(SyncError::NonCurrentBranch);
     }
     if update.old_oid == ZERO_OID || update.new_oid == ZERO_OID {
       logger
         .error("Rejecting push: creating or deleting refs is not supported.")
         .await;
-      bail!("creating or deleting refs is not supported");
+      return Err(SyncError::RefMutationUnsupported);
     }
 
     logger
@@ -325,7 +325,7 @@ async fn execute_post_receive(
         .await;
       return Err(err.into());
     }
-    Ok::<(game::Model, SyncOutcome), anyhow::Error>((game, outcome))
+    Ok::<(game::Model, SyncOutcome), SyncError>((game, outcome))
   }
   .await
   {
@@ -371,7 +371,7 @@ async fn execute_post_receive(
 async fn synchronize_repository(
   state: &GlobalState, txn: &DatabaseTransaction, game: &game::Model, game_bucket: &GameBucket,
   diff: &[DiffEntry], logger: &StreamLogger,
-) -> anyhow::Result<SyncOutcome> {
+) -> Result<SyncOutcome, SyncError> {
   let mut outcome = SyncOutcome::default();
   let mut challenge_changes = ChallengeChangeSet::default();
   let mut game_config_changed = false;
@@ -404,9 +404,9 @@ async fn synchronize_repository(
     let bucket = challenge
       .bucket
       .clone()
-      .ok_or_else(|| anyhow!("Challenges can only be deleted from the web client."))?;
+      .ok_or(SyncError::ChallengeDeleteRestricted)?;
     if !challenge_dirs.contains(&bucket) {
-      bail!("Challenges can only be deleted from the web client.");
+      return Err(SyncError::ChallengeDeleteRestricted);
     }
     challenge_map.insert(bucket, challenge);
   }
@@ -448,8 +448,7 @@ async fn synchronize_repository(
       .collect();
     new_bucket_graph.insert(bucket_name.clone(), prerequisites);
   }
-  let new_bucket_order =
-    topological_sort(&new_bucket_graph).map_err(|err| anyhow::anyhow!("Rejecting push: {err}"))?;
+  let new_bucket_order = topological_sort(&new_bucket_graph).map_err(SyncError::PushRejected)?;
 
   for bucket_name in &new_bucket_order {
     logger
@@ -498,8 +497,10 @@ async fn synchronize_repository(
   }
 
   for bucket_name in affected_existing_buckets {
-    let existing = challenge_map.get(&bucket_name).with_context(|| {
-      format!("challenge bucket `{bucket_name}` does not exist in the database")
+    let existing = challenge_map.get(&bucket_name).ok_or_else(|| {
+      SyncError::PushRejected(format!(
+        "challenge bucket `{bucket_name}` does not exist in the database"
+      ))
     })?;
     let challenge_bucket = game_bucket.at(&bucket_name).await?;
 
@@ -546,7 +547,9 @@ async fn synchronize_repository(
     .map(|c| (c.id, c.prerequisites.0.clone()))
     .collect();
   if let Some(cycle) = find_cycle(&graph) {
-    bail!("Rejecting push: prerequisite graph contains a cycle: {cycle}");
+    return Err(SyncError::PushRejected(format!(
+      "prerequisite graph contains a cycle: {cycle}"
+    )));
   }
 
   if milestones_changed {
@@ -561,7 +564,7 @@ async fn synchronize_repository(
 
 async fn sync_game_config(
   txn: &DatabaseTransaction, game: &game::Model, game_bucket: &GameBucket,
-) -> anyhow::Result<game::Model> {
+) -> Result<game::Model, SyncError> {
   let bucket_config = game_bucket.config().await?;
   Ok(
     game::update(
@@ -611,7 +614,7 @@ async fn sync_game_config(
 async fn create_challenge_from_bucket(
   txn: &DatabaseTransaction, game: &game::Model, challenge_bucket: &ChallengeBucket,
   bucket_to_id: &BTreeMap<String, i64>,
-) -> anyhow::Result<challenge::Model> {
+) -> Result<challenge::Model, SyncError> {
   let config = challenge_bucket.config().await?;
   let content = challenge_bucket.description().await?;
   let prerequisites = resolve_bucket_prerequisites(&config, challenge_bucket, bucket_to_id)?;
@@ -632,34 +635,30 @@ async fn create_challenge_from_bucket(
     prerequisites: challenge::PrerequisiteList(prerequisites),
     avatar: config.avatar,
   };
-  model.validate().map_err(|errors| {
-    anyhow!(
-      "Invalid challenge `{}`: {}",
-      challenge_bucket.name,
-      flatten_validation_errors(errors)
-    )
-  })?;
+  model
+    .validate()
+    .map_err(|errors| SyncError::InvalidChallenge {
+      name: challenge_bucket.name.clone(),
+      reason: flatten_validation_errors(errors),
+    })?;
   Ok(challenge::create(txn, model).await?)
 }
 
 fn resolve_bucket_prerequisites(
   config: &r2s_bucket::challenge::ChallengeConfig, challenge_bucket: &ChallengeBucket,
   bucket_to_id: &BTreeMap<String, i64>,
-) -> anyhow::Result<Vec<i64>> {
+) -> Result<Vec<i64>, SyncError> {
   crate::utility::prerequisites::resolve_prerequisite_ids(bucket_to_id, &config.prerequisites)
-    .map_err(anyhow::Error::msg)
-    .with_context(|| {
-      format!(
-        "invalid prerequisites for challenge bucket `{}`",
-        challenge_bucket.name
-      )
+    .map_err(|reason| SyncError::ChallengePrerequisites {
+      bucket: challenge_bucket.name.clone(),
+      reason,
     })
 }
 
 async fn sync_challenge_record(
   txn: &DatabaseTransaction, previous: &challenge::Model, challenge_bucket: &ChallengeBucket,
   bucket_to_id: &BTreeMap<String, i64>,
-) -> anyhow::Result<challenge::Model> {
+) -> Result<challenge::Model, SyncError> {
   let config = challenge_bucket.config().await?;
   let content = challenge_bucket.description().await?;
   let prerequisites = resolve_bucket_prerequisites(&config, challenge_bucket, bucket_to_id)?;
@@ -680,13 +679,12 @@ async fn sync_challenge_record(
     prerequisites: challenge::PrerequisiteList(prerequisites),
     avatar: config.avatar,
   };
-  model.validate().map_err(|errors| {
-    anyhow!(
-      "Invalid challenge `{}`: {}",
-      challenge_bucket.name,
-      flatten_validation_errors(errors)
-    )
-  })?;
+  model
+    .validate()
+    .map_err(|errors| SyncError::InvalidChallenge {
+      name: challenge_bucket.name.clone(),
+      reason: flatten_validation_errors(errors),
+    })?;
   Ok(challenge::update(txn, model).await?)
 }
 
@@ -697,7 +695,7 @@ async fn sync_challenge_record(
 async fn sync_milestones_from_bucket(
   txn: &DatabaseTransaction, game: &game::Model, game_bucket: &GameBucket,
   bucket_to_id: &BTreeMap<String, i64>, logger: &StreamLogger,
-) -> anyhow::Result<bool> {
+) -> Result<bool, SyncError> {
   let bucket_milestones = game_bucket.milestones().await?;
   let existing = challenge_milestone::get_list(txn, game.id).await?;
   let mut changed = false;
@@ -705,27 +703,22 @@ async fn sync_milestones_from_bucket(
 
   for bucket_milestone in &bucket_milestones.milestones {
     if bucket_milestone.prerequisites.is_empty() {
-      bail!(
-        "Milestone `{}` has no prerequisites, it would never be achieved.",
-        bucket_milestone.name
-      );
+      return Err(SyncError::MilestoneWithoutPrerequisites {
+        name: bucket_milestone.name.clone(),
+      });
     }
     if !seen.insert(bucket_milestone.name.as_str()) {
-      bail!(
-        "Milestone `{}` is declared more than once.",
-        bucket_milestone.name
-      );
+      return Err(SyncError::DuplicateMilestone {
+        name: bucket_milestone.name.clone(),
+      });
     }
     let prerequisites = crate::utility::prerequisites::resolve_prerequisite_ids(
       bucket_to_id,
       &bucket_milestone.prerequisites,
     )
-    .map_err(anyhow::Error::msg)
-    .with_context(|| {
-      format!(
-        "invalid prerequisites for milestone `{}`",
-        bucket_milestone.name
-      )
+    .map_err(|reason| SyncError::MilestonePrerequisites {
+      name: bucket_milestone.name.clone(),
+      reason,
     })?;
 
     let milestone = challenge_milestone::Model {
@@ -739,13 +732,12 @@ async fn sync_milestones_from_bucket(
       name: bucket_milestone.name.clone(),
       description: bucket_milestone.description.clone(),
     };
-    milestone.validate().map_err(|errors| {
-      anyhow!(
-        "Invalid milestone `{}`: {}",
-        bucket_milestone.name,
-        flatten_validation_errors(errors)
-      )
-    })?;
+    milestone
+      .validate()
+      .map_err(|errors| SyncError::InvalidMilestone {
+        name: bucket_milestone.name.clone(),
+        reason: flatten_validation_errors(errors),
+      })?;
 
     if let Some(previous) = existing.iter().find(|m| m.name == bucket_milestone.name) {
       let next = challenge_milestone::Model {
@@ -803,29 +795,28 @@ async fn sync_milestones_from_bucket(
 async fn sync_hints_from_bucket(
   txn: &DatabaseTransaction, challenge_id: i64, challenge_bucket: &ChallengeBucket,
   previous: Option<&challenge::Model>,
-) -> anyhow::Result<()> {
+) -> Result<(), SyncError> {
   let bucket_hints = challenge_bucket.hints().await?;
   let existing_hints = hint::get_list(txn, challenge_id).await?;
   if let Some(previous) = previous
     && bucket_hints.hints.len() < existing_hints.len()
   {
-    bail!(
-      "Hints for challenge `{}` can only be appended in Git. Existing hints must be managed from the web client.",
-      previous.name
-    );
+    return Err(SyncError::HintsAppendOnly {
+      name: previous.name.clone(),
+    });
   }
 
   for (index, existing) in existing_hints.iter().enumerate() {
     let Some(bucket_hint) = bucket_hints.hints.get(index) else {
-      bail!("Hints can only be appended in Git.");
+      return Err(SyncError::HintsTruncated);
     };
     if existing.content != bucket_hint.content || existing.cost != bucket_hint.cost {
       let challenge_name = previous
         .map(|model| model.name.as_str())
         .unwrap_or(&challenge_bucket.name);
-      bail!(
-        "Hints for challenge `{challenge_name}` can only be appended in Git. Existing hints must be managed from the web client."
-      );
+      return Err(SyncError::HintsAppendOnly {
+        name: challenge_name.to_owned(),
+      });
     }
   }
 
@@ -846,20 +837,20 @@ async fn sync_hints_from_bucket(
   Ok(())
 }
 
-async fn validate_env(challenge_bucket: &ChallengeBucket) -> anyhow::Result<()> {
+async fn validate_env(challenge_bucket: &ChallengeBucket) -> Result<(), SyncError> {
   let Some(env) = challenge_bucket.env().await? else {
     return Ok(());
   };
   validate_env_config(&challenge_bucket.name, &env)
 }
 
-fn validate_env_config(bucket_name: &str, env: &ChallengeEnv) -> anyhow::Result<()> {
+fn validate_env_config(bucket_name: &str, env: &ChallengeEnv) -> Result<(), SyncError> {
   let mut ports = HashSet::new();
   for image in &env.images {
     if let Some(port) = image.port
       && !ports.insert(port)
     {
-      bail!("Challenge `{bucket_name}` has conflicting ports in env.toml.");
+      return Err(SyncError::ConflictingPorts(bucket_name.to_owned()));
     }
   }
   Ok(())
@@ -867,7 +858,7 @@ fn validate_env_config(bucket_name: &str, env: &ChallengeEnv) -> anyhow::Result<
 
 async fn lint_checker(
   state: &GlobalState, challenge_bucket: &ChallengeBucket, logger: &StreamLogger,
-) -> anyhow::Result<()> {
+) -> Result<(), SyncError> {
   let diagnostics = state.checker.lint(challenge_bucket).await?;
   if diagnostics.is_empty() {
     logger
@@ -896,7 +887,7 @@ async fn checker_script_exists(challenge_bucket: &ChallengeBucket) -> bool {
 
 async fn rollback_repository(
   game_bucket: &GameBucket, updates: &[UpdatedRef], head_ref: &str, logger: &StreamLogger,
-) -> anyhow::Result<()> {
+) -> Result<(), SyncError> {
   logger
     .warn("Synchronization failed; rolling the repository back.")
     .await;
@@ -975,16 +966,14 @@ fn classify_path(
   }
 }
 
-async fn list_challenge_dirs(game_bucket: &GameBucket) -> anyhow::Result<BTreeSet<String>> {
+async fn list_challenge_dirs(game_bucket: &GameBucket) -> Result<BTreeSet<String>, SyncError> {
   let mut result = BTreeSet::new();
   let challenges_root = game_bucket.git.path().join("challenges");
   let mut entries = tokio::fs::read_dir(&challenges_root)
     .await
-    .with_context(|| {
-      format!(
-        "failed to read challenge directory `{}`",
-        challenges_root.display()
-      )
+    .map_err(|source| SyncError::ChallengeDirRead {
+      path: challenges_root.display().to_string(),
+      source,
     })?;
   while let Some(entry) = entries.next_entry().await? {
     if !entry.file_type().await?.is_dir() {
@@ -1052,19 +1041,21 @@ fn display_ref_name(ref_name: &str) -> &str {
     .unwrap_or(ref_name)
 }
 
-fn convert_game_host_type(host_type: r2s_bucket::game::HostType) -> anyhow::Result<game::HostType> {
+fn convert_game_host_type(
+  host_type: r2s_bucket::game::HostType,
+) -> Result<game::HostType, SyncError> {
   Ok(serde_json::from_value(serde_json::to_value(host_type)?)?)
 }
 
 fn convert_challenge_tag_list(
   tag_list: r2s_bucket::challenge::TagList,
-) -> anyhow::Result<challenge::TagList> {
+) -> Result<challenge::TagList, SyncError> {
   Ok(serde_json::from_value(serde_json::to_value(tag_list)?)?)
 }
 
 fn convert_score_rule(
   score_rule: r2s_bucket::challenge::ScoreRule,
-) -> anyhow::Result<challenge::ScoreRule> {
+) -> Result<challenge::ScoreRule, SyncError> {
   Ok(serde_json::from_value(serde_json::to_value(score_rule)?)?)
 }
 

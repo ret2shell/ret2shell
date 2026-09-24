@@ -30,6 +30,7 @@ mod repo;
 pub(crate) mod repo_sync;
 mod runtime;
 mod statistics;
+mod sync_error;
 mod team;
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
