@@ -1039,12 +1039,14 @@ export default function Milestones(props: { gameId: number }) {
           const [x3, y3] = pt(u0 + EDGE_TEXTURE_W + slant, 0);
           const [x4, y4] = pt(u0 + EDGE_TEXTURE_W, half);
           const [x5, y5] = pt(u0, half);
+          const [x6, y6] = pt(u0 + slant, 0);
           ctx.beginPath();
           ctx.moveTo(x1, y1);
           ctx.lineTo(x2, y2);
           ctx.lineTo(x3, y3);
           ctx.lineTo(x4, y4);
           ctx.lineTo(x5, y5);
+          ctx.lineTo(x6, y6);
           ctx.closePath();
           ctx.fill();
         }
