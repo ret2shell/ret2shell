@@ -123,8 +123,9 @@ const EDGE_TEXTURE_LIGHTEN = 0.35;
 const EDGE_TEXTURE_SOLVE_COLOR = "#ffffff";
 // tracks carry a 1px outline in the divider color
 const EDGE_BORDER_EXTRA = 2;
-// non-ancestor edges fade to this alpha while a node is selected
-const DIM_ALPHA = 0.12;
+// non-ancestor tracks stack this factor (the nodes' opacity-40 dimming) on
+// top of the base alpha while a node is selected
+const DIM_ALPHA = 0.4;
 // the port hit zone is a vertical strip of this width spanning the full node
 // height, centered on the node border
 const PORT_STRIP_W = 16;
@@ -136,6 +137,8 @@ const PORT_SNAP_RADIUS = 40;
 const EDGE_NODE_MARGIN_PX = 8;
 // upper bound for the monotone edge/node overlap resolution loop
 const MAX_OVERLAP_ITERATIONS = 16;
+// tracks run at 70% opacity in every solve state so the canvas breathes
+const TRACK_ALPHA = 0.7;
 // canvas theme fallbacks, used until the probed theme colors resolve
 const FALLBACK_TEXT_COLOR = "#888888";
 const FALLBACK_PRIMARY_COLOR = "#3b82f6";
@@ -586,9 +589,12 @@ function buildTracks(
     }
     return { base: c.edgeBase, overlayColor: c.edgeOverlay.color, overlayAlpha: c.edgeOverlay.alpha };
   };
-  // while a node is selected, tracks outside the ancestor chain fade out;
-  // merged tracks light up when any of their edges belongs to the chain
-  const alphaOf = (keys: string[]) => (chain ? (keys.some((k) => chain.edges.has(k)) ? 1 : DIM_ALPHA) : 1);
+  // tracks run at 70% opacity in every solve state; while a node is
+  // selected, tracks outside the ancestor chain stack the nodes' dimming on
+  // top, and merged tracks light up when any of their edges belongs to the
+  // chain
+  const alphaOf = (keys: string[]) =>
+    chain && keys.some((k) => chain.edges.has(k)) ? TRACK_ALPHA : TRACK_ALPHA * DIM_ALPHA;
   const selectedOf = (keys: string[]) => keys.some((k) => k === selected);
 
   const bySource = new Map<string, Edge[]>();
