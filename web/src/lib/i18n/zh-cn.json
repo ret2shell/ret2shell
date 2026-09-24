@@ -1642,7 +1642,7 @@
       "password": {
         "required": "密码不能为空",
         "minimumLength": "密码至少 8 位",
-        "tooWeak": "密码在 8 - 40 字符之间，至少包含一个大写字母、一个小写字母、一个数字和一个特殊字符",
+        "tooWeak": "密码在 8 - 40 字符之间，至少包含一个大写字母、一个小写字母和一个数字",
         "placeholder": "请输入密码",
         "label": "密码",
         "confirmRequired": "确认密码不能为空",

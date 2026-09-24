@@ -1642,7 +1642,7 @@
       "password": {
         "required": "Password cannot be empty",
         "minimumLength": "Password must be at least 8 characters",
-        "tooWeak": "Password must be between 8-40 characters, and must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+        "tooWeak": "Password must be between 8-40 characters, and must contain at least one uppercase letter, one lowercase letter, and one number",
         "placeholder": "Please enter your password",
         "label": "Password",
         "confirmRequired": "Confirm password cannot be empty",

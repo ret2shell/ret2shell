@@ -1642,7 +1642,7 @@
       "password": {
         "required": "密碼不能為空",
         "minimumLength": "密碼至少 8 位",
-        "tooWeak": "密碼在 8 - 40 字符之間，至少包含一個大寫字母、一個小寫字母、一個數字和一個特殊字符",
+        "tooWeak": "密碼在 8 - 40 字符之間，至少包含一個大寫字母、一個小寫字母和一個數字",
         "placeholder": "請輸入密碼",
         "label": "密碼",
         "confirmRequired": "確認密碼不能為空",
