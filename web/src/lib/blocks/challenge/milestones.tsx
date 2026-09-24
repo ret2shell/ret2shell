@@ -48,9 +48,15 @@ import { Portal } from "solid-js/web";
 const NODE_W = 224;
 const MILESTONE_H = 88;
 const CHALLENGE_H = 48;
-const GAP_X = 120;
-const GAP_Y = 24;
-const PAD = 24;
+// node centers snap to the world grid (multiples of GRID_Y); the column
+// pitch and the first column center are grid multiples, so auto layout,
+// drag snapping and the dot grid all agree
+const GRID_Y = 24;
+const COLUMN_START = GRID_Y * 5;
+const COLUMN_PITCH = GRID_Y * 15;
+const GAP_X = COLUMN_PITCH - NODE_W;
+const GAP_Y = GRID_Y;
+const PAD = GRID_Y;
 
 type NodeKind = "challenge" | "milestone";
 
@@ -81,10 +87,6 @@ function probeColor(cls: string, fallback: string, property: "color" | "backgrou
 }
 
 const REGION_GAP = 96;
-// nodes snap to this virtual grid while dragging; the canvas dot grid uses
-// the same step, and gap centers between columns form the vertical grid
-// lines that edge bends align to
-const GRID_Y = 24;
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 2;
 // fitting the view never zooms in beyond 100%
@@ -147,20 +149,27 @@ function heightOf(key: string) {
   return nodeKindOf(key) === "challenge" ? CHALLENGE_H : MILESTONE_H;
 }
 
+// node positions are stored as CENTER coordinates; centers snap to the
+// world grid so every node sits exactly on the dot grid
 function columnX(column: number) {
-  return PAD + column * (NODE_W + GAP_X);
+  return COLUMN_START + column * COLUMN_PITCH;
 }
 
 function columnOf(x: number) {
-  return Math.round((x - PAD) / (NODE_W + GAP_X));
+  return Math.round((x - COLUMN_START) / COLUMN_PITCH);
 }
 
 function snapX(x: number) {
-  return columnX(Math.round((x - PAD) / (NODE_W + GAP_X)));
+  return columnX(columnOf(x));
 }
 
 function snapY(y: number) {
-  return PAD + Math.round((y - PAD) / GRID_Y) * GRID_Y;
+  return Math.round(y / GRID_Y) * GRID_Y;
+}
+
+/** Snaps a center position up to the next grid line. */
+function alignCeil(y: number) {
+  return Math.ceil(y / GRID_Y) * GRID_Y;
 }
 
 type Graph = {
@@ -290,7 +299,7 @@ function placeByPredecessors(
     for (const key of members) {
       const centers = (graph.preds.get(key) ?? [])
         .filter((p) => result[p])
-        .map((p) => result[p].y + heightOf(p) / 2)
+        .map((p) => result[p].y)
         .sort((a, b) => a - b);
       if (centers.length > 0) anchor.set(key, centers[Math.floor((centers.length - 1) / 2)]);
     }
@@ -301,31 +310,33 @@ function placeByPredecessors(
         firstSucc(a).localeCompare(firstSucc(b)) ||
         a.localeCompare(b)
     );
-    for (const key of sortedMembers) {
+    for (const [i, key] of sortedMembers.entries()) {
       const h = heightOf(key);
       // align by y-center with the anchor predecessor; the first node of a
       // column in this region may rise above regionY for the alignment, as
-      // long as it stays clear of the previous region's nodes in this column
+      // long as it stays clear of the previous region's nodes in this column;
+      // every center snaps up to the grid so stacking stays aligned
       let yPos = firstInRegion
         ? Math.max(
-            anchor.has(key) ? (anchor.get(key) ?? 0) - h / 2 : y,
-            (columnBottom.get(column) ?? Number.NEGATIVE_INFINITY) + GAP_Y
+            anchor.has(key) ? (anchor.get(key) ?? 0) : y,
+            (columnBottom.get(column) ?? Number.NEGATIVE_INFINITY) + GAP_Y + h / 2
           )
-        : Math.max(y, (anchor.get(key) ?? y + h / 2) - h / 2);
+        : Math.max(y, anchor.get(key) ?? Number.NEGATIVE_INFINITY);
       firstInRegion = false;
+      yPos = alignCeil(yPos);
       let moved = true;
       while (moved) {
         moved = false;
         for (const interval of (blocked.get(column) ?? []).sort((a, b) => a.top - b.top)) {
-          if (yPos < interval.bottom && yPos + h > interval.top) {
-            yPos = interval.bottom + GAP_Y;
+          if (yPos < interval.bottom && yPos + h / 2 > interval.top) {
+            yPos = alignCeil(interval.bottom + GAP_Y + h / 2);
             moved = true;
           }
         }
       }
       result[key] = { x: columnX(column), y: yPos };
-      columnBottom.set(column, yPos + h);
-      const center = yPos + h / 2;
+      columnBottom.set(column, yPos + h / 2);
+      const center = yPos;
       for (const succ of graph.succs.get(key) ?? []) {
         const succColumn = columnOfNode.get(succ) ?? 0;
         for (let crossed = column + 1; crossed < succColumn; crossed++) {
@@ -336,7 +347,7 @@ function placeByPredecessors(
           });
         }
       }
-      y = yPos + h + GAP_Y;
+      y = alignCeil(yPos + h / 2 + GAP_Y + heightOf(sortedMembers[i + 1] ?? key) / 2);
     }
   }
   return blocked;
@@ -357,26 +368,26 @@ function pullTowardSuccessors(
 ) {
   for (const column of [...byColumn.keys()].sort((a, b) => b - a)) {
     for (const key of byColumn.get(column)!) {
-      const centers = (graph.succs.get(key) ?? []).map((s) => result[s].y + heightOf(s) / 2).sort((a, b) => a - b);
+      const centers = (graph.succs.get(key) ?? []).map((s) => result[s].y).sort((a, b) => a - b);
       if (centers.length === 0) continue;
       const h = heightOf(key);
-      const newTop = centers[Math.floor((centers.length - 1) / 2)] - h / 2;
-      if (Math.abs(newTop - result[key].y) < 1) continue;
+      const newCenter = centers[Math.floor((centers.length - 1) / 2)];
+      if (Math.abs(newCenter - result[key].y) < 1) continue;
       const guard = outerBottom.get(column);
-      if (guard !== undefined && newTop < guard + GAP_Y) continue;
+      if (guard !== undefined && newCenter - h / 2 < guard + GAP_Y) continue;
       const overlapsNode = tree.some(
         (other) =>
           other !== key &&
           (columnOfNode.get(other) ?? 0) === column &&
-          newTop < result[other].y + heightOf(other) &&
-          newTop + h > result[other].y
+          newCenter - h / 2 < result[other].y + heightOf(other) / 2 &&
+          newCenter + h / 2 > result[other].y - heightOf(other) / 2
       );
       if (overlapsNode) continue;
       const overlapsEdge = (blocked.get(column) ?? []).some(
-        (interval) => newTop < interval.bottom && newTop + h > interval.top
+        (interval) => newCenter - h / 2 < interval.bottom && newCenter + h / 2 > interval.top
       );
       if (overlapsEdge) continue;
-      result[key] = { ...result[key], y: newTop };
+      result[key] = { ...result[key], y: newCenter };
     }
   }
 }
@@ -415,20 +426,20 @@ function fullLayout(keys: string[], edges: Edge[]) {
 
     let bottom = regionY;
     for (const key of tree) {
-      bottom = Math.max(bottom, result[key].y + heightOf(key));
+      bottom = Math.max(bottom, result[key].y + heightOf(key) / 2);
       const column = columnOfNode.get(key) ?? 0;
       columnBottom.set(
         column,
-        Math.max(columnBottom.get(column) ?? Number.NEGATIVE_INFINITY, result[key].y + heightOf(key))
+        Math.max(columnBottom.get(column) ?? Number.NEGATIVE_INFINITY, result[key].y + heightOf(key) / 2)
       );
     }
-    regionY = bottom + REGION_GAP;
+    regionY = alignCeil(bottom + REGION_GAP);
   }
 
   // isolated nodes share one trailing single-column region
-  for (const key of singles.sort()) {
+  for (const [i, key] of singles.sort().entries()) {
     result[key] = { x: columnX(0), y: regionY };
-    regionY += heightOf(key) + GAP_Y;
+    regionY = alignCeil(regionY + heightOf(key) / 2 + GAP_Y + heightOf(singles[i + 1] ?? key) / 2);
   }
   return result;
 }
@@ -453,15 +464,18 @@ function incrementalLayout(keys: string[], edges: Edge[], existing: Record<strin
     const h = heightOf(key);
     const occupants = Object.entries(result)
       .filter(([other]) => other !== key && columnOf(result[other].x) === column)
-      .map(([other, pos]) => ({ top: pos.y, bottom: pos.y + heightOf(other) }));
+      .map(([other, pos]) => ({ top: pos.y - heightOf(other) / 2, bottom: pos.y + heightOf(other) / 2 }));
     let bottom = PAD;
     for (const occ of occupants) bottom = Math.max(bottom, occ.bottom + GAP_Y);
 
-    const predCenters = placedPreds.map((p) => result[p].y + heightOf(p) / 2).sort((a, b) => a - b);
-    let y = bottom;
+    const predCenters = placedPreds.map((p) => result[p].y).sort((a, b) => a - b);
+    let y = alignCeil(bottom + GAP_Y + h / 2);
     if (predCenters.length > 0) {
-      const candidate = predCenters[Math.floor((predCenters.length - 1) / 2)] - h / 2;
-      if (candidate >= PAD && occupants.every((occ) => candidate + h <= occ.top || candidate >= occ.bottom + GAP_Y)) {
+      const candidate = alignCeil(predCenters[Math.floor((predCenters.length - 1) / 2)]);
+      if (
+        candidate >= PAD &&
+        occupants.every((occ) => candidate + h / 2 <= occ.top || candidate >= occ.bottom + GAP_Y)
+      ) {
         y = candidate;
       }
     }
@@ -656,10 +670,10 @@ export default function Milestones(props: { gameId: number }) {
     for (const node of ns) {
       const p = pos[node.key];
       if (!p) continue;
-      minX = Math.min(minX, p.x);
-      minY = Math.min(minY, p.y);
-      maxX = Math.max(maxX, p.x + NODE_W);
-      maxY = Math.max(maxY, p.y + node.h);
+      minX = Math.min(minX, p.x - NODE_W / 2);
+      minY = Math.min(minY, p.y - node.h / 2);
+      maxX = Math.max(maxX, p.x + NODE_W / 2);
+      maxY = Math.max(maxY, p.y + node.h / 2);
     }
     if (!Number.isFinite(minX)) return;
     const rect = wrapperRef.getBoundingClientRect();
@@ -691,10 +705,10 @@ export default function Milestones(props: { gameId: number }) {
     const to = nodeMap().get(edge.to);
     if (!from || !to || !pos[from.key] || !pos[to.key]) return null;
     return {
-      x1: pos[from.key].x + NODE_W,
-      y1: pos[from.key].y + from.h / 2,
-      x2: pos[to.key].x,
-      y2: pos[to.key].y + to.h / 2,
+      x1: pos[from.key].x + NODE_W / 2,
+      y1: pos[from.key].y,
+      x2: pos[to.key].x - NODE_W / 2,
+      y2: pos[to.key].y,
     };
   }
 
@@ -706,10 +720,10 @@ export default function Milestones(props: { gameId: number }) {
 
   /** Rectilinear (right-angle) elbow segments of an edge in world coords.
    * The vertical segment runs at the center of the column gap right before
-   * the target column; since node x positions snap to the column grid, this
-   * always lands on the vertical grid line of the gap. */
+   * the target column; since node centers snap to the column grid, this
+   * always lands midway between the two columns. */
   function elbowSegments(g: { x1: number; y1: number; x2: number; y2: number }) {
-    const mx = g.x2 - GAP_X / 2;
+    const mx = g.x2 - (GAP_X + NODE_W) / 2;
     if (Math.abs(g.y2 - g.y1) < 1) {
       return { segments: [{ ax: g.x1, ay: g.y1, bx: g.x2, by: g.y2 }], corners: [] as { x: number; y: number }[] };
     }
@@ -770,14 +784,14 @@ export default function Milestones(props: { gameId: number }) {
             if (node.key === edge.from || node.key === edge.to || node.key === draggingKey) continue;
             const np = adjusted[node.key];
             if (!np) continue;
-            if (np.x + NODE_W <= minX + 2 || np.x >= maxX - 2) continue;
-            if (segY <= np.y - margin || segY >= np.y + node.h + margin) continue;
+            if (np.x + NODE_W / 2 <= minX + 2 || np.x - NODE_W / 2 >= maxX - 2) continue;
+            if (segY <= np.y - node.h / 2 - margin || segY >= np.y + node.h / 2 + margin) continue;
             // center the line in the gap between this node and the one above
             const column = columnOf(np.x);
             const above = [...nm.values()]
               .filter((other) => other.key !== node.key && columnOf(adjusted[other.key]?.x ?? 0) === column)
-              .map((other) => ({ bottom: (adjusted[other.key]?.y ?? 0) + other.h }))
-              .filter((entry) => entry.bottom <= np.y + margin)
+              .map((other) => ({ bottom: (adjusted[other.key]?.y ?? 0) + other.h / 2 }))
+              .filter((entry) => entry.bottom <= np.y - node.h / 2 + margin)
               .sort((a, b) => b.bottom - a.bottom)[0];
             const targetTop = above ? Math.max(2 * segY - above.bottom, segY + margin) : segY + margin;
             if (np.y < targetTop) {
@@ -802,12 +816,13 @@ export default function Milestones(props: { gameId: number }) {
         let prevBottom = Number.NEGATIVE_INFINITY;
         for (const node of members) {
           const np = adjusted[node.key];
-          if (node.key !== draggingKey && np.y < prevBottom + GAP_Y) {
-            np.y = prevBottom + GAP_Y;
+          const half = node.h / 2;
+          if (node.key !== draggingKey && np.y - half < prevBottom + GAP_Y) {
+            np.y = prevBottom + GAP_Y + half;
             moved = true;
             changed = true;
           }
-          prevBottom = Math.max(prevBottom, np.y + node.h);
+          prevBottom = Math.max(prevBottom, np.y + half);
         }
       }
       if (!moved) break;
@@ -1008,7 +1023,7 @@ export default function Milestones(props: { gameId: number }) {
     for (const edge of edgeList) {
       const g = edgeGeometry(edge);
       if (!g) continue;
-      const mx = g.x2 - GAP_X / 2;
+      const mx = g.x2 - (GAP_X + NODE_W) / 2;
       const own = isSolved(edge);
       const ownState: TrackState = own ? "solved" : "unsolved";
       const straight = Math.abs(g.y2 - g.y1) < 1;
@@ -1027,7 +1042,7 @@ export default function Milestones(props: { gameId: number }) {
         ...sourceSiblings
           .map((sibling) => edgeGeometry(sibling)?.x2)
           .filter((x2): x2 is number => x2 !== undefined)
-          .map((x2) => x2 - GAP_X / 2),
+          .map((x2) => x2 - (GAP_X + NODE_W) / 2),
         mx
       );
       if (sourceShared && minMx > g.x1 + 1) {
@@ -1136,7 +1151,7 @@ export default function Milestones(props: { gameId: number }) {
       const from = nodeMap().get(conn.from);
       const pos = positions()[conn.from];
       if (from && pos) {
-        const elbow = elbowSegments({ x1: pos.x + NODE_W, y1: pos.y + from.h / 2, x2: conn.x, y2: conn.y });
+        const elbow = elbowSegments({ x1: pos.x + NODE_W / 2, y1: pos.y, x2: conn.x, y2: conn.y });
         strokeTrack(elbow.segments, c.divider, 1, EDGE_WIDTH + EDGE_BORDER_EXTRA);
         strokeTrack(elbow.segments, c.primary, 1, EDGE_WIDTH);
         drawChevrons(elbow.segments, "#ffffff", EDGE_TEXTURE_LIGHTEN);
@@ -1311,7 +1326,8 @@ export default function Milestones(props: { gameId: number }) {
         if (node.key === from) continue;
         const p = positions()[node.key];
         if (!p) continue;
-        const dist = Math.hypot(w.x - p.x, w.y - (p.y + node.h / 2));
+        // the in-port sits on the target's left edge, at its center height
+        const dist = Math.hypot(w.x - (p.x - NODE_W / 2), w.y - p.y);
         if (dist < nearestDist) {
           nearest = node.key;
           nearestDist = dist;
@@ -1587,8 +1603,8 @@ export default function Milestones(props: { gameId: number }) {
                               })()
                             )}
                             style={{
-                              left: `${pos().x}px`,
-                              top: `${pos().y}px`,
+                              left: `${pos().x - NODE_W / 2}px`,
+                              top: `${pos().y - CHALLENGE_H / 2}px`,
                               width: `${NODE_W}px`,
                               height: `${CHALLENGE_H}px`,
                             }}
@@ -1650,8 +1666,8 @@ export default function Milestones(props: { gameId: number }) {
                                     achieved() ? "border-success/60" : "border-layer-content/10"
                                   )}
                                   style={{
-                                    left: `${pos().x}px`,
-                                    top: `${pos().y}px`,
+                                    left: `${pos().x - NODE_W / 2}px`,
+                                    top: `${pos().y - MILESTONE_H / 2}px`,
                                     width: `${NODE_W}px`,
                                     height: `${MILESTONE_H}px`,
                                   }}
