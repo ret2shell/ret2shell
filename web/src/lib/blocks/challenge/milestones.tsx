@@ -80,47 +80,6 @@ function probeColor(cls: string, fallback: string, property: "color" | "backgrou
   return color;
 }
 
-/** Blends `fg` over `bg` at the given alpha into an opaque rgb() color, so
- * overlapping translucent strokes never bleed into each other. */
-function mixColors(fg: string, bg: string, alpha: number) {
-  const parse = (color: string) => color.match(/[\d.]+/g)?.map(Number) ?? [0, 0, 0];
-  const f = parse(fg);
-  const b = parse(bg);
-  const mix = (i: number) => Math.round(f[i] * alpha + b[i] * (1 - alpha));
-  return `rgb(${mix(0)}, ${mix(1)}, ${mix(2)})`;
-}
-
-/** Raises the HSL lightness of an rgb() color by `amount` (0-1). */
-function lightenColor(color: string, amount: number) {
-  const [r, g, b] = (color.match(/[\d.]+/g)?.map(Number) ?? [0, 0, 0]).slice(0, 3).map((v) => v / 255);
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  const l = (max + min) / 2;
-  const d = max - min;
-  let h = 0;
-  let sat = 0;
-  if (d !== 0) {
-    sat = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
-    else if (max === g) h = (b - r) / d + 2;
-    else h = (r - g) / d + 4;
-    h /= 6;
-  }
-  const l2 = Math.min(1, l + amount);
-  const hue = (p: number, q: number, sector: number) => {
-    const t = sector < 0 ? sector + 1 : sector > 1 ? sector - 1 : sector;
-    if (t < 1 / 6) return p + (q - p) * 6 * t;
-    if (t < 1 / 2) return q;
-    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-    return p;
-  };
-  const q2 = l2 < 0.5 ? l2 * (1 + sat) : l2 + sat - l2 * sat;
-  const p2 = 2 * l2 - q2;
-  return `rgb(${Math.round(hue(p2, q2, h + 1 / 3) * 255)}, ${Math.round(hue(p2, q2, h) * 255)}, ${Math.round(
-    hue(p2, q2, h - 1 / 3) * 255
-  )})`;
-}
-
 const REGION_GAP = 96;
 // nodes snap to this virtual grid while dragging; the canvas dot grid uses
 // the same step, and gap centers between columns form the vertical grid
@@ -148,8 +107,11 @@ const EDGE_TEXTURE_W = 8;
 // apart instead of overlapping on the gap center line; the same spacing fans
 // edges out of a shared source port
 const EDGE_TRACK_SPACING = EDGE_WIDTH + 4;
-// solved tracks brighten the success color by this lightness
-const SOLVED_LIGHTNESS_BOOST = 0.2;
+// the chevron texture is a translucent white or black overlay of the track
+// base: light themes darken the track slightly, dark themes lighten it, and
+// solved tracks always lighten
+const EDGE_TEXTURE_DARKEN = 0.18;
+const EDGE_TEXTURE_LIGHTEN = 0.35;
 // tracks carry a 1px outline in the divider color
 const EDGE_BORDER_EXTRA = 2;
 // non-ancestor edges fade to this alpha while a node is selected
@@ -167,7 +129,6 @@ const EDGE_NODE_MARGIN_PX = 8;
 const MAX_OVERLAP_ITERATIONS = 16;
 // canvas theme fallbacks, used until the probed theme colors resolve
 const FALLBACK_TEXT_COLOR = "#888888";
-const FALLBACK_BG_COLOR = "#111111";
 const FALLBACK_PRIMARY_COLOR = "#3b82f6";
 const FALLBACK_SUCCESS_COLOR = "#22c55e";
 const FALLBACK_DIVIDER_COLOR = "rgba(136, 136, 136, 0.1)";
@@ -667,12 +628,13 @@ export default function Milestones(props: { gameId: number }) {
   const [size, setSize] = createSignal({ w: 0, h: 0 });
   const [colors, setColors] = createSignal({
     content: FALLBACK_TEXT_COLOR,
-    muted: FALLBACK_TEXT_COLOR,
     primary: FALLBACK_PRIMARY_COLOR,
     success: FALLBACK_SUCCESS_COLOR,
     divider: FALLBACK_DIVIDER_COLOR,
     edgeBase: "#dddddd",
-    edgeTexture: "#aaaaaa",
+    // the texture overlay that darkens (light theme) or lightens (dark
+    // theme) the track base into the chevron texture
+    edgeOverlay: { color: "#000000", alpha: EDGE_TEXTURE_DARKEN },
   });
 
   function toWorld(clientX: number, clientY: number) {
@@ -979,12 +941,14 @@ export default function Milestones(props: { gameId: number }) {
     }
     const chain = ancestorChain();
     const isSolved = (edge: Edge) => nodeKindOf(edge.from) === "challenge" && solved.has(nodeIdOf(edge.from));
-    // track palette: unsolved tracks are gray with a lighter >>>>> texture,
-    // solved tracks use success with a lightness-boosted texture
-    const trackStyleOf = (solvedFlag: boolean, isSelected: boolean) => {
-      if (isSelected) return { base: c.primary, texture: lightenColor(c.primary, SOLVED_LIGHTNESS_BOOST) };
-      if (solvedFlag) return { base: c.success, texture: lightenColor(c.success, SOLVED_LIGHTNESS_BOOST) };
-      return { base: c.edgeBase, texture: c.edgeTexture };
+    // track palette: unsolved tracks use the theme band color, solved tracks
+    // use success; the chevron texture is always an overlay of the track's
+    // own color (lighter or darker), never an unrelated color
+    const trackStyleOf = (solvedFlag: boolean) => {
+      if (solvedFlag) {
+        return { base: c.success, overlayColor: "#ffffff", overlayAlpha: EDGE_TEXTURE_LIGHTEN };
+      }
+      return { base: c.edgeBase, overlayColor: c.edgeOverlay.color, overlayAlpha: c.edgeOverlay.alpha };
     };
     // while a node is selected, edges outside its ancestor chain fade out
     const alphaOf = (key: string) => (chain ? (chain.edges.has(key) ? 1 : DIM_ALPHA) : 1);
@@ -1065,10 +1029,11 @@ export default function Milestones(props: { gameId: number }) {
       const segments = bundled && elbow.segments.length > 1 ? elbow.segments.slice(0, -1) : elbow.segments;
       if (segments.length === 0) return;
       const key = edgeKey(edge);
-      const style = trackStyleOf(isSolved(edge), key === selected);
+      const style = trackStyleOf(isSolved(edge));
       const alpha = alphaOf(key);
-      // 1px divider-colored outline under the base stroke
-      strokeTrack(segments, c.divider, alpha, EDGE_WIDTH + EDGE_BORDER_EXTRA);
+      // 1px outline under the base stroke; a selected track carries a
+      // primary outline instead of the divider color
+      strokeTrack(segments, key === selected ? c.primary : c.divider, alpha, EDGE_WIDTH + EDGE_BORDER_EXTRA);
       strokeTrack(segments, style.base, alpha, EDGE_WIDTH);
       // corner squares join the segments (the junction at the target side is
       // owned by the trunk)
@@ -1081,7 +1046,7 @@ export default function Milestones(props: { gameId: number }) {
         const cy = corner.y * z + p.y;
         ctx.fillRect(cx - halfCorner, cy - halfCorner, halfCorner * 2, halfCorner * 2);
       }
-      drawChevrons(segments, style.texture, alpha);
+      drawChevrons(segments, style.overlayColor, style.overlayAlpha * alpha);
       ctx.globalAlpha = 1;
     };
 
@@ -1094,13 +1059,11 @@ export default function Milestones(props: { gameId: number }) {
       if (members.length < 2) continue;
       const g = edgeGeometry(members[0]);
       if (!g) return;
-      const style = trackStyleOf(
-        members.every(isSolved),
-        members.some((e) => edgeKey(e) === selected)
-      );
+      const style = trackStyleOf(members.every(isSolved));
       const alpha = alphaOf(edgeKey(members[0]));
       const trunkSegment = { ax: g.x2 - GAP_X / 2 + g.lane, ay: g.y2, bx: g.x2, by: g.y2 };
-      strokeTrack([trunkSegment], c.divider, alpha, EDGE_WIDTH + EDGE_BORDER_EXTRA);
+      const border = members.some((e) => edgeKey(e) === selected) ? c.primary : c.divider;
+      strokeTrack([trunkSegment], border, alpha, EDGE_WIDTH + EDGE_BORDER_EXTRA);
       strokeTrack([trunkSegment], style.base, alpha, EDGE_WIDTH);
       const halfJunction = (EDGE_WIDTH / 2 + 1) * z;
       ctx.fillStyle = style.base;
@@ -1108,7 +1071,7 @@ export default function Milestones(props: { gameId: number }) {
       const jx = trunkSegment.ax * z + p.x;
       const jy = trunkSegment.ay * z + p.y;
       ctx.fillRect(jx - halfJunction, jy - halfJunction, halfJunction * 2, halfJunction * 2);
-      drawChevrons([trunkSegment], style.texture, alpha);
+      drawChevrons([trunkSegment], style.overlayColor, style.overlayAlpha * alpha);
       ctx.globalAlpha = 1;
     }
 
@@ -1119,7 +1082,7 @@ export default function Milestones(props: { gameId: number }) {
         const elbow = elbowSegments({ x1: pos.x + NODE_W, y1: pos.y + from.h / 2, x2: conn.x, y2: conn.y });
         strokeTrack(elbow.segments, c.divider, 1, EDGE_WIDTH + EDGE_BORDER_EXTRA);
         strokeTrack(elbow.segments, c.primary, 1, EDGE_WIDTH);
-        drawChevrons(elbow.segments, lightenColor(c.primary, SOLVED_LIGHTNESS_BOOST), 1);
+        drawChevrons(elbow.segments, "#ffffff", EDGE_TEXTURE_LIGHTEN);
       }
     }
   }
@@ -1187,13 +1150,14 @@ export default function Milestones(props: { gameId: number }) {
     const dark = fullTheme() === "dark";
     setColors({
       content,
-      muted: mixColors(content, probeColor("bg-layer", FALLBACK_BG_COLOR, "backgroundColor"), 0.25),
       primary: probeColor("text-primary", FALLBACK_PRIMARY_COLOR),
       success: probeColor("text-success", FALLBACK_SUCCESS_COLOR),
       // tracks are outlined in the divider color, matching <Divider />
       divider: probeColor("bg-layer-content/10", FALLBACK_DIVIDER_COLOR, "backgroundColor"),
       edgeBase: dark ? "#444444" : "#dddddd",
-      edgeTexture: dark ? "#777777" : "#aaaaaa",
+      edgeOverlay: dark
+        ? { color: "#ffffff", alpha: EDGE_TEXTURE_LIGHTEN }
+        : { color: "#000000", alpha: EDGE_TEXTURE_DARKEN },
     });
   });
 
