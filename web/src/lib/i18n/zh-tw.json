@@ -1396,6 +1396,7 @@
       "title": "里程碑",
       "empty": "暫無里程碑",
       "achieved": "已達成",
+      "newAchievement": "獲得了新成就！",
       "prerequisites": "前置題目",
       "form": {
         "name": {
@@ -2134,6 +2135,7 @@
     "noSolves": "沒有已解出題目",
     "solvesJournal": "成員 {{user}} 解出了題目 {{challenge}}。",
     "extras": "額外分數變動",
+    "milestoneJournal": "獲得了成就 {{milestone}}。",
     "noExtras": "沒有額外分數變動"
   },
   "notification": {

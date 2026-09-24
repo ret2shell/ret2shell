@@ -1396,6 +1396,7 @@
       "title": "Milestones",
       "empty": "No milestones yet",
       "achieved": "Achieved",
+      "newAchievement": "New achievement unlocked!",
       "prerequisites": "Prerequisites",
       "form": {
         "name": {
@@ -2134,6 +2135,7 @@
     "noSolves": "No solves yet",
     "solvesJournal": "Player {{user}} solved challenge {{challenge}}.",
     "extras": "Extra score changes",
+    "milestoneJournal": "Achieved milestone {{milestone}}.",
     "noExtras": "No extra score changes here"
   },
   "notification": {

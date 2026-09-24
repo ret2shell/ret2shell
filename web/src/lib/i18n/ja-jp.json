@@ -1396,6 +1396,7 @@
       "title": "マイルストーン",
       "empty": "マイルストーンはまだありません",
       "achieved": "達成済み",
+      "newAchievement": "新しい実績を達成しました！",
       "prerequisites": "前提問題",
       "form": {
         "name": {
@@ -2134,6 +2135,7 @@
     "noSolves": "解かれた問題はありません",
     "solvesJournal": "{{user}} さんが {{challenge}} を解決しました。",
     "extras": "追加スコアの変動",
+    "milestoneJournal": "実績 {{milestone}} を達成しました。",
     "noExtras": "追加スコアの変動はありません"
   },
   "notification": {

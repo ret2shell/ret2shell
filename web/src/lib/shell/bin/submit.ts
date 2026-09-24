@@ -1,9 +1,11 @@
 import { inflyClient } from "@api";
-import { checkSubmissionStatus, submitFlag } from "@api/game";
+import { checkSubmissionStatus, getSelfSolves, submitFlag } from "@api/game";
+import { fetchNewlyAchievedMilestones } from "@api/milestone";
 import type { Challenge } from "@models/challenge";
 import type { Game } from "@models/game";
 import { isAdminOfGame, isGameInProgress } from "@storage/game";
 import { t } from "@storage/theme";
+import { addToast } from "@storage/toast";
 import ansiColors from "ansi-colors";
 import { HTTPError } from "ky";
 import type { ParseEntry } from "shell-quote";
@@ -31,6 +33,14 @@ export class Submit implements Command {
     }
     const flag = origin.replace("submit", "").trim();
     io.info(`${t("shell.submit.submitting")}: ${ansiColors.blue(flag)}`);
+    // snapshot the solved set so milestones newly completed by this solve
+    // can be celebrated once the checker confirms it
+    let beforeSolved: Set<number> | null = null;
+    try {
+      beforeSolved = new Set((await getSelfSolves(game.id)).map((s) => s.challenge_id));
+    } catch {
+      // without a snapshot the celebration below is skipped entirely
+    }
     try {
       const submission = await submitFlag(game!.id, challenge!.id, flag);
       io.print(ansiColors.green(`${t("shell.submit.waitingForChecking")}`));
@@ -49,6 +59,21 @@ export class Submit implements Command {
               queryKey: ["game", game!.id, "selfSolves"],
             });
             io.success(`${t("challenge.submission.status.solved.title")}: ${st.result}`);
+            if (beforeSolved) {
+              try {
+                const achieved = await fetchNewlyAchievedMilestones(game!.id, beforeSolved);
+                for (const milestone of achieved) {
+                  addToast({
+                    level: "success",
+                    description: t("challenge.milestone.newAchievement"),
+                    subtitle: milestone.name,
+                    duration: 10000,
+                  });
+                }
+              } catch {
+                // best-effort celebration, never blocks the submit flow
+              }
+            }
             if (isGameInProgress(game) && !isAdminOfGame(game)) {
               inflyClient.invalidateQueries({
                 queryKey: ["game", game.id, "team", "self"],

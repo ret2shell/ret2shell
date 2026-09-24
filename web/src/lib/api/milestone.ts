@@ -3,9 +3,28 @@ import { t } from "@storage/theme";
 import { useMutation, useQuery } from "@tanstack/solid-query";
 import { createMemo } from "solid-js";
 import api, { api_root, handleHttpError, inflyClient, safeJson, toastSuccess } from ".";
+import { getSelfSolves } from "./game";
 
 export async function getMilestones(game_id: number) {
   return await api.get(`${api_root}/game/${game_id}/milestone`).json<Milestone[]>();
+}
+
+/** Milestones whose prerequisites are all present in `solved`. Milestones
+ * without prerequisites are never achieved, mirroring the backend scoring. */
+export function achievedMilestones(milestones: Milestone[], solved: Set<number>) {
+  return milestones.filter(
+    (milestone) => milestone.prerequisites.length > 0 && milestone.prerequisites.every((id) => solved.has(id))
+  );
+}
+
+/** Fetches the fresh milestone/solve state and returns the milestones that
+ * became achieved since `beforeSolved` (a solved-challenge-id set) was
+ * captured. */
+export async function fetchNewlyAchievedMilestones(game_id: number, beforeSolved: Set<number>) {
+  const [milestones, solves] = await Promise.all([getMilestones(game_id), getSelfSolves(game_id)]);
+  const before = new Set(achievedMilestones(milestones, beforeSolved).map((milestone) => milestone.id));
+  const solved = new Set(solves.map((submission) => submission.challenge_id));
+  return achievedMilestones(milestones, solved).filter((milestone) => !before.has(milestone.id));
 }
 
 export function useMilestones({

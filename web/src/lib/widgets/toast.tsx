@@ -65,7 +65,12 @@ export default function (props: ComponentProps<"div"> & ToastProps) {
               `text-${toastMsgProps.toast.level}`
             )}
           />
-          <span class="text-wrap align-middle">{toastMsgProps.toast.description}</span>
+          <span class="inline-flex flex-col align-middle">
+            <span class="text-wrap">{toastMsgProps.toast.description}</span>
+            <Show when={toastMsgProps.toast.subtitle}>
+              <span class="text-sm opacity-60">{toastMsgProps.toast.subtitle}</span>
+            </Show>
+          </span>
         </span>
         <Show when={toastMsgProps.toast.reject || toastMsgProps.toast.accept}>
           <div class="flex flex-row items-center justify-end space-x-2">
