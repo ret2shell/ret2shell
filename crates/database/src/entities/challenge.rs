@@ -11,15 +11,40 @@ use sea_orm::{
   entity::prelude::*,
 };
 use serde::{Deserialize, Serialize};
+use validator::{Validate, ValidationError};
 
 use super::submission;
-use crate::game;
+use crate::{game, validation::non_blank};
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
+#[derive(
+  Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult, Validate,
+)]
+#[validate(schema(function = "minimum_not_above_initial"))]
 pub struct ScoreRule {
+  #[validate(range(
+    min = 0,
+    max = 1500,
+    message = "initial score must be between 0 and 1500"
+  ))]
   pub initial: i32,
+  #[validate(range(
+    min = 0,
+    max = 1500,
+    message = "minimum score must be between 0 and 1500"
+  ))]
   pub minimum: i32,
+  #[validate(range(min = 1, max = 200, message = "score decay must be between 1 and 200"))]
   pub decay: i32,
+}
+
+fn minimum_not_above_initial(rule: &ScoreRule) -> Result<(), ValidationError> {
+  if rule.minimum > rule.initial {
+    return Err(
+      ValidationError::new("minimum_above_initial")
+        .with_message("minimum score must not exceed initial score".into()),
+    );
+  }
+  Ok(())
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
@@ -36,21 +61,50 @@ pub struct TagList(pub Vec<Tag>);
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct PrerequisiteList(pub Vec<i64>);
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default)]
+fn non_empty_tags(tag: &TagList) -> Result<(), ValidationError> {
+  if tag.0.is_empty() {
+    return Err(ValidationError::new("non_empty_tags"));
+  }
+  Ok(())
+}
+
+fn release_before_archive(model: &Model) -> Result<(), ValidationError> {
+  if let (Some(release_at), Some(archive_at)) = (&model.release_at, &model.archive_at)
+    && release_at >= archive_at
+  {
+    return Err(
+      ValidationError::new("release_window")
+        .with_message("challenge release time must be before archive time".into()),
+    );
+  }
+  Ok(())
+}
+
+#[derive(
+  Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default, Validate,
+)]
 #[sea_orm(table_name = "challenge")]
+#[validate(schema(function = "release_before_archive"))]
 pub struct Model {
   #[sea_orm(primary_key)]
   pub id: i64,
+  #[validate(custom(function = "non_blank", message = "challenge name is required"))]
   pub name: String,
   #[serde(with = "ts_seconds")]
   pub updated_at: DateTime<Utc>,
   #[sea_orm(column_type = "Text")]
+  #[validate(
+    required(message = "challenge content is required"),
+    custom(function = "non_blank", message = "challenge content is required")
+  )]
   pub content: Option<String>,
   pub hidden: bool,
   pub game_id: i64,
   #[sea_orm(column_type = "JsonBinary")]
+  #[validate(custom(function = "non_empty_tags", message = "challenge tag is required"))]
   pub tag: TagList,
   #[sea_orm(column_type = "JsonBinary")]
+  #[validate(nested)]
   pub score_rule: ScoreRule,
   pub score: i32,
   pub bucket: Option<String>,
@@ -63,6 +117,10 @@ pub struct Model {
   #[serde(default = "PrerequisiteList::default")]
   pub prerequisites: PrerequisiteList,
   #[serde(default = "Option::default")]
+  #[validate(length(
+    max = "crate::validation::AVATAR_MAX_LEN",
+    message = "challenge avatar must be at most 255 characters"
+  ))]
   pub avatar: Option<String>,
 }
 
@@ -73,6 +131,46 @@ impl Model {
       ..self
     }
   }
+}
+
+/// Failure modes of `resolve_prerequisites`. Domain violations are reported
+/// separately from database errors so that the caller can map them to
+/// different response statuses.
+#[derive(Debug)]
+pub enum ResolvePrerequisitesError {
+  OwnPrerequisite,
+  NotFound(i64),
+  WrongGame(i64),
+  Db(DbErr),
+}
+
+impl From<DbErr> for ResolvePrerequisitesError {
+  fn from(error: DbErr) -> Self {
+    Self::Db(error)
+  }
+}
+
+/// Resolves prerequisite ids to their challenge models. Fails when an id is
+/// the excluded challenge itself, does not exist, or belongs to another game.
+pub async fn resolve_prerequisites<C>(
+  db: &C, game_id: i64, exclude_id: Option<i64>, prerequisites: &PrerequisiteList,
+) -> Result<Vec<Model>, ResolvePrerequisitesError>
+where
+  C: ConnectionTrait, {
+  let mut models = Vec::with_capacity(prerequisites.0.len());
+  for &id in &prerequisites.0 {
+    if Some(id) == exclude_id {
+      return Err(ResolvePrerequisitesError::OwnPrerequisite);
+    }
+    let model = get(db, id)
+      .await?
+      .ok_or(ResolvePrerequisitesError::NotFound(id))?;
+    if model.game_id != game_id {
+      return Err(ResolvePrerequisitesError::WrongGame(id));
+    }
+    models.push(model);
+  }
+  Ok(models)
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

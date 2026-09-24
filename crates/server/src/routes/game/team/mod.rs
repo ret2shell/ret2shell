@@ -19,6 +19,7 @@ use sea_orm::TransactionTrait;
 use serde::Deserialize;
 use tower_http::request_id::RequestId;
 use tracing::{error, info, warn};
+use validator::Validate;
 
 use super::worker;
 use crate::{
@@ -26,7 +27,7 @@ use crate::{
   traits::{GlobalState, ResponseError},
   utility::{
     pagination::{DEFAULT_PAGE_SIZE, page, page_size},
-    validation::validate_team_form,
+    validation::validation_bad_request,
   },
 };
 
@@ -112,7 +113,7 @@ async fn update_self_team(
     team.name = token.nickname.clone();
   }
   team.tag = req.tag;
-  validate_team_form(&team.name, team.tag.as_deref())?;
+  team.validate().map_err(validation_bad_request)?;
   if game.archived() {
     warn!("user try to update team in archived game");
     return Err(ResponseError::PreconditionFailed(
@@ -364,7 +365,6 @@ async fn create_team(
       "can not join multiple teams".to_owned(),
     ));
   }
-  validate_team_form(&req.name, req.tag.as_deref())?;
   let state = if game.enable_audit {
     if auditor.audit_content(&req.name) {
       team::State::Pending
@@ -374,20 +374,17 @@ async fn create_team(
   } else {
     team::State::Passed
   };
-  let team_token = Some(nanoid!());
-  let team = team::create(
-    &db.conn,
-    team::Model {
-      name: req.name,
-      game_id: game.id,
-      state,
-      token: team_token,
-      institute_id: user.institute_id,
-      tag: req.tag,
-      ..Default::default()
-    },
-  )
-  .await?;
+  let team = team::Model {
+    name: req.name,
+    game_id: game.id,
+    state,
+    token: Some(nanoid!()),
+    institute_id: user.institute_id,
+    tag: req.tag,
+    ..Default::default()
+  };
+  team.validate().map_err(validation_bad_request)?;
+  let team = team::create(&db.conn, team).await?;
   user2_team::user_join_team(&db.conn, token.id, team.id).await?;
   info!(
     team_id=%team.id, team_name=%team.name,
@@ -474,7 +471,7 @@ async fn update_team_info(
   Extension(trace): Extension<RequestId>, Json(req): Json<team::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   ensure_team_in_game(&game, &team)?;
-  validate_team_form(&req.name, req.tag.as_deref())?;
+  req.validate().map_err(validation_bad_request)?;
   let result = team::update(
     &db.conn,
     team::Model {

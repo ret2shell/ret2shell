@@ -23,6 +23,7 @@ use sea_orm::TransactionTrait;
 use serde::Deserialize;
 use tower_http::request_id::RequestId;
 use tracing::{info, warn};
+use validator::Validate;
 
 use crate::{
   middleware::auth::{Token, is_game_admin},
@@ -30,7 +31,7 @@ use crate::{
   traits::{GlobalState, ResponseError},
   utility::{
     pagination::{DEFAULT_PAGE_SIZE, DEFAULT_SUBMISSION_PAGE_SIZE, page, page_size},
-    validation::{validate_challenge_model, validate_max_len},
+    validation::validation_bad_request,
   },
 };
 
@@ -99,10 +100,11 @@ pub(super) async fn create_challenge(
   State(ref db): State<Database>, State(bucket): State<Bucket>, Extension(token): Extension<Token>,
   Extension(game): Extension<game::Model>, Json(challenge): Json<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  validate_challenge_model(&challenge)?;
+  challenge.validate().map_err(validation_bad_request)?;
   let txn = db.conn.begin().await?;
-  let referenced =
-    super::resolve_prerequisite_models(&txn, game.id, None, &challenge.prerequisites).await?;
+  let referenced = challenge::resolve_prerequisites(&txn, game.id, None, &challenge.prerequisites)
+    .await
+    .map_err(super::resolve_prerequisites_error)?;
   let prerequisite_buckets = super::prerequisite_bucket_names(&referenced)?;
   let game_bucket = bucket
     .at_mut(
@@ -152,16 +154,17 @@ pub(super) async fn update_challenge(
   Extension(game): Extension<game::Model>, Extension(prev_challenge): Extension<challenge::Model>,
   Extension(trace): Extension<RequestId>, Json(challenge): Json<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  validate_challenge_model(&challenge)?;
+  challenge.validate().map_err(validation_bad_request)?;
   super::check_challenge_publishing(&prev_challenge)?;
   let txn = db.conn.begin().await?;
-  let referenced = super::resolve_prerequisite_models(
+  let referenced = challenge::resolve_prerequisites(
     &txn,
     game.id,
     Some(prev_challenge.id),
     &challenge.prerequisites,
   )
-  .await?;
+  .await
+  .map_err(super::resolve_prerequisites_error)?;
   super::ensure_acyclic_prerequisites(&txn, &game, prev_challenge.id, &challenge.prerequisites)
     .await?;
   let prerequisite_buckets = super::prerequisite_bucket_names(&referenced)?;
@@ -238,8 +241,9 @@ pub(super) async fn update_challenge_prerequisites(
 ) -> Result<impl IntoResponse, ResponseError> {
   let txn = db.conn.begin().await?;
   let referenced =
-    super::resolve_prerequisite_models(&txn, game.id, Some(prev_challenge.id), &prerequisites)
-      .await?;
+    challenge::resolve_prerequisites(&txn, game.id, Some(prev_challenge.id), &prerequisites)
+      .await
+      .map_err(super::resolve_prerequisites_error)?;
   super::ensure_acyclic_prerequisites(&txn, &game, prev_challenge.id, &prerequisites).await?;
   let prerequisite_buckets = super::prerequisite_bucket_names(&referenced)?;
   let challenge = challenge::update(
@@ -279,8 +283,13 @@ pub(super) async fn update_challenge_avatar(
   Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
   Extension(prev_challenge): Extension<challenge::Model>, Json(avatar): Json<Option<String>>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  if let Some(avatar) = &avatar {
-    validate_max_len(avatar, "challenge avatar", 255)?;
+  if let Some(avatar) = &avatar
+    && r2s_database::validation::char_len(avatar)
+      > r2s_database::validation::AVATAR_MAX_LEN as usize
+  {
+    return Err(ResponseError::BadRequest(
+      "challenge avatar must be at most 255 characters".to_owned(),
+    ));
   }
   let txn = db.conn.begin().await?;
   let challenge = challenge::update(
@@ -291,8 +300,9 @@ pub(super) async fn update_challenge_avatar(
     },
   )
   .await?;
-  let referenced =
-    super::resolve_prerequisite_models(&txn, game.id, None, &challenge.prerequisites).await?;
+  let referenced = challenge::resolve_prerequisites(&txn, game.id, None, &challenge.prerequisites)
+    .await
+    .map_err(super::resolve_prerequisites_error)?;
   let prerequisite_buckets = super::prerequisite_bucket_names(&referenced)?;
   let (game_bucket, challenge_bucket) =
     super::get_challenge_bucket_mut(&bucket, &game, &challenge).await?;

@@ -1,5 +1,7 @@
 mod entities;
 
+pub mod validation;
+
 pub use entities::{
   article, audit, calendar, challenge, challenge_milestone, chat, comment, config, extra, game,
   hint, institute, ip, media, notification, oauth, oauth_provider, submission, team, user,

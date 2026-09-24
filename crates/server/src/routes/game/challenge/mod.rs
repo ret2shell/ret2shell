@@ -187,32 +187,24 @@ pub(super) fn check_challenge_publishing(prev: &challenge::Model) -> Result<(), 
   Ok(())
 }
 
-/// Loads the models of the challenges referenced by `prerequisites` and
-/// validates that every reference exists, belongs to the same game and is not
-/// the challenge itself.
-pub(super) async fn resolve_prerequisite_models<C>(
-  db: &C, game_id: i64, exclude_id: Option<i64>, prerequisites: &challenge::PrerequisiteList,
-) -> Result<Vec<challenge::Model>, ResponseError>
-where
-  C: ConnectionTrait, {
-  let mut models = Vec::with_capacity(prerequisites.0.len());
-  for &id in &prerequisites.0 {
-    if Some(id) == exclude_id {
-      return Err(ResponseError::BadRequest(
-        "a challenge cannot be its own prerequisite".to_owned(),
-      ));
+/// Maps the domain violations reported by `challenge::resolve_prerequisites`
+/// to client errors while keeping database errors on the error path.
+pub(super) fn resolve_prerequisites_error(
+  error: challenge::ResolvePrerequisitesError,
+) -> ResponseError {
+  use challenge::ResolvePrerequisitesError as Error;
+  match error {
+    Error::OwnPrerequisite => {
+      ResponseError::BadRequest("a challenge cannot be its own prerequisite".to_owned())
     }
-    let model = challenge::get(db, id).await?.ok_or_else(|| {
+    Error::NotFound(id) => {
       ResponseError::BadRequest(format!("prerequisite challenge {id} does not exist"))
-    })?;
-    if model.game_id != game_id {
-      return Err(ResponseError::BadRequest(format!(
-        "prerequisite challenge {id} does not belong to this game"
-      )));
     }
-    models.push(model);
+    Error::WrongGame(id) => ResponseError::BadRequest(format!(
+      "prerequisite challenge {id} does not belong to this game"
+    )),
+    Error::Db(error) => error.into(),
   }
-  Ok(models)
 }
 
 /// Maps the given prerequisite models to their bucket names, the persistent

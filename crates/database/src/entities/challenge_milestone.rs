@@ -5,13 +5,14 @@ use std::collections::HashSet;
 use chrono::{DateTime, Utc, serde::ts_seconds};
 use sea_orm::{ActiveValue, IntoActiveModel, QueryOrder, entity::prelude::*};
 use serde::{Deserialize, Serialize};
+use validator::Validate;
 
-use crate::challenge::PrerequisiteList;
+use crate::{challenge::PrerequisiteList, validation::non_blank};
 
 /// A game-scoped milestone: when a team has solved every challenge listed in
 /// `prerequisites`, the static `bonus_score` is awarded on top of the regular
 /// challenge and extra scores.
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Validate)]
 #[sea_orm(table_name = "challenge_milestone")]
 pub struct Model {
   #[sea_orm(primary_key)]
@@ -25,10 +26,24 @@ pub struct Model {
   #[serde(default = "PrerequisiteList::default")]
   pub prerequisites: PrerequisiteList,
   #[serde(default = "Option::default")]
+  #[validate(length(
+    max = "crate::validation::AVATAR_MAX_LEN",
+    message = "milestone avatar must be at most 255 characters"
+  ))]
   pub avatar: Option<String>,
+  #[validate(range(
+    min = 0,
+    max = 10000,
+    message = "milestone bonus score must be between 0 and 10000"
+  ))]
   pub bonus_score: i32,
+  #[validate(
+    custom(function = "non_blank", message = "milestone name is required"),
+    length(max = 127, message = "milestone name must be at most 127 characters")
+  )]
   pub name: String,
   #[sea_orm(column_type = "Text")]
+  #[validate(custom(function = "non_blank", message = "milestone description is required"))]
   pub description: String,
 }
 
@@ -109,6 +124,21 @@ where
     .map(|_| ())
 }
 
+/// Whether another milestone of the same game already uses the given name.
+pub async fn is_name_taken<C>(
+  db: &C, game_id: i64, exclude_id: Option<i64>, name: &str,
+) -> Result<bool, DbErr>
+where
+  C: ConnectionTrait, {
+  let mut query = Entity::find()
+    .filter(Column::GameId.eq(game_id))
+    .filter(Column::Name.eq(name));
+  if let Some(id) = exclude_id {
+    query = query.filter(Column::Id.ne(id));
+  }
+  Ok(query.count(db).await? > 0)
+}
+
 /// Evaluates the static bonus scores of all milestones that are satisfied by
 /// the given set of solved challenge ids. A milestone counts as satisfied only
 /// when its prerequisites are non-empty and every one of them is solved.
@@ -132,6 +162,7 @@ mod tests {
   use std::collections::HashSet;
 
   use chrono::Utc;
+  use validator::Validate;
 
   use super::{Model, milestone_bonus};
   use crate::challenge::PrerequisiteList;
@@ -148,6 +179,79 @@ mod tests {
       name: format!("milestone-{id}"),
       description: String::new(),
     }
+  }
+
+  fn valid_milestone() -> Model {
+    Model {
+      description: "a milestone".to_owned(),
+      ..milestone(1, 100, vec![10])
+    }
+  }
+
+  #[test]
+  fn validation_matches_the_former_route_rules() {
+    assert!(valid_milestone().validate().is_ok());
+    // name: required and at most 127 characters
+    assert!(
+      Model {
+        name: " ".to_owned(),
+        ..valid_milestone()
+      }
+      .validate()
+      .is_err()
+    );
+    assert!(
+      Model {
+        name: "a".repeat(127),
+        ..valid_milestone()
+      }
+      .validate()
+      .is_ok()
+    );
+    assert!(
+      Model {
+        name: "a".repeat(128),
+        ..valid_milestone()
+      }
+      .validate()
+      .is_err()
+    );
+    // description: required
+    assert!(milestone(1, 100, vec![10]).validate().is_err());
+    // bonus score: 0..=10000
+    assert!(
+      Model {
+        bonus_score: -1,
+        ..valid_milestone()
+      }
+      .validate()
+      .is_err()
+    );
+    assert!(
+      Model {
+        bonus_score: 10001,
+        ..valid_milestone()
+      }
+      .validate()
+      .is_err()
+    );
+    // avatar: at most 255 characters when present
+    assert!(
+      Model {
+        avatar: Some("a".repeat(255)),
+        ..valid_milestone()
+      }
+      .validate()
+      .is_ok()
+    );
+    assert!(
+      Model {
+        avatar: Some("a".repeat(256)),
+        ..valid_milestone()
+      }
+      .validate()
+      .is_err()
+    );
   }
 
   fn solved(ids: &[i64]) -> HashSet<i64> {

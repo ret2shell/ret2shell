@@ -26,13 +26,14 @@ use serde::Deserialize;
 use serde_json::Value;
 use tower_http::request_id::RequestId;
 use tracing::{info, warn};
+use validator::Validate;
 
 use crate::{
   middleware::auth::{Token, is_game_admin},
   traits::ResponseError,
   utility::{
     pagination::{DEFAULT_PAGE_SIZE, page, page_size},
-    validation::validate_game_model,
+    validation::validation_bad_request,
   },
 };
 
@@ -263,7 +264,7 @@ pub(super) async fn create_game(
   State(ref db): State<Database>, State(ref bucket): State<Bucket>,
   Extension(token): Extension<Token>, Json(mut model): Json<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  validate_game_model(&model)?;
+  model.validate().map_err(validation_bad_request)?;
   let txn = db.conn.begin().await?;
   let game_bucket = bucket.create(serde_json::to_value(&model)?).await?;
   model.bucket = Some(game_bucket.name.clone());
@@ -300,7 +301,7 @@ pub(super) async fn update_game(
   Extension(trace): Extension<RequestId>, Extension(token): Extension<Token>,
   Json(model): Json<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  validate_game_model(&model)?;
+  model.validate().map_err(validation_bad_request)?;
   let txn = db.conn.begin().await?;
   let model = game::update(
     &txn,

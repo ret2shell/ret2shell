@@ -13,6 +13,7 @@ use r2s_database::{
 use r2s_migrator::Database;
 use serde::Deserialize;
 use tracing::info;
+use validator::Validate;
 
 use crate::{
   middleware::{
@@ -22,7 +23,7 @@ use crate::{
   traits::{GlobalState, ResponseError},
   utility::{
     pagination::{DEFAULT_PAGE_SIZE, page, page_size},
-    validation::{validate_account, validate_email, validate_nickname},
+    validation::validation_bad_request,
   },
 };
 
@@ -130,19 +131,13 @@ async fn update_user(
   Extension(user): Extension<user::Model>, Extension(token): Extension<Token>,
   Extension(token_tracker): Extension<TokenTracker>, Json(data): Json<user::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  validate_account(&data.account)?;
-  validate_nickname(&data.nickname)?;
   let email = data
     .email
     .clone()
     .ok_or_else(|| ResponseError::BadRequest("email is required".to_owned()))?;
-  validate_email(&email)?;
-  for identity in [&data.account, &email] {
-    if let Some(existing) = user::get_by_account_or_email(&db.conn, identity).await?
-      && existing.id != user.id
-    {
-      return Err(ResponseError::Conflict("account already exists".to_owned()));
-    }
+  data.validate().map_err(validation_bad_request)?;
+  if user::is_account_or_email_taken(&db.conn, Some(user.id), &[&data.account, &email]).await? {
+    return Err(ResponseError::Conflict("account already exists".to_owned()));
   }
   let user = user::update(
     &db.conn,

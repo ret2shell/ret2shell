@@ -10,9 +10,10 @@ use sea_orm::{
 };
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
+use validator::Validate;
 
 use super::user;
-use crate::{game, institute, user2_team};
+use crate::{game, institute, user2_team, validation::non_blank};
 
 #[derive(
   Clone,
@@ -59,11 +60,17 @@ impl TeamScoreHistoryList {
   }
 }
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default)]
+#[derive(
+  Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default, Validate,
+)]
 #[sea_orm(table_name = "team")]
 pub struct Model {
   #[sea_orm(primary_key)]
   pub id: i64,
+  #[validate(
+    custom(function = "non_blank", message = "team name is required"),
+    length(max = 32, message = "team name must be at most 32 characters")
+  )]
   pub name: String,
   pub game_id: i64,
   pub token: Option<String>,
@@ -74,6 +81,7 @@ pub struct Model {
   pub history: TeamScoreHistoryList,
   #[serde(with = "ts_seconds")]
   pub last_active_at: DateTime<Utc>,
+  #[validate(length(max = 32, message = "team tag must be at most 32 characters"))]
   pub tag: Option<String>,
 }
 

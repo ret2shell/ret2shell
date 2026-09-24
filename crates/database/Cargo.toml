@@ -29,6 +29,7 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 serde_repr = { workspace = true }
 tracing = { workspace = true }
+validator = { workspace = true }
 
 r2s-config = { workspace = true }
 

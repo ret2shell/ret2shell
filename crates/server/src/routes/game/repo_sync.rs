@@ -23,6 +23,7 @@ use serde::Deserialize;
 use tokio::{fs, sync::mpsc};
 use tokio_stream::wrappers::ReceiverStream;
 use tracing::{error, info, warn};
+use validator::Validate;
 
 use super::{
   core::invalidate_game_doc_cache,
@@ -37,6 +38,7 @@ use crate::{
   utility::{
     game_repo::schedule_game_repo_index_refresh,
     prerequisites::{find_cycle, topological_sort},
+    validation::flatten_validation_errors,
   },
 };
 
@@ -613,29 +615,31 @@ async fn create_challenge_from_bucket(
   let config = challenge_bucket.config().await?;
   let content = challenge_bucket.description().await?;
   let prerequisites = resolve_bucket_prerequisites(&config, challenge_bucket, bucket_to_id)?;
-  Ok(
-    challenge::create(
-      txn,
-      challenge::Model {
-        id: 0,
-        name: config.name,
-        updated_at: Utc::now(),
-        content: Some(content),
-        hidden: true,
-        game_id: game.id,
-        tag: convert_challenge_tag_list(config.tag)?,
-        score_rule: convert_score_rule(config.score_rule)?,
-        score: 0,
-        bucket: Some(challenge_bucket.name.clone()),
-        ref_id: None,
-        release_at: None,
-        archive_at: None,
-        prerequisites: challenge::PrerequisiteList(prerequisites),
-        avatar: config.avatar,
-      },
+  let model = challenge::Model {
+    id: 0,
+    name: config.name,
+    updated_at: Utc::now(),
+    content: Some(content),
+    hidden: true,
+    game_id: game.id,
+    tag: convert_challenge_tag_list(config.tag)?,
+    score_rule: convert_score_rule(config.score_rule)?,
+    score: 0,
+    bucket: Some(challenge_bucket.name.clone()),
+    ref_id: None,
+    release_at: None,
+    archive_at: None,
+    prerequisites: challenge::PrerequisiteList(prerequisites),
+    avatar: config.avatar,
+  };
+  model.validate().map_err(|errors| {
+    anyhow!(
+      "Invalid challenge `{}`: {}",
+      challenge_bucket.name,
+      flatten_validation_errors(errors)
     )
-    .await?,
-  )
+  })?;
+  Ok(challenge::create(txn, model).await?)
 }
 
 fn resolve_bucket_prerequisites(
@@ -659,29 +663,31 @@ async fn sync_challenge_record(
   let config = challenge_bucket.config().await?;
   let content = challenge_bucket.description().await?;
   let prerequisites = resolve_bucket_prerequisites(&config, challenge_bucket, bucket_to_id)?;
-  Ok(
-    challenge::update(
-      txn,
-      challenge::Model {
-        id: previous.id,
-        name: config.name,
-        updated_at: previous.updated_at,
-        content: Some(content),
-        hidden: previous.hidden,
-        game_id: previous.game_id,
-        tag: convert_challenge_tag_list(config.tag)?,
-        score_rule: convert_score_rule(config.score_rule)?,
-        score: previous.score,
-        bucket: previous.bucket.clone(),
-        ref_id: previous.ref_id,
-        release_at: previous.release_at,
-        archive_at: previous.archive_at,
-        prerequisites: challenge::PrerequisiteList(prerequisites),
-        avatar: config.avatar,
-      },
+  let model = challenge::Model {
+    id: previous.id,
+    name: config.name,
+    updated_at: previous.updated_at,
+    content: Some(content),
+    hidden: previous.hidden,
+    game_id: previous.game_id,
+    tag: convert_challenge_tag_list(config.tag)?,
+    score_rule: convert_score_rule(config.score_rule)?,
+    score: previous.score,
+    bucket: previous.bucket.clone(),
+    ref_id: previous.ref_id,
+    release_at: previous.release_at,
+    archive_at: previous.archive_at,
+    prerequisites: challenge::PrerequisiteList(prerequisites),
+    avatar: config.avatar,
+  };
+  model.validate().map_err(|errors| {
+    anyhow!(
+      "Invalid challenge `{}`: {}",
+      challenge_bucket.name,
+      flatten_validation_errors(errors)
     )
-    .await?,
-  )
+  })?;
+  Ok(challenge::update(txn, model).await?)
 }
 
 /// Synchronizes the milestones declared in `milestones.toml` into the
@@ -698,15 +704,6 @@ async fn sync_milestones_from_bucket(
   let mut seen = HashSet::new();
 
   for bucket_milestone in &bucket_milestones.milestones {
-    if bucket_milestone.name.trim().is_empty() || bucket_milestone.name.chars().count() > 127 {
-      bail!("Milestone names must be between 1 and 127 characters long.");
-    }
-    if bucket_milestone.bonus_score < 0 {
-      bail!(
-        "Milestone `{}` has a negative bonus score.",
-        bucket_milestone.name
-      );
-    }
     if bucket_milestone.prerequisites.is_empty() {
       bail!(
         "Milestone `{}` has no prerequisites, it would never be achieved.",
@@ -731,17 +728,31 @@ async fn sync_milestones_from_bucket(
       )
     })?;
 
+    let milestone = challenge_milestone::Model {
+      id: 0,
+      created_at: Utc::now(),
+      updated_at: Utc::now(),
+      game_id: game.id,
+      prerequisites: challenge::PrerequisiteList(prerequisites),
+      avatar: bucket_milestone.avatar.clone(),
+      bonus_score: bucket_milestone.bonus_score,
+      name: bucket_milestone.name.clone(),
+      description: bucket_milestone.description.clone(),
+    };
+    milestone.validate().map_err(|errors| {
+      anyhow!(
+        "Invalid milestone `{}`: {}",
+        bucket_milestone.name,
+        flatten_validation_errors(errors)
+      )
+    })?;
+
     if let Some(previous) = existing.iter().find(|m| m.name == bucket_milestone.name) {
       let next = challenge_milestone::Model {
         id: previous.id,
         created_at: previous.created_at,
         updated_at: previous.updated_at,
-        game_id: previous.game_id,
-        prerequisites: challenge::PrerequisiteList(prerequisites),
-        avatar: bucket_milestone.avatar.clone(),
-        bonus_score: bucket_milestone.bonus_score,
-        name: bucket_milestone.name.clone(),
-        description: bucket_milestone.description.clone(),
+        ..milestone
       };
       if next.prerequisites != previous.prerequisites
         || next.avatar != previous.avatar
@@ -758,21 +769,7 @@ async fn sync_milestones_from_bucket(
           .await;
       }
     } else {
-      challenge_milestone::create(
-        txn,
-        challenge_milestone::Model {
-          id: 0,
-          created_at: Utc::now(),
-          updated_at: Utc::now(),
-          game_id: game.id,
-          prerequisites: challenge::PrerequisiteList(prerequisites),
-          avatar: bucket_milestone.avatar.clone(),
-          bonus_score: bucket_milestone.bonus_score,
-          name: bucket_milestone.name.clone(),
-          description: bucket_milestone.description.clone(),
-        },
-      )
-      .await?;
+      challenge_milestone::create(txn, milestone).await?;
       changed = true;
       logger
         .info(format!(

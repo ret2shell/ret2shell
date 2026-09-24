@@ -10,8 +10,12 @@ use sea_orm::{
 };
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
+use validator::Validate;
 
-use crate::institute;
+use crate::{
+  institute,
+  validation::{account_handle, nickname_len},
+};
 
 #[derive(
   FromPrimitive, ToPrimitive, Clone, Copy, Debug, PartialEq, Serialize_repr, Deserialize_repr, Eq,
@@ -33,7 +37,9 @@ pub enum Permission {
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct Permissions(pub Vec<Permission>);
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default)]
+#[derive(
+  Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default, Validate,
+)]
 #[sea_orm(table_name = "user")]
 pub struct Model {
   #[sea_orm(primary_key)]
@@ -41,11 +47,14 @@ pub struct Model {
   #[serde(with = "ts_seconds")]
   pub registered_at: DateTime<Utc>,
   #[sea_orm(unique)]
+  #[validate(custom(function = "account_handle"))]
   pub account: String,
+  #[validate(custom(function = "nickname_len"))]
   pub nickname: String,
   #[serde(skip_serializing)]
   pub password: Option<String>,
   #[sea_orm(unique)]
+  #[validate(email(message = "invalid email"))]
   pub email: Option<String>,
   #[sea_orm(column_type = "Text", nullable)]
   pub description: Option<String>,
@@ -290,6 +299,23 @@ where
     )
     .one(db)
     .await
+}
+
+/// Whether any of the given identities (account or email, matched like
+/// `get_by_account_or_email`) is already used by another user.
+pub async fn is_account_or_email_taken<C>(
+  db: &C, exclude_id: Option<i64>, identities: &[&str],
+) -> Result<bool, DbErr>
+where
+  C: ConnectionTrait, {
+  for identity in identities {
+    if let Some(existing) = get_by_account_or_email(db, identity).await?
+      && Some(existing.id) != exclude_id
+    {
+      return Ok(true);
+    }
+  }
+  Ok(false)
 }
 
 pub async fn get_page<C>(

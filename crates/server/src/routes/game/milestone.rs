@@ -14,6 +14,7 @@ use r2s_bucket::{
 use r2s_database::{challenge, challenge_milestone, game, team, user::Permission};
 use r2s_migrator::Database;
 use sea_orm::{DatabaseTransaction, TransactionTrait};
+use validator::Validate;
 
 use crate::{
   middleware::{
@@ -21,7 +22,7 @@ use crate::{
     data,
   },
   traits::{GlobalState, ResponseError},
-  utility::validation::validate_challenge_milestone_model,
+  utility::validation::validation_bad_request,
   worker,
 };
 
@@ -64,17 +65,21 @@ pub(super) async fn create_milestone(
   State(ref db): State<Database>, State(bucket): State<Bucket>, Extension(token): Extension<Token>,
   Extension(game): Extension<game::Model>, Json(milestone): Json<challenge_milestone::Model>,
 ) -> Result<impl IntoResponse, crate::traits::ResponseError> {
-  validate_challenge_milestone_model(&milestone)?;
+  milestone.validate().map_err(validation_bad_request)?;
   let txn = db.conn.begin().await?;
-  super::challenge::resolve_prerequisite_models(&txn, game.id, None, &milestone.prerequisites)
-    .await?;
-  ensure_name_available(&txn, game.id, None, &milestone.name).await?;
+  challenge::resolve_prerequisites(&txn, game.id, None, &milestone.prerequisites)
+    .await
+    .map_err(super::challenge::resolve_prerequisites_error)?;
+  if challenge_milestone::is_name_taken(&txn, game.id, None, &milestone.name).await? {
+    return Err(ResponseError::Conflict(format!(
+      "milestone {} already exists in this game",
+      milestone.name
+    )));
+  }
   let milestone = challenge_milestone::create(
     &txn,
     challenge_milestone::Model {
       id: 0,
-      created_at: chrono::Utc::now(),
-      updated_at: chrono::Utc::now(),
       game_id: game.id,
       ..milestone
     },
@@ -117,19 +122,25 @@ pub(super) async fn update_milestone(
   Json(milestone): Json<challenge_milestone::Model>,
 ) -> Result<impl IntoResponse, crate::traits::ResponseError> {
   ensure_milestone_in_game(&game, &prev_milestone)?;
-  validate_challenge_milestone_model(&milestone)?;
+  milestone.validate().map_err(validation_bad_request)?;
   let txn = db.conn.begin().await?;
   // milestones are not challenges, so the self-reference exclusion of the
   // challenge id space does not apply here
-  super::challenge::resolve_prerequisite_models(&txn, game.id, None, &milestone.prerequisites)
-    .await?;
-  ensure_name_available(&txn, game.id, Some(prev_milestone.id), &milestone.name).await?;
+  challenge::resolve_prerequisites(&txn, game.id, None, &milestone.prerequisites)
+    .await
+    .map_err(super::challenge::resolve_prerequisites_error)?;
+  if challenge_milestone::is_name_taken(&txn, game.id, Some(prev_milestone.id), &milestone.name)
+    .await?
+  {
+    return Err(ResponseError::Conflict(format!(
+      "milestone {} already exists in this game",
+      milestone.name
+    )));
+  }
   let milestone = challenge_milestone::update(
     &txn,
     challenge_milestone::Model {
       id: prev_milestone.id,
-      created_at: prev_milestone.created_at,
-      game_id: prev_milestone.game_id,
       ..milestone
     },
   )
@@ -185,21 +196,6 @@ pub(super) async fn delete_milestones(
   .await?;
   txn.commit().await?;
   recalculate_team_scores(db.clone(), game).await;
-  Ok(())
-}
-
-async fn ensure_name_available(
-  txn: &DatabaseTransaction, game_id: i64, exclude_id: Option<i64>, name: &str,
-) -> Result<(), crate::traits::ResponseError> {
-  let taken = challenge_milestone::get_list(txn, game_id)
-    .await?
-    .iter()
-    .any(|m| Some(m.id) != exclude_id && m.name == name);
-  if taken {
-    return Err(crate::traits::ResponseError::Conflict(format!(
-      "milestone {name} already exists in this game"
-    )));
-  }
   Ok(())
 }
 
