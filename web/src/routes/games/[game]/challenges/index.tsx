@@ -149,6 +149,7 @@ export default function () {
       const toastId = addToast({
         level: "info",
         description: `${t("game.hammer.newMessages", { challenge: challengeName })}: ${msg}`,
+        duration: 5000,
         accept: () => {
           navigate(`/games/${gameId()}/challenges?challenge=${chat.challenge_id}&tab=hammer`);
           setTimeout(() => removeToast(toastId), 50);

@@ -1332,11 +1332,11 @@ export default function Milestones(props: { gameId: number }) {
   function tryConnect(from: string, to: string) {
     if (from === to) return;
     if (edges().some((e) => e.from === from && e.to === to)) {
-      addToast({ level: "info", description: t("challenge.milestone.editor.duplicate") });
+      addToast({ level: "info", description: t("challenge.milestone.editor.duplicate"), duration: 5000 });
       return;
     }
     if (createsCycle(from, to)) {
-      addToast({ level: "warning", description: t("challenge.milestone.editor.cycle") });
+      addToast({ level: "warning", description: t("challenge.milestone.editor.cycle"), duration: 5000 });
       return;
     }
     setEdges([...edges(), { from, to }]);
