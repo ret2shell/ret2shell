@@ -90,6 +90,37 @@ function mixColors(fg: string, bg: string, alpha: number) {
   return `rgb(${mix(0)}, ${mix(1)}, ${mix(2)})`;
 }
 
+/** Raises the HSL lightness of an rgb() color by `amount` (0-1). */
+function lightenColor(color: string, amount: number) {
+  const [r, g, b] = (color.match(/[\d.]+/g)?.map(Number) ?? [0, 0, 0]).slice(0, 3).map((v) => v / 255);
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  const d = max - min;
+  let h = 0;
+  let sat = 0;
+  if (d !== 0) {
+    sat = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h /= 6;
+  }
+  const l2 = Math.min(1, l + amount);
+  const hue = (p: number, q: number, sector: number) => {
+    const t = sector < 0 ? sector + 1 : sector > 1 ? sector - 1 : sector;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+  const q2 = l2 < 0.5 ? l2 * (1 + sat) : l2 + sat - l2 * sat;
+  const p2 = 2 * l2 - q2;
+  return `rgb(${Math.round(hue(p2, q2, h + 1 / 3) * 255)}, ${Math.round(hue(p2, q2, h) * 255)}, ${Math.round(
+    hue(p2, q2, h - 1 / 3) * 255
+  )})`;
+}
+
 const REGION_GAP = 96;
 // nodes snap to this virtual grid while dragging; the canvas dot grid uses
 // the same step, and gap centers between columns form the vertical grid
@@ -106,17 +137,21 @@ const DRAG_THRESHOLD_PX = 4;
 const EDGE_HIT_TOLERANCE_PX = 8;
 // stroke width of all edges, in world px
 const EDGE_WIDTH = 8;
-// arrowheads are drawn at the target end of every edge
-const EDGE_ARROW_LEN = EDGE_WIDTH * 2.2;
-const EDGE_ARROW_HALF_H = EDGE_WIDTH * 1.5;
+// unsolved tracks: a #888888 base stroke with a lighter >>>>> texture
+const EDGE_BASE_COLOR = "#888888";
+const EDGE_TEXTURE_COLOR = "#aaaaaa";
+// the >>>>> texture: chevrons repeating along the track at this spacing
+const EDGE_TEXTURE_SPACING = 11;
+const EDGE_TEXTURE_LEN = 6;
+const EDGE_TEXTURE_HALF_W = 4;
 // edges entering the same column gap run on parallel tracks spaced this far
 // apart instead of overlapping on the gap center line; the same spacing fans
 // edges out of a shared source port
 const EDGE_TRACK_SPACING = EDGE_WIDTH + 4;
-// direction chevrons are drawn at the midpoint of segments longer than this
-const CHEVRON_MIN_LEN = 80;
-const CHEVRON_LEN = EDGE_WIDTH * 1.8;
-const CHEVRON_HALF_W = EDGE_WIDTH / 2 + 2.5;
+// solved tracks brighten the success color by this lightness
+const SOLVED_LIGHTNESS_BOOST = 0.2;
+// tracks carry a 1px outline in the divider color
+const EDGE_BORDER_EXTRA = 2;
 // non-ancestor edges fade to this alpha while a node is selected
 const DIM_ALPHA = 0.12;
 // the port hit zone is a vertical strip of this width spanning the full node
@@ -135,6 +170,7 @@ const FALLBACK_TEXT_COLOR = "#888888";
 const FALLBACK_BG_COLOR = "#111111";
 const FALLBACK_PRIMARY_COLOR = "#3b82f6";
 const FALLBACK_SUCCESS_COLOR = "#22c55e";
+const FALLBACK_DIVIDER_COLOR = "rgba(136, 136, 136, 0.1)";
 
 function clampZoom(zoom: number) {
   return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom));
@@ -634,6 +670,7 @@ export default function Milestones(props: { gameId: number }) {
     muted: FALLBACK_TEXT_COLOR,
     primary: FALLBACK_PRIMARY_COLOR,
     success: FALLBACK_SUCCESS_COLOR,
+    divider: FALLBACK_DIVIDER_COLOR,
   });
 
   function toWorld(clientX: number, clientY: number) {
@@ -932,8 +969,7 @@ export default function Milestones(props: { gameId: number }) {
     }
 
     // edges sharing a successor converge into a single trunk in the column
-    // gap before the target; the trunk carries the unsolved color on top
-    // unless every predecessor is solved
+    // gap before the target
     const byTarget = new Map<string, Edge[]>();
     for (const edge of edgeList) {
       if (!byTarget.has(edge.to)) byTarget.set(edge.to, []);
@@ -941,36 +977,60 @@ export default function Milestones(props: { gameId: number }) {
     }
     const chain = ancestorChain();
     const isSolved = (edge: Edge) => nodeKindOf(edge.from) === "challenge" && solved.has(nodeIdOf(edge.from));
-    const styleOf = (isSelected: boolean, solvedFlag: boolean) => {
-      if (isSelected) return { color: c.primary, alpha: 1 };
-      if (solvedFlag) return { color: c.success, alpha: 0.75 };
-      return { color: c.muted, alpha: 1 };
+    // track palette: unsolved tracks are gray with a lighter >>>>> texture,
+    // solved tracks use success with a lightness-boosted texture
+    const trackStyleOf = (solvedFlag: boolean, isSelected: boolean) => {
+      if (isSelected) return { base: c.primary, texture: lightenColor(c.primary, SOLVED_LIGHTNESS_BOOST) };
+      if (solvedFlag) return { base: c.success, texture: lightenColor(c.success, SOLVED_LIGHTNESS_BOOST) };
+      return { base: EDGE_BASE_COLOR, texture: EDGE_TEXTURE_COLOR };
     };
     // while a node is selected, edges outside its ancestor chain fade out
-    const alphaOf = (key: string, base: number) => (chain ? (chain.edges.has(key) ? base : DIM_ALPHA) : base);
+    const alphaOf = (key: string) => (chain ? (chain.edges.has(key) ? 1 : DIM_ALPHA) : 1);
 
-    // filled arrowhead in screen coords; (x, y) is its center and the tip
-    // points half the length forward along (dirX, dirY)
-    const drawArrowHead = (
-      x: number,
-      y: number,
-      dirX: number,
-      dirY: number,
-      color: string,
-      alpha: number,
-      len: number,
-      halfW: number
-    ) => {
-      const perpX = -dirY;
-      const perpY = dirX;
+    type TrackSegment = { ax: number; ay: number; bx: number; by: number };
+    const strokeTrack = (segments: TrackSegment[], color: string, alpha: number, width: number) => {
       ctx.beginPath();
-      ctx.moveTo(x + dirX * len * 0.5, y + dirY * len * 0.5);
-      ctx.lineTo(x - dirX * len * 0.5 + perpX * halfW, y - dirY * len * 0.5 + perpY * halfW);
-      ctx.lineTo(x - dirX * len * 0.5 - perpX * halfW, y - dirY * len * 0.5 - perpY * halfW);
-      ctx.closePath();
+      ctx.moveTo(segments[0].ax * z + p.x, segments[0].ay * z + p.y);
+      for (const seg of segments) {
+        ctx.lineTo(seg.bx * z + p.x, seg.by * z + p.y);
+      }
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = alpha;
+      ctx.lineWidth = width;
+      ctx.stroke();
+    };
+
+    // the >>>>> texture: chevrons repeating along every segment, pointing
+    // along the flow direction
+    const drawChevrons = (
+      segments: { ax: number; ay: number; bx: number; by: number }[],
+      color: string,
+      alpha: number
+    ) => {
       ctx.fillStyle = color;
       ctx.globalAlpha = alpha;
-      ctx.fill();
+      for (const seg of segments) {
+        const dx = seg.bx - seg.ax;
+        const dy = seg.by - seg.ay;
+        const len = Math.hypot(dx, dy);
+        if (len < EDGE_TEXTURE_SPACING) continue;
+        const dirX = dx / len;
+        const dirY = dy / len;
+        const perpX = -dirY;
+        const perpY = dirX;
+        const tip = (EDGE_TEXTURE_LEN / 2) * z;
+        const half = EDGE_TEXTURE_HALF_W * z;
+        for (let d = EDGE_TEXTURE_SPACING / 2; d < len; d += EDGE_TEXTURE_SPACING) {
+          const cx = (seg.ax + dirX * d) * z + p.x;
+          const cy = (seg.ay + dirY * d) * z + p.y;
+          ctx.beginPath();
+          ctx.moveTo(cx + dirX * tip, cy + dirY * tip);
+          ctx.lineTo(cx - dirX * tip + perpX * half, cy - dirY * tip + perpY * half);
+          ctx.lineTo(cx - dirX * tip - perpX * half, cy - dirY * tip - perpY * half);
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
       ctx.globalAlpha = 1;
     };
 
@@ -985,60 +1045,23 @@ export default function Milestones(props: { gameId: number }) {
       const segments = bundled && elbow.segments.length > 1 ? elbow.segments.slice(0, -1) : elbow.segments;
       if (segments.length === 0) return;
       const key = edgeKey(edge);
-      const style = styleOf(key === selected, isSolved(edge));
-      const alpha = alphaOf(key, style.alpha);
-      ctx.beginPath();
-      ctx.moveTo(g.x1 * z + p.x, g.y1 * z + p.y);
-      for (const seg of segments) {
-        ctx.lineTo(seg.bx * z + p.x, seg.by * z + p.y);
-      }
-      ctx.strokeStyle = style.color;
-      ctx.globalAlpha = alpha;
-      ctx.lineWidth = EDGE_WIDTH;
-      ctx.stroke();
-      // direction chevrons at the midpoint of long segments, so stacked or
-      // crossing paths still show which way each one flows
-      for (const seg of segments) {
-        const dx = seg.bx - seg.ax;
-        const dy = seg.by - seg.ay;
-        const len = Math.hypot(dx, dy);
-        if (len < CHEVRON_MIN_LEN) continue;
-        drawArrowHead(
-          ((seg.ax + seg.bx) / 2) * z + p.x,
-          ((seg.ay + seg.by) / 2) * z + p.y,
-          dx / len,
-          dy / len,
-          style.color,
-          alpha,
-          CHEVRON_LEN * z,
-          CHEVRON_HALF_W * z
-        );
-      }
-      // squares at the right-angle corners (the junction square at the
-      // target side is owned by the trunk)
-      ctx.fillStyle = style.color;
+      const style = trackStyleOf(isSolved(edge), key === selected);
+      const alpha = alphaOf(key);
+      // 1px divider-colored outline under the base stroke
+      strokeTrack(segments, c.divider, alpha, EDGE_WIDTH + EDGE_BORDER_EXTRA);
+      strokeTrack(segments, style.base, alpha, EDGE_WIDTH);
+      // corner squares join the segments (the junction at the target side is
+      // owned by the trunk)
       const corners = bundled ? elbow.corners.slice(0, -1) : elbow.corners;
       const halfCorner = EDGE_WIDTH / 2 + 1;
+      ctx.fillStyle = style.base;
+      ctx.globalAlpha = alpha;
       for (const corner of corners) {
         const cx = corner.x * z + p.x;
         const cy = corner.y * z + p.y;
-        ctx.globalAlpha = alpha;
         ctx.fillRect(cx - halfCorner, cy - halfCorner, halfCorner * 2, halfCorner * 2);
       }
-      // terminal arrowhead points into the target; bundled edges share the
-      // one drawn by the trunk
-      if (!bundled) {
-        drawArrowHead(
-          g.x2 * z + p.x - 1 - (EDGE_ARROW_LEN * z) / 2,
-          g.y2 * z + p.y,
-          1,
-          0,
-          style.color,
-          alpha,
-          EDGE_ARROW_LEN * z,
-          EDGE_ARROW_HALF_H * z
-        );
-      }
+      drawChevrons(segments, style.texture, alpha);
       ctx.globalAlpha = 1;
     };
 
@@ -1046,68 +1069,37 @@ export default function Milestones(props: { gameId: number }) {
     for (const edge of edgeList.filter((e) => isSolved(e))) drawMember(edge);
     for (const edge of edgeList.filter((e) => !isSolved(e))) drawMember(edge);
 
-    // shared trunks
+    // shared trunks: the final horizontal hop into the target, drawn once
     for (const members of byTarget.values()) {
       if (members.length < 2) continue;
       const g = edgeGeometry(members[0]);
       if (!g) return;
-      const anySelected = members.some((e) => edgeKey(e) === selected);
-      const style = styleOf(anySelected, members.every(isSolved));
-      const alpha = alphaOf(edgeKey(members[0]), style.alpha);
-      const mx = (g.x2 - GAP_X / 2 + g.lane) * z + p.x;
-      const y2 = g.y2 * z + p.y;
-      ctx.beginPath();
-      ctx.moveTo(mx, y2);
-      ctx.lineTo(g.x2 * z + p.x, y2);
-      ctx.strokeStyle = style.color;
-      ctx.globalAlpha = alpha;
-      ctx.lineWidth = EDGE_WIDTH;
-      ctx.stroke();
-      ctx.fillStyle = style.color;
-      const halfJunction = EDGE_WIDTH / 2 + 1;
-      ctx.fillRect(mx - halfJunction, y2 - halfJunction, halfJunction * 2, halfJunction * 2);
-      ctx.globalAlpha = 1;
-      drawArrowHead(
-        g.x2 * z + p.x - 1 - (EDGE_ARROW_LEN * z) / 2,
-        y2,
-        1,
-        0,
-        style.color,
-        alpha,
-        EDGE_ARROW_LEN * z,
-        EDGE_ARROW_HALF_H * z
+      const style = trackStyleOf(
+        members.every(isSolved),
+        members.some((e) => edgeKey(e) === selected)
       );
+      const alpha = alphaOf(edgeKey(members[0]));
+      const trunkSegment = { ax: g.x2 - GAP_X / 2 + g.lane, ay: g.y2, bx: g.x2, by: g.y2 };
+      strokeTrack([trunkSegment], c.divider, alpha, EDGE_WIDTH + EDGE_BORDER_EXTRA);
+      strokeTrack([trunkSegment], style.base, alpha, EDGE_WIDTH);
+      const halfJunction = EDGE_WIDTH / 2 + 1;
+      ctx.fillStyle = style.base;
+      ctx.globalAlpha = alpha;
+      const jx = trunkSegment.ax * z + p.x;
+      const jy = trunkSegment.ay * z + p.y;
+      ctx.fillRect(jx - halfJunction, jy - halfJunction, halfJunction * 2, halfJunction * 2);
+      drawChevrons([trunkSegment], style.texture, alpha);
+      ctx.globalAlpha = 1;
     }
 
     if (conn) {
       const from = nodeMap().get(conn.from);
       const pos = positions()[conn.from];
       if (from && pos) {
-        const x1 = (pos.x + NODE_W) * z + p.x;
-        const y1 = (pos.y + from.h / 2) * z + p.y;
         const elbow = elbowSegments({ x1: pos.x + NODE_W, y1: pos.y + from.h / 2, x2: conn.x, y2: conn.y });
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        for (const seg of elbow.segments) {
-          ctx.lineTo(seg.bx * z + p.x, seg.by * z + p.y);
-        }
-        ctx.strokeStyle = c.primary;
-        ctx.lineWidth = EDGE_WIDTH;
-        ctx.stroke();
-        const last = elbow.segments[elbow.segments.length - 1];
-        const dx = last.bx - last.ax;
-        const dy = last.by - last.ay;
-        const len = Math.hypot(dx, dy) || 1;
-        drawArrowHead(
-          conn.x * z + p.x - (dx / len) * ((EDGE_ARROW_LEN * z) / 2),
-          conn.y * z + p.y - (dy / len) * ((EDGE_ARROW_LEN * z) / 2),
-          dx / len,
-          dy / len,
-          c.primary,
-          1,
-          EDGE_ARROW_LEN * z,
-          EDGE_ARROW_HALF_H * z
-        );
+        strokeTrack(elbow.segments, c.divider, 1, EDGE_WIDTH + EDGE_BORDER_EXTRA);
+        strokeTrack(elbow.segments, c.primary, 1, EDGE_WIDTH);
+        drawChevrons(elbow.segments, lightenColor(c.primary, SOLVED_LIGHTNESS_BOOST), 1);
       }
     }
   }
@@ -1177,6 +1169,8 @@ export default function Milestones(props: { gameId: number }) {
       muted: mixColors(content, probeColor("bg-layer", FALLBACK_BG_COLOR, "backgroundColor"), 0.25),
       primary: probeColor("text-primary", FALLBACK_PRIMARY_COLOR),
       success: probeColor("text-success", FALLBACK_SUCCESS_COLOR),
+      // tracks are outlined in the divider color, matching <Divider />
+      divider: probeColor("bg-layer-content/10", FALLBACK_DIVIDER_COLOR, "backgroundColor"),
     });
   });
 
