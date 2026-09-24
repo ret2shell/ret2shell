@@ -137,9 +137,8 @@ const DRAG_THRESHOLD_PX = 4;
 const EDGE_HIT_TOLERANCE_PX = 8;
 // stroke width of all edges, in world px
 const EDGE_WIDTH = 8;
-// unsolved tracks: a #888888 base stroke with a lighter >>>>> texture
-const EDGE_BASE_COLOR = "#888888";
-const EDGE_TEXTURE_COLOR = "#aaaaaa";
+// unsolved track colors follow the theme so the tracks hug the background:
+// light theme uses #dddddd/#aaaaaa, dark theme uses #444444/#777777
 // the >>>>> texture: chevrons repeating along the track at this spacing
 const EDGE_TEXTURE_SPACING = 11;
 const EDGE_TEXTURE_LEN = 6;
@@ -671,6 +670,8 @@ export default function Milestones(props: { gameId: number }) {
     primary: FALLBACK_PRIMARY_COLOR,
     success: FALLBACK_SUCCESS_COLOR,
     divider: FALLBACK_DIVIDER_COLOR,
+    edgeBase: "#dddddd",
+    edgeTexture: "#aaaaaa",
   });
 
   function toWorld(clientX: number, clientY: number) {
@@ -982,12 +983,14 @@ export default function Milestones(props: { gameId: number }) {
     const trackStyleOf = (solvedFlag: boolean, isSelected: boolean) => {
       if (isSelected) return { base: c.primary, texture: lightenColor(c.primary, SOLVED_LIGHTNESS_BOOST) };
       if (solvedFlag) return { base: c.success, texture: lightenColor(c.success, SOLVED_LIGHTNESS_BOOST) };
-      return { base: EDGE_BASE_COLOR, texture: EDGE_TEXTURE_COLOR };
+      return { base: c.edgeBase, texture: c.edgeTexture };
     };
     // while a node is selected, edges outside its ancestor chain fade out
     const alphaOf = (key: string) => (chain ? (chain.edges.has(key) ? 1 : DIM_ALPHA) : 1);
 
     type TrackSegment = { ax: number; ay: number; bx: number; by: number };
+    // every track dimension is world units scaled by the zoom, so zooming
+    // reads as zooming into the drawing
     const strokeTrack = (segments: TrackSegment[], color: string, alpha: number, width: number) => {
       ctx.beginPath();
       ctx.moveTo(segments[0].ax * z + p.x, segments[0].ay * z + p.y);
@@ -996,7 +999,7 @@ export default function Milestones(props: { gameId: number }) {
       }
       ctx.strokeStyle = color;
       ctx.globalAlpha = alpha;
-      ctx.lineWidth = width;
+      ctx.lineWidth = width * z;
       ctx.stroke();
     };
 
@@ -1053,7 +1056,7 @@ export default function Milestones(props: { gameId: number }) {
       // corner squares join the segments (the junction at the target side is
       // owned by the trunk)
       const corners = bundled ? elbow.corners.slice(0, -1) : elbow.corners;
-      const halfCorner = EDGE_WIDTH / 2 + 1;
+      const halfCorner = (EDGE_WIDTH / 2 + 1) * z;
       ctx.fillStyle = style.base;
       ctx.globalAlpha = alpha;
       for (const corner of corners) {
@@ -1082,7 +1085,7 @@ export default function Milestones(props: { gameId: number }) {
       const trunkSegment = { ax: g.x2 - GAP_X / 2 + g.lane, ay: g.y2, bx: g.x2, by: g.y2 };
       strokeTrack([trunkSegment], c.divider, alpha, EDGE_WIDTH + EDGE_BORDER_EXTRA);
       strokeTrack([trunkSegment], style.base, alpha, EDGE_WIDTH);
-      const halfJunction = EDGE_WIDTH / 2 + 1;
+      const halfJunction = (EDGE_WIDTH / 2 + 1) * z;
       ctx.fillStyle = style.base;
       ctx.globalAlpha = alpha;
       const jx = trunkSegment.ax * z + p.x;
@@ -1164,6 +1167,7 @@ export default function Milestones(props: { gameId: number }) {
   createEffect(() => {
     fullTheme();
     const content = probeColor("text-layer-content", FALLBACK_TEXT_COLOR);
+    const dark = fullTheme() === "dark";
     setColors({
       content,
       muted: mixColors(content, probeColor("bg-layer", FALLBACK_BG_COLOR, "backgroundColor"), 0.25),
@@ -1171,6 +1175,8 @@ export default function Milestones(props: { gameId: number }) {
       success: probeColor("text-success", FALLBACK_SUCCESS_COLOR),
       // tracks are outlined in the divider color, matching <Divider />
       divider: probeColor("bg-layer-content/10", FALLBACK_DIVIDER_COLOR, "backgroundColor"),
+      edgeBase: dark ? "#444444" : "#dddddd",
+      edgeTexture: dark ? "#777777" : "#aaaaaa",
     });
   });
 
