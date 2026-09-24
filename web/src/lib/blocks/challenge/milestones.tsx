@@ -17,7 +17,7 @@ import { mediaPath } from "@lib/utils/media";
 import type { Milestone } from "@models/milestone";
 import { useNavigate } from "@solidjs/router";
 import { isAdminOfGame } from "@storage/game";
-import { fullTheme, t } from "@storage/theme";
+import { fullTheme, t, themeStore } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
@@ -128,6 +128,7 @@ const FALLBACK_TEXT_COLOR = "#888888";
 const FALLBACK_PRIMARY_COLOR = "#3b82f6";
 const FALLBACK_SUCCESS_COLOR = "#22c55e";
 const FALLBACK_DIVIDER_COLOR = "rgba(136, 136, 136, 0.1)";
+const FALLBACK_WARNING_COLOR = "#f59e0b";
 
 function clampZoom(zoom: number) {
   return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom));
@@ -626,6 +627,7 @@ export default function Milestones(props: { gameId: number }) {
     content: FALLBACK_TEXT_COLOR,
     primary: FALLBACK_PRIMARY_COLOR,
     success: FALLBACK_SUCCESS_COLOR,
+    warning: FALLBACK_WARNING_COLOR,
     divider: FALLBACK_DIVIDER_COLOR,
     edgeBase: "#dddddd",
     // the texture overlay that darkens (light theme) or lightens (dark
@@ -877,17 +879,6 @@ export default function Milestones(props: { gameId: number }) {
     }
     const chain = ancestorChain();
     const isSolved = (edge: Edge) => nodeKindOf(edge.from) === "challenge" && solved.has(nodeIdOf(edge.from));
-    // track palette: unsolved tracks use the theme band color, solved tracks
-    // use success; the chevron texture is always an overlay of the track's
-    // own color (lighter or darker), never an unrelated color
-    const trackStyleOf = (solvedFlag: boolean) => {
-      if (solvedFlag) {
-        return { base: c.success, overlayColor: "#ffffff", overlayAlpha: EDGE_TEXTURE_LIGHTEN };
-      }
-      return { base: c.edgeBase, overlayColor: c.edgeOverlay.color, overlayAlpha: c.edgeOverlay.alpha };
-    };
-    // while a node is selected, edges outside its ancestor chain fade out
-    const alphaOf = (key: string) => (chain ? (chain.edges.has(key) ? 1 : DIM_ALPHA) : 1);
 
     type TrackSegment = { ax: number; ay: number; bx: number; by: number };
     // every track dimension is world units scaled by the zoom, so zooming
@@ -956,70 +947,120 @@ export default function Milestones(props: { gameId: number }) {
       ctx.globalAlpha = 1;
     };
 
+    type TrackState = "solved" | "mixed" | "unsolved";
     type TrackDraw = {
-      key: string;
-      solved: boolean;
-      selected: boolean;
+      state: TrackState;
       alpha: number;
+      selected: boolean;
       segments: TrackSegment[];
-      // bundled groups draw one extra trunk segment into the target
-      trunk: TrackSegment | null;
       style: { base: string; overlayColor: string; overlayAlpha: number };
     };
+    // overlap groups: tracks sharing a target merge into one corridor (the
+    // vertical approach plus the final hop), tracks sharing a source merge
+    // into one shared prefix; a group with mixed solve states turns warning
+    const stateOf = (members: Edge[]): TrackState => {
+      const solvedCount = members.filter((edge) => isSolved(edge)).length;
+      if (solvedCount === 0) return "unsolved";
+      return solvedCount === members.length ? "solved" : "mixed";
+    };
+    const trackStyleOf = (state: TrackState) => {
+      if (state === "solved") {
+        return { base: c.success, overlayColor: "#ffffff", overlayAlpha: EDGE_TEXTURE_LIGHTEN };
+      }
+      if (state === "mixed") {
+        return { base: c.warning, overlayColor: c.edgeOverlay.color, overlayAlpha: c.edgeOverlay.alpha };
+      }
+      return { base: c.edgeBase, overlayColor: c.edgeOverlay.color, overlayAlpha: c.edgeOverlay.alpha };
+    };
+    // while a node is selected, tracks outside the ancestor chain fade out;
+    // merged tracks light up when any of their edges belongs to the chain
+    const alphaOf = (keys: string[]) => (chain ? (keys.some((k) => chain.edges.has(k)) ? 1 : DIM_ALPHA) : 1);
+    const selectedOf = (keys: string[]) => keys.some((k) => k === selected);
+
+    const bySource = new Map<string, Edge[]>();
+    for (const edge of edgeList) {
+      const list = bySource.get(edge.from) ?? [];
+      list.push(edge);
+      bySource.set(edge.from, list);
+    }
+
     const tracks: TrackDraw[] = [];
     for (const edge of edgeList) {
       const g = edgeGeometry(edge);
       if (!g) continue;
-      const elbow = elbowSegments(g);
-      const bundled = (byTarget.get(edge.to)?.length ?? 0) > 1;
-      // bundled members stop at the junction; the trunk is drawn once below.
-      // a straight member (same height) has no distinct trunk segment and is
-      // drawn in full — the trunk simply overlays it
-      const segments = bundled && elbow.segments.length > 1 ? elbow.segments.slice(0, -1) : elbow.segments;
-      if (segments.length === 0) continue;
-      const key = edgeKey(edge);
-      tracks.push({
-        key,
-        solved: isSolved(edge),
-        selected: key === selected,
-        alpha: alphaOf(key),
-        segments,
-        trunk: null,
-        style: trackStyleOf(isSolved(edge)),
-      });
-    }
-    // shared trunks: the final horizontal hop into the target, drawn once
-    // per bundled group
-    for (const members of byTarget.values()) {
-      if (members.length < 2) continue;
-      const g = edgeGeometry(members[0]);
-      if (!g) continue;
-      const solvedFlag = members.every(isSolved);
-      const key = edgeKey(members[0]);
-      tracks.push({
-        key,
-        solved: solvedFlag,
-        selected: members.some((e) => edgeKey(e) === selected),
-        alpha: alphaOf(key),
-        segments: [],
-        trunk: { ax: g.x2 - GAP_X / 2, ay: g.y2, bx: g.x2, by: g.y2 },
-        style: trackStyleOf(solvedFlag),
-      });
+      const mx = g.x2 - GAP_X / 2;
+      const own = isSolved(edge);
+      const straight = Math.abs(g.y2 - g.y1) < 1;
+      const sourceSiblings = bySource.get(edge.from) ?? [];
+      const targetGroup = byTarget.get(edge.to) ?? [edge];
+      const sourceKeys = sourceSiblings.map(edgeKey);
+      const targetKeys = targetGroup.map(edgeKey);
+
+      // corridor: the vertical approach plus, for a shared target, the
+      // final hop — one merged track in the target group's color
+      const corridorState = targetGroup.length > 1 ? stateOf(targetGroup) : own ? "solved" : "unsolved";
+      const corridorSegments: TrackSegment[] = [];
+      if (!straight) {
+        corridorSegments.push({ ax: mx, ay: g.y1, bx: mx, by: g.y2 });
+      }
+      if (targetGroup.length > 1) {
+        corridorSegments.push({ ax: mx, ay: g.y2, bx: g.x2, by: g.y2 });
+      }
+      if (corridorSegments.length > 0) {
+        tracks.push({
+          state: corridorState,
+          alpha: alphaOf(targetKeys),
+          selected: selectedOf(targetKeys),
+          segments: corridorSegments,
+          style: trackStyleOf(corridorState),
+        });
+      }
+
+      // shared prefix with same-source siblings, in the group's color
+      const horizontalEnd = targetGroup.length > 1 ? mx : g.x2;
+      const minMx = Math.min(
+        ...sourceSiblings
+          .map((sibling) => edgeGeometry(sibling)?.x2)
+          .filter((x2): x2 is number => x2 !== undefined)
+          .map((x2) => x2 - GAP_X / 2),
+        horizontalEnd
+      );
+      if (sourceSiblings.length > 1 && minMx > g.x1 + 1) {
+        tracks.push({
+          state: stateOf(sourceSiblings),
+          alpha: alphaOf(sourceKeys),
+          selected: selectedOf(sourceKeys),
+          segments: [{ ax: g.x1, ay: g.y1, bx: minMx, by: g.y1 }],
+          style: trackStyleOf(stateOf(sourceSiblings)),
+        });
+      }
+      // the remaining horizontal after the shared prefix keeps the edge's
+      // own solve state
+      const restStart = sourceSiblings.length > 1 ? minMx : g.x1;
+      if (horizontalEnd - restStart > 1) {
+        tracks.push({
+          state: own ? "solved" : "unsolved",
+          alpha: alphaOf([edgeKey(edge)]),
+          selected: edgeKey(edge) === selected,
+          segments: [{ ax: restStart, ay: g.y1, bx: horizontalEnd, by: g.y1 }],
+          style: trackStyleOf(own ? "solved" : "unsolved"),
+        });
+      }
     }
 
-    // solved tracks first, unsolved on top; within each group the outline,
-    // base and texture layers are drawn in separate passes so that joined
-    // tracks never cut their outlines through another track's base stroke
-    const ordered = [...tracks.filter((t) => t.solved), ...tracks.filter((t) => !t.solved)];
-    const pathOf = (t: TrackDraw) => (t.trunk ? [t.trunk] : t.segments);
+    // solved tracks first, mixed and unsolved on top; within each group the
+    // outline, base and texture layers are drawn in separate passes so that
+    // joined tracks never cut their outlines through another track's base
+    // stroke
+    const ordered = [...tracks.filter((t) => t.state === "solved"), ...tracks.filter((t) => t.state !== "solved")];
     for (const t of ordered) {
-      strokeTrack(pathOf(t), t.selected ? c.primary : c.divider, t.alpha, EDGE_WIDTH + EDGE_BORDER_EXTRA);
+      strokeTrack(t.segments, t.selected ? c.primary : c.divider, t.alpha, EDGE_WIDTH + EDGE_BORDER_EXTRA);
     }
     for (const t of ordered) {
-      strokeTrack(pathOf(t), t.style.base, t.alpha, EDGE_WIDTH);
+      strokeTrack(t.segments, t.style.base, t.alpha, EDGE_WIDTH);
     }
     for (const t of ordered) {
-      drawChevrons(pathOf(t), t.style.overlayColor, t.style.overlayAlpha * t.alpha);
+      drawChevrons(t.segments, t.style.overlayColor, t.style.overlayAlpha * t.alpha);
     }
 
     if (conn) {
@@ -1094,11 +1135,12 @@ export default function Milestones(props: { gameId: number }) {
   createEffect(() => {
     fullTheme();
     const content = probeColor("text-layer-content", FALLBACK_TEXT_COLOR);
-    const dark = fullTheme() === "dark";
+    const dark = themeStore.colorScheme === "dark";
     setColors({
       content,
       primary: probeColor("text-primary", FALLBACK_PRIMARY_COLOR),
       success: probeColor("text-success", FALLBACK_SUCCESS_COLOR),
+      warning: probeColor("text-warning", FALLBACK_WARNING_COLOR),
       // tracks are outlined in the divider color, matching <Divider />
       divider: probeColor("bg-layer-content/10", FALLBACK_DIVIDER_COLOR, "backgroundColor"),
       edgeBase: dark ? "#444444" : "#dddddd",

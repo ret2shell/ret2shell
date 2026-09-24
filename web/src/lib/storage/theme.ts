@@ -3,7 +3,7 @@ import { resolveTemplate, translator } from "@solid-primitives/i18n";
 import { createPrefersDark } from "@solid-primitives/media";
 import { makePersisted } from "@solid-primitives/storage";
 import { createEffect, createResource, createRoot, untrack } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createStore, type StoreReturn } from "solid-js/store";
 
 let systemPrefersLocale = (window.navigator.language || window.navigator.languages[0])
   .replace("-", "_")
@@ -13,10 +13,18 @@ if (!hasLocale(systemPrefersLocale)) {
   systemPrefersLocale = "zh_cn" as Locale;
 }
 
+type ThemeStoreShape = {
+  theme: string;
+  locale: Locale;
+  colorScheme: "dark" | "light";
+  colorSchemeFollowsSystem: boolean;
+  showBackgroundImg: boolean;
+};
+
 const themeRoot = createRoot(() => {
   const prefersDark = createPrefersDark();
-  const [themeStore, setThemeStore] = makePersisted(
-    createStore({
+  const [themeStore, setThemeStore] = makePersisted<ThemeStoreShape, StoreReturn<ThemeStoreShape>>(
+    createStore<ThemeStoreShape>({
       theme: "cyber",
       locale: systemPrefersLocale,
       colorScheme: "dark",
