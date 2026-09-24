@@ -311,7 +311,11 @@ impl ChallengeBucket {
 
   pub async fn get_static_files(&self) -> Result<Vec<String>, BucketError> {
     let mut files = vec![];
-    let mut dir = read_dir(&self.path.join("static")).await?;
+    // challenges synced from a git repository may not carry the folder at all
+    let mut dir = match read_dir(&self.path.join("static")).await {
+      Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(files),
+      other => other?,
+    };
     while let Some(entry) = dir.next_entry().await? {
       let entry_file = entry.file_name().to_string_lossy().to_string();
       if entry_file.starts_with('.') {
@@ -324,7 +328,11 @@ impl ChallengeBucket {
 
   pub async fn get_mapped_files(&self) -> Result<Vec<String>, BucketError> {
     let mut files = vec![];
-    let mut dir = read_dir(&self.path.join("mapped")).await?;
+    // challenges synced from a git repository may not carry the folder at all
+    let mut dir = match read_dir(&self.path.join("mapped")).await {
+      Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(files),
+      other => other?,
+    };
     while let Some(entry) = dir.next_entry().await? {
       let entry_file = entry.file_name().to_string_lossy().to_string();
       if entry_file.starts_with('.') {
@@ -347,7 +355,11 @@ impl ChallengeBucket {
 
   pub async fn get_checker_files(&self) -> Result<Vec<String>, BucketError> {
     let mut files = vec![];
-    let mut dir = read_dir(&self.path.join("checker")).await?;
+    // challenges synced from a git repository may not carry the folder at all
+    let mut dir = match read_dir(&self.path.join("checker")).await {
+      Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(files),
+      other => other?,
+    };
     while let Some(entry) = dir.next_entry().await? {
       let entry_file = entry.file_name().to_string_lossy().to_string();
       if entry_file.starts_with('.') {
