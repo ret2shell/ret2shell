@@ -95,9 +95,40 @@ const REGION_GAP = 96;
 // the same step, and gap centers between columns form the vertical grid
 // lines that edge bends align to
 const GRID_Y = 24;
+const MIN_ZOOM = 0.25;
+const MAX_ZOOM = 2;
+// fitting the view never zooms in beyond 100%
+const MAX_FIT_ZOOM = 1;
+const WHEEL_ZOOM_SPEED = 0.0015;
+// pointer moves below this distance count as clicks instead of drags
+const DRAG_THRESHOLD_PX = 4;
+// how far from an edge a click still selects it
+const EDGE_HIT_TOLERANCE_PX = 8;
+// keep horizontal edge segments this far away from node boxes
+const EDGE_NODE_MARGIN_PX = 8;
+// upper bound for the monotone edge/node overlap resolution loop
+const MAX_OVERLAP_ITERATIONS = 16;
+// canvas theme fallbacks, used until the probed theme colors resolve
+const FALLBACK_TEXT_COLOR = "#888888";
+const FALLBACK_BG_COLOR = "#111111";
+const FALLBACK_PRIMARY_COLOR = "#3b82f6";
+const FALLBACK_SUCCESS_COLOR = "#22c55e";
+
+function clampZoom(zoom: number) {
+  return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom));
+}
+
+/// Node keys are `<kind-prefix><id>` strings; `c` challenges, `m` milestones.
+function nodeKindOf(key: string): NodeKind {
+  return key.startsWith("c") ? "challenge" : "milestone";
+}
+
+function nodeIdOf(key: string): number {
+  return Number(key.slice(1));
+}
 
 function heightOf(key: string) {
-  return key.startsWith("c") ? CHALLENGE_H : MILESTONE_H;
+  return nodeKindOf(key) === "challenge" ? CHALLENGE_H : MILESTONE_H;
 }
 
 function columnX(column: number) {
@@ -116,32 +147,33 @@ function snapY(y: number) {
   return PAD + Math.round((y - PAD) / GRID_Y) * GRID_Y;
 }
 
-/** Lays out the full graph from scratch. Connected components (independent
- * multi-way trees) are stacked into separate vertical regions. Within a tree,
- * a node with predecessors hugs them (column = deepest predecessor + 1); a
- * node without predecessors but with successors hugs the nearest successor
- * (column = nearest successor - 1). When an edge spans over intermediate
- * columns, the covered slots in those columns are left empty and following
- * nodes shift down, so long edges never cross a node. Isolated nodes share a
- * trailing single-column region. */
-function fullLayout(keys: string[], edges: Edge[]) {
+type Graph = {
+  preds: Map<string, string[]>;
+  succs: Map<string, string[]>;
+  adjacent: Map<string, string[]>;
+};
+
+function pushTo(map: Map<string, string[]>, key: string, value: string) {
+  if (!map.has(key)) map.set(key, []);
+  map.get(key)?.push(value);
+}
+
+function buildGraph(keys: string[], edges: Edge[]): Graph {
   const keySet = new Set(keys);
-  const preds = new Map<string, string[]>();
-  const succs = new Map<string, string[]>();
-  const adjacent = new Map<string, string[]>();
-  const push = (map: Map<string, string[]>, key: string, value: string) => {
-    if (!map.has(key)) map.set(key, []);
-    map.get(key)?.push(value);
-  };
+  const graph: Graph = { preds: new Map(), succs: new Map(), adjacent: new Map() };
   for (const edge of edges) {
     if (!keySet.has(edge.from) || !keySet.has(edge.to)) continue;
-    push(preds, edge.to, edge.from);
-    push(succs, edge.from, edge.to);
-    push(adjacent, edge.from, edge.to);
-    push(adjacent, edge.to, edge.from);
+    pushTo(graph.preds, edge.to, edge.from);
+    pushTo(graph.succs, edge.from, edge.to);
+    pushTo(graph.adjacent, edge.from, edge.to);
+    pushTo(graph.adjacent, edge.to, edge.from);
   }
+  return graph;
+}
 
-  // connected components over the undirected view of the graph
+/** Splits the undirected view of the graph into connected components with
+ * more than one node ("trees") and isolated nodes ("singles"). */
+function splitComponents(keys: string[], graph: Graph) {
   const visited = new Set<string>();
   const trees: string[][] = [];
   const singles: string[] = [];
@@ -153,7 +185,7 @@ function fullLayout(keys: string[], edges: Edge[]) {
     while (queue.length > 0) {
       const current = queue.pop()!;
       component.push(current);
-      for (const next of adjacent.get(current) ?? []) {
+      for (const next of graph.adjacent.get(current) ?? []) {
         if (visited.has(next)) continue;
         visited.add(next);
         queue.push(next);
@@ -165,10 +197,185 @@ function fullLayout(keys: string[], edges: Edge[]) {
   }
   // trees containing milestones come first, then sorted by first node key
   trees.sort((a, b) => {
-    const am = a.some((k) => !k.startsWith("c")) ? 0 : 1;
-    const bm = b.some((k) => !k.startsWith("c")) ? 0 : 1;
+    const am = a.some((k) => nodeKindOf(k) === "milestone") ? 0 : 1;
+    const bm = b.some((k) => nodeKindOf(k) === "milestone") ? 0 : 1;
     return am - bm || a[0].localeCompare(b[0]);
   });
+  return { trees, singles };
+}
+
+/** Column assignment for one tree via two fixpoint iterations: a node with
+ * predecessors hugs the deepest one (column = deepest predecessor + 1); a
+ * source node without predecessors hugs its nearest successor (column =
+ * nearest successor - 1). */
+function assignColumns(tree: string[], edges: Edge[], graph: Graph): Map<string, number> {
+  const treeEdges = edges.filter((e) => tree.includes(e.from) && tree.includes(e.to));
+
+  // earliest possible column (hug predecessors)
+  const minLayer = new Map<string, number>(tree.map((key) => [key, 0]));
+  for (let i = 0; i < tree.length; i++) {
+    let changed = false;
+    for (const edge of treeEdges) {
+      const next = (minLayer.get(edge.from) ?? 0) + 1;
+      if (next > (minLayer.get(edge.to) ?? 0)) {
+        minLayer.set(edge.to, next);
+        changed = true;
+      }
+    }
+    if (!changed) break;
+  }
+  const columnOfNode = new Map<string, number>(tree.map((key) => [key, minLayer.get(key) ?? 0]));
+  for (let i = 0; i < tree.length; i++) {
+    let changed = false;
+    for (const key of tree) {
+      const keyPreds = graph.preds.get(key) ?? [];
+      const keySuccs = graph.succs.get(key) ?? [];
+      if (keyPreds.length > 0) {
+        const target = Math.max(...keyPreds.map((p) => columnOfNode.get(p) ?? 0)) + 1;
+        if (target !== columnOfNode.get(key)) {
+          columnOfNode.set(key, target);
+          changed = true;
+        }
+      } else if (keySuccs.length > 0) {
+        const target = Math.max(0, Math.min(...keySuccs.map((s) => columnOfNode.get(s) ?? 0)) - 1);
+        if (target !== columnOfNode.get(key)) {
+          columnOfNode.set(key, target);
+          changed = true;
+        }
+      }
+    }
+    if (!changed) break;
+  }
+  return columnOfNode;
+}
+
+/** Pass A (left to right): place every column top to bottom, anchoring each
+ * node to the lower-median center of its predecessors, and record the slots
+ * spanned by long edges as blocked intervals. Mutates `result` and
+ * `columnBottom` in place. */
+function placeByPredecessors(
+  byColumn: Map<number, string[]>,
+  graph: Graph,
+  columnOfNode: Map<string, number>,
+  result: Record<string, NodePos>,
+  columnBottom: Map<number, number>,
+  regionY: number
+): Map<number, { top: number; bottom: number }[]> {
+  const blocked = new Map<number, { top: number; bottom: number }[]>();
+  for (const column of [...byColumn.keys()].sort((a, b) => a - b)) {
+    let y = regionY;
+    let firstInRegion = true;
+    const members = byColumn.get(column)!;
+    // a node prefers to sit directly right of its lower-median predecessor
+    // (index floor((count - 1) / 2): two predecessors align with the first,
+    // three with the second); nodes sharing the same predecessors or
+    // successors get the same anchor and are therefore placed adjacently
+    const anchor = new Map<string, number>();
+    for (const key of members) {
+      const centers = (graph.preds.get(key) ?? [])
+        .filter((p) => result[p])
+        .map((p) => result[p].y + heightOf(p) / 2)
+        .sort((a, b) => a - b);
+      if (centers.length > 0) anchor.set(key, centers[Math.floor((centers.length - 1) / 2)]);
+    }
+    const firstSucc = (key: string) => (graph.succs.get(key) ?? []).sort()[0] ?? "";
+    const sortedMembers = [...members].sort(
+      (a, b) =>
+        (anchor.get(a) ?? Number.POSITIVE_INFINITY) - (anchor.get(b) ?? Number.POSITIVE_INFINITY) ||
+        firstSucc(a).localeCompare(firstSucc(b)) ||
+        a.localeCompare(b)
+    );
+    for (const key of sortedMembers) {
+      const h = heightOf(key);
+      // align by y-center with the anchor predecessor; the first node of a
+      // column in this region may rise above regionY for the alignment, as
+      // long as it stays clear of the previous region's nodes in this column
+      let yPos = firstInRegion
+        ? Math.max(
+            anchor.has(key) ? (anchor.get(key) ?? 0) - h / 2 : y,
+            (columnBottom.get(column) ?? Number.NEGATIVE_INFINITY) + GAP_Y
+          )
+        : Math.max(y, (anchor.get(key) ?? y + h / 2) - h / 2);
+      firstInRegion = false;
+      let moved = true;
+      while (moved) {
+        moved = false;
+        for (const interval of (blocked.get(column) ?? []).sort((a, b) => a.top - b.top)) {
+          if (yPos < interval.bottom && yPos + h > interval.top) {
+            yPos = interval.bottom + GAP_Y;
+            moved = true;
+          }
+        }
+      }
+      result[key] = { x: columnX(column), y: yPos };
+      columnBottom.set(column, yPos + h);
+      const center = yPos + h / 2;
+      for (const succ of graph.succs.get(key) ?? []) {
+        const succColumn = columnOfNode.get(succ) ?? 0;
+        for (let crossed = column + 1; crossed < succColumn; crossed++) {
+          if (!blocked.has(crossed)) blocked.set(crossed, []);
+          blocked.get(crossed)?.push({
+            top: center - MILESTONE_H / 2 - GAP_Y / 2,
+            bottom: center + MILESTONE_H / 2 + GAP_Y / 2,
+          });
+        }
+      }
+      y = yPos + h + GAP_Y;
+    }
+  }
+  return blocked;
+}
+
+/** Pass B (right to left, runs once): pull every node toward the
+ * lower-median center of its successors; successor attraction wins over the
+ * predecessor anchor when they conflict. A move is skipped when it would
+ * overlap another node, a spanning edge, or the previous region. */
+function pullTowardSuccessors(
+  byColumn: Map<number, string[]>,
+  tree: string[],
+  graph: Graph,
+  columnOfNode: Map<string, number>,
+  result: Record<string, NodePos>,
+  outerBottom: Map<number, number>,
+  blocked: Map<number, { top: number; bottom: number }[]>
+) {
+  for (const column of [...byColumn.keys()].sort((a, b) => b - a)) {
+    for (const key of byColumn.get(column)!) {
+      const centers = (graph.succs.get(key) ?? []).map((s) => result[s].y + heightOf(s) / 2).sort((a, b) => a - b);
+      if (centers.length === 0) continue;
+      const h = heightOf(key);
+      const newTop = centers[Math.floor((centers.length - 1) / 2)] - h / 2;
+      if (Math.abs(newTop - result[key].y) < 1) continue;
+      const guard = outerBottom.get(column);
+      if (guard !== undefined && newTop < guard + GAP_Y) continue;
+      const overlapsNode = tree.some(
+        (other) =>
+          other !== key &&
+          (columnOfNode.get(other) ?? 0) === column &&
+          newTop < result[other].y + heightOf(other) &&
+          newTop + h > result[other].y
+      );
+      if (overlapsNode) continue;
+      const overlapsEdge = (blocked.get(column) ?? []).some(
+        (interval) => newTop < interval.bottom && newTop + h > interval.top
+      );
+      if (overlapsEdge) continue;
+      result[key] = { ...result[key], y: newTop };
+    }
+  }
+}
+
+/** Lays out the full graph from scratch. Connected components (independent
+ * multi-way trees) are stacked into separate vertical regions. Within a
+ * tree, a node with predecessors hugs them (column = deepest predecessor +
+ * 1); a node without predecessors but with successors hugs the nearest
+ * successor (column = nearest successor - 1). When an edge spans over
+ * intermediate columns, the covered slots in those columns are left empty
+ * and following nodes shift down, so long edges never cross a node.
+ * Isolated nodes share a trailing single-column region. */
+function fullLayout(keys: string[], edges: Edge[]) {
+  const graph = buildGraph(keys, edges);
+  const { trees, singles } = splitComponents(keys, graph);
 
   const result: Record<string, NodePos> = {};
   let regionY = PAD;
@@ -176,46 +383,7 @@ function fullLayout(keys: string[], edges: Edge[]) {
   const columnBottom = new Map<number, number>();
 
   for (const tree of trees) {
-    const treeEdges = edges.filter((e) => tree.includes(e.from) && tree.includes(e.to));
-
-    // earliest possible column (hug predecessors)
-    const minLayer = new Map<string, number>(tree.map((key) => [key, 0]));
-    for (let i = 0; i < tree.length; i++) {
-      let changed = false;
-      for (const edge of treeEdges) {
-        const next = (minLayer.get(edge.from) ?? 0) + 1;
-        if (next > (minLayer.get(edge.to) ?? 0)) {
-          minLayer.set(edge.to, next);
-          changed = true;
-        }
-      }
-      if (!changed) break;
-    }
-    // final columns via fixpoint iteration: a node with predecessors hugs the
-    // deepest one (column = deepest predecessor + 1); a source node without
-    // predecessors hugs its nearest successor (column = nearest successor - 1)
-    const columnOfNode = new Map<string, number>(tree.map((key) => [key, minLayer.get(key) ?? 0]));
-    for (let i = 0; i < tree.length; i++) {
-      let changed = false;
-      for (const key of tree) {
-        const keyPreds = preds.get(key) ?? [];
-        const keySuccs = succs.get(key) ?? [];
-        if (keyPreds.length > 0) {
-          const target = Math.max(...keyPreds.map((p) => columnOfNode.get(p) ?? 0)) + 1;
-          if (target !== columnOfNode.get(key)) {
-            columnOfNode.set(key, target);
-            changed = true;
-          }
-        } else if (keySuccs.length > 0) {
-          const target = Math.max(0, Math.min(...keySuccs.map((s) => columnOfNode.get(s) ?? 0)) - 1);
-          if (target !== columnOfNode.get(key)) {
-            columnOfNode.set(key, target);
-            changed = true;
-          }
-        }
-      }
-      if (!changed) break;
-    }
+    const columnOfNode = assignColumns(tree, edges, graph);
 
     // place columns left to right; sources of spanning edges are always
     // placed before the intermediate columns they cross
@@ -225,100 +393,9 @@ function fullLayout(keys: string[], edges: Edge[]) {
       if (!byColumn.has(column)) byColumn.set(column, []);
       byColumn.get(column)?.push(key);
     }
-    // pass A (left to right): anchor every node to the lower-median center
-    // of its predecessors
     const outerBottom = new Map(columnBottom);
-    const blocked = new Map<number, { top: number; bottom: number }[]>();
-    for (const column of [...byColumn.keys()].sort((a, b) => a - b)) {
-      let y = regionY;
-      let firstInRegion = true;
-      const members = byColumn.get(column)!;
-      // a node prefers to sit directly right of its lower-median predecessor
-      // (index floor((count - 1) / 2): two predecessors align with the first,
-      // three with the second); nodes sharing the same predecessors or
-      // successors get the same anchor and are therefore placed adjacently
-      const anchor = new Map<string, number>();
-      for (const key of members) {
-        const centers = (preds.get(key) ?? [])
-          .filter((p) => result[p])
-          .map((p) => result[p].y + heightOf(p) / 2)
-          .sort((a, b) => a - b);
-        if (centers.length > 0) anchor.set(key, centers[Math.floor((centers.length - 1) / 2)]);
-      }
-      const firstSucc = (key: string) => (succs.get(key) ?? []).sort()[0] ?? "";
-      const sortedMembers = [...members].sort(
-        (a, b) =>
-          (anchor.get(a) ?? Number.POSITIVE_INFINITY) - (anchor.get(b) ?? Number.POSITIVE_INFINITY) ||
-          firstSucc(a).localeCompare(firstSucc(b)) ||
-          a.localeCompare(b)
-      );
-      for (const key of sortedMembers) {
-        const h = heightOf(key);
-        // align by y-center with the anchor predecessor; the first node of a
-        // column in this region may rise above regionY for the alignment, as
-        // long as it stays clear of the previous region's nodes in this column
-        let yPos = firstInRegion
-          ? Math.max(
-              anchor.has(key) ? (anchor.get(key) ?? 0) - h / 2 : y,
-              (columnBottom.get(column) ?? Number.NEGATIVE_INFINITY) + GAP_Y
-            )
-          : Math.max(y, (anchor.get(key) ?? y + h / 2) - h / 2);
-        firstInRegion = false;
-        let moved = true;
-        while (moved) {
-          moved = false;
-          for (const interval of (blocked.get(column) ?? []).sort((a, b) => a.top - b.top)) {
-            if (yPos < interval.bottom && yPos + h > interval.top) {
-              yPos = interval.bottom + GAP_Y;
-              moved = true;
-            }
-          }
-        }
-        result[key] = { x: columnX(column), y: yPos };
-        columnBottom.set(column, yPos + h);
-        const center = yPos + h / 2;
-        for (const succ of succs.get(key) ?? []) {
-          const succColumn = columnOfNode.get(succ) ?? 0;
-          for (let crossed = column + 1; crossed < succColumn; crossed++) {
-            if (!blocked.has(crossed)) blocked.set(crossed, []);
-            blocked.get(crossed)?.push({
-              top: center - MILESTONE_H / 2 - GAP_Y / 2,
-              bottom: center + MILESTONE_H / 2 + GAP_Y / 2,
-            });
-          }
-        }
-        y = yPos + h + GAP_Y;
-      }
-    }
-
-    // pass B (right to left, runs once): pull every node toward the
-    // lower-median center of its successors; successor attraction wins over
-    // the predecessor anchor when they conflict. a move is skipped when it
-    // would overlap another node, a spanning edge, or the previous region
-    for (const column of [...byColumn.keys()].sort((a, b) => b - a)) {
-      for (const key of byColumn.get(column)!) {
-        const centers = (succs.get(key) ?? []).map((s) => result[s].y + heightOf(s) / 2).sort((a, b) => a - b);
-        if (centers.length === 0) continue;
-        const h = heightOf(key);
-        const newTop = centers[Math.floor((centers.length - 1) / 2)] - h / 2;
-        if (Math.abs(newTop - result[key].y) < 1) continue;
-        const guard = outerBottom.get(column);
-        if (guard !== undefined && newTop < guard + GAP_Y) continue;
-        const overlapsNode = tree.some(
-          (other) =>
-            other !== key &&
-            (columnOfNode.get(other) ?? 0) === column &&
-            newTop < result[other].y + heightOf(other) &&
-            newTop + h > result[other].y
-        );
-        if (overlapsNode) continue;
-        const overlapsEdge = (blocked.get(column) ?? []).some(
-          (interval) => newTop < interval.bottom && newTop + h > interval.top
-        );
-        if (overlapsEdge) continue;
-        result[key] = { ...result[key], y: newTop };
-      }
-    }
+    const blocked = placeByPredecessors(byColumn, graph, columnOfNode, result, columnBottom, regionY);
+    pullTowardSuccessors(byColumn, tree, graph, columnOfNode, result, outerBottom, blocked);
 
     let bottom = regionY;
     for (const key of tree) {
@@ -435,9 +512,9 @@ export default function Milestones(props: { gameId: number }) {
   const prerequisitesByNode = createMemo(() => {
     const map = new Map<string, number[]>();
     for (const edge of validEdges()) {
-      if (!edge.from.startsWith("c")) continue;
+      if (nodeKindOf(edge.from) !== "challenge") continue;
       if (!map.has(edge.to)) map.set(edge.to, []);
-      map.get(edge.to)?.push(Number(edge.from.slice(1)));
+      map.get(edge.to)?.push(nodeIdOf(edge.from));
     }
     return map;
   });
@@ -500,10 +577,10 @@ export default function Milestones(props: { gameId: number }) {
   let cleanupWrapper: (() => void) | undefined;
   const [size, setSize] = createSignal({ w: 0, h: 0 });
   const [colors, setColors] = createSignal({
-    content: "#888888",
-    muted: "#888888",
-    primary: "#888888",
-    success: "#888888",
+    content: FALLBACK_TEXT_COLOR,
+    muted: FALLBACK_TEXT_COLOR,
+    primary: FALLBACK_PRIMARY_COLOR,
+    success: FALLBACK_SUCCESS_COLOR,
   });
 
   function toWorld(clientX: number, clientY: number) {
@@ -536,7 +613,7 @@ export default function Milestones(props: { gameId: number }) {
     const rect = wrapperRef.getBoundingClientRect();
     const bw = maxX - minX + PAD * 2;
     const bh = maxY - minY + PAD * 2;
-    const z = Math.min(1, Math.max(0.25, Math.min(rect.width / bw, rect.height / bh)));
+    const z = clampZoom(Math.min(MAX_FIT_ZOOM, rect.width / bw, rect.height / bh));
     setZoom(z);
     setPan({
       x: (rect.width - (maxX - minX) * z) / 2 - minX * z,
@@ -550,7 +627,7 @@ export default function Milestones(props: { gameId: number }) {
     const mx = rect.width / 2;
     const my = rect.height / 2;
     const z = zoom();
-    const nz = Math.min(2, Math.max(0.25, z * factor));
+    const nz = clampZoom(z * factor);
     const wx = (mx - pan().x) / z;
     const wy = (my - pan().y) / z;
     setZoom(nz);
@@ -598,7 +675,7 @@ export default function Milestones(props: { gameId: number }) {
   }
 
   function hitTestEdge(world: { x: number; y: number }): string | null {
-    const threshold = 8 / zoom();
+    const threshold = EDGE_HIT_TOLERANCE_PX / zoom();
     for (const edge of validEdges()) {
       const g = edgeGeometry(edge);
       if (!g) continue;
@@ -626,8 +703,8 @@ export default function Milestones(props: { gameId: number }) {
     const adjusted: Record<string, NodePos> = {};
     for (const [key, p] of Object.entries(pos)) adjusted[key] = { ...p };
     let changed = false;
-    const margin = 8;
-    for (let iter = 0; iter < 16; iter++) {
+    const margin = EDGE_NODE_MARGIN_PX;
+    for (let iter = 0; iter < MAX_OVERLAP_ITERATIONS; iter++) {
       let moved = false;
       for (const edge of edgeList) {
         const g = edgeGeometry(edge, adjusted);
@@ -683,7 +760,20 @@ export default function Milestones(props: { gameId: number }) {
       }
       if (!moved) break;
     }
-    if (changed) setPositions(adjusted);
+    // only commit when the result actually differs: pushes are monotone, so
+    // an equal result means the layout already converged and a redundant
+    // setPositions here could feed the effect back into itself
+    if (changed) {
+      const prev = positions();
+      const identical =
+        Object.keys(adjusted).length === Object.keys(prev).length &&
+        Object.keys(adjusted).every((key) => {
+          const a = adjusted[key];
+          const b = prev[key];
+          return b && a.x === b.x && a.y === b.y;
+        });
+      if (!identical) setPositions(adjusted);
+    }
   });
 
   function draw() {
@@ -712,7 +802,7 @@ export default function Milestones(props: { gameId: number }) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
 
-    const step = 24 * z;
+    const step = GRID_Y * z;
     if (step >= 8) {
       ctx.fillStyle = c.content;
       ctx.globalAlpha = 0.08;
@@ -736,7 +826,7 @@ export default function Milestones(props: { gameId: number }) {
       if (!byTarget.has(edge.to)) byTarget.set(edge.to, []);
       byTarget.get(edge.to)?.push(edge);
     }
-    const isSolved = (edge: Edge) => edge.from.startsWith("c") && solved.has(Number(edge.from.slice(1)));
+    const isSolved = (edge: Edge) => nodeKindOf(edge.from) === "challenge" && solved.has(nodeIdOf(edge.from));
     const styleOf = (isSelected: boolean, solvedFlag: boolean) => {
       if (isSelected) return { color: c.primary, alpha: 1, width: 3 };
       if (solvedFlag) return { color: c.success, alpha: 0.6, width: 2 };
@@ -839,7 +929,7 @@ export default function Milestones(props: { gameId: number }) {
       const mx = e.clientX - rect.left;
       const my = e.clientY - rect.top;
       const z = zoom();
-      const nz = Math.min(2, Math.max(0.25, z * Math.exp(-e.deltaY * 0.0015)));
+      const nz = clampZoom(z * Math.exp(-e.deltaY * WHEEL_ZOOM_SPEED));
       const wx = (mx - pan().x) / z;
       const wy = (my - pan().y) / z;
       setZoom(nz);
@@ -878,15 +968,12 @@ export default function Milestones(props: { gameId: number }) {
 
   createEffect(() => {
     fullTheme();
+    const content = probeColor("text-layer-content", FALLBACK_TEXT_COLOR);
     setColors({
-      content: probeColor("text-layer-content", "#888888"),
-      muted: mixColors(
-        probeColor("text-layer-content", "#888888"),
-        probeColor("bg-layer", "#111111", "backgroundColor"),
-        0.25
-      ),
-      primary: probeColor("text-primary", "#3b82f6"),
-      success: probeColor("text-success", "#22c55e"),
+      content,
+      muted: mixColors(content, probeColor("bg-layer", FALLBACK_BG_COLOR, "backgroundColor"), 0.25),
+      primary: probeColor("text-primary", FALLBACK_PRIMARY_COLOR),
+      success: probeColor("text-success", FALLBACK_SUCCESS_COLOR),
     });
   });
 
@@ -913,7 +1000,7 @@ export default function Milestones(props: { gameId: number }) {
     const onMove = (ev: PointerEvent) => {
       const dx = ev.clientX - startX;
       const dy = ev.clientY - startY;
-      if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
+      if (Math.abs(dx) + Math.abs(dy) > DRAG_THRESHOLD_PX) moved = true;
       if (moved) setPan({ x: startPan.x + dx, y: startPan.y + dy });
     };
     const onUp = (ev: PointerEvent) => {
@@ -940,7 +1027,7 @@ export default function Milestones(props: { gameId: number }) {
     const onMove = (ev: PointerEvent) => {
       const dx = ev.clientX - startX;
       const dy = ev.clientY - startY;
-      if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
+      if (Math.abs(dx) + Math.abs(dy) > DRAG_THRESHOLD_PX) moved = true;
       if (!moved || !admin()) return;
       draggingKey = node.key;
       setPositions((prev) => ({
@@ -1036,10 +1123,10 @@ export default function Milestones(props: { gameId: number }) {
   const [avatarUploading, setAvatarUploading] = createSignal<string | null>(null);
 
   async function applyNodeAvatar(key: string, avatar: string | null) {
-    if (key.startsWith("c")) {
+    if (nodeKindOf(key) === "challenge") {
       await challengeAvatarMutation.mutateAsync({
         game_id: props.gameId,
-        challenge_id: Number(key.slice(1)),
+        challenge_id: nodeIdOf(key),
         avatar,
       });
     } else {

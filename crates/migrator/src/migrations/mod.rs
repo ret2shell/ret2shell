@@ -34,3 +34,4 @@ pub mod m_20260704_000001_game_env_limit;
 pub mod m_20260823_000001_oauth_provider_portal_text;
 pub mod m_20260915_000001_challenge_prerequisites_avatar;
 pub mod m_20260915_000002_create_challenge_milestone;
+pub mod m_20260924_000001_challenge_milestone_unique_name;

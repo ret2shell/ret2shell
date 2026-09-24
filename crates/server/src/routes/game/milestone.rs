@@ -11,7 +11,7 @@ use r2s_bucket::{
   Bucket,
   game::{Milestone, Milestones},
 };
-use r2s_database::{challenge, challenge_milestone, game, team, user::Permission};
+use r2s_database::{challenge, challenge_milestone, game, user::Permission};
 use r2s_migrator::Database;
 use sea_orm::{DatabaseTransaction, TransactionTrait};
 use validator::Validate;
@@ -94,7 +94,7 @@ pub(super) async fn create_milestone(
   )
   .await?;
   txn.commit().await?;
-  recalculate_team_scores(db.clone(), game).await;
+  recalculate_team_scores(db.clone(), game.id).await;
   Ok(Json(milestone))
 }
 
@@ -154,7 +154,7 @@ pub(super) async fn update_milestone(
   )
   .await?;
   txn.commit().await?;
-  recalculate_team_scores(db.clone(), game).await;
+  recalculate_team_scores(db.clone(), game.id).await;
   Ok(Json(milestone))
 }
 
@@ -175,7 +175,7 @@ pub(super) async fn delete_milestone(
   )
   .await?;
   txn.commit().await?;
-  recalculate_team_scores(db.clone(), game).await;
+  recalculate_team_scores(db.clone(), game.id).await;
   Ok(())
 }
 
@@ -195,7 +195,7 @@ pub(super) async fn delete_milestones(
   )
   .await?;
   txn.commit().await?;
-  recalculate_team_scores(db.clone(), game).await;
+  recalculate_team_scores(db.clone(), game.id).await;
   Ok(())
 }
 
@@ -206,24 +206,25 @@ async fn write_milestones_to_bucket(
   txn: &DatabaseTransaction, bucket: &Bucket, game: &game::Model, token: &Token, message: String,
 ) -> Result<(), crate::traits::ResponseError> {
   let milestones = challenge_milestone::get_list(txn, game.id).await?;
-  let challenges = challenge::get_full_list(txn, game.id).await?;
-  let bucket_names: BTreeMap<i64, String> = challenges
-    .iter()
-    .filter_map(|c| c.bucket.clone().map(|bucket| (c.id, bucket)))
+  let challenges: BTreeMap<i64, challenge::Model> = challenge::get_full_list(txn, game.id)
+    .await?
+    .into_iter()
+    .map(|challenge| (challenge.id, challenge))
     .collect();
 
   let mut bucket_milestones = Vec::with_capacity(milestones.len());
   for milestone in &milestones {
-    let mut prerequisites = Vec::with_capacity(milestone.prerequisites.0.len());
+    let mut referenced = Vec::with_capacity(milestone.prerequisites.0.len());
     for &id in &milestone.prerequisites.0 {
-      let bucket = bucket_names.get(&id).ok_or_else(|| {
+      let model = challenges.get(&id).cloned().ok_or_else(|| {
         ResponseError::InternalServerError(format!(
           "milestone {}:{} references challenge {id} without a bucket",
           milestone.id, milestone.name
         ))
       })?;
-      prerequisites.push(bucket.clone());
+      referenced.push(model);
     }
+    let prerequisites = super::challenge::prerequisite_bucket_names(&referenced)?;
     bucket_milestones.push(Milestone {
       name: milestone.name.clone(),
       description: milestone.description.clone(),
@@ -250,16 +251,12 @@ async fn write_milestones_to_bucket(
 }
 
 /// Milestone changes may satisfy or unsatisfy milestones for any team of the
-/// game, so every team score is recalculated. The score and history storage
-/// stay untouched: `update_team_state` only appends a history entry when the
-/// total actually changed.
-async fn recalculate_team_scores(db: Database, game: game::Model) {
+/// game, so every team score is recalculated. The recalculation is
+/// fire-and-forget here: failures only surface in the logs.
+async fn recalculate_team_scores(db: Database, game_id: i64) {
   tokio::spawn(async move {
-    for team in team::get_list_by_game_id(&db.conn, game.id)
+    worker::game::recalculate_team_scores(&db, game_id)
       .await
-      .unwrap_or_default()
-    {
-      worker::game::update_team_state(&db, team).await.ok();
-    }
+      .ok();
   });
 }

@@ -1419,7 +1419,6 @@
         "saved": "已儲存 {{count}} 項更改",
         "cycle": "無法連線：會產生循環依賴",
         "duplicate": "該依賴已存在",
-        "emptyPrerequisites": "里程碑 {{name}} 至少需要一個前置題目",
         "deleteEdge": "刪除連線",
         "fit": "適應畫布"
       },

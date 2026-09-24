@@ -1419,7 +1419,6 @@
         "saved": "Saved {{count}} change(s)",
         "cycle": "Cannot connect: this would create a dependency cycle",
         "duplicate": "This dependency already exists",
-        "emptyPrerequisites": "Milestone {{name}} needs at least one prerequisite challenge",
         "deleteEdge": "Delete edge",
         "fit": "Fit to view"
       },

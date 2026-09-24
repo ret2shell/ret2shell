@@ -16,7 +16,7 @@ use chrono::Utc;
 use futures::TryStreamExt;
 use r2s_bucket::{challenge::ChallengeBucket, game::GameBucket, git::DiffEntry};
 use r2s_config::cluster::ChallengeEnv;
-use r2s_database::{challenge, challenge_milestone, game, hint, team};
+use r2s_database::{challenge, challenge_milestone, game, hint};
 use sea_orm::{DatabaseTransaction, TransactionTrait};
 use serde::Deserialize;
 use tokio::{fs, sync::mpsc};
@@ -356,9 +356,7 @@ async fn execute_post_receive(
     logger
       .info("Recalculating team scores after milestone changes...")
       .await;
-    for team in team::get_list_by_game_id(&state.db.conn, game.id).await? {
-      worker::game::update_team_state(&state.db, team).await.ok();
-    }
+    worker::game::recalculate_team_scores(&state.db, game.id).await?;
   }
   schedule_game_repo_index_refresh(&state, game.id, &session.game_bucket).await;
 

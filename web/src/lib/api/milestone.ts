@@ -79,7 +79,7 @@ export function useUpdateMilestoneMutation(
     },
     onError: (err: Error) => {
       if (!props.silenced) {
-        handleHttpError(err, t("general.actions.update.status.fail"));
+        handleHttpError(err, t("general.actions.save.status.fail"));
       }
       props.onError?.(err);
     },

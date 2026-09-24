@@ -4,7 +4,7 @@ use r2s_bucket::Bucket;
 use r2s_cache::Cache;
 use r2s_checker::Checker;
 use r2s_database::{
-  audit, challenge, extra, game, submission,
+  DbErr, audit, challenge, extra, game, submission,
   team::{self, TeamScoreHistory, TeamScoreHistoryList},
   user,
 };
@@ -518,6 +518,16 @@ async fn submission_worker_exec(
   txn.commit().await?;
 
   Ok(submission)
+}
+
+/// Recalculates the state of every team of the game, e.g. after milestone
+/// changes. Per-team failures are logged and skipped; only listing the teams
+/// can fail.
+pub async fn recalculate_team_scores(db: &Database, game_id: i64) -> Result<(), DbErr> {
+  for team in team::get_list_by_game_id(&db.conn, game_id).await? {
+    update_team_state(db, team).await.ok();
+  }
+  Ok(())
 }
 
 pub async fn update_team_state(db: &Database, team: team::Model) -> Result<(), ResponseError> {
