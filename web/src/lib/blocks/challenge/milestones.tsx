@@ -541,6 +541,10 @@ export default function Milestones(props: { gameId: number }) {
     return map;
   });
 
+  // node selection lives with the graph state: the ancestor chain memo
+  // below reads it at creation time
+  const [selectedNode, setSelectedNode] = createSignal<string | null>(null);
+
   // the transitive ancestor chain of the selected node: every predecessor
   // node that can reach it, plus the edges along those chains
   const ancestorChain = createMemo(() => {
@@ -607,7 +611,6 @@ export default function Milestones(props: { gameId: number }) {
   // the in-port closest to an in-progress connection, snapped on drop
   const [nearPort, setNearPort] = createSignal<string | null>(null);
   const [selectedEdge, setSelectedEdge] = createSignal<string | null>(null);
-  const [selectedNode, setSelectedNode] = createSignal<string | null>(null);
   const [saving, setSaving] = createSignal(false);
   const [detailId, setDetailId] = createSignal<number | null>(null);
   const [formOpen, setFormOpen] = createSignal(false);
