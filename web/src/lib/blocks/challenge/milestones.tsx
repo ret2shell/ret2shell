@@ -1332,6 +1332,19 @@ export default function Milestones(props: { gameId: number }) {
     });
   });
 
+  // warn before leaving the page with unsaved prerequisite edits; the
+  // listener is bound only while the edit is dirty
+  createEffect(() => {
+    if (!dirty()) return;
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      // required by Chrome and Firefox to show the confirmation dialog
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    onCleanup(() => window.removeEventListener("beforeunload", onBeforeUnload));
+  });
+
   // the chevron texture flows toward the targets: a requestAnimationFrame
   // loop advances the texture phase and redraws; rAF pauses automatically
   // when the tab is hidden
@@ -1617,18 +1630,10 @@ export default function Milestones(props: { gameId: number }) {
 
   return (
     <div class="flex-1 overflow-hidden flex flex-col">
-      <div class="h-16 shrink-0 flex items-center px-2 space-x-2 border-b border-b-layer-content/10">
+      <div class="h-16 shrink-0 flex items-center px-2 pl-4 space-x-2 border-b border-b-layer-content/10">
         <span class="shrink-0 icon-[fluent--trophy-20-regular] w-5 h-5 text-primary" />
         <span class="font-bold truncate">{t("challenge.milestone.title")}</span>
         <span class="flex-1" />
-        <Show when={admin()}>
-          <span class="opacity-60 hidden xl:inline">{t("challenge.milestone.editor.hint")}</span>
-          <Show when={dirty()}>
-            <Tag level="warning">
-              <span>{t("challenge.milestone.editor.unsaved")}</span>
-            </Tag>
-          </Show>
-        </Show>
         <Button ghost square title={t("challenge.milestone.editor.zoomOut")} onClick={() => zoomBy(1 / ZOOM_STEP)}>
           <span class="shrink-0 icon-[fluent--zoom-out-20-regular] w-5 h-5" />
         </Button>
@@ -1693,6 +1698,16 @@ export default function Milestones(props: { gameId: number }) {
             onPointerDown={onBackgroundPointerDown}
           >
             <canvas ref={canvasRef} class="absolute inset-0 w-full h-full" />
+            <Show when={admin()}>
+              <span class="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 opacity-60 pointer-events-none whitespace-nowrap">
+                {t("challenge.milestone.editor.hint")}
+              </span>
+              <Show when={dirty()}>
+                <Tag level="warning" class="absolute right-4 bottom-4 z-10 pointer-events-none">
+                  <span>{t("challenge.milestone.editor.unsaved")}</span>
+                </Tag>
+              </Show>
+            </Show>
             <div class="absolute inset-0 pointer-events-none">
               <div
                 class="absolute top-0 left-0 pointer-events-none"
