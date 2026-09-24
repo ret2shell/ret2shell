@@ -894,6 +894,8 @@ export default function Milestones(props: { gameId: number }) {
       ctx.lineWidth = width * z;
       // rounded elbows: the joins soften the 90-degree turns
       ctx.lineJoin = "round";
+      // round caps make the seams between consecutive pieces invisible
+      ctx.lineCap = "round";
       ctx.stroke();
     };
 
@@ -956,8 +958,9 @@ export default function Milestones(props: { gameId: number }) {
       style: { base: string; overlayColor: string; overlayAlpha: number };
     };
     // overlap groups: tracks sharing a target merge into one corridor (the
-    // vertical approach plus the final hop), tracks sharing a source merge
-    // into one shared prefix; a group with mixed solve states turns warning
+    // shared vertical overlap plus the final hop), tracks sharing a source
+    // merge into one shared prefix; a group with mixed solve states turns
+    // warning
     const stateOf = (members: Edge[]): TrackState => {
       const solvedCount = members.filter((edge) => isSolved(edge)).length;
       if (solvedCount === 0) return "unsolved";
@@ -1007,97 +1010,109 @@ export default function Milestones(props: { gameId: number }) {
       if (!g) continue;
       const mx = g.x2 - GAP_X / 2;
       const own = isSolved(edge);
+      const ownState: TrackState = own ? "solved" : "unsolved";
       const straight = Math.abs(g.y2 - g.y1) < 1;
       const sourceSiblings = bySource.get(edge.from) ?? [];
       const targetGroup = byTarget.get(edge.to) ?? [edge];
       const sourceKeys = sourceSiblings.map(edgeKey);
       const targetKeys = targetGroup.map(edgeKey);
 
-      // corridor: the vertical approach plus, for a shared target, the
-      // final hop. the overlap shared by the whole group is colored by the
-      // group state, while each member's exclusive approach keeps its own
-      // solve state
-      const shared = targetGroup.length > 1 ? sharedVertical.get(edge.to) : undefined;
-      if (!straight) {
-        if (shared) {
-          if (!mergedDrawn.has(`shared:${edge.to}`)) {
-            mergedDrawn.add(`shared:${edge.to}`);
-            const towardTarget = g.y2 >= shared.end;
-            const [from, to] = towardTarget ? [shared.start, shared.end] : [shared.end, shared.start];
-            tracks.push({
-              state: stateOf(targetGroup),
-              alpha: alphaOf(targetKeys),
-              selected: selectedOf(targetKeys),
-              segments: [{ ax: mx, ay: from, bx: mx, by: to }],
-              style: trackStyleOf(stateOf(targetGroup)),
-            });
-          }
-          if (g.y1 < shared.start - 1) {
-            tracks.push({
-              state: own ? "solved" : "unsolved",
-              alpha: alphaOf([edgeKey(edge)]),
-              selected: edgeKey(edge) === selected,
-              segments: [{ ax: mx, ay: g.y1, bx: mx, by: shared.start }],
-              style: trackStyleOf(own ? "solved" : "unsolved"),
-            });
-          } else if (g.y1 > shared.end + 1) {
-            tracks.push({
-              state: own ? "solved" : "unsolved",
-              alpha: alphaOf([edgeKey(edge)]),
-              selected: edgeKey(edge) === selected,
-              segments: [{ ax: mx, ay: shared.end, bx: mx, by: g.y1 }],
-              style: trackStyleOf(own ? "solved" : "unsolved"),
-            });
-          }
-        } else {
-          tracks.push({
-            state: own ? "solved" : "unsolved",
-            alpha: alphaOf([edgeKey(edge)]),
-            selected: edgeKey(edge) === selected,
-            segments: [{ ax: mx, ay: g.y1, bx: mx, by: g.y2 }],
-            style: trackStyleOf(own ? "solved" : "unsolved"),
-          });
-        }
-      }
-      if (targetGroup.length > 1 && !mergedDrawn.has(`trunk:${edge.to}`)) {
-        mergedDrawn.add(`trunk:${edge.to}`);
-        tracks.push({
-          state: stateOf(targetGroup),
-          alpha: alphaOf(targetKeys),
-          selected: selectedOf(targetKeys),
-          segments: [{ ax: mx, ay: g.y2, bx: g.x2, by: g.y2 }],
-          style: trackStyleOf(stateOf(targetGroup)),
-        });
-      }
+      // pieces in path order; consecutive pieces sharing a state join into
+      // one continuous path so the round line join keeps the elbows smooth
+      const pieces: { state: TrackState; keys: string[]; segments: TrackSegment[] }[] = [];
 
       // shared prefix with same-source siblings, in the group's color
-      const horizontalEnd = targetGroup.length > 1 ? mx : g.x2;
+      const sourceShared = sourceSiblings.length > 1;
       const minMx = Math.min(
         ...sourceSiblings
           .map((sibling) => edgeGeometry(sibling)?.x2)
           .filter((x2): x2 is number => x2 !== undefined)
           .map((x2) => x2 - GAP_X / 2),
-        horizontalEnd
+        mx
       );
-      if (sourceSiblings.length > 1 && minMx > g.x1 + 1) {
-        tracks.push({
+      if (sourceShared && minMx > g.x1 + 1) {
+        pieces.push({
           state: stateOf(sourceSiblings),
-          alpha: alphaOf(sourceKeys),
-          selected: selectedOf(sourceKeys),
+          keys: sourceKeys,
           segments: [{ ax: g.x1, ay: g.y1, bx: minMx, by: g.y1 }],
-          style: trackStyleOf(stateOf(sourceSiblings)),
         });
       }
-      // the remaining horizontal after the shared prefix keeps the edge's
-      // own solve state
-      const restStart = sourceSiblings.length > 1 ? minMx : g.x1;
-      if (horizontalEnd - restStart > 1) {
+
+      // the own horizontal after the shared prefix, up to the corridor; the
+      // corridor vertical splits at the group's shared overlap: exclusive
+      // approaches keep the own state, the shared overlap takes the group
+      // state; for an unshared target the own final hop closes the path
+      const ownSegments: TrackSegment[] = [];
+      const prefixEnd = sourceShared ? minMx : g.x1;
+      if (mx - prefixEnd > 1) {
+        ownSegments.push({ ax: prefixEnd, ay: g.y1, bx: mx, by: g.y1 });
+      }
+      if (!straight) {
+        const shared = targetGroup.length > 1 ? sharedVertical.get(edge.to) : undefined;
+        if (shared) {
+          if (g.y1 < shared.start - 1) {
+            ownSegments.push({ ax: mx, ay: g.y1, bx: mx, by: shared.start });
+          } else if (g.y1 > shared.end + 1) {
+            ownSegments.push({ ax: mx, ay: shared.end, bx: mx, by: g.y1 });
+          }
+        } else {
+          ownSegments.push({ ax: mx, ay: g.y1, bx: mx, by: g.y2 });
+        }
+      }
+      if (targetGroup.length === 1) {
+        ownSegments.push({ ax: mx, ay: g.y2, bx: g.x2, by: g.y2 });
+      }
+      if (ownSegments.length > 0) {
+        pieces.push({ state: ownState, keys: [edgeKey(edge)], segments: ownSegments });
+      }
+
+      // the shared vertical overlap and the final hop are drawn once per
+      // group, in the group's color
+      const shared = targetGroup.length > 1 ? sharedVertical.get(edge.to) : undefined;
+      if (!straight && shared && !mergedDrawn.has(`shared:${edge.to}`)) {
+        mergedDrawn.add(`shared:${edge.to}`);
+        const towardTarget = g.y2 >= shared.end;
+        const [from, to] = towardTarget ? [shared.start, shared.end] : [shared.end, shared.start];
+        pieces.push({
+          state: stateOf(targetGroup),
+          keys: targetKeys,
+          segments: [{ ax: mx, ay: from, bx: mx, by: to }],
+        });
+      }
+      if (targetGroup.length > 1 && !mergedDrawn.has(`trunk:${edge.to}`)) {
+        mergedDrawn.add(`trunk:${edge.to}`);
+        pieces.push({
+          state: stateOf(targetGroup),
+          keys: targetKeys,
+          segments: [{ ax: mx, ay: g.y2, bx: g.x2, by: g.y2 }],
+        });
+      }
+
+      // merge consecutive same-state pieces into continuous paths
+      let run: (typeof pieces)[number] | null = null;
+      for (const piece of pieces) {
+        if (run && run.state === piece.state && run.keys.join("|") === piece.keys.join("|")) {
+          run.segments.push(...piece.segments);
+        } else {
+          if (run) {
+            tracks.push({
+              state: run.state,
+              alpha: alphaOf(run.keys),
+              selected: selectedOf(run.keys),
+              segments: run.segments,
+              style: trackStyleOf(run.state),
+            });
+          }
+          run = { ...piece, segments: [...piece.segments] };
+        }
+      }
+      if (run) {
         tracks.push({
-          state: own ? "solved" : "unsolved",
-          alpha: alphaOf([edgeKey(edge)]),
-          selected: edgeKey(edge) === selected,
-          segments: [{ ax: restStart, ay: g.y1, bx: horizontalEnd, by: g.y1 }],
-          style: trackStyleOf(own ? "solved" : "unsolved"),
+          state: run.state,
+          alpha: alphaOf(run.keys),
+          selected: selectedOf(run.keys),
+          segments: run.segments,
+          style: trackStyleOf(run.state),
         });
       }
     }
@@ -1552,7 +1567,7 @@ export default function Milestones(props: { gameId: number }) {
                           <div
                             title={node.name}
                             class={clsx(
-                              "absolute flex items-center gap-2 px-3 rounded-lg border-2 backdrop-blur-sm cursor-pointer transition-all pointer-events-auto",
+                              "absolute flex items-center gap-2 px-3 rounded-lg border-2 backdrop-blur-sm cursor-pointer transition-colors pointer-events-auto",
                               "bg-layer/80",
                               // while a node is selected, everything outside
                               // its ancestor chain fades out
@@ -1625,7 +1640,7 @@ export default function Milestones(props: { gameId: number }) {
                                 <div
                                   title={milestone().name}
                                   class={clsx(
-                                    "absolute flex flex-col justify-center gap-1 px-3 rounded-lg border-2 backdrop-blur-sm cursor-pointer transition-all pointer-events-auto",
+                                    "absolute flex flex-col justify-center gap-1 px-3 rounded-lg border-2 backdrop-blur-sm cursor-pointer transition-colors pointer-events-auto",
                                     "bg-layer/80 hover:border-primary/60",
                                     ancestorChain() &&
                                       !ancestorChain()!.nodes.has(node.key) &&
