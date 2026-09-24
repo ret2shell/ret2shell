@@ -1616,6 +1616,15 @@ export default function Milestones(props: { gameId: number }) {
     setSelectedEdge(null);
   }
 
+  // re-run the full layout over the current unsaved graph; positions are
+  // session-only, so this never touches the saved prerequisites
+  function tidy() {
+    const ns = nodes();
+    if (ns.length === 0) return;
+    setPositions(fullLayout(ns, validEdges()));
+    fitView();
+  }
+
   let avatarInput: HTMLInputElement | undefined;
   const [avatarTarget, setAvatarTarget] = createSignal<string | null>(null);
   const [avatarUploading, setAvatarUploading] = createSignal<string | null>(null);
@@ -1741,6 +1750,10 @@ export default function Milestones(props: { gameId: number }) {
           >
             <span class="shrink-0 icon-[fluent--add-20-regular] w-5 h-5" />
             <span>{t("general.actions.create.title")}</span>
+          </Button>
+          <Button ghost onClick={tidy} title={t("challenge.milestone.editor.tidy")}>
+            <span class="shrink-0 icon-[fluent--wand-20-regular] w-5 h-5" />
+            <span>{t("challenge.milestone.editor.tidy")}</span>
           </Button>
           <Button
             level="primary"
