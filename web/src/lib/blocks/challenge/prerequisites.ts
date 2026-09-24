@@ -3,10 +3,10 @@ import { useGame, useSelfSolves } from "@api/game";
 import { isAdminOfGame } from "@storage/game";
 import { createMemo } from "solid-js";
 
-/// Computes the prerequisite gating state of a challenge. `gated` exempts
-/// game admins (mirroring the backend behavior, used to disable actions),
-/// while `locked` is the raw state shown to everyone (used for the blur
-/// overlay that admins may dismiss).
+/** Computes the prerequisite gating state of a challenge. `gated` exempts
+ * game admins (mirroring the backend behavior, used to disable actions),
+ * while `locked` is the raw state shown to everyone (used for the blur
+ * overlay that admins may dismiss). */
 export function usePrerequisiteGating(props: { gameId: () => number; challengeId: () => number }) {
   const game = useGame({ id: props.gameId });
   const challenge = useChallenge({ game_id: props.gameId, challenge_id: props.challengeId });
@@ -26,7 +26,7 @@ export function usePrerequisiteGating(props: { gameId: () => number; challengeId
   const lockedChallenges = createMemo(() =>
     lockedIds().map((id) => ({
       id,
-      name: challenges.data?.[0].find((c) => c.id === id)?.name ?? `#${id}`,
+      name: (challenges.data?.[0] ?? []).find((c) => c.id === id)?.name ?? `#${id}`,
     }))
   );
 

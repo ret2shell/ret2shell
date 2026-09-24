@@ -1,4 +1,4 @@
-import { handleHttpError, inflyClient } from "@api";
+import { handleHttpError, inflyClient, toastSuccess } from "@api";
 import {
   useChallenges,
   useUpdateChallengeAvatarMutation,
@@ -138,7 +138,7 @@ function clampZoom(zoom: number) {
   return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom));
 }
 
-/// Node keys are `<kind-prefix><id>` strings; `c` challenges, `m` milestones.
+/** Node keys are `<kind-prefix><id>` strings; `c` challenges, `m` milestones. */
 function nodeKindOf(key: string): NodeKind {
   return key.startsWith("c") ? "challenge" : "milestone";
 }
@@ -500,7 +500,7 @@ export default function Milestones(props: { gameId: number }) {
   const navigate = useNavigate();
   const game = useGame({ id: () => props.gameId });
   const challenges = useChallenges({ game_id: () => props.gameId });
-  const milestones = useMilestones({ game_id: () => props.gameId, enabled: () => !!game.data });
+  const milestones = useMilestones({ game_id: () => props.gameId });
   const solves = useSelfSolves({ game_id: () => props.gameId });
 
   const admin = createMemo(() => isAdminOfGame(game.data));
@@ -1454,7 +1454,7 @@ export default function Milestones(props: { gameId: number }) {
       const resp = await uploadMedia(file, false);
       await applyNodeAvatar(key, resp.hash);
     } catch (err) {
-      handleHttpError(err as Error, t("general.actions.upload.status.fail"));
+      handleHttpError(err, t("general.actions.upload.status.fail"));
     }
     setAvatarUploading(null);
     setAvatarTarget(null);
@@ -1496,15 +1496,11 @@ export default function Milestones(props: { gameId: number }) {
         });
         count++;
       }
-      addToast({
-        level: "success",
-        description: t("challenge.milestone.editor.saved", { count }),
-        duration: 5000,
-      });
+      toastSuccess(t("challenge.milestone.editor.saved", { count }));
       setBaseline(validEdges());
       setSelectedEdge(null);
     } catch (err) {
-      handleHttpError(err as Error, t("general.actions.save.status.fail"));
+      handleHttpError(err, t("general.actions.save.status.fail"));
     } finally {
       setSaving(false);
       inflyClient.invalidateQueries({ queryKey: ["game", props.gameId, "challenge"] });
