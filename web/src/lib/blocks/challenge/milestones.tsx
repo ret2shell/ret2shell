@@ -557,10 +557,10 @@ function edgeGeometry(edge: Edge, nodeMap: Map<string, GNode>, positions: Record
  * (target right of the source) take the three-segment route through the
  * gap right before the target column. Backward or same-column edges cannot
  * reach over the target: they exit right into the gap after the source
- * column, detour through a lane above or below both endpoint nodes, and
- * re-enter through the gap before the target column — an S-shaped route.
- * The lane clears the nearer endpoint edge by one and a half grid rows and
- * snaps away from the nodes onto the grid. */
+ * column, run an S-detour whose horizontal lane crosses the band between
+ * the two endpoint rows, and re-enter through the gap before the target
+ * column. When the two rows overlap (no clear band), the lane wraps around
+ * the outside of both nodes instead, keeping EDGE_NODE_MARGIN_PX clear. */
 function elbowSegments(g: { x1: number; y1: number; x2: number; y2: number }, h1 = 0, h2 = 0) {
   if (g.x2 > g.x1 + 1) {
     const mx = g.x2 - GAP_X / 2;
@@ -578,9 +578,18 @@ function elbowSegments(g: { x1: number; y1: number; x2: number; y2: number }, h1
   const exit = g.x1 + GAP_X / 2;
   const entry = g.x2 - GAP_X / 2;
   const over = g.y2 <= g.y1;
-  const lane = over
-    ? alignCeil(Math.min(g.y1 - h1 / 2, g.y2 - h2 / 2) - GAP_Y - GRID_Y / 2)
-    : alignFloor(Math.max(g.y1 + h1 / 2, g.y2 + h2 / 2) + GAP_Y + GRID_Y / 2);
+  // the S lane runs midway through the clear band between the facing edges
+  // of the endpoint nodes; when the rows overlap there is no band, so the
+  // lane wraps around the outside of both, one and a half grid rows beyond
+  // the nearer edge, snapped away from the nodes onto the grid
+  const betweenLow = over ? g.y2 + h2 / 2 + EDGE_NODE_MARGIN_PX : g.y1 + h1 / 2 + EDGE_NODE_MARGIN_PX;
+  const betweenHigh = over ? g.y1 - h1 / 2 - EDGE_NODE_MARGIN_PX : g.y2 - h2 / 2 - EDGE_NODE_MARGIN_PX;
+  const lane =
+    betweenLow <= betweenHigh
+      ? (betweenLow + betweenHigh) / 2
+      : over
+        ? alignCeil(Math.min(g.y1 - h1 / 2, g.y2 - h2 / 2) - GAP_Y - GRID_Y / 2)
+        : alignFloor(Math.max(g.y1 + h1 / 2, g.y2 + h2 / 2) + GAP_Y + GRID_Y / 2);
   return {
     segments: [
       { ax: g.x1, ay: g.y1, bx: exit, by: g.y1 },
