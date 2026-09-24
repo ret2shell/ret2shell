@@ -31,7 +31,6 @@ use super::{
     GitHookSession, strip_git_hook_ansi,
   },
   sync_error::SyncError,
-  worker,
 };
 use crate::{
   traits::{GlobalState, ResponseError},
@@ -348,15 +347,27 @@ async fn execute_post_receive(
   for challenge in outcome.scoreboard_updates {
     state
       .queue
-      .publish("scoreboard", challenge, &session.trace_id)
+      .publish(
+        crate::worker::game::SCOREBOARD_TOPIC,
+        challenge,
+        &session.trace_id,
+      )
       .await
       .ok();
   }
   if outcome.milestones_changed {
     logger
-      .info("Recalculating team scores after milestone changes...")
+      .info("Rescoring every team after milestone changes...")
       .await;
-    worker::game::recalculate_team_scores(&state.db, game.id).await?;
+    state
+      .queue
+      .publish(
+        crate::worker::game::SCOREBOARD_TOPIC,
+        crate::worker::game::ScoreMaintenance::Game { game_id: game.id },
+        &session.trace_id,
+      )
+      .await
+      .ok();
   }
   schedule_game_repo_index_refresh(&state, game.id, &session.game_bucket).await;
 

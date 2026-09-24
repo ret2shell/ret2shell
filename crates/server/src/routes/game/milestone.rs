@@ -13,7 +13,9 @@ use r2s_bucket::{
 };
 use r2s_database::{challenge, challenge_milestone, game, user::Permission};
 use r2s_migrator::Database;
+use r2s_queue::Queue;
 use sea_orm::{DatabaseTransaction, TransactionTrait};
+use tower_http::request_id::RequestId;
 use validator::Validate;
 
 use crate::{
@@ -23,7 +25,7 @@ use crate::{
   },
   traits::{GlobalState, ResponseError},
   utility::validation::validation_bad_request,
-  worker,
+  worker::game::{SCOREBOARD_TOPIC, ScoreMaintenance},
 };
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
@@ -62,7 +64,8 @@ pub(super) async fn get_milestones(
 }
 
 pub(super) async fn create_milestone(
-  State(ref db): State<Database>, State(bucket): State<Bucket>, Extension(token): Extension<Token>,
+  State(ref db): State<Database>, State(bucket): State<Bucket>, State(queue): State<Queue>,
+  Extension(token): Extension<Token>, Extension(trace): Extension<RequestId>,
   Extension(game): Extension<game::Model>, Json(milestone): Json<challenge_milestone::Model>,
 ) -> Result<impl IntoResponse, crate::traits::ResponseError> {
   milestone.validate().map_err(validation_bad_request)?;
@@ -94,7 +97,14 @@ pub(super) async fn create_milestone(
   )
   .await?;
   txn.commit().await?;
-  recalculate_team_scores(db.clone(), game.id).await;
+  queue
+    .publish(
+      SCOREBOARD_TOPIC,
+      ScoreMaintenance::Game { game_id: game.id },
+      trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    )
+    .await
+    .ok();
   Ok(Json(milestone))
 }
 
@@ -116,7 +126,8 @@ fn ensure_milestone_in_game(
 }
 
 pub(super) async fn update_milestone(
-  State(ref db): State<Database>, State(bucket): State<Bucket>, Extension(token): Extension<Token>,
+  State(ref db): State<Database>, State(bucket): State<Bucket>, State(queue): State<Queue>,
+  Extension(token): Extension<Token>, Extension(trace): Extension<RequestId>,
   Extension(game): Extension<game::Model>,
   Extension(prev_milestone): Extension<challenge_milestone::Model>,
   Json(milestone): Json<challenge_milestone::Model>,
@@ -154,12 +165,20 @@ pub(super) async fn update_milestone(
   )
   .await?;
   txn.commit().await?;
-  recalculate_team_scores(db.clone(), game.id).await;
+  queue
+    .publish(
+      SCOREBOARD_TOPIC,
+      ScoreMaintenance::Game { game_id: game.id },
+      trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    )
+    .await
+    .ok();
   Ok(Json(milestone))
 }
 
 pub(super) async fn delete_milestone(
-  State(ref db): State<Database>, State(bucket): State<Bucket>, Extension(token): Extension<Token>,
+  State(ref db): State<Database>, State(bucket): State<Bucket>, State(queue): State<Queue>,
+  Extension(token): Extension<Token>, Extension(trace): Extension<RequestId>,
   Extension(game): Extension<game::Model>,
   Extension(milestone): Extension<challenge_milestone::Model>,
 ) -> Result<impl IntoResponse, crate::traits::ResponseError> {
@@ -175,13 +194,21 @@ pub(super) async fn delete_milestone(
   )
   .await?;
   txn.commit().await?;
-  recalculate_team_scores(db.clone(), game.id).await;
+  queue
+    .publish(
+      SCOREBOARD_TOPIC,
+      ScoreMaintenance::Game { game_id: game.id },
+      trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    )
+    .await
+    .ok();
   Ok(())
 }
 
 /// Removes every milestone of the game.
 pub(super) async fn delete_milestones(
-  State(ref db): State<Database>, State(bucket): State<Bucket>, Extension(token): Extension<Token>,
+  State(ref db): State<Database>, State(bucket): State<Bucket>, State(queue): State<Queue>,
+  Extension(token): Extension<Token>, Extension(trace): Extension<RequestId>,
   Extension(game): Extension<game::Model>,
 ) -> Result<impl IntoResponse, crate::traits::ResponseError> {
   let txn = db.conn.begin().await?;
@@ -195,7 +222,14 @@ pub(super) async fn delete_milestones(
   )
   .await?;
   txn.commit().await?;
-  recalculate_team_scores(db.clone(), game.id).await;
+  queue
+    .publish(
+      SCOREBOARD_TOPIC,
+      ScoreMaintenance::Game { game_id: game.id },
+      trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    )
+    .await
+    .ok();
   Ok(())
 }
 
@@ -248,15 +282,4 @@ async fn write_milestones_to_bucket(
     )
     .await?;
   Ok(())
-}
-
-/// Milestone changes may satisfy or unsatisfy milestones for any team of the
-/// game, so every team score is recalculated. The recalculation is
-/// fire-and-forget here: failures only surface in the logs.
-async fn recalculate_team_scores(db: Database, game_id: i64) {
-  tokio::spawn(async move {
-    worker::game::recalculate_team_scores(&db, game_id)
-      .await
-      .ok();
-  });
 }

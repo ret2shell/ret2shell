@@ -16,6 +16,7 @@ use r2s_event::{
 use r2s_migrator::Database;
 use r2s_queue::{Queue, TracedMessage};
 use sea_orm::TransactionTrait;
+use serde::{Deserialize, Serialize};
 use tracing::{Instrument, Span, debug, error, error_span, info, warn};
 
 use crate::{
@@ -24,6 +25,22 @@ use crate::{
 };
 
 const GAME_REPO_INDEX_REFRESH_INTERVAL_SECS: u64 = 30;
+
+/// Topic carrying score maintenance work for the scoreboard worker.
+pub const SCOREBOARD_TOPIC: &str = "scoreboard";
+
+/// Maintenance payload of [`SCOREBOARD_TOPIC`]. A challenge payload
+/// rescores the teams that solved it (e.g. after score decay); a game
+/// payload rescores every team of the game, since any game-wide change may
+/// push teams across a milestone or an extra. Untagged on purpose: the
+/// challenge arm keeps the historical bare-model shape, so pending messages
+/// published by an older binary still deserialize after a hot upgrade.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum ScoreMaintenance {
+  Challenge(challenge::Model),
+  Game { game_id: i64 },
+}
 
 pub async fn spawn_game_workers(state: GlobalState) {
   let queue = state.queue.clone();
@@ -83,16 +100,16 @@ async fn score_maintenance_worker(queue: Queue, db: Database) {
         message.double_ack().await.ok();
         continue;
       }
-      let challenge_msg = serde_json::from_str::<TracedMessage<challenge::Model>>(&req.unwrap())
+      let maintenance = serde_json::from_str::<TracedMessage<ScoreMaintenance>>(&req.unwrap())
         .inspect_err(|e| {
           error!(error=?e, "failed to parse message from nats");
         })
         .ok();
       let span = error_span!(
         "request",
-        trace=%challenge_msg.as_ref().map(|c| &c.trace).unwrap_or(&"UNKNOWN".to_owned())
+        trace=%maintenance.as_ref().map(|m| &m.trace).unwrap_or(&"UNKNOWN".to_owned())
       );
-      let created_at = challenge_msg.as_ref().map(|c| c.created_at);
+      let created_at = maintenance.as_ref().map(|m| m.created_at);
       if created_at
         .is_none_or(|c| Utc::now().signed_duration_since(c) > chrono::Duration::minutes(10))
       {
@@ -100,27 +117,36 @@ async fn score_maintenance_worker(queue: Queue, db: Database) {
         message.double_ack().await.ok();
         continue;
       }
-      let challenge_payload = challenge_msg.map(|c| c.payload);
-      if challenge_payload.is_none() {
-        message.double_ack().await.ok();
-        continue;
+      match maintenance.map(|m| m.payload) {
+        None => {
+          message.double_ack().await.ok();
+        }
+        Some(ScoreMaintenance::Challenge(challenge)) => {
+          // reload the challenge so the rescore sees the current score
+          let Some(Some(challenge)) = challenge::get(&db.conn, challenge.id)
+            .await
+            .inspect_err(|e| error!(error=?e, "failed to load challenge for scoreboard worker"))
+            .ok()
+          else {
+            message.double_ack().await.ok();
+            continue;
+          };
+          score_maintenance_worker_exec(db.clone(), challenge)
+            .instrument(span)
+            .await
+            .inspect_err(|e| error!(error=?e, "failed to process message"))
+            .ok();
+          message.double_ack().await.ok();
+        }
+        Some(ScoreMaintenance::Game { game_id }) => {
+          score_maintenance_worker_exec_game(db.clone(), game_id)
+            .instrument(span)
+            .await
+            .inspect_err(|e| error!(error=?e, "failed to process message"))
+            .ok();
+          message.double_ack().await.ok();
+        }
       }
-
-      let Some(Some(current_challenge)) =
-        challenge::get(&db.conn, challenge_payload.as_ref().unwrap().id)
-          .await
-          .inspect_err(|e| error!(error=?e, "failed to load challenge for scoreboard worker"))
-          .ok()
-      else {
-        message.double_ack().await.ok();
-        continue;
-      };
-      score_maintenance_worker_exec(db.clone(), current_challenge.clone())
-        .instrument(span)
-        .await
-        .inspect_err(|e| error!(error=?e, "failed to process message"))
-        .ok();
-      message.double_ack().await.ok();
     }
   }
 }
@@ -461,7 +487,7 @@ async fn submission_worker_exec(
     queue.publish("event", event, &trace).await.ok(); // publish scoreboard update event if necessary
     if changed {
       queue
-        .publish("scoreboard", challenge.clone(), &trace)
+        .publish(SCOREBOARD_TOPIC, challenge.clone(), &trace)
         .await
         .ok();
       cache.at("challenge").del(challenge.id).await.ok();
@@ -520,12 +546,13 @@ async fn submission_worker_exec(
   Ok(submission)
 }
 
-/// Recalculates the state of every team of the game, e.g. after milestone
-/// changes. Per-team failures are logged and skipped; only listing the teams
-/// can fail.
-pub async fn recalculate_team_scores(db: &Database, game_id: i64) -> Result<(), DbErr> {
+/// Rescores every team of the game: any game-wide score change (milestone
+/// edits, imports, retro fixes, ...) may push any team across an
+/// achievement. Per-team failures are logged and skipped; only listing the
+/// teams can fail.
+async fn score_maintenance_worker_exec_game(db: Database, game_id: i64) -> Result<(), DbErr> {
   for team in team::get_list_by_game_id(&db.conn, game_id).await? {
-    update_team_state(db, team).await.ok();
+    update_team_state(&db, team).await.ok();
   }
   Ok(())
 }
