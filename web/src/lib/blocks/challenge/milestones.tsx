@@ -105,6 +105,8 @@ const EDGE_WIDTH = 8;
 // rest of the band keeps the base color
 const EDGE_TEXTURE_PERIOD = 20;
 const EDGE_TEXTURE_W = 8;
+// the chevron texture flows toward the target at this speed, in world px/s
+const EDGE_FLOW_SPEED = 30;
 // the chevron texture is a translucent white or black overlay of the track
 // base: light themes darken the track slightly, dark themes lighten it, and
 // solved tracks always lighten
@@ -164,7 +166,12 @@ function snapX(x: number) {
 }
 
 function snapY(y: number) {
-  return Math.round(y / GRID_Y) * GRID_Y;
+  return snapGrid(y);
+}
+
+/** Snaps any world coordinate to the nearest grid line. */
+function snapGrid(v: number) {
+  return Math.round(v / GRID_Y) * GRID_Y;
 }
 
 /** Snaps a center position up to the next grid line. */
@@ -723,7 +730,7 @@ export default function Milestones(props: { gameId: number }) {
    * the target column; since node centers snap to the column grid, this
    * always lands midway between the two columns. */
   function elbowSegments(g: { x1: number; y1: number; x2: number; y2: number }) {
-    const mx = g.x2 - (GAP_X + NODE_W) / 2;
+    const mx = g.x2 - GAP_X / 2;
     if (Math.abs(g.y2 - g.y1) < 1) {
       return { segments: [{ ax: g.x1, ay: g.y1, bx: g.x2, by: g.y2 }], corners: [] as { x: number; y: number }[] };
     }
@@ -761,6 +768,8 @@ export default function Milestones(props: { gameId: number }) {
   // downward, so the resolution always converges; the node currently being
   // dragged is exempt and wins over the lines
   let draggingKey: string | null = null;
+  // flow phase of the chevron texture, advanced by the rAF loop
+  let flowPhase = 0;
   createEffect(() => {
     const edgeList = validEdges();
     const pos = positions();
@@ -921,7 +930,8 @@ export default function Milestones(props: { gameId: number }) {
     const drawChevrons = (
       segments: { ax: number; ay: number; bx: number; by: number }[],
       color: string,
-      alpha: number
+      alpha: number,
+      phase = 0
     ) => {
       ctx.fillStyle = color;
       ctx.globalAlpha = alpha;
@@ -943,7 +953,9 @@ export default function Milestones(props: { gameId: number }) {
           (seg.ax + dirX * u + perpX * v) * z + p.x,
           (seg.ay + dirY * u + perpY * v) * z + p.y,
         ];
-        for (let u0 = 0; u0 + EDGE_TEXTURE_W + slant <= len; u0 += EDGE_TEXTURE_PERIOD) {
+        // the flow phase slides the whole pattern forward; it is periodic,
+        // so wrapping the phase back to zero is seamless
+        for (let u0 = phase; u0 + EDGE_TEXTURE_W + slant <= len; u0 += EDGE_TEXTURE_PERIOD) {
           const [x1, y1] = pt(u0, -half);
           const [x2, y2] = pt(u0 + EDGE_TEXTURE_W, -half);
           const [x3, y3] = pt(u0 + EDGE_TEXTURE_W + slant, 0);
@@ -1023,7 +1035,7 @@ export default function Milestones(props: { gameId: number }) {
     for (const edge of edgeList) {
       const g = edgeGeometry(edge);
       if (!g) continue;
-      const mx = g.x2 - (GAP_X + NODE_W) / 2;
+      const mx = g.x2 - GAP_X / 2;
       const own = isSolved(edge);
       const ownState: TrackState = own ? "solved" : "unsolved";
       const straight = Math.abs(g.y2 - g.y1) < 1;
@@ -1042,7 +1054,7 @@ export default function Milestones(props: { gameId: number }) {
         ...sourceSiblings
           .map((sibling) => edgeGeometry(sibling)?.x2)
           .filter((x2): x2 is number => x2 !== undefined)
-          .map((x2) => x2 - (GAP_X + NODE_W) / 2),
+          .map((x2) => x2 - GAP_X / 2),
         mx
       );
       if (sourceShared && minMx > g.x1 + 1) {
@@ -1068,7 +1080,7 @@ export default function Milestones(props: { gameId: number }) {
           if (g.y1 < shared.start - 1) {
             ownSegments.push({ ax: mx, ay: g.y1, bx: mx, by: shared.start });
           } else if (g.y1 > shared.end + 1) {
-            ownSegments.push({ ax: mx, ay: shared.end, bx: mx, by: g.y1 });
+            ownSegments.push({ ax: mx, ay: g.y1, bx: mx, by: shared.end });
           }
         } else {
           ownSegments.push({ ax: mx, ay: g.y1, bx: mx, by: g.y2 });
@@ -1144,7 +1156,7 @@ export default function Milestones(props: { gameId: number }) {
       strokeTrack(t.segments, t.style.base, t.alpha, EDGE_WIDTH);
     }
     for (const t of ordered) {
-      drawChevrons(t.segments, t.style.overlayColor, t.style.overlayAlpha * t.alpha);
+      drawChevrons(t.segments, t.style.overlayColor, t.style.overlayAlpha * t.alpha, flowPhase);
     }
 
     if (conn) {
@@ -1214,6 +1226,22 @@ export default function Milestones(props: { gameId: number }) {
       cleanupWrapper?.();
       window.removeEventListener("keydown", onKeyDown);
     });
+  });
+
+  // the chevron texture flows toward the targets: a requestAnimationFrame
+  // loop advances the texture phase and redraws; rAF pauses automatically
+  // when the tab is hidden
+  onMount(() => {
+    let raf = 0;
+    let last = performance.now();
+    const frame = (now: number) => {
+      flowPhase = (flowPhase + ((now - last) / 1000) * EDGE_FLOW_SPEED) % EDGE_TEXTURE_PERIOD;
+      last = now;
+      draw();
+      raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
+    onCleanup(() => cancelAnimationFrame(raf));
   });
 
   createEffect(() => {
@@ -1315,10 +1343,10 @@ export default function Milestones(props: { gameId: number }) {
     e.stopPropagation();
     e.preventDefault();
     const world = toWorld(e.clientX, e.clientY);
-    setConnecting({ from, x: world.x, y: world.y });
+    setConnecting({ from, x: snapGrid(world.x), y: snapGrid(world.y) });
     const onMove = (ev: PointerEvent) => {
       const w = toWorld(ev.clientX, ev.clientY);
-      setConnecting({ from, x: w.x, y: w.y });
+      setConnecting({ from, x: snapGrid(w.x), y: snapGrid(w.y) });
       // snap feedback: highlight the nearest in-port within reach
       let nearest: string | null = null;
       let nearestDist = PORT_SNAP_RADIUS;
