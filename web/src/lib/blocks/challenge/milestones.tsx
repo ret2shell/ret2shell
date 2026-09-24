@@ -140,9 +140,11 @@ const EDGE_WIDTH = 8;
 // unsolved track colors follow the theme so the tracks hug the background:
 // light theme uses #dddddd/#aaaaaa, dark theme uses #444444/#777777
 // the >>>>> texture: chevrons repeating along the track at this spacing
-const EDGE_TEXTURE_SPACING = 11;
-const EDGE_TEXTURE_LEN = 6;
-const EDGE_TEXTURE_HALF_W = 4;
+const EDGE_TEXTURE_SPACING = 22;
+const EDGE_TEXTURE_LEN = 9;
+// half width slightly exceeds the track half width, so every chevron
+// visibly pokes out of the track instead of melting into it
+const EDGE_TEXTURE_HALF_W = 7.5;
 // edges entering the same column gap run on parallel tracks spaced this far
 // apart instead of overlapping on the gap center line; the same spacing fans
 // edges out of a shared source port
