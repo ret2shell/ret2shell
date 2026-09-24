@@ -985,6 +985,23 @@ export default function Milestones(props: { gameId: number }) {
     }
 
     const tracks: TrackDraw[] = [];
+    // the vertical overlap shared by every member of a target group; only
+    // this interval is colored by the group, exclusive approaches keep their
+    // own solve state
+    const sharedVertical = new Map<string, { start: number; end: number } | null>();
+    const mergedDrawn = new Set<string>();
+    for (const [target, members] of byTarget) {
+      if (members.length < 2) continue;
+      let start = Number.NEGATIVE_INFINITY;
+      let end = Number.POSITIVE_INFINITY;
+      for (const member of members) {
+        const gm = edgeGeometry(member);
+        if (!gm) continue;
+        start = Math.max(start, Math.min(gm.y1, gm.y2));
+        end = Math.min(end, Math.max(gm.y1, gm.y2));
+      }
+      sharedVertical.set(target, end > start ? { start, end } : null);
+    }
     for (const edge of edgeList) {
       const g = edgeGeometry(edge);
       if (!g) continue;
@@ -997,22 +1014,59 @@ export default function Milestones(props: { gameId: number }) {
       const targetKeys = targetGroup.map(edgeKey);
 
       // corridor: the vertical approach plus, for a shared target, the
-      // final hop — one merged track in the target group's color
-      const corridorState = targetGroup.length > 1 ? stateOf(targetGroup) : own ? "solved" : "unsolved";
-      const corridorSegments: TrackSegment[] = [];
+      // final hop. the overlap shared by the whole group is colored by the
+      // group state, while each member's exclusive approach keeps its own
+      // solve state
+      const shared = targetGroup.length > 1 ? sharedVertical.get(edge.to) : undefined;
       if (!straight) {
-        corridorSegments.push({ ax: mx, ay: g.y1, bx: mx, by: g.y2 });
+        if (shared) {
+          if (!mergedDrawn.has(`shared:${edge.to}`)) {
+            mergedDrawn.add(`shared:${edge.to}`);
+            const towardTarget = g.y2 >= shared.end;
+            const [from, to] = towardTarget ? [shared.start, shared.end] : [shared.end, shared.start];
+            tracks.push({
+              state: stateOf(targetGroup),
+              alpha: alphaOf(targetKeys),
+              selected: selectedOf(targetKeys),
+              segments: [{ ax: mx, ay: from, bx: mx, by: to }],
+              style: trackStyleOf(stateOf(targetGroup)),
+            });
+          }
+          if (g.y1 < shared.start - 1) {
+            tracks.push({
+              state: own ? "solved" : "unsolved",
+              alpha: alphaOf([edgeKey(edge)]),
+              selected: edgeKey(edge) === selected,
+              segments: [{ ax: mx, ay: g.y1, bx: mx, by: shared.start }],
+              style: trackStyleOf(own ? "solved" : "unsolved"),
+            });
+          } else if (g.y1 > shared.end + 1) {
+            tracks.push({
+              state: own ? "solved" : "unsolved",
+              alpha: alphaOf([edgeKey(edge)]),
+              selected: edgeKey(edge) === selected,
+              segments: [{ ax: mx, ay: shared.end, bx: mx, by: g.y1 }],
+              style: trackStyleOf(own ? "solved" : "unsolved"),
+            });
+          }
+        } else {
+          tracks.push({
+            state: own ? "solved" : "unsolved",
+            alpha: alphaOf([edgeKey(edge)]),
+            selected: edgeKey(edge) === selected,
+            segments: [{ ax: mx, ay: g.y1, bx: mx, by: g.y2 }],
+            style: trackStyleOf(own ? "solved" : "unsolved"),
+          });
+        }
       }
-      if (targetGroup.length > 1) {
-        corridorSegments.push({ ax: mx, ay: g.y2, bx: g.x2, by: g.y2 });
-      }
-      if (corridorSegments.length > 0) {
+      if (targetGroup.length > 1 && !mergedDrawn.has(`trunk:${edge.to}`)) {
+        mergedDrawn.add(`trunk:${edge.to}`);
         tracks.push({
-          state: corridorState,
+          state: stateOf(targetGroup),
           alpha: alphaOf(targetKeys),
           selected: selectedOf(targetKeys),
-          segments: corridorSegments,
-          style: trackStyleOf(corridorState),
+          segments: [{ ax: mx, ay: g.y2, bx: g.x2, by: g.y2 }],
+          style: trackStyleOf(stateOf(targetGroup)),
         });
       }
 
