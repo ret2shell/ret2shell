@@ -965,6 +965,8 @@ export default function Milestones(props: { gameId: number }) {
       ctx.strokeStyle = color;
       ctx.globalAlpha = alpha;
       ctx.lineWidth = width * z;
+      // rounded elbows: the joins soften the 90-degree turns
+      ctx.lineJoin = "round";
       ctx.stroke();
     };
 
@@ -1018,61 +1020,70 @@ export default function Milestones(props: { gameId: number }) {
       ctx.globalAlpha = 1;
     };
 
-    const drawMember = (edge: Edge) => {
+    type TrackDraw = {
+      key: string;
+      solved: boolean;
+      selected: boolean;
+      alpha: number;
+      segments: TrackSegment[];
+      // bundled groups draw one extra trunk segment into the target
+      trunk: TrackSegment | null;
+      style: { base: string; overlayColor: string; overlayAlpha: number };
+    };
+    const tracks: TrackDraw[] = [];
+    for (const edge of edgeList) {
       const g = edgeGeometry(edge);
-      if (!g) return;
+      if (!g) continue;
       const elbow = elbowSegments(g);
       const bundled = (byTarget.get(edge.to)?.length ?? 0) > 1;
       // bundled members stop at the junction; the trunk is drawn once below.
       // a straight member (same height) has no distinct trunk segment and is
       // drawn in full — the trunk simply overlays it
       const segments = bundled && elbow.segments.length > 1 ? elbow.segments.slice(0, -1) : elbow.segments;
-      if (segments.length === 0) return;
+      if (segments.length === 0) continue;
       const key = edgeKey(edge);
-      const style = trackStyleOf(isSolved(edge));
-      const alpha = alphaOf(key);
-      // 1px outline under the base stroke; a selected track carries a
-      // primary outline instead of the divider color
-      strokeTrack(segments, key === selected ? c.primary : c.divider, alpha, EDGE_WIDTH + EDGE_BORDER_EXTRA);
-      strokeTrack(segments, style.base, alpha, EDGE_WIDTH);
-      // corner squares join the segments (the junction at the target side is
-      // owned by the trunk)
-      const corners = bundled ? elbow.corners.slice(0, -1) : elbow.corners;
-      const halfCorner = (EDGE_WIDTH / 2 + 1) * z;
-      ctx.fillStyle = style.base;
-      ctx.globalAlpha = alpha;
-      for (const corner of corners) {
-        const cx = corner.x * z + p.x;
-        const cy = corner.y * z + p.y;
-        ctx.fillRect(cx - halfCorner, cy - halfCorner, halfCorner * 2, halfCorner * 2);
-      }
-      drawChevrons(segments, style.overlayColor, style.overlayAlpha * alpha);
-      ctx.globalAlpha = 1;
-    };
-
-    // solved edges first, unsolved on top
-    for (const edge of edgeList.filter((e) => isSolved(e))) drawMember(edge);
-    for (const edge of edgeList.filter((e) => !isSolved(e))) drawMember(edge);
-
+      tracks.push({
+        key,
+        solved: isSolved(edge),
+        selected: key === selected,
+        alpha: alphaOf(key),
+        segments,
+        trunk: null,
+        style: trackStyleOf(isSolved(edge)),
+      });
+    }
     // shared trunks: the final horizontal hop into the target, drawn once
+    // per bundled group
     for (const members of byTarget.values()) {
       if (members.length < 2) continue;
       const g = edgeGeometry(members[0]);
-      if (!g) return;
-      const style = trackStyleOf(members.every(isSolved));
-      const alpha = alphaOf(edgeKey(members[0]));
-      const trunkSegment = { ax: g.x2 - GAP_X / 2 + g.lane, ay: g.y2, bx: g.x2, by: g.y2 };
-      const border = members.some((e) => edgeKey(e) === selected) ? c.primary : c.divider;
-      strokeTrack([trunkSegment], border, alpha, EDGE_WIDTH + EDGE_BORDER_EXTRA);
-      strokeTrack([trunkSegment], style.base, alpha, EDGE_WIDTH);
-      const halfJunction = (EDGE_WIDTH / 2 + 1) * z;
-      ctx.fillStyle = style.base;
-      ctx.globalAlpha = alpha;
-      const jx = trunkSegment.ax * z + p.x;
-      const jy = trunkSegment.ay * z + p.y;
-      ctx.fillRect(jx - halfJunction, jy - halfJunction, halfJunction * 2, halfJunction * 2);
-      drawChevrons([trunkSegment], style.overlayColor, style.overlayAlpha * alpha);
-      ctx.globalAlpha = 1;
+      if (!g) continue;
+      const solvedFlag = members.every(isSolved);
+      const key = edgeKey(members[0]);
+      tracks.push({
+        key,
+        solved: solvedFlag,
+        selected: members.some((e) => edgeKey(e) === selected),
+        alpha: alphaOf(key),
+        segments: [],
+        trunk: { ax: g.x2 - GAP_X / 2 + g.lane, ay: g.y2, bx: g.x2, by: g.y2 },
+        style: trackStyleOf(solvedFlag),
+      });
+    }
+
+    // solved tracks first, unsolved on top; within each group the outline,
+    // base and texture layers are drawn in separate passes so that joined
+    // tracks never cut their outlines through another track's base stroke
+    const ordered = [...tracks.filter((t) => t.solved), ...tracks.filter((t) => !t.solved)];
+    const pathOf = (t: TrackDraw) => (t.trunk ? [t.trunk] : t.segments);
+    for (const t of ordered) {
+      strokeTrack(pathOf(t), t.selected ? c.primary : c.divider, t.alpha, EDGE_WIDTH + EDGE_BORDER_EXTRA);
+    }
+    for (const t of ordered) {
+      strokeTrack(pathOf(t), t.style.base, t.alpha, EDGE_WIDTH);
+    }
+    for (const t of ordered) {
+      drawChevrons(pathOf(t), t.style.overlayColor, t.style.overlayAlpha * t.alpha);
     }
 
     if (conn) {
