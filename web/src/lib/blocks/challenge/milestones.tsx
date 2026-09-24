@@ -153,10 +153,6 @@ function nodeIdOf(key: string): number {
   return Number(key.slice(1));
 }
 
-function heightOf(key: string) {
-  return nodeKindOf(key) === "challenge" ? CHALLENGE_H : MILESTONE_H;
-}
-
 // node positions are stored as CENTER coordinates; centers snap to the
 // world grid so every node sits exactly on the dot grid
 function columnX(column: number) {
@@ -294,7 +290,8 @@ function placeByPredecessors(
   columnOfNode: Map<string, number>,
   result: Record<string, NodePos>,
   columnBottom: Map<number, number>,
-  regionY: number
+  regionY: number,
+  heights: Map<string, number>
 ): Map<number, { top: number; bottom: number }[]> {
   const blocked = new Map<number, { top: number; bottom: number }[]>();
   for (const column of [...byColumn.keys()].sort((a, b) => a - b)) {
@@ -320,8 +317,11 @@ function placeByPredecessors(
         firstSucc(a).localeCompare(firstSucc(b)) ||
         a.localeCompare(b)
     );
+    // blocked intervals of this column are fixed while the column is placed
+    // (spanning sources push into later columns only), so sort them once
+    const intervals = (blocked.get(column) ?? []).sort((a, b) => a.top - b.top);
     for (const [i, key] of sortedMembers.entries()) {
-      const h = heightOf(key);
+      const h = heights.get(key)!;
       // align by y-center with the anchor predecessor; the first node of a
       // column in this region may rise above regionY for the alignment, as
       // long as it stays clear of the previous region's nodes in this column;
@@ -337,7 +337,7 @@ function placeByPredecessors(
       let moved = true;
       while (moved) {
         moved = false;
-        for (const interval of (blocked.get(column) ?? []).sort((a, b) => a.top - b.top)) {
+        for (const interval of intervals) {
           if (yPos < interval.bottom && yPos + h / 2 > interval.top) {
             yPos = alignCeil(interval.bottom + GAP_Y + h / 2);
             moved = true;
@@ -352,12 +352,12 @@ function placeByPredecessors(
         for (let crossed = column + 1; crossed < succColumn; crossed++) {
           if (!blocked.has(crossed)) blocked.set(crossed, []);
           blocked.get(crossed)?.push({
-            top: center - MILESTONE_H / 2 - GAP_Y / 2,
-            bottom: center + MILESTONE_H / 2 + GAP_Y / 2,
+            top: center - h / 2 - GAP_Y / 2,
+            bottom: center + h / 2 + GAP_Y / 2,
           });
         }
       }
-      y = alignCeil(yPos + h / 2 + GAP_Y + heightOf(sortedMembers[i + 1] ?? key) / 2);
+      y = alignCeil(yPos + h / 2 + GAP_Y + (heights.get(sortedMembers[i + 1] ?? key) ?? 0) / 2);
     }
   }
   return blocked;
@@ -374,13 +374,14 @@ function pullTowardSuccessors(
   columnOfNode: Map<string, number>,
   result: Record<string, NodePos>,
   outerBottom: Map<number, number>,
-  blocked: Map<number, { top: number; bottom: number }[]>
+  blocked: Map<number, { top: number; bottom: number }[]>,
+  heights: Map<string, number>
 ) {
   for (const column of [...byColumn.keys()].sort((a, b) => b - a)) {
     for (const key of byColumn.get(column)!) {
       const centers = (graph.succs.get(key) ?? []).map((s) => result[s].y).sort((a, b) => a - b);
       if (centers.length === 0) continue;
-      const h = heightOf(key);
+      const h = heights.get(key)!;
       const newCenter = centers[Math.floor((centers.length - 1) / 2)];
       if (Math.abs(newCenter - result[key].y) < 1) continue;
       const guard = outerBottom.get(column);
@@ -389,8 +390,8 @@ function pullTowardSuccessors(
         (other) =>
           other !== key &&
           (columnOfNode.get(other) ?? 0) === column &&
-          newCenter - h / 2 < result[other].y + heightOf(other) / 2 &&
-          newCenter + h / 2 > result[other].y - heightOf(other) / 2
+          newCenter - h / 2 < result[other].y + (heights.get(other) ?? 0) / 2 &&
+          newCenter + h / 2 > result[other].y - (heights.get(other) ?? 0) / 2
       );
       if (overlapsNode) continue;
       const overlapsEdge = (blocked.get(column) ?? []).some(
@@ -410,7 +411,9 @@ function pullTowardSuccessors(
  * intermediate columns, the covered slots in those columns are left empty
  * and following nodes shift down, so long edges never cross a node.
  * Isolated nodes share a trailing single-column region. */
-function fullLayout(keys: string[], edges: Edge[]) {
+function fullLayout(nodes: GNode[], edges: Edge[]) {
+  const heights = new Map(nodes.map((n) => [n.key, n.h]));
+  const keys = nodes.map((n) => n.key);
   const graph = buildGraph(keys, edges);
   const { trees, singles } = splitComponents(keys, graph);
 
@@ -431,16 +434,16 @@ function fullLayout(keys: string[], edges: Edge[]) {
       byColumn.get(column)?.push(key);
     }
     const outerBottom = new Map(columnBottom);
-    const blocked = placeByPredecessors(byColumn, graph, columnOfNode, result, columnBottom, regionY);
-    pullTowardSuccessors(byColumn, tree, graph, columnOfNode, result, outerBottom, blocked);
+    const blocked = placeByPredecessors(byColumn, graph, columnOfNode, result, columnBottom, regionY, heights);
+    pullTowardSuccessors(byColumn, tree, graph, columnOfNode, result, outerBottom, blocked, heights);
 
     let bottom = regionY;
     for (const key of tree) {
-      bottom = Math.max(bottom, result[key].y + heightOf(key) / 2);
+      bottom = Math.max(bottom, result[key].y + (heights.get(key) ?? 0) / 2);
       const column = columnOfNode.get(key) ?? 0;
       columnBottom.set(
         column,
-        Math.max(columnBottom.get(column) ?? Number.NEGATIVE_INFINITY, result[key].y + heightOf(key) / 2)
+        Math.max(columnBottom.get(column) ?? Number.NEGATIVE_INFINITY, result[key].y + (heights.get(key) ?? 0) / 2)
       );
     }
     regionY = alignCeil(bottom + REGION_GAP);
@@ -449,7 +452,7 @@ function fullLayout(keys: string[], edges: Edge[]) {
   // isolated nodes share one trailing single-column region
   for (const [i, key] of singles.sort().entries()) {
     result[key] = { x: columnX(0), y: regionY };
-    regionY = alignCeil(regionY + heightOf(key) / 2 + GAP_Y + heightOf(singles[i + 1] ?? key) / 2);
+    regionY = alignCeil(regionY + (heights.get(key) ?? 0) / 2 + GAP_Y + (heights.get(singles[i + 1] ?? key) ?? 0) / 2);
   }
   return result;
 }
@@ -458,10 +461,14 @@ function fullLayout(keys: string[], edges: Edge[]) {
  * neighbors, leaving every existing (possibly user-dragged) node untouched.
  * The y position prefers the median predecessor's row when it does not
  * overlap existing nodes in the same column. */
-function incrementalLayout(keys: string[], edges: Edge[], existing: Record<string, NodePos>) {
+function incrementalLayout(nodes: GNode[], edges: Edge[], existing: Record<string, NodePos>) {
   const result = { ...existing };
-  const keySet = new Set(keys);
-  const missing = keys.filter((key) => !existing[key]).sort();
+  const heights = new Map(nodes.map((n) => [n.key, n.h]));
+  const keySet = new Set(nodes.map((n) => n.key));
+  const missing = nodes
+    .map((n) => n.key)
+    .filter((key) => !existing[key])
+    .sort();
   for (const key of missing) {
     const placedPreds = edges.filter((e) => e.to === key && keySet.has(e.from) && result[e.from]).map((e) => e.from);
     const succColumns = edges
@@ -471,10 +478,13 @@ function incrementalLayout(keys: string[], edges: Edge[], existing: Record<strin
     if (placedPreds.length > 0) column = Math.max(...placedPreds.map((p) => columnOf(result[p].x))) + 1;
     else if (succColumns.length > 0) column = Math.max(0, Math.min(...succColumns) - 1);
 
-    const h = heightOf(key);
+    const h = heights.get(key)!;
     const occupants = Object.entries(result)
       .filter(([other]) => other !== key && columnOf(result[other].x) === column)
-      .map(([other, pos]) => ({ top: pos.y - heightOf(other) / 2, bottom: pos.y + heightOf(other) / 2 }));
+      .map(([other, pos]) => ({
+        top: pos.y - (heights.get(other) ?? 0) / 2,
+        bottom: pos.y + (heights.get(other) ?? 0) / 2,
+      }));
     let bottom = PAD;
     for (const occ of occupants) bottom = Math.max(bottom, occ.bottom + GAP_Y);
 
@@ -497,9 +507,9 @@ function incrementalLayout(keys: string[], edges: Edge[], existing: Record<strin
 /** Assigns positions to the nodes missing from `existing`. A fresh page does
  * a full forest-aware layout; nodes added later (e.g. a newly created
  * milestone) are placed incrementally next to their neighbors. */
-function autoLayout(keys: string[], edges: Edge[], existing: Record<string, NodePos>) {
-  if (Object.keys(existing).length === 0) return fullLayout(keys, edges);
-  return incrementalLayout(keys, edges, existing);
+function autoLayout(nodes: GNode[], edges: Edge[], existing: Record<string, NodePos>) {
+  if (Object.keys(existing).length === 0) return fullLayout(nodes, edges);
+  return incrementalLayout(nodes, edges, existing);
 }
 
 export default function Milestones(props: { gameId: number }) {
@@ -530,7 +540,6 @@ export default function Milestones(props: { gameId: number }) {
     })),
   ]);
   const nodeSet = createMemo(() => new Set(nodes().map((n) => n.key)));
-  const nodeKeys = createMemo(() => nodes().map((n) => n.key));
   const nodeMap = createMemo(() => new Map(nodes().map((n) => [n.key, n])));
 
   const baseEdges = createMemo<Edge[]>(() => {
@@ -612,13 +621,13 @@ export default function Milestones(props: { gameId: number }) {
   // baseEdges (a pure data memo) instead of the synced edge signal, because
   // the sync effect may run after this one within the same update
   createEffect(
-    on(nodeKeys, (keys) => {
+    on(nodes, (ns) => {
       if (!challenges.data || !milestones.data) return;
       const set = untrack(nodeSet);
       const current = untrack(baseEdges).filter((e) => set.has(e.from) && set.has(e.to));
       setPositions((prev) => {
-        if (keys.every((key) => prev[key])) return prev;
-        return autoLayout(keys, current, prev);
+        if (ns.every((node) => prev[node.key])) return prev;
+        return autoLayout(ns, current, prev);
       });
     })
   );
