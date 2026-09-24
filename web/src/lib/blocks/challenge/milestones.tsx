@@ -725,6 +725,13 @@ function buildTracks(
   return tracks;
 }
 
+// pre-rendered single-dot tile for the background grid; one pattern fill
+// replaces thousands of arc() calls per frame. The tile is rebuilt when the
+// on-screen grid pitch (zoom) or the dot color changes.
+let gridTile: HTMLCanvasElement | undefined;
+let gridTileStep = 0;
+let gridTileColor = "";
+
 export default function Milestones(props: { gameId: number }) {
   const navigate = useNavigate();
   const game = useGame({ id: () => props.gameId });
@@ -1104,18 +1111,36 @@ export default function Milestones(props: { gameId: number }) {
 
     const step = GRID_Y * z;
     if (step >= 8) {
-      ctx.fillStyle = c.content;
-      ctx.globalAlpha = 0.08;
-      const startX = (((p.x % step) + step) % step) - step;
-      const startY = (((p.y % step) + step) % step) - step;
-      for (let x = startX; x < w; x += step) {
-        for (let y = startY; y < h; y += step) {
-          ctx.beginPath();
-          ctx.arc(x, y, 1, 0, Math.PI * 2);
-          ctx.fill();
+      const stepDev = Math.max(1, Math.round(step * dpr));
+      if (!gridTile || gridTileStep !== stepDev || gridTileColor !== c.content) {
+        gridTile = document.createElement("canvas");
+        gridTile.width = gridTile.height = stepDev;
+        const tile = gridTile.getContext("2d");
+        if (tile) {
+          tile.fillStyle = c.content;
+          tile.globalAlpha = 0.08;
+          // a quarter dot at the corner: the wrapped tiles combine into the
+          // same full dot the per-dot loop used to draw
+          tile.beginPath();
+          tile.arc(0, 0, dpr, 0, Math.PI * 2);
+          tile.fill();
         }
+        gridTileStep = stepDev;
+        gridTileColor = c.content;
       }
-      ctx.globalAlpha = 1;
+      const pattern = ctx.createPattern(gridTile, "repeat");
+      if (pattern) {
+        ctx.save();
+        // paint in device pixels: the pattern tiles axis-aligned and the
+        // anchor keeps the dots on the world grid under the current pan
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        const ox = (((p.x * dpr) % stepDev) + stepDev) % stepDev;
+        const oy = (((p.y * dpr) % stepDev) + stepDev) % stepDev;
+        ctx.translate(ox, oy);
+        ctx.fillStyle = pattern;
+        ctx.fillRect(-stepDev, -stepDev, w * dpr + 2 * stepDev, h * dpr + 2 * stepDev);
+        ctx.restore();
+      }
     }
 
     // every track dimension is world units scaled by the zoom, so zooming
