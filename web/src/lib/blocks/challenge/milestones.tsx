@@ -185,6 +185,11 @@ function alignCeil(y: number) {
   return Math.ceil(y / GRID_Y) * GRID_Y;
 }
 
+/** Snaps a center position down to the previous grid line. */
+function alignFloor(y: number) {
+  return Math.floor(y / GRID_Y) * GRID_Y;
+}
+
 type Graph = {
   preds: Map<string, string[]>;
   succs: Map<string, string[]>;
@@ -548,6 +553,45 @@ function edgeGeometry(edge: Edge, nodeMap: Map<string, GNode>, positions: Record
   };
 }
 
+/** Rectilinear elbow segments of an edge in world coords. Forward edges
+ * (target right of the source) take the three-segment route through the
+ * gap right before the target column. Backward or same-column edges cannot
+ * reach over the target: they exit right into the gap after the source
+ * column, detour through a lane above or below both endpoint nodes, and
+ * re-enter through the gap before the target column — an S-shaped route.
+ * The lane clears the nearer endpoint edge by one and a half grid rows and
+ * snaps away from the nodes onto the grid. */
+function elbowSegments(g: { x1: number; y1: number; x2: number; y2: number }, h1 = 0, h2 = 0) {
+  if (g.x2 > g.x1 + 1) {
+    const mx = g.x2 - GAP_X / 2;
+    if (Math.abs(g.y2 - g.y1) < 1) {
+      return { segments: [{ ax: g.x1, ay: g.y1, bx: g.x2, by: g.y2 }] };
+    }
+    return {
+      segments: [
+        { ax: g.x1, ay: g.y1, bx: mx, by: g.y1 },
+        { ax: mx, ay: g.y1, bx: mx, by: g.y2 },
+        { ax: mx, ay: g.y2, bx: g.x2, by: g.y2 },
+      ],
+    };
+  }
+  const exit = g.x1 + GAP_X / 2;
+  const entry = g.x2 - GAP_X / 2;
+  const over = g.y2 <= g.y1;
+  const lane = over
+    ? alignCeil(Math.min(g.y1 - h1 / 2, g.y2 - h2 / 2) - GAP_Y - GRID_Y / 2)
+    : alignFloor(Math.max(g.y1 + h1 / 2, g.y2 + h2 / 2) + GAP_Y + GRID_Y / 2);
+  return {
+    segments: [
+      { ax: g.x1, ay: g.y1, bx: exit, by: g.y1 },
+      { ax: exit, ay: g.y1, bx: exit, by: lane },
+      { ax: exit, ay: lane, bx: entry, by: lane },
+      { ax: entry, ay: lane, bx: entry, by: g.y2 },
+      { ax: entry, ay: g.y2, bx: g.x2, by: g.y2 },
+    ],
+  };
+}
+
 /** Resolves the edge set into drawable tracks: tracks sharing a target merge
  * into one corridor (the shared vertical overlap plus the final hop), tracks
  * sharing a source merge into one shared prefix, and a group with mixed
@@ -565,10 +609,19 @@ function buildTracks(
   }
 ): TrackDraw[] {
   const { nodeMap, positions, solved, chain, selectedEdge: selected, colors: c } = ctx;
+  // an edge whose in-port sits at or left of the out-port cannot take the
+  // forward corridor route; it is drawn as a standalone S-detour instead
+  const isBackward = (edge: Edge) => {
+    const from = nodeMap.get(edge.from);
+    const to = nodeMap.get(edge.to);
+    if (!from || !to || !positions[edge.from] || !positions[edge.to]) return false;
+    return positions[edge.to].x - NODE_W / 2 <= positions[edge.from].x + NODE_W / 2 + 1;
+  };
   // edges sharing a successor converge into a single trunk in the column
   // gap before the target
   const byTarget = new Map<string, Edge[]>();
   for (const edge of edgeList) {
+    if (isBackward(edge)) continue;
     if (!byTarget.has(edge.to)) byTarget.set(edge.to, []);
     byTarget.get(edge.to)?.push(edge);
   }
@@ -599,9 +652,18 @@ function buildTracks(
 
   const bySource = new Map<string, Edge[]>();
   for (const edge of edgeList) {
+    if (isBackward(edge)) continue;
     const list = bySource.get(edge.from) ?? [];
     list.push(edge);
     bySource.set(edge.from, list);
+  }
+  // backward siblings from one source share the identical exit stub
+  const bySourceBackward = new Map<string, Edge[]>();
+  for (const edge of edgeList) {
+    if (!isBackward(edge)) continue;
+    const list = bySourceBackward.get(edge.from) ?? [];
+    list.push(edge);
+    bySourceBackward.set(edge.from, list);
   }
 
   const tracks: TrackDraw[] = [];
@@ -625,6 +687,32 @@ function buildTracks(
   for (const edge of edgeList) {
     const g = edgeGeometry(edge, nodeMap, positions);
     if (!g) continue;
+    // backward edges take the S-detour routed around the endpoint nodes;
+    // only the exit stub is shared among the backward siblings of a source
+    if (g.x2 <= g.x1 + 1) {
+      const ownState: TrackState = isSolved(edge) ? "solved" : "unsolved";
+      const route = elbowSegments(g, nodeMap.get(edge.from)?.h ?? 0, nodeMap.get(edge.to)?.h ?? 0);
+      const group = bySourceBackward.get(edge.from) ?? [edge];
+      const others = group.filter((sibling) => sibling !== edge);
+      const [exitStub, ...detour] = route.segments;
+      const pieces: { state: TrackState; keys: string[]; segments: TrackSegment[] }[] = [];
+      if (others.length > 0) {
+        pieces.push({ state: stateOf(group), keys: group.map(edgeKey), segments: [exitStub] });
+        pieces.push({ state: ownState, keys: [edgeKey(edge)], segments: detour });
+      } else {
+        pieces.push({ state: ownState, keys: [edgeKey(edge)], segments: route.segments });
+      }
+      for (const piece of pieces) {
+        tracks.push({
+          state: piece.state,
+          alpha: alphaOf(piece.keys),
+          selected: selectedOf(piece.keys),
+          segments: piece.segments,
+          style: trackStyleOf(piece.state),
+        });
+      }
+      continue;
+    }
     const mx = g.x2 - GAP_X / 2;
     const own = isSolved(edge);
     const ownState: TrackState = own ? "solved" : "unsolved";
@@ -976,34 +1064,15 @@ export default function Milestones(props: { gameId: number }) {
     return Math.hypot(px - (ax + u * (bx - ax)), py - (ay + u * (by - ay)));
   }
 
-  /** Rectilinear (right-angle) elbow segments of an edge in world coords.
-   * The vertical segment runs at the center of the column gap right before
-   * the target column; since node centers snap to the column grid, this
-   * always lands midway between the two columns. */
-  function elbowSegments(g: { x1: number; y1: number; x2: number; y2: number }) {
-    const mx = g.x2 - GAP_X / 2;
-    if (Math.abs(g.y2 - g.y1) < 1) {
-      return { segments: [{ ax: g.x1, ay: g.y1, bx: g.x2, by: g.y2 }], corners: [] as { x: number; y: number }[] };
-    }
-    return {
-      segments: [
-        { ax: g.x1, ay: g.y1, bx: mx, by: g.y1 },
-        { ax: mx, ay: g.y1, bx: mx, by: g.y2 },
-        { ax: mx, ay: g.y2, bx: g.x2, by: g.y2 },
-      ],
-      corners: [
-        { x: mx, y: g.y1 },
-        { x: mx, y: g.y2 },
-      ],
-    };
-  }
-
   function hitTestEdge(world: { x: number; y: number }): string | null {
     const threshold = EDGE_HIT_TOLERANCE_PX / zoom();
+    const nm = nodeMap();
+    const pos = positions();
     for (const edge of validEdges()) {
-      const g = edgeGeometry(edge, nodeMap(), positions());
+      const g = edgeGeometry(edge, nm, pos);
       if (!g) continue;
-      for (const seg of elbowSegments(g).segments) {
+      const elbow = elbowSegments(g, nm.get(edge.from)?.h ?? 0, nm.get(edge.to)?.h ?? 0);
+      for (const seg of elbow.segments) {
         if (pointToSegmentDistance(world.x, world.y, seg.ax, seg.ay, seg.bx, seg.by) < threshold) {
           return edgeKey(edge);
         }
@@ -1035,7 +1104,8 @@ export default function Milestones(props: { gameId: number }) {
       for (const edge of edgeList) {
         const g = edgeGeometry(edge, nm, adjusted);
         if (!g) continue;
-        for (const seg of elbowSegments(g).segments) {
+        const elbow = elbowSegments(g, nm.get(edge.from)?.h ?? 0, nm.get(edge.to)?.h ?? 0);
+        for (const seg of elbow.segments) {
           if (Math.abs(seg.ay - seg.by) > 1) continue;
           const segY = seg.ay;
           const minX = Math.min(seg.ax, seg.bx);
@@ -1267,7 +1337,7 @@ export default function Milestones(props: { gameId: number }) {
       const from = nodeMap().get(conn.from);
       const pos = positions()[conn.from];
       if (from && pos) {
-        const elbow = elbowSegments({ x1: pos.x + NODE_W / 2, y1: pos.y, x2: conn.x, y2: conn.y });
+        const elbow = elbowSegments({ x1: pos.x + NODE_W / 2, y1: pos.y, x2: conn.x, y2: conn.y }, from.h);
         strokeTrack(elbow.segments, c.divider, 1, EDGE_WIDTH + EDGE_BORDER_EXTRA);
         strokeTrack(elbow.segments, c.primary, 1, EDGE_WIDTH);
         drawChevrons(elbow.segments, EDGE_TEXTURE_SOLVE_COLOR, EDGE_TEXTURE_LIGHTEN);
