@@ -139,12 +139,11 @@ const EDGE_HIT_TOLERANCE_PX = 8;
 const EDGE_WIDTH = 8;
 // unsolved track colors follow the theme so the tracks hug the background:
 // light theme uses #dddddd/#aaaaaa, dark theme uses #444444/#777777
-// the >>>>> texture: chevrons repeating along the track at this spacing
-const EDGE_TEXTURE_SPACING = 22;
-const EDGE_TEXTURE_LEN = 9;
-// half width slightly exceeds the track half width, so every chevron
-// visibly pokes out of the track instead of melting into it
-const EDGE_TEXTURE_HALF_W = 7.5;
+// the >>>>> texture: every period, two 45-degree parallelograms (one per
+// half of the band) join into a ">" filled with the texture color while the
+// rest of the band keeps the base color
+const EDGE_TEXTURE_PERIOD = 20;
+const EDGE_TEXTURE_W = 8;
 // edges entering the same column gap run on parallel tracks spaced this far
 // apart instead of overlapping on the gap center line; the same spacing fans
 // edges out of a shared source port
@@ -1005,8 +1004,10 @@ export default function Milestones(props: { gameId: number }) {
       ctx.stroke();
     };
 
-    // the >>>>> texture: chevrons repeating along every segment, pointing
-    // along the flow direction
+    // the >>>>> texture: alternate coloring inside the band. Every period,
+    // two 45-degree parallelograms (one per half of the band thickness) join
+    // into a ">" filled with the texture color; the remaining band keeps the
+    // base color. Everything stays within the track bounds.
     const drawChevrons = (
       segments: { ax: number; ay: number; bx: number; by: number }[],
       color: string,
@@ -1014,24 +1015,36 @@ export default function Milestones(props: { gameId: number }) {
     ) => {
       ctx.fillStyle = color;
       ctx.globalAlpha = alpha;
+      const half = EDGE_WIDTH / 2;
+      // 45-degree slant: advancing across half the band offsets half as far
+      // along it
+      const slant = half;
       for (const seg of segments) {
         const dx = seg.bx - seg.ax;
         const dy = seg.by - seg.ay;
         const len = Math.hypot(dx, dy);
-        if (len < EDGE_TEXTURE_SPACING) continue;
+        if (len < EDGE_TEXTURE_PERIOD) continue;
         const dirX = dx / len;
         const dirY = dy / len;
         const perpX = -dirY;
         const perpY = dirX;
-        const tip = (EDGE_TEXTURE_LEN / 2) * z;
-        const half = EDGE_TEXTURE_HALF_W * z;
-        for (let d = EDGE_TEXTURE_SPACING / 2; d < len; d += EDGE_TEXTURE_SPACING) {
-          const cx = (seg.ax + dirX * d) * z + p.x;
-          const cy = (seg.ay + dirY * d) * z + p.y;
+        // point in world coords from local (u = along, v = across the band)
+        const pt = (u: number, v: number): [number, number] => [
+          (seg.ax + dirX * u + perpX * v) * z + p.x,
+          (seg.ay + dirY * u + perpY * v) * z + p.y,
+        ];
+        for (let u0 = 0; u0 + EDGE_TEXTURE_W + slant <= len; u0 += EDGE_TEXTURE_PERIOD) {
+          const [x1, y1] = pt(u0, -half);
+          const [x2, y2] = pt(u0 + EDGE_TEXTURE_W, -half);
+          const [x3, y3] = pt(u0 + EDGE_TEXTURE_W + slant, 0);
+          const [x4, y4] = pt(u0 + EDGE_TEXTURE_W, half);
+          const [x5, y5] = pt(u0, half);
           ctx.beginPath();
-          ctx.moveTo(cx + dirX * tip, cy + dirY * tip);
-          ctx.lineTo(cx - dirX * tip + perpX * half, cy - dirY * tip + perpY * half);
-          ctx.lineTo(cx - dirX * tip - perpX * half, cy - dirY * tip - perpY * half);
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.lineTo(x3, y3);
+          ctx.lineTo(x4, y4);
+          ctx.lineTo(x5, y5);
           ctx.closePath();
           ctx.fill();
         }
