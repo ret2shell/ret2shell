@@ -512,6 +512,219 @@ function autoLayout(nodes: GNode[], edges: Edge[], existing: Record<string, Node
   return incrementalLayout(nodes, edges, existing);
 }
 
+type TrackState = "solved" | "mixed" | "unsolved";
+
+type TrackSegment = { ax: number; ay: number; bx: number; by: number };
+
+type TrackDraw = {
+  state: TrackState;
+  alpha: number;
+  selected: boolean;
+  segments: TrackSegment[];
+  style: { base: string; overlayColor: string; overlayAlpha: number };
+};
+
+type AncestorChain = { nodes: Set<string>; edges: Set<string>; selected: string };
+
+/** Endpoints of an edge in world coords, or null when either side has no
+ * position yet. */
+function edgeGeometry(edge: Edge, nodeMap: Map<string, GNode>, positions: Record<string, NodePos>) {
+  const from = nodeMap.get(edge.from);
+  const to = nodeMap.get(edge.to);
+  if (!from || !to || !positions[edge.from] || !positions[edge.to]) return null;
+  return {
+    x1: positions[edge.from].x + NODE_W / 2,
+    y1: positions[edge.from].y,
+    x2: positions[edge.to].x - NODE_W / 2,
+    y2: positions[edge.to].y,
+  };
+}
+
+/** Resolves the edge set into drawable tracks: tracks sharing a target merge
+ * into one corridor (the shared vertical overlap plus the final hop), tracks
+ * sharing a source merge into one shared prefix, and a group with mixed
+ * solve states turns warning. Pure data — the canvas paints the result, so
+ * this runs on graph/selection/theme changes only, not per frame. */
+function buildTracks(
+  edgeList: Edge[],
+  ctx: {
+    nodeMap: Map<string, GNode>;
+    positions: Record<string, NodePos>;
+    solved: Set<number>;
+    chain: AncestorChain | null;
+    selectedEdge: string | null;
+    colors: { success: string; warning: string; edgeBase: string; edgeOverlay: { color: string; alpha: number } };
+  }
+): TrackDraw[] {
+  const { nodeMap, positions, solved, chain, selectedEdge: selected, colors: c } = ctx;
+  // edges sharing a successor converge into a single trunk in the column
+  // gap before the target
+  const byTarget = new Map<string, Edge[]>();
+  for (const edge of edgeList) {
+    if (!byTarget.has(edge.to)) byTarget.set(edge.to, []);
+    byTarget.get(edge.to)?.push(edge);
+  }
+  // edge sources are always challenges, so the solve state reads directly
+  // off the source id
+  const isSolved = (edge: Edge) => solved.has(nodeIdOf(edge.from));
+  const stateOf = (members: Edge[]): TrackState => {
+    const solvedCount = members.filter((edge) => isSolved(edge)).length;
+    if (solvedCount === 0) return "unsolved";
+    return solvedCount === members.length ? "solved" : "mixed";
+  };
+  const trackStyleOf = (state: TrackState) => {
+    if (state === "solved") {
+      return { base: c.success, overlayColor: EDGE_TEXTURE_SOLVE_COLOR, overlayAlpha: EDGE_TEXTURE_LIGHTEN };
+    }
+    if (state === "mixed") {
+      return { base: c.warning, overlayColor: c.edgeOverlay.color, overlayAlpha: c.edgeOverlay.alpha };
+    }
+    return { base: c.edgeBase, overlayColor: c.edgeOverlay.color, overlayAlpha: c.edgeOverlay.alpha };
+  };
+  // while a node is selected, tracks outside the ancestor chain fade out;
+  // merged tracks light up when any of their edges belongs to the chain
+  const alphaOf = (keys: string[]) => (chain ? (keys.some((k) => chain.edges.has(k)) ? 1 : DIM_ALPHA) : 1);
+  const selectedOf = (keys: string[]) => keys.some((k) => k === selected);
+
+  const bySource = new Map<string, Edge[]>();
+  for (const edge of edgeList) {
+    const list = bySource.get(edge.from) ?? [];
+    list.push(edge);
+    bySource.set(edge.from, list);
+  }
+
+  const tracks: TrackDraw[] = [];
+  // the vertical overlap shared by every member of a target group; only
+  // this interval is colored by the group, exclusive approaches keep their
+  // own solve state
+  const sharedVertical = new Map<string, { start: number; end: number } | null>();
+  const mergedDrawn = new Set<string>();
+  for (const [target, members] of byTarget) {
+    if (members.length < 2) continue;
+    let start = Number.NEGATIVE_INFINITY;
+    let end = Number.POSITIVE_INFINITY;
+    for (const member of members) {
+      const gm = edgeGeometry(member, nodeMap, positions);
+      if (!gm) continue;
+      start = Math.max(start, Math.min(gm.y1, gm.y2));
+      end = Math.min(end, Math.max(gm.y1, gm.y2));
+    }
+    sharedVertical.set(target, end > start ? { start, end } : null);
+  }
+  for (const edge of edgeList) {
+    const g = edgeGeometry(edge, nodeMap, positions);
+    if (!g) continue;
+    const mx = g.x2 - GAP_X / 2;
+    const own = isSolved(edge);
+    const ownState: TrackState = own ? "solved" : "unsolved";
+    const straight = Math.abs(g.y2 - g.y1) < 1;
+    const sourceSiblings = bySource.get(edge.from) ?? [];
+    const targetGroup = byTarget.get(edge.to) ?? [edge];
+    const sourceKeys = sourceSiblings.map(edgeKey);
+    const targetKeys = targetGroup.map(edgeKey);
+
+    // pieces in path order; consecutive pieces sharing a state join into
+    // one continuous path so the round line join keeps the elbows smooth
+    const pieces: { state: TrackState; keys: string[]; segments: TrackSegment[] }[] = [];
+
+    // shared prefix with same-source siblings, in the group's color
+    const sourceShared = sourceSiblings.length > 1;
+    const minMx = Math.min(
+      ...sourceSiblings
+        .map((sibling) => edgeGeometry(sibling, nodeMap, positions)?.x2)
+        .filter((x2): x2 is number => x2 !== undefined)
+        .map((x2) => x2 - GAP_X / 2),
+      mx
+    );
+    if (sourceShared && minMx > g.x1 + 1) {
+      pieces.push({
+        state: stateOf(sourceSiblings),
+        keys: sourceKeys,
+        segments: [{ ax: g.x1, ay: g.y1, bx: minMx, by: g.y1 }],
+      });
+    }
+
+    // the own horizontal after the shared prefix, up to the corridor; the
+    // corridor vertical splits at the group's shared overlap: exclusive
+    // approaches keep the own state, the shared overlap takes the group
+    // state; for an unshared target the own final hop closes the path
+    const ownSegments: TrackSegment[] = [];
+    const prefixEnd = sourceShared ? minMx : g.x1;
+    if (mx - prefixEnd > 1) {
+      ownSegments.push({ ax: prefixEnd, ay: g.y1, bx: mx, by: g.y1 });
+    }
+    if (!straight) {
+      const shared = targetGroup.length > 1 ? sharedVertical.get(edge.to) : undefined;
+      if (shared) {
+        if (g.y1 < shared.start - 1) {
+          ownSegments.push({ ax: mx, ay: g.y1, bx: mx, by: shared.start });
+        } else if (g.y1 > shared.end + 1) {
+          ownSegments.push({ ax: mx, ay: g.y1, bx: mx, by: shared.end });
+        }
+      } else {
+        ownSegments.push({ ax: mx, ay: g.y1, bx: mx, by: g.y2 });
+      }
+    }
+    if (targetGroup.length === 1) {
+      ownSegments.push({ ax: mx, ay: g.y2, bx: g.x2, by: g.y2 });
+    }
+    if (ownSegments.length > 0) {
+      pieces.push({ state: ownState, keys: [edgeKey(edge)], segments: ownSegments });
+    }
+
+    // the shared vertical overlap and the final hop are drawn once per
+    // group, in the group's color
+    const shared = targetGroup.length > 1 ? sharedVertical.get(edge.to) : undefined;
+    if (!straight && shared && !mergedDrawn.has(`shared:${edge.to}`)) {
+      mergedDrawn.add(`shared:${edge.to}`);
+      const towardTarget = g.y2 >= shared.end;
+      const [from, to] = towardTarget ? [shared.start, shared.end] : [shared.end, shared.start];
+      pieces.push({
+        state: stateOf(targetGroup),
+        keys: targetKeys,
+        segments: [{ ax: mx, ay: from, bx: mx, by: to }],
+      });
+    }
+    if (targetGroup.length > 1 && !mergedDrawn.has(`trunk:${edge.to}`)) {
+      mergedDrawn.add(`trunk:${edge.to}`);
+      pieces.push({
+        state: stateOf(targetGroup),
+        keys: targetKeys,
+        segments: [{ ax: mx, ay: g.y2, bx: g.x2, by: g.y2 }],
+      });
+    }
+
+    // merge consecutive same-state pieces into continuous paths
+    let run: (typeof pieces)[number] | null = null;
+    for (const piece of pieces) {
+      if (run && run.state === piece.state && run.keys.join("|") === piece.keys.join("|")) {
+        run.segments.push(...piece.segments);
+      } else {
+        if (run) {
+          tracks.push({
+            state: run.state,
+            alpha: alphaOf(run.keys),
+            selected: selectedOf(run.keys),
+            segments: run.segments,
+            style: trackStyleOf(run.state),
+          });
+        }
+        run = { ...piece, segments: [...piece.segments] };
+      }
+    }
+    if (run) {
+      tracks.push({
+        state: run.state,
+        alpha: alphaOf(run.keys),
+        selected: selectedOf(run.keys),
+        segments: run.segments,
+        style: trackStyleOf(run.state),
+      });
+    }
+  }
+  return tracks;
+}
+
 export default function Milestones(props: { gameId: number }) {
   const navigate = useNavigate();
   const game = useGame({ id: () => props.gameId });
@@ -719,18 +932,6 @@ export default function Milestones(props: { gameId: number }) {
     setPan({ x: mx - wx * nz, y: my - wy * nz });
   }
 
-  function edgeGeometry(edge: Edge, pos: Record<string, NodePos> = positions()) {
-    const from = nodeMap().get(edge.from);
-    const to = nodeMap().get(edge.to);
-    if (!from || !to || !pos[from.key] || !pos[to.key]) return null;
-    return {
-      x1: pos[from.key].x + NODE_W / 2,
-      y1: pos[from.key].y,
-      x2: pos[to.key].x - NODE_W / 2,
-      y2: pos[to.key].y,
-    };
-  }
-
   function pointToSegmentDistance(px: number, py: number, ax: number, ay: number, bx: number, by: number) {
     const lenSq = (bx - ax) * (bx - ax) + (by - ay) * (by - ay) || 1;
     const u = Math.max(0, Math.min(1, ((px - ax) * (bx - ax) + (py - ay) * (by - ay)) / lenSq));
@@ -762,7 +963,7 @@ export default function Milestones(props: { gameId: number }) {
   function hitTestEdge(world: { x: number; y: number }): string | null {
     const threshold = EDGE_HIT_TOLERANCE_PX / zoom();
     for (const edge of validEdges()) {
-      const g = edgeGeometry(edge);
+      const g = edgeGeometry(edge, nodeMap(), positions());
       if (!g) continue;
       for (const seg of elbowSegments(g).segments) {
         if (pointToSegmentDistance(world.x, world.y, seg.ax, seg.ay, seg.bx, seg.by) < threshold) {
@@ -794,7 +995,7 @@ export default function Milestones(props: { gameId: number }) {
     for (let iter = 0; iter < MAX_OVERLAP_ITERATIONS; iter++) {
       let moved = false;
       for (const edge of edgeList) {
-        const g = edgeGeometry(edge, adjusted);
+        const g = edgeGeometry(edge, nm, adjusted);
         if (!g) continue;
         for (const seg of elbowSegments(g).segments) {
           if (Math.abs(seg.ay - seg.by) > 1) continue;
@@ -864,6 +1065,19 @@ export default function Milestones(props: { gameId: number }) {
     }
   });
 
+  // the drawable tracks (merged corridors and prefixes), rebuilt only when
+  // the graph, the selection or the theme changes — not per animation frame
+  const tracks = createMemo(() =>
+    buildTracks(validEdges(), {
+      nodeMap: nodeMap(),
+      positions: positions(),
+      solved: solvedIds(),
+      chain: ancestorChain(),
+      selectedEdge: selectedEdge(),
+      colors: colors(),
+    })
+  );
+
   function draw() {
     // read every reactive source before the guards, otherwise the effect
     // tracks nothing when the canvas has not mounted yet and never redraws
@@ -871,9 +1085,7 @@ export default function Milestones(props: { gameId: number }) {
     const z = zoom();
     const p = pan();
     const c = colors();
-    const edgeList = validEdges();
-    const selected = selectedEdge();
-    const solved = solvedIds();
+    const trackList = tracks();
     const conn = connecting();
     positions();
     nodeMap();
@@ -906,17 +1118,6 @@ export default function Milestones(props: { gameId: number }) {
       ctx.globalAlpha = 1;
     }
 
-    // edges sharing a successor converge into a single trunk in the column
-    // gap before the target
-    const byTarget = new Map<string, Edge[]>();
-    for (const edge of edgeList) {
-      if (!byTarget.has(edge.to)) byTarget.set(edge.to, []);
-      byTarget.get(edge.to)?.push(edge);
-    }
-    const chain = ancestorChain();
-    const isSolved = (edge: Edge) => nodeKindOf(edge.from) === "challenge" && solved.has(nodeIdOf(edge.from));
-
-    type TrackSegment = { ax: number; ay: number; bx: number; by: number };
     // every track dimension is world units scaled by the zoom, so zooming
     // reads as zooming into the drawing
     const strokeTrack = (segments: TrackSegment[], color: string, alpha: number, width: number) => {
@@ -988,179 +1189,14 @@ export default function Milestones(props: { gameId: number }) {
       ctx.globalAlpha = 1;
     };
 
-    type TrackState = "solved" | "mixed" | "unsolved";
-    type TrackDraw = {
-      state: TrackState;
-      alpha: number;
-      selected: boolean;
-      segments: TrackSegment[];
-      style: { base: string; overlayColor: string; overlayAlpha: number };
-    };
-    // overlap groups: tracks sharing a target merge into one corridor (the
-    // shared vertical overlap plus the final hop), tracks sharing a source
-    // merge into one shared prefix; a group with mixed solve states turns
-    // warning
-    const stateOf = (members: Edge[]): TrackState => {
-      const solvedCount = members.filter((edge) => isSolved(edge)).length;
-      if (solvedCount === 0) return "unsolved";
-      return solvedCount === members.length ? "solved" : "mixed";
-    };
-    const trackStyleOf = (state: TrackState) => {
-      if (state === "solved") {
-        return { base: c.success, overlayColor: EDGE_TEXTURE_SOLVE_COLOR, overlayAlpha: EDGE_TEXTURE_LIGHTEN };
-      }
-      if (state === "mixed") {
-        return { base: c.warning, overlayColor: c.edgeOverlay.color, overlayAlpha: c.edgeOverlay.alpha };
-      }
-      return { base: c.edgeBase, overlayColor: c.edgeOverlay.color, overlayAlpha: c.edgeOverlay.alpha };
-    };
-    // while a node is selected, tracks outside the ancestor chain fade out;
-    // merged tracks light up when any of their edges belongs to the chain
-    const alphaOf = (keys: string[]) => (chain ? (keys.some((k) => chain.edges.has(k)) ? 1 : DIM_ALPHA) : 1);
-    const selectedOf = (keys: string[]) => keys.some((k) => k === selected);
-
-    const bySource = new Map<string, Edge[]>();
-    for (const edge of edgeList) {
-      const list = bySource.get(edge.from) ?? [];
-      list.push(edge);
-      bySource.set(edge.from, list);
-    }
-
-    const tracks: TrackDraw[] = [];
-    // the vertical overlap shared by every member of a target group; only
-    // this interval is colored by the group, exclusive approaches keep their
-    // own solve state
-    const sharedVertical = new Map<string, { start: number; end: number } | null>();
-    const mergedDrawn = new Set<string>();
-    for (const [target, members] of byTarget) {
-      if (members.length < 2) continue;
-      let start = Number.NEGATIVE_INFINITY;
-      let end = Number.POSITIVE_INFINITY;
-      for (const member of members) {
-        const gm = edgeGeometry(member);
-        if (!gm) continue;
-        start = Math.max(start, Math.min(gm.y1, gm.y2));
-        end = Math.min(end, Math.max(gm.y1, gm.y2));
-      }
-      sharedVertical.set(target, end > start ? { start, end } : null);
-    }
-    for (const edge of edgeList) {
-      const g = edgeGeometry(edge);
-      if (!g) continue;
-      const mx = g.x2 - GAP_X / 2;
-      const own = isSolved(edge);
-      const ownState: TrackState = own ? "solved" : "unsolved";
-      const straight = Math.abs(g.y2 - g.y1) < 1;
-      const sourceSiblings = bySource.get(edge.from) ?? [];
-      const targetGroup = byTarget.get(edge.to) ?? [edge];
-      const sourceKeys = sourceSiblings.map(edgeKey);
-      const targetKeys = targetGroup.map(edgeKey);
-
-      // pieces in path order; consecutive pieces sharing a state join into
-      // one continuous path so the round line join keeps the elbows smooth
-      const pieces: { state: TrackState; keys: string[]; segments: TrackSegment[] }[] = [];
-
-      // shared prefix with same-source siblings, in the group's color
-      const sourceShared = sourceSiblings.length > 1;
-      const minMx = Math.min(
-        ...sourceSiblings
-          .map((sibling) => edgeGeometry(sibling)?.x2)
-          .filter((x2): x2 is number => x2 !== undefined)
-          .map((x2) => x2 - GAP_X / 2),
-        mx
-      );
-      if (sourceShared && minMx > g.x1 + 1) {
-        pieces.push({
-          state: stateOf(sourceSiblings),
-          keys: sourceKeys,
-          segments: [{ ax: g.x1, ay: g.y1, bx: minMx, by: g.y1 }],
-        });
-      }
-
-      // the own horizontal after the shared prefix, up to the corridor; the
-      // corridor vertical splits at the group's shared overlap: exclusive
-      // approaches keep the own state, the shared overlap takes the group
-      // state; for an unshared target the own final hop closes the path
-      const ownSegments: TrackSegment[] = [];
-      const prefixEnd = sourceShared ? minMx : g.x1;
-      if (mx - prefixEnd > 1) {
-        ownSegments.push({ ax: prefixEnd, ay: g.y1, bx: mx, by: g.y1 });
-      }
-      if (!straight) {
-        const shared = targetGroup.length > 1 ? sharedVertical.get(edge.to) : undefined;
-        if (shared) {
-          if (g.y1 < shared.start - 1) {
-            ownSegments.push({ ax: mx, ay: g.y1, bx: mx, by: shared.start });
-          } else if (g.y1 > shared.end + 1) {
-            ownSegments.push({ ax: mx, ay: g.y1, bx: mx, by: shared.end });
-          }
-        } else {
-          ownSegments.push({ ax: mx, ay: g.y1, bx: mx, by: g.y2 });
-        }
-      }
-      if (targetGroup.length === 1) {
-        ownSegments.push({ ax: mx, ay: g.y2, bx: g.x2, by: g.y2 });
-      }
-      if (ownSegments.length > 0) {
-        pieces.push({ state: ownState, keys: [edgeKey(edge)], segments: ownSegments });
-      }
-
-      // the shared vertical overlap and the final hop are drawn once per
-      // group, in the group's color
-      const shared = targetGroup.length > 1 ? sharedVertical.get(edge.to) : undefined;
-      if (!straight && shared && !mergedDrawn.has(`shared:${edge.to}`)) {
-        mergedDrawn.add(`shared:${edge.to}`);
-        const towardTarget = g.y2 >= shared.end;
-        const [from, to] = towardTarget ? [shared.start, shared.end] : [shared.end, shared.start];
-        pieces.push({
-          state: stateOf(targetGroup),
-          keys: targetKeys,
-          segments: [{ ax: mx, ay: from, bx: mx, by: to }],
-        });
-      }
-      if (targetGroup.length > 1 && !mergedDrawn.has(`trunk:${edge.to}`)) {
-        mergedDrawn.add(`trunk:${edge.to}`);
-        pieces.push({
-          state: stateOf(targetGroup),
-          keys: targetKeys,
-          segments: [{ ax: mx, ay: g.y2, bx: g.x2, by: g.y2 }],
-        });
-      }
-
-      // merge consecutive same-state pieces into continuous paths
-      let run: (typeof pieces)[number] | null = null;
-      for (const piece of pieces) {
-        if (run && run.state === piece.state && run.keys.join("|") === piece.keys.join("|")) {
-          run.segments.push(...piece.segments);
-        } else {
-          if (run) {
-            tracks.push({
-              state: run.state,
-              alpha: alphaOf(run.keys),
-              selected: selectedOf(run.keys),
-              segments: run.segments,
-              style: trackStyleOf(run.state),
-            });
-          }
-          run = { ...piece, segments: [...piece.segments] };
-        }
-      }
-      if (run) {
-        tracks.push({
-          state: run.state,
-          alpha: alphaOf(run.keys),
-          selected: selectedOf(run.keys),
-          segments: run.segments,
-          style: trackStyleOf(run.state),
-        });
-      }
-    }
-
     // solved tracks first, mixed and unsolved on top; within each group the
     // outline, base and texture layers are drawn in separate passes so that
     // joined tracks never cut their outlines through another track's base
     // stroke
-    const ordered = [...tracks.filter((t) => t.state === "solved"), ...tracks.filter((t) => t.state !== "solved")];
+    const ordered = [
+      ...trackList.filter((t) => t.state === "solved"),
+      ...trackList.filter((t) => t.state !== "solved"),
+    ];
     for (const t of ordered) {
       strokeTrack(t.segments, t.selected ? c.primary : c.divider, t.alpha, EDGE_WIDTH + EDGE_BORDER_EXTRA);
     }
