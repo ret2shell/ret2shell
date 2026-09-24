@@ -103,10 +103,6 @@ const EDGE_WIDTH = 8;
 // rest of the band keeps the base color
 const EDGE_TEXTURE_PERIOD = 20;
 const EDGE_TEXTURE_W = 8;
-// edges entering the same column gap run on parallel tracks spaced this far
-// apart instead of overlapping on the gap center line; the same spacing fans
-// edges out of a shared source port
-const EDGE_TRACK_SPACING = EDGE_WIDTH + 4;
 // the chevron texture is a translucent white or black overlay of the track
 // base: light themes darken the track slightly, dark themes lighten it, and
 // solved tracks always lighten
@@ -692,14 +688,11 @@ export default function Milestones(props: { gameId: number }) {
     const from = nodeMap().get(edge.from);
     const to = nodeMap().get(edge.to);
     if (!from || !to || !pos[from.key] || !pos[to.key]) return null;
-    const key = edgeKey(edge);
     return {
       x1: pos[from.key].x + NODE_W,
-      // edges fan out from the source port so parallel departures stay apart
-      y1: pos[from.key].y + from.h / 2 + (edgeFans().get(key) ?? 0),
+      y1: pos[from.key].y + from.h / 2,
       x2: pos[to.key].x,
       y2: pos[to.key].y + to.h / 2,
-      lane: edgeLanes().get(key) ?? 0,
     };
   }
 
@@ -713,8 +706,8 @@ export default function Milestones(props: { gameId: number }) {
    * The vertical segment runs at the center of the column gap right before
    * the target column; since node x positions snap to the column grid, this
    * always lands on the vertical grid line of the gap. */
-  function elbowSegments(g: { x1: number; y1: number; x2: number; y2: number; lane?: number }) {
-    const mx = g.x2 - GAP_X / 2 + (g.lane ?? 0);
+  function elbowSegments(g: { x1: number; y1: number; x2: number; y2: number }) {
+    const mx = g.x2 - GAP_X / 2;
     if (Math.abs(g.y2 - g.y1) < 1) {
       return { segments: [{ ax: g.x1, ay: g.y1, bx: g.x2, by: g.y2 }], corners: [] as { x: number; y: number }[] };
     }
@@ -730,63 +723,6 @@ export default function Milestones(props: { gameId: number }) {
       ],
     };
   }
-
-  // corridor tracks: edges entering the same column gap get parallel lane
-  // offsets (per target, since edges sharing a target are one logical
-  // corridor), ordered by target y so adjacent targets take adjacent lanes
-  const edgeLanes = createMemo(() => {
-    const lanes = new Map<string, number>();
-    const pos = positions();
-    const targetsByCorridor = new Map<number, string[]>();
-    for (const edge of validEdges()) {
-      const target = pos[edge.to];
-      if (!target) continue;
-      const corridor = columnOf(target.x);
-      const list = targetsByCorridor.get(corridor) ?? [];
-      if (!list.includes(edge.to)) {
-        list.push(edge.to);
-        targetsByCorridor.set(corridor, list);
-      }
-    }
-    for (const [corridor, targets] of targetsByCorridor) {
-      targets.sort((a, b) => (pos[a]?.y ?? 0) - (pos[b]?.y ?? 0) || a.localeCompare(b));
-      const n = targets.length;
-      for (const [i, target] of targets.entries()) {
-        const offset = (i - (n - 1) / 2) * EDGE_TRACK_SPACING;
-        for (const edge of validEdges()) {
-          if (edge.to === target && columnOf(pos[edge.to]?.x ?? 0) === corridor) {
-            lanes.set(edgeKey(edge), offset);
-          }
-        }
-      }
-    }
-    return lanes;
-  });
-
-  // fan-out: edges leaving the same source port start at staggered heights
-  // so their first horizontal runs stay parallel instead of stacked
-  const edgeFans = createMemo(() => {
-    const fans = new Map<string, number>();
-    const pos = positions();
-    const bySource = new Map<string, Edge[]>();
-    for (const edge of validEdges()) {
-      if (!pos[edge.from] || !pos[edge.to]) continue;
-      const list = bySource.get(edge.from) ?? [];
-      list.push(edge);
-      bySource.set(edge.from, list);
-    }
-    for (const [source, edges] of bySource) {
-      edges.sort((a, b) => (pos[a.to]?.y ?? 0) - (pos[b.to]?.y ?? 0) || a.to.localeCompare(b.to));
-      const from = nodeMap().get(source);
-      const maxFan = from ? from.h / 2 - EDGE_WIDTH : 0;
-      const n = edges.length;
-      for (const [i, edge] of edges.entries()) {
-        const raw = (i - (n - 1) / 2) * EDGE_TRACK_SPACING;
-        fans.set(edgeKey(edge), Math.max(-maxFan, Math.min(maxFan, raw)));
-      }
-    }
-    return fans;
-  });
 
   function hitTestEdge(world: { x: number; y: number }): string | null {
     const threshold = EDGE_HIT_TOLERANCE_PX / zoom();
@@ -1066,7 +1002,7 @@ export default function Milestones(props: { gameId: number }) {
         selected: members.some((e) => edgeKey(e) === selected),
         alpha: alphaOf(key),
         segments: [],
-        trunk: { ax: g.x2 - GAP_X / 2 + g.lane, ay: g.y2, bx: g.x2, by: g.y2 },
+        trunk: { ax: g.x2 - GAP_X / 2, ay: g.y2, bx: g.x2, by: g.y2 },
         style: trackStyleOf(solvedFlag),
       });
     }
