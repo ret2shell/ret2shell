@@ -14,6 +14,7 @@ import {
 } from "@api/milestone";
 import { Dialog } from "@ark-ui/solid";
 import { mediaPath } from "@lib/utils/media";
+import type { Challenge } from "@models/challenge";
 import type { Milestone } from "@models/milestone";
 import { useNavigate } from "@solidjs/router";
 import { isAdminOfGame } from "@storage/game";
@@ -76,6 +77,10 @@ function edgeKey(edge: Edge) {
   return `${edge.from}->${edge.to}`;
 }
 
+/** Reads a resolved theme color by mounting a hidden probe element with the
+ * given Tailwind class. The class must be emitted somewhere in the app for
+ * this to work — when no element ever uses it, the computed style stays
+ * empty and `fallback` wins silently. */
 function probeColor(cls: string, fallback: string, property: "color" | "backgroundColor" = "color") {
   const el = document.createElement("span");
   el.className = cls;
@@ -742,6 +747,7 @@ export default function Milestones(props: { gameId: number }) {
   const admin = createMemo(() => isAdminOfGame(game.data));
   const solvedIds = createMemo(() => new Set((solves.data ?? []).map((s) => s.challenge_id)));
   const challengeMap = createMemo(() => new Map((challenges.data?.[0] ?? []).map((c) => [c.id, c])));
+  const milestoneMap = createMemo(() => new Map((milestones.data ?? []).map((m) => [m.id, m])));
 
   const nodes = createMemo<GNode[]>(() => [
     ...(challenges.data?.[0] ?? []).map((c) => ({
@@ -775,7 +781,9 @@ export default function Milestones(props: { gameId: number }) {
 
   const [baseline, setBaseline] = createSignal<Edge[]>([]);
   const [edges, setEdges] = createSignal<Edge[]>([]);
-  const validEdges = createMemo(() => edges().filter((e) => nodeSet().has(e.from) && nodeSet().has(e.to)));
+  // an edge is valid when both endpoints are on the canvas
+  const isValidEdge = (edge: Edge) => nodeSet().has(edge.from) && nodeSet().has(edge.to);
+  const validEdges = createMemo(() => edges().filter(isValidEdge));
 
   // live prerequisite challenge ids of each node, derived from the edge set
   const prerequisitesByNode = createMemo(() => {
@@ -819,7 +827,7 @@ export default function Milestones(props: { gameId: number }) {
 
   const dirty = createMemo(() => {
     const pack = (list: Edge[]) => list.map(edgeKey).sort().join("|");
-    return pack(validEdges()) !== pack(baseline().filter((e) => nodeSet().has(e.from) && nodeSet().has(e.to)));
+    return pack(validEdges()) !== pack(baseline().filter(isValidEdge));
   });
 
   // follow server state whenever there is no local unsaved edit
@@ -843,8 +851,7 @@ export default function Milestones(props: { gameId: number }) {
   createEffect(
     on(nodes, (ns) => {
       if (!challenges.data || !milestones.data) return;
-      const set = untrack(nodeSet);
-      const current = untrack(baseEdges).filter((e) => set.has(e.from) && set.has(e.to));
+      const current = untrack(() => baseEdges().filter(isValidEdge));
       setPositions((prev) => {
         if (ns.every((node) => prev[node.key])) return prev;
         return autoLayout(ns, current, prev);
@@ -863,7 +870,25 @@ export default function Milestones(props: { gameId: number }) {
   const [formOpen, setFormOpen] = createSignal(false);
   const [editing, setEditing] = createSignal<Milestone | null>(null);
 
-  const detailMilestone = createMemo(() => milestones.data?.find((m) => m.id === detailId()) ?? null);
+  const detailMilestone = createMemo(() => {
+    const id = detailId();
+    return id === null ? null : (milestoneMap().get(id) ?? null);
+  });
+
+  // while a node is selected, everything outside its ancestor chain fades out
+  const dimmedClass = (key: string) => {
+    const chain = ancestorChain();
+    return chain && !chain.nodes.has(key) && key !== chain.selected ? "opacity-40" : "";
+  };
+
+  // solved: success border; locked while any predecessor is unsolved;
+  // unlocked (primary border) otherwise, including no predecessors
+  const challengeBorderClass = (node: GNode) => {
+    if (solvedIds().has(node.id)) return "border-success hover:border-success";
+    const prereqs = prerequisitesByNode().get(node.key) ?? [];
+    const locked = prereqs.some((id) => !solvedIds().has(id));
+    return locked ? "border-layer-content/20" : "border-primary/50 hover:border-primary";
+  };
 
   // batch save runs sequentially and reports once, so the per-item toasts and
   // invalidations of the mutation hooks are silenced there
@@ -1489,7 +1514,7 @@ export default function Milestones(props: { gameId: number }) {
   }
 
   function resetChanges() {
-    setEdges(baseline().filter((e) => nodeSet().has(e.from) && nodeSet().has(e.to)));
+    setEdges(baseline().filter(isValidEdge));
     setSelectedEdge(null);
   }
 
@@ -1505,7 +1530,7 @@ export default function Milestones(props: { gameId: number }) {
         avatar,
       });
     } else {
-      const milestone = milestones.data?.find((m) => `m${m.id}` === key);
+      const milestone = milestoneMap().get(nodeIdOf(key));
       if (!milestone) return;
       await milestoneAvatarMutation.mutateAsync({
         game_id: props.gameId,
@@ -1682,26 +1707,13 @@ export default function Milestones(props: { gameId: number }) {
                             class={clsx(
                               "absolute flex items-center gap-2 px-3 rounded-lg border-2 backdrop-blur-sm cursor-pointer transition-colors pointer-events-auto",
                               "bg-layer/80",
-                              // while a node is selected, everything outside
-                              // its ancestor chain fades out
-                              ancestorChain() &&
-                                !ancestorChain()!.nodes.has(node.key) &&
-                                node.key !== ancestorChain()!.selected &&
-                                "opacity-40",
+                              dimmedClass(node.key),
                               node.key === selectedNode() && "ring-2 ring-primary/70",
-                              // solved: success border; locked while any
-                              // predecessor is unsolved; unlocked (primary
-                              // border) otherwise, including no predecessors
-                              (() => {
-                                if (solvedIds().has(node.id)) return "border-success hover:border-success";
-                                const prereqs = prerequisitesByNode().get(node.key) ?? [];
-                                const locked = prereqs.some((id) => !solvedIds().has(id));
-                                return locked ? "border-layer-content/20" : "border-primary/50 hover:border-primary";
-                              })()
+                              challengeBorderClass(node)
                             )}
                             style={{
                               left: `${pos().x - NODE_W / 2}px`,
-                              top: `${pos().y - CHALLENGE_H / 2}px`,
+                              top: `${pos().y - node.h / 2}px`,
                               width: `${NODE_W}px`,
                               height: `${CHALLENGE_H}px`,
                             }}
@@ -1739,7 +1751,7 @@ export default function Milestones(props: { gameId: number }) {
                           </div>
                         </Match>
                         <Match when={node.kind === "milestone"}>
-                          <Show when={milestones.data?.find((m) => m.id === node.id)}>
+                          <Show when={milestoneMap().get(node.id)}>
                             {(milestone) => {
                               const prereqs = createMemo(() => prerequisitesByNode().get(node.key) ?? []);
                               const solvedCount = createMemo(
@@ -1755,16 +1767,13 @@ export default function Milestones(props: { gameId: number }) {
                                   class={clsx(
                                     "absolute flex flex-col justify-center gap-1 px-3 rounded-lg border-2 backdrop-blur-sm cursor-pointer transition-colors pointer-events-auto",
                                     "bg-layer/80 hover:border-primary/60",
-                                    ancestorChain() &&
-                                      !ancestorChain()!.nodes.has(node.key) &&
-                                      node.key !== ancestorChain()!.selected &&
-                                      "opacity-40",
+                                    dimmedClass(node.key),
                                     node.key === selectedNode() && "ring-2 ring-primary/70",
                                     achieved() ? "border-success/60" : "border-layer-content/10"
                                   )}
                                   style={{
                                     left: `${pos().x - NODE_W / 2}px`,
-                                    top: `${pos().y - MILESTONE_H / 2}px`,
+                                    top: `${pos().y - node.h / 2}px`,
                                     width: `${NODE_W}px`,
                                     height: `${MILESTONE_H}px`,
                                   }}
@@ -1834,6 +1843,7 @@ export default function Milestones(props: { gameId: number }) {
         prerequisites={prerequisitesByNode().get(`m${detailId()}`) ?? []}
         admin={admin()}
         solvedIds={solvedIds()}
+        challengeMap={challengeMap()}
         onClose={() => setDetailId(null)}
         onEdit={(milestone) => {
           setEditing(milestone);
@@ -1966,11 +1976,10 @@ function MilestoneDetailDialog(props: {
   prerequisites: number[];
   admin: boolean;
   solvedIds: Set<number>;
+  challengeMap: Map<number, Challenge>;
   onClose: () => void;
   onEdit: (milestone: Milestone) => void;
 }) {
-  const challenges = useChallenges({ game_id: () => props.gameId });
-  const challengeMap = createMemo(() => new Map((challenges.data?.[0] ?? []).map((c) => [c.id, c])));
   const deleteMutation = useDeleteMilestoneMutation({
     onSuccess: () => props.onClose(),
   });
@@ -2036,8 +2045,8 @@ function MilestoneDetailDialog(props: {
                                   : "icon-[fluent--flag-20-regular] opacity-60"
                               )}
                             />
-                            <span class="flex-1 truncate">{challengeMap().get(id)?.name ?? `#${id}`}</span>
-                            <span class="shrink-0 opacity-60">{challengeMap().get(id)?.score} pts</span>
+                            <span class="flex-1 truncate">{props.challengeMap.get(id)?.name ?? `#${id}`}</span>
+                            <span class="shrink-0 opacity-60">{props.challengeMap.get(id)?.score} pts</span>
                           </div>
                         )}
                       </For>
@@ -2149,12 +2158,16 @@ function MilestoneFormDialog(props: {
       avatar: props.milestone?.avatar ?? null,
       // prerequisites are managed by drag-connecting on the canvas
       prerequisites: props.milestone?.prerequisites ?? [],
-    } as Milestone;
+    };
 
-    if (props.milestone) {
-      await updateMutation.mutateAsync({ game_id: props.gameId, milestone });
-    } else {
-      await createMutation.mutateAsync({ game_id: props.gameId, milestone });
+    try {
+      if (props.milestone) {
+        await updateMutation.mutateAsync({ game_id: props.gameId, milestone });
+      } else {
+        await createMutation.mutateAsync({ game_id: props.gameId, milestone });
+      }
+    } catch {
+      // the mutation hooks already toast failures
     }
   }
 
