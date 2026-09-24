@@ -1420,7 +1420,9 @@
         "cycle": "接続できません：循環依存が発生します",
         "duplicate": "この依存関係は既に存在します",
         "deleteEdge": "エッジを削除",
-        "fit": "表示に合わせる"
+        "fit": "表示に合わせる",
+        "zoomIn": "拡大",
+        "zoomOut": "縮小"
       },
       "errors": {
         "fetchList": {

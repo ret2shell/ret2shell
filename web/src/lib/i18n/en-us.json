@@ -1420,7 +1420,9 @@
         "cycle": "Cannot connect: this would create a dependency cycle",
         "duplicate": "This dependency already exists",
         "deleteEdge": "Delete edge",
-        "fit": "Fit to view"
+        "fit": "Fit to view",
+        "zoomIn": "Zoom in",
+        "zoomOut": "Zoom out"
       },
       "errors": {
         "fetchList": {

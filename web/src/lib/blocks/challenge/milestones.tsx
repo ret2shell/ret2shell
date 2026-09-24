@@ -91,6 +91,8 @@ const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 2;
 // fitting the view never zooms in beyond 100%
 const MAX_FIT_ZOOM = 1;
+// multiplicative step of the toolbar zoom in/out buttons
+const ZOOM_STEP = 1.2;
 const WHEEL_ZOOM_SPEED = 0.0015;
 // pointer moves below this distance count as clicks instead of drags
 const DRAG_THRESHOLD_PX = 4;
@@ -112,6 +114,8 @@ const EDGE_FLOW_SPEED = 30;
 // solved tracks always lighten
 const EDGE_TEXTURE_DARKEN = 0.18;
 const EDGE_TEXTURE_LIGHTEN = 0.35;
+// solved tracks and in-progress connections lighten via a white overlay
+const EDGE_TEXTURE_SOLVE_COLOR = "#ffffff";
 // tracks carry a 1px outline in the divider color
 const EDGE_BORDER_EXTRA = 2;
 // non-ancestor edges fade to this alpha while a node is selected
@@ -133,6 +137,8 @@ const FALLBACK_PRIMARY_COLOR = "#3b82f6";
 const FALLBACK_SUCCESS_COLOR = "#22c55e";
 const FALLBACK_DIVIDER_COLOR = "rgba(136, 136, 136, 0.1)";
 const FALLBACK_WARNING_COLOR = "#f59e0b";
+// upper bound of the milestone bonus score, mirrored from the backend model
+const MAX_BONUS_SCORE = 10000;
 
 function clampZoom(zoom: number) {
   return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom));
@@ -992,7 +998,7 @@ export default function Milestones(props: { gameId: number }) {
     };
     const trackStyleOf = (state: TrackState) => {
       if (state === "solved") {
-        return { base: c.success, overlayColor: "#ffffff", overlayAlpha: EDGE_TEXTURE_LIGHTEN };
+        return { base: c.success, overlayColor: EDGE_TEXTURE_SOLVE_COLOR, overlayAlpha: EDGE_TEXTURE_LIGHTEN };
       }
       if (state === "mixed") {
         return { base: c.warning, overlayColor: c.edgeOverlay.color, overlayAlpha: c.edgeOverlay.alpha };
@@ -1163,7 +1169,7 @@ export default function Milestones(props: { gameId: number }) {
         const elbow = elbowSegments({ x1: pos.x + NODE_W / 2, y1: pos.y, x2: conn.x, y2: conn.y });
         strokeTrack(elbow.segments, c.divider, 1, EDGE_WIDTH + EDGE_BORDER_EXTRA);
         strokeTrack(elbow.segments, c.primary, 1, EDGE_WIDTH);
-        drawChevrons(elbow.segments, "#ffffff", EDGE_TEXTURE_LIGHTEN);
+        drawChevrons(elbow.segments, EDGE_TEXTURE_SOLVE_COLOR, EDGE_TEXTURE_LIGHTEN);
       }
     }
   }
@@ -1522,10 +1528,10 @@ export default function Milestones(props: { gameId: number }) {
             </Tag>
           </Show>
         </Show>
-        <Button ghost square title="-" onClick={() => zoomBy(1 / 1.2)}>
+        <Button ghost square title={t("challenge.milestone.editor.zoomOut")} onClick={() => zoomBy(1 / ZOOM_STEP)}>
           <span class="shrink-0 icon-[fluent--zoom-out-20-regular] w-5 h-5" />
         </Button>
-        <Button ghost square title="+" onClick={() => zoomBy(1.2)}>
+        <Button ghost square title={t("challenge.milestone.editor.zoomIn")} onClick={() => zoomBy(ZOOM_STEP)}>
           <span class="shrink-0 icon-[fluent--zoom-in-20-regular] w-5 h-5" />
         </Button>
         <Button ghost square title={t("challenge.milestone.editor.fit")} onClick={fitView}>
@@ -2061,14 +2067,14 @@ function MilestoneFormDialog(props: {
     }
     if (!valid) return;
 
-    const milestone = {
+    const milestone: Milestone = {
       id: props.milestone?.id ?? 0,
       created_at: props.milestone?.created_at ?? DateTime.now(),
       updated_at: DateTime.now(),
       game_id: props.gameId,
       name: name().trim(),
       description: description().trim(),
-      bonus_score: Math.min(10000, Math.max(0, bonusScore())),
+      bonus_score: Math.min(MAX_BONUS_SCORE, Math.max(0, bonusScore())),
       // the avatar is managed by the node icon on the canvas
       avatar: props.milestone?.avatar ?? null,
       // prerequisites are managed by drag-connecting on the canvas
@@ -2146,7 +2152,7 @@ function MilestoneFormDialog(props: {
                   name="bonus_score"
                   type="number"
                   min={0}
-                  max={10000}
+                  max={MAX_BONUS_SCORE}
                   value={bonusScore()}
                   onInput={(e) => setBonusScore(Number(e.currentTarget.value) || 0)}
                   required

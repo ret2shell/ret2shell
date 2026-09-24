@@ -1420,7 +1420,9 @@
         "cycle": "無法連線：會產生循環依賴",
         "duplicate": "該依賴已存在",
         "deleteEdge": "刪除連線",
-        "fit": "適應畫布"
+        "fit": "適應畫布",
+        "zoomIn": "放大",
+        "zoomOut": "縮小"
       },
       "errors": {
         "fetchList": {
