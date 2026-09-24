@@ -165,10 +165,6 @@ function snapX(x: number) {
   return columnX(columnOf(x));
 }
 
-function snapY(y: number) {
-  return snapGrid(y);
-}
-
 /** Snaps any world coordinate to the nearest grid line. */
 function snapGrid(v: number) {
   return Math.round(v / GRID_Y) * GRID_Y;
@@ -212,15 +208,16 @@ function splitComponents(keys: string[], graph: Graph) {
   for (const key of keys) {
     if (visited.has(key)) continue;
     const component: string[] = [];
-    const queue = [key];
+    // depth-first traversal: pop from the tail of the stack
+    const stack = [key];
     visited.add(key);
-    while (queue.length > 0) {
-      const current = queue.pop()!;
+    while (stack.length > 0) {
+      const current = stack.pop()!;
       component.push(current);
       for (const next of graph.adjacent.get(current) ?? []) {
         if (visited.has(next)) continue;
         visited.add(next);
-        queue.push(next);
+        stack.push(next);
       }
     }
     component.sort();
@@ -1320,7 +1317,7 @@ export default function Milestones(props: { gameId: number }) {
       draggingKey = node.key;
       setPositions((prev) => ({
         ...prev,
-        [node.key]: { x: snapX(startPos.x + dx / zoom()), y: snapY(startPos.y + dy / zoom()) },
+        [node.key]: { x: snapX(startPos.x + dx / zoom()), y: snapGrid(startPos.y + dy / zoom()) },
       }));
     };
     const onUp = () => {

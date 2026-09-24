@@ -30,5 +30,5 @@ export function usePrerequisiteGating(props: { gameId: () => number; challengeId
     }))
   );
 
-  return { unsatisfied, gated, locked, lockedChallenges };
+  return { gated, locked, lockedChallenges };
 }
