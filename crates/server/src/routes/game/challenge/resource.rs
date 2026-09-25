@@ -224,16 +224,32 @@ pub(super) async fn update_challenge(
   Ok(Json(challenge))
 }
 
-/// Updates only the prerequisites of a challenge. Unlike `update_challenge`,
-/// this endpoint does not require the full challenge model (content etc.) and
-/// is allowed on published challenges, since prerequisites do not alter the
-/// scoring configuration.
+/// Payload of [`update_challenge_prerequisites`]. `unlock_limit` rides along
+/// because it only makes sense together with the prerequisite set: how many
+/// of them must be solved before the challenge unlocks, `0` meaning all.
+#[derive(Deserialize, Validate)]
+pub(super) struct UpdateChallengePrerequisitesRequest {
+  pub prerequisites: challenge::PrerequisiteList,
+  #[validate(range(
+    min = 0,
+    max = 1000,
+    message = "challenge unlock limit must be between 0 and 1000"
+  ))]
+  pub unlock_limit: i32,
+}
+
+/// Updates only the prerequisites and the unlock limit of a challenge.
+/// Unlike `update_challenge`, this endpoint does not require the full
+/// challenge model (content etc.) and is allowed on published challenges,
+/// since neither field alters the scoring configuration.
 pub(super) async fn update_challenge_prerequisites(
   State(ref db): State<Database>, State(cache): State<Cache>, State(bucket): State<Bucket>,
   Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
   Extension(prev_challenge): Extension<challenge::Model>,
-  Json(prerequisites): Json<challenge::PrerequisiteList>,
+  Json(req): Json<UpdateChallengePrerequisitesRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  req.validate()?;
+  let prerequisites = req.prerequisites;
   let txn = db.conn.begin().await?;
   let referenced =
     challenge::resolve_prerequisites(&txn, game.id, Some(prev_challenge.id), &prerequisites)
@@ -244,6 +260,7 @@ pub(super) async fn update_challenge_prerequisites(
     &txn,
     challenge::Model {
       prerequisites,
+      unlock_limit: req.unlock_limit,
       ..prev_challenge
     },
   )

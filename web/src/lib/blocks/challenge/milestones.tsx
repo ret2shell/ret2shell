@@ -2,12 +2,16 @@ import { handleHttpError, inflyClient, toastSuccess } from "@api";
 import {
   useChallenges,
   useUpdateChallengeAvatarMutation,
-  useUpdateChallengeMutation,
   useUpdateChallengePrerequisitesMutation,
 } from "@api/challenge";
 import { useGame, useSelfSolves } from "@api/game";
 import { uploadMedia } from "@api/media";
-import { useCreateMilestoneMutation, useMilestones, useUpdateMilestoneMutation } from "@api/milestone";
+import {
+  requiredPrerequisiteCount,
+  useCreateMilestoneMutation,
+  useMilestones,
+  useUpdateMilestoneMutation,
+} from "@api/milestone";
 import { Dialog } from "@ark-ui/solid";
 import { mediaPath } from "@lib/utils/media";
 import type { Challenge } from "@models/challenge";
@@ -612,15 +616,17 @@ function elbowSegments(g: { x1: number; y1: number; x2: number; y2: number }, h1
 
 /** Resolves the edge set into drawable tracks: tracks sharing a target merge
  * into one corridor (the shared vertical overlap plus the final hop), tracks
- * sharing a source merge into one shared prefix, and a group with mixed
- * solve states turns warning. Pure data — the canvas paints the result, so
- * this runs on graph/selection/theme changes only, not per frame. */
+ * sharing a source merge into one shared prefix, and a target group that is
+ * partially solved but not yet unlocked (see the target's unlock limit)
+ * turns warning. Pure data — the canvas paints the result, so this runs on
+ * graph/selection/theme changes only, not per frame. */
 function buildTracks(
   edgeList: Edge[],
   ctx: {
     nodeMap: Map<string, GNode>;
     positions: Record<string, NodePos>;
     solved: Set<number>;
+    unlockLimitOf: (key: string) => number;
     chain: AncestorChain | null;
     selectedEdge: string | null;
     colors: {
@@ -655,6 +661,15 @@ function buildTracks(
     const solvedCount = members.filter((edge) => isSolved(edge)).length;
     if (solvedCount === 0) return "unsolved";
     return solvedCount === members.length ? "solved" : "mixed";
+  };
+  // the merged corridor and trunk into a target follow the target's unlock
+  // limit: once enough of its prerequisites are solved the shared path reads
+  // as solved, and only a partial-but-locked group stays warning
+  const targetStateOf = (target: string, members: Edge[]): TrackState => {
+    const solvedCount = members.filter((edge) => isSolved(edge)).length;
+    if (solvedCount === 0) return "unsolved";
+    const required = requiredPrerequisiteCount(ctx.unlockLimitOf(target), members.length);
+    return solvedCount >= required ? "solved" : "mixed";
   };
   const trackStyleOf = (state: TrackState) => {
     if (state === "solved") {
@@ -838,7 +853,7 @@ function buildTracks(
       const towardTarget = g.y2 >= shared.end;
       const [from, to] = towardTarget ? [shared.start, shared.end] : [shared.end, shared.start];
       pieces.push({
-        state: stateOf(targetGroup),
+        state: targetStateOf(edge.to, targetGroup),
         keys: targetKeys,
         segments: [{ ax: mx, ay: from, bx: mx, by: to }],
       });
@@ -846,7 +861,7 @@ function buildTracks(
     if (targetGroup.length > 1 && !mergedDrawn.has(`trunk:${edge.to}`)) {
       mergedDrawn.add(`trunk:${edge.to}`);
       pieces.push({
-        state: stateOf(targetGroup),
+        state: targetStateOf(edge.to, targetGroup),
         keys: targetKeys,
         segments: [{ ax: mx, ay: g.y2, bx: g.x2, by: g.y2 }],
       });
@@ -889,14 +904,6 @@ function buildTracks(
 let gridTile: HTMLCanvasElement | undefined;
 let gridTileStep = 0;
 let gridTileColor = "";
-
-/// How many of the `total` prerequisites must be solved for an unlock: `0`
-/// means all of them, any positive limit is capped at the total so the
-/// requirement can never become unsatisfiable. Mirrors the backend's
-/// `required_prerequisite_count`.
-function requiredPrerequisiteCount(unlockLimit: number, total: number) {
-  return unlockLimit <= 0 ? total : Math.min(unlockLimit, total);
-}
 
 function milestoneAchieved(prerequisites: number[], solved: Set<number>, unlockLimit: number) {
   const total = prerequisites.length;
@@ -1096,12 +1103,15 @@ export default function Milestones(props: { gameId: number }) {
     return chain && !chain.nodes.has(key) && key !== chain.selected ? "opacity-40" : "";
   };
 
-  // solved: success border; locked while any predecessor is unsolved;
-  // unlocked (primary border) otherwise, including no predecessors
+  // solved: success border; locked while fewer prerequisites are solved
+  // than the unlock limit requires; unlocked (primary border) otherwise,
+  // including no predecessors
   const challengeBorderClass = (node: GNode) => {
     if (solvedIds().has(node.id)) return "border-success hover:border-success";
     const prereqs = prerequisitesByNode().get(node.key) ?? [];
-    const locked = prereqs.some((id) => !solvedIds().has(id));
+    const required = requiredPrerequisiteCount(challengeMap().get(node.id)?.unlock_limit ?? 0, prereqs.length);
+    const solvedCount = prereqs.filter((id) => solvedIds().has(id)).length;
+    const locked = solvedCount < required;
     return locked ? "border-layer-content/20" : "border-primary/50 hover:border-primary";
   };
 
@@ -1307,6 +1317,13 @@ export default function Milestones(props: { gameId: number }) {
       nodeMap: nodeMap(),
       positions: positions(),
       solved: solvedIds(),
+      unlockLimitOf: (key: string) => {
+        const node = nodeMap().get(key);
+        if (!node) return 0;
+        return node.kind === "challenge"
+          ? (challengeMap().get(node.id)?.unlock_limit ?? 0)
+          : (milestoneMap().get(node.id)?.unlock_limit ?? 0);
+      },
       chain: ancestorChain(),
       selectedEdge: selectedEdge(),
       colors: colors(),
@@ -1828,6 +1845,7 @@ export default function Milestones(props: { gameId: number }) {
           game_id: props.gameId,
           challenge_id: c.id,
           prerequisites: next,
+          unlock_limit: c.unlock_limit ?? 0,
         });
         count++;
       }
@@ -2176,13 +2194,6 @@ export default function Milestones(props: { gameId: number }) {
         open={formOpen()}
         onOpenChange={setFormOpen}
       />
-      <ChallengeFormDialog
-        gameId={props.gameId}
-        challenge={editingChallenge()}
-        prerequisiteCount={prerequisitesByNode().get(`c${editingChallenge()?.id ?? 0}`)?.length ?? 0}
-        open={challengeFormOpen()}
-        onOpenChange={setChallengeFormOpen}
-      />
     </div>
   );
 }
@@ -2308,8 +2319,10 @@ function NodeAvatar(props: {
   );
 }
 
-/** Edit dialog for a challenge node on the canvas: name plus the unlock
- * limit slider. Persists through the regular challenge update mutation. */
+/** Edit dialog for a challenge node on the canvas: just the unlock limit
+ * slider. It persists through the dedicated prerequisites endpoint so it
+ * also works on published challenges; the challenge name is deliberately
+ * not editable here — that stays on the challenge settings page. */
 function ChallengeFormDialog(props: {
   gameId: number;
   challenge: Challenge | null;
@@ -2317,27 +2330,24 @@ function ChallengeFormDialog(props: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const [name, setName] = createSignal("");
   const [unlockLimit, setUnlockLimit] = createSignal(0);
-  const updateMutation = useUpdateChallengeMutation();
+  const updatePrerequisitesMutation = useUpdateChallengePrerequisitesMutation();
 
   createEffect(() => {
     if (!props.open) return;
-    setName(props.challenge?.name ?? "");
     setUnlockLimit(props.challenge?.unlock_limit ?? 0);
   });
 
   async function onSubmit() {
     const current = props.challenge;
-    if (!current || !name().trim()) return;
-    await updateMutation.mutateAsync({
+    if (!current) return;
+    const limit = Math.max(0, unlockLimit());
+    if (limit === current.unlock_limit) return;
+    await updatePrerequisitesMutation.mutateAsync({
       game_id: props.gameId,
-      challenge: {
-        ...current,
-        name: name().trim(),
-        updated_at: DateTime.now(),
-        unlock_limit: Math.max(0, unlockLimit()),
-      },
+      challenge_id: current.id,
+      prerequisites: current.prerequisites ?? [],
+      unlock_limit: limit,
     });
   }
 
@@ -2359,18 +2369,18 @@ function ChallengeFormDialog(props: {
             >
               <div class="card-content p-3 lg:p-6 w-96 max-w-[calc(100vw-2rem)] flex flex-col space-y-2">
                 <h2 class="font-bold text-lg">{t("general.actions.edit.title")}</h2>
-                <Input
-                  icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
-                  title={t("challenge.form.name.label")}
-                  placeholder={t("challenge.form.name.placeholder")}
-                  name="name"
-                  value={name()}
-                  onInput={(e) => setName(e.currentTarget.value)}
-                  maxLength={127}
-                  required
+                <UnlockLimitSlider
+                  total={props.prerequisiteCount}
+                  value={unlockLimit()}
+                  onChange={setUnlockLimit}
+                  hideFooter
                 />
-                <UnlockLimitSlider total={props.prerequisiteCount} value={unlockLimit()} onChange={setUnlockLimit} />
-                <Button level="primary" class="w-full mt-4!" loading={updateMutation.isPending} onClick={onSubmit}>
+                <Button
+                  level="primary"
+                  class="w-full mt-4!"
+                  loading={updatePrerequisitesMutation.isPending}
+                  onClick={onSubmit}
+                >
                   {t("general.actions.save.title")}
                 </Button>
               </div>
@@ -2613,7 +2623,12 @@ function MilestoneFormDialog(props: {
                   onInput={(e) => setBonusScore(Number(e.currentTarget.value) || 0)}
                   required
                 />
-                <UnlockLimitSlider total={props.prerequisiteCount} value={unlockLimit()} onChange={setUnlockLimit} />
+                <UnlockLimitSlider
+                  total={props.prerequisiteCount}
+                  value={unlockLimit()}
+                  onChange={setUnlockLimit}
+                  hideFooter
+                />
                 <Button
                   level="primary"
                   class="w-full mt-4!"

@@ -9,9 +9,9 @@ use validator::Validate;
 
 use crate::{challenge::PrerequisiteList, validation::non_blank};
 
-/// A game-scoped milestone: when a team has solved every challenge listed in
-/// `prerequisites`, the static `bonus_score` is awarded on top of the regular
-/// challenge and extra scores.
+/// A game-scoped milestone: when a team has solved enough of the challenges
+/// listed in `prerequisites` (see `unlock_limit`), the static `bonus_score`
+/// is awarded on top of the regular challenge and extra scores.
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Validate)]
 #[sea_orm(table_name = "challenge_milestone")]
 pub struct Model {
@@ -148,9 +148,6 @@ where
   Ok(query.count(db).await? > 0)
 }
 
-/// Evaluates the static bonus scores of all milestones that are satisfied by
-/// the given set of solved challenge ids. A milestone counts as satisfied only
-/// when its prerequisites are non-empty and every one of them is solved.
 /// How many of the `total` prerequisites must be solved for an unlock: `0`
 /// means all of them, any positive limit is capped at the total so the
 /// requirement can never become unsatisfiable.
@@ -162,6 +159,10 @@ pub fn required_prerequisite_count(unlock_limit: i32, total: usize) -> usize {
   }
 }
 
+/// Evaluates the static bonus scores of all milestones that are satisfied by
+/// the given set of solved challenge ids. A milestone counts as satisfied
+/// when its prerequisites are non-empty and enough of them are solved — see
+/// `required_prerequisite_count` for how `unlock_limit` defines "enough".
 pub fn milestone_bonus(solved: &HashSet<i64>, milestones: &[Model]) -> i32 {
   milestones
     .iter()

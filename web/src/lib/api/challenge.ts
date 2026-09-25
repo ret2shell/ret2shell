@@ -134,10 +134,15 @@ export function useUpdateChallengeMutation(
   }));
 }
 
-export async function updateChallengePrerequisites(game_id: number, challenge_id: number, prerequisites: number[]) {
+export async function updateChallengePrerequisites(
+  game_id: number,
+  challenge_id: number,
+  prerequisites: number[],
+  unlock_limit: number
+) {
   return await api
     .patch(`${api_root}/game/${game_id}/challenge/${challenge_id}/prerequisites`, {
-      json: prerequisites,
+      json: { prerequisites, unlock_limit },
     })
     .json<Challenge>();
 }
@@ -146,8 +151,8 @@ export function useUpdateChallengePrerequisitesMutation(
   props: { silenced?: boolean; onSuccess?: (challenge: Challenge) => void; onError?: (err: Error) => void } = {}
 ) {
   return useMutation(() => ({
-    mutationFn: (req: { game_id: number; challenge_id: number; prerequisites: number[] }) =>
-      updateChallengePrerequisites(req.game_id, req.challenge_id, req.prerequisites),
+    mutationFn: (req: { game_id: number; challenge_id: number; prerequisites: number[]; unlock_limit: number }) =>
+      updateChallengePrerequisites(req.game_id, req.challenge_id, req.prerequisites, req.unlock_limit),
     onSuccess: (data: Challenge) => {
       if (!props.silenced) {
         toastSuccess(t("general.actions.save.status.success"));

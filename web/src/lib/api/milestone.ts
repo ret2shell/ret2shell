@@ -9,12 +9,24 @@ export async function getMilestones(game_id: number) {
   return await api.get(`${api_root}/game/${game_id}/milestone`).json<Milestone[]>();
 }
 
-/** Milestones whose prerequisites are all present in `solved`. Milestones
- * without prerequisites are never achieved, mirroring the backend scoring. */
+/** How many of the `total` prerequisites must be solved for an unlock: `0`
+ * means all of them, any positive limit is capped at the total so the
+ * requirement can never become unsatisfiable. Mirrors the backend's
+ * `required_prerequisite_count`. */
+export function requiredPrerequisiteCount(unlockLimit: number, total: number) {
+  return unlockLimit <= 0 ? total : Math.min(unlockLimit, total);
+}
+
+/** Milestones whose unlock requirement is met by `solved`: enough of the
+ * prerequisites (see `unlock_limit`) are present. Milestones without
+ * prerequisites are never achieved, mirroring the backend scoring. */
 export function achievedMilestones(milestones: Milestone[], solved: Set<number>) {
-  return milestones.filter(
-    (milestone) => milestone.prerequisites.length > 0 && milestone.prerequisites.every((id) => solved.has(id))
-  );
+  return milestones.filter((milestone) => {
+    const total = milestone.prerequisites.length;
+    if (total === 0) return false;
+    const required = requiredPrerequisiteCount(milestone.unlock_limit, total);
+    return milestone.prerequisites.filter((id) => solved.has(id)).length >= required;
+  });
 }
 
 /** Fetches the fresh milestone/solve state and returns the milestones that
