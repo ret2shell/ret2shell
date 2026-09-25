@@ -156,11 +156,6 @@ const FALLBACK_DIVIDER_COLOR = "rgba(136, 136, 136, 0.1)";
 const FALLBACK_WARNING_COLOR = "#f59e0b";
 // upper bound of the milestone bonus score, mirrored from the backend model
 const MAX_BONUS_SCORE = 10000;
-// milestone nodes wear a 45-degree light/dark pinstripe wash so they read
-// differently from challenge nodes at a glance; the tint follows the theme
-// through --color-layer-content
-const MILESTONE_STRIPES =
-  "repeating-linear-gradient(45deg, transparent 0 8px, color-mix(in srgb, var(--color-layer-content) 6%, transparent) 8px 16px)";
 
 function clampZoom(zoom: number) {
   return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom));
@@ -2136,7 +2131,6 @@ export default function Milestones(props: { gameId: number }) {
                                     top: `${pos().y - node.h / 2}px`,
                                     width: `${NODE_W}px`,
                                     height: `${MILESTONE_H}px`,
-                                    "background-image": MILESTONE_STRIPES,
                                   }}
                                   onPointerDown={(e) => onNodePointerDown(e, node)}
                                   onDblClick={(e) => {
@@ -2179,8 +2173,9 @@ export default function Milestones(props: { gameId: number }) {
                                   <div class="flex-1 flex items-center gap-2 w-full min-h-0">
                                     <div class="flex-1 flex flex-col justify-center gap-1 min-w-0">
                                       <div class="flex items-center justify-between gap-1">
-                                        <span class="shrink-0 text-primary font-bold">
-                                          +{milestone().bonus_score} pts
+                                        <span class="shrink-0 flex items-center gap-1 text-primary font-bold">
+                                          <span class="shrink-0 icon-[fluent-emoji-flat--thumbs-up] w-4 h-4" />
+                                          <span>+{milestone().bonus_score} pts</span>
                                         </span>
                                         <span class="text-xs opacity-60">
                                           {progressSolved()}/{requiredCount()}
