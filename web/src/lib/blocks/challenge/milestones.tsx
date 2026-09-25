@@ -2120,12 +2120,12 @@ export default function Milestones(props: { gameId: number }) {
                                 <div
                                   title={milestone().name}
                                   class={clsx(
-                                    "absolute flex flex-col p-2 gap-1 rounded-lg border-2 border-t-4 backdrop-blur-sm cursor-pointer transition-colors pointer-events-auto",
-                                    // the golden top border is the milestone
-                                    // badge; the side borders always keep the
-                                    // muted divider color, achievement shows
-                                    // through the icon and the progress bar
-                                    "bg-layer/80 border-layer-content/10 border-t-amber-400 hover:border-primary/60 hover:border-t-amber-400",
+                                    "absolute flex flex-col p-2 gap-1 rounded-lg border-2 border-y-4 backdrop-blur-sm cursor-pointer transition-colors pointer-events-auto",
+                                    // the golden top/bottom borders are the
+                                    // milestone badge; the side borders always
+                                    // keep the muted divider color, achievement
+                                    // shows through the icon and the progress bar
+                                    "bg-layer/80 border-layer-content/10 border-y-amber-400 hover:border-primary/60 hover:border-y-amber-400",
                                     dimmedClass(node.key),
                                     node.key === selectedNode() && "ring-2 ring-primary/70"
                                   )}
