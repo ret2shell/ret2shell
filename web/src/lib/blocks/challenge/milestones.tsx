@@ -9,6 +9,7 @@ import { uploadMedia } from "@api/media";
 import {
   requiredPrerequisiteCount,
   useCreateMilestoneMutation,
+  useDeleteMilestoneMutation,
   useMilestones,
   useUpdateMilestoneMutation,
 } from "@api/milestone";
@@ -2515,6 +2516,19 @@ function MilestoneFormDialog(props: {
   const updateMutation = useUpdateMilestoneMutation({
     onSuccess: () => props.onOpenChange(false),
   });
+  const deleteMutation = useDeleteMilestoneMutation({
+    onSuccess: () => props.onOpenChange(false),
+  });
+
+  async function onDelete() {
+    const milestone = props.milestone;
+    if (!milestone) return;
+    try {
+      await deleteMutation.mutateAsync({ game_id: props.gameId, milestone_id: milestone.id });
+    } catch {
+      // the mutation hook already toasts failures
+    }
+  }
 
   async function onSubmit() {
     let valid = true;
@@ -2629,14 +2643,28 @@ function MilestoneFormDialog(props: {
                   onChange={setUnlockLimit}
                   hideFooter
                 />
-                <Button
-                  level="primary"
-                  class="w-full mt-4!"
-                  loading={createMutation.isPending || updateMutation.isPending}
-                  onClick={onSubmit}
-                >
-                  {props.milestone ? t("general.actions.save.title") : t("general.actions.create.title")}
-                </Button>
+                <div class="flex gap-2 mt-4!">
+                  <Show when={props.milestone}>
+                    <Button
+                      level="error"
+                      square
+                      ghost
+                      title={t("general.actions.delete.title")}
+                      loading={deleteMutation.isPending}
+                      onClick={onDelete}
+                    >
+                      <span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5" />
+                    </Button>
+                  </Show>
+                  <Button
+                    level="primary"
+                    class="flex-1"
+                    loading={createMutation.isPending || updateMutation.isPending}
+                    onClick={onSubmit}
+                  >
+                    {props.milestone ? t("general.actions.save.title") : t("general.actions.create.title")}
+                  </Button>
+                </div>
               </div>
             </OverlayScrollbarsComponent>
             <Dialog.CloseTrigger
