@@ -1918,8 +1918,14 @@ export default function Milestones(props: { gameId: number }) {
                                 () => prereqs().filter((id) => solvedIds().has(id)).length
                               );
                               const achieved = createMemo(
-                                () => prereqs().length > 0 && prereqs().every((id) => solvedIds().has(id))
+                                () => milestoneAchieved(prereqs(), solvedIds(), milestone().unlock_limit)
                               );
+                              // the unlock limit caps the progress denominator: with a limit
+                              // of 2 out of 4 prerequisites the milestone completes at 2/2
+                              const requiredCount = createMemo(() =>
+                                requiredPrerequisiteCount(milestone().unlock_limit, prereqs().length)
+                              );
+                              const progressSolved = createMemo(() => Math.min(solvedCount(), requiredCount()));
                               return (
                                 // biome-ignore lint/a11y/noStaticElementInteractions: canvas graph node, pointer-driven like the canvas itself
                                 <div
@@ -1966,7 +1972,7 @@ export default function Milestones(props: { gameId: number }) {
                                     <span class="shrink-0 text-primary font-bold">+{milestone().bonus_score} pts</span>
                                     <span class="flex-1" />
                                     <span class="shrink-0 opacity-60">
-                                      {solvedCount()}/{prereqs().length}
+                                      {progressSolved()}/{requiredCount()}
                                     </span>
                                   </div>
                                   <div class="w-full h-1 rounded-full bg-layer-content/10 overflow-hidden">
@@ -1976,7 +1982,7 @@ export default function Milestones(props: { gameId: number }) {
                                         achieved() ? "bg-success" : "bg-primary"
                                       )}
                                       style={{
-                                        width: `${prereqs().length > 0 ? (solvedCount() / prereqs().length) * 100 : 0}%`,
+                                        width: `${requiredCount() > 0 ? (progressSolved() / requiredCount()) * 100 : 0}%`,
                                       }}
                                     />
                                   </div>
