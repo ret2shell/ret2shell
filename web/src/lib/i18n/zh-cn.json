@@ -1396,7 +1396,7 @@
       "title": "里程碑",
       "empty": "暂无里程碑",
       "achieved": "已达成",
-      "newAchievement": "获得了新成就！",
+      "newAchievement": "获得了新成就：{{milestone}}！",
       "prerequisites": "前置题目",
       "form": {
         "name": {

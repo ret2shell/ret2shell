@@ -7,7 +7,6 @@ export type ToastMessage = {
   id?: string;
   img?: string;
   description: string;
-  subtitle?: string;
   level: "info" | "success" | "warning" | "error";
   duration?: number;
   reject?: () => void;

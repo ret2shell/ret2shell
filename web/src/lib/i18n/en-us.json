@@ -1396,7 +1396,7 @@
       "title": "Milestones",
       "empty": "No milestones yet",
       "achieved": "Achieved",
-      "newAchievement": "New achievement unlocked!",
+      "newAchievement": "New achievement unlocked: {{milestone}}!",
       "prerequisites": "Prerequisites",
       "form": {
         "name": {

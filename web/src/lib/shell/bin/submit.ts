@@ -65,8 +65,7 @@ export class Submit implements Command {
                 for (const milestone of achieved) {
                   addToast({
                     level: "success",
-                    description: t("challenge.milestone.newAchievement"),
-                    subtitle: milestone.name,
+                    description: t("challenge.milestone.newAchievement", { milestone: milestone.name }),
                     duration: 10000,
                   });
                 }

@@ -1396,7 +1396,7 @@
       "title": "マイルストーン",
       "empty": "マイルストーンはまだありません",
       "achieved": "達成済み",
-      "newAchievement": "新しい実績を達成しました！",
+      "newAchievement": "新しい実績を達成しました：{{milestone}}！",
       "prerequisites": "前提問題",
       "form": {
         "name": {
