@@ -26,14 +26,12 @@ use serde::Deserialize;
 use serde_json::Value;
 use tower_http::request_id::RequestId;
 use tracing::{info, warn};
+use validator::Validate;
 
 use crate::{
   middleware::auth::{Token, is_game_admin},
   traits::ResponseError,
-  utility::{
-    pagination::{DEFAULT_PAGE_SIZE, page, page_size},
-    validation::validate_game_model,
-  },
+  utility::pagination::{DEFAULT_PAGE_SIZE, page, page_size},
 };
 
 const GAME_DOC_CACHE_TTL: i64 = 60 * 5;
@@ -263,7 +261,7 @@ pub(super) async fn create_game(
   State(ref db): State<Database>, State(ref bucket): State<Bucket>,
   Extension(token): Extension<Token>, Json(mut model): Json<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  validate_game_model(&model)?;
+  model.validate()?;
   let txn = db.conn.begin().await?;
   let game_bucket = bucket.create(serde_json::to_value(&model)?).await?;
   model.bucket = Some(game_bucket.name.clone());
@@ -300,7 +298,7 @@ pub(super) async fn update_game(
   Extension(trace): Extension<RequestId>, Extension(token): Extension<Token>,
   Json(model): Json<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  validate_game_model(&model)?;
+  model.validate()?;
   let txn = db.conn.begin().await?;
   let model = game::update(
     &txn,
@@ -335,7 +333,7 @@ pub(super) async fn update_game(
     );
     let payload = EventContainer {
       game_id: game.id,
-      event: Event::Game(GameEvent {
+      event: Event::Game(Box::new(GameEvent {
         event_type: if model.frozen {
           GameEventType::Freeze
         } else {
@@ -351,7 +349,7 @@ pub(super) async fn update_game(
           "{} the game",
           if model.frozen { "Freeze" } else { "Unfreeze" }
         ),
-      }),
+      })),
     };
     queue
       .publish(

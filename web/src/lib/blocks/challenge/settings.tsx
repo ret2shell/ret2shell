@@ -2,8 +2,10 @@ import { useChallenge, useUpdateChallengeMutation } from "@api/challenge";
 import type { Challenge } from "@models/challenge";
 import { t } from "@storage/theme";
 import { DateTime } from "luxon";
+import { createEffect, createSignal } from "solid-js";
 import type { ChallengeWidgetProps } from ".";
 import { type ChallengeForm, FormBare } from "./form";
+import UnlockLimitSlider from "./unlock-limit-slider";
 
 export default function (props: ChallengeWidgetProps) {
   const challenge = useChallenge({
@@ -12,6 +14,9 @@ export default function (props: ChallengeWidgetProps) {
   });
 
   const updateChallengeMutation = useUpdateChallengeMutation();
+
+  const [unlockLimit, setUnlockLimit] = createSignal(0);
+  createEffect(() => setUnlockLimit(challenge.data?.unlock_limit ?? 0));
 
   async function handleUpdateChallenge(result: ChallengeForm) {
     const tags = result.tag.split("/").map((t) => {
@@ -37,6 +42,9 @@ export default function (props: ChallengeWidgetProps) {
       },
       release_at: result.release_at ? DateTime.fromSeconds(result.release_at) : null,
       archive_at: result.archive_at ? DateTime.fromSeconds(result.archive_at) : null,
+      prerequisites: challenge.data?.prerequisites ?? [],
+      unlock_limit: unlockLimit(),
+      avatar: challenge.data?.avatar ?? null,
     };
     await updateChallengeMutation.mutateAsync({ game_id: props.gameId, challenge: data });
   }
@@ -55,6 +63,13 @@ export default function (props: ChallengeWidgetProps) {
         gameId={props.gameId}
         challengeId={props.challengeId}
       />
+      <div class="w-full max-w-5xl mb-4">
+        <UnlockLimitSlider
+          total={challenge.data?.prerequisites.length ?? 0}
+          value={unlockLimit()}
+          onChange={setUnlockLimit}
+        />
+      </div>
     </div>
   );
 }

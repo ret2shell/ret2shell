@@ -2,18 +2,43 @@
 
 use sea_orm::{ActiveValue, IntoActiveModel, entity::prelude::*};
 use serde::{Deserialize, Serialize};
+use validator::{Validate, ValidationError};
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
+use crate::validation::{char_len, non_blank, optional_url};
+
+fn provider_slug(value: &str) -> Result<(), ValidationError> {
+  let len = char_len(value);
+  if !(2..=32).contains(&len)
+    || !value
+      .chars()
+      .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_')
+  {
+    return Err(ValidationError::new("provider_slug"));
+  }
+  Ok(())
+}
+
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Validate)]
 #[sea_orm(table_name = "oauth_provider")]
 pub struct Model {
   #[sea_orm(primary_key)]
   pub id: i64,
+  #[validate(custom(function = "non_blank", message = "oauth provider name is required"))]
   pub name: String,
   pub avatar: Option<String>,
+  #[validate(custom(
+    function = "provider_slug",
+    message = "oauth provider contains invalid characters"
+  ))]
   pub provider: String,
   #[sea_orm(column_type = "Text", nullable)]
+  #[validate(custom(function = "non_blank", message = "oauth provider script is required"))]
   pub script: String,
   #[sea_orm(column_type = "Text", nullable)]
+  #[validate(custom(
+    function = "optional_url",
+    message = "oauth provider portal is invalid"
+  ))]
   pub portal: Option<String>,
 }
 

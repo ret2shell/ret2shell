@@ -1,5 +1,6 @@
 import { useInstitutes } from "@api/account";
 import { useGame } from "@api/game";
+import { achievedMilestones, requiredPrerequisiteCount, useMilestones } from "@api/milestone";
 import {
   useCreateTeamExtraMutation,
   useDeleteTeamMutation,
@@ -606,6 +607,42 @@ export default function () {
     enabled: () => gameId() > 0 && teamId() > 0,
   });
 
+  const milestones = useMilestones({
+    game_id: gameId,
+    enabled: () => gameId() > 0,
+  });
+
+  // milestone bonuses never land in the extras table; synthesize a row per
+  // achieved milestone, timestamped with the prerequisite solve that
+  // completed the unlock requirement, so they show up next to the granted
+  // extras
+  const milestoneExtras = createMemo(() => {
+    const solvedAt = new Map<number, DateTime>();
+    for (const submission of solves.data ?? []) {
+      const prev = solvedAt.get(submission.challenge_id);
+      if (!prev || submission.created_at > prev) solvedAt.set(submission.challenge_id, submission.created_at);
+    }
+    const solved = new Set(solvedAt.keys());
+    return achievedMilestones(milestones.data ?? [], solved).map((milestone) => {
+      // the achievement moment is when the required-th prerequisite was
+      // solved: the required earliest solve times among the satisfied ones
+      const required = requiredPrerequisiteCount(milestone.unlock_limit, milestone.prerequisites.length);
+      const times = milestone.prerequisites
+        .filter((id) => solvedAt.has(id))
+        .map((id) => solvedAt.get(id)!)
+        .sort((a, b) => a.toMillis() - b.toMillis());
+      return {
+        reason: t("team.milestoneJournal", { milestone: milestone.name }),
+        score: milestone.bonus_score,
+        created_at: times[required - 1],
+      };
+    });
+  });
+
+  const extraRows = createMemo(() =>
+    [...(extras.data ?? []), ...milestoneExtras()].sort((a, b) => a.created_at.toMillis() - b.created_at.toMillis())
+  );
+
   const selfTeam = useSelfTeam({
     game_id: gameId,
     enabled: () => gameId() > 0 && !!accountStore.id,
@@ -752,7 +789,7 @@ export default function () {
             </h3>
             <section class="flex flex-col">
               <For
-                each={extras.data ?? []}
+                each={extraRows()}
                 fallback={
                   <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2 opacity-60">
                     <span class="shrink-0 icon-[fluent--emoji-sad-slight-20-regular] w-5 h-5" />

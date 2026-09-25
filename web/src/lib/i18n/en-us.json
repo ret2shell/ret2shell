@@ -956,6 +956,11 @@
         "title": "Hidden",
         "message": "This challenge is hidden, only for admin testing.",
         "alert": "Please click the \"Up\" button when the challenge is ready. The platform will not automatically change the visibility of the challenge. The auto-publishing function will use time points and the hidden state to calculate the final visibility for players."
+      },
+      "locked": {
+        "message": "This challenge is locked",
+        "hint": "Solve the following prerequisite challenges to unlock",
+        "dismiss": "Friendly, don't shoot!"
       }
     },
     "actions": {
@@ -1383,10 +1388,55 @@
       }
     },
     "settings": {
-      "title": "Settings"
+      "title": "Settings",
+      "unlockLimit": {
+        "label": "Unlock requirements",
+        "all": "All"
+      }
     },
     "inGame": "In-game challenges",
-    "total": "All challenges"
+    "total": "All challenges",
+    "milestone": {
+      "title": "Milestones",
+      "unknown": "Mysterious unknown challenge/achievement",
+      "empty": "No milestones yet",
+      "achieved": "Achieved",
+      "newAchievement": "New achievement unlocked: {{milestone}}!",
+      "prerequisites": "Prerequisites",
+      "form": {
+        "name": {
+          "label": "Milestone Name",
+          "placeholder": "Please enter a name",
+          "required": "Name is required"
+        },
+        "description": {
+          "label": "Milestone Description",
+          "placeholder": "Please enter a description",
+          "required": "Description is required"
+        },
+        "bonusScore": {
+          "label": "Bonus Score",
+          "placeholder": "Please enter the bonus score"
+        }
+      },
+      "editor": {
+        "hint": "Drag ports to connect, click an edge to delete; click a node to highlight its prerequisite chain, double-click for details",
+        "unsaved": "Unsaved changes",
+        "saved": "Saved {{count}} change(s)",
+        "tidy": "Tidy up",
+        "cycle": "Cannot connect: this would create a dependency cycle",
+        "duplicate": "This dependency already exists",
+        "deleteEdge": "Delete edge",
+        "fit": "Fit to view",
+        "zoomIn": "Zoom in",
+        "zoomOut": "Zoom out"
+      },
+      "errors": {
+        "fetchList": {
+          "title": "Failed to fetch milestones"
+        }
+      }
+    }
   },
   "wsrx": {
     "title": "WebSocket Reflector X",
@@ -1600,7 +1650,7 @@
       "password": {
         "required": "Password cannot be empty",
         "minimumLength": "Password must be at least 8 characters",
-        "tooWeak": "Password must be between 8-40 characters, and must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+        "tooWeak": "Password must be between 8-40 characters, and must contain at least one uppercase letter, one lowercase letter, and one number",
         "placeholder": "Please enter your password",
         "label": "Password",
         "confirmRequired": "Confirm password cannot be empty",
@@ -2091,6 +2141,7 @@
     "noSolves": "No solves yet",
     "solvesJournal": "Player {{user}} solved challenge {{challenge}}.",
     "extras": "Extra score changes",
+    "milestoneJournal": "Achieved milestone {{milestone}}.",
     "noExtras": "No extra score changes here"
   },
   "notification": {

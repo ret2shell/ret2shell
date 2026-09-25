@@ -134,6 +134,71 @@ export function useUpdateChallengeMutation(
   }));
 }
 
+export async function updateChallengePrerequisites(
+  game_id: number,
+  challenge_id: number,
+  prerequisites: number[],
+  unlock_limit: number
+) {
+  return await api
+    .patch(`${api_root}/game/${game_id}/challenge/${challenge_id}/prerequisites`, {
+      json: { prerequisites, unlock_limit },
+    })
+    .json<Challenge>();
+}
+
+export function useUpdateChallengePrerequisitesMutation(
+  props: { silenced?: boolean; onSuccess?: (challenge: Challenge) => void; onError?: (err: Error) => void } = {}
+) {
+  return useMutation(() => ({
+    mutationFn: (req: { game_id: number; challenge_id: number; prerequisites: number[]; unlock_limit: number }) =>
+      updateChallengePrerequisites(req.game_id, req.challenge_id, req.prerequisites, req.unlock_limit),
+    onSuccess: (data: Challenge) => {
+      if (!props.silenced) {
+        toastSuccess(t("general.actions.save.status.success"));
+        inflyClient.invalidateQueries({ queryKey: ["game", data.game_id, "challenge"] });
+      }
+      props.onSuccess?.(data);
+    },
+    onError: (err: Error) => {
+      if (!props.silenced) {
+        handleHttpError(err, t("general.actions.save.status.fail"));
+      }
+      props.onError?.(err);
+    },
+  }));
+}
+
+export async function updateChallengeAvatar(game_id: number, challenge_id: number, avatar: string | null) {
+  return await api
+    .patch(`${api_root}/game/${game_id}/challenge/${challenge_id}/avatar`, {
+      json: avatar,
+    })
+    .json<Challenge>();
+}
+
+export function useUpdateChallengeAvatarMutation(
+  props: { silenced?: boolean; onSuccess?: (challenge: Challenge) => void; onError?: (err: Error) => void } = {}
+) {
+  return useMutation(() => ({
+    mutationFn: (req: { game_id: number; challenge_id: number; avatar: string | null }) =>
+      updateChallengeAvatar(req.game_id, req.challenge_id, req.avatar),
+    onSuccess: (data: Challenge) => {
+      if (!props.silenced) {
+        toastSuccess(t("general.actions.save.status.success"));
+        inflyClient.invalidateQueries({ queryKey: ["game", data.game_id, "challenge"] });
+      }
+      props.onSuccess?.(data);
+    },
+    onError: (err: Error) => {
+      if (!props.silenced) {
+        handleHttpError(err, t("general.actions.save.status.fail"));
+      }
+      props.onError?.(err);
+    },
+  }));
+}
+
 export async function upChallenge(game_id: number, challenge_id: number) {
   return await api.post(`${api_root}/game/${game_id}/challenge/${challenge_id}/publish`).json<Challenge>();
 }

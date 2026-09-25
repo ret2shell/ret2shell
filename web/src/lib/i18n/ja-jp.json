@@ -956,6 +956,11 @@
         "title": "非表示",
         "message": "問題は非表示にされています。管理者のテスト用です。",
         "alert": "問題が準備ができたら、「公開」ボタンをクリックしてください。プラットフォームは問題の可視性を自動的に変更しません。自動公開機能は、タイムノードと非表示状態を使用して、問題の最終的な可視性を計算します。"
+      },
+      "locked": {
+        "message": "この問題はロックされています",
+        "hint": "以下の前提問題を解くとアンロックされます",
+        "dismiss": "味方だ、撃つな！"
       }
     },
     "actions": {
@@ -1383,10 +1388,55 @@
       }
     },
     "settings": {
-      "title": "設定"
+      "title": "設定",
+      "unlockLimit": {
+        "label": "アンロック要件",
+        "all": "すべて"
+      }
     },
     "inGame": "ゲーム中の問題",
-    "total": "すべての問題"
+    "total": "すべての問題",
+    "milestone": {
+      "title": "マイルストーン",
+      "unknown": "謎の未知の問題/実績",
+      "empty": "マイルストーンはまだありません",
+      "achieved": "達成済み",
+      "newAchievement": "新しい実績を達成しました：{{milestone}}！",
+      "prerequisites": "前提問題",
+      "form": {
+        "name": {
+          "label": "マイルストーン名",
+          "placeholder": "名前を入力してください",
+          "required": "名前は必須です"
+        },
+        "description": {
+          "label": "マイルストーン説明",
+          "placeholder": "説明を入力してください",
+          "required": "説明は必須です"
+        },
+        "bonusScore": {
+          "label": "ボーナススコア",
+          "placeholder": "ボーナススコアを入力してください"
+        }
+      },
+      "editor": {
+        "hint": "ポートをドラッグして接続、線をクリックで削除。ノードをクリックで前提チェーンをハイライト、ダブルクリックで詳細",
+        "unsaved": "未保存の変更があります",
+        "saved": "{{count}} 件の変更を保存しました",
+        "tidy": "整理する",
+        "cycle": "接続できません：循環依存が発生します",
+        "duplicate": "この依存関係は既に存在します",
+        "deleteEdge": "エッジを削除",
+        "fit": "表示に合わせる",
+        "zoomIn": "拡大",
+        "zoomOut": "縮小"
+      },
+      "errors": {
+        "fetchList": {
+          "title": "マイルストーンの取得に失敗しました"
+        }
+      }
+    }
   },
   "wsrx": {
     "title": "WebSocket Reflector X",
@@ -1600,7 +1650,7 @@
       "password": {
         "required": "パスワードは空にできません",
         "minimumLength": "パスワードは少なくとも 8 文字以上でなければなりません",
-        "tooWeak": "パスワードは 8 〜 40 文字で、少なくとも大文字 1 文字、小文字 1 文字、数字 1 桁、特殊文字 1 文字を含む必要があります",
+        "tooWeak": "パスワードは 8 〜 40 文字で、少なくとも大文字 1 文字、小文字 1 文字、数字 1 桁を含む必要があります",
         "placeholder": "パスワードを入力してください",
         "label": "パスワード",
         "confirmRequired": "確認用パスワードは空にできません",
@@ -2091,6 +2141,7 @@
     "noSolves": "解かれた問題はありません",
     "solvesJournal": "{{user}} さんが {{challenge}} を解決しました。",
     "extras": "追加スコアの変動",
+    "milestoneJournal": "実績 {{milestone}} を達成しました。",
     "noExtras": "追加スコアの変動はありません"
   },
   "notification": {

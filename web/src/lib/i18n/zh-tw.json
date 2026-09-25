@@ -956,6 +956,11 @@
         "title": "已隱藏",
         "message": "題目已隱藏，僅供管理員測試。",
         "alert": "請在題目準備好後點擊“公開”按鈕公開題目。平臺不會主動更改題目可見性，自動放題功能會使用時間節點與隱藏狀態來計算題目的最終可見性。"
+      },
+      "locked": {
+        "message": "本題已鎖定",
+        "hint": "完成以下前置題目後解鎖",
+        "dismiss": "自己人，別開槍"
       }
     },
     "actions": {
@@ -1383,10 +1388,55 @@
       }
     },
     "settings": {
-      "title": "設置"
+      "title": "設置",
+      "unlockLimit": {
+        "label": "解鎖要求数量",
+        "all": "全部"
+      }
     },
     "inGame": "賽中題目",
-    "total": "所有題目"
+    "total": "所有題目",
+    "milestone": {
+      "title": "里程碑",
+      "unknown": "神秘的未知題目/成就",
+      "empty": "暫無里程碑",
+      "achieved": "已達成",
+      "newAchievement": "獲得了新成就：{{milestone}}！",
+      "prerequisites": "前置題目",
+      "form": {
+        "name": {
+          "label": "里程碑名稱",
+          "placeholder": "請輸入名稱",
+          "required": "名稱不能為空"
+        },
+        "description": {
+          "label": "里程碑描述",
+          "placeholder": "請輸入描述",
+          "required": "描述不能為空"
+        },
+        "bonusScore": {
+          "label": "獎勵分數",
+          "placeholder": "請輸入獎勵分數"
+        }
+      },
+      "editor": {
+        "hint": "拖曳端口連線，點擊連線刪除；點擊節點高亮前置鏈，雙擊開啟詳情",
+        "unsaved": "有未儲存的更改",
+        "saved": "已儲存 {{count}} 項更改",
+        "tidy": "整理",
+        "cycle": "無法連線：會產生循環依賴",
+        "duplicate": "該依賴已存在",
+        "deleteEdge": "刪除連線",
+        "fit": "適應畫布",
+        "zoomIn": "放大",
+        "zoomOut": "縮小"
+      },
+      "errors": {
+        "fetchList": {
+          "title": "取得里程碑列表失敗"
+        }
+      }
+    }
   },
   "wsrx": {
     "title": "WebSocket Reflector X",
@@ -1600,7 +1650,7 @@
       "password": {
         "required": "密碼不能為空",
         "minimumLength": "密碼至少 8 位",
-        "tooWeak": "密碼在 8 - 40 字符之間，至少包含一個大寫字母、一個小寫字母、一個數字和一個特殊字符",
+        "tooWeak": "密碼在 8 - 40 字符之間，至少包含一個大寫字母、一個小寫字母和一個數字",
         "placeholder": "請輸入密碼",
         "label": "密碼",
         "confirmRequired": "確認密碼不能為空",
@@ -2091,6 +2141,7 @@
     "noSolves": "沒有已解出題目",
     "solvesJournal": "成員 {{user}} 解出了題目 {{challenge}}。",
     "extras": "額外分數變動",
+    "milestoneJournal": "獲得了成就 {{milestone}}。",
     "noExtras": "沒有額外分數變動"
   },
   "notification": {

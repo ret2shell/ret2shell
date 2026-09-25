@@ -10,8 +10,12 @@ use sea_orm::{
 };
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
+use validator::{Validate, ValidationError};
 
-use crate::team;
+use crate::{
+  team,
+  validation::{non_blank, optional_url},
+};
 
 #[derive(
   Clone,
@@ -103,14 +107,86 @@ pub struct TimelinePreset {
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct TimelinePresets(pub Vec<TimelinePreset>);
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
+
+fn award_rates_in_range(award_rates: &AwardRates) -> Result<(), ValidationError> {
+  if award_rates.0.iter().any(|rate| !(0..=100).contains(rate)) {
+    return Err(ValidationError::new("award_rate_range"));
+  }
+  Ok(())
+}
+
+/// Cross-field game validation: schedule ordering, host-type dependent team
+/// size, timeline presets and the hammer url.
+fn validate_game_schema(game: &Model) -> Result<(), ValidationError> {
+  if game.register_at > game.start_at {
+    return Err(
+      ValidationError::new("register_after_start")
+        .with_message("register time must be before start time".into()),
+    );
+  }
+  if game.start_at >= game.end_at {
+    return Err(
+      ValidationError::new("start_after_end")
+        .with_message("start time must be before end time".into()),
+    );
+  }
+  if game.end_at > game.archive_at {
+    return Err(
+      ValidationError::new("archive_before_end")
+        .with_message("archive time must be after end time".into()),
+    );
+  }
+
+  if game.host_type == HostType::Game && !(0..=99).contains(&game.team_size) {
+    return Err(
+      ValidationError::new("team_size_range")
+        .with_message("team size must be between 0 and 99".into()),
+    );
+  }
+
+  if let Some(timeline_presets) = &game.timeline_presets {
+    for preset in &timeline_presets.0 {
+      if preset.label.trim().is_empty() {
+        return Err(
+          ValidationError::new("timeline_label_blank")
+            .with_message("timeline label is required".into()),
+        );
+      }
+      if preset.start_at >= preset.end_at {
+        return Err(
+          ValidationError::new("timeline_inverted")
+            .with_message("timeline start time must be before end time".into()),
+        );
+      }
+      if preset.start_at < game.start_at || preset.end_at > game.end_at {
+        return Err(
+          ValidationError::new("timeline_out_of_game")
+            .with_message("timeline must be inside game time range".into()),
+        );
+      }
+    }
+  }
+
+  if let Some(url) = &game.hammer_policy.outer_url
+    && optional_url(url).is_err()
+  {
+    return Err(ValidationError::new("hammer_url").with_message("invalid hammer url".into()));
+  }
+
+  Ok(())
+}
+
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Validate)]
 #[sea_orm(table_name = "game")]
+#[validate(schema(function = "validate_game_schema"))]
 pub struct Model {
   #[sea_orm(primary_key)]
   pub id: i64,
   #[serde(with = "ts_seconds")]
   pub updated_at: DateTime<Utc>,
+  #[validate(custom(function = "non_blank", message = "game name is required"))]
   pub name: String,
+  #[validate(custom(function = "non_blank", message = "game brief is required"))]
   pub brief: String,
   pub introduction_id: Option<i64>,
   #[serde(with = "ts_seconds")]
@@ -126,6 +202,7 @@ pub struct Model {
   pub frozen: bool,
   pub host_type: HostType,
   pub team_size: i32,
+  #[validate(range(min = 1, max = 99, message = "env limit must be between 1 and 99"))]
   pub env_limit: Option<i32>,
   #[sea_orm(column_type = "JsonBinary")]
   pub access_policy: AccessPolicy,
@@ -139,8 +216,13 @@ pub struct Model {
   pub logo: Option<String>,
   pub enable_audit: bool,
   pub can_register_after_started: bool,
+  #[validate(range(min = 0, max = 100, message = "award rate must be between 0 and 100"))]
   pub award_rate: i32,
   #[sea_orm(column_type = "JsonBinary")]
+  #[validate(custom(
+    function = "award_rates_in_range",
+    message = "award rate must be between 0 and 100"
+  ))]
   pub award_rates: Option<AwardRates>,
   #[sea_orm(column_type = "JsonBinary")]
   pub admins: Admins,

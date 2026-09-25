@@ -22,6 +22,7 @@ use sea_orm::TransactionTrait;
 use serde::{Deserialize, Serialize};
 use tower_http::request_id::RequestId;
 use tracing::{debug, info, warn};
+use validator::Validate;
 
 use crate::{
   middleware::{
@@ -29,10 +30,7 @@ use crate::{
     data,
   },
   traits::{GlobalState, ResponseError},
-  utility::{
-    password::{hash_password, verify_password},
-    validation::{validate_email, validate_nickname, validate_password, validate_register_request},
-  },
+  utility::password::{hash_password, verify_password},
 };
 
 mod captcha;
@@ -445,11 +443,15 @@ async fn send_email(
   Ok(())
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Validate)]
 struct RegisterRequest {
+  #[validate(custom(function = "r2s_database::validation::account_handle"))]
   pub account: String,
+  #[validate(custom(function = "r2s_database::validation::nickname_len"))]
   pub nickname: String,
+  #[validate(email(message = "invalid email"))]
   pub email: String,
+  #[validate(custom(function = "r2s_database::validation::password_strength"))]
   pub password: String,
   pub captcha_id: String,
   pub captcha_answer: String,
@@ -469,18 +471,12 @@ async fn register(
   {
     captcha_protected!(cache, &body.captcha_id, &body.captcha_answer);
   }
-  validate_register_request(&body.account, &body.nickname, &body.email, &body.password)?;
+  body.validate()?;
 
   // if user::get_user_by_account(db, &body.email).await.is_ok() {
   //     return Err((StatusCode::CONFLICT, "account already exists"));
   // }
-  if user::get_by_account_or_email(&txn, &body.email)
-    .await?
-    .is_some()
-    || user::get_by_account_or_email(&txn, &body.account)
-      .await?
-      .is_some()
-  {
+  if user::is_account_or_email_taken(&txn, None, &[&body.email, &body.account]).await? {
     return Err(ResponseError::Conflict("account already exists".to_owned()));
   }
 
@@ -677,9 +673,10 @@ async fn forgot_password(
   Ok(StatusCode::OK)
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Validate)]
 struct ResetPasswordRequest {
   pub email: String,
+  #[validate(custom(function = "r2s_database::validation::password_strength"))]
   pub password: String,
   pub token: String,
   pub captcha_id: String,
@@ -708,7 +705,7 @@ async fn reset_password(
     }
   };
 
-  validate_password(&body.password)?;
+  body.validate()?;
   let password = hash_password(&body.password)?;
   user::update_password(&db.conn, user.id, password).await?;
   let mut prev_token: Option<String>;
@@ -723,9 +720,10 @@ async fn reset_password(
   Ok(())
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Validate)]
 struct ChangePasswordRequest {
   pub old_password: String,
+  #[validate(custom(function = "r2s_database::validation::password_strength"))]
   pub new_password: String,
 }
 
@@ -744,7 +742,7 @@ async fn change_password(
   let password_hash = user.password.unwrap_or_default();
   match verify_password(&body.old_password, &password_hash)? {
     true => {
-      validate_password(&body.new_password)?;
+      body.validate()?;
       let password = hash_password(&body.new_password)?;
       user::update_password(&db.conn, user.id, password).await?;
       while let Some(token_str) = cache
@@ -805,15 +803,6 @@ async fn change_profile(
       return Err(ResponseError::BadRequest("email is required".to_owned()));
     }
   };
-  validate_nickname(&body.nickname)?;
-  validate_email(&email)?;
-  if email_changed
-    && user::get_by_account_or_email(&db.conn, &email)
-      .await?
-      .is_some()
-  {
-    return Err(ResponseError::Conflict("email already used".to_owned()));
-  }
   let user = user::Model {
     nickname: body.nickname.clone(),
     email: Some(email.clone()),
@@ -830,6 +819,12 @@ async fn change_profile(
     ),
     ..user
   };
+  // the account comes from the database, so this validates the profile
+  // fields that were actually changed: nickname and email
+  user.validate()?;
+  if email_changed && user::is_account_or_email_taken(&db.conn, None, &[&email]).await? {
+    return Err(ResponseError::Conflict("email already used".to_owned()));
+  }
 
   let user = user::update(&db.conn, user).await?;
   if email_changed {
@@ -864,6 +859,15 @@ async fn change_profile(
 struct DeleteSelfRequest {
   pub captcha_id: String,
   pub captcha_answer: String,
+}
+
+/// Random lowercase alphanumeric suffix for tombstone accounts, keeping the
+/// rewritten account unique and inside the account character rules.
+fn deleted_account_suffix() -> String {
+  const CHARSET: &[u8] = b"abcdefghijklmnopqrstuvwxyz0123456789";
+  (0..8)
+    .map(|_| CHARSET[rand::rng().random_range(0..CHARSET.len())] as char)
+    .collect()
 }
 
 async fn delete_self(
@@ -903,7 +907,7 @@ async fn delete_self(
     }
   }
   let user = user::Model {
-    account: format!("[DELETED]_{}", user.id),
+    account: format!("deleted_{}_{}", user.id, deleted_account_suffix()),
     nickname: format!("[DELETED]_{}", user.id),
     email: Some(format!("deleted-{}@private.ret.sh.cn", user.id)),
     description: Some(format!(
@@ -931,46 +935,4 @@ async fn delete_self(
 
   txn.commit().await?;
   Ok(StatusCode::OK)
-}
-
-#[cfg(test)]
-mod tests {
-  use crate::utility::validation::{
-    validate_account, validate_email, validate_nickname, validate_password,
-    validate_register_request,
-  };
-
-  #[test]
-  fn register_validation_accepts_frontend_valid_fields() {
-    assert!(
-      validate_register_request(
-        "Valid_User_01",
-        "测试用户",
-        "user@example.com",
-        "StrongPass1"
-      )
-      .is_ok()
-    );
-  }
-
-  #[test]
-  fn register_validation_rejects_invalid_accounts_after_filtering() {
-    assert!(validate_account("abc").is_err());
-    assert!(validate_account("a".repeat(33).as_str()).is_err());
-    assert!(validate_account("bad-user").is_err());
-    assert!(validate_account("bad user").is_err());
-    assert!(validate_account("测试_user").is_err());
-  }
-
-  #[test]
-  fn register_validation_rejects_invalid_nickname_email_and_password() {
-    assert!(validate_nickname("a").is_err());
-    assert!(validate_nickname("a".repeat(33).as_str()).is_err());
-    assert!(validate_email("not-an-email").is_err());
-    assert!(validate_email("user@example").is_err());
-    assert!(validate_password("weakpass1").is_err());
-    assert!(validate_password("WEAKPASS1").is_err());
-    assert!(validate_password("WeakPass").is_err());
-    assert!(validate_password("Aa1".repeat(14).as_str()).is_err());
-  }
 }

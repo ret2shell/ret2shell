@@ -19,7 +19,11 @@ pub const GIT_HOOK_SESSION_DOMAIN: &str = "git-hook-session";
 pub const GIT_HOOK_AUTH_DOMAIN: &str = "git-hook-auth";
 pub const GIT_HOOK_TTL: i64 = 60 * 10;
 pub const GIT_HOOK_COLOR_HEADER: &str = "x-ret2shell-git-hook-color";
-const ZERO_OID: &str = "0000000000000000000000000000000000000000";
+pub(crate) const ZERO_OID: &str = "0000000000000000000000000000000000000000";
+/// The last line a successful post-receive sync emits. The hook client
+/// treats the response as complete only when it has seen this sentinel;
+/// anything else (truncation, abort, timeout) triggers a local rollback.
+pub(crate) const SYNC_COMPLETION_SENTINEL: &str = "ret2shell git sync completed successfully";
 const GIT_HOOK_COLOR_ALWAYS: &str = "always";
 const GIT_HOOK_COLOR_NEVER: &str = "never";
 
@@ -122,10 +126,10 @@ pub struct GitHookSession {
 }
 
 #[derive(Clone, Debug)]
-struct UpdatedRef {
-  old_oid: String,
-  new_oid: String,
-  ref_name: String,
+pub(crate) struct UpdatedRef {
+  pub(crate) old_oid: String,
+  pub(crate) new_oid: String,
+  pub(crate) ref_name: String,
 }
 
 pub async fn run_post_receive(
@@ -162,29 +166,69 @@ pub async fn run_post_receive(
     }
   };
   let status = response.status();
-  let body = forward_response(Body::new(response.into_body())).await;
+  let completed = match forward_response(Body::new(response.into_body())).await {
+    Ok(completed) => completed,
+    Err(err) => {
+      if let Err(rollback_err) = rollback_post_receive(repo_path, &payload, formatter).await {
+        return Err(anyhow!(err).context(format!(
+          "internal hook response ended early and the repository rollback also failed: {rollback_err}"
+        )));
+      }
+      return Err(err.context("internal hook response ended before synchronization completed"));
+    }
+  };
   if !status.is_success() {
     if let Err(rollback_err) = rollback_post_receive(repo_path, &payload, formatter).await {
       return Err(anyhow!(
         "internal hook request failed with status {status}; repository rollback also failed: {rollback_err}"
       ));
     }
-    if let Err(err) = body {
-      return Err(err.context(format!("internal hook request failed with status {status}")));
-    }
     return Err(anyhow!("internal hook request failed with status {status}"));
   }
-  body
-}
-
-async fn forward_response(body: Body) -> anyhow::Result<()> {
-  let mut stream = body.into_data_stream();
-  let mut stdout = tokio::io::stdout();
-  while let Some(chunk) = stream.try_next().await? {
-    stdout.write_all(&chunk).await?;
-    stdout.flush().await?;
+  if !completed {
+    if let Err(rollback_err) = rollback_post_receive(repo_path, &payload, formatter).await {
+      return Err(anyhow!(
+        "synchronization did not report completion and the repository rollback also failed: {rollback_err}"
+      ));
+    }
+    return Err(anyhow!(
+      "synchronization did not report completion; the repository was rolled back locally"
+    ));
   }
   Ok(())
+}
+
+/// Streams the post-receive response to stdout and reports whether the
+/// completion sentinel was seen. Chunks may split or coalesce lines, so the
+/// sentinel check runs on reassembled lines rather than raw chunks.
+async fn forward_response(body: Body) -> anyhow::Result<bool> {
+  let mut stream = body.into_data_stream();
+  let mut stdout = tokio::io::stdout();
+  let mut pending = String::new();
+  let mut completed = false;
+  while let Some(chunk) = stream.try_next().await? {
+    pending.push_str(&String::from_utf8_lossy(&chunk));
+    while let Some(pos) = pending.find('\n') {
+      let line = pending[..pos].trim_end();
+      if strip_git_hook_ansi(line) == SYNC_COMPLETION_SENTINEL {
+        completed = true;
+      }
+      stdout.write_all(&pending.as_bytes()[..=pos]).await?;
+      pending.drain(..=pos);
+    }
+    stdout.flush().await?;
+  }
+  if let Some(last) = pending.strip_suffix('\n').or(Some(pending.as_str())) {
+    let line = last.trim_end();
+    if !line.is_empty() {
+      if strip_git_hook_ansi(line) == SYNC_COMPLETION_SENTINEL {
+        completed = true;
+      }
+      stdout.write_all(pending.as_bytes()).await?;
+      stdout.flush().await?;
+    }
+  }
+  Ok(completed)
 }
 
 async fn rollback_post_receive(
@@ -279,7 +323,7 @@ pub(crate) fn strip_git_hook_ansi(line: &str) -> String {
   plain
 }
 
-fn parse_post_receive_updates(payload: &[u8]) -> anyhow::Result<Vec<UpdatedRef>> {
+pub(crate) fn parse_post_receive_updates(payload: &[u8]) -> anyhow::Result<Vec<UpdatedRef>> {
   let payload = std::str::from_utf8(payload).context("invalid post-receive payload encoding")?;
   let mut updates = Vec::new();
   for line in payload.lines() {

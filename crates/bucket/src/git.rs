@@ -847,11 +847,14 @@ impl Git {
   pub async fn diff_name_status(
     &self, old_oid: impl AsRef<str>, new_oid: impl AsRef<str>,
   ) -> Result<Vec<DiffEntry>, BucketError> {
+    // `-z` terminates every field with NUL: paths are passed through raw
+    // bytes and never C-quoted, so non-ASCII bucket names survive the trip
     let output = Command::new("git")
       .current_dir(&self.path)
       .arg("diff")
       .arg("--name-status")
       .arg("--find-renames")
+      .arg("-z")
       .arg(old_oid.as_ref())
       .arg(new_oid.as_ref())
       .output()
@@ -864,20 +867,24 @@ impl Git {
     }
 
     let output = String::from_utf8(output.stdout)?;
+    let mut fields = output.split('\0').filter(|field| !field.is_empty());
     let mut entries = Vec::new();
-    for line in output.lines() {
-      let mut parts = line.split('\t');
-      let Some(status) = parts.next() else {
-        continue;
-      };
-      let Some(first_path) = parts.next() else {
-        continue;
-      };
-      let second_path = parts.next();
-      let (old_path, path) = if let Some(path) = second_path {
-        (Some(first_path.to_string()), path.to_string())
+    while let Some(status) = fields.next() {
+      // renames and copies carry the source path before the destination
+      let is_rename = matches!(status.chars().next(), Some('R' | 'C'));
+      let (old_path, path) = if is_rename {
+        let Some(old_path) = fields.next() else {
+          break;
+        };
+        let Some(path) = fields.next() else {
+          break;
+        };
+        (Some(old_path.to_string()), path.to_string())
       } else {
-        (None, first_path.to_string())
+        let Some(path) = fields.next() else {
+          break;
+        };
+        (None, path.to_string())
       };
       entries.push(DiffEntry {
         status: status.to_string(),

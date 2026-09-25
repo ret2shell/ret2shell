@@ -1,0 +1,282 @@
+use std::collections::BTreeMap;
+
+use axum::{
+  Extension, Json, Router,
+  extract::State,
+  middleware,
+  response::IntoResponse,
+  routing::{delete, get, patch, post},
+};
+use r2s_bucket::{
+  Bucket,
+  game::{Milestone, Milestones},
+};
+use r2s_database::{challenge, challenge_milestone, game, user::Permission};
+use r2s_migrator::Database;
+use r2s_queue::Queue;
+use sea_orm::{DatabaseTransaction, TransactionTrait};
+use tower_http::request_id::RequestId;
+use validator::Validate;
+
+use crate::{
+  middleware::{
+    auth::{self, Token},
+    data,
+  },
+  traits::{GlobalState, ResponseError},
+  worker::game::{SCOREBOARD_TOPIC, ScoreMaintenance},
+};
+
+pub fn router(state: &GlobalState) -> Router<GlobalState> {
+  Router::new()
+    .nest(
+      "/{challenge_milestone}",
+      Router::new()
+        .route("/", patch(update_milestone).delete(delete_milestone))
+        .route_layer(middleware::from_fn_with_state(
+          state.clone(),
+          data::prepare_data!(challenge_milestone, false, id, name),
+        )),
+    )
+    .route("/all", delete(delete_milestones))
+    .route("/", post(create_milestone))
+    .route_layer(middleware::from_fn_with_state(
+      state.clone(),
+      auth::game_admin_required,
+    ))
+    .route("/", get(get_milestones))
+    .route_layer(middleware::from_fn_with_state(
+      state.clone(),
+      auth::game_access_required,
+    ))
+    .route_layer(middleware::from_fn(auth::permission_required_all!(
+      Permission::Basic,
+      Permission::Verified
+    )))
+}
+
+pub(super) async fn get_milestones(
+  State(ref db): State<Database>, Extension(game): Extension<game::Model>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let milestones = challenge_milestone::get_list(&db.conn, game.id).await?;
+  Ok(Json(milestones))
+}
+
+pub(super) async fn create_milestone(
+  State(ref db): State<Database>, State(bucket): State<Bucket>, State(queue): State<Queue>,
+  Extension(token): Extension<Token>, Extension(trace): Extension<RequestId>,
+  Extension(game): Extension<game::Model>, Json(milestone): Json<challenge_milestone::Model>,
+) -> Result<impl IntoResponse, crate::traits::ResponseError> {
+  milestone.validate()?;
+  let txn = db.conn.begin().await?;
+  challenge::resolve_prerequisites(&txn, game.id, None, &milestone.prerequisites).await?;
+  if challenge_milestone::is_name_taken(&txn, game.id, None, &milestone.name).await? {
+    return Err(ResponseError::Conflict(format!(
+      "milestone {} already exists in this game",
+      milestone.name
+    )));
+  }
+  let milestone = challenge_milestone::create(
+    &txn,
+    challenge_milestone::Model {
+      id: 0,
+      game_id: game.id,
+      ..milestone
+    },
+  )
+  .await?;
+  write_milestones_to_bucket(
+    &txn,
+    &bucket,
+    &game,
+    &token,
+    format!(":sparkles: create milestone {}", milestone.name),
+  )
+  .await?;
+  txn.commit().await?;
+  queue
+    .publish(
+      SCOREBOARD_TOPIC,
+      ScoreMaintenance::Game { game_id: game.id },
+      trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    )
+    .await
+    .ok();
+  Ok(Json(milestone))
+}
+
+/// Rejects the request when the milestone belongs to another game than the one
+/// addressed by the URL, mirroring the cross-game guard on challenge routes.
+fn ensure_milestone_in_game(
+  game: &game::Model, milestone: &challenge_milestone::Model,
+) -> Result<(), ResponseError> {
+  if milestone.game_id != game.id {
+    tracing::warn!(
+      milestone_id = milestone.id,
+      milestone_game_id = milestone.game_id,
+      game_id = game.id,
+      "user wants to access cross-game milestone"
+    );
+    return Err(ResponseError::Forbidden("permission denied".to_owned()));
+  }
+  Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+pub(super) async fn update_milestone(
+  State(ref db): State<Database>, State(bucket): State<Bucket>, State(queue): State<Queue>,
+  Extension(token): Extension<Token>, Extension(trace): Extension<RequestId>,
+  Extension(game): Extension<game::Model>,
+  Extension(prev_milestone): Extension<challenge_milestone::Model>,
+  Json(milestone): Json<challenge_milestone::Model>,
+) -> Result<impl IntoResponse, crate::traits::ResponseError> {
+  ensure_milestone_in_game(&game, &prev_milestone)?;
+  milestone.validate()?;
+  let txn = db.conn.begin().await?;
+  // milestones are not challenges, so the self-reference exclusion of the
+  // challenge id space does not apply here
+  challenge::resolve_prerequisites(&txn, game.id, None, &milestone.prerequisites).await?;
+  if challenge_milestone::is_name_taken(&txn, game.id, Some(prev_milestone.id), &milestone.name)
+    .await?
+  {
+    return Err(ResponseError::Conflict(format!(
+      "milestone {} already exists in this game",
+      milestone.name
+    )));
+  }
+  let milestone = challenge_milestone::update(
+    &txn,
+    challenge_milestone::Model {
+      id: prev_milestone.id,
+      ..milestone
+    },
+  )
+  .await?;
+  write_milestones_to_bucket(
+    &txn,
+    &bucket,
+    &game,
+    &token,
+    format!(":recycle: update milestone {}", milestone.name),
+  )
+  .await?;
+  txn.commit().await?;
+  queue
+    .publish(
+      SCOREBOARD_TOPIC,
+      ScoreMaintenance::Game { game_id: game.id },
+      trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    )
+    .await
+    .ok();
+  Ok(Json(milestone))
+}
+
+pub(super) async fn delete_milestone(
+  State(ref db): State<Database>, State(bucket): State<Bucket>, State(queue): State<Queue>,
+  Extension(token): Extension<Token>, Extension(trace): Extension<RequestId>,
+  Extension(game): Extension<game::Model>,
+  Extension(milestone): Extension<challenge_milestone::Model>,
+) -> Result<impl IntoResponse, crate::traits::ResponseError> {
+  ensure_milestone_in_game(&game, &milestone)?;
+  let txn = db.conn.begin().await?;
+  challenge_milestone::delete(&txn, milestone.id).await?;
+  write_milestones_to_bucket(
+    &txn,
+    &bucket,
+    &game,
+    &token,
+    format!(":fire: delete milestone {}", milestone.name),
+  )
+  .await?;
+  txn.commit().await?;
+  queue
+    .publish(
+      SCOREBOARD_TOPIC,
+      ScoreMaintenance::Game { game_id: game.id },
+      trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    )
+    .await
+    .ok();
+  Ok(())
+}
+
+/// Removes every milestone of the game.
+pub(super) async fn delete_milestones(
+  State(ref db): State<Database>, State(bucket): State<Bucket>, State(queue): State<Queue>,
+  Extension(token): Extension<Token>, Extension(trace): Extension<RequestId>,
+  Extension(game): Extension<game::Model>,
+) -> Result<impl IntoResponse, crate::traits::ResponseError> {
+  let txn = db.conn.begin().await?;
+  challenge_milestone::delete_by_game_id(&txn, game.id).await?;
+  write_milestones_to_bucket(
+    &txn,
+    &bucket,
+    &game,
+    &token,
+    ":fire: delete all milestones".to_owned(),
+  )
+  .await?;
+  txn.commit().await?;
+  queue
+    .publish(
+      SCOREBOARD_TOPIC,
+      ScoreMaintenance::Game { game_id: game.id },
+      trace.header_value().to_str().unwrap_or("UNKNOWN"),
+    )
+    .await
+    .ok();
+  Ok(())
+}
+
+/// Mirrors the milestones of the game into the `milestones.toml` of the game
+/// bucket. Prerequisites are stored as challenge bucket names because
+/// challenge ids are not persistent across databases.
+async fn write_milestones_to_bucket(
+  txn: &DatabaseTransaction, bucket: &Bucket, game: &game::Model, token: &Token, message: String,
+) -> Result<(), crate::traits::ResponseError> {
+  let milestones = challenge_milestone::get_list(txn, game.id).await?;
+  let challenges: BTreeMap<i64, challenge::Model> = challenge::get_full_list(txn, game.id)
+    .await?
+    .into_iter()
+    .map(|challenge| (challenge.id, challenge))
+    .collect();
+
+  let mut bucket_milestones = Vec::with_capacity(milestones.len());
+  for milestone in &milestones {
+    let mut referenced = Vec::with_capacity(milestone.prerequisites.0.len());
+    for &id in &milestone.prerequisites.0 {
+      let model = challenges.get(&id).cloned().ok_or_else(|| {
+        ResponseError::InternalServerError(format!(
+          "milestone {}:{} references challenge {id} without a bucket",
+          milestone.id, milestone.name
+        ))
+      })?;
+      referenced.push(model);
+    }
+    let prerequisites = super::challenge::prerequisite_bucket_names(&referenced)?;
+    bucket_milestones.push(Milestone {
+      name: milestone.name.clone(),
+      description: milestone.description.clone(),
+      avatar: milestone.avatar.clone(),
+      bonus_score: milestone.bonus_score,
+      unlock_limit: milestone.unlock_limit,
+      prerequisites,
+    });
+  }
+
+  let game_bucket = super::get_game_bucket_mut(bucket, game).await?;
+  game_bucket
+    .set_milestones(Milestones {
+      milestones: bucket_milestones,
+    })
+    .await?;
+  game_bucket
+    .commit(
+      message,
+      &token.account,
+      format!("{}@private.ret.sh.cn", token.account),
+    )
+    .await?;
+  Ok(())
+}

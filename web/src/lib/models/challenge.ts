@@ -13,6 +13,9 @@ export type Challenge = {
   bucket: string | null;
   release_at: DateTime | null;
   archive_at: DateTime | null;
+  prerequisites: number[];
+  unlock_limit: number;
+  avatar: string | null;
 };
 
 export type ChallengeImage = {

@@ -23,6 +23,7 @@ use sea_orm::TransactionTrait;
 use serde::{Deserialize, Serialize};
 use tower_http::request_id::RequestId;
 use tracing::{info, warn};
+use validator::Validate;
 
 use crate::{
   middleware::{
@@ -31,10 +32,7 @@ use crate::{
   },
   routes::account::{EmailType, send_email},
   traits::{GlobalState, ResponseError},
-  utility::{
-    password::hash_password,
-    validation::{validate_oauth_provider_model, validate_register_request},
-  },
+  utility::password::hash_password,
 };
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
@@ -106,7 +104,7 @@ async fn create_oauth_provider(
   State(db): State<Database>, State(oauth): State<OAuth>,
   Json(provider): Json<r2s_database::oauth_provider::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  validate_oauth_provider_model(&provider)?;
+  provider.validate()?;
   let lint = oauth.lint(&provider.script).await?;
   let provider = r2s_database::oauth_provider::create(&db.conn, provider).await?;
   Ok(Json(OAuthProviderResponse {
@@ -119,7 +117,7 @@ async fn update_oauth_provider(
   State(db): State<Database>, State(oauth): State<OAuth>, State(engine): State<Engine>,
   Path(service): Path<String>, Json(provider): Json<r2s_database::oauth_provider::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  validate_oauth_provider_model(&provider)?;
+  provider.validate()?;
   let original_provider = r2s_database::oauth_provider::get_by_provider(&db.conn, &service)
     .await?
     .ok_or_else(|| ResponseError::NotFound("oauth provider".to_owned()))?;
@@ -203,8 +201,8 @@ async fn login_with_oauth_account(
           .at("oauth")
           .set_ex(&temp_token, cached_token, 30 * 60)
           .await?;
-        // info!("OAuth user {auth_key} not found, temp token {temp_token} generated for
-        // register");
+        // info!("OAuth user {auth_key} not found, temp token {temp_token}
+        // generated for register");
         info!(
           ?auth_key,
           ?temp_token,
@@ -249,12 +247,16 @@ async fn login_with_oauth_account(
   Ok((StatusCode::OK, Json(OAuthLoginResponse::default())))
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Validate)]
 struct OAuthRegisterRequest {
   pub token: String,
+  #[validate(custom(function = "r2s_database::validation::account_handle"))]
   pub account: String,
+  #[validate(custom(function = "r2s_database::validation::nickname_len"))]
   pub nickname: String,
+  #[validate(email(message = "invalid email"))]
   pub email: String,
+  #[validate(custom(function = "r2s_database::validation::password_strength"))]
   pub password: String,
   pub captcha_id: String,
   pub captcha_answer: String,
@@ -272,7 +274,7 @@ async fn register_with_oauth_account(
   {
     captcha_protected!(cache, &req.captcha_id, &req.captcha_answer);
   }
-  validate_register_request(&req.account, &req.nickname, &req.email, &req.password)?;
+  req.validate()?;
   let cached_token = cache
     .at("oauth")
     .get::<OAuthCachedToken>(&req.token)
@@ -288,13 +290,7 @@ async fn register_with_oauth_account(
   // if user::get_user_by_account(db, &body.email).await.is_ok() {
   //     return Err((StatusCode::CONFLICT, "account already exists"));
   // }
-  if user::get_by_account_or_email(&txn, &req.email)
-    .await?
-    .is_some()
-    || user::get_by_account_or_email(&txn, &req.account)
-      .await?
-      .is_some()
-  {
+  if user::is_account_or_email_taken(&txn, None, &[&req.email, &req.account]).await? {
     return Err(ResponseError::Conflict("account already exists".to_owned()));
   }
 
