@@ -2120,14 +2120,11 @@ export default function Milestones(props: { gameId: number }) {
                                 <div
                                   title={milestone().name}
                                   class={clsx(
-                                    "absolute flex flex-col p-2 gap-1 rounded-lg border-2 border-y-4 backdrop-blur-sm cursor-pointer transition-colors pointer-events-auto",
-                                    // the golden top/bottom borders are the
-                                    // milestone badge; the side borders always
-                                    // keep the muted divider color, achievement
-                                    // shows through the icon and the progress bar
-                                    "bg-layer/80 border-layer-content/10 border-y-amber-400 hover:border-primary/60 hover:border-y-amber-400",
+                                    "absolute flex flex-col p-2 gap-1 rounded-lg border-2 backdrop-blur-sm cursor-pointer transition-colors pointer-events-auto",
+                                    "bg-layer/80 hover:border-primary/60",
                                     dimmedClass(node.key),
-                                    node.key === selectedNode() && "ring-2 ring-primary/70"
+                                    node.key === selectedNode() && "ring-2 ring-primary/70",
+                                    achieved() ? "border-success/60" : "border-layer-content/10"
                                   )}
                                   style={{
                                     left: `${pos().x - NODE_W / 2}px`,
@@ -2155,7 +2152,9 @@ export default function Milestones(props: { gameId: number }) {
                                       onPick={onPickNodeAvatar}
                                       onClear={onClearNodeAvatar}
                                     />
-                                    <span class="flex-1 truncate text-left font-bold">{milestone().name}</span>
+                                    <span class="flex-1 truncate text-left font-bold text-amber-500 dark:text-amber-400">
+                                      {milestone().name}
+                                    </span>
                                     <Show when={admin()}>
                                       <Button
                                         size="sm"
