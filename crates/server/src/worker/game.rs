@@ -1,10 +1,12 @@
+use std::collections::HashSet;
+
 use chrono::Utc;
 use futures::StreamExt;
 use r2s_bucket::Bucket;
 use r2s_cache::Cache;
 use r2s_checker::Checker;
 use r2s_database::{
-  DbErr, audit, challenge, extra, game, submission,
+  DbErr, audit, challenge, challenge_milestone, extra, game, submission,
   team::{self, TeamScoreHistory, TeamScoreHistoryList},
   user,
 };
@@ -469,13 +471,41 @@ async fn submission_worker_exec(
     team.last_active_at = changed_at;
     team::update(&txn, team.clone()).await?;
 
-    // stage 3.3: create team correct event
+    // stage 3.3: detect the milestones this solve newly achieved, mirroring
+    // the blood detection: the team's solved set now contains this
+    // challenge, so whatever is achieved with it but not without it was
+    // unlocked by this submission
+    let solves =
+      submission::get_list(&txn, true, false, None, None, Some(team.id), None, false).await?;
+    let solved: HashSet<i64> = solves.iter().map(|s| s.challenge_id).collect();
+    let all_milestones = challenge_milestone::get_list(&txn, game.id).await?;
+    let achieved_before: HashSet<i64> = {
+      let mut before = solved.clone();
+      before.remove(&challenge.id);
+      challenge_milestone::achieved_milestones(&before, &all_milestones)
+        .into_iter()
+        .map(|milestone| milestone.id)
+        .collect()
+    };
+    let milestones: Vec<_> = challenge_milestone::achieved_milestones(&solved, &all_milestones)
+      .into_iter()
+      .filter(|milestone| !achieved_before.contains(&milestone.id))
+      .collect();
+    if !milestones.is_empty() {
+      info!(
+        count = milestones.len(),
+        "submission achieved new milestones"
+      );
+    }
+
+    // stage 3.4: create team correct event
     let event = EventContainer {
       game_id: challenge.game_id,
       event: Event::Submission(Box::new(SubmissionEvent {
         event_type: SubmissionEventType::Correct,
         submission: submission.clone(),
         blood_state,
+        milestones,
         challenge: challenge.clone(),
         operator: user.clone(),
         team: Some(team.clone()),
@@ -531,6 +561,7 @@ async fn submission_worker_exec(
         event_type: SubmissionEventType::Cheated,
         submission: submission.clone(),
         blood_state: None,
+        milestones: Vec::new(),
         challenge: challenge.clone(),
         operator: user.clone(),
         team: Some(team.clone()),

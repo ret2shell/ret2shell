@@ -159,6 +159,36 @@ pub fn required_prerequisite_count(unlock_limit: i32, total: usize) -> usize {
   }
 }
 
+/// Whether the milestone's unlock requirement is met by the given set of
+/// solved challenge ids: the prerequisites are non-empty and enough of them
+/// are solved — see `required_prerequisite_count` for how `unlock_limit`
+/// defines "enough".
+pub fn is_achieved(solved: &HashSet<i64>, milestone: &Model) -> bool {
+  let total = milestone.prerequisites.0.len();
+  if total == 0 {
+    return false;
+  }
+  let required = required_prerequisite_count(milestone.unlock_limit, total);
+  milestone
+    .prerequisites
+    .0
+    .iter()
+    .filter(|id| solved.contains(*id))
+    .count()
+    >= required
+}
+
+/// The milestones achieved by the given set of solved challenge ids, in the
+/// order they appear in `milestones` (id order when it comes from
+/// `get_list`).
+pub fn achieved_milestones(solved: &HashSet<i64>, milestones: &[Model]) -> Vec<Model> {
+  milestones
+    .iter()
+    .filter(|milestone| is_achieved(solved, milestone))
+    .cloned()
+    .collect()
+}
+
 /// Evaluates the static bonus scores of all milestones that are satisfied by
 /// the given set of solved challenge ids. A milestone counts as satisfied
 /// when its prerequisites are non-empty and enough of them are solved — see
@@ -166,20 +196,7 @@ pub fn required_prerequisite_count(unlock_limit: i32, total: usize) -> usize {
 pub fn milestone_bonus(solved: &HashSet<i64>, milestones: &[Model]) -> i32 {
   milestones
     .iter()
-    .filter(|milestone| {
-      let total = milestone.prerequisites.0.len();
-      if total == 0 {
-        return false;
-      }
-      let required = required_prerequisite_count(milestone.unlock_limit, total);
-      milestone
-        .prerequisites
-        .0
-        .iter()
-        .filter(|id| solved.contains(*id))
-        .count()
-        >= required
-    })
+    .filter(|milestone| is_achieved(solved, milestone))
     .map(|milestone| milestone.bonus_score)
     .sum()
 }
