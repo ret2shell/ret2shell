@@ -1887,7 +1887,7 @@ export default function Milestones(props: { gameId: number }) {
                           <div
                             title={node.name}
                             class={clsx(
-                              "absolute flex flex-col justify-center gap-1 px-3 rounded-lg border-2 backdrop-blur-sm cursor-pointer transition-colors pointer-events-auto",
+                              "absolute flex flex-col px-3 py-2 gap-1 rounded-lg border-2 backdrop-blur-sm cursor-pointer transition-colors pointer-events-auto",
                               "bg-layer/80",
                               dimmedClass(node.key),
                               node.key === selectedNode() && "ring-2 ring-primary/70",
@@ -1906,7 +1906,7 @@ export default function Milestones(props: { gameId: number }) {
                               navigate(`/games/${props.gameId}/challenges?challenge=${node.id}`);
                             }}
                           >
-                            <div class="flex items-center gap-2 w-full">
+                            <div class="flex-1 flex items-center gap-2 w-full min-h-0">
                               <NodeAvatar
                                 nodeKey={node.key}
                                 avatar={challengeMap().get(node.id)?.avatar ?? null}
@@ -1922,28 +1922,33 @@ export default function Milestones(props: { gameId: number }) {
                                 onClear={onClearNodeAvatar}
                               />
                               <span class="flex-1 truncate text-left font-bold">{node.name}</span>
-                              <Show when={!node.phantom}>
-                                <span class="shrink-0 opacity-60">{challengeMap().get(node.id)?.score} pts</span>
-                              </Show>
                             </div>
-                            <div class="flex items-center gap-2 w-full">
-                              <div class="flex-1 h-1 rounded-full bg-layer-content/10 overflow-hidden">
-                                <div
-                                  class={clsx(
-                                    "h-full rounded-full transition-all",
-                                    progress().unlocked ? "bg-success" : "bg-primary"
-                                  )}
-                                  style={{ width: `${progress().width}%` }}
-                                />
+                            <div class="flex-1 flex items-center gap-2 w-full min-h-0">
+                              <div class="flex-1 flex flex-col justify-center gap-1 min-w-0">
+                                <div class="flex items-center justify-between gap-1">
+                                  <Show when={!node.phantom}>
+                                    <span>{challengeMap().get(node.id)?.score} pts</span>
+                                  </Show>
+                                  <span class="text-xs opacity-60">
+                                    {progress().solved}/{progress().required}
+                                  </span>
+                                </div>
+                                <div class="h-1 rounded-full bg-layer-content/10 overflow-hidden">
+                                  <div
+                                    class={clsx(
+                                      "h-full rounded-full transition-all",
+                                      progress().unlocked ? "bg-success" : "bg-primary"
+                                    )}
+                                    style={{ width: `${progress().width}%` }}
+                                  />
+                                </div>
                               </div>
-                              <span class="shrink-0 text-xs opacity-60">
-                                {progress().solved}/{progress().required}
-                              </span>
                               <Show when={admin() && !node.phantom}>
-                                <button
-                                  type="button"
+                                <Button
+                                  size="sm"
+                                  square
+                                  ghost
                                   title={t("general.actions.edit.title")}
-                                  class="shrink-0 cursor-pointer opacity-60 hover:opacity-100 transition-opacity"
                                   onPointerDown={(e) => e.stopPropagation()}
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -1952,7 +1957,7 @@ export default function Milestones(props: { gameId: number }) {
                                   }}
                                 >
                                   <span class="shrink-0 icon-[fluent--settings-20-regular] w-4 h-4" />
-                                </button>
+                                </Button>
                               </Show>
                             </div>
                             <Show when={admin()}>
@@ -1987,7 +1992,7 @@ export default function Milestones(props: { gameId: number }) {
                                 <div
                                   title={milestone().name}
                                   class={clsx(
-                                    "absolute flex flex-col justify-center gap-1 px-3 rounded-lg border-2 backdrop-blur-sm cursor-pointer transition-colors pointer-events-auto",
+                                    "absolute flex flex-col px-3 py-2 gap-1 rounded-lg border-2 backdrop-blur-sm cursor-pointer transition-colors pointer-events-auto",
                                     "bg-layer/80 hover:border-primary/60",
                                     dimmedClass(node.key),
                                     node.key === selectedNode() && "ring-2 ring-primary/70",
@@ -2005,7 +2010,7 @@ export default function Milestones(props: { gameId: number }) {
                                     setDetailId(node.id);
                                   }}
                                 >
-                                  <div class="flex items-center gap-2 w-full">
+                                  <div class="flex-1 flex items-center gap-2 w-full min-h-0">
                                     <NodeAvatar
                                       nodeKey={node.key}
                                       avatar={milestone().avatar}
@@ -2020,34 +2025,35 @@ export default function Milestones(props: { gameId: number }) {
                                       onClear={onClearNodeAvatar}
                                     />
                                     <span class="flex-1 truncate text-left font-bold">{milestone().name}</span>
-                                    <Show when={achieved()}>
-                                      <span class="shrink-0 icon-[fluent--checkmark-circle-20-filled] w-5 h-5 text-success" />
-                                    </Show>
                                   </div>
-                                  <div class="flex items-center gap-2 w-full">
-                                    <span class="shrink-0 text-primary font-bold">+{milestone().bonus_score} pts</span>
-                                    <span class="flex-1" />
-                                    <span class="shrink-0 opacity-60">
-                                      {progressSolved()}/{requiredCount()}
-                                    </span>
-                                  </div>
-                                  <div class="flex items-center gap-2 w-full">
-                                    <div class="flex-1 h-1 rounded-full bg-layer-content/10 overflow-hidden">
-                                      <div
-                                        class={clsx(
-                                          "h-full rounded-full transition-all",
-                                          achieved() ? "bg-success" : "bg-primary"
-                                        )}
-                                        style={{
-                                          width: `${requiredCount() > 0 ? (progressSolved() / requiredCount()) * 100 : 0}%`,
-                                        }}
-                                      />
+                                  <div class="flex-1 flex items-center gap-2 w-full min-h-0">
+                                    <div class="flex-1 flex flex-col justify-center gap-1 min-w-0">
+                                      <div class="flex items-center justify-between gap-1">
+                                        <span class="shrink-0 text-primary font-bold">
+                                          +{milestone().bonus_score} pts
+                                        </span>
+                                        <span class="text-xs opacity-60">
+                                          {progressSolved()}/{requiredCount()}
+                                        </span>
+                                      </div>
+                                      <div class="h-1 rounded-full bg-layer-content/10 overflow-hidden">
+                                        <div
+                                          class={clsx(
+                                            "h-full rounded-full transition-all",
+                                            achieved() ? "bg-success" : "bg-primary"
+                                          )}
+                                          style={{
+                                            width: `${requiredCount() > 0 ? (progressSolved() / requiredCount()) * 100 : 0}%`,
+                                          }}
+                                        />
+                                      </div>
                                     </div>
                                     <Show when={admin()}>
-                                      <button
-                                        type="button"
+                                      <Button
+                                        size="sm"
+                                        square
+                                        ghost
                                         title={t("general.actions.edit.title")}
-                                        class="shrink-0 cursor-pointer opacity-60 hover:opacity-100 transition-opacity"
                                         onPointerDown={(e) => e.stopPropagation()}
                                         onClick={(e) => {
                                           e.stopPropagation();
@@ -2056,9 +2062,12 @@ export default function Milestones(props: { gameId: number }) {
                                         }}
                                       >
                                         <span class="shrink-0 icon-[fluent--settings-20-regular] w-4 h-4" />
-                                      </button>
+                                      </Button>
                                     </Show>
                                   </div>
+                                  <Show when={admin()}>
+                                    <PortMarker nodeKey={node.key} side="in" active={nearPort() === node.key} />
+                                  </Show>
                                   <Show when={admin()}>
                                     <PortMarker nodeKey={node.key} side="in" active={nearPort() === node.key} />
                                   </Show>
