@@ -2689,6 +2689,14 @@ function MilestoneFormDialog(props: {
                   hideFooter
                 />
                 <div class="flex gap-2 mt-4!">
+                  <Button
+                    level="primary"
+                    class="flex-1"
+                    loading={createMutation.isPending || updateMutation.isPending}
+                    onClick={onSubmit}
+                  >
+                    {props.milestone ? t("general.actions.save.title") : t("general.actions.create.title")}
+                  </Button>
                   <Show when={props.milestone}>
                     <Button
                       level="error"
@@ -2701,14 +2709,6 @@ function MilestoneFormDialog(props: {
                       <span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5" />
                     </Button>
                   </Show>
-                  <Button
-                    level="primary"
-                    class="flex-1"
-                    loading={createMutation.isPending || updateMutation.isPending}
-                    onClick={onSubmit}
-                  >
-                    {props.milestone ? t("general.actions.save.title") : t("general.actions.create.title")}
-                  </Button>
                 </div>
               </div>
             </OverlayScrollbarsComponent>
