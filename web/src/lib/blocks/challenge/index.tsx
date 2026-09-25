@@ -65,10 +65,10 @@ function BottomPanel(props: ChallengeWidgetProps) {
   const game = useGame({ id: () => props.gameId });
   const gating = usePrerequisiteGating({ gameId: () => props.gameId, challengeId: () => props.challengeId });
   const pageComponent = () => {
-    if (!isAdminOfGame(game.data) && ["statistics", "instances", "checker", "settings"].includes(page())) {
+    if (!isAdminOfGame(game.data) && ["statistics", "instances", "checker", "settings", "files"].includes(page())) {
       return pages.terminal;
     }
-    if (gating.gated() && ["terminal", "hints", "files"].includes(page())) {
+    if (gating.gated() && ["terminal", "hints", "hammer", "answer"].includes(page())) {
       return LockedPanel;
     }
     if (props.training && page() === "hammer") {
@@ -146,7 +146,7 @@ function BottomPanel(props: ChallengeWidgetProps) {
           <Button
             onClick={() => setSearchParams({ tab: "answer" })}
             ghost={page() !== "answer"}
-            disabled={!props.archived && !isAdminOfGame(game.data)}
+            disabled={(!props.archived && !isAdminOfGame(game.data)) || gating.gated()}
           >
             <span class="shrink-0 icon-[fluent--checkmark-circle-20-regular] w-5 h-5" />
             <span>{t("challenge.answer.title")}</span>
