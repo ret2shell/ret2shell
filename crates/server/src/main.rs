@@ -54,9 +54,11 @@ enum InternalCommands {
 struct HookArgs {
   #[arg(value_enum)]
   kind: HookKind,
-  #[arg(long)]
+  /// session/auth keys are nanoids whose alphabet includes `-`; a value
+  /// starting with `-` must not be parsed as a flag.
+  #[arg(long, allow_hyphen_values = true)]
   session: String,
-  #[arg(long)]
+  #[arg(long, allow_hyphen_values = true)]
   auth_key: String,
   #[arg(long)]
   base_url: String,

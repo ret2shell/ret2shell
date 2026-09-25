@@ -2,6 +2,8 @@ use std::{
   collections::{BTreeMap, BTreeSet, HashSet},
   fmt::Display,
   net::SocketAddr,
+  pin::Pin,
+  task::{Context, Poll},
   time::Duration,
 };
 
@@ -14,7 +16,7 @@ use axum::{
   routing::post,
 };
 use chrono::Utc;
-use futures::TryStreamExt;
+use futures::{Stream, TryStreamExt};
 use r2s_bucket::{challenge::ChallengeBucket, game::GameBucket, git::DiffEntry};
 use r2s_config::cluster::ChallengeEnv;
 use r2s_database::{challenge, challenge_milestone, game, hint};
@@ -45,6 +47,28 @@ use crate::{
 
 pub(crate) fn router() -> Router<GlobalState> {
   Router::new().route("/git-hook/post-receive", post(post_receive))
+}
+
+/// Streams the sync log to the push client and aborts the sync task as soon
+/// as the response body is dropped, which happens exactly when the push
+/// client disconnects mid-sync.
+struct AbortOnDropStream {
+  inner: ReceiverStream<Result<Bytes, std::io::Error>>,
+  handle: tokio::task::AbortHandle,
+}
+
+impl Stream for AbortOnDropStream {
+  type Item = Result<Bytes, std::io::Error>;
+
+  fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+    Pin::new(&mut self.inner).poll_next(cx)
+  }
+}
+
+impl Drop for AbortOnDropStream {
+  fn drop(&mut self) {
+    self.handle.abort();
+  }
 }
 
 #[derive(Deserialize)]
@@ -194,7 +218,7 @@ pub(crate) async fn post_receive(
 
   const EXECUTE_TIMEOUT: Duration = Duration::from_secs(600);
   let (tx, rx) = mpsc::channel(64);
-  let logger = StreamLogger::new(tx.clone(), GitHookFormatter::from_headers(&headers));
+  let logger = StreamLogger::new(tx, GitHookFormatter::from_headers(&headers));
   let handle = tokio::spawn(async move {
     match tokio::time::timeout(EXECUTE_TIMEOUT, execute_post_receive(state, session, updates, logger.clone()))
       .await
@@ -210,15 +234,13 @@ pub(crate) async fn post_receive(
       }
     }
   });
-  // a disconnected push client drops the response body and releases the repo
-  // lock early; abort the sync task at once so it cannot race the next writer
-  let closed = tx.clone();
-  tokio::spawn(async move {
-    closed.closed().await;
-    handle.abort();
-  });
-
-  let stream = ReceiverStream::new(rx);
+  // dropping the response body (client disconnect) aborts the sync task at
+  // once, so a gone client cannot leave it racing the next writer after the
+  // repo lock is released
+  let stream = AbortOnDropStream {
+    inner: ReceiverStream::new(rx),
+    handle: handle.abort_handle(),
+  };
   Ok((
     StatusCode::OK,
     [("Content-Type", "text/plain; charset=utf-8")],
