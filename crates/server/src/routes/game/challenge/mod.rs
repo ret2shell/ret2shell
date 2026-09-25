@@ -189,24 +189,6 @@ pub(super) fn check_challenge_publishing(prev: &challenge::Model) -> Result<(), 
 
 /// Maps the domain violations reported by `challenge::resolve_prerequisites`
 /// to client errors while keeping database errors on the error path.
-pub(super) fn resolve_prerequisites_error(
-  error: challenge::ResolvePrerequisitesError,
-) -> ResponseError {
-  use challenge::ResolvePrerequisitesError as Error;
-  match error {
-    Error::OwnPrerequisite => {
-      ResponseError::BadRequest("a challenge cannot be its own prerequisite".to_owned())
-    }
-    Error::NotFound(id) => {
-      ResponseError::BadRequest(format!("prerequisite challenge {id} does not exist"))
-    }
-    Error::WrongGame(id) => ResponseError::BadRequest(format!(
-      "prerequisite challenge {id} does not belong to this game"
-    )),
-    Error::Db(error) => error.into(),
-  }
-}
-
 /// Maps the given prerequisite models to their bucket names, the persistent
 /// reference used inside the game repository.
 pub(super) fn prerequisite_bucket_names(

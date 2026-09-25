@@ -998,15 +998,16 @@ async fn list_challenge_dirs(game_bucket: &GameBucket) -> Result<BTreeSet<String
 }
 
 async fn read_body(body: Body) -> Result<Vec<u8>, ResponseError> {
-  body
-    .into_data_stream()
-    .map_err(std::io::Error::other)
-    .try_fold(Vec::new(), |mut acc, chunk| async move {
-      acc.extend_from_slice(&chunk);
-      Ok(acc)
-    })
-    .await
-    .map_err(ResponseError::FileIoError)
+  Ok(
+    body
+      .into_data_stream()
+      .map_err(std::io::Error::other)
+      .try_fold(Vec::new(), |mut acc, chunk| async move {
+        acc.extend_from_slice(&chunk);
+        Ok(acc)
+      })
+      .await?,
+  )
 }
 
 fn parse_post_receive_updates(payload: &[u8]) -> Result<Vec<UpdatedRef>, ResponseError> {

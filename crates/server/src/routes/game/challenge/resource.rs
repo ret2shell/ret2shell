@@ -99,9 +99,8 @@ pub(super) async fn create_challenge(
 ) -> Result<impl IntoResponse, ResponseError> {
   challenge.validate()?;
   let txn = db.conn.begin().await?;
-  let referenced = challenge::resolve_prerequisites(&txn, game.id, None, &challenge.prerequisites)
-    .await
-    .map_err(super::resolve_prerequisites_error)?;
+  let referenced =
+    challenge::resolve_prerequisites(&txn, game.id, None, &challenge.prerequisites).await?;
   let prerequisite_buckets = super::prerequisite_bucket_names(&referenced)?;
   let game_bucket = bucket
     .at_mut(
@@ -160,8 +159,7 @@ pub(super) async fn update_challenge(
     Some(prev_challenge.id),
     &challenge.prerequisites,
   )
-  .await
-  .map_err(super::resolve_prerequisites_error)?;
+  .await?;
   super::ensure_acyclic_prerequisites(&txn, &game, prev_challenge.id, &challenge.prerequisites)
     .await?;
   let prerequisite_buckets = super::prerequisite_bucket_names(&referenced)?;
@@ -239,8 +237,7 @@ pub(super) async fn update_challenge_prerequisites(
   let txn = db.conn.begin().await?;
   let referenced =
     challenge::resolve_prerequisites(&txn, game.id, Some(prev_challenge.id), &prerequisites)
-      .await
-      .map_err(super::resolve_prerequisites_error)?;
+      .await?;
   super::ensure_acyclic_prerequisites(&txn, &game, prev_challenge.id, &prerequisites).await?;
   let prerequisite_buckets = super::prerequisite_bucket_names(&referenced)?;
   let challenge = challenge::update(
@@ -297,9 +294,8 @@ pub(super) async fn update_challenge_avatar(
     },
   )
   .await?;
-  let referenced = challenge::resolve_prerequisites(&txn, game.id, None, &challenge.prerequisites)
-    .await
-    .map_err(super::resolve_prerequisites_error)?;
+  let referenced =
+    challenge::resolve_prerequisites(&txn, game.id, None, &challenge.prerequisites).await?;
   let prerequisite_buckets = super::prerequisite_bucket_names(&referenced)?;
   let (game_bucket, challenge_bucket) =
     super::get_challenge_bucket_mut(&bucket, &game, &challenge).await?;

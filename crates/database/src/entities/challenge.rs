@@ -11,6 +11,7 @@ use sea_orm::{
   entity::prelude::*,
 };
 use serde::{Deserialize, Serialize};
+use thiserror::Error as ThisError;
 use validator::{Validate, ValidationError};
 
 use super::submission;
@@ -136,18 +137,16 @@ impl Model {
 /// Failure modes of `resolve_prerequisites`. Domain violations are reported
 /// separately from database errors so that the caller can map them to
 /// different response statuses.
-#[derive(Debug)]
+#[derive(Debug, ThisError)]
 pub enum ResolvePrerequisitesError {
+  #[error("a challenge cannot be its own prerequisite")]
   OwnPrerequisite,
+  #[error("prerequisite challenge {0} does not exist")]
   NotFound(i64),
+  #[error("prerequisite challenge {0} does not belong to this game")]
   WrongGame(i64),
-  Db(DbErr),
-}
-
-impl From<DbErr> for ResolvePrerequisitesError {
-  fn from(error: DbErr) -> Self {
-    Self::Db(error)
-  }
+  #[error(transparent)]
+  Db(#[from] DbErr),
 }
 
 /// Resolves prerequisite ids to their challenge models. Fails when an id is

@@ -69,9 +69,7 @@ pub(super) async fn create_milestone(
 ) -> Result<impl IntoResponse, crate::traits::ResponseError> {
   milestone.validate()?;
   let txn = db.conn.begin().await?;
-  challenge::resolve_prerequisites(&txn, game.id, None, &milestone.prerequisites)
-    .await
-    .map_err(super::challenge::resolve_prerequisites_error)?;
+  challenge::resolve_prerequisites(&txn, game.id, None, &milestone.prerequisites).await?;
   if challenge_milestone::is_name_taken(&txn, game.id, None, &milestone.name).await? {
     return Err(ResponseError::Conflict(format!(
       "milestone {} already exists in this game",
@@ -137,9 +135,7 @@ pub(super) async fn update_milestone(
   let txn = db.conn.begin().await?;
   // milestones are not challenges, so the self-reference exclusion of the
   // challenge id space does not apply here
-  challenge::resolve_prerequisites(&txn, game.id, None, &milestone.prerequisites)
-    .await
-    .map_err(super::challenge::resolve_prerequisites_error)?;
+  challenge::resolve_prerequisites(&txn, game.id, None, &milestone.prerequisites).await?;
   if challenge_milestone::is_name_taken(&txn, game.id, Some(prev_milestone.id), &milestone.name)
     .await?
   {

@@ -11,7 +11,7 @@ use r2s_cache::Cache;
 use r2s_checker::Checker;
 use r2s_cluster::Cluster;
 use r2s_config::GlobalConfig;
-use r2s_database::DbErr;
+use r2s_database::{DbErr, challenge::ResolvePrerequisitesError};
 use r2s_engine::Engine;
 use r2s_event::EventManager;
 use r2s_media::Media;
@@ -52,6 +52,8 @@ pub enum ResponseError {
   BadRequest(String),
   #[error("{0}")]
   Validation(#[from] ValidationErrors),
+  #[error("prerequisite resolution failed")]
+  ResolvePrerequisites(#[from] ResolvePrerequisitesError),
   #[error("forbidden: {0}")]
   Forbidden(String),
   #[error("not found: {0}")]
@@ -103,6 +105,23 @@ macro_rules! log_with_resp {
   }};
 }
 
+/// Shared response mapping for database failures, used by both the direct
+/// [`ResponseError::DatabaseError`] variant and nested domain errors.
+fn database_error_response(error: DbErr) -> (StatusCode, String) {
+  match error {
+    DbErr::RecordNotFound(s) => (StatusCode::NOT_FOUND, format!("record not found: {s}")),
+    DbErr::Json(_) => (
+      StatusCode::INTERNAL_SERVER_ERROR,
+      "data cruptted".to_owned(),
+    ),
+    _ => log_with_resp!(
+      StatusCode::INTERNAL_SERVER_ERROR,
+      "database internal error".to_owned(),
+      error.to_string()
+    ),
+  }
+}
+
 impl IntoResponse for ResponseError {
   fn into_response(self) -> Response<Body> {
     let (status, message) = match self {
@@ -119,17 +138,21 @@ impl IntoResponse for ResponseError {
       ResponseError::Conflict(summary) => (StatusCode::CONFLICT, summary),
       ResponseError::TooManyRequests(summary) => (StatusCode::TOO_MANY_REQUESTS, summary),
       ResponseError::PreconditionFailed(summary) => (StatusCode::PRECONDITION_FAILED, summary),
-      ResponseError::DatabaseError(e) => match e {
-        DbErr::RecordNotFound(s) => (StatusCode::NOT_FOUND, format!("record not found: {s}")),
-        DbErr::Json(_) => (
-          StatusCode::INTERNAL_SERVER_ERROR,
-          "data cruptted".to_owned(),
+      ResponseError::DatabaseError(e) => database_error_response(e),
+      ResponseError::ResolvePrerequisites(error) => match error {
+        ResolvePrerequisitesError::OwnPrerequisite => (
+          StatusCode::BAD_REQUEST,
+          "a challenge cannot be its own prerequisite".to_owned(),
         ),
-        _ => log_with_resp!(
-          StatusCode::INTERNAL_SERVER_ERROR,
-          "database internal error".to_owned(),
-          e.to_string()
+        ResolvePrerequisitesError::NotFound(id) => (
+          StatusCode::BAD_REQUEST,
+          format!("prerequisite challenge {id} does not exist"),
         ),
+        ResolvePrerequisitesError::WrongGame(id) => (
+          StatusCode::BAD_REQUEST,
+          format!("prerequisite challenge {id} does not belong to this game"),
+        ),
+        ResolvePrerequisitesError::Db(e) => database_error_response(e),
       },
       ResponseError::Gone(summary) => (StatusCode::GONE, summary),
       ResponseError::CacheError(e) => match e {

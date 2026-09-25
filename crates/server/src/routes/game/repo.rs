@@ -217,7 +217,7 @@ async fn create_post_receive_hooks_dir(
   }
   fs::create_dir_all(&dir).await?;
   let hook_path = dir.join("post-receive");
-  let exe_path = std::env::current_exe().map_err(ResponseError::FileIoError)?;
+  let exe_path = std::env::current_exe()?;
   let script = format!(
     "#!/bin/sh\nexec {} internal hook post-receive --session {} --auth-key {} --base-url {} --repo-path {}\n",
     shell_quote(exe_path.as_os_str()),
@@ -268,7 +268,7 @@ async fn spawn_receive_pack_with_hook(
     .arg("receive-pack")
     .arg("--stateless-rpc")
     .arg(repo_path);
-  let mut child = cmd.spawn().map_err(ResponseError::FileIoError)?;
+  let mut child = cmd.spawn()?;
   let stdout = child
     .stdout
     .take()
