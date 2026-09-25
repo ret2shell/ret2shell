@@ -23,6 +23,7 @@ pub enum ChallengeMilestone {
   BonusScore,
   Name,
   Description,
+  UnlockLimit,
 }
 
 #[async_trait::async_trait]

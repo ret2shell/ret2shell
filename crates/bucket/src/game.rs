@@ -89,6 +89,10 @@ pub struct Milestone {
   pub bonus_score: i32,
   #[serde(default)]
   pub prerequisites: Vec<String>,
+  /// How many of the prerequisites must be solved before the milestone is
+  /// achieved. `0` means all of them.
+  #[serde(default)]
+  pub unlock_limit: i32,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -345,6 +349,7 @@ mod tests {
         description: "solve the first half".to_owned(),
         avatar: Some("avatar-hash".to_owned()),
         bonus_score: 200,
+        unlock_limit: 0,
         prerequisites: vec!["web_1700000000".to_owned(), "pwn_1700000001".to_owned()],
       }],
     };

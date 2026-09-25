@@ -50,6 +50,7 @@ impl MigratorTrait for Migrator {
       Box::new(migrations::m_20260915_000001_challenge_prerequisites_avatar::Migration),
       Box::new(migrations::m_20260915_000002_create_challenge_milestone::Migration),
       Box::new(migrations::m_20260924_000001_challenge_milestone_unique_name::Migration),
+      Box::new(migrations::m_20260925_000001_challenge_milestone_unlock_limit::Migration),
     ]
   }
 }

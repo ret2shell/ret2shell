@@ -1388,7 +1388,11 @@
       }
     },
     "settings": {
-      "title": "设置"
+      "title": "设置",
+      "unlockLimit": {
+        "label": "解锁要求数量",
+        "all": "全部"
+      }
     },
     "inGame": "赛中题目",
     "total": "所有题目",

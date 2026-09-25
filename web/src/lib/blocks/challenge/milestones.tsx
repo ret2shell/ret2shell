@@ -45,6 +45,7 @@ import {
   untrack,
 } from "solid-js";
 import { Portal } from "solid-js/web";
+import UnlockLimitSlider from "./unlock-limit-slider";
 
 const NODE_W = 224;
 const MILESTONE_H = 88;
@@ -841,6 +842,20 @@ function buildTracks(
 let gridTile: HTMLCanvasElement | undefined;
 let gridTileStep = 0;
 let gridTileColor = "";
+
+/// How many of the `total` prerequisites must be solved for an unlock: `0`
+/// means all of them, any positive limit is capped at the total so the
+/// requirement can never become unsatisfiable. Mirrors the backend's
+/// `required_prerequisite_count`.
+function requiredPrerequisiteCount(unlockLimit: number, total: number) {
+  return unlockLimit <= 0 ? total : Math.min(unlockLimit, total);
+}
+
+function milestoneAchieved(prerequisites: number[], solved: Set<number>, unlockLimit: number) {
+  const total = prerequisites.length;
+  if (total === 0) return false;
+  return prerequisites.filter((id) => solved.has(id)).length >= requiredPrerequisiteCount(unlockLimit, total);
+}
 
 export default function Milestones(props: { gameId: number }) {
   const navigate = useNavigate();
@@ -1995,7 +2010,13 @@ export default function Milestones(props: { gameId: number }) {
           setFormOpen(true);
         }}
       />
-      <MilestoneFormDialog gameId={props.gameId} milestone={editing()} open={formOpen()} onOpenChange={setFormOpen} />
+      <MilestoneFormDialog
+        gameId={props.gameId}
+        milestone={editing()}
+        prerequisiteCount={prerequisitesByNode().get(`m${editing()?.id ?? 0}`)?.length ?? 0}
+        open={formOpen()}
+        onOpenChange={setFormOpen}
+      />
     </div>
   );
 }
@@ -2165,11 +2186,7 @@ function MilestoneDetailDialog(props: {
                         <h2 class="font-bold text-lg truncate max-w-full">{milestone().name}</h2>
                         <p class="font-normal opacity-60">+{milestone().bonus_score} pts</p>
                       </div>
-                      <Show
-                        when={
-                          props.prerequisites.length > 0 && props.prerequisites.every((id) => props.solvedIds.has(id))
-                        }
-                      >
+                      <Show when={milestoneAchieved(props.prerequisites, props.solvedIds, milestone().unlock_limit)}>
                         <Tag level="success">
                           <span>{t("challenge.milestone.achieved")}</span>
                         </Tag>
@@ -2254,12 +2271,14 @@ function MilestoneDetailDialog(props: {
 function MilestoneFormDialog(props: {
   gameId: number;
   milestone: Milestone | null;
+  prerequisiteCount: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
   const [name, setName] = createSignal("");
   const [description, setDescription] = createSignal("");
   const [bonusScore, setBonusScore] = createSignal(100);
+  const [unlockLimit, setUnlockLimit] = createSignal(0);
   const [nameError, setNameError] = createSignal("");
   const [descriptionError, setDescriptionError] = createSignal("");
 
@@ -2268,6 +2287,7 @@ function MilestoneFormDialog(props: {
     setName(props.milestone?.name ?? "");
     setDescription(props.milestone?.description ?? "");
     setBonusScore(props.milestone?.bonus_score ?? 100);
+    setUnlockLimit(props.milestone?.unlock_limit ?? 0);
     setNameError("");
     setDescriptionError("");
   });
@@ -2299,6 +2319,7 @@ function MilestoneFormDialog(props: {
       name: name().trim(),
       description: description().trim(),
       bonus_score: Math.min(MAX_BONUS_SCORE, Math.max(0, bonusScore())),
+      unlock_limit: Math.max(0, unlockLimit()),
       // the avatar is managed by the node icon on the canvas
       avatar: props.milestone?.avatar ?? null,
       // prerequisites are managed by drag-connecting on the canvas
@@ -2385,6 +2406,7 @@ function MilestoneFormDialog(props: {
                   onInput={(e) => setBonusScore(Number(e.currentTarget.value) || 0)}
                   required
                 />
+                <UnlockLimitSlider total={props.prerequisiteCount} value={unlockLimit()} onChange={setUnlockLimit} />
                 <Button
                   level="primary"
                   class="w-full mt-4!"

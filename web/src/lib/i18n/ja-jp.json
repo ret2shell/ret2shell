@@ -1388,7 +1388,11 @@
       }
     },
     "settings": {
-      "title": "設定"
+      "title": "設定",
+      "unlockLimit": {
+        "label": "アンロック要件",
+        "all": "すべて"
+      }
     },
     "inGame": "ゲーム中の問題",
     "total": "すべての問題",

@@ -1388,7 +1388,11 @@
       }
     },
     "settings": {
-      "title": "Settings"
+      "title": "Settings",
+      "unlockLimit": {
+        "label": "Unlock requirements",
+        "all": "All"
+      }
     },
     "inGame": "In-game challenges",
     "total": "All challenges",

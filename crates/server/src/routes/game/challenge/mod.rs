@@ -219,6 +219,7 @@ pub(super) fn challenge_bucket_config(
     score_rule: serde_json::from_value(serde_json::to_value(&challenge.score_rule)?)?,
     avatar: challenge.avatar.clone(),
     prerequisites: prerequisite_buckets,
+    unlock_limit: challenge.unlock_limit,
   })
 }
 

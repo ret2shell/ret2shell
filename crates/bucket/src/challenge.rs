@@ -48,6 +48,10 @@ pub struct ChallengeConfig {
   /// bucket names.
   #[serde(default)]
   pub prerequisites: Vec<String>,
+  /// How many of the prerequisites must be solved before the challenge
+  /// unlocks. `0` means all of them.
+  #[serde(default)]
+  pub unlock_limit: i32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -447,6 +451,7 @@ mod tests {
         minimum: 100,
         decay: 10,
       },
+      unlock_limit: 0,
       avatar: Some("avatar-hash".to_owned()),
       prerequisites: vec!["web_1700000000".to_owned()],
     };

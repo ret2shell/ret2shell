@@ -1388,7 +1388,11 @@
       }
     },
     "settings": {
-      "title": "設置"
+      "title": "設置",
+      "unlockLimit": {
+        "label": "解鎖要求数量",
+        "all": "全部"
+      }
     },
     "inGame": "賽中題目",
     "total": "所有題目",

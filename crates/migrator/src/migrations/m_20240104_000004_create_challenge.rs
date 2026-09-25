@@ -28,6 +28,7 @@ pub enum Challenge {
   ArchiveAt,
   Prerequisites,
   Avatar,
+  UnlockLimit,
 }
 
 #[async_trait::async_trait]

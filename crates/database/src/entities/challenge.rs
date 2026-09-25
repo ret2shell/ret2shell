@@ -117,6 +117,15 @@ pub struct Model {
   #[sea_orm(column_type = "JsonBinary")]
   #[serde(default = "PrerequisiteList::default")]
   pub prerequisites: PrerequisiteList,
+  /// How many prerequisites must be solved before this challenge unlocks.
+  /// `0` means every prerequisite is required.
+  #[serde(default)]
+  #[validate(range(
+    min = 0,
+    max = 1000,
+    message = "challenge unlock limit must be between 0 and 1000"
+  ))]
+  pub unlock_limit: i32,
   #[serde(default = "Option::default")]
   #[validate(length(
     max = "crate::validation::AVATAR_MAX_LEN",
@@ -407,15 +416,17 @@ where
   Entity::delete_by_id(id).exec(db).await.map(|_| ())
 }
 
-/// Returns the prerequisite challenge ids that are not solved yet by the given
-/// team, or by the given user when the challenge belongs to a training game
-/// without teams.
+/// Returns the prerequisite challenge ids that still gate the given team (or
+/// user in training games) from unlocking this challenge. Empty once the
+/// unlock limit — the number of prerequisites that must be solved, see
+/// `unlock_limit` — is met.
 pub async fn unsatisfied_prerequisites<C>(
   db: &C, challenge: &Model, team_id: Option<i64>, user_id: i64,
 ) -> Result<Vec<i64>, DbErr>
 where
   C: ConnectionTrait, {
-  if challenge.prerequisites.0.is_empty() {
+  let prerequisites = &challenge.prerequisites.0;
+  if prerequisites.is_empty() {
     return Ok(vec![]);
   }
   let solves = super::submission::get_list(
@@ -430,13 +441,17 @@ where
   )
   .await?;
   let solved: HashSet<i64> = solves.iter().map(|s| s.challenge_id).collect();
-  Ok(
-    challenge
-      .prerequisites
-      .0
-      .iter()
-      .copied()
-      .filter(|id| !solved.contains(id))
-      .collect(),
-  )
+  let satisfied = prerequisites
+    .iter()
+    .filter(|id| solved.contains(id))
+    .count();
+  let required = super::challenge_milestone::required_prerequisite_count(
+    challenge.unlock_limit,
+    prerequisites.len(),
+  );
+  if satisfied >= required {
+    return Ok(vec![]);
+  }
+  // the requirement is not met yet, so every prerequisite still gates
+  Ok(prerequisites.to_vec())
 }

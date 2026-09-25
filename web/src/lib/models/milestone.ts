@@ -6,6 +6,7 @@ export type Milestone = {
   updated_at: DateTime;
   game_id: number;
   prerequisites: number[];
+  unlock_limit: number;
   avatar: string | null;
   bonus_score: number;
   name: string;

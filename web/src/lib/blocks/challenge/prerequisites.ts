@@ -6,7 +6,8 @@ import { createMemo } from "solid-js";
 /** Computes the prerequisite gating state of a challenge. `gated` exempts
  * game admins (mirroring the backend behavior, used to disable actions),
  * while `locked` is the raw state shown to everyone (used for the blur
- * overlay that admins may dismiss). */
+ * overlay that admins may dismiss). The unlock limit — how many
+ * prerequisites must be solved, `0` meaning all — is honored on both. */
 export function usePrerequisiteGating(props: { gameId: () => number; challengeId: () => number }) {
   const game = useGame({ id: props.gameId });
   const challenge = useChallenge({ game_id: props.gameId, challenge_id: props.challengeId });
@@ -17,11 +18,16 @@ export function usePrerequisiteGating(props: { gameId: () => number; challengeId
 
   const lockedIds = createMemo(() => (challenge.data?.prerequisites ?? []).filter((id) => !solvedIds().has(id)));
 
-  const unsatisfied = createMemo(() => (isAdminOfGame(game.data) ? [] : lockedIds()));
+  const unlocked = createMemo(() => {
+    const total = (challenge.data?.prerequisites ?? []).length;
+    const limit = challenge.data?.unlock_limit ?? 0;
+    const required = limit <= 0 ? total : Math.min(limit, total);
+    return total - lockedIds().length >= required;
+  });
 
-  const gated = createMemo(() => unsatisfied().length > 0);
+  const gated = createMemo(() => !isAdminOfGame(game.data) && !unlocked());
 
-  const locked = createMemo(() => lockedIds().length > 0);
+  const locked = createMemo(() => !unlocked());
 
   const lockedChallenges = createMemo(() =>
     lockedIds().map((id) => ({

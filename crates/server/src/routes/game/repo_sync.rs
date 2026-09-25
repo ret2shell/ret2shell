@@ -700,6 +700,7 @@ async fn create_challenge_from_bucket(
     archive_at: None,
     prerequisites: challenge::PrerequisiteList(prerequisites),
     avatar: config.avatar,
+    unlock_limit: config.unlock_limit,
   };
   model
     .validate()
@@ -744,6 +745,7 @@ async fn sync_challenge_record(
     archive_at: previous.archive_at,
     prerequisites: challenge::PrerequisiteList(prerequisites),
     avatar: config.avatar,
+    unlock_limit: config.unlock_limit,
   };
   model
     .validate()
@@ -797,6 +799,7 @@ async fn sync_milestones_from_bucket(
       bonus_score: bucket_milestone.bonus_score,
       name: bucket_milestone.name.clone(),
       description: bucket_milestone.description.clone(),
+      unlock_limit: bucket_milestone.unlock_limit,
     };
     milestone
       .validate()
@@ -816,6 +819,7 @@ async fn sync_milestones_from_bucket(
         || next.avatar != previous.avatar
         || next.bonus_score != previous.bonus_score
         || next.description != previous.description
+        || next.unlock_limit != previous.unlock_limit
       {
         challenge_milestone::update(txn, next).await?;
         changed = true;

@@ -260,6 +260,7 @@ async fn write_milestones_to_bucket(
       description: milestone.description.clone(),
       avatar: milestone.avatar.clone(),
       bonus_score: milestone.bonus_score,
+      unlock_limit: milestone.unlock_limit,
       prerequisites,
     });
   }

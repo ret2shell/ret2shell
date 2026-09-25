@@ -25,6 +25,15 @@ pub struct Model {
   #[sea_orm(column_type = "JsonBinary")]
   #[serde(default = "PrerequisiteList::default")]
   pub prerequisites: PrerequisiteList,
+  /// How many of the prerequisites must be solved before this milestone is
+  /// achieved. `0` means every prerequisite is required.
+  #[serde(default)]
+  #[validate(range(
+    min = 0,
+    max = 1000,
+    message = "milestone unlock limit must be between 0 and 1000"
+  ))]
+  pub unlock_limit: i32,
   #[serde(default = "Option::default")]
   #[validate(length(
     max = "crate::validation::AVATAR_MAX_LEN",
@@ -142,16 +151,33 @@ where
 /// Evaluates the static bonus scores of all milestones that are satisfied by
 /// the given set of solved challenge ids. A milestone counts as satisfied only
 /// when its prerequisites are non-empty and every one of them is solved.
+/// How many of the `total` prerequisites must be solved for an unlock: `0`
+/// means all of them, any positive limit is capped at the total so the
+/// requirement can never become unsatisfiable.
+pub fn required_prerequisite_count(unlock_limit: i32, total: usize) -> usize {
+  if unlock_limit <= 0 {
+    total
+  } else {
+    std::cmp::min(unlock_limit as usize, total)
+  }
+}
+
 pub fn milestone_bonus(solved: &HashSet<i64>, milestones: &[Model]) -> i32 {
   milestones
     .iter()
     .filter(|milestone| {
-      !milestone.prerequisites.0.is_empty()
-        && milestone
-          .prerequisites
-          .0
-          .iter()
-          .all(|id| solved.contains(id))
+      let total = milestone.prerequisites.0.len();
+      if total == 0 {
+        return false;
+      }
+      let required = required_prerequisite_count(milestone.unlock_limit, total);
+      milestone
+        .prerequisites
+        .0
+        .iter()
+        .filter(|id| solved.contains(*id))
+        .count()
+        >= required
     })
     .map(|milestone| milestone.bonus_score)
     .sum()
@@ -176,6 +202,7 @@ mod tests {
       prerequisites: PrerequisiteList(prerequisites),
       avatar: None,
       bonus_score,
+      unlock_limit: 0,
       name: format!("milestone-{id}"),
       description: String::new(),
     }
@@ -268,6 +295,31 @@ mod tests {
   fn milestone_bonus_skips_partially_satisfied_milestones() {
     let milestones = [milestone(1, 100, vec![10, 11])];
     assert_eq!(milestone_bonus(&solved(&[10]), &milestones), 0);
+  }
+
+  #[test]
+  fn milestone_bonus_honors_unlock_limit() {
+    // limit 2 of 3: two solves suffice
+    let mut partial = milestone(1, 300, vec![10, 11, 12]);
+    partial.unlock_limit = 2;
+    assert_eq!(milestone_bonus(&solved(&[10, 11]), &[partial.clone()]), 300);
+    // one solve short of the limit: not awarded
+    assert_eq!(milestone_bonus(&solved(&[10]), &[partial.clone()]), 0);
+    // a limit beyond the total is capped at the total
+    partial.unlock_limit = 7;
+    assert_eq!(
+      milestone_bonus(&solved(&[10, 11, 12]), &[partial.clone()]),
+      300
+    );
+    assert_eq!(milestone_bonus(&solved(&[10, 11]), &[partial]), 0);
+  }
+
+  #[test]
+  fn required_prerequisite_count_caps_at_total() {
+    use super::required_prerequisite_count;
+    assert_eq!(required_prerequisite_count(0, 3), 3);
+    assert_eq!(required_prerequisite_count(2, 3), 2);
+    assert_eq!(required_prerequisite_count(5, 3), 3);
   }
 
   #[test]
