@@ -1,7 +1,9 @@
 import { handleHttpError, inflyClient, toastSuccess } from "@api";
 import {
+  useChallenge,
   useChallenges,
   useUpdateChallengeAvatarMutation,
+  useUpdateChallengeMutation,
   useUpdateChallengePrerequisitesMutation,
 } from "@api/challenge";
 import { useGame, useSelfSolves } from "@api/game";
@@ -49,7 +51,7 @@ import UnlockLimitSlider from "./unlock-limit-slider";
 
 const NODE_W = 224;
 const MILESTONE_H = 88;
-const CHALLENGE_H = 48;
+const CHALLENGE_H = 88;
 // node centers snap to the world grid (multiples of GRID_Y); the column
 // pitch and the first column center are grid multiples, so auto layout,
 // drag snapping and the dot grid all agree
@@ -854,7 +856,22 @@ function requiredPrerequisiteCount(unlockLimit: number, total: number) {
 function milestoneAchieved(prerequisites: number[], solved: Set<number>, unlockLimit: number) {
   const total = prerequisites.length;
   if (total === 0) return false;
-  return prerequisites.filter((id) => solved.has(id)).length >= requiredPrerequisiteCount(unlockLimit, total);
+  return prerequisiteProgress(prerequisites, solved, unlockLimit).unlocked;
+}
+
+/// Progress of a prerequisite set under the given unlock limit. A set with
+/// no prerequisites reports a full bar with a 0/0 counter.
+function prerequisiteProgress(prerequisites: number[], solved: Set<number>, unlockLimit: number) {
+  const total = prerequisites.length;
+  if (total === 0) return { solved: 0, required: 0, width: 100, unlocked: true };
+  const required = requiredPrerequisiteCount(unlockLimit, total);
+  const count = Math.min(prerequisites.filter((id) => solved.has(id)).length, required);
+  return {
+    solved: count,
+    required,
+    width: required > 0 ? (count / required) * 100 : 100,
+    unlocked: count >= required,
+  };
 }
 
 export default function Milestones(props: { gameId: number }) {
@@ -1016,6 +1033,8 @@ export default function Milestones(props: { gameId: number }) {
   const [detailId, setDetailId] = createSignal<number | null>(null);
   const [formOpen, setFormOpen] = createSignal(false);
   const [editing, setEditing] = createSignal<Milestone | null>(null);
+  const [challengeFormOpen, setChallengeFormOpen] = createSignal(false);
+  const [editingChallenge, setEditingChallenge] = createSignal<Challenge | null>(null);
 
   const detailMilestone = createMemo(() => {
     const id = detailId();
@@ -1855,6 +1874,12 @@ export default function Milestones(props: { gameId: number }) {
                 <For each={nodes()}>
                   {(node) => {
                     const pos = () => positions()[node.key] ?? { x: PAD, y: PAD };
+                    const progress = () =>
+                      prerequisiteProgress(
+                        prerequisitesByNode().get(node.key) ?? [],
+                        solvedIds(),
+                        challengeMap().get(node.id)?.unlock_limit ?? 0
+                      );
                     return (
                       <Switch>
                         <Match when={node.kind === "challenge"}>
@@ -1862,7 +1887,7 @@ export default function Milestones(props: { gameId: number }) {
                           <div
                             title={node.name}
                             class={clsx(
-                              "absolute flex items-center gap-2 px-3 rounded-lg border-2 backdrop-blur-sm cursor-pointer transition-colors pointer-events-auto",
+                              "absolute flex flex-col justify-center gap-1 px-3 rounded-lg border-2 backdrop-blur-sm cursor-pointer transition-colors pointer-events-auto",
                               "bg-layer/80",
                               dimmedClass(node.key),
                               node.key === selectedNode() && "ring-2 ring-primary/70",
@@ -1881,24 +1906,55 @@ export default function Milestones(props: { gameId: number }) {
                               navigate(`/games/${props.gameId}/challenges?challenge=${node.id}`);
                             }}
                           >
-                            <NodeAvatar
-                              nodeKey={node.key}
-                              avatar={challengeMap().get(node.id)?.avatar ?? null}
-                              fallback={node.name}
-                              defaultIcon={
-                                solvedIds().has(node.id)
-                                  ? "icon-[fluent--checkmark-circle-20-regular] text-success"
-                                  : "icon-[fluent--flag-20-regular]"
-                              }
-                              admin={admin() && !node.phantom}
-                              uploading={avatarUploading() === node.key}
-                              onPick={onPickNodeAvatar}
-                              onClear={onClearNodeAvatar}
-                            />
-                            <span class="flex-1 truncate text-left font-bold">{node.name}</span>
-                            <Show when={!node.phantom}>
-                              <span class="shrink-0 opacity-60">{challengeMap().get(node.id)?.score} pts</span>
-                            </Show>
+                            <div class="flex items-center gap-2 w-full">
+                              <NodeAvatar
+                                nodeKey={node.key}
+                                avatar={challengeMap().get(node.id)?.avatar ?? null}
+                                fallback={node.name}
+                                defaultIcon={
+                                  solvedIds().has(node.id)
+                                    ? "icon-[fluent--checkmark-circle-20-regular] text-success"
+                                    : "icon-[fluent--flag-20-regular]"
+                                }
+                                admin={admin() && !node.phantom}
+                                uploading={avatarUploading() === node.key}
+                                onPick={onPickNodeAvatar}
+                                onClear={onClearNodeAvatar}
+                              />
+                              <span class="flex-1 truncate text-left font-bold">{node.name}</span>
+                              <Show when={!node.phantom}>
+                                <span class="shrink-0 opacity-60">{challengeMap().get(node.id)?.score} pts</span>
+                              </Show>
+                            </div>
+                            <div class="flex items-center gap-2 w-full">
+                              <div class="flex-1 h-1 rounded-full bg-layer-content/10 overflow-hidden">
+                                <div
+                                  class={clsx(
+                                    "h-full rounded-full transition-all",
+                                    progress().unlocked ? "bg-success" : "bg-primary"
+                                  )}
+                                  style={{ width: `${progress().width}%` }}
+                                />
+                              </div>
+                              <span class="shrink-0 text-xs opacity-60">
+                                {progress().solved}/{progress().required}
+                              </span>
+                              <Show when={admin() && !node.phantom}>
+                                <button
+                                  type="button"
+                                  title={t("general.actions.edit.title")}
+                                  class="shrink-0 cursor-pointer opacity-60 hover:opacity-100 transition-opacity"
+                                  onPointerDown={(e) => e.stopPropagation()}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingChallenge(challengeMap().get(node.id) ?? null);
+                                    setChallengeFormOpen(true);
+                                  }}
+                                >
+                                  <span class="shrink-0 icon-[fluent--settings-20-regular] w-4 h-4" />
+                                </button>
+                              </Show>
+                            </div>
                             <Show when={admin()}>
                               <PortMarker nodeKey={node.key} side="in" active={nearPort() === node.key} />
                               <PortMarker
@@ -1917,8 +1973,8 @@ export default function Milestones(props: { gameId: number }) {
                               const solvedCount = createMemo(
                                 () => prereqs().filter((id) => solvedIds().has(id)).length
                               );
-                              const achieved = createMemo(
-                                () => milestoneAchieved(prereqs(), solvedIds(), milestone().unlock_limit)
+                              const achieved = createMemo(() =>
+                                milestoneAchieved(prereqs(), solvedIds(), milestone().unlock_limit)
                               );
                               // the unlock limit caps the progress denominator: with a limit
                               // of 2 out of 4 prerequisites the milestone completes at 2/2
@@ -1975,16 +2031,33 @@ export default function Milestones(props: { gameId: number }) {
                                       {progressSolved()}/{requiredCount()}
                                     </span>
                                   </div>
-                                  <div class="w-full h-1 rounded-full bg-layer-content/10 overflow-hidden">
-                                    <div
-                                      class={clsx(
-                                        "h-full rounded-full transition-all",
-                                        achieved() ? "bg-success" : "bg-primary"
-                                      )}
-                                      style={{
-                                        width: `${requiredCount() > 0 ? (progressSolved() / requiredCount()) * 100 : 0}%`,
-                                      }}
-                                    />
+                                  <div class="flex items-center gap-2 w-full">
+                                    <div class="flex-1 h-1 rounded-full bg-layer-content/10 overflow-hidden">
+                                      <div
+                                        class={clsx(
+                                          "h-full rounded-full transition-all",
+                                          achieved() ? "bg-success" : "bg-primary"
+                                        )}
+                                        style={{
+                                          width: `${requiredCount() > 0 ? (progressSolved() / requiredCount()) * 100 : 0}%`,
+                                        }}
+                                      />
+                                    </div>
+                                    <Show when={admin()}>
+                                      <button
+                                        type="button"
+                                        title={t("general.actions.edit.title")}
+                                        class="shrink-0 cursor-pointer opacity-60 hover:opacity-100 transition-opacity"
+                                        onPointerDown={(e) => e.stopPropagation()}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setEditing(milestone());
+                                          setFormOpen(true);
+                                        }}
+                                      >
+                                        <span class="shrink-0 icon-[fluent--settings-20-regular] w-4 h-4" />
+                                      </button>
+                                    </Show>
                                   </div>
                                   <Show when={admin()}>
                                     <PortMarker nodeKey={node.key} side="in" active={nearPort() === node.key} />
@@ -2004,17 +2077,18 @@ export default function Milestones(props: { gameId: number }) {
         </Match>
       </Switch>
       <MilestoneDetailDialog
-        gameId={props.gameId}
         milestone={detailMilestone()}
         prerequisites={prerequisitesByNode().get(`m${detailId()}`) ?? []}
-        admin={admin()}
         solvedIds={solvedIds()}
         challengeMap={challengeMap()}
         onClose={() => setDetailId(null)}
-        onEdit={(milestone) => {
-          setEditing(milestone);
-          setFormOpen(true);
-        }}
+      />
+      <ChallengeFormDialog
+        gameId={props.gameId}
+        challenge={editingChallenge()}
+        prerequisiteCount={prerequisitesByNode().get(`c${editingChallenge()?.id ?? 0}`)?.length ?? 0}
+        open={challengeFormOpen()}
+        onOpenChange={setChallengeFormOpen}
       />
       <MilestoneFormDialog
         gameId={props.gameId}
@@ -2022,6 +2096,13 @@ export default function Milestones(props: { gameId: number }) {
         prerequisiteCount={prerequisitesByNode().get(`m${editing()?.id ?? 0}`)?.length ?? 0}
         open={formOpen()}
         onOpenChange={setFormOpen}
+      />
+      <ChallengeFormDialog
+        gameId={props.gameId}
+        challenge={editingChallenge()}
+        prerequisiteCount={prerequisitesByNode().get(`c${editingChallenge()?.id ?? 0}`)?.length ?? 0}
+        open={challengeFormOpen()}
+        onOpenChange={setChallengeFormOpen}
       />
     </div>
   );
@@ -2142,20 +2223,93 @@ function NodeAvatar(props: {
   );
 }
 
-function MilestoneDetailDialog(props: {
+/** Edit dialog for a challenge node on the canvas: name plus the unlock
+ * limit slider. Persists through the regular challenge update mutation. */
+function ChallengeFormDialog(props: {
   gameId: number;
+  challenge: Challenge | null;
+  prerequisiteCount: number;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const [name, setName] = createSignal("");
+  const [unlockLimit, setUnlockLimit] = createSignal(0);
+  const updateMutation = useUpdateChallengeMutation();
+
+  createEffect(() => {
+    if (!props.open) return;
+    setName(props.challenge?.name ?? "");
+    setUnlockLimit(props.challenge?.unlock_limit ?? 0);
+  });
+
+  async function onSubmit() {
+    const current = props.challenge;
+    if (!current || !name().trim()) return;
+    await updateMutation.mutateAsync({
+      game_id: props.gameId,
+      challenge: {
+        ...current,
+        name: name().trim(),
+        updated_at: DateTime.now(),
+        unlock_limit: Math.max(0, unlockLimit()),
+      },
+    });
+  }
+
+  return (
+    <Dialog.Root lazyMount unmountOnExit open={props.open} onOpenChange={(details) => props.onOpenChange(details.open)}>
+      <Portal>
+        <Dialog.Backdrop class="dialog-backdrop fixed backdrop-blur-sm bg-layer/60 top-0 left-0 w-screen h-screen" />
+        <Dialog.Positioner class="fixed top-0 left-0 w-screen h-screen flex items-center justify-center">
+          <Dialog.Content class="dialog-content card relative max-h-[calc(100vh-2rem)]">
+            <OverlayScrollbarsComponent
+              options={{
+                scrollbars: {
+                  theme: `os-theme-${fullTheme()}`,
+                  autoHide: "scroll",
+                },
+              }}
+              class="relative w-full max-w-full h-full max-h-[calc(100vh-2rem)] overflow-hidden"
+              defer
+            >
+              <div class="card-content p-3 lg:p-6 w-96 max-w-[calc(100vw-2rem)] flex flex-col space-y-2">
+                <h2 class="font-bold text-lg">{t("general.actions.edit.title")}</h2>
+                <Input
+                  icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
+                  title={t("challenge.form.name.label")}
+                  placeholder={t("challenge.form.name.placeholder")}
+                  name="name"
+                  value={name()}
+                  onInput={(e) => setName(e.currentTarget.value)}
+                  maxLength={127}
+                  required
+                />
+                <UnlockLimitSlider total={props.prerequisiteCount} value={unlockLimit()} onChange={setUnlockLimit} />
+                <Button level="primary" class="w-full mt-4!" loading={updateMutation.isPending} onClick={onSubmit}>
+                  {t("general.actions.save.title")}
+                </Button>
+              </div>
+            </OverlayScrollbarsComponent>
+            <Dialog.CloseTrigger
+              class="btn btn-sm btn-square flex items-center justify-center btn-ghost absolute right-2 top-2"
+              title={t("general.actions.close.title")}
+            >
+              <span class="shrink-0 icon-[fluent--dismiss-20-regular] w-5 h-5" />
+            </Dialog.CloseTrigger>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
+  );
+}
+
+function MilestoneDetailDialog(props: {
   milestone: Milestone | null;
   prerequisites: number[];
-  admin: boolean;
   solvedIds: Set<number>;
   challengeMap: Map<number, Challenge>;
   onClose: () => void;
-  onEdit: (milestone: Milestone) => void;
 }) {
-  const deleteMutation = useDeleteMilestoneMutation({
-    onSuccess: () => props.onClose(),
-  });
-
   return (
     <Dialog.Root
       lazyMount
@@ -2219,44 +2373,6 @@ function MilestoneDetailDialog(props: {
                         )}
                       </For>
                     </div>
-                    <Show when={props.admin}>
-                      <Divider class="w-full" />
-                      <div class="flex flex-row space-x-2 justify-end">
-                        <Button ghost onClick={() => props.onEdit(milestone())}>
-                          <span class="shrink-0 icon-[fluent--edit-20-regular] w-5 h-5" />
-                          <span>{t("general.actions.edit.title")}</span>
-                        </Button>
-                        <Popover
-                          ghost
-                          btnContent={
-                            <>
-                              <span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5 text-error" />
-                              <span class="text-error">{t("general.actions.delete.title")}</span>
-                            </>
-                          }
-                        >
-                          <Card contentClass="p-2 flex flex-col space-y-2 max-w-96">
-                            <span class="inline-block space-x-2">
-                              <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5 text-warning align-middle" />
-                              <span>{t("general.actions.delete.message")}</span>
-                            </span>
-                            <Button
-                              level="primary"
-                              class="self-end"
-                              loading={deleteMutation.isPending}
-                              onClick={() =>
-                                deleteMutation.mutate({
-                                  game_id: props.gameId,
-                                  milestone_id: milestone().id,
-                                })
-                              }
-                            >
-                              {t("general.actions.yes.title")}
-                            </Button>
-                          </Card>
-                        </Popover>
-                      </div>
-                    </Show>
                   </div>
                 )}
               </Show>
