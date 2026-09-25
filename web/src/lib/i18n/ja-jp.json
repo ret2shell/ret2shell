@@ -1394,6 +1394,7 @@
     "total": "すべての問題",
     "milestone": {
       "title": "マイルストーン",
+      "unknown": "謎の未知の問題/実績",
       "empty": "マイルストーンはまだありません",
       "achieved": "達成済み",
       "newAchievement": "新しい実績を達成しました：{{milestone}}！",

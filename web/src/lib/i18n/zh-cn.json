@@ -1394,6 +1394,7 @@
     "total": "所有题目",
     "milestone": {
       "title": "里程碑",
+      "unknown": "神秘的未知题目/成就",
       "empty": "暂无里程碑",
       "achieved": "已达成",
       "newAchievement": "获得了新成就：{{milestone}}！",

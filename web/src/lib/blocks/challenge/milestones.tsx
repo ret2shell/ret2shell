@@ -67,6 +67,8 @@ type GNode = {
   id: number;
   name: string;
   h: number;
+  /// set for prerequisite ids that resolve to no visible challenge
+  phantom?: boolean;
 };
 
 type NodePos = { x: number; y: number };
@@ -852,22 +854,49 @@ export default function Milestones(props: { gameId: number }) {
   const challengeMap = createMemo(() => new Map((challenges.data?.[0] ?? []).map((c) => [c.id, c])));
   const milestoneMap = createMemo(() => new Map((milestones.data ?? []).map((m) => [m.id, m])));
 
-  const nodes = createMemo<GNode[]>(() => [
-    ...(challenges.data?.[0] ?? []).map((c) => ({
-      key: `c${c.id}`,
-      kind: "challenge" as const,
-      id: c.id,
-      name: c.name,
-      h: CHALLENGE_H,
-    })),
-    ...(milestones.data ?? []).map((m) => ({
-      key: `m${m.id}`,
-      kind: "milestone" as const,
-      id: m.id,
-      name: m.name,
-      h: MILESTONE_H,
-    })),
-  ]);
+  const nodes = createMemo<GNode[]>(() => {
+    const resolved = [
+      ...(challenges.data?.[0] ?? []).map((c) => ({
+        key: `c${c.id}`,
+        kind: "challenge" as const,
+        id: c.id,
+        name: c.name,
+        h: CHALLENGE_H,
+      })),
+      ...(milestones.data ?? []).map((m) => ({
+        key: `m${m.id}`,
+        kind: "milestone" as const,
+        id: m.id,
+        name: m.name,
+        h: MILESTONE_H,
+      })),
+    ];
+    // the challenge list hides unpublished or hidden challenges from players;
+    // a prerequisite pointing at one of them must not be silently dropped,
+    // otherwise milestones would look achievable while the backend keeps the
+    // bonus locked. unresolved references render as opaque placeholder nodes
+    if (!challenges.data) return resolved;
+    const known = new Set(resolved.map((node) => node.key));
+    const referenced = new Set<number>();
+    for (const challenge of challenges.data[0]) {
+      for (const prerequisite of challenge.prerequisites ?? []) referenced.add(prerequisite);
+    }
+    for (const milestone of milestones.data ?? []) {
+      for (const prerequisite of milestone.prerequisites) referenced.add(prerequisite);
+    }
+    const unknown = [...referenced].filter((id) => !known.has(`c${id}`)).sort((a, b) => a - b);
+    return [
+      ...resolved,
+      ...unknown.map((id) => ({
+        key: `c${id}`,
+        kind: "challenge" as const,
+        id,
+        name: t("challenge.milestone.unknown"),
+        h: CHALLENGE_H,
+        phantom: true,
+      })),
+    ];
+  });
   const nodeSet = createMemo(() => new Set(nodes().map((n) => n.key)));
   const nodeMap = createMemo(() => new Map(nodes().map((n) => [n.key, n])));
 
@@ -1832,6 +1861,7 @@ export default function Milestones(props: { gameId: number }) {
                             }}
                             onPointerDown={(e) => onNodePointerDown(e, node)}
                             onDblClick={(e) => {
+                              if (node.phantom) return;
                               e.stopPropagation();
                               navigate(`/games/${props.gameId}/challenges?challenge=${node.id}`);
                             }}
@@ -1845,13 +1875,15 @@ export default function Milestones(props: { gameId: number }) {
                                   ? "icon-[fluent--checkmark-circle-20-regular] text-success"
                                   : "icon-[fluent--flag-20-regular]"
                               }
-                              admin={admin()}
+                              admin={admin() && !node.phantom}
                               uploading={avatarUploading() === node.key}
                               onPick={onPickNodeAvatar}
                               onClear={onClearNodeAvatar}
                             />
                             <span class="flex-1 truncate text-left font-bold">{node.name}</span>
-                            <span class="shrink-0 opacity-60">{challengeMap().get(node.id)?.score} pts</span>
+                            <Show when={!node.phantom}>
+                              <span class="shrink-0 opacity-60">{challengeMap().get(node.id)?.score} pts</span>
+                            </Show>
                             <Show when={admin()}>
                               <PortMarker nodeKey={node.key} side="in" active={nearPort() === node.key} />
                               <PortMarker

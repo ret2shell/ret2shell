@@ -2,6 +2,7 @@ use std::{
   collections::{BTreeMap, BTreeSet, HashSet},
   fmt::Display,
   net::SocketAddr,
+  time::Duration,
 };
 
 use axum::{
@@ -28,7 +29,8 @@ use super::{
   core::invalidate_game_doc_cache,
   hook::{
     GIT_HOOK_AUTH_DOMAIN, GIT_HOOK_SESSION_DOMAIN, GitHookFormatter, GitHookMessageLevel,
-    GitHookSession, strip_git_hook_ansi,
+    GitHookSession, SYNC_COMPLETION_SENTINEL, UpdatedRef, ZERO_OID, parse_post_receive_updates,
+    strip_git_hook_ansi,
   },
   sync_error::SyncError,
 };
@@ -41,8 +43,6 @@ use crate::{
   },
 };
 
-const ZERO_OID: &str = "0000000000000000000000000000000000000000";
-
 pub(crate) fn router() -> Router<GlobalState> {
   Router::new().route("/git-hook/post-receive", post(post_receive))
 }
@@ -51,13 +51,6 @@ pub(crate) fn router() -> Router<GlobalState> {
 pub(crate) struct PostReceiveQuery {
   session: String,
   auth: String,
-}
-
-#[derive(Clone, Debug)]
-struct UpdatedRef {
-  old_oid: String,
-  new_oid: String,
-  ref_name: String,
 }
 
 #[derive(Default)]
@@ -196,14 +189,33 @@ pub(crate) async fn post_receive(
       "git hook session not found or expired".to_owned(),
     ))?;
   let payload = read_body(body).await?;
-  let updates = parse_post_receive_updates(&payload)?;
+  let updates = parse_post_receive_updates(&payload)
+    .map_err(|err| ResponseError::BadRequest(err.to_string()))?;
 
+  const EXECUTE_TIMEOUT: Duration = Duration::from_secs(600);
   let (tx, rx) = mpsc::channel(64);
-  let logger = StreamLogger::new(tx, GitHookFormatter::from_headers(&headers));
-  tokio::spawn(async move {
-    if let Err(err) = execute_post_receive(state, session, updates, logger.clone()).await {
-      logger.error(format!("Synchronization failed: {err}")).await;
+  let logger = StreamLogger::new(tx.clone(), GitHookFormatter::from_headers(&headers));
+  let handle = tokio::spawn(async move {
+    match tokio::time::timeout(EXECUTE_TIMEOUT, execute_post_receive(state, session, updates, logger.clone()))
+      .await
+    {
+      Ok(Ok(())) => logger.success(SYNC_COMPLETION_SENTINEL).await,
+      Ok(Err(err)) => logger.error(format!("Synchronization failed: {err}")).await,
+      Err(_) => {
+        logger
+          .error(
+            "Synchronization timed out; the repository may be half-synchronized and require manual inspection.",
+          )
+          .await
+      }
     }
+  });
+  // a disconnected push client drops the response body and releases the repo
+  // lock early; abort the sync task at once so it cannot race the next writer
+  let closed = tx.clone();
+  tokio::spawn(async move {
+    closed.closed().await;
+    handle.abort();
   });
 
   let stream = ReceiverStream::new(rx);
@@ -330,22 +342,40 @@ async fn execute_post_receive(
   {
     Ok(result) => result,
     Err(err) => {
-      rollback_repository(&game_bucket, &updates, &head_ref, &logger).await?;
+      if let Err(rollback_err) =
+        rollback_repository(&game_bucket, &updates, &head_ref, &logger).await
+      {
+        logger
+          .error(format!("Repository rollback failed: {rollback_err}"))
+          .await;
+      }
       return Err(err);
     }
   };
 
-  if outcome.invalidate_game {
-    state.cache.at("game").del(game.id).await.ok();
+  if outcome.invalidate_game
+    && let Err(err) = state.cache.at("game").del(game.id).await
+  {
+    logger
+      .error(format!("failed to invalidate the game cache: {err}"))
+      .await;
   }
-  if outcome.invalidate_game_docs {
-    invalidate_game_doc_cache(&state.cache, game.id).await.ok();
+  if outcome.invalidate_game_docs
+    && let Err(err) = invalidate_game_doc_cache(&state.cache, game.id).await
+  {
+    logger
+      .error(format!("failed to invalidate the doc cache: {err}"))
+      .await;
   }
   for challenge_id in outcome.challenge_ids {
-    state.cache.at("challenge").del(challenge_id).await.ok();
+    if let Err(err) = state.cache.at("challenge").del(challenge_id).await {
+      logger
+        .error(format!("failed to invalidate the challenge cache: {err}"))
+        .await;
+    }
   }
   for challenge in outcome.scoreboard_updates {
-    state
+    if let Err(err) = state
       .queue
       .publish(
         crate::worker::game::SCOREBOARD_TOPIC,
@@ -353,13 +383,17 @@ async fn execute_post_receive(
         &session.trace_id,
       )
       .await
-      .ok();
+    {
+      logger
+        .error(format!("failed to publish the scoreboard update: {err}"))
+        .await;
+    }
   }
   if outcome.milestones_changed {
     logger
       .info("Rescoring every team after milestone changes...")
       .await;
-    state
+    if let Err(err) = state
       .queue
       .publish(
         crate::worker::game::SCOREBOARD_TOPIC,
@@ -367,13 +401,14 @@ async fn execute_post_receive(
         &session.trace_id,
       )
       .await
-      .ok();
+    {
+      logger
+        .error(format!("failed to publish the rescore request: {err}"))
+        .await;
+    }
   }
   schedule_game_repo_index_refresh(&state, game.id, &session.game_bucket).await;
 
-  logger
-    .success("Repository synchronization completed successfully.")
-    .await;
   Ok(())
 }
 
@@ -1010,36 +1045,6 @@ async fn read_body(body: Body) -> Result<Vec<u8>, ResponseError> {
   )
 }
 
-fn parse_post_receive_updates(payload: &[u8]) -> Result<Vec<UpdatedRef>, ResponseError> {
-  let payload = std::str::from_utf8(payload)
-    .map_err(|_| ResponseError::BadRequest("invalid post-receive payload encoding".to_owned()))?;
-  let mut updates = Vec::new();
-  for line in payload.lines().filter(|line| !line.trim().is_empty()) {
-    let mut parts = line.split_whitespace();
-    let Some(old_oid) = parts.next() else {
-      return Err(ResponseError::BadRequest(
-        "invalid post-receive payload".to_owned(),
-      ));
-    };
-    let Some(new_oid) = parts.next() else {
-      return Err(ResponseError::BadRequest(
-        "invalid post-receive payload".to_owned(),
-      ));
-    };
-    let Some(ref_name) = parts.next() else {
-      return Err(ResponseError::BadRequest(
-        "invalid post-receive payload".to_owned(),
-      ));
-    };
-    updates.push(UpdatedRef {
-      old_oid: old_oid.to_owned(),
-      new_oid: new_oid.to_owned(),
-      ref_name: ref_name.to_owned(),
-    });
-  }
-  Ok(updates)
-}
-
 fn short_oid(oid: &str) -> &str {
   oid.get(..7).unwrap_or(oid)
 }
@@ -1077,7 +1082,6 @@ mod tests {
     ChallengeChangeSet, classify_path, display_ref_name, parse_post_receive_updates, short_oid,
     validate_env_config,
   };
-  use crate::traits::ResponseError;
 
   #[allow(deprecated)]
   fn image(name: &str, port: Option<u16>) -> ChallengeImage {
@@ -1174,15 +1178,8 @@ old-2 new-2 refs/tags/v1.0.0
 
   #[test]
   fn parse_post_receive_updates_rejects_invalid_input() {
-    assert!(matches!(
-      parse_post_receive_updates(b"old new"),
-      Err(ResponseError::BadRequest(message)) if message == "invalid post-receive payload"
-    ));
-    assert!(matches!(
-      parse_post_receive_updates(&[0xff]),
-      Err(ResponseError::BadRequest(message))
-        if message == "invalid post-receive payload encoding"
-    ));
+    assert!(parse_post_receive_updates(b"old new").is_err());
+    assert!(parse_post_receive_updates(&[0xFF]).is_err());
   }
 
   #[test]
