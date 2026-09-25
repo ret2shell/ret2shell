@@ -2122,14 +2122,12 @@ export default function Milestones(props: { gameId: number }) {
                                   class={clsx(
                                     "absolute flex flex-col p-2 gap-1 rounded-lg border-2 border-t-4 backdrop-blur-sm cursor-pointer transition-colors pointer-events-auto",
                                     // the golden top border is the milestone
-                                    // badge: it stays gold even when achieved,
-                                    // while the side borders carry the state
-                                    "bg-layer/80 border-t-amber-400 hover:border-primary/60 hover:border-t-amber-400",
+                                    // badge; the side borders always keep the
+                                    // muted divider color, achievement shows
+                                    // through the icon and the progress bar
+                                    "bg-layer/80 border-layer-content/10 border-t-amber-400 hover:border-primary/60 hover:border-t-amber-400",
                                     dimmedClass(node.key),
-                                    node.key === selectedNode() && "ring-2 ring-primary/70",
-                                    achieved()
-                                      ? "border-success/60 border-t-amber-400"
-                                      : "border-layer-content/10 border-t-amber-400"
+                                    node.key === selectedNode() && "ring-2 ring-primary/70"
                                   )}
                                   style={{
                                     left: `${pos().x - NODE_W / 2}px`,
