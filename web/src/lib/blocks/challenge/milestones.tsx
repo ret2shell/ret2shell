@@ -1887,7 +1887,7 @@ export default function Milestones(props: { gameId: number }) {
                           <div
                             title={node.name}
                             class={clsx(
-                              "absolute flex flex-col px-3 py-2 gap-1 rounded-lg border-2 backdrop-blur-sm cursor-pointer transition-colors pointer-events-auto",
+                              "absolute flex flex-col p-3 gap-1 rounded-lg border-2 backdrop-blur-sm cursor-pointer transition-colors pointer-events-auto",
                               "bg-layer/80",
                               dimmedClass(node.key),
                               node.key === selectedNode() && "ring-2 ring-primary/70",
@@ -1992,7 +1992,7 @@ export default function Milestones(props: { gameId: number }) {
                                 <div
                                   title={milestone().name}
                                   class={clsx(
-                                    "absolute flex flex-col px-3 py-2 gap-1 rounded-lg border-2 backdrop-blur-sm cursor-pointer transition-colors pointer-events-auto",
+                                    "absolute flex flex-col p-3 gap-1 rounded-lg border-2 backdrop-blur-sm cursor-pointer transition-colors pointer-events-auto",
                                     "bg-layer/80 hover:border-primary/60",
                                     dimmedClass(node.key),
                                     node.key === selectedNode() && "ring-2 ring-primary/70",
