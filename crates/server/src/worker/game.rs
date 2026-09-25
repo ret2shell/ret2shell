@@ -38,7 +38,7 @@ pub const SCOREBOARD_TOPIC: &str = "scoreboard";
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum ScoreMaintenance {
-  Challenge(challenge::Model),
+  Challenge(Box<challenge::Model>),
   Game { game_id: i64 },
 }
 

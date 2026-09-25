@@ -25,10 +25,7 @@ use super::worker;
 use crate::{
   middleware::{auth, auth::is_game_admin, data},
   traits::{GlobalState, ResponseError},
-  utility::{
-    pagination::{DEFAULT_PAGE_SIZE, page, page_size},
-    validation::validation_bad_request,
-  },
+  utility::pagination::{DEFAULT_PAGE_SIZE, page, page_size},
 };
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
@@ -113,7 +110,7 @@ async fn update_self_team(
     team.name = token.nickname.clone();
   }
   team.tag = req.tag;
-  team.validate().map_err(validation_bad_request)?;
+  team.validate()?;
   if game.archived() {
     warn!("user try to update team in archived game");
     return Err(ResponseError::PreconditionFailed(
@@ -383,7 +380,7 @@ async fn create_team(
     tag: req.tag,
     ..Default::default()
   };
-  team.validate().map_err(validation_bad_request)?;
+  team.validate()?;
   let team = team::create(&db.conn, team).await?;
   user2_team::user_join_team(&db.conn, token.id, team.id).await?;
   info!(
@@ -471,7 +468,7 @@ async fn update_team_info(
   Extension(trace): Extension<RequestId>, Json(req): Json<team::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   ensure_team_in_game(&game, &team)?;
-  req.validate().map_err(validation_bad_request)?;
+  req.validate()?;
   let result = team::update(
     &db.conn,
     team::Model {

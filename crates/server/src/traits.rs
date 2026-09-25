@@ -20,6 +20,7 @@ use r2s_oauth::OAuth;
 use r2s_queue::Queue;
 use thiserror::Error;
 use tracing::{error, warn};
+use validator::ValidationErrors;
 
 pub type HTTPClient = HyperLegacyClient<HttpConnector, Body>;
 
@@ -49,6 +50,8 @@ pub enum ResponseError {
   Unauthorized(String),
   #[error("bad request: {0}")]
   BadRequest(String),
+  #[error("{0}")]
+  Validation(#[from] ValidationErrors),
   #[error("forbidden: {0}")]
   Forbidden(String),
   #[error("not found: {0}")]
@@ -106,6 +109,10 @@ impl IntoResponse for ResponseError {
       ResponseError::InternalServerError(summary) => (StatusCode::INTERNAL_SERVER_ERROR, summary),
       ResponseError::Unauthorized(summary) => (StatusCode::UNAUTHORIZED, summary),
       ResponseError::BadRequest(summary) => (StatusCode::BAD_REQUEST, summary),
+      ResponseError::Validation(errors) => (
+        StatusCode::BAD_REQUEST,
+        crate::utility::validation::flatten_validation_errors(errors),
+      ),
       ResponseError::Forbidden(summary) => (StatusCode::FORBIDDEN, summary),
 
       ResponseError::NotFound(summary) => (StatusCode::NOT_FOUND, summary),

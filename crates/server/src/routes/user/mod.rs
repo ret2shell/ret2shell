@@ -21,10 +21,7 @@ use crate::{
     data,
   },
   traits::{GlobalState, ResponseError},
-  utility::{
-    pagination::{DEFAULT_PAGE_SIZE, page, page_size},
-    validation::validation_bad_request,
-  },
+  utility::pagination::{DEFAULT_PAGE_SIZE, page, page_size},
 };
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
@@ -135,7 +132,7 @@ async fn update_user(
     .email
     .clone()
     .ok_or_else(|| ResponseError::BadRequest("email is required".to_owned()))?;
-  data.validate().map_err(validation_bad_request)?;
+  data.validate()?;
   if user::is_account_or_email_taken(&db.conn, Some(user.id), &[&data.account, &email]).await? {
     return Err(ResponseError::Conflict("account already exists".to_owned()));
   }

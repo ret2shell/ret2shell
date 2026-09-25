@@ -24,7 +24,6 @@ use crate::{
     data,
   },
   traits::{GlobalState, ResponseError},
-  utility::validation::validation_bad_request,
   worker::game::{SCOREBOARD_TOPIC, ScoreMaintenance},
 };
 
@@ -68,7 +67,7 @@ pub(super) async fn create_milestone(
   Extension(token): Extension<Token>, Extension(trace): Extension<RequestId>,
   Extension(game): Extension<game::Model>, Json(milestone): Json<challenge_milestone::Model>,
 ) -> Result<impl IntoResponse, crate::traits::ResponseError> {
-  milestone.validate().map_err(validation_bad_request)?;
+  milestone.validate()?;
   let txn = db.conn.begin().await?;
   challenge::resolve_prerequisites(&txn, game.id, None, &milestone.prerequisites)
     .await
@@ -125,6 +124,7 @@ fn ensure_milestone_in_game(
   Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 pub(super) async fn update_milestone(
   State(ref db): State<Database>, State(bucket): State<Bucket>, State(queue): State<Queue>,
   Extension(token): Extension<Token>, Extension(trace): Extension<RequestId>,
@@ -133,7 +133,7 @@ pub(super) async fn update_milestone(
   Json(milestone): Json<challenge_milestone::Model>,
 ) -> Result<impl IntoResponse, crate::traits::ResponseError> {
   ensure_milestone_in_game(&game, &prev_milestone)?;
-  milestone.validate().map_err(validation_bad_request)?;
+  milestone.validate()?;
   let txn = db.conn.begin().await?;
   // milestones are not challenges, so the self-reference exclusion of the
   // challenge id space does not apply here

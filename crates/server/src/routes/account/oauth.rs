@@ -32,7 +32,7 @@ use crate::{
   },
   routes::account::{EmailType, send_email},
   traits::{GlobalState, ResponseError},
-  utility::{password::hash_password, validation::validation_bad_request},
+  utility::password::hash_password,
 };
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
@@ -104,7 +104,7 @@ async fn create_oauth_provider(
   State(db): State<Database>, State(oauth): State<OAuth>,
   Json(provider): Json<r2s_database::oauth_provider::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  provider.validate().map_err(validation_bad_request)?;
+  provider.validate()?;
   let lint = oauth.lint(&provider.script).await?;
   let provider = r2s_database::oauth_provider::create(&db.conn, provider).await?;
   Ok(Json(OAuthProviderResponse {
@@ -117,7 +117,7 @@ async fn update_oauth_provider(
   State(db): State<Database>, State(oauth): State<OAuth>, State(engine): State<Engine>,
   Path(service): Path<String>, Json(provider): Json<r2s_database::oauth_provider::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  provider.validate().map_err(validation_bad_request)?;
+  provider.validate()?;
   let original_provider = r2s_database::oauth_provider::get_by_provider(&db.conn, &service)
     .await?
     .ok_or_else(|| ResponseError::NotFound("oauth provider".to_owned()))?;
@@ -274,7 +274,7 @@ async fn register_with_oauth_account(
   {
     captcha_protected!(cache, &req.captcha_id, &req.captcha_answer);
   }
-  req.validate().map_err(validation_bad_request)?;
+  req.validate()?;
   let cached_token = cache
     .at("oauth")
     .get::<OAuthCachedToken>(&req.token)

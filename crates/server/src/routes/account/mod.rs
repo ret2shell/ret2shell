@@ -30,10 +30,7 @@ use crate::{
     data,
   },
   traits::{GlobalState, ResponseError},
-  utility::{
-    password::{hash_password, verify_password},
-    validation::validation_bad_request,
-  },
+  utility::password::{hash_password, verify_password},
 };
 
 mod captcha;
@@ -474,7 +471,7 @@ async fn register(
   {
     captcha_protected!(cache, &body.captcha_id, &body.captcha_answer);
   }
-  body.validate().map_err(validation_bad_request)?;
+  body.validate()?;
 
   // if user::get_user_by_account(db, &body.email).await.is_ok() {
   //     return Err((StatusCode::CONFLICT, "account already exists"));
@@ -708,7 +705,7 @@ async fn reset_password(
     }
   };
 
-  body.validate().map_err(validation_bad_request)?;
+  body.validate()?;
   let password = hash_password(&body.password)?;
   user::update_password(&db.conn, user.id, password).await?;
   let mut prev_token: Option<String>;
@@ -745,7 +742,7 @@ async fn change_password(
   let password_hash = user.password.unwrap_or_default();
   match verify_password(&body.old_password, &password_hash)? {
     true => {
-      body.validate().map_err(validation_bad_request)?;
+      body.validate()?;
       let password = hash_password(&body.new_password)?;
       user::update_password(&db.conn, user.id, password).await?;
       while let Some(token_str) = cache
@@ -824,7 +821,7 @@ async fn change_profile(
   };
   // the account comes from the database, so this validates the profile
   // fields that were actually changed: nickname and email
-  user.validate().map_err(validation_bad_request)?;
+  user.validate()?;
   if email_changed && user::is_account_or_email_taken(&db.conn, None, &[&email]).await? {
     return Err(ResponseError::Conflict("email already used".to_owned()));
   }

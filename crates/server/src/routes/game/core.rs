@@ -31,10 +31,7 @@ use validator::Validate;
 use crate::{
   middleware::auth::{Token, is_game_admin},
   traits::ResponseError,
-  utility::{
-    pagination::{DEFAULT_PAGE_SIZE, page, page_size},
-    validation::validation_bad_request,
-  },
+  utility::pagination::{DEFAULT_PAGE_SIZE, page, page_size},
 };
 
 const GAME_DOC_CACHE_TTL: i64 = 60 * 5;
@@ -264,7 +261,7 @@ pub(super) async fn create_game(
   State(ref db): State<Database>, State(ref bucket): State<Bucket>,
   Extension(token): Extension<Token>, Json(mut model): Json<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  model.validate().map_err(validation_bad_request)?;
+  model.validate()?;
   let txn = db.conn.begin().await?;
   let game_bucket = bucket.create(serde_json::to_value(&model)?).await?;
   model.bucket = Some(game_bucket.name.clone());
@@ -301,7 +298,7 @@ pub(super) async fn update_game(
   Extension(trace): Extension<RequestId>, Extension(token): Extension<Token>,
   Json(model): Json<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  model.validate().map_err(validation_bad_request)?;
+  model.validate()?;
   let txn = db.conn.begin().await?;
   let model = game::update(
     &txn,

@@ -7,8 +7,6 @@
 
 use validator::{ValidationErrors, ValidationErrorsKind};
 
-use crate::traits::ResponseError;
-
 /// Flattens the errors reported by a `validator` derive into a deterministic,
 /// human-readable message. Messages are sorted so that the text does not
 /// depend on hash map iteration order.
@@ -35,8 +33,4 @@ pub fn flatten_validation_errors(errors: ValidationErrors) -> String {
   collect(errors, &mut messages);
   messages.sort();
   messages.join("; ")
-}
-
-pub fn validation_bad_request(errors: ValidationErrors) -> ResponseError {
-  ResponseError::BadRequest(flatten_validation_errors(errors))
 }

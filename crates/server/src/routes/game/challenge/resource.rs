@@ -29,10 +29,7 @@ use crate::{
   middleware::auth::{Token, is_game_admin},
   routes::game::lifecycle,
   traits::{GlobalState, ResponseError},
-  utility::{
-    pagination::{DEFAULT_PAGE_SIZE, DEFAULT_SUBMISSION_PAGE_SIZE, page, page_size},
-    validation::validation_bad_request,
-  },
+  utility::pagination::{DEFAULT_PAGE_SIZE, DEFAULT_SUBMISSION_PAGE_SIZE, page, page_size},
 };
 
 #[derive(Deserialize)]
@@ -100,7 +97,7 @@ pub(super) async fn create_challenge(
   State(ref db): State<Database>, State(bucket): State<Bucket>, Extension(token): Extension<Token>,
   Extension(game): Extension<game::Model>, Json(challenge): Json<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  challenge.validate().map_err(validation_bad_request)?;
+  challenge.validate()?;
   let txn = db.conn.begin().await?;
   let referenced = challenge::resolve_prerequisites(&txn, game.id, None, &challenge.prerequisites)
     .await
@@ -154,7 +151,7 @@ pub(super) async fn update_challenge(
   Extension(game): Extension<game::Model>, Extension(prev_challenge): Extension<challenge::Model>,
   Extension(trace): Extension<RequestId>, Json(challenge): Json<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  challenge.validate().map_err(validation_bad_request)?;
+  challenge.validate()?;
   super::check_challenge_publishing(&prev_challenge)?;
   let txn = db.conn.begin().await?;
   let referenced = challenge::resolve_prerequisites(
