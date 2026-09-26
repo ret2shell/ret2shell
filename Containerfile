@@ -1,4 +1,4 @@
-FROM rust:1.95-alpine AS server
+FROM rust:1.98-alpine AS server
 
 # hadolint ignore=DL3018
 RUN apk add --update --no-cache musl-dev clang lld
