@@ -9,6 +9,7 @@ import { uploadMedia } from "@api/media";
 import {
   requiredPrerequisiteCount,
   useCreateMilestoneMutation,
+  useDeleteMilestoneMutation,
   useMilestones,
   useUpdateMilestoneMutation,
 } from "@api/milestone";
@@ -67,6 +68,9 @@ type GNode = {
   id: number;
   name: string;
   h: number;
+  /// challenge tag names, used as the lowest-priority layout tiebreaker:
+  /// challenges sharing tags are laid out adjacently
+  tags: string[];
   /// set for prerequisite ids that resolve to no visible challenge
   phantom?: boolean;
 };
@@ -201,6 +205,29 @@ type Graph = {
   adjacent: Map<string, string[]>;
 };
 
+// tagless nodes (milestones, phantom challenges) sort after every tagged
+// challenge in the tag tiebreaker
+const TAGLESS_KEY = "\uffff";
+
+/** The lowest-priority ordering key of the auto layout: challenges sharing
+ * a tag set sort adjacently, so similar challenges cluster together when
+ * every structural criterion (anchors, edges, keys) ties. */
+function tagSortKey(tags: string[]) {
+  if (tags.length === 0) return TAGLESS_KEY;
+  return [...tags].sort().join("\u0001");
+}
+
+/** Builds the key lookup used by the tag tiebreaker of the layout passes. */
+function tagKeyOf(nodes: GNode[]) {
+  const keys = new Map(nodes.map((n) => [n.key, tagSortKey(n.tags)]));
+  return (key: string) => keys.get(key) ?? TAGLESS_KEY;
+}
+
+/** Compares two node keys by their tag set first and their key second. */
+function compareByTag(tagKey: (key: string) => string, a: string, b: string) {
+  return tagKey(a).localeCompare(tagKey(b)) || a.localeCompare(b);
+}
+
 function pushTo(map: Map<string, string[]>, key: string, value: string) {
   if (!map.has(key)) map.set(key, []);
   map.get(key)?.push(value);
@@ -225,7 +252,7 @@ function buildGraph(keys: string[], edges: Edge[]): Graph {
 
 /** Splits the undirected view of the graph into connected components with
  * more than one node ("trees") and isolated nodes ("singles"). */
-function splitComponents(keys: string[], graph: Graph) {
+function splitComponents(keys: string[], graph: Graph, tagKey: (key: string) => string) {
   const visited = new Set<string>();
   const trees: string[][] = [];
   const singles: string[] = [];
@@ -248,11 +275,12 @@ function splitComponents(keys: string[], graph: Graph) {
     if (component.length > 1) trees.push(component);
     else singles.push(key);
   }
-  // trees containing milestones come first, then sorted by first node key
+  // trees containing milestones come first, then grouped by tag similarity,
+  // then sorted by first node key
   trees.sort((a, b) => {
     const am = a.some((k) => nodeKindOf(k) === "milestone") ? 0 : 1;
     const bm = b.some((k) => nodeKindOf(k) === "milestone") ? 0 : 1;
-    return am - bm || a[0].localeCompare(b[0]);
+    return am - bm || compareByTag(tagKey, a[0], b[0]);
   });
   return { trees, singles };
 }
@@ -313,7 +341,8 @@ function placeByPredecessors(
   result: Record<string, NodePos>,
   columnBottom: Map<number, number>,
   regionY: number,
-  heights: Map<string, number>
+  heights: Map<string, number>,
+  tagKey: (key: string) => string
 ): Map<number, { top: number; bottom: number }[]> {
   const blocked = new Map<number, { top: number; bottom: number }[]>();
   for (const column of [...byColumn.keys()].sort((a, b) => a - b)) {
@@ -333,11 +362,13 @@ function placeByPredecessors(
       if (centers.length > 0) anchor.set(key, centers[Math.floor((centers.length - 1) / 2)]);
     }
     const firstSucc = (key: string) => (graph.succs.get(key) ?? []).sort()[0] ?? "";
+    // nodes sharing anchors or successors tie on every structural
+    // criterion; the tag tiebreaker clusters similar challenges adjacently
     const sortedMembers = [...members].sort(
       (a, b) =>
         (anchor.get(a) ?? Number.POSITIVE_INFINITY) - (anchor.get(b) ?? Number.POSITIVE_INFINITY) ||
         firstSucc(a).localeCompare(firstSucc(b)) ||
-        a.localeCompare(b)
+        compareByTag(tagKey, a, b)
     );
     // blocked intervals of this column are fixed while the column is placed
     // (spanning sources push into later columns only), so sort them once
@@ -437,7 +468,8 @@ function fullLayout(nodes: GNode[], edges: Edge[]) {
   const heights = new Map(nodes.map((n) => [n.key, n.h]));
   const keys = nodes.map((n) => n.key);
   const graph = buildGraph(keys, edges);
-  const { trees, singles } = splitComponents(keys, graph);
+  const tagKey = tagKeyOf(nodes);
+  const { trees, singles } = splitComponents(keys, graph, tagKey);
 
   const result: Record<string, NodePos> = {};
   let regionY = PAD;
@@ -456,7 +488,7 @@ function fullLayout(nodes: GNode[], edges: Edge[]) {
       byColumn.get(column)?.push(key);
     }
     const outerBottom = new Map(columnBottom);
-    const blocked = placeByPredecessors(byColumn, graph, columnOfNode, result, columnBottom, regionY, heights);
+    const blocked = placeByPredecessors(byColumn, graph, columnOfNode, result, columnBottom, regionY, heights, tagKey);
     pullTowardSuccessors(byColumn, tree, graph, columnOfNode, result, outerBottom, blocked, heights);
 
     let bottom = regionY;
@@ -471,10 +503,14 @@ function fullLayout(nodes: GNode[], edges: Edge[]) {
     regionY = alignCeil(bottom + REGION_GAP);
   }
 
-  // isolated nodes share one trailing single-column region
-  for (const [i, key] of singles.sort().entries()) {
+  // isolated nodes share one trailing single-column region, grouped by
+  // tag similarity so similar challenges sit next to each other
+  const orderedSingles = [...singles].sort((a, b) => compareByTag(tagKey, a, b));
+  for (const [i, key] of orderedSingles.entries()) {
     result[key] = { x: columnX(0), y: regionY };
-    regionY = alignCeil(regionY + (heights.get(key) ?? 0) / 2 + GAP_Y + (heights.get(singles[i + 1] ?? key) ?? 0) / 2);
+    regionY = alignCeil(
+      regionY + (heights.get(key) ?? 0) / 2 + GAP_Y + (heights.get(orderedSingles[i + 1] ?? key) ?? 0) / 2
+    );
   }
   return result;
 }
@@ -487,10 +523,11 @@ function incrementalLayout(nodes: GNode[], edges: Edge[], existing: Record<strin
   const result = { ...existing };
   const heights = new Map(nodes.map((n) => [n.key, n.h]));
   const keySet = new Set(nodes.map((n) => n.key));
+  const tagKey = tagKeyOf(nodes);
   const missing = nodes
     .map((n) => n.key)
     .filter((key) => !existing[key])
-    .sort();
+    .sort((a, b) => compareByTag(tagKey, a, b));
   for (const key of missing) {
     const placedPreds = edges.filter((e) => e.to === key && keySet.has(e.from) && result[e.from]).map((e) => e.from);
     const succColumns = edges
@@ -946,6 +983,7 @@ export default function Milestones(props: { gameId: number }) {
         id: c.id,
         name: c.name,
         h: CHALLENGE_H,
+        tags: (c.tag ?? []).map((tag) => tag.name),
       })),
       ...(milestones.data ?? []).map((m) => ({
         key: `m${m.id}`,
@@ -953,6 +991,7 @@ export default function Milestones(props: { gameId: number }) {
         id: m.id,
         name: m.name,
         h: MILESTONE_H,
+        tags: [] as string[],
       })),
     ];
     // the challenge list hides unpublished or hidden challenges from players;
@@ -977,6 +1016,7 @@ export default function Milestones(props: { gameId: number }) {
         id,
         name: t("challenge.milestone.unknown"),
         h: CHALLENGE_H,
+        tags: [] as string[],
         phantom: true,
       })),
     ];
@@ -2112,7 +2152,9 @@ export default function Milestones(props: { gameId: number }) {
                                       onPick={onPickNodeAvatar}
                                       onClear={onClearNodeAvatar}
                                     />
-                                    <span class="flex-1 truncate text-left font-bold">{milestone().name}</span>
+                                    <span class="flex-1 truncate text-left font-bold text-amber-500 dark:text-amber-400">
+                                      {milestone().name}
+                                    </span>
                                     <Show when={admin()}>
                                       <Button
                                         size="sm"
@@ -2133,8 +2175,9 @@ export default function Milestones(props: { gameId: number }) {
                                   <div class="flex-1 flex items-center gap-2 w-full min-h-0">
                                     <div class="flex-1 flex flex-col justify-center gap-1 min-w-0">
                                       <div class="flex items-center justify-between gap-1">
-                                        <span class="shrink-0 text-primary font-bold">
-                                          +{milestone().bonus_score} pts
+                                        <span class="shrink-0 flex items-center gap-1 text-primary font-bold">
+                                          <span class="shrink-0 icon-[fluent-emoji-flat--thumbs-up] w-4 h-4" />
+                                          <span>+{milestone().bonus_score} pts</span>
                                         </span>
                                         <span class="text-xs opacity-60">
                                           {progressSolved()}/{requiredCount()}
@@ -2515,6 +2558,19 @@ function MilestoneFormDialog(props: {
   const updateMutation = useUpdateMilestoneMutation({
     onSuccess: () => props.onOpenChange(false),
   });
+  const deleteMutation = useDeleteMilestoneMutation({
+    onSuccess: () => props.onOpenChange(false),
+  });
+
+  async function onDelete() {
+    const milestone = props.milestone;
+    if (!milestone) return;
+    try {
+      await deleteMutation.mutateAsync({ game_id: props.gameId, milestone_id: milestone.id });
+    } catch {
+      // the mutation hook already toasts failures
+    }
+  }
 
   async function onSubmit() {
     let valid = true;
@@ -2629,14 +2685,28 @@ function MilestoneFormDialog(props: {
                   onChange={setUnlockLimit}
                   hideFooter
                 />
-                <Button
-                  level="primary"
-                  class="w-full mt-4!"
-                  loading={createMutation.isPending || updateMutation.isPending}
-                  onClick={onSubmit}
-                >
-                  {props.milestone ? t("general.actions.save.title") : t("general.actions.create.title")}
-                </Button>
+                <div class="flex gap-2 mt-4!">
+                  <Button
+                    level="primary"
+                    class="flex-1"
+                    loading={createMutation.isPending || updateMutation.isPending}
+                    onClick={onSubmit}
+                  >
+                    {props.milestone ? t("general.actions.save.title") : t("general.actions.create.title")}
+                  </Button>
+                  <Show when={props.milestone}>
+                    <Button
+                      level="error"
+                      square
+                      ghost
+                      title={t("general.actions.delete.title")}
+                      loading={deleteMutation.isPending}
+                      onClick={onDelete}
+                    >
+                      <span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5" />
+                    </Button>
+                  </Show>
+                </div>
               </div>
             </OverlayScrollbarsComponent>
             <Dialog.CloseTrigger

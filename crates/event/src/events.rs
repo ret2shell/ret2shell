@@ -1,4 +1,4 @@
-use r2s_database::{challenge, submission, team, user};
+use r2s_database::{challenge, challenge_milestone, submission, team, user};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -28,6 +28,12 @@ pub enum SubmissionEventType {
 pub struct SubmissionEvent {
   pub submission: submission::Model,
   pub blood_state: Option<i32>,
+  /// Milestones the team's solve newly achieved, mirroring `blood_state`;
+  /// empty for every event that is not a fresh correct submission. Defaults
+  /// to empty so messages published by an older binary still deserialize
+  /// after a hot upgrade.
+  #[serde(default)]
+  pub milestones: Vec<challenge_milestone::Model>,
   pub operator: user::Model,
   pub team: Option<team::Model>,
   pub challenge: challenge::Model,

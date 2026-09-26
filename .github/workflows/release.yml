@@ -284,9 +284,6 @@ jobs:
           - os: ubuntu-24.04-arm
             target: aarch64-unknown-linux-musl
             binary_ext: ""
-          - os: macos-15-intel
-            target: x86_64-apple-darwin
-            binary_ext: ""
           - os: macos-latest
             target: aarch64-apple-darwin
             binary_ext: ""

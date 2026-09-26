@@ -149,6 +149,7 @@ pub(super) async fn submit_flag(
           team: team.clone(),
           peer_team: None,
           blood_state: None,
+          milestones: Vec::new(),
           reason: None,
           challenge: challenge.clone(),
         })),
