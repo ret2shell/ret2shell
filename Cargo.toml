@@ -8,8 +8,8 @@ edition      = "2024"
 homepage     = "https://ret.sh.cn/"
 publish      = true
 repository   = "https://github.com/ret2shell/ret2shell"
-rust-version = "1.95.0"
-version      = "3.12.1"
+rust-version = "1.98.1"
+version      = "3.12.2"
 
 [profile.release]
 codegen-units = 1

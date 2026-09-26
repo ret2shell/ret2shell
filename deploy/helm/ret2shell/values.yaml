@@ -12,7 +12,7 @@ global:
 platform:
   image:
     repository: ghcr.io/ret2shell/ret2shell
-    tag: 3.12.1
+    tag: 3.12.2
     digest: ""
     pullPolicy: IfNotPresent
   replicaCount: 1

@@ -330,7 +330,7 @@ jobs:
         run: bash .github/setup-env.sh
 
       - name: Setup rust
-        uses: dtolnay/rust-toolchain@1.95.0
+        uses: dtolnay/rust-toolchain@1.98.1
         with:
           targets: ${{ matrix.target }}
 
