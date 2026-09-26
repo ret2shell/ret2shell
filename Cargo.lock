@@ -878,9 +878,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.4.7"
+version = "1.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "54413ede23c2daf518f35156dfde027feb2374004d63bd497f983c8db9c0e313"
+checksum = "f360145194ee8e21db5ee7f3fcd4fe52210864c75c985dae33218202c8bbe040"
 dependencies = [
  "find-msvc-tools",
  "jobserver",
@@ -1763,9 +1763,9 @@ dependencies = [
 
 [[package]]
 name = "find-msvc-tools"
-version = "0.1.13"
+version = "0.1.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef25905e51abafe4dcea6c15fec58c57b601cdbd0ee53d22ea1d3016c587d39b"
+checksum = "aedcfb3409746eddb02b9e19ebda1c3394f759a152e48ee875a0844d1b955484"
 
 [[package]]
 name = "flate2"
@@ -4168,7 +4168,7 @@ checksum = "f8dcc9c7d52a811697d2151c701e0d08956f92b0e24136cf4cf27b57a6a0d9bf"
 
 [[package]]
 name = "r2s-auditor"
-version = "3.12.0"
+version = "3.12.1"
 dependencies = [
  "aho-corasick",
  "r2s-config",
@@ -4179,7 +4179,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-bucket"
-version = "3.12.0"
+version = "3.12.1"
 dependencies = [
  "chrono",
  "deunicode",
@@ -4198,7 +4198,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-cache"
-version = "3.12.0"
+version = "3.12.1"
 dependencies = [
  "r2s-config",
  "redis",
@@ -4210,7 +4210,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-captcha"
-version = "3.12.0"
+version = "3.12.1"
 dependencies = [
  "async-trait",
  "biosvg",
@@ -4226,7 +4226,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-checker"
-version = "3.12.0"
+version = "3.12.1"
 dependencies = [
  "chrono",
  "r2s-bucket",
@@ -4243,7 +4243,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-cli"
-version = "3.12.0"
+version = "3.12.1"
 dependencies = [
  "clap",
  "hex",
@@ -4259,7 +4259,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-cluster"
-version = "3.12.0"
+version = "3.12.1"
 dependencies = [
  "axum",
  "chrono",
@@ -4284,7 +4284,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-config"
-version = "3.12.0"
+version = "3.12.1"
 dependencies = [
  "sea-orm",
  "serde",
@@ -4295,7 +4295,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-database"
-version = "3.12.0"
+version = "3.12.1"
 dependencies = [
  "chrono",
  "num-derive 0.5.1",
@@ -4312,7 +4312,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-email"
-version = "3.12.0"
+version = "3.12.1"
 dependencies = [
  "async-nats",
  "chrono",
@@ -4329,7 +4329,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-engine"
-version = "3.12.0"
+version = "3.12.1"
 dependencies = [
  "chrono",
  "ret2script",
@@ -4344,7 +4344,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-event"
-version = "3.12.0"
+version = "3.12.1"
 dependencies = [
  "async-nats",
  "axum",
@@ -4361,7 +4361,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-media"
-version = "3.12.0"
+version = "3.12.1"
 dependencies = [
  "hex",
  "image",
@@ -4378,7 +4378,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-migrator"
-version = "3.12.0"
+version = "3.12.1"
 dependencies = [
  "r2s-config",
  "sea-orm",
@@ -4389,7 +4389,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-oauth"
-version = "3.12.0"
+version = "3.12.1"
 dependencies = [
  "async-trait",
  "chrono",
@@ -4408,7 +4408,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-queue"
-version = "3.12.0"
+version = "3.12.1"
 dependencies = [
  "async-nats",
  "chrono",
@@ -4421,7 +4421,7 @@ dependencies = [
 
 [[package]]
 name = "r2s-server"
-version = "3.12.0"
+version = "3.12.1"
 dependencies = [
  "anyhow",
  "argon2",
@@ -4853,7 +4853,7 @@ dependencies = [
 
 [[package]]
 name = "ret2shell"
-version = "3.12.0"
+version = "3.12.1"
 dependencies = [
  "r2s-auditor",
  "r2s-bucket",
@@ -7352,18 +7352,18 @@ dependencies = [
 
 [[package]]
 name = "zerocopy"
-version = "0.8.58"
+version = "0.8.59"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c17e8fafad82b542ff3717217ecdc736231b59e387768c9630123b4ce4d2db44"
+checksum = "6df92bf3d9227be3d53173901ddbffac2babc27ae50f397776ffd6dc33f800cb"
 dependencies = [
  "zerocopy-derive",
 ]
 
 [[package]]
 name = "zerocopy-derive"
-version = "0.8.58"
+version = "0.8.59"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "595f56e044df4f46a0c9a626f65c3d99eb8488f7e8a8baa12dd76326d9710bf2"
+checksum = "ac4f328cf2f05d084e496c3e9c3f33ed0a183656a16e1fcec4d464d8373aec82"
 dependencies = [
  "proc-macro2",
  "quote",
