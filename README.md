@@ -46,7 +46,7 @@ You are done for backend development.
 #### Install Node.js and Pnpm for frontend
 
 ```bash
-curl -fsSL https://deb.nodesource.com/setup_21.x | sudo -E bash -
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 ```
 
 Then install pnpm
