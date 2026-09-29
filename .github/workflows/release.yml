@@ -227,25 +227,11 @@ jobs:
           fetch-depth: 0
           ref: ${{ needs.prepare.outputs.release_version }}
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/setup@v3
         with:
-          version: 10.11.0
-          run_install: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: lts/*
-          cache: pnpm
-          cache-dependency-path: web/pnpm-lock.yaml
-
-      - name: Install dependencies
-        working-directory: web
-        run: |
-          if [ -n '${{ vars.NPM_REGISTRY }}' ]; then
-            export NPM_CONFIG_REGISTRY='${{ vars.NPM_REGISTRY }}'
-          fi
-          pnpm install --frozen-lockfile
+          cache: true
+          working-directory: web
+          require-lockfile: true # --frozen-lockfile
 
       - name: Build web dist
         working-directory: web
