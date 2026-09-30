@@ -36,10 +36,7 @@ fn get_user_from_yale_xml_impl(xml_response: &str) -> Result<IdsInfo, io::Error>
       "missing field: user",
     ))?
     .to_owned();
-  Ok(IdsInfo {
-    name: String::new(),
-    id: uid,
-  })
+  Ok(IdsInfo { name: String::new(), id: uid })
 }
 
 #[rune::function]
