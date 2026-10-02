@@ -21,13 +21,12 @@ pub fn get_info_from_yale_xml(xml_response: &str) -> Result<IdsInfo, io::Error> 
 fn get_info_from_yale_xml_impl(xml_response: &str) -> Result<IdsInfo, io::Error> {
   let doc = roxmltree::Document::parse(xml_response)
     .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-  let name_node = doc
+  let name = doc
     .descendants()
     .find(|node| node.tag_name().name() == "cn")
-    .ok_or(io::Error::new(
-      io::ErrorKind::InvalidData,
-      "missing field: cn",
-    ))?;
+    .and_then(|node| node.text())
+    .unwrap_or("")
+    .to_owned();
   let uid_node = doc
     .descendants()
     .find(|node| node.tag_name().name() == "user")
@@ -107,7 +106,7 @@ mod tests {
     </cas:authenticationSuccess>
 </cas:serviceResponse>
         "#;
-    let info = get_user_from_yale_xml_impl(xml_without_cn).unwrap();
+    let info = get_info_from_yale_xml_impl(xml_without_cn).unwrap();
     assert_eq!(info.name, "");
     assert_eq!(info.id, "114514");
   }
