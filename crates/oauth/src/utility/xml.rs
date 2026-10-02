@@ -94,13 +94,28 @@ mod tests {
     <cas:authenticationSuccess>
         <cas:user>114514</cas:user>
         <cas:attributes>
-          <cas:uid>114514</cas:uid>
+          <cas:uid>1145141919810</cas:uid>
         </cas:attributes>
     </cas:authenticationSuccess>
 </cas:serviceResponse>
         "#;
     let info = get_info_from_yale_xml_impl(xml_without_cn).unwrap();
     assert_eq!(info.name, "");
-    assert_eq!(info.id, "114514");
+    assert_eq!(info.id, "1145141919810");
+
+    let xml_with_null_cn = r#"
+<cas:serviceResponse xmlns:cas='http://www.yale.edu/tp/cas'>
+    <cas:authenticationSuccess>
+        <cas:user>114514</cas:user>
+        <cas:attributes>
+          <cas:cn></cas:cn>
+          <cas:uid>1145141919810</cas:uid>
+        </cas:attributes>
+    </cas:authenticationSuccess>
+</cas:serviceResponse>
+        "#;
+    let info = get_info_from_yale_xml_impl(xml_with_null_cn).unwrap();
+    assert_eq!(info.name, "");
+    assert_eq!(info.id, "1145141919810");
   }
 }
