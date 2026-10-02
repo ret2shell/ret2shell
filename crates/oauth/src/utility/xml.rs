@@ -9,37 +9,8 @@ pub fn module(_stdio: bool) -> Result<Module, ContextError> {
 
   module.ty::<IdsInfo>()?;
   module.function_meta(get_info_from_yale_xml)?;
-  module.function_meta(get_user_from_yale_xml)?;
 
   Ok(module)
-}
-
-#[rune::function]
-pub fn get_user_from_yale_xml(xml_response: &str) -> Result<IdsInfo, io::Error> {
-  get_user_from_yale_xml_impl(xml_response)
-}
-
-fn get_user_from_yale_xml_impl(xml_response: &str) -> Result<IdsInfo, io::Error> {
-  let doc = roxmltree::Document::parse(xml_response)
-    .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-  let uid_node = doc
-    .descendants()
-    .find(|node| node.tag_name().name() == "user")
-    .ok_or(io::Error::new(
-      io::ErrorKind::InvalidData,
-      "missing field: user",
-    ))?;
-  let uid = uid_node
-    .text()
-    .ok_or(io::Error::new(
-      io::ErrorKind::InvalidData,
-      "missing field: user",
-    ))?
-    .to_owned();
-  Ok(IdsInfo {
-    name: String::new(),
-    id: uid,
-  })
 }
 
 #[rune::function]
