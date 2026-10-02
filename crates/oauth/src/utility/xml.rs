@@ -34,13 +34,6 @@ fn get_info_from_yale_xml_impl(xml_response: &str) -> Result<IdsInfo, io::Error>
       io::ErrorKind::InvalidData,
       "missing field: user",
     ))?;
-  let name = name_node
-    .text()
-    .ok_or(io::Error::new(
-      io::ErrorKind::InvalidData,
-      "missing field: cn",
-    ))?
-    .to_owned();
   let uid = uid_node
     .text()
     .ok_or(io::Error::new(
