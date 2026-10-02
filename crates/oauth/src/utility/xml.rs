@@ -88,11 +88,11 @@ mod tests {
   }
 
   #[test]
-  fn test_xml_parse_user_only() {
+  fn test_xml_without_cn_parse() {
     let xml_without_cn = r#"
 <cas:serviceResponse xmlns:cas='http://www.yale.edu/tp/cas'>
     <cas:authenticationSuccess>
-        <cas:user>114514</cas:user>
+        <cas:user>1145141919810</cas:user>
         <cas:attributes>
           <cas:uid>1145141919810</cas:uid>
         </cas:attributes>
@@ -102,11 +102,14 @@ mod tests {
     let info = get_info_from_yale_xml_impl(xml_without_cn).unwrap();
     assert_eq!(info.name, "");
     assert_eq!(info.id, "1145141919810");
+  }
 
+  #[test]
+  fn test_xml_with_null_cn_parse() {
     let xml_with_null_cn = r#"
 <cas:serviceResponse xmlns:cas='http://www.yale.edu/tp/cas'>
     <cas:authenticationSuccess>
-        <cas:user>114514</cas:user>
+        <cas:user>1145141919810</cas:user>
         <cas:attributes>
           <cas:cn></cas:cn>
           <cas:uid>1145141919810</cas:uid>
