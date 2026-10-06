@@ -20,13 +20,13 @@ RUN --mount=type=cache,target=/var/lib/ret2shell/target \
     cargo build --locked --release --bin r2s-server --target "$R2S_BUILD_TARGET" && \
     cp "/var/lib/ret2shell/target/$R2S_BUILD_TARGET/release/r2s-server" /usr/local/bin/r2s-server
 
-FROM node:22-alpine AS frontend
+FROM node:lts-alpine AS frontend
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 
-COPY ./web/package.json ./web/pnpm-lock.yaml /var/lib/ret2shell/web/
+COPY ./web/package.json ./web/pnpm-lock.yaml ./web/pnpm-workspace.yaml /var/lib/ret2shell/web/
 WORKDIR /var/lib/ret2shell/web
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile
