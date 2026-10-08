@@ -11,4 +11,8 @@ export type Milestone = {
   bonus_score: number;
   name: string;
   description: string;
+  /// Manual position on the milestone graph in logical grid units;
+  /// `null` means the automatic layout owns this node.
+  layout_col: number | null;
+  layout_row: number | null;
 };

@@ -24,6 +24,8 @@ pub enum ChallengeMilestone {
   Name,
   Description,
   UnlockLimit,
+  LayoutCol,
+  LayoutRow,
 }
 
 #[async_trait::async_trait]
