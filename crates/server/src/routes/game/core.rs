@@ -299,6 +299,13 @@ pub(super) async fn update_game(
   Json(model): Json<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   model.validate()?;
+  // Weight decides which games are promoted on the home page, so it stays a
+  // host-level attribute even though game admins may edit the rest of the game.
+  if model.weight != game.weight && !token.permissions.0.contains(&Permission::Host) {
+    return Err(ResponseError::Forbidden(
+      "only host operators can change game weight".to_owned(),
+    ));
+  }
   let txn = db.conn.begin().await?;
   let model = game::update(
     &txn,
