@@ -803,6 +803,7 @@ async fn change_profile(
       return Err(ResponseError::BadRequest("email is required".to_owned()));
     }
   };
+  let nickname_changed = body.nickname != user.nickname;
   let user = user::Model {
     nickname: body.nickname.clone(),
     email: Some(email.clone()),
@@ -826,7 +827,18 @@ async fn change_profile(
     return Err(ResponseError::Conflict("email already used".to_owned()));
   }
 
-  let user = user::update(&db.conn, user).await?;
+  let txn = db.conn.begin().await?;
+  let user = user::update(&txn, user).await?;
+  if nickname_changed {
+    for mut team in team::get_list_by_user_id(&txn, user.id).await? {
+      let game = game::get(&txn, team.game_id).await?;
+      if game.team_size == 1 {
+        team.name = user.nickname.clone();
+        team::update(&txn, team).await?;
+      }
+    }
+  }
+  txn.commit().await?;
   if email_changed {
     send_email(
       cache,
@@ -852,6 +864,7 @@ async fn change_profile(
       .renew_requested
       .store(true, std::sync::atomic::Ordering::Relaxed);
   }
+  token_tracker.token.lock().await.nickname = user.nickname.clone();
   Ok(StatusCode::OK)
 }
 
