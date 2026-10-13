@@ -832,7 +832,7 @@ async fn change_profile(
   if nickname_changed {
     for mut team in team::get_list_by_user_id(&txn, user.id).await? {
       let game = game::get(&txn, team.game_id).await?;
-      if game.team_size == 1 {
+      if game.is_some_and(|game| game.team_size == 1) {
         team.name = user.nickname.clone();
         team::update(&txn, team).await?;
       }
