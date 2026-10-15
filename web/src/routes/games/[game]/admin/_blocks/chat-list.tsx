@@ -1,27 +1,82 @@
-import { useGameAdminChatSessions } from "@api/game";
+import { getGameAdminChatSessions, useGameAdminChatSessions } from "@api/game";
+import type { ChatSession } from "@models/chat";
 import { useParams, useSearchParams } from "@solidjs/router";
 import { fullTheme, t } from "@storage/theme";
 import Avatar from "@widgets/avatar";
+import Button from "@widgets/button";
 import Link from "@widgets/link";
-import Pagination from "@widgets/pagination";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { createMemo, For, onCleanup, Show } from "solid-js";
+import { createEffect, createMemo, createSignal, For, onCleanup, Show, untrack } from "solid-js";
+import { createStore, reconcile } from "solid-js/store";
+
+function sessionKey(session: ChatSession) {
+  return `${session.team_id}:${session.challenge_id}`;
+}
+
+function mergeSessions(existing: ChatSession[], incoming: ChatSession[]): ChatSession[] {
+  const byKey = new Map<string, ChatSession>();
+  for (const item of existing) byKey.set(sessionKey(item), item);
+  for (const item of incoming) byKey.set(sessionKey(item), item);
+  return [...byKey.values()].sort((a, b) => b.last_active_at.toMillis() - a.last_active_at.toMillis());
+}
 
 export default function ChatList() {
   const params = useParams();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const gameId = createMemo(() => Number.parseInt(params.game ?? "", 10) || -1);
-  const pageSize = 15;
-  const page = createMemo(() => (searchParams.page && Number.parseInt(searchParams.page as string, 10)) || 1);
   const teamId = createMemo(() => Number.parseInt((searchParams.team as string) ?? "", 10) || null);
   const challengeId = createMemo(() => Number.parseInt((searchParams.challenge as string) ?? "", 10) || null);
 
   const sessionsQuery = useGameAdminChatSessions({
     game_id: gameId,
-    page: () => 1,
-    page_size: () => pageSize * page(),
     enabled: () => gameId() > 0,
   });
+
+  const [sessions, setSessions] = createStore<ChatSession[]>([]);
+  const [nextCursor, setNextCursor] = createSignal<number | null>(null);
+  const [loadingMore, setLoadingMore] = createSignal(false);
+
+  let lastGameId: number | null = null;
+
+  createEffect(() => {
+    const currentGameId = gameId();
+    const data = sessionsQuery.data;
+
+    // the component survives param-only navigation between games, so reset
+    // state when the game changes to avoid leaking stale sessions/cursor
+    if (lastGameId !== currentGameId) {
+      lastGameId = currentGameId;
+      setSessions(reconcile([]));
+      setNextCursor(null);
+    }
+
+    if (!data) return;
+
+    const existing = untrack(() => Array.from(sessions));
+    // only the first page seeds the cursor; deeper pages advance it via loadMore
+    if (existing.length === 0) setNextCursor(data.next_cursor);
+    setSessions(mergeSessions(existing, data.items));
+  });
+
+  async function loadMore() {
+    const cursor = nextCursor();
+    if (cursor === null || loadingMore()) return;
+    setLoadingMore(true);
+    try {
+      const page = await getGameAdminChatSessions(gameId(), { cursor, limit: 15 });
+      setNextCursor(page.next_cursor);
+      setSessions(
+        mergeSessions(
+          untrack(() => Array.from(sessions)),
+          page.items
+        )
+      );
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingMore(false);
+    }
+  }
 
   const timer = setInterval(() => {
     if (gameId() > 0) sessionsQuery.refetch();
@@ -49,7 +104,7 @@ export default function ChatList() {
         defer
       >
         <Show
-          when={sessionsQuery.data && sessionsQuery.data[0].length > 0}
+          when={sessions.length > 0}
           fallback={
             <div class="w-full min-h-full flex flex-row space-x-2 p-3 lg:p-6 items-center justify-center">
               <span class="shrink-0 icon-[fluent--chat-20-regular] w-5 h-5" />
@@ -58,7 +113,7 @@ export default function ChatList() {
           }
         >
           <div class="w-full min-h-full overflow-hidden flex flex-col space-y-2 p-2">
-            <For each={sessionsQuery.data?.[0] || []}>
+            <For each={sessions}>
               {(session) => (
                 <Link
                   href={`/games/${gameId()}/admin/hammers?challenge=${session.challenge_id}&team=${session.team_id}`}
@@ -93,13 +148,13 @@ export default function ChatList() {
                 </Link>
               )}
             </For>
-            <Pagination
-              class="p-6 lg:p-9"
-              count={sessionsQuery.data?.[1] || 0}
-              pageSize={pageSize}
-              page={page()}
-              onPageChange={(page) => setSearchParams({ page: page.page.toString() })}
-            />
+            <Show when={nextCursor() !== null}>
+              <div class="flex justify-center py-2">
+                <Button size="sm" ghost onClick={loadMore} loading={loadingMore()} disabled={loadingMore()}>
+                  {t("general.actions.loadMore.title")}
+                </Button>
+              </div>
+            </Show>
           </div>
         </Show>
       </OverlayScrollbarsComponent>

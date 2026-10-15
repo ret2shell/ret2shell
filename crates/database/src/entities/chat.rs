@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc, serde::ts_seconds};
 use sea_orm::{
-  ActiveValue, Condition, FromQueryResult, IntoActiveModel, JoinType, Order, QueryOrder,
-  QuerySelect, QueryTrait, entity::prelude::*,
+  ActiveValue, FromQueryResult, IntoActiveModel, JoinType, Order, QueryOrder, QuerySelect,
+  QueryTrait, entity::prelude::*, sea_query::ExprTrait,
 };
 use serde::{Deserialize, Serialize};
 
@@ -49,6 +49,7 @@ pub struct SessionModel {
   pub game_id: i64,
   pub game_name: String,
   pub checked: bool,
+  pub last_message_id: i64,
   #[serde(with = "ts_seconds")]
   pub last_active_at: DateTime<Utc>,
   pub last_message: Option<String>,
@@ -118,60 +119,82 @@ impl Related<super::challenge::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
-pub async fn get_sessions<C>(
-  conn: &C, game_id: i64, challenge_id: Option<i64>, page: u64, page_size: u64,
-) -> Result<(Vec<SessionModel>, u64), DbErr>
+/// Cursor-paginated session list: one row per (team, challenge) with its newest
+/// message.
+///
+/// `cursor` is the `last_message_id` of the previous page (keyset on
+/// `max(chat.id)`). Returns `(items, has_more)` ordered by `last_message_id`
+/// DESC.
+pub async fn get_sessions_page<C>(
+  conn: &C, game_id: i64, challenge_id: Option<i64>, cursor: Option<i64>, limit: u64,
+) -> Result<(Vec<SessionModel>, bool), DbErr>
 where
   C: sea_orm::ConnectionTrait, {
-  let page_size = page_size.max(1);
-  let page = page.max(1);
-  let mut sql = Entity::find().filter(Column::GameId.eq(game_id));
+  let limit = Ord::max(limit, 1);
+
+  let mut sub = Entity::find()
+    .select_only()
+    .column_as(Column::Id.max(), "max_id")
+    .filter(Column::GameId.eq(game_id))
+    .group_by(Column::TeamId)
+    .group_by(Column::ChallengeId);
   if let Some(challenge_id) = challenge_id {
-    sql = sql.filter(Column::ChallengeId.eq(challenge_id));
+    sub = sub.filter(Column::ChallengeId.eq(challenge_id));
   }
-  sql = sql.select_only().columns([
-    Column::ChallengeId,
-    Column::TeamId,
-    Column::GameId,
-    Column::Checked,
-    Column::IsAdmin,
-  ]);
-  sql = sql
+  if let Some(cursor) = cursor {
+    // HAVING max(id) < cursor keeps the keyset semantics correct even when
+    // different sessions interleave in id space.
+    sub = sub.having(Column::Id.max().lt(cursor));
+  }
+  let sub_query = sub.into_query();
+
+  let query = Entity::find()
+    .filter(Column::GameId.eq(game_id))
+    .select_only()
+    .columns([
+      Column::ChallengeId,
+      Column::TeamId,
+      Column::GameId,
+      Column::Checked,
+      Column::IsAdmin,
+    ])
     .join(JoinType::InnerJoin, Relation::Challenge.def())
     .join(JoinType::InnerJoin, Relation::Team.def())
     .join(JoinType::InnerJoin, Relation::Game.def())
-    // .order_by(Column::Checked, Order::Desc)
-    // .order_by(Column::IsAdmin, Order::Asc)
-    // .order_by(Column::CreatedAt, Order::Desc)
     .column_as(super::challenge::Column::Name, "challenge_name")
     .column_as(super::team::Column::Name, "team_name")
     .column_as(super::game::Column::Name, "game_name")
+    .column_as(Column::Id, "last_message_id")
     .column_as(Column::UserId, "last_user_id")
     .column_as(Column::Content, "last_message")
-    .column_as(Column::CreatedAt, "last_active_at");
-  let sub_query = Entity::find()
-    .select_only()
-    .columns([Column::Id])
-    .distinct_on([(Entity, Column::TeamId), (Entity, Column::ChallengeId)])
-    .order_by_desc(Column::TeamId)
-    .order_by_desc(Column::ChallengeId)
-    .order_by_desc(Column::CreatedAt)
-    .into_query();
-  sql = sql
-    .filter(Condition::any().add(Column::Id.in_subquery(sub_query)))
-    .order_by_desc(Column::CreatedAt);
+    .column_as(Column::CreatedAt, "last_active_at")
+    .filter(Column::Id.in_subquery(sub_query))
+    .order_by_desc(Column::Id)
+    .limit(limit + 1);
 
-  let paginator = sql.into_model().paginate(conn, page_size);
-  let total = paginator.num_items().await?;
-  let result = paginator.fetch_page(page - 1).await?;
-
-  Ok((result, total))
+  let mut sessions = query.into_model().all(conn).await?;
+  let has_more = sessions.len() as u64 > limit;
+  sessions.truncate(limit as usize);
+  Ok((sessions, has_more))
 }
 
-pub async fn get_list<C>(conn: &C, team_id: i64, challenge_id: i64) -> Result<Vec<ExModel>, DbErr>
+/// Keyset-paginated message history for a single (team, challenge) session.
+///
+/// * `after_id`  -> messages newer than the cursor, ascending (incremental
+///   polling).
+/// * `before_id` -> messages older than the cursor, ascending (load older
+///   history).
+/// * neither     -> the newest page, ascending.
+///
+/// Returns `(items, has_more)`. `items` is always ascending by id.
+pub async fn get_list_page<C>(
+  conn: &C, team_id: i64, challenge_id: i64, after_id: Option<i64>, before_id: Option<i64>,
+  limit: u64,
+) -> Result<(Vec<ExModel>, bool), DbErr>
 where
   C: sea_orm::ConnectionTrait, {
-  let sql = Entity::find()
+  let limit = Ord::max(limit, 1);
+  let mut query = Entity::find()
     .join(JoinType::InnerJoin, Relation::Challenge.def())
     .join(JoinType::InnerJoin, Relation::Team.def())
     .join(JoinType::InnerJoin, Relation::User.def())
@@ -180,10 +203,64 @@ where
     .column_as(super::user::Column::Nickname, "user_name")
     .column_as(super::user::Column::Avatar, "avatar")
     .filter(Column::TeamId.eq(team_id))
+    .filter(Column::ChallengeId.eq(challenge_id));
+
+  let ascending = if let Some(after_id) = after_id {
+    query = query
+      .filter(Column::Id.gt(after_id))
+      .order_by_asc(Column::Id);
+    true
+  } else if let Some(before_id) = before_id {
+    query = query
+      .filter(Column::Id.lt(before_id))
+      .order_by_desc(Column::Id);
+    false
+  } else {
+    query = query.order_by_desc(Column::Id);
+    false
+  };
+
+  let mut rows = query.limit(limit + 1).into_model().all(conn).await?;
+  let has_more = rows.len() as u64 > limit;
+  rows.truncate(limit as usize);
+  if !ascending {
+    rows.reverse();
+  }
+  Ok((rows, has_more))
+}
+
+/// How many messages `user_id` has sent in the session since the newest admin
+/// reply. Used to enforce the per-user "3 messages before a reply" limit.
+///
+/// This only reads the rows needed for the quota; every message in the session
+/// (including teammates' messages) is still listed by `get_list_page`. The scan
+/// stays small because each user can send at most three messages after the
+/// newest admin reply.
+pub async fn count_pending_messages<C>(
+  conn: &C, team_id: i64, challenge_id: i64, user_id: i64,
+) -> Result<u64, DbErr>
+where
+  C: sea_orm::ConnectionTrait, {
+  let last_admin_id = Entity::find()
+    .select_only()
+    .column(Column::Id)
+    .filter(Column::TeamId.eq(team_id))
     .filter(Column::ChallengeId.eq(challenge_id))
-    .order_by(Column::CreatedAt, Order::Desc);
-  let chats = sql.into_model().all(conn).await?;
-  Ok(chats)
+    .filter(Column::IsAdmin.eq(true))
+    .order_by_desc(Column::Id)
+    .limit(1)
+    .into_tuple::<i64>()
+    .one(conn)
+    .await?
+    .unwrap_or(0);
+
+  Entity::find()
+    .filter(Column::TeamId.eq(team_id))
+    .filter(Column::ChallengeId.eq(challenge_id))
+    .filter(Column::UserId.eq(user_id))
+    .filter(Column::Id.gt(last_admin_id))
+    .count(conn)
+    .await
 }
 
 pub async fn get_last<C>(
@@ -209,14 +286,16 @@ where
 pub async fn get_unchecked<C>(conn: &C, team_id: i64, is_admin: bool) -> Result<Vec<Model>, DbErr>
 where
   C: sea_orm::ConnectionTrait, {
-  let chats = Entity::find()
+  Entity::find()
     .filter(Column::TeamId.eq(team_id))
     .filter(Column::Checked.eq(false))
     .filter(Column::IsAdmin.eq(is_admin))
-    .distinct_on([(Entity, Column::TeamId), (Entity, Column::ChallengeId)])
+    .distinct_on([Column::TeamId, Column::ChallengeId])
+    .order_by_asc(Column::TeamId)
+    .order_by_asc(Column::ChallengeId)
+    .order_by_desc(Column::Id)
     .all(conn)
-    .await?;
-  Ok(chats)
+    .await
 }
 
 pub async fn create<C>(conn: &C, chat: Model) -> Result<Model, DbErr>

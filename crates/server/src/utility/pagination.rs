@@ -1,6 +1,7 @@
 pub const DEFAULT_PAGE: u64 = 1;
 pub const DEFAULT_PAGE_SIZE: u64 = 15;
-pub const DEFAULT_CHAT_PAGE_SIZE: u64 = 30;
+pub const DEFAULT_CHAT_MESSAGE_LIMIT: u64 = 50;
+pub const DEFAULT_CHAT_SESSION_LIMIT: u64 = 20;
 pub const DEFAULT_SUBMISSION_PAGE_SIZE: u64 = 10;
 pub const MAX_PAGE_SIZE: u64 = 100;
 pub const DEFAULT_LOG_LIMIT: usize = 1000;

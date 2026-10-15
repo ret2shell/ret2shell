@@ -28,5 +28,17 @@ export type ChatSession = {
   last_active_at: DateTime;
   last_message: string | null;
   last_user_id: number | null;
+  last_message_id: number;
   is_admin: boolean;
+};
+
+export type ChatMessagePage = {
+  items: Chat[];
+  has_more: boolean;
+};
+
+export type ChatSessionPage = {
+  items: ChatSession[];
+  has_more: boolean;
+  next_cursor: number | null;
 };

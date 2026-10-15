@@ -1,4 +1,10 @@
-import { useGame, useGamePlayerChatMessages, useSelfSolves, useSendGamePlayerChatMessageMutation } from "@api/game";
+import {
+  getGamePlayerChatMessages,
+  useGame,
+  useGamePlayerChatMessages,
+  useSelfSolves,
+  useSendGamePlayerChatMessageMutation,
+} from "@api/game";
 import { useSelfTeam } from "@api/team";
 import platformAvatar from "@assets/imgs/rx.webp";
 import { mediaPath } from "@lib/utils/media";
@@ -15,11 +21,22 @@ import { EditorBare } from "@widgets/editor";
 import Link from "@widgets/link";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { createEffect, createMemo, createSignal, For, Match, onCleanup, onMount, Show, Switch } from "solid-js";
+import {
+  createEffect,
+  createMemo,
+  createSignal,
+  For,
+  Match,
+  onCleanup,
+  onMount,
+  Show,
+  Switch,
+  untrack,
+} from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 
 import type { ChallengeWidgetProps } from ".";
-import { mergeChats } from "./hammer.utils";
+import { mergeChatItems, mergeChats } from "./hammer.utils";
 
 export function ChatBlock(props: {
   avatar?: string;
@@ -94,28 +111,123 @@ export default function (props: ChallengeWidgetProps) {
     enabled: () => !props.training && !isAdminOfGame(game.data),
   });
 
+  const [hasMoreHistory, setHasMoreHistory] = createSignal(false);
+
+  const maxLoadedId = createMemo(() => {
+    let max = 0;
+    for (const item of chats) {
+      if (item.id > max) max = item.id;
+    }
+    return max;
+  });
+
+  const minLoadedId = createMemo(() => {
+    let min = Number.POSITIVE_INFINITY;
+    for (const item of chats) {
+      // the synthetic solved message uses id 0 and must not become a cursor
+      if (item.id > 0 && item.id < min) min = item.id;
+    }
+    return Number.isFinite(min) ? min : 0;
+  });
+
+  let lastSessionKey = "";
+
   createEffect(() => {
-    if (!chatsQuery.data || !solvesQuery.data) {
+    const data = chatsQuery.data;
+    const sessionKey = `${props.gameId}:${props.challengeId}:${team.data?.id ?? 0}`;
+
+    if (!data || !solvesQuery.data) {
+      lastSessionKey = sessionKey;
+      setHasMoreHistory(false);
       setChats(reconcile([]));
       return;
     }
 
+    const merged = mergeChats(
+      props.gameId,
+      props.challengeId,
+      team.data?.id ?? 0,
+      data.items,
+      solvesQuery.data.find((v) => v.challenge_id === props.challengeId)?.created_at ?? null
+    );
+
+    if (sessionKey !== lastSessionKey) {
+      lastSessionKey = sessionKey;
+      setHasMoreHistory(data.has_more);
+      setChats(reconcile(merged, { key: "id" }));
+      return;
+    }
+
+    // reconcile merges the newest page into the store so older pages and
+    // incrementally polled messages are preserved while `checked` flags refresh
     setChats(
       reconcile(
-        mergeChats(
-          props.gameId,
-          props.challengeId,
-          team.data?.id ?? 0,
-          chatsQuery.data,
-          solvesQuery.data.find((v) => v.challenge_id === props.challengeId)?.created_at ?? null
+        mergeChatItems(
+          untrack(() => Array.from(chats)),
+          merged
         ),
         { key: "id" }
       )
     );
   });
 
-  const interval = setInterval(() => chatsQuery.refetch(), 5000);
+  let pollInFlight = false;
+  let pollTick = 0;
+  const interval = setInterval(async () => {
+    if (pollInFlight) return;
+    pollInFlight = true;
+    pollTick += 1;
+    try {
+      if (pollTick % 6 === 0 || maxLoadedId() === 0) {
+        // reconcile the newest page every ~30s (and until the first page arrives)
+        await chatsQuery.refetch();
+      } else {
+        const page = await getGamePlayerChatMessages(props.gameId, props.challengeId, {
+          after_id: maxLoadedId(),
+        });
+        if (page.items.length > 0) {
+          setChats(
+            mergeChatItems(
+              untrack(() => Array.from(chats)),
+              page.items
+            )
+          );
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      pollInFlight = false;
+    }
+  }, 5000);
   onCleanup(() => clearInterval(interval));
+
+  const [loadingOlder, setLoadingOlder] = createSignal(false);
+
+  async function loadOlder() {
+    const beforeId = minLoadedId();
+    if (beforeId <= 0 || loadingOlder()) return;
+    setLoadingOlder(true);
+    try {
+      const page = await getGamePlayerChatMessages(props.gameId, props.challengeId, {
+        before_id: beforeId,
+      });
+      setHasMoreHistory(page.has_more);
+      if (page.items.length > 0) {
+        setChats(
+          mergeChatItems(
+            page.items,
+            untrack(() => Array.from(chats))
+          )
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingOlder(false);
+    }
+  }
+
   let chatBottomEl: HTMLDivElement;
 
   const availableMsg = createMemo(() => {
@@ -204,6 +316,13 @@ export default function (props: ChallengeWidgetProps) {
             />
           </Match>
         </Switch>
+        <Show when={hasMoreHistory()}>
+          <div class="flex justify-center py-2">
+            <Button size="sm" ghost onClick={loadOlder} loading={loadingOlder()} disabled={loadingOlder()}>
+              {t("general.actions.loadMore.title")}
+            </Button>
+          </div>
+        </Show>
         <For each={chats}>
           {(chat, index) => (
             <ChatBlock

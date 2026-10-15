@@ -7,7 +7,7 @@ vi.mock("@storage/theme", () => ({
   t: (key: string) => key,
 }));
 
-import { mergeChats } from "./hammer.utils";
+import { mergeChatItems, mergeChats } from "./hammer.utils";
 
 function createChat(overrides: Partial<Chat> = {}): Chat {
   return {
@@ -28,6 +28,41 @@ function createChat(overrides: Partial<Chat> = {}): Chat {
     ...overrides,
   };
 }
+
+describe("mergeChatItems", () => {
+  it("dedupes by id and keeps ascending order", () => {
+    const merged = mergeChatItems(
+      [createChat({ id: 2, created_at: DateTime.fromSeconds(2) })],
+      [
+        createChat({ id: 3, created_at: DateTime.fromSeconds(3) }),
+        createChat({ id: 1, created_at: DateTime.fromSeconds(1) }),
+        createChat({ id: 2, created_at: DateTime.fromSeconds(2) }),
+      ]
+    );
+
+    expect(merged.map((chat) => chat.id)).toEqual([1, 2, 3]);
+  });
+
+  it("replaces existing items with incoming ones sharing the same id", () => {
+    const merged = mergeChatItems(
+      [createChat({ id: 1, checked: false, content: "old" })],
+      [createChat({ id: 1, checked: true, content: "new" })]
+    );
+
+    expect(merged).toHaveLength(1);
+    expect(merged[0]).toMatchObject({ id: 1, checked: true, content: "new" });
+  });
+
+  it("breaks created_at ties by id", () => {
+    const at = DateTime.fromSeconds(5);
+    const merged = mergeChatItems(
+      [createChat({ id: 3, created_at: at })],
+      [createChat({ id: 2, created_at: at }), createChat({ id: 1, created_at: at })]
+    );
+
+    expect(merged.map((chat) => chat.id)).toEqual([1, 2, 3]);
+  });
+});
 
 describe("mergeChats", () => {
   it("keeps only current session chats and appends the solved system message", () => {

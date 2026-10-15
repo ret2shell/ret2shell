@@ -18,6 +18,13 @@ function createSolvedChat(gameId: number, challengeId: number, teamId: number, s
   };
 }
 
+export function mergeChatItems(existing: Chat[], incoming: Chat[]): Chat[] {
+  const byId = new Map<number, Chat>();
+  for (const item of existing) byId.set(item.id, item);
+  for (const item of incoming) byId.set(item.id, item);
+  return [...byId.values()].sort((a, b) => a.created_at.toMillis() - b.created_at.toMillis() || a.id - b.id);
+}
+
 export function mergeChats(
   gameId: number,
   challengeId: number,
@@ -31,5 +38,5 @@ export function mergeChats(
     merged.push(createSolvedChat(gameId, challengeId, teamId, solvedAt));
   }
 
-  return merged.sort((a, b) => a.created_at.toMillis() - b.created_at.toMillis() || a.id - b.id);
+  return mergeChatItems([], merged);
 }

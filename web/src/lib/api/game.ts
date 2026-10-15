@@ -1,5 +1,5 @@
 import type { Audit } from "@models/audit";
-import type { Chat, ChatSession } from "@models/chat";
+import type { Chat, ChatMessagePage, ChatSessionPage } from "@models/chat";
 import type { RegistryConfig } from "@models/config";
 import type { Game, HostType } from "@models/game";
 import type { ObjectInfo } from "@models/git";
@@ -462,54 +462,36 @@ export function useSelfSolves({
   );
 }
 
-export async function getGameAdminChatSessions(
-  game_id: number,
-  challenge_id?: number,
-  page?: number,
-  page_size?: number
-) {
+export type ChatSessionListParams = {
+  challenge_id?: number;
+  cursor?: number;
+  limit?: number;
+};
+
+export async function getGameAdminChatSessions(game_id: number, params: ChatSessionListParams = {}) {
   return await api
     .get(`${api_root}/game/${game_id}/chat/admin`, {
-      searchParams: JSON.parse(
-        JSON.stringify({
-          challenge_id,
-          page,
-          page_size,
-        })
-      ) as SearchParamsOption,
+      searchParams: JSON.parse(JSON.stringify(params)) as SearchParamsOption,
     })
-    .json<[ChatSession[], number]>();
+    .json<ChatSessionPage>();
 }
 
 export function useGameAdminChatSessions({
   game_id,
   challenge_id,
-  page,
-  page_size,
   enabled,
   onError,
 }: {
   game_id: () => number;
   challenge_id?: () => number;
-  page?: () => number;
-  page_size?: () => number;
   enabled?: () => boolean;
   onError?: (err: Error) => boolean;
 }) {
-  const keys = createMemo(() => [
-    "game",
-    game_id(),
-    "chat",
-    "adminSessions",
-    challenge_id?.(),
-    page?.(),
-    page_size?.(),
-  ]);
+  const keys = createMemo(() => ["game", game_id(), "chat", "adminSessions", challenge_id?.()]);
   return useQuery(
     () => ({
       queryKey: keys(),
-      queryFn: async () =>
-        await getGameAdminChatSessions(game_id(), challenge_id?.(), page?.() ?? 1, page_size?.() ?? 15),
+      queryFn: async () => await getGameAdminChatSessions(game_id(), { challenge_id: challenge_id?.() }),
       enabled: enabled?.(),
       throwOnError: (err: Error) => {
         handleHttpError(err, t("game.hammer.errors.fetchSessions.title"));
@@ -520,15 +502,29 @@ export function useGameAdminChatSessions({
   );
 }
 
-export async function getGameAdminChatMessages(game_id: number, challenge_id: number, team_id: number) {
+export type ChatMessageListParams = {
+  after_id?: number;
+  before_id?: number;
+  limit?: number;
+};
+
+export async function getGameAdminChatMessages(
+  game_id: number,
+  challenge_id: number,
+  team_id: number,
+  params: ChatMessageListParams = {}
+) {
   return await api
     .get(`${api_root}/game/${game_id}/chat/admin/session`, {
-      searchParams: {
-        challenge_id,
-        team_id,
-      },
+      searchParams: JSON.parse(
+        JSON.stringify({
+          challenge_id,
+          team_id,
+          ...params,
+        })
+      ) as SearchParamsOption,
     })
-    .json<Chat[]>();
+    .json<ChatMessagePage>();
 }
 
 export function useGameAdminChatMessages({
@@ -596,8 +592,16 @@ export function useSendGameAdminChatMessageMutation(
   }));
 }
 
-export async function getGamePlayerChatMessages(game_id: number, challenge_id: number) {
-  return await api.get(`${api_root}/game/${game_id}/chat/${challenge_id}`).json<Chat[]>();
+export async function getGamePlayerChatMessages(
+  game_id: number,
+  challenge_id: number,
+  params: ChatMessageListParams = {}
+) {
+  return await api
+    .get(`${api_root}/game/${game_id}/chat/${challenge_id}`, {
+      searchParams: JSON.parse(JSON.stringify(params)) as SearchParamsOption,
+    })
+    .json<ChatMessagePage>();
 }
 
 export function useGamePlayerChatMessages({
