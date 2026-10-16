@@ -1104,7 +1104,7 @@
         "0": "The message you send here will be forwarded to the challenge setter along with your status. The challenge setter may reply here or contact you through other IMs.",
         "1": "Note that you can only send five messages before the challenge author replies, so try to combine your questions.",
         "2": "For long messages such as logs and code, it is recommended to use an online clipboard to send, for example:",
-        "3": "Replies and emoji reactions also count towards the message quota, use them wisely."
+        "3": "Heads up~ emoji reactions count towards your message quota too!"
       },
       "role": {
         "admin": "Admin",
