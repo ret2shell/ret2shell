@@ -1125,6 +1125,13 @@
         "maxMessageLimit": {
           "title": "Message limit reached, please wait for response..."
         }
+      },
+      "toolbar": {
+        "uploadImage": "Upload image",
+        "insertMoji": "Insert moji",
+        "notImage": "Only image files can be uploaded",
+        "uploaded": "Image uploaded",
+        "uploadFailed": "Failed to upload image"
       }
     },
     "submission": {
@@ -2330,5 +2337,18 @@
     "title": "Institute management",
     "manual": "Manual",
     "withOAuth": "Use 3rd auth service"
+  },
+  "moji": {
+    "search": "Search moji…",
+    "notFound": "No moji found",
+    "categories": {
+      "smileys": "Smileys",
+      "gestures": "Gestures",
+      "animals": "Animals",
+      "food": "Food",
+      "activities": "Activities",
+      "objects": "Objects",
+      "symbols": "Symbols"
+    }
   }
 }

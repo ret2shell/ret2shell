@@ -127,6 +127,13 @@ article.article pre > code {
   @apply flex flex-col break-all;
 }
 
+/* moji (:code:) icons rendered inline in markdown; sized slightly larger
+   than the text so colorful emoji read well at body size */
+.moji {
+  /* ! keeps the size over the iconify utility's `width/height: 1em` */
+  @apply inline-block w-[1.25em]! h-[1.25em]! align-[-0.25em] shrink-0;
+}
+
 code:not(pre code) {
   @apply text-[1em]! break-words! bg-layer-content/10! rounded-xs mx-1! px-1! font-normal!;
 }

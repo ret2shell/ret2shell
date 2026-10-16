@@ -1125,6 +1125,13 @@
         "maxMessageLimit": {
           "title": "已經到達消息上限，請等待反饋..."
         }
+      },
+      "toolbar": {
+        "uploadImage": "上傳圖片",
+        "insertMoji": "插入表情",
+        "notImage": "只能上傳圖片檔案",
+        "uploaded": "圖片已上傳",
+        "uploadFailed": "圖片上傳失敗"
       }
     },
     "submission": {
@@ -2330,5 +2337,18 @@
     "title": "組織管理",
     "manual": "手動管理",
     "withOAuth": "使用認證服務"
+  },
+  "moji": {
+    "search": "搜尋表情…",
+    "notFound": "沒有找到表情",
+    "categories": {
+      "smileys": "表情",
+      "gestures": "手勢",
+      "animals": "動物",
+      "food": "食物",
+      "activities": "活動",
+      "objects": "物品",
+      "symbols": "符號"
+    }
   }
 }

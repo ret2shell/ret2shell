@@ -7,6 +7,7 @@ import {
 } from "@api/game";
 import { useSelfTeam } from "@api/team";
 import platformAvatar from "@assets/imgs/rx.webp";
+import { singleMojiOf } from "@lib/moji";
 import { mediaPath } from "@lib/utils/media";
 import type { Chat } from "@models/chat";
 import { createBreakpoints } from "@solid-primitives/media";
@@ -33,9 +34,9 @@ import {
   untrack,
 } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
-
 import type { ChallengeWidgetProps } from ".";
 import { mergeChatItems, mergeChats } from "./hammer.utils";
+import ChatToolbarActions from "./hammer-toolbar";
 
 // kept in sync with CHAT_REPLY_MESSAGE_LIMIT on the server; only used as the
 // quota fallback before the first authoritative `remaining` arrives
@@ -53,6 +54,8 @@ export function ChatBlock(props: {
   isChecked?: boolean;
 }) {
   const matches = createBreakpoints(breakpoints);
+  // a message that is exactly one :moji: renders as a single enlarged emoji
+  const jumboMoji = createMemo(() => singleMojiOf(props.content));
   return (
     <div class={clsx("self-start flex-row flex items-center", matches.lg ? "w-[calc(100%-4rem)]" : "w-full")}>
       <Show when={props.showAvatar} fallback={<div class="w-10 h-10 shrink-0 self-start" />}>
@@ -70,7 +73,12 @@ export function ChatBlock(props: {
             </A>
           </header>
         </Show>
-        <Article class="max-w-full!" content={props.content} noExtraPaddings compact extra />
+        <Show
+          when={jumboMoji()}
+          fallback={<Article class="max-w-full!" content={props.content} noExtraPaddings compact extra />}
+        >
+          {(moji) => <span class={clsx("w-16 h-16 block", moji().icon)} />}
+        </Show>
         <footer class="text-xs flex items-center space-x-2">
           <span class="opacity-30 group-hover:opacity-80 transition-opacity duration-300">
             {props.sendAt.toFormat("yyyy-MM-dd HH:mm")}
@@ -402,6 +410,7 @@ export default function (props: ChallengeWidgetProps) {
                   })}
             </span>
           </span>
+          <ChatToolbarActions onInsert={(text) => setChat(chat() + text)} />
           <div class="flex-1" />
           <Show when={chatsQuery.isLoading || sendMutation.isPending}>
             <span class="shrink-0 icon-[fluent--arrow-sync-20-regular] w-5 h-5 animate-spin" />

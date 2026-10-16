@@ -1125,6 +1125,13 @@
         "maxMessageLimit": {
           "title": "メッセージ上限に達しました。フィードバックを待ってください..."
         }
+      },
+      "toolbar": {
+        "uploadImage": "画像をアップロード",
+        "insertMoji": "絵文字を挿入",
+        "notImage": "画像ファイルのみアップロードできます",
+        "uploaded": "画像をアップロードしました",
+        "uploadFailed": "画像のアップロードに失敗しました"
       }
     },
     "submission": {
@@ -2330,5 +2337,18 @@
     "title": "組織管理",
     "manual": "手動管理",
     "withOAuth": "認証サービスを使用"
+  },
+  "moji": {
+    "search": "絵文字を検索…",
+    "notFound": "絵文字が見つかりません",
+    "categories": {
+      "smileys": "顔文字",
+      "gestures": "ジェスチャー",
+      "animals": "動物",
+      "food": "食べ物",
+      "activities": "アクティビティ",
+      "objects": "物",
+      "symbols": "記号"
+    }
   }
 }

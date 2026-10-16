@@ -10,6 +10,7 @@ import { useTeamInfo, useTeamSolves } from "@api/team";
 import platformAvatar from "@assets/imgs/rx.webp";
 import { ChatBlock } from "@blocks/challenge/hammer";
 import { mergeChatItems, mergeChats } from "@blocks/challenge/hammer.utils";
+import ChatToolbarActions from "@blocks/challenge/hammer-toolbar";
 // import { stickerSet } from "@assets/stickers";
 import { mediaPath } from "@lib/utils/media";
 import type { Chat } from "@models/chat";
@@ -365,6 +366,7 @@ export default function () {
               </div>
               <div class="sticky bottom-0 flex flex-col space-y-2 p-3 border-t border-t-layer-content/5 backdrop-blur">
                 <div class="flex flex-row items-center h-8 space-x-2">
+                  <ChatToolbarActions onInsert={(text) => setChat(chat() + text)} />
                   <div class="flex-1" />
                   <Show when={chatsQuery.isFetching || solves.isFetching}>
                     <span class="shrink-0 icon-[fluent--arrow-sync-20-regular] w-5 h-5 animate-spin" />
