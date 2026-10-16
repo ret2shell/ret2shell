@@ -120,10 +120,14 @@ export function getCompletions(source: string, cursor: number): CompletionResult
   if (valueField !== undefined) {
     const editing = current && (current.kind === "word" || current.kind === "string");
     // replace through the end of the value token, and filter by the text
-    // actually typed before the caret
+    // actually typed before the caret (decoded, without the opening quote)
     const from = editing ? current.start : cursor;
     const to = editing ? current.end : cursor;
-    const prefix = editing ? source.slice(current.start, cursor) : "";
+    const prefix = !editing
+      ? ""
+      : current.kind === "string"
+        ? current.value.slice(0, Math.max(0, Math.min(cursor - current.start - 1, current.value.length)))
+        : source.slice(current.start, cursor);
     return valueCompletion(valueField, prefix, from, to);
   }
 

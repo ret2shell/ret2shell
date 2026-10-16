@@ -126,6 +126,7 @@ class Parser {
         const token = this.next();
         if (token.kind === "rparen") this.diag("unexpectedParen", token.start, token.end);
         if (token.kind === "rbracket") this.diag("unexpectedBracket", token.start, token.end);
+        if (token.kind === "string" && !token.terminated) this.diag("unclosedString", token.start, token.end);
       }
       if (this.peek().kind !== "pipe") break;
     }
@@ -252,7 +253,19 @@ class Parser {
       return { type: "phrase", token: first };
     }
 
-    // stray structural token (comma, colon, lbracket, cmp, tilde) — skip it
+    // regexp phrase: ~"re" / ~`re` (filters the log message)
+    if (token.kind === "tilde") {
+      this.next();
+      const value = this.peek();
+      if (value.kind === "word" || value.kind === "string") {
+        const v = this.next();
+        if (v.kind === "string" && !v.terminated) this.diag("unclosedString", v.start, v.end);
+        return { type: "phrase", token: v };
+      }
+      return undefined;
+    }
+
+    // stray structural token (comma, colon, lbracket, cmp) — skip it
     this.next();
     return undefined;
   }

@@ -212,6 +212,17 @@ describe("completion", () => {
     expect(diagCodes("_msg:(x OR (y AND z))")).toEqual([]);
     expect(diagCodes("_msg:(x OR (y AND z)")).toContain("unclosedParen");
   });
+
+  it("completes enum values inside quotes using the decoded prefix", () => {
+    const result = complete('level:"ER');
+    expect(result.labels).toContain("ERROR");
+    expect([result.from, result.to]).toEqual([6, 9]);
+  });
+
+  it("flags unterminated strings after a bare tilde", () => {
+    expect(diagCodes('~"timeout"')).toEqual([]);
+    expect(diagCodes('~"timeout')).toContain("unclosedString");
+  });
 });
 
 describe("regressions from review", () => {
