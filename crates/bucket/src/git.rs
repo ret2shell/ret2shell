@@ -913,10 +913,30 @@ impl Git {
       .arg(self.path.as_os_str());
     debug!(?cmd, "run command for git repo stream internal rpc");
     let mut child = cmd.spawn()?;
-    let stdout_fd = child.stdout.take().unwrap();
-    let mut stdin_fd = child.stdin.take().unwrap();
+    let stdout_fd = child
+      .stdout
+      .take()
+      .ok_or_else(|| BucketError::GitCommandFailed("failed to capture git stdout".to_owned()))?;
+    let mut stdin_fd = child
+      .stdin
+      .take()
+      .ok_or_else(|| BucketError::GitCommandFailed("failed to capture git stdin".to_owned()))?;
     tokio::spawn(async move {
-      tokio::io::copy(&mut stdin, &mut stdin_fd).await.unwrap();
+      // Feed the request body into git, then close stdin so the process sees
+      // EOF even when the copy fails halfway through.
+      if let Err(error) = tokio::io::copy(&mut stdin, &mut stdin_fd).await {
+        warn!(?error, "failed to pipe request body into git process");
+      }
+      drop(stdin_fd);
+      // Always reap the child: without `wait` it lingers as a zombie and keeps
+      // its pipe file descriptors alive until the parent process exits.
+      match child.wait().await {
+        Ok(status) if !status.success() => {
+          warn!(?status, "git process exited with failure");
+        }
+        Ok(_) => {}
+        Err(error) => warn!(?error, "failed to wait for git process"),
+      }
     });
     Ok(stdout_fd)
   }
