@@ -106,7 +106,6 @@ export const PIPE_SNIPPETS: Suggestion[] = [
   { label: "limit N", insert: "limit 100", kind: "pipe", detailKey: "limit" },
   { label: "fields a, b", insert: "fields ", kind: "pipe", detailKey: "fields", retrigger: true },
   { label: "filter …", insert: "filter ", kind: "pipe", detailKey: "filterPipe", retrigger: true },
-  { label: "stats by (…) count()", insert: "stats by () count()", kind: "pipe", detailKey: "stats", cursorBack: 9 },
   { label: "uniq by (…)", insert: "uniq by ()", kind: "pipe", detailKey: "uniq", cursorBack: 1 },
   { label: "extract …", insert: 'extract " regexp " from _msg', kind: "pipe", detailKey: "extract" },
   { label: "copy a as b", insert: "copy ", kind: "pipe", detailKey: "copy", retrigger: true },

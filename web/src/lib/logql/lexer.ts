@@ -29,8 +29,9 @@ export function lex(source: string): Token[] {
       continue;
     }
 
-    // quoted string
-    if (ch === '"') {
+    // quoted string (single or double quotes)
+    if (ch === '"' || ch === "'") {
+      const quote = ch;
       const start = i;
       i++;
       let value = "";
@@ -42,7 +43,7 @@ export function lex(source: string): Token[] {
           i += 2;
           continue;
         }
-        if (c === '"') {
+        if (c === quote) {
           terminated = true;
           i++;
           break;
@@ -82,7 +83,7 @@ export function lex(source: string): Token[] {
 
     // bare word
     const start = i;
-    while (i < n && !' \t\r\n"()[]{},|:<>=~'.includes(source[i])) {
+    while (i < n && !" \t\r\n\"'()[]{},|:<>=~".includes(source[i])) {
       i++;
     }
     // exotic characters outside the grammar (e.g. `{` / `}`) must still

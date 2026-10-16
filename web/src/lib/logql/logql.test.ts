@@ -160,6 +160,30 @@ describe("completion", () => {
   it("absorbs adjacent colons inside bare values", () => {
     expect(diagCodes("target:r2s_server::worker* | sort by (_time) desc | limit 100")).toEqual([]);
   });
+
+  it("supports single-quoted strings", () => {
+    expect(diagCodes("_msg:'a | b'")).toEqual([]);
+  });
+
+  it("keeps subquery pipes inside parens", () => {
+    expect(diagCodes("* | union (level:ERROR | limit 10)")).toEqual([]);
+  });
+
+  it("supports half-open time ranges in filters and pipe args", () => {
+    expect(diagCodes("_time:[2026-01-01,2026-01-02)")).toEqual([]);
+    expect(diagCodes("* | filter _time:[2026-01-01,2026-01-02)")).toEqual([]);
+  });
+
+  it("caret at the start of a value selects the whole value token", () => {
+    const result = complete("level:ERROR", 6);
+    expect(result.labels).toEqual(["TRACE", "DEBUG", "INFO", "WARN", "ERROR", "*", '~"regexp"']);
+    expect([result.from, result.to]).toEqual([6, 11]);
+  });
+
+  it("filter pipe completes predicates and values", () => {
+    expect(labels("* | filter ")).toContain("level:");
+    expect(labels("* | filter level:")).toContain("ERROR");
+  });
 });
 
 describe("regressions from review", () => {

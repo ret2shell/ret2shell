@@ -13,13 +13,6 @@ const PIPE_STARTERS: Suggestion[] = [
   { label: "| sort by (_time) desc", insert: " | sort by (_time) desc", kind: "pipe", detailKey: "sort" },
   { label: "| limit N", insert: " | limit 100", kind: "pipe", detailKey: "limit" },
   { label: "| fields …", insert: " | fields ", kind: "pipe", detailKey: "fields", retrigger: true },
-  {
-    label: "| stats by (…) count()",
-    insert: " | stats by () count()",
-    kind: "pipe",
-    detailKey: "stats",
-    cursorBack: 9,
-  },
 ];
 
 const LIMIT_VALUES = ["10", "20", "50", "100", "1000"];
@@ -32,9 +25,12 @@ function prevToken(tokens: Token[], cursor: number): Token | undefined {
   return undefined;
 }
 
-/** token currently being edited: start <= cursor <= end (excluding eof) */
+/** token currently being edited: start <= cursor <= end (excluding eof).
+ *  Word/string tokens win over punctuation at shared boundaries, so the caret
+ *  at the start of `ERROR` in `level:ERROR` selects the value, not the colon. */
 function currentToken(tokens: Token[], cursor: number): Token | undefined {
-  return tokens.find((t) => t.kind !== "eof" && t.start <= cursor && cursor <= t.end);
+  const candidates = tokens.filter((t) => t.kind !== "eof" && t.start <= cursor && cursor <= t.end);
+  return candidates.find((t) => t.kind === "word" || t.kind === "string") ?? candidates[0];
 }
 
 function tokenBefore(tokens: Token[], token: Token): Token | undefined {
@@ -115,7 +111,7 @@ export function getCompletions(source: string, cursor: number): CompletionResult
 
   // ── pipe section ──────────────────────────────────────────────────────
   if (firstPipe && cursor > firstPipe.start) {
-    return pipeCompletions(tokens, cursor, current, firstPipe);
+    return pipeCompletions(source, tokens, cursor, current, firstPipe);
   }
 
   // ── filter section ────────────────────────────────────────────────────
@@ -166,6 +162,7 @@ export function getCompletions(source: string, cursor: number): CompletionResult
 }
 
 function pipeCompletions(
+  source: string,
   tokens: Token[],
   cursor: number,
   current: Token | undefined,
@@ -206,7 +203,7 @@ function pipeCompletions(
   const prefix = editingWord ? editingWord.value : "";
 
   // per-command argument completion
-  const own = pipeArgCompletion(command, name, args, prev, editingWord, prefix, from, to);
+  const own = pipeArgCompletion(command, name, args, prev, editingWord, prefix, from, to, source, cursor);
   if (own) return own;
 
   // after a finished command → chain another pipe
@@ -224,8 +221,16 @@ function pipeArgCompletion(
   editingWord: Token | undefined,
   prefix: string,
   from: number,
-  to: number
+  to: number,
+  source: string,
+  cursor: number
 ): CompletionResult | undefined {
+  // the filter pipe takes a full predicate expression; delegate to the
+  // filter-section completion on the remaining source and translate offsets
+  if (command === "filter") {
+    const sub = getCompletions(source.slice(name.end), cursor - name.end);
+    return { from: sub.from + name.end, to: sub.to + name.end, items: sub.items };
+  }
   switch (command) {
     case "sort": {
       const hasOpen = args.some((t) => t.kind === "lparen");
@@ -271,8 +276,7 @@ function pipeArgCompletion(
     case "rename":
     case "uniq":
     case "stats":
-    case "top":
-    case "filter": {
+    case "top": {
       // after a complete `by (…)` group, allow chaining
       const hasClose = args.some((t) => t.kind === "rparen");
       const hasOpen = args.some((t) => t.kind === "lparen");

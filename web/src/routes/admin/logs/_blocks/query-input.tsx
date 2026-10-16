@@ -2,7 +2,7 @@ import { getCompletions, parse, QUERY_PRESETS } from "@lib/logql";
 import type { Diagnostic, Suggestion } from "@lib/logql/types";
 import { t } from "@storage/theme";
 import clsx from "clsx";
-import { createMemo, createSignal, For, Show } from "solid-js";
+import { createEffect, createMemo, createSignal, For, Show } from "solid-js";
 
 type Mode = { type: "presets" } | { type: "suggestions"; from: number; to: number; items: Suggestion[] };
 
@@ -111,6 +111,12 @@ export default function LogQueryInput(props: {
         e.preventDefault();
         break;
       case "Tab": {
+        if (e.shiftKey) {
+          // Shift+Tab moves focus backward; never insert a completion
+          setOpen(false);
+          setSelected(-1);
+          return;
+        }
         const idx = selected() >= 0 ? selected() : 0;
         pick(idx);
         e.preventDefault();
@@ -146,6 +152,14 @@ export default function LogQueryInput(props: {
   }
 
   const firstError = createMemo(() => diagnostics()[0]);
+
+  // keep the keyboard-highlighted option visible inside the scrollable menu
+  createEffect(() => {
+    const idx = selected();
+    if (idx >= 0 && open()) {
+      document.getElementById(`logql-suggestion-${idx}`)?.scrollIntoView({ block: "nearest" });
+    }
+  });
 
   return (
     <div class={clsx("relative", props.class)}>

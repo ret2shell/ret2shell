@@ -92,21 +92,26 @@ class Parser {
         } else {
           this.diag("missingCommand", pipe.start, pipe.end);
         }
-        // consume args until next pipe or eof, tracking delimiter balance
+        // consume args until next top-level pipe or eof, tracking delimiter
+        // balance; a pipe inside a parenthesized subquery belongs to the args
         const openStack: Token[] = [];
-        while (this.peek().kind !== "pipe" && this.peek().kind !== "eof") {
+        for (;;) {
+          const ahead = this.peek();
+          if (ahead.kind === "eof") break;
+          if (ahead.kind === "pipe" && openStack.length === 0) break;
           const token = this.next();
           if (token.kind === "string" && !token.terminated) {
             this.diag("unclosedString", token.start, token.end);
           }
           if (token.kind === "lparen" || token.kind === "lbracket") {
             openStack.push(token);
-          } else if (token.kind === "rparen") {
-            if (openStack.at(-1)?.kind === "lparen") openStack.pop();
-            else this.diag("unexpectedParen", token.start, token.end);
-          } else if (token.kind === "rbracket") {
-            if (openStack.at(-1)?.kind === "lbracket") openStack.pop();
-            else this.diag("unexpectedBracket", token.start, token.end);
+          } else if (token.kind === "rparen" || token.kind === "rbracket") {
+            // time ranges may mix brackets, e.g. `_time:[start, end)`
+            if (openStack.length > 0) {
+              openStack.pop();
+            } else {
+              this.diag(token.kind === "rparen" ? "unexpectedParen" : "unexpectedBracket", token.start, token.end);
+            }
           }
           command.args.push(token);
         }
@@ -259,11 +264,11 @@ class Parser {
     // range filter: field:[a, b] / field:(a, b)
     if (token.kind === "lbracket" || token.kind === "lparen") {
       const open = this.next();
-      const closeKind = token.kind === "lbracket" ? "rbracket" : "rparen";
       let close: Token | undefined;
       while (this.peek().kind !== "eof" && this.peek().kind !== "pipe") {
         const t = this.next();
-        if (t.kind === closeKind) {
+        // time ranges may mix brackets, e.g. `_time:[start, end)`
+        if (t.kind === "rbracket" || t.kind === "rparen") {
           close = t;
           break;
         }
