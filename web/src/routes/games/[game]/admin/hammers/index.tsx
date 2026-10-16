@@ -10,6 +10,7 @@ import { useTeamInfo, useTeamSolves } from "@api/team";
 import platformAvatar from "@assets/imgs/rx.webp";
 import { ChatBlock, type ChatReaction } from "@blocks/challenge/hammer";
 import { mergeChatItems, mergeChats, parseChatReference, resolveChatReference } from "@blocks/challenge/hammer.utils";
+import ChatHistorySentinel from "@blocks/challenge/hammer-sentinel";
 import ChatToolbarActions from "@blocks/challenge/hammer-toolbar";
 import { singleMojiOf } from "@lib/moji";
 // import { stickerSet } from "@assets/stickers";
@@ -86,24 +87,38 @@ export default function () {
   // standalone chat blocks; replies keep their own message with a quote
   const referenceCache = new Map<
     number,
-    { kind: "reply" | "reaction"; message: Chat; rest: string; moji?: string } | null
+    { kind: "reply" | "reaction" | "dropped"; message?: Chat; rest?: string; moji?: string } | null
   >();
 
-  function classify(message: Chat) {
+  function classify(
+    message: Chat
+  ): { kind: "reply" | "reaction" | "dropped"; message?: Chat; rest?: string; moji?: string } | null {
     if (message.id === 0) return null;
     if (referenceCache.has(message.id)) return referenceCache.get(message.id);
-    let result: { kind: "reply" | "reaction"; message: Chat; rest: string; moji?: string } | null = null;
+    let result: { kind: "reply" | "reaction" | "dropped"; message?: Chat; rest?: string; moji?: string } | null = null;
     const parsed = parseChatReference(message.content);
     if (parsed) {
       const resolved = resolveChatReference(chats, parsed.reference, parsed.rest);
-      if (resolved?.reaction) {
+      if (!resolved) {
+        // the reference target is not loaded (deep history) or gone: drop
+        // the message silently instead of leaking the raw @account#id text
+        result = { kind: "dropped" };
+      } else if (resolved.reaction) {
+        // reactions to a reaction follow the chain down to the original
+        // message, otherwise the tag would target a block that never renders
+        let target = resolved.message;
+        for (let depth = 0; depth < 8; depth += 1) {
+          const targetInfo = classify(target);
+          if (targetInfo?.kind !== "reaction" || !targetInfo.message) break;
+          target = targetInfo.message;
+        }
         result = {
           kind: "reaction",
-          message: resolved.message,
+          message: target,
           rest: parsed.rest,
           moji: singleMojiOf(parsed.rest)?.icon,
         };
-      } else if (resolved) {
+      } else {
         result = { kind: "reply", message: resolved.message, rest: parsed.rest };
       }
     }
@@ -121,7 +136,7 @@ export default function () {
     const targets = new Map<number, ChatReaction[]>();
     for (const message of chats) {
       const info = classify(message);
-      if (info?.kind !== "reaction" || !info.moji) continue;
+      if (info?.kind !== "reaction" || !info.moji || !info.message) continue;
       const list = targets.get(info.message.id) ?? [];
       list.push({ icon: info.moji, label: message.user_name || message.user_account || "?" });
       targets.set(info.message.id, list);
@@ -131,7 +146,7 @@ export default function () {
 
   function resolveReference(message: Chat) {
     const info = classify(message);
-    if (info?.kind !== "reply") return null;
+    if (info?.kind !== "reply" || !info.message || info.rest === undefined) return null;
     return { message: info.message, rest: info.rest };
   }
 
@@ -265,6 +280,9 @@ export default function () {
 
   const [editorExpanded, setEditorExpanded] = createSignal(false);
   const [loadingOlder, setLoadingOlder] = createSignal(false);
+  // the overlay scrollbars instance resolves its viewport asynchronously;
+  // the sentinel re-arms its observer once this signal settles
+  const [chatViewport, setChatViewport] = createSignal<HTMLElement | null>(null);
 
   async function loadOlder() {
     const currentChallengeId = challengeId();
@@ -272,10 +290,17 @@ export default function () {
     const beforeId = minLoadedId();
     if (!currentChallengeId || !currentTeamId || beforeId <= 0 || loadingOlder()) return;
     setLoadingOlder(true);
+    // keep the scroll anchor stable while older messages are prepended
+    const scroller = chatViewport();
+    const prevHeight = scroller?.scrollHeight ?? 0;
+    const prevTop = scroller?.scrollTop ?? 0;
     try {
       const page = await getGameAdminChatMessages(gameId(), currentChallengeId, currentTeamId, {
         mode: "before",
         before_id: beforeId,
+      });
+      requestAnimationFrame(() => {
+        if (scroller) scroller.scrollTop = prevTop + (scroller.scrollHeight - prevHeight);
       });
       setHasMoreHistory(page.has_more);
       if (page.items.length > 0) {
@@ -374,6 +399,11 @@ export default function () {
           </Show>
         </div>
         <OverlayScrollbarsComponent
+          ref={(instance) => {
+            // the solid binding hands over the OverlayScrollbars instance
+            // (not the DOM element) once it is initialized
+            setChatViewport(instance?.elements?.().viewport ?? null);
+          }}
           class="w-full flex-1 relative"
           options={{
             scrollbars: {
@@ -405,14 +435,13 @@ export default function () {
                   sendAt={game.data?.start_at ?? DateTime.now()}
                   isChecked
                 />
-                <Show when={hasMoreHistory()}>
-                  <div class="flex justify-center py-2">
-                    <Button size="sm" ghost onClick={loadOlder} loading={loadingOlder()} disabled={loadingOlder()}>
-                      {t("general.actions.loadMore.title")}
-                    </Button>
-                  </div>
-                </Show>
-                <For each={chats.filter((m) => classify(m)?.kind !== "reaction")}>
+                <ChatHistorySentinel
+                  onLoad={loadOlder}
+                  hasMore={hasMoreHistory()}
+                  loading={loadingOlder()}
+                  root={chatViewport()}
+                />
+                <For each={chats.filter((m) => !classify(m) || classify(m)!.kind === "reply")}>
                   {(chat, index) => (
                     <ChatBlock
                       messageId={chat.id}

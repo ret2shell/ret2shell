@@ -39,6 +39,7 @@ import {
 import { createStore, reconcile } from "solid-js/store";
 import type { ChallengeWidgetProps } from ".";
 import { mergeChatItems, mergeChats, parseChatReference, resolveChatReference } from "./hammer.utils";
+import ChatHistorySentinel from "./hammer-sentinel";
 import ChatToolbarActions from "./hammer-toolbar";
 
 // kept in sync with CHAT_REPLY_MESSAGE_LIMIT on the server; only used as the
@@ -142,6 +143,21 @@ export function ChatBlock(props: {
             />
           )}
         </Show>
+        <Show when={(props.reactions?.length ?? 0) > 0}>
+          <div class="flex flex-row flex-wrap items-center gap-1 ps-0.5">
+            <For each={props.reactions}>
+              {(reaction) => (
+                <Tag
+                  level="layer-content"
+                  title={reaction.label}
+                  icon={<span class={clsx("w-4 h-4 shrink-0", reaction.icon)} />}
+                >
+                  <span>{reaction.label}</span>
+                </Tag>
+              )}
+            </For>
+          </div>
+        </Show>
         <footer class="text-xs flex items-center space-x-2">
           <span class="opacity-30 group-hover:opacity-80 transition-opacity duration-300">
             {props.sendAt.toFormat("yyyy-MM-dd HH:mm")}
@@ -159,11 +175,11 @@ export function ChatBlock(props: {
                   positioning={{ placement: "top" }}
                   lazyMount
                   unmountOnExit
-                  ghost
-                  square
-                  size="sm"
+                  bare
                   title={t("challenge.hammer.toolbar.react")}
-                  btnContent={<span class="shrink-0 icon-[fluent--emoji-add-16-regular] w-4 h-4" />}
+                  btnContent={
+                    <span class="shrink-0 icon-[fluent--emoji-add-16-regular] w-4 h-4 opacity-60 hover:opacity-100 transition-opacity" />
+                  }
                   popContentClass="card z-50 p-3"
                   ref={reactTrigger}
                   onOpenChange={(detail) => {
@@ -178,34 +194,18 @@ export function ChatBlock(props: {
                 </Popover>
               </Show>
               <Show when={props.onReply}>
-                <Button
-                  square
-                  ghost
-                  size="sm"
+                <button
+                  type="button"
+                  class="inline-flex items-center justify-center cursor-pointer"
                   title={t("challenge.hammer.toolbar.reply")}
                   onClick={() => props.onReply?.()}
                 >
-                  <span class="shrink-0 icon-[fluent--arrow-reply-16-regular] w-4 h-4" />
-                </Button>
+                  <span class="shrink-0 icon-[fluent--arrow-reply-16-regular] w-4 h-4 opacity-60 hover:opacity-100 transition-opacity" />
+                </button>
               </Show>
             </div>
           </Show>
         </footer>
-        <Show when={(props.reactions?.length ?? 0) > 0}>
-          <div class="flex flex-row flex-wrap items-center gap-1 ps-0.5">
-            <For each={props.reactions}>
-              {(reaction) => (
-                <Tag
-                  level="layer-content"
-                  title={reaction.label}
-                  icon={<span class={clsx("w-4 h-4 shrink-0", reaction.icon)} />}
-                >
-                  <span>{reaction.label}</span>
-                </Tag>
-              )}
-            </For>
-          </div>
-        </Show>
       </div>
     </div>
   );
@@ -378,10 +378,17 @@ export default function (props: ChallengeWidgetProps) {
     const beforeId = minLoadedId();
     if (beforeId <= 0 || loadingOlder()) return;
     setLoadingOlder(true);
+    // keep the scroll anchor stable while older messages are prepended
+    const scroller = document.scrollingElement;
+    const prevHeight = scroller?.scrollHeight ?? 0;
+    const prevTop = scroller?.scrollTop ?? 0;
     try {
       const page = await getGamePlayerChatMessages(props.gameId, props.challengeId, {
         mode: "before",
         before_id: beforeId,
+      });
+      requestAnimationFrame(() => {
+        if (scroller) scroller.scrollTop = prevTop + (scroller.scrollHeight - prevHeight);
       });
       setHasMoreHistory(page.has_more);
       if (page.items.length > 0) {
@@ -406,24 +413,38 @@ export default function (props: ChallengeWidgetProps) {
   // standalone chat blocks; replies keep their own message with a quote
   const referenceCache = new Map<
     number,
-    { kind: "reply" | "reaction"; message: Chat; rest: string; moji?: string } | null
+    { kind: "reply" | "reaction" | "dropped"; message?: Chat; rest?: string; moji?: string } | null
   >();
 
-  function classify(message: Chat) {
+  function classify(
+    message: Chat
+  ): { kind: "reply" | "reaction" | "dropped"; message?: Chat; rest?: string; moji?: string } | null {
     if (message.id === 0) return null;
     if (referenceCache.has(message.id)) return referenceCache.get(message.id);
-    let result: { kind: "reply" | "reaction"; message: Chat; rest: string; moji?: string } | null = null;
+    let result: { kind: "reply" | "reaction" | "dropped"; message?: Chat; rest?: string; moji?: string } | null = null;
     const parsed = parseChatReference(message.content);
     if (parsed) {
       const resolved = resolveChatReference(chats, parsed.reference, parsed.rest);
-      if (resolved?.reaction) {
+      if (!resolved) {
+        // the reference target is not loaded (deep history) or gone: drop
+        // the message silently instead of leaking the raw @account#id text
+        result = { kind: "dropped" };
+      } else if (resolved.reaction) {
+        // reactions to a reaction follow the chain down to the original
+        // message, otherwise the tag would target a block that never renders
+        let target = resolved.message;
+        for (let depth = 0; depth < 8; depth += 1) {
+          const targetInfo = classify(target);
+          if (targetInfo?.kind !== "reaction" || !targetInfo.message) break;
+          target = targetInfo.message;
+        }
         result = {
           kind: "reaction",
-          message: resolved.message,
+          message: target,
           rest: parsed.rest,
           moji: singleMojiOf(parsed.rest)?.icon,
         };
-      } else if (resolved) {
+      } else {
         result = { kind: "reply", message: resolved.message, rest: parsed.rest };
       }
     }
@@ -441,7 +462,7 @@ export default function (props: ChallengeWidgetProps) {
     const targets = new Map<number, ChatReaction[]>();
     for (const message of chats) {
       const info = classify(message);
-      if (info?.kind !== "reaction" || !info.moji) continue;
+      if (info?.kind !== "reaction" || !info.moji || !info.message) continue;
       const list = targets.get(info.message.id) ?? [];
       list.push({ icon: info.moji, label: message.user_name || message.user_account || "?" });
       targets.set(info.message.id, list);
@@ -451,7 +472,7 @@ export default function (props: ChallengeWidgetProps) {
 
   function resolveReference(message: Chat) {
     const info = classify(message);
-    if (info?.kind !== "reply") return null;
+    if (info?.kind !== "reply" || !info.message || info.rest === undefined) return null;
     return { message: info.message, rest: info.rest };
   }
 
@@ -549,14 +570,8 @@ export default function (props: ChallengeWidgetProps) {
             />
           </Match>
         </Switch>
-        <Show when={hasMoreHistory()}>
-          <div class="flex justify-center py-2">
-            <Button size="sm" ghost onClick={loadOlder} loading={loadingOlder()} disabled={loadingOlder()}>
-              {t("general.actions.loadMore.title")}
-            </Button>
-          </div>
-        </Show>
-        <For each={chats.filter((m) => classify(m)?.kind !== "reaction")}>
+        <ChatHistorySentinel onLoad={loadOlder} hasMore={hasMoreHistory()} loading={loadingOlder()} />
+        <For each={chats.filter((m) => !classify(m) || classify(m)!.kind === "reply")}>
           {(chat, index) => (
             <ChatBlock
               messageId={chat.id}

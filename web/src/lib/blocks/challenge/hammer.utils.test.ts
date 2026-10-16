@@ -134,12 +134,22 @@ describe("chat references", () => {
 
   it("rejects malformed prefixes", () => {
     expect(parseChatReference("普通消息")).toBeNull();
-    expect(parseChatReference("@alice#10")).toBeNull(); // 前缀后必须有内容
     expect(parseChatReference("@alice#10无空格")).toBeNull();
     expect(parseChatReference("前置文本 @alice#10 你好")).toBeNull();
   });
 
-  it("resolves only when account and id match a player message", () => {
+  it("accepts a bare prefix (empty reply body sent as-is)", () => {
+    expect(parseChatReference("@alice#10")).toEqual({
+      reference: { account: "alice", messageId: 10 },
+      rest: "",
+    });
+    expect(parseChatReference("@alice#10 ")).toEqual({
+      reference: { account: "alice", messageId: 10 },
+      rest: "",
+    });
+  });
+
+  it("resolves when account and id match any session message, admin included", () => {
     expect(resolveChatReference(session, { account: "alice", messageId: 10 }, "你好")).toEqual({
       message: session[0],
       reaction: false,
@@ -148,8 +158,11 @@ describe("chat references", () => {
     expect(resolveChatReference(session, { account: "bob", messageId: 10 }, "你好")).toBeNull();
     // 消息不存在
     expect(resolveChatReference(session, { account: "alice", messageId: 99 }, "你好")).toBeNull();
-    // 管理员消息不可被引用
-    expect(resolveChatReference(session, { account: "admin", messageId: 11 }, "你好")).toBeNull();
+    // 管理员消息也可以被引用
+    expect(resolveChatReference(session, { account: "admin", messageId: 11 }, "你好")).toEqual({
+      message: session[1],
+      reaction: false,
+    });
   });
 
   it("classifies a single moji rest as a reaction", () => {

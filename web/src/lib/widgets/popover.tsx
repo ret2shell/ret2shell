@@ -8,6 +8,8 @@ export default function (
     children?: JSX.Element;
     btnContent?: JSX.Element;
     popContentClass?: string;
+    /** render the trigger as a bare icon holder without btn styles */
+    bare?: boolean;
   } & ButtonProps &
     ComponentProps<"button">
 ) {
@@ -20,6 +22,7 @@ export default function (
     "uppercase",
     "loading",
     "square",
+    "bare",
   ]);
   const [dialogRootProps, _2] = splitProps(_1, [
     "closeOnEscape",
@@ -59,18 +62,23 @@ export default function (
       <Popover.Trigger
         {...nativeProps}
         class={clsx(
-          "btn",
-          // btn-primary btn-info btn-success btn-warning btn-error
-          !!buttonProps.level && `btn-${buttonProps.level}`,
-          // btn-sm btn-md
-          `btn-${buttonProps.size || "md"}`,
-          buttonProps.ghost && !opened() && "btn-ghost",
-          buttonProps.bold && "btn-bold",
-          // justify-start justify-center justify-end
-          `justify-${buttonProps.justify || "center"}`,
-          buttonProps.uppercase && "uppercase",
-          nativeProps.disabled && "btn-disabled",
-          buttonProps.square && "btn-square",
+          buttonProps.bare
+            ? // bare icon holder: no btn chrome, only centering + pointer
+              "inline-flex items-center justify-center cursor-pointer"
+            : [
+                "btn",
+                // btn-primary btn-info btn-success btn-warning btn-error
+                !!buttonProps.level && `btn-${buttonProps.level}`,
+                // btn-sm btn-md
+                `btn-${buttonProps.size || "md"}`,
+                buttonProps.ghost && !opened() && "btn-ghost",
+                buttonProps.bold && "btn-bold",
+                // justify-start justify-center justify-end
+                `justify-${buttonProps.justify || "center"}`,
+                buttonProps.uppercase && "uppercase",
+                nativeProps.disabled && "btn-disabled",
+                buttonProps.square && "btn-square",
+              ],
           nativeProps.class,
           nativeProps.classList
         )}

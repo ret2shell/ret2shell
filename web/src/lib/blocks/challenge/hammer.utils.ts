@@ -59,27 +59,25 @@ export type ChatReference = {
  * start with the reference prefix shape.
  */
 export function parseChatReference(content: string): { reference: ChatReference; rest: string } | null {
-  const match = /^@([a-zA-Z0-9_-]+)#(\d+)[ \t]+([\s\S]+)$/.exec(content);
+  const match = /^@([a-zA-Z0-9_-]+)#(\d+)(?:[ \t]+([\s\S]*))?$/.exec(content.trim());
   if (!match) return null;
   return {
     reference: { account: match[1], messageId: Number.parseInt(match[2], 10) },
-    rest: match[3],
+    rest: match[3] ?? "",
   };
 }
 
 /**
  * Resolve the reference against the session's messages: it is only valid when
- * both the account and the message id match a player message in this session
- * (admin messages are not referenceable).
+ * both the account and the message id match a message in this session (from a
+ * player or an admin).
  */
 export function resolveChatReference(
   messages: Chat[],
   reference: ChatReference,
   rest: string
 ): { message: Chat; reaction: boolean } | null {
-  const target = messages.find(
-    (m) => m.id === reference.messageId && m.user_account === reference.account && !m.is_admin
-  );
+  const target = messages.find((m) => m.id === reference.messageId && m.user_account === reference.account);
   if (!target) return null;
   return { message: target, reaction: restIsSingleMoji(rest) };
 }
