@@ -55,7 +55,10 @@ export default function ChatList() {
     const existing = untrack(() => Array.from(sessions));
     // only the first page seeds the cursor; deeper pages advance it via loadMore
     if (existing.length === 0) setNextCursor(data.next_cursor);
-    setSessions(mergeSessions(existing, data.items));
+    // keyed reconcile so the 5s refetch only touches sessions that actually
+    // changed (last_message_id moves when a session gets a new message);
+    // a plain replacement would re-render every row on every poll
+    setSessions(reconcile(mergeSessions(existing, data.items), { key: "last_message_id" }));
   });
 
   async function loadMore() {
@@ -66,9 +69,12 @@ export default function ChatList() {
       const page = await getGameAdminChatSessions(gameId(), { cursor, limit: 15 });
       setNextCursor(page.next_cursor);
       setSessions(
-        mergeSessions(
-          untrack(() => Array.from(sessions)),
-          page.items
+        reconcile(
+          mergeSessions(
+            untrack(() => Array.from(sessions)),
+            page.items
+          ),
+          { key: "last_message_id" }
         )
       );
     } catch (error) {

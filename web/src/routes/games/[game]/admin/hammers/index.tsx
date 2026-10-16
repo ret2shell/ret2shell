@@ -209,9 +209,12 @@ export default function () {
       setHasMoreHistory(page.has_more);
       if (page.items.length > 0) {
         setChats(
-          mergeChatItems(
-            page.items,
-            untrack(() => Array.from(chats))
+          reconcile(
+            mergeChatItems(
+              page.items,
+              untrack(() => Array.from(chats))
+            ),
+            { key: "id" }
           )
         );
       }
@@ -251,10 +254,16 @@ export default function () {
         if (page.items.length === 0) break;
         const lastId = page.items[page.items.length - 1].id;
         if (lastId > cursor) cursor = lastId;
+        // reconcile keeps the keyed diff fine-grained: the sync context
+        // re-delivers the newest ~16 rows as fresh objects every poll, and a
+        // plain store replacement would tear down and rebuild those rows
         setChats(
-          mergeChatItems(
-            untrack(() => Array.from(chats)),
-            page.items
+          reconcile(
+            mergeChatItems(
+              untrack(() => Array.from(chats)),
+              page.items
+            ),
+            { key: "id" }
           )
         );
         if (!page.has_more) break;
