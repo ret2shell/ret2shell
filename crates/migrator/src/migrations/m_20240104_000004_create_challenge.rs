@@ -29,6 +29,8 @@ pub enum Challenge {
   Prerequisites,
   Avatar,
   UnlockLimit,
+  LayoutCol,
+  LayoutRow,
 }
 
 #[async_trait::async_trait]

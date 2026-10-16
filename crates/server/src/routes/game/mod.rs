@@ -21,6 +21,7 @@ mod challenge;
 mod chat;
 mod core;
 pub(crate) mod hook;
+mod layout;
 pub(crate) mod lifecycle;
 mod milestone;
 mod notification;
@@ -111,6 +112,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
             .route("/", get(statistics::get_game_statistics))
             .route("/export", get(statistics::export_statistics)),
         )
+        .route("/layout", patch(layout::update_game_layout))
         .route("/", patch(core::update_game).delete(core::delete_game))
         .route_layer(middleware::from_fn(auth::game_admin_required))
         .route("/solve", get(participant::get_self_solves))

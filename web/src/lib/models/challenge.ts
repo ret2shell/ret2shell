@@ -16,6 +16,10 @@ export type Challenge = {
   prerequisites: number[];
   unlock_limit: number;
   avatar: string | null;
+  /// Manual position on the milestone graph in logical grid units;
+  /// `null` means the automatic layout owns this node.
+  layout_col: number | null;
+  layout_row: number | null;
 };
 
 export type ChallengeImage = {

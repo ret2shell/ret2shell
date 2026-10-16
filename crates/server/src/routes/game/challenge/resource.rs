@@ -168,6 +168,10 @@ pub(super) async fn update_challenge(
     &txn,
     challenge::Model {
       hidden: prev_challenge.hidden,
+      // the graph layout belongs to `PATCH /game/{game}/layout`; a full
+      // challenge update must never silently drop a hand-placed position
+      layout_col: prev_challenge.layout_col,
+      layout_row: prev_challenge.layout_row,
       ..challenge
     },
   )
