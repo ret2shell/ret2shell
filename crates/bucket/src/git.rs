@@ -356,12 +356,17 @@ impl Git {
       warn!(?path, "git repository does not exist");
       return Err(BucketError::PathDoesNotExist(path.display().to_string()));
     }
-    // A repository always exposes a `.git` entry (directory for normal
-    // checkouts, file for worktrees), so a filesystem lookup is enough to
-    // detect it. Avoid shelling out to `git describe` here: this runs on
-    // every bucket open, including every read-only request, and spawning a
-    // subprocess per request exhausts the file descriptor limit under load.
-    if !path.join(".git").exists() {
+    // Validate the repository with cheap filesystem lookups instead of
+    // shelling out to `git`: this runs on every bucket open, including every
+    // read-only request, and spawning a subprocess per request exhausts the
+    // file descriptor limit under load. Buckets are always regular
+    // repositories created by `git init`, so the core layout under `.git` is
+    // enough; worktree `gitdir` indirection is not supported.
+    let git_dir = path.join(".git");
+    if !git_dir.join("HEAD").exists()
+      || !git_dir.join("objects").exists()
+      || !git_dir.join("refs").exists()
+    {
       warn!(?path, "path is not a git repository");
       return Err(BucketError::GitCommandFailed(format!(
         "{} is not a git repository",
@@ -1256,5 +1261,16 @@ mod tests {
     assert!(matches!(result, Err(BucketError::GitCommandFailed(_))));
 
     fs::remove_dir_all(dir).expect("remove plain directory");
+  }
+
+  #[tokio::test]
+  async fn try_open_rejects_an_incomplete_git_directory() {
+    let dir = temp_repo_path("git-incomplete");
+    fs::create_dir_all(dir.join(".git")).expect("create bare .git directory");
+
+    let result = Git::try_open(&dir).await;
+    assert!(matches!(result, Err(BucketError::GitCommandFailed(_))));
+
+    fs::remove_dir_all(dir).expect("remove incomplete repository");
   }
 }
