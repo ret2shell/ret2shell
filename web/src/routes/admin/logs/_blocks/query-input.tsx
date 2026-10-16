@@ -42,6 +42,21 @@ export default function LogQueryInput(props: {
   // colored segments rendered behind the transparent-text input
   const segments = createMemo(() => highlight(props.value, diagnostics()));
 
+  // full-source parts: colored segments interleaved with plain gaps so
+  // uncolored words and spaces keep their exact width in the overlay
+  const parts = createMemo(() => {
+    const value = props.value;
+    const result: { start: number; end: number; cls: string }[] = [];
+    let pos = 0;
+    for (const seg of segments()) {
+      if (seg.start > pos) result.push({ start: pos, end: seg.start, cls: "" });
+      result.push(seg);
+      pos = seg.end;
+    }
+    if (pos < value.length) result.push({ start: pos, end: value.length, cls: "" });
+    return result;
+  });
+
   const mode = createMemo<Mode>(() => {
     const value = props.value;
     if (!value.trim()) return { type: "presets" };
@@ -211,11 +226,11 @@ export default function LogQueryInput(props: {
         <div class="relative min-w-0 flex-1 h-8">
           <div
             aria-hidden="true"
-            class="pointer-events-none absolute inset-0 flex flex-row items-center overflow-hidden font-mono text-sm px-2"
+            class="pointer-events-none absolute inset-0 flex flex-row items-center overflow-hidden font-mono px-2"
           >
             <span class="whitespace-pre" style={{ transform: `translateX(${-scrollLeft()}px)` }}>
-              <For each={segments()}>
-                {(seg) => <span class={seg.cls}>{props.value.slice(seg.start, seg.end)}</span>}
+              <For each={parts()}>
+                {(part) => <span class={part.cls}>{props.value.slice(part.start, part.end)}</span>}
               </For>
               {/* keep the caret visible when text reaches the right edge */}
               &nbsp;
