@@ -77,7 +77,16 @@ export function ChatBlock(props: {
           when={jumboMoji()}
           fallback={<Article class="max-w-full!" content={props.content} noExtraPaddings compact extra />}
         >
-          {(moji) => <span class={clsx("w-16 h-16 block", moji().icon)} />}
+          {(moji) => (
+            <span
+              class={clsx(
+                // four times the area of an inline moji (2x per side), capped at
+                // 60% of the smaller viewport dimension
+                "w-[min(8rem,60vmin)] h-[min(8rem,60vmin)] block",
+                moji().icon
+              )}
+            />
+          )}
         </Show>
         <footer class="text-xs flex items-center space-x-2">
           <span class="opacity-30 group-hover:opacity-80 transition-opacity duration-300">
