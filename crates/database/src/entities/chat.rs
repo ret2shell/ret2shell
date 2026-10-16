@@ -44,6 +44,8 @@ pub struct ExModel {
 pub struct SessionModel {
   pub challenge_id: i64,
   pub challenge_name: String,
+  pub challenge_avatar: Option<String>,
+  pub challenge_tag: super::challenge::TagList,
   pub team_id: i64,
   pub team_name: String,
   pub game_id: i64,
@@ -162,6 +164,8 @@ where
     .join(JoinType::InnerJoin, Relation::Team.def())
     .join(JoinType::InnerJoin, Relation::Game.def())
     .column_as(super::challenge::Column::Name, "challenge_name")
+    .column_as(super::challenge::Column::Avatar, "challenge_avatar")
+    .column_as(super::challenge::Column::Tag, "challenge_tag")
     .column_as(super::team::Column::Name, "team_name")
     .column_as(super::game::Column::Name, "game_name")
     .column_as(Column::Id, "last_message_id")

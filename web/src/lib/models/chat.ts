@@ -20,6 +20,8 @@ export type Chat = {
 export type ChatSession = {
   challenge_id: number;
   challenge_name: string;
+  challenge_avatar?: string | null;
+  challenge_tag?: { name: string; primary: boolean }[];
   team_id: number;
   team_name: string;
   game_id: number;

@@ -47,11 +47,22 @@ where
     return Ok(());
   }
   debug!(src=?original.as_ref(), "generating thumbnail");
-  let img = image::open(&original)?;
+  // stored media files are named by content hash without an extension, so
+  // the format must be sniffed from the stream instead of the file name and
+  // the destination parent (thumbnails/<xx>/<xxxx>) must be created first
+  let reader = std::io::BufReader::new(std::fs::File::open(&original)?);
+  let img_reader = image::ImageReader::new(reader).with_guessed_format()?;
+  let format = img_reader
+    .format()
+    .ok_or_else(|| MediaError::UnsupportedFileType("unknown image format".to_owned()))?;
+  let img = img_reader.decode().map_err(MediaError::ImageError)?;
+  if let Some(parent) = dest.as_ref().parent() {
+    tokio::fs::create_dir_all(parent).await?;
+  }
 
   match img
     .resize(longest_edge, longest_edge, FilterType::Nearest)
-    .save(&dest)
+    .save_with_format(&dest, format)
   {
     Err(err) => {
       warn!(error=?err, "failed to resize image to thumbnail");
@@ -164,5 +175,44 @@ mod tests {
 
     fs::remove_file(original).ok();
     fs::remove_file(dest).ok();
+  }
+}
+
+#[cfg(test)]
+mod hash_path_tests {
+  use std::{
+    fs,
+    time::{SystemTime, UNIX_EPOCH},
+  };
+
+  use image::{Rgba, RgbaImage};
+
+  use super::make_thumbnail;
+
+  #[tokio::test]
+  async fn make_thumbnail_sniffs_extensionless_hash_paths() {
+    let unique = SystemTime::now()
+      .duration_since(UNIX_EPOCH)
+      .unwrap()
+      .as_nanos();
+    let dir = std::env::temp_dir().join(format!("ret2shell-hashpath-{unique}"));
+    fs::create_dir_all(&dir).unwrap();
+    let original = dir.join("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef");
+    let dest = dir
+      .join("thumbnails")
+      .join("01")
+      .join("23")
+      .join(original.file_name().unwrap());
+
+    let staged = dir.join("staged.png");
+    RgbaImage::from_pixel(8, 4, Rgba([255, 0, 0, 255]))
+      .save(&staged)
+      .unwrap();
+    fs::rename(&staged, &original).unwrap();
+
+    let result = make_thumbnail(&original, &dest, 4).await;
+    assert!(result.is_ok(), "extensionless path failed: {result:?}");
+
+    fs::remove_dir_all(&dir).ok();
   }
 }

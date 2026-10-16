@@ -1,10 +1,12 @@
 import { getGameAdminChatSessions, useGameAdminChatSessions } from "@api/game";
+import { mediaPath } from "@lib/utils/media";
 import type { ChatSession } from "@models/chat";
 import { useParams, useSearchParams } from "@solidjs/router";
 import { fullTheme, t } from "@storage/theme";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
 import Link from "@widgets/link";
+import Tag from "@widgets/tag";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { createEffect, createMemo, createSignal, For, onCleanup, Show, untrack } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
@@ -127,7 +129,11 @@ export default function ChatList() {
                   class="flex-row items-center h-auto py-2 px-3! fade-group-right"
                 >
                   <div class="w-8 h-8 aspect-square shrink-0 relative">
-                    <Avatar class="w-full h-full" src={undefined} fallback={session.team_name} />
+                    <Avatar
+                      class="w-full h-full"
+                      src={session.challenge_avatar ? mediaPath(session.challenge_avatar) : undefined}
+                      fallback={session.challenge_name}
+                    />
                     <div class="absolute -right-1 -bottom-1 w-2 h-2">
                       <Show when={!session.checked && !session.is_admin}>
                         <div class="bg-error rounded-full w-2 h-2" title={t("game.hammer.status.adminUnread.title")} />
@@ -143,6 +149,13 @@ export default function ChatList() {
                   <div class="flex-col flex-1">
                     <div class="flex flex-row space-x-2 items-center">
                       <span class="flex-1 truncate font-bold text-start w-0">{session.team_name}</span>
+                      <Tag
+                        size="sm"
+                        level={session.challenge_tag?.some((tag) => tag.primary) ? "success" : "info"}
+                        class="shrink-0 max-w-40"
+                      >
+                        <span class="truncate min-w-0">{session.challenge_name}</span>
+                      </Tag>
                     </div>
                     <div class="flex flex-row space-x-2 items-center overflow-hidden">
                       <span class="flex-1 w-0 truncate opacity-60 text-start font-normal text-xs">
