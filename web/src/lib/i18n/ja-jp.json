@@ -1131,7 +1131,9 @@
         "insertMoji": "絵文字を挿入",
         "notImage": "画像ファイルのみアップロードできます",
         "uploaded": "画像をアップロードしました",
-        "uploadFailed": "画像のアップロードに失敗しました"
+        "uploadFailed": "画像のアップロードに失敗しました",
+        "react": "絵文字でリアクション",
+        "reply": "返信"
       }
     },
     "submission": {

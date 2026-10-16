@@ -1,3 +1,4 @@
+import { Popover as ArkPopover } from "@ark-ui/solid";
 import { MOJI_CATEGORIES } from "@lib/moji";
 import { t } from "@storage/theme";
 import clsx from "clsx";
@@ -36,14 +37,22 @@ export default function MojiPicker(props: { onPick: (code: string) => void }) {
         <div class="grid grid-cols-8 gap-1 p-1">
           <For each={activeCategory().items}>
             {(item) => (
-              <button
-                type="button"
-                class="flex items-center justify-center w-8 h-8 rounded-md hover:bg-layer-content/10 active:bg-layer-content/20 transition-colors"
-                title={`:${item.code}:`}
-                onClick={() => props.onPick(item.code)}
-              >
-                <span class={clsx("w-6 h-6", item.icon)} />
-              </button>
+              <ArkPopover.CloseTrigger
+                asChild={(childProps) => (
+                  <button
+                    {...childProps}
+                    type="button"
+                    class="flex items-center justify-center w-8 h-8 rounded-md hover:bg-layer-content/10 active:bg-layer-content/20 transition-colors"
+                    title={`:${item.code}:`}
+                    onClick={(e) => {
+                      childProps.onClick?.(e);
+                      props.onPick(item.code);
+                    }}
+                  >
+                    <span class={clsx("w-6 h-6", item.icon)} />
+                  </button>
+                )}
+              />
             )}
           </For>
           <Show when={activeCategory().items.length === 0}>

@@ -51,6 +51,9 @@ export default function (
       autoFocus={false}
       onOpenChange={(detail) => {
         setOpened(detail.open);
+        // dialogRootProps is spread above, but this handler overrides it —
+        // forward to the caller's onOpenChange so controlled usage works
+        dialogRootProps.onOpenChange?.(detail);
       }}
     >
       <Popover.Trigger

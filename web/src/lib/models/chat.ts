@@ -6,6 +6,7 @@ export type Chat = {
   content: string;
   user_id: number;
   user_name?: string;
+  user_account?: string;
   avatar?: string;
   team_id: number;
   team_name?: string;

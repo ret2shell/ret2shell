@@ -14,8 +14,8 @@ import { createSignal } from "solid-js";
  */
 export default function ChatToolbarActions(props: { onInsert: (text: string) => void }) {
   const [uploading, setUploading] = createSignal(false);
-  const [pickerOpen, setPickerOpen] = createSignal(false);
   let fileInput: HTMLInputElement | undefined;
+  let emojiTrigger: HTMLButtonElement | undefined;
 
   async function onFileChosen(e: Event) {
     const input = e.currentTarget as HTMLInputElement;
@@ -60,22 +60,24 @@ export default function ChatToolbarActions(props: { onInsert: (text: string) => 
       >
         <span class="shrink-0 icon-[fluent--image-20-regular] w-5 h-5" />
       </Button>
+      {/* uncontrolled popover: picking an item closes it through the
+          CloseTrigger inside the picker grid */}
       <Popover
-        open={pickerOpen()}
-        onOpenChange={(detail) => setPickerOpen(detail.open)}
         positioning={{ placement: "top" }}
+        ghost
         square
         size="sm"
         title={t("challenge.hammer.toolbar.insertMoji")}
         btnContent={<span class="shrink-0 icon-[fluent--emoji-20-regular] w-5 h-5" />}
-        popContentClass="card z-50"
+        popContentClass="card z-50 p-3"
+        ref={emojiTrigger}
+        onOpenChange={(detail) => {
+          // the trigger keeps focus after close, leaving the ghost button
+          // highlighted — clear it so the toolbar settles back to flat
+          if (!detail.open) emojiTrigger?.blur();
+        }}
       >
-        <MojiPicker
-          onPick={(code) => {
-            props.onInsert(`:${code}:`);
-            setPickerOpen(false);
-          }}
-        />
+        <MojiPicker onPick={(code) => props.onInsert(`:${code}:`)} />
       </Popover>
     </>
   );

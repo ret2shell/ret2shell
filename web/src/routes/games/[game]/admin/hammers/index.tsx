@@ -9,7 +9,7 @@ import { useTeamInfo, useTeamSolves } from "@api/team";
 // import xdsecMascotCiallo from "@assets/imgs/xdsec-mascot-ciallo.webp";
 import platformAvatar from "@assets/imgs/rx.webp";
 import { ChatBlock } from "@blocks/challenge/hammer";
-import { mergeChatItems, mergeChats } from "@blocks/challenge/hammer.utils";
+import { mergeChatItems, mergeChats, parseChatReference, resolveChatReference } from "@blocks/challenge/hammer.utils";
 import ChatToolbarActions from "@blocks/challenge/hammer-toolbar";
 // import { stickerSet } from "@assets/stickers";
 import { mediaPath } from "@lib/utils/media";
@@ -81,6 +81,32 @@ export default function () {
       content: chat(),
     });
   }
+  // resolve the @account#id reference of a message against the loaded session
+  function resolveReference(message: Chat) {
+    if (message.id === 0) return null;
+    const parsed = parseChatReference(message.content);
+    if (!parsed) return null;
+    const resolved = resolveChatReference(chats, parsed.reference, parsed.rest);
+    if (!resolved) return null;
+    return { ...resolved, rest: parsed.rest };
+  }
+
+  function reactTo(message: Chat, code: string) {
+    const currentChallengeId = challengeId();
+    const currentTeamId = teamId();
+    if (!currentChallengeId || !currentTeamId) return;
+    sendMutation.mutate({
+      game_id: gameId(),
+      challenge_id: currentChallengeId,
+      team_id: currentTeamId,
+      content: `@${message.user_account}#${message.id} :${code}:`,
+    });
+  }
+
+  function replyTo(message: Chat) {
+    setChat(`@${message.user_account}#${message.id} ${chat()}`);
+  }
+
   let chatBottomEl: HTMLDivElement | undefined;
 
   const [hasMoreHistory, setHasMoreHistory] = createSignal(false);
@@ -360,6 +386,9 @@ export default function () {
                       content={chat.content}
                       sendAt={chat.created_at}
                       isChecked={chat.checked || chat.id <= checkedThroughId()}
+                      reference={resolveReference(chat)}
+                      onReact={chat.id === 0 ? undefined : (code) => reactTo(chat, code)}
+                      onReply={chat.id === 0 ? undefined : () => replyTo(chat)}
                     />
                   )}
                 </For>

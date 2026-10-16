@@ -30,6 +30,7 @@ pub struct ExModel {
   pub content: String,
   pub user_id: i64,
   pub user_name: String,
+  pub user_account: String,
   pub avatar: Option<String>,
   pub team_id: i64,
   pub team_name: String,
@@ -205,6 +206,7 @@ where
     .column_as(super::challenge::Column::Name, "challenge_name")
     .column_as(super::team::Column::Name, "team_name")
     .column_as(super::user::Column::Nickname, "user_name")
+    .column_as(super::user::Column::Account, "user_account")
     .column_as(super::user::Column::Avatar, "avatar")
     .filter(Column::TeamId.eq(team_id))
     .filter(Column::ChallengeId.eq(challenge_id));
@@ -280,6 +282,7 @@ where
     .column_as(super::challenge::Column::Name, "challenge_name")
     .column_as(super::team::Column::Name, "team_name")
     .column_as(super::user::Column::Nickname, "user_name")
+    .column_as(super::user::Column::Account, "user_account")
     .column_as(super::user::Column::Avatar, "avatar")
     .filter(Column::TeamId.eq(team_id))
     .filter(Column::ChallengeId.eq(challenge_id));

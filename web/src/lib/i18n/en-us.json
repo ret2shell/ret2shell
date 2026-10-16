@@ -1131,7 +1131,9 @@
         "insertMoji": "Insert moji",
         "notImage": "Only image files can be uploaded",
         "uploaded": "Image uploaded",
-        "uploadFailed": "Failed to upload image"
+        "uploadFailed": "Failed to upload image",
+        "react": "React with moji",
+        "reply": "Reply"
       }
     },
     "submission": {

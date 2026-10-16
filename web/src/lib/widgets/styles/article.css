@@ -134,6 +134,42 @@ article.article pre > code {
   @apply inline-block w-[1.25em]! h-[1.25em]! align-[-0.25em] shrink-0;
 }
 
+/* discord-style jumbo emoji: 1.2x zoom on hover with a damped spring swing
+   that fades out like a settling pendulum */
+.jumbo-moji {
+  transform-origin: 50% 85%;
+  transition: scale 0.3s ease-out;
+
+  &:hover {
+    scale: 1.2;
+    animation: jumbo-moji-swing 1.1s ease-out;
+  }
+}
+
+@keyframes jumbo-moji-swing {
+  0% {
+    rotate: 0deg;
+  }
+  18% {
+    rotate: 14deg;
+  }
+  36% {
+    rotate: -11deg;
+  }
+  54% {
+    rotate: 7.5deg;
+  }
+  72% {
+    rotate: -4deg;
+  }
+  88% {
+    rotate: 1.5deg;
+  }
+  100% {
+    rotate: 0deg;
+  }
+}
+
 code:not(pre code) {
   @apply text-[1em]! break-words! bg-layer-content/10! rounded-xs mx-1! px-1! font-normal!;
 }

@@ -7,7 +7,7 @@ vi.mock("@storage/theme", () => ({
   t: (key: string) => key,
 }));
 
-import { mergeChatItems, mergeChats } from "./hammer.utils";
+import { mergeChatItems, mergeChats, parseChatReference, resolveChatReference } from "./hammer.utils";
 
 function createChat(overrides: Partial<Chat> = {}): Chat {
   return {
@@ -112,5 +112,51 @@ describe("mergeChats", () => {
     expect(current[0]).toBe(firstChat);
     expect(current[0]).toMatchObject({ id: 1, checked: true });
     expect(current[1]).toMatchObject({ id: 2, content: "next" });
+  });
+});
+
+describe("chat references", () => {
+  const session = [
+    createChat({ id: 10, user_account: "alice", user_id: 2, content: "被引用的消息" }),
+    createChat({ id: 11, user_account: "admin", user_id: 1, content: "管理员的回复", is_admin: true }),
+  ];
+
+  it("parses the @account#id prefix", () => {
+    expect(parseChatReference("@alice#10 你好")).toEqual({
+      reference: { account: "alice", messageId: 10 },
+      rest: "你好",
+    });
+    expect(parseChatReference("@alice#10 :fire:")).toEqual({
+      reference: { account: "alice", messageId: 10 },
+      rest: ":fire:",
+    });
+  });
+
+  it("rejects malformed prefixes", () => {
+    expect(parseChatReference("普通消息")).toBeNull();
+    expect(parseChatReference("@alice#10")).toBeNull(); // 前缀后必须有内容
+    expect(parseChatReference("@alice#10无空格")).toBeNull();
+    expect(parseChatReference("前置文本 @alice#10 你好")).toBeNull();
+  });
+
+  it("resolves only when account and id match a player message", () => {
+    expect(resolveChatReference(session, { account: "alice", messageId: 10 }, "你好")).toEqual({
+      message: session[0],
+      reaction: false,
+    });
+    // 账号不匹配
+    expect(resolveChatReference(session, { account: "bob", messageId: 10 }, "你好")).toBeNull();
+    // 消息不存在
+    expect(resolveChatReference(session, { account: "alice", messageId: 99 }, "你好")).toBeNull();
+    // 管理员消息不可被引用
+    expect(resolveChatReference(session, { account: "admin", messageId: 11 }, "你好")).toBeNull();
+  });
+
+  it("classifies a single moji rest as a reaction", () => {
+    expect(resolveChatReference(session, { account: "alice", messageId: 10 }, "你好")?.reaction).toBe(false);
+    const parsed = parseChatReference("@alice#10 :fire:");
+    expect(resolveChatReference(session, parsed!.reference, parsed!.rest)?.reaction).toBe(true);
+    const reply = parseChatReference("@alice#10 :fire: 还有文字");
+    expect(resolveChatReference(session, reply!.reference, reply!.rest)?.reaction).toBe(false);
   });
 });

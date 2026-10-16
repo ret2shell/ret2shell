@@ -1131,7 +1131,9 @@
         "insertMoji": "插入表情",
         "notImage": "只能上传图片文件",
         "uploaded": "图片已上传",
-        "uploadFailed": "图片上传失败"
+        "uploadFailed": "图片上传失败",
+        "react": "添加表情回应",
+        "reply": "回复"
       }
     },
     "submission": {

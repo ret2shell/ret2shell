@@ -8,6 +8,7 @@ import {
 import { useSelfTeam } from "@api/team";
 import platformAvatar from "@assets/imgs/rx.webp";
 import { singleMojiOf } from "@lib/moji";
+import MojiPicker from "@lib/moji/picker";
 import { mediaPath } from "@lib/utils/media";
 import type { Chat } from "@models/chat";
 import { createBreakpoints } from "@solid-primitives/media";
@@ -19,6 +20,7 @@ import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
 import { EditorBare } from "@widgets/editor";
 import Link from "@widgets/link";
+import Popover from "@widgets/popover";
 import clsx from "clsx";
 import { DateTime } from "luxon";
 import {
@@ -35,7 +37,7 @@ import {
 } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import type { ChallengeWidgetProps } from ".";
-import { mergeChatItems, mergeChats } from "./hammer.utils";
+import { mergeChatItems, mergeChats, parseChatReference, resolveChatReference } from "./hammer.utils";
 import ChatToolbarActions from "./hammer-toolbar";
 
 // kept in sync with CHAT_REPLY_MESSAGE_LIMIT on the server; only used as the
@@ -52,10 +54,18 @@ export function ChatBlock(props: {
   content: string;
   sendAt: DateTime;
   isChecked?: boolean;
+  /** resolved reply/reaction reference, if the message carries a valid one */
+  reference?: { message: Chat; reaction: boolean; rest: string } | null;
+  /** called with a moji code when the reader reacts to this message */
+  onReact?: (code: string) => void;
+  /** called when the reader starts a reply to this message */
+  onReply?: () => void;
 }) {
   const matches = createBreakpoints(breakpoints);
   // a message that is exactly one :moji: renders as a single enlarged emoji
-  const jumboMoji = createMemo(() => singleMojiOf(props.content));
+  const jumboMoji = createMemo(() => singleMojiOf(props.reference ? props.reference.rest : props.content));
+  let reactTrigger: HTMLButtonElement | undefined;
+  const preview = (content: string) => content.replace(/\s+/g, " ").trim().slice(0, 48) || "…";
   return (
     <div class={clsx("self-start flex-row flex items-center", matches.lg ? "w-[calc(100%-4rem)]" : "w-full")}>
       <Show when={props.showAvatar} fallback={<div class="w-10 h-10 shrink-0 self-start" />}>
@@ -73,16 +83,39 @@ export function ChatBlock(props: {
             </A>
           </header>
         </Show>
+        <Show when={props.reference}>
+          {(ref) => (
+            <div class="flex flex-row items-center space-x-1 text-xs opacity-70 border-s-2 border-s-layer-content/30 ps-2">
+              <span
+                class={clsx(
+                  "shrink-0 w-4 h-4",
+                  ref().reaction ? "icon-[fluent--emoji-add-16-regular]" : "icon-[fluent--arrow-reply-16-regular]"
+                )}
+              />
+              <span class="truncate">
+                @{ref().message.user_account}: {preview(ref().message.content)}
+              </span>
+            </div>
+          )}
+        </Show>
         <Show
           when={jumboMoji()}
-          fallback={<Article class="max-w-full!" content={props.content} noExtraPaddings compact extra />}
+          fallback={
+            <Article
+              class="max-w-full!"
+              content={props.reference ? props.reference.rest : props.content}
+              noExtraPaddings
+              compact
+              extra
+            />
+          }
         >
           {(moji) => (
             <span
               class={clsx(
                 // four times the area of an inline moji (2x per side), capped at
                 // 60% of the smaller viewport dimension
-                "w-[min(8rem,60vmin)] h-[min(8rem,60vmin)] block",
+                "jumbo-moji w-[min(8rem,60vmin)] h-[min(8rem,60vmin)] block",
                 moji().icon
               )}
             />
@@ -97,6 +130,45 @@ export function ChatBlock(props: {
             fallback={<span class="shrink-0 icon-[fluent--circle-16-regular] w-4 h-4 text-gray-500" />}
           >
             <span class="shrink-0 icon-[fluent--checkmark-16-regular] w-4 h-4 text-success" />
+          </Show>
+          <Show when={props.onReact || props.onReply}>
+            <div class="flex-1" />
+            <div class="flex flex-row items-center space-x-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200">
+              <Show when={props.onReact}>
+                <Popover
+                  positioning={{ placement: "top" }}
+                  lazyMount
+                  unmountOnExit
+                  ghost
+                  square
+                  size="sm"
+                  title={t("challenge.hammer.toolbar.react")}
+                  btnContent={<span class="shrink-0 icon-[fluent--emoji-add-16-regular] w-4 h-4" />}
+                  popContentClass="card z-50 p-3"
+                  ref={reactTrigger}
+                  onOpenChange={(detail) => {
+                    if (!detail.open) reactTrigger?.blur();
+                  }}
+                >
+                  <MojiPicker
+                    onPick={(code) => {
+                      props.onReact?.(code);
+                    }}
+                  />
+                </Popover>
+              </Show>
+              <Show when={props.onReply}>
+                <Button
+                  square
+                  ghost
+                  size="sm"
+                  title={t("challenge.hammer.toolbar.reply")}
+                  onClick={() => props.onReply?.()}
+                >
+                  <span class="shrink-0 icon-[fluent--arrow-reply-16-regular] w-4 h-4" />
+                </Button>
+              </Show>
+            </div>
           </Show>
         </footer>
       </div>
@@ -295,6 +367,28 @@ export default function (props: ChallengeWidgetProps) {
     }
   }
 
+  // resolve the @account#id reference of a message against the loaded session
+  function resolveReference(message: Chat) {
+    if (message.id === 0) return null;
+    const parsed = parseChatReference(message.content);
+    if (!parsed) return null;
+    const resolved = resolveChatReference(chats, parsed.reference, parsed.rest);
+    if (!resolved) return null;
+    return { ...resolved, rest: parsed.rest };
+  }
+
+  function reactTo(message: Chat, code: string) {
+    sendMutation.mutate({
+      game_id: props.gameId,
+      challenge_id: props.challengeId,
+      content: `@${message.user_account}#${message.id} :${code}:`,
+    });
+  }
+
+  function replyTo(message: Chat) {
+    setChat(`@${message.user_account}#${message.id} ${chat()}`);
+  }
+
   let chatBottomEl: HTMLDivElement;
 
   // the server is authoritative for the send quota; fall back to the cap
@@ -402,6 +496,9 @@ export default function (props: ChallengeWidgetProps) {
               content={chat.content}
               sendAt={chat.created_at}
               isChecked={chat.checked || chat.id <= checkedThroughId()}
+              reference={resolveReference(chat)}
+              onReact={chat.id === 0 ? undefined : (code) => reactTo(chat, code)}
+              onReply={chat.id === 0 ? undefined : () => replyTo(chat)}
             />
           )}
         </For>
