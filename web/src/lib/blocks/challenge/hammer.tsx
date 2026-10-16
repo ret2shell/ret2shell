@@ -21,6 +21,7 @@ import Button from "@widgets/button";
 import { EditorBare } from "@widgets/editor";
 import Link from "@widgets/link";
 import Popover from "@widgets/popover";
+import Tag from "@widgets/tag";
 import clsx from "clsx";
 import { DateTime } from "luxon";
 import {
@@ -44,6 +45,13 @@ import ChatToolbarActions from "./hammer-toolbar";
 // quota fallback before the first authoritative `remaining` arrives
 const FREE_MESSAGE_LIMIT = 3;
 
+export type ChatReaction = {
+  /** icon class of the reaction emoji */
+  icon: string;
+  /** display name of the user who reacted */
+  label: string;
+};
+
 export function ChatBlock(props: {
   avatar?: string;
   showAvatar?: boolean;
@@ -54,8 +62,12 @@ export function ChatBlock(props: {
   content: string;
   sendAt: DateTime;
   isChecked?: boolean;
-  /** resolved reply/reaction reference, if the message carries a valid one */
-  reference?: { message: Chat; reaction: boolean; rest: string } | null;
+  /** id used as the DOM anchor for reply-jump scrolling */
+  messageId: number;
+  /** resolved reply reference, if the message carries a valid one */
+  reference?: { message: Chat; rest: string } | null;
+  /** reactions collected under this message */
+  reactions?: ChatReaction[];
   /** called with a moji code when the reader reacts to this message */
   onReact?: (code: string) => void;
   /** called when the reader starts a reply to this message */
@@ -65,9 +77,18 @@ export function ChatBlock(props: {
   // a message that is exactly one :moji: renders as a single enlarged emoji
   const jumboMoji = createMemo(() => singleMojiOf(props.reference ? props.reference.rest : props.content));
   let reactTrigger: HTMLButtonElement | undefined;
+
+  function jumpToReferenced() {
+    const target = props.reference?.message;
+    if (!target) return;
+    document.getElementById(`chat-message-${target.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
   const preview = (content: string) => content.replace(/\s+/g, " ").trim().slice(0, 48) || "…";
   return (
-    <div class={clsx("self-start flex-row flex items-center", matches.lg ? "w-[calc(100%-4rem)]" : "w-full")}>
+    <div
+      id={props.messageId > 0 ? `chat-message-${props.messageId}` : undefined}
+      class={clsx("self-start flex-row flex items-center", matches.lg ? "w-[calc(100%-4rem)]" : "w-full")}
+    >
       <Show when={props.showAvatar} fallback={<div class="w-10 h-10 shrink-0 self-start" />}>
         <A class="w-10 h-10 shrink-0 self-start mt-2" href={props.link}>
           <Avatar class="w-full h-full" src={props.avatar} fallback={props.nameLabel} />
@@ -85,17 +106,17 @@ export function ChatBlock(props: {
         </Show>
         <Show when={props.reference}>
           {(ref) => (
-            <div class="flex flex-row items-center space-x-1 text-xs opacity-70 border-s-2 border-s-layer-content/30 ps-2">
-              <span
-                class={clsx(
-                  "shrink-0 w-4 h-4",
-                  ref().reaction ? "icon-[fluent--emoji-add-16-regular]" : "icon-[fluent--arrow-reply-16-regular]"
-                )}
-              />
+            <button
+              type="button"
+              class="flex flex-row items-center space-x-1 text-xs opacity-70 border-s-2 border-s-layer-content/30 ps-2 hover:opacity-100 hover:border-s-primary transition-colors text-start"
+              title={t("challenge.hammer.jumpToReferenced")}
+              onClick={jumpToReferenced}
+            >
+              <span class="shrink-0 w-4 h-4 icon-[fluent--arrow-reply-16-regular]" />
               <span class="truncate">
                 @{ref().message.user_account}: {preview(ref().message.content)}
               </span>
-            </div>
+            </button>
           )}
         </Show>
         <Show
@@ -132,7 +153,6 @@ export function ChatBlock(props: {
             <span class="shrink-0 icon-[fluent--checkmark-16-regular] w-4 h-4 text-success" />
           </Show>
           <Show when={props.onReact || props.onReply}>
-            <div class="flex-1" />
             <div class="flex flex-row items-center space-x-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200">
               <Show when={props.onReact}>
                 <Popover
@@ -171,6 +191,21 @@ export function ChatBlock(props: {
             </div>
           </Show>
         </footer>
+        <Show when={(props.reactions?.length ?? 0) > 0}>
+          <div class="flex flex-row flex-wrap items-center gap-1 ps-0.5">
+            <For each={props.reactions}>
+              {(reaction) => (
+                <Tag
+                  level="layer-content"
+                  title={reaction.label}
+                  icon={<span class={clsx("w-4 h-4 shrink-0", reaction.icon)} />}
+                >
+                  <span>{reaction.label}</span>
+                </Tag>
+              )}
+            </For>
+          </div>
+        </Show>
       </div>
     </div>
   );
@@ -367,14 +402,57 @@ export default function (props: ChallengeWidgetProps) {
     }
   }
 
-  // resolve the @account#id reference of a message against the loaded session
-  function resolveReference(message: Chat) {
+  // reactions are rendered under their target message instead of as
+  // standalone chat blocks; replies keep their own message with a quote
+  const referenceCache = new Map<
+    number,
+    { kind: "reply" | "reaction"; message: Chat; rest: string; moji?: string } | null
+  >();
+
+  function classify(message: Chat) {
     if (message.id === 0) return null;
+    if (referenceCache.has(message.id)) return referenceCache.get(message.id);
+    let result: { kind: "reply" | "reaction"; message: Chat; rest: string; moji?: string } | null = null;
     const parsed = parseChatReference(message.content);
-    if (!parsed) return null;
-    const resolved = resolveChatReference(chats, parsed.reference, parsed.rest);
-    if (!resolved) return null;
-    return { ...resolved, rest: parsed.rest };
+    if (parsed) {
+      const resolved = resolveChatReference(chats, parsed.reference, parsed.rest);
+      if (resolved?.reaction) {
+        result = {
+          kind: "reaction",
+          message: resolved.message,
+          rest: parsed.rest,
+          moji: singleMojiOf(parsed.rest)?.icon,
+        };
+      } else if (resolved) {
+        result = { kind: "reply", message: resolved.message, rest: parsed.rest };
+      }
+    }
+    referenceCache.set(message.id, result);
+    return result;
+  }
+
+  createEffect(() => {
+    // invalidate the classification cache whenever the session content changes
+    chats;
+    referenceCache.clear();
+  });
+
+  const reactionTargets = createMemo(() => {
+    const targets = new Map<number, ChatReaction[]>();
+    for (const message of chats) {
+      const info = classify(message);
+      if (info?.kind !== "reaction" || !info.moji) continue;
+      const list = targets.get(info.message.id) ?? [];
+      list.push({ icon: info.moji, label: message.user_name || message.user_account || "?" });
+      targets.set(info.message.id, list);
+    }
+    return targets;
+  });
+
+  function resolveReference(message: Chat) {
+    const info = classify(message);
+    if (info?.kind !== "reply") return null;
+    return { message: info.message, rest: info.rest };
   }
 
   function reactTo(message: Chat, code: string) {
@@ -478,9 +556,11 @@ export default function (props: ChallengeWidgetProps) {
             </Button>
           </div>
         </Show>
-        <For each={chats}>
+        <For each={chats.filter((m) => classify(m)?.kind !== "reaction")}>
           {(chat, index) => (
             <ChatBlock
+              messageId={chat.id}
+              reactions={reactionTargets().get(chat.id)}
               avatar={chat.id === 0 ? platformAvatar : chat.avatar ? mediaPath(chat.avatar) : undefined}
               showAvatar={index() === 0 || chats.at(index() - 1)?.user_id !== chat.user_id}
               roleLabel={

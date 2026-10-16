@@ -1134,7 +1134,8 @@
         "uploadFailed": "Failed to upload image",
         "react": "React with moji",
         "reply": "Reply"
-      }
+      },
+      "jumpToReferenced": "Jump to the referenced message"
     },
     "submission": {
       "submit": "Submitted",

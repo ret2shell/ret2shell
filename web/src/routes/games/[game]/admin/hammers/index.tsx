@@ -8,9 +8,10 @@ import {
 import { useTeamInfo, useTeamSolves } from "@api/team";
 // import xdsecMascotCiallo from "@assets/imgs/xdsec-mascot-ciallo.webp";
 import platformAvatar from "@assets/imgs/rx.webp";
-import { ChatBlock } from "@blocks/challenge/hammer";
+import { ChatBlock, type ChatReaction } from "@blocks/challenge/hammer";
 import { mergeChatItems, mergeChats, parseChatReference, resolveChatReference } from "@blocks/challenge/hammer.utils";
 import ChatToolbarActions from "@blocks/challenge/hammer-toolbar";
+import { singleMojiOf } from "@lib/moji";
 // import { stickerSet } from "@assets/stickers";
 import { mediaPath } from "@lib/utils/media";
 import type { Chat } from "@models/chat";
@@ -81,14 +82,57 @@ export default function () {
       content: chat(),
     });
   }
-  // resolve the @account#id reference of a message against the loaded session
-  function resolveReference(message: Chat) {
+  // reactions are rendered under their target message instead of as
+  // standalone chat blocks; replies keep their own message with a quote
+  const referenceCache = new Map<
+    number,
+    { kind: "reply" | "reaction"; message: Chat; rest: string; moji?: string } | null
+  >();
+
+  function classify(message: Chat) {
     if (message.id === 0) return null;
+    if (referenceCache.has(message.id)) return referenceCache.get(message.id);
+    let result: { kind: "reply" | "reaction"; message: Chat; rest: string; moji?: string } | null = null;
     const parsed = parseChatReference(message.content);
-    if (!parsed) return null;
-    const resolved = resolveChatReference(chats, parsed.reference, parsed.rest);
-    if (!resolved) return null;
-    return { ...resolved, rest: parsed.rest };
+    if (parsed) {
+      const resolved = resolveChatReference(chats, parsed.reference, parsed.rest);
+      if (resolved?.reaction) {
+        result = {
+          kind: "reaction",
+          message: resolved.message,
+          rest: parsed.rest,
+          moji: singleMojiOf(parsed.rest)?.icon,
+        };
+      } else if (resolved) {
+        result = { kind: "reply", message: resolved.message, rest: parsed.rest };
+      }
+    }
+    referenceCache.set(message.id, result);
+    return result;
+  }
+
+  createEffect(() => {
+    // invalidate the classification cache whenever the session content changes
+    chats;
+    referenceCache.clear();
+  });
+
+  const reactionTargets = createMemo(() => {
+    const targets = new Map<number, ChatReaction[]>();
+    for (const message of chats) {
+      const info = classify(message);
+      if (info?.kind !== "reaction" || !info.moji) continue;
+      const list = targets.get(info.message.id) ?? [];
+      list.push({ icon: info.moji, label: message.user_name || message.user_account || "?" });
+      targets.set(info.message.id, list);
+    }
+    return targets;
+  });
+
+  function resolveReference(message: Chat) {
+    const info = classify(message);
+    if (info?.kind !== "reply") return null;
+    return { message: info.message, rest: info.rest };
   }
 
   function reactTo(message: Chat, code: string) {
@@ -368,9 +412,11 @@ export default function () {
                     </Button>
                   </div>
                 </Show>
-                <For each={chats}>
+                <For each={chats.filter((m) => classify(m)?.kind !== "reaction")}>
                   {(chat, index) => (
                     <ChatBlock
+                      messageId={chat.id}
+                      reactions={reactionTargets().get(chat.id)}
                       avatar={chat.id === 0 ? platformAvatar : chat.avatar ? mediaPath(chat.avatar) : undefined}
                       showAvatar={index() === 0 || chats.at(index() - 1)?.user_id !== chat.user_id}
                       roleLabel={

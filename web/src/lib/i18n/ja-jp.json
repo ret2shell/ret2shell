@@ -1134,7 +1134,8 @@
         "uploadFailed": "画像のアップロードに失敗しました",
         "react": "絵文字でリアクション",
         "reply": "返信"
-      }
+      },
+      "jumpToReferenced": "参照されたメッセージへジャンプ"
     },
     "submission": {
       "submit": "提出しました",

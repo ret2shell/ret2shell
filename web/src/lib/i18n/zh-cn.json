@@ -1134,7 +1134,8 @@
         "uploadFailed": "图片上传失败",
         "react": "添加表情回应",
         "reply": "回复"
-      }
+      },
+      "jumpToReferenced": "点击跳转到被回复的消息"
     },
     "submission": {
       "submit": "提交了",

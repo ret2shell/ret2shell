@@ -1134,7 +1134,8 @@
         "uploadFailed": "圖片上傳失敗",
         "react": "新增表情回應",
         "reply": "回覆"
-      }
+      },
+      "jumpToReferenced": "點擊跳轉到被回覆的訊息"
     },
     "submission": {
       "submit": "提交了",
