@@ -100,15 +100,11 @@ struct UpdateTeamRequest {
 
 async fn update_self_team(
   State(ref db): State<Database>, State(ref auditor): State<Auditor>,
-  Extension(token): Extension<auth::Token>, Extension(game): Extension<game::Model>,
-  Extension(team): Extension<Option<team::Model>>, Json(req): Json<UpdateTeamRequest>,
+  Extension(game): Extension<game::Model>, Extension(team): Extension<Option<team::Model>>,
+  Json(req): Json<UpdateTeamRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let mut team = team.ok_or_else(|| ResponseError::NotFound("team not found".to_owned()))?;
-  if game.team_size != 1 {
-    team.name = req.name;
-  } else {
-    team.name = token.nickname.clone();
-  }
+  team.name = req.name;
   team.tag = req.tag;
   team.validate()?;
   if game.archived() {
