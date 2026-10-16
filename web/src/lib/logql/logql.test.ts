@@ -184,6 +184,34 @@ describe("completion", () => {
     expect(labels("* | filter ")).toContain("level:");
     expect(labels("* | filter level:")).toContain("ERROR");
   });
+
+  it("caret at field-name start replaces the whole field and colon", () => {
+    const result = complete("level:ERROR", 0);
+    expect(result.labels).toContain("level:");
+    expect([result.from, result.to]).toEqual([0, 6]);
+  });
+
+  it("command completion replaces existing arguments", () => {
+    // caret inside `limit` of `* | limit 100`
+    const result = complete("* | limit 100", 5);
+    expect(result.labels).toContain("limit N");
+    expect([result.from, result.to]).toEqual([4, 13]);
+  });
+
+  it("caret at pipe-argument start replaces the argument", () => {
+    // caret at the start of `100`
+    const result = complete("* | limit 100", 10);
+    expect([result.from, result.to]).toEqual([10, 13]);
+  });
+
+  it("supports backtick raw strings", () => {
+    expect(diagCodes("_msg:~`(timeout|error)`")).toEqual([]);
+  });
+
+  it("tracks nested delimiters in field-scoped filters", () => {
+    expect(diagCodes("_msg:(x OR (y AND z))")).toEqual([]);
+    expect(diagCodes("_msg:(x OR (y AND z)")).toContain("unclosedParen");
+  });
 });
 
 describe("regressions from review", () => {

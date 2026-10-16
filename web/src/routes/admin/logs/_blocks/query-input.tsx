@@ -94,6 +94,9 @@ export default function LogQueryInput(props: {
   }
 
   function onKeyDown(e: KeyboardEvent) {
+    // never steal keys while an IME composition (e.g. Chinese/Japanese
+    // candidate selection) is in progress
+    if (e.isComposing) return;
     if (!open() || itemCount() === 0) {
       if (e.key === "ArrowDown" && !props.disabled) {
         setOpen(true);

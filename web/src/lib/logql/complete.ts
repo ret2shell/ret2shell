@@ -128,15 +128,18 @@ export function getCompletions(source: string, cursor: number): CompletionResult
   }
 
   // editing a word → field-name completion (+ boolean keywords)
-  if (current && current.kind === "word" && current.start < cursor) {
+  // the token-start boundary counts as editing, so the caret at the start of
+  // an existing word still replaces it instead of inserting before it
+  if (current && current.kind === "word" && current.start <= cursor) {
     // when an existing colon follows the word, swallow it so accepting a
     // `field:` suggestion does not produce `field::`
     const next = tokenAfter(tokens, current);
     const to = next?.kind === "colon" ? next.end : current.end;
+    const prefix = source.slice(current.start, cursor);
     return {
       from: current.start,
       to,
-      items: [...fieldSuggestions(current.value), ...filterByPrefix(KEYWORD_SUGGESTIONS, current.value)],
+      items: [...fieldSuggestions(prefix), ...filterByPrefix(KEYWORD_SUGGESTIONS, prefix)],
     };
   }
 
@@ -182,11 +185,14 @@ function pipeCompletions(
     name.start >= cursor ||
     (current !== undefined && current === name && commandTokens.indexOf(name) === 0)
   ) {
-    const editing = current !== undefined && current === name && current.kind === "word" && current.start < cursor;
-    const prefix = editing ? current.value : "";
+    const editing = current !== undefined && current === name && current.kind === "word" && current.start <= cursor;
+    const prefix = editing ? source.slice(current.start, cursor) : "";
+    // snippets expand to a full command, so replace existing arguments too
+    const lastArg = [...commandTokens].reverse().find((t) => t.kind !== "pipe");
+    const to = editing ? (lastArg !== current && lastArg ? lastArg.end : current.end) : cursor;
     return {
       from: editing ? current.start : cursor,
-      to: editing ? current.end : cursor,
+      to,
       items: filterByPrefix(PIPE_SNIPPETS, prefix),
     };
   }
@@ -197,10 +203,10 @@ function pipeCompletions(
   const args = commandTokens.slice(commandTokens.indexOf(name) + 1).filter((t) => t.start < cursor);
   const prev = prevToken(tokens, cursor);
 
-  const editingWord = current && current.kind === "word" && current.start < cursor ? current : undefined;
+  const editingWord = current && current.kind === "word" && current.start <= cursor ? current : undefined;
   const from = editingWord ? editingWord.start : cursor;
   const to = editingWord ? editingWord.end : cursor;
-  const prefix = editingWord ? editingWord.value : "";
+  const prefix = editingWord ? source.slice(editingWord.start, cursor) : "";
 
   // per-command argument completion
   const own = pipeArgCompletion(command, name, args, prev, editingWord, prefix, from, to, source, cursor);

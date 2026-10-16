@@ -265,19 +265,29 @@ class Parser {
     if (token.kind === "lbracket" || token.kind === "lparen") {
       const open = this.next();
       let close: Token | undefined;
+      let depth = 1;
       while (this.peek().kind !== "eof" && this.peek().kind !== "pipe") {
         const t = this.next();
-        // time ranges may mix brackets, e.g. `_time:[start, end)`
+        if (t.kind === "lbracket" || t.kind === "lparen") {
+          depth++;
+          continue;
+        }
+        // time ranges may mix brackets, e.g. `_time:[start, end)`;
+        // nested groups like `_msg:(x OR (y AND z))` close at depth 0
         if (t.kind === "rbracket" || t.kind === "rparen") {
-          close = t;
-          break;
+          depth--;
+          if (depth === 0) {
+            close = t;
+            break;
+          }
+          continue;
         }
         if (t.kind === "string" && !t.terminated) {
           this.diag("unclosedString", t.start, t.end);
         }
       }
       if (!close) {
-        this.diag("unclosedBracket", open.start, open.end);
+        this.diag(open.kind === "lparen" ? "unclosedParen" : "unclosedBracket", open.start, open.end);
       }
       node.range = { open, close };
       return node;

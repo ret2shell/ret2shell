@@ -29,7 +29,7 @@ export function lex(source: string): Token[] {
       continue;
     }
 
-    // quoted string (single or double quotes)
+    // quoted string (single or double quotes, with escapes)
     if (ch === '"' || ch === "'") {
       const quote = ch;
       const start = i;
@@ -74,6 +74,30 @@ export function lex(source: string): Token[] {
       continue;
     }
 
+    // backtick raw string (no escape processing)
+    if (ch === "`") {
+      const start = i;
+      i++;
+      let terminated = false;
+      while (i < n) {
+        if (source[i] === "`") {
+          terminated = true;
+          i++;
+          break;
+        }
+        i++;
+      }
+      tokens.push({
+        kind: "string",
+        text: source.slice(start, i),
+        value: source.slice(start + 1, terminated ? i - 1 : i),
+        start,
+        end: i,
+        terminated,
+      });
+      continue;
+    }
+
     const single = SINGLE_CHAR_TOKENS[ch];
     if (single) {
       tokens.push({ kind: single, text: ch, value: ch, start: i, end: i + 1 });
@@ -83,7 +107,7 @@ export function lex(source: string): Token[] {
 
     // bare word
     const start = i;
-    while (i < n && !" \t\r\n\"'()[]{},|:<>=~".includes(source[i])) {
+    while (i < n && !" \t\r\n\"'`()[]{},|:<>=~".includes(source[i])) {
       i++;
     }
     // exotic characters outside the grammar (e.g. `{` / `}`) must still
