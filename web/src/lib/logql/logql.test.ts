@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getCompletions } from "./complete";
+import { highlight } from "./highlight";
 import { lex } from "./lexer";
 import { parse } from "./parser";
 
@@ -263,6 +264,60 @@ describe("regressions from review", () => {
   it("all presets parse without diagnostics", () => {
     for (const preset of QUERY_PRESETS) {
       expect(diagCodes(preset.query), preset.id).toEqual([]);
+    }
+  });
+});
+
+describe("highlight", () => {
+  it("colors field names, keywords, strings and pipe commands", () => {
+    const source = 'level:ERROR AND _msg:"login" | stats by (account) count()';
+    const segments = highlight(source, []);
+    expect(segments.map((s) => source.slice(s.start, s.end))).toEqual([
+      "level",
+      ":",
+      "AND",
+      "_msg",
+      ":",
+      '"login"',
+      "|",
+      "stats",
+      "(",
+      ")",
+      "count",
+      "(",
+      ")",
+    ]);
+    expect(segments[0].cls).toContain("text-primary");
+    expect(segments[3].cls).toContain("text-primary");
+    expect(segments[2].cls).toContain("text-warning");
+    expect(segments[5].cls).toContain("text-success");
+    expect(segments[7].cls).toContain("text-info");
+    expect(segments[10].cls).toContain("text-info");
+  });
+
+  it("underlines unterminated strings", () => {
+    const segments = highlight('_msg:"oops', parse('_msg:"oops').diagnostics);
+    const str = segments.find((s) => s.start === 5);
+    expect(str?.cls).toContain("decoration-wavy");
+  });
+
+  it("does not color plain words or numbers-as-commands outside pipes", () => {
+    const segments = highlight("stats limit", []);
+    expect(segments).toEqual([]);
+  });
+
+  it("colors numeric words", () => {
+    const segments = highlight("| limit 100", []);
+    expect(segments.some((s) => s.cls.includes("text-warning") && !s.cls.includes("font-bold"))).toBe(true);
+  });
+
+  it("keeps segments sorted and non-overlapping", () => {
+    const source = "(level:ERROR OR span.uri:/api) AND NOT _time:[1..2] | top 3 (target)";
+    const segments = highlight(source, parse(source).diagnostics);
+    let cursor = 0;
+    for (const seg of segments) {
+      expect(seg.start).toBeGreaterThanOrEqual(cursor);
+      cursor = seg.end;
     }
   });
 });
