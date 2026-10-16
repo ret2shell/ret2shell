@@ -797,6 +797,7 @@ async fn change_profile(
   Json(body): Json<user::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let email_changed = body.email != user.email;
+  let nickname_changed = body.nickname != user.nickname;
   let email = match body.email.clone() {
     Some(email) => email,
     None => {
@@ -848,6 +849,11 @@ async fn change_profile(
       permissions: user.permissions,
       ..Default::default()
     };
+    token_tracker
+      .renew_requested
+      .store(true, std::sync::atomic::Ordering::Relaxed);
+  } else if nickname_changed {
+    token_tracker.token.lock().await.nickname = user.nickname.clone();
     token_tracker
       .renew_requested
       .store(true, std::sync::atomic::Ordering::Relaxed);
