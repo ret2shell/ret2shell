@@ -1102,8 +1102,9 @@
       "outerFollow": "Hammer is not enabled for this game. Please follow the organizer's requirements and provide feedback through other channels.",
       "tips": {
         "0": "The message you send here will be forwarded to the challenge setter along with your status. The challenge setter may reply here or contact you through other IMs.",
-        "1": "Please note that before the challenge setter replies, you can only send three messages, so please try to combine your questions in one message.",
-        "2": "For long messages such as logs and code, it is recommended to use an online clipboard to send, for example:"
+        "1": "Note that you can only send five messages before the challenge author replies, so try to combine your questions.",
+        "2": "For long messages such as logs and code, it is recommended to use an online clipboard to send, for example:",
+        "3": "Replies and emoji reactions also count towards the message quota, use them wisely."
       },
       "role": {
         "admin": "Admin",

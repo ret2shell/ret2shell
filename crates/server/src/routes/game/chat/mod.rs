@@ -30,7 +30,7 @@ use crate::{
 
 /// Per-user cap on unanswered messages in a hammer chat session; enforced by
 /// `player_send_chat` and reported as `remaining` by `player_get_chat_session`.
-const CHAT_REPLY_MESSAGE_LIMIT: u64 = 3;
+const CHAT_REPLY_MESSAGE_LIMIT: u64 = 5;
 
 fn ensure_challenge_in_game(
   game: &game::Model, challenge: &challenge::Model,

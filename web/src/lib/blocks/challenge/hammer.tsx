@@ -51,7 +51,7 @@ import ChatToolbarActions from "./hammer-toolbar";
 
 // kept in sync with CHAT_REPLY_MESSAGE_LIMIT on the server; only used as the
 // quota fallback before the first authoritative `remaining` arrives
-const FREE_MESSAGE_LIMIT = 3;
+const FREE_MESSAGE_LIMIT = 5;
 
 type ChatReaction = AggregatedReaction;
 
@@ -537,6 +537,16 @@ export default function (props: ChallengeWidgetProps) {
                 nameLabel="Ciallo～(∠・ω< )⌒☆"
                 labelClasses="text-primary"
                 content={`${t("challenge.hammer.tips.1")}\n\n${t("challenge.hammer.tips.2")} [GitHub Gists](https://gist.github.com), [bpa.st](https://bpa.st), [paste.rs](https://paste.rs), [0x0.st](https://0x0.st)`}
+                sendAt={game.data?.start_at || DateTime.now()}
+                isChecked
+              />
+              <ChatBlock
+                avatar={platformAvatar}
+                roleLabel=">_<"
+                link="/magic/sakana"
+                nameLabel="Ciallo～(∠・ω< )⌒☆"
+                labelClasses="text-primary"
+                content={t("challenge.hammer.tips.3")}
                 sendAt={game.data?.start_at || DateTime.now()}
                 isChecked
               />
