@@ -313,11 +313,35 @@ class Parser {
       const v = this.next();
       if (v.kind === "string" && !v.terminated) this.diag("unclosedString", v.start, v.end);
       node.value = v;
-      // values may contain further colons (e.g. `target:r2s_server::worker*`)
+      let valueEnd = v.end;
       if (v.kind === "word") {
-        while (this.peek().kind === "colon" && this.peek(1).kind === "word") {
+        // bare values may contain further colons (e.g. `target:r2s_server::worker*`);
+        // only adjacent colons belong to the value, spaced ones do not
+        while (this.peek().kind === "colon" && this.peek().start === valueEnd) {
+          const colon = this.next();
+          valueEnd = colon.end;
+          if (this.peek().kind === "word" && this.peek().start === valueEnd) {
+            valueEnd = this.next().end;
+          }
+        }
+        // function-style filter: field:in(a, b) — only when the opening
+        // paren is directly adjacent to the value
+        const open = this.peek();
+        if (open.kind === "lparen" && open.start === valueEnd) {
           this.next();
-          this.next();
+          let depth = 1;
+          let close: Token | undefined;
+          while (depth > 0 && this.peek().kind !== "eof" && this.peek().kind !== "pipe") {
+            const t = this.next();
+            if (t.kind === "string" && !t.terminated) this.diag("unclosedString", t.start, t.end);
+            if (t.kind === "lparen") depth++;
+            if (t.kind === "rparen") {
+              depth--;
+              if (depth === 0) close = t;
+            }
+          }
+          if (!close) this.diag("unclosedParen", open.start, open.end);
+          node.range = { open, close };
         }
       }
       return node;

@@ -151,6 +151,15 @@ describe("completion", () => {
   it("accepts NOT as the operand of AND", () => {
     expect(diagCodes("level:ERROR AND NOT span.uri:/health")).toEqual([]);
   });
+
+  it("accepts function-style filters like field:in(...)", () => {
+    expect(diagCodes('level:in("INFO","ERROR")')).toEqual([]);
+    expect(diagCodes('level:in("INFO","ERROR"')).toContain("unclosedParen");
+  });
+
+  it("absorbs adjacent colons inside bare values", () => {
+    expect(diagCodes("target:r2s_server::worker* | sort by (_time) desc | limit 100")).toEqual([]);
+  });
 });
 
 describe("regressions from review", () => {
