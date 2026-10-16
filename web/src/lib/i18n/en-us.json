@@ -2103,7 +2103,6 @@
         "label": "Team name",
         "required": "Team name cannot be empty",
         "maximumLength": "Name can be at most 32 characters",
-        "customDisabled": "Team name cannot be changed",
         "placeholder": "Please enter team name",
         "chuunibyouGenerator": "Chuunibyou Generator"
       },

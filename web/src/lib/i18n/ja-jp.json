@@ -2103,7 +2103,6 @@
         "label": "チーム名",
         "required": "チーム名を入力してください",
         "maximumLength": "最大 32 文字まで",
-        "customDisabled": "チーム名は変更できません",
         "placeholder": "チーム名を入力してください",
         "chuunibyouGenerator": "中二病ジェネレーター"
       },

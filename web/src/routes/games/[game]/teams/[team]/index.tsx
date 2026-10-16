@@ -257,7 +257,6 @@ type TeamSelfUpdateForm = {
 };
 
 function SelfManagement(props: { gameId: number; onDone?: (team: Team) => void; onLeft?: () => void }) {
-  const game = useGame({ id: () => props.gameId, enabled: () => !!props.gameId });
   const institutes = useInstitutes();
   const team = useSelfTeam({ game_id: () => props.gameId });
   const members = useTeamMembers({
@@ -359,7 +358,6 @@ function SelfManagement(props: { gameId: number; onDone?: (team: Team) => void; 
                   value={field.value}
                   error={field.error}
                   required
-                  disabled={game.data?.team_size === 1}
                 />
               )}
             </Field>

@@ -2103,7 +2103,6 @@
         "label": "队伍名称",
         "required": "队伍名称不能为空",
         "maximumLength": "名称最长 32 个字符",
-        "customDisabled": "无法更改队名",
         "placeholder": "请输入队伍名称",
         "chuunibyouGenerator": "中二病生成器"
       },
