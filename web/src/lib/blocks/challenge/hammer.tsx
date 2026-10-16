@@ -474,6 +474,15 @@ export default function (props: ChallengeWidgetProps) {
     return aggregated;
   });
 
+  // the rendered message list: reactions render under their targets and
+  // dropped references are silent, so both are excluded from the flow
+  const visibleChats = createMemo(() =>
+    chats.filter((m) => {
+      const info = classify(m);
+      return !info || info.kind === "reply";
+    })
+  );
+
   function resolveReference(message: Chat) {
     const info = classify(message);
     if (info?.kind !== "reply" || !info.message || info.rest === undefined) return null;
@@ -575,13 +584,13 @@ export default function (props: ChallengeWidgetProps) {
           </Match>
         </Switch>
         <ChatHistorySentinel onLoad={loadOlder} hasMore={hasMoreHistory()} loading={loadingOlder()} />
-        <For each={chats.filter((m) => !classify(m) || classify(m)!.kind === "reply")}>
+        <For each={visibleChats()}>
           {(chat, index) => (
             <ChatBlock
               messageId={chat.id}
               reactions={reactionTargets().get(chat.id)}
               avatar={chat.id === 0 ? platformAvatar : chat.avatar ? mediaPath(chat.avatar) : undefined}
-              showAvatar={index() === 0 || chats.at(index() - 1)?.user_id !== chat.user_id}
+              showAvatar={index() === 0 || visibleChats().at(index() - 1)?.user_id !== chat.user_id}
               roleLabel={
                 chat.id === 0
                   ? ">_<"
