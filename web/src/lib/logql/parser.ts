@@ -76,36 +76,53 @@ class Parser {
 
   private parsePipes(): PipeCommand[] {
     const pipes: PipeCommand[] = [];
-    while (this.peek().kind === "pipe") {
-      const pipe = this.next();
-      const command: PipeCommand = { pipe, args: [] };
-      const name = this.peek();
-      if (name.kind === "word" && booleanKeyword(name) === undefined) {
-        command.name = this.next();
-        if (!PIPE_COMMANDS.includes(command.name.value.toLowerCase() as (typeof PIPE_COMMANDS)[number])) {
-          this.diag("unknownCommand", name.start, name.end, { command: name.value });
+    for (;;) {
+      while (this.peek().kind === "pipe") {
+        const pipe = this.next();
+        const command: PipeCommand = { pipe, args: [] };
+        const name = this.peek();
+        if (name.kind === "word" && booleanKeyword(name) === undefined) {
+          command.name = this.next();
+          if (!PIPE_COMMANDS.includes(command.name.value.toLowerCase() as (typeof PIPE_COMMANDS)[number])) {
+            this.diag("unknownCommand", name.start, name.end, { command: name.value });
+          }
+        } else if (name.kind !== "pipe" && name.kind !== "eof") {
+          // e.g. `| "foo"` — not a command
+          this.diag("unknownCommand", name.start, name.end, { command: name.text });
+        } else {
+          this.diag("missingCommand", pipe.start, pipe.end);
         }
-      } else if (name.kind !== "pipe" && name.kind !== "eof") {
-        // e.g. `| "foo"` — not a command
-        this.diag("unknownCommand", name.start, name.end, { command: name.text });
-      } else {
-        this.diag("missingCommand", pipe.start, pipe.end);
+        // consume args until next pipe or eof, tracking delimiter balance
+        const openStack: Token[] = [];
+        while (this.peek().kind !== "pipe" && this.peek().kind !== "eof") {
+          const token = this.next();
+          if (token.kind === "string" && !token.terminated) {
+            this.diag("unclosedString", token.start, token.end);
+          }
+          if (token.kind === "lparen" || token.kind === "lbracket") {
+            openStack.push(token);
+          } else if (token.kind === "rparen") {
+            if (openStack.at(-1)?.kind === "lparen") openStack.pop();
+            else this.diag("unexpectedParen", token.start, token.end);
+          } else if (token.kind === "rbracket") {
+            if (openStack.at(-1)?.kind === "lbracket") openStack.pop();
+            else this.diag("unexpectedBracket", token.start, token.end);
+          }
+          command.args.push(token);
+        }
+        for (const open of openStack) {
+          this.diag(open.kind === "lparen" ? "unclosedParen" : "unclosedBracket", open.start, open.end);
+        }
+        pipes.push(command);
       }
-      // consume args until next pipe or eof
-      while (this.peek().kind !== "pipe" && this.peek().kind !== "eof") {
+      // trailing tokens that are not pipes (e.g. unmatched closing parens);
+      // loop back in case another pipe command follows them
+      while (this.peek().kind !== "eof" && this.peek().kind !== "pipe") {
         const token = this.next();
-        if (token.kind === "string" && !token.terminated) {
-          this.diag("unclosedString", token.start, token.end);
-        }
-        command.args.push(token);
+        if (token.kind === "rparen") this.diag("unexpectedParen", token.start, token.end);
+        if (token.kind === "rbracket") this.diag("unexpectedBracket", token.start, token.end);
       }
-      pipes.push(command);
-    }
-    // trailing tokens that are not pipes (e.g. unmatched closing parens)
-    while (this.peek().kind !== "eof") {
-      const token = this.next();
-      if (token.kind === "rparen") this.diag("unexpectedParen", token.start, token.end);
-      if (token.kind === "rbracket") this.diag("unexpectedBracket", token.start, token.end);
+      if (this.peek().kind !== "pipe") break;
     }
     return pipes;
   }
@@ -141,11 +158,14 @@ class Parser {
       if (booleanKeyword(token) === "and") {
         const and = this.next();
         const next = this.peek();
+        // NOT is a valid operand start; only AND/OR/end-of-expression dangle
+        const nextKw = booleanKeyword(next);
         if (
           next.kind === "eof" ||
           next.kind === "pipe" ||
           next.kind === "rparen" ||
-          booleanKeyword(next) !== undefined
+          nextKw === "and" ||
+          nextKw === "or"
         ) {
           this.diag("danglingOperator", and.start, and.end, { operator: "AND" });
           break;
@@ -165,7 +185,14 @@ class Parser {
     if (booleanKeyword(token) === "not") {
       const not = this.next();
       const next = this.peek();
-      if (next.kind === "eof" || next.kind === "pipe" || next.kind === "rparen" || booleanKeyword(next) !== undefined) {
+      const nextKw = booleanKeyword(next);
+      if (
+        next.kind === "eof" ||
+        next.kind === "pipe" ||
+        next.kind === "rparen" ||
+        nextKw === "and" ||
+        nextKw === "or"
+      ) {
         this.diag("danglingOperator", not.start, not.end, { operator: "NOT" });
         return { type: "not", token: not };
       }
@@ -286,6 +313,13 @@ class Parser {
       const v = this.next();
       if (v.kind === "string" && !v.terminated) this.diag("unclosedString", v.start, v.end);
       node.value = v;
+      // values may contain further colons (e.g. `target:r2s_server::worker*`)
+      if (v.kind === "word") {
+        while (this.peek().kind === "colon" && this.peek(1).kind === "word") {
+          this.next();
+          this.next();
+        }
+      }
       return node;
     }
 

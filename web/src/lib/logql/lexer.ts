@@ -85,6 +85,9 @@ export function lex(source: string): Token[] {
     while (i < n && !' \t\r\n"()[]{},|:<>=~'.includes(source[i])) {
       i++;
     }
+    // exotic characters outside the grammar (e.g. `{` / `}`) must still
+    // consume input, otherwise the scanner loops forever
+    if (i === start) i++;
     tokens.push({
       kind: "word",
       text: source.slice(start, i),

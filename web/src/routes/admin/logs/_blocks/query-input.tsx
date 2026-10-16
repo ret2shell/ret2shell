@@ -72,9 +72,8 @@ export default function LogQueryInput(props: {
     requestAnimationFrame(() => {
       inputRef.focus();
       inputRef.setSelectionRange(cursor, cursor);
-      if (item.retrigger) {
-        setOpen(true);
-      }
+      // only chained completions (field:, keywords, …) keep the menu open
+      setOpen(item.retrigger === true);
       refresh();
     });
   }
@@ -164,6 +163,11 @@ export default function LogQueryInput(props: {
           ref={inputRef}
           class="input w-0 flex-1 input-sm border-0 outline-none rounded-l-none!"
           type="text"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={open() && itemCount() > 0}
+          aria-controls="logql-suggestion-listbox"
+          aria-activedescendant={selected() >= 0 ? `logql-suggestion-${selected()}` : undefined}
           value={props.value}
           disabled={props.disabled}
           placeholder={props.placeholder}
@@ -206,7 +210,7 @@ export default function LogQueryInput(props: {
       </Show>
       <Show when={open() && itemCount() > 0}>
         <div class="absolute left-0 right-0 top-full mt-1 z-30 card shadow-lg">
-          <div class="card-content p-2 max-h-80 overflow-y-auto">
+          <div class="card-content p-2 max-h-80 overflow-y-auto" role="listbox" id="logql-suggestion-listbox">
             <div class="px-2 pb-1 text-xs opacity-60 flex flex-row justify-between">
               <span>
                 {mode().type === "presets"
@@ -223,6 +227,9 @@ export default function LogQueryInput(props: {
                     {(preset, idx) => (
                       <button
                         type="button"
+                        role="option"
+                        id={`logql-suggestion-${idx()}`}
+                        aria-selected={selected() === idx()}
                         class={clsx(
                           "btn btn-ghost btn-sm items-center overflow-hidden h-auto py-1",
                           selected() === idx() && "bg-layer-content/10"
@@ -247,6 +254,9 @@ export default function LogQueryInput(props: {
                   {(item, idx) => (
                     <button
                       type="button"
+                      role="option"
+                      id={`logql-suggestion-${idx()}`}
+                      aria-selected={selected() === idx()}
                       class={clsx(
                         "btn btn-ghost btn-sm items-center overflow-hidden",
                         selected() === idx() && "bg-layer-content/10"

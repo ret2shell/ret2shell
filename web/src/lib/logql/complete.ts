@@ -18,7 +18,7 @@ const PIPE_STARTERS: Suggestion[] = [
     insert: " | stats by () count()",
     kind: "pipe",
     detailKey: "stats",
-    cursorBack: 8,
+    cursorBack: 9,
   },
 ];
 
@@ -40,6 +40,11 @@ function currentToken(tokens: Token[], cursor: number): Token | undefined {
 function tokenBefore(tokens: Token[], token: Token): Token | undefined {
   const idx = tokens.indexOf(token);
   return idx > 0 ? tokens[idx - 1] : undefined;
+}
+
+function tokenAfter(tokens: Token[], token: Token): Token | undefined {
+  const idx = tokens.indexOf(token);
+  return idx >= 0 && idx < tokens.length - 1 ? tokens[idx + 1] : undefined;
 }
 
 function filterByPrefix(items: Suggestion[], prefix: string): Suggestion[] {
@@ -117,19 +122,24 @@ export function getCompletions(source: string, cursor: number): CompletionResult
   // field value context: `field:<cursor>` / `field:val<cursor>`
   const valueField = valueContext(tokens, cursor, current);
   if (valueField !== undefined) {
-    const prefix =
-      current && (current.kind === "word" || current.kind === "string") && current.kind !== "colon"
-        ? current.value
-        : "";
-    const from = current && (current.kind === "word" || current.kind === "string") ? current.start : cursor;
-    return valueCompletion(valueField, prefix, from, cursor);
+    const editing = current && (current.kind === "word" || current.kind === "string");
+    // replace through the end of the value token, and filter by the text
+    // actually typed before the caret
+    const from = editing ? current.start : cursor;
+    const to = editing ? current.end : cursor;
+    const prefix = editing ? source.slice(current.start, cursor) : "";
+    return valueCompletion(valueField, prefix, from, to);
   }
 
   // editing a word → field-name completion (+ boolean keywords)
   if (current && current.kind === "word" && current.start < cursor) {
+    // when an existing colon follows the word, swallow it so accepting a
+    // `field:` suggestion does not produce `field::`
+    const next = tokenAfter(tokens, current);
+    const to = next?.kind === "colon" ? next.end : current.end;
     return {
       from: current.start,
-      to: current.end,
+      to,
       items: [...fieldSuggestions(current.value), ...filterByPrefix(KEYWORD_SUGGESTIONS, current.value)],
     };
   }
@@ -185,7 +195,9 @@ function pipeCompletions(
   }
 
   const command = name.value.toLowerCase();
-  const args = commandTokens.slice(commandTokens.indexOf(name) + 1);
+  // only tokens before the caret describe the current context; tokens after
+  // the caret (e.g. an existing closing paren) must not steer completion
+  const args = commandTokens.slice(commandTokens.indexOf(name) + 1).filter((t) => t.start < cursor);
   const prev = prevToken(tokens, cursor);
 
   const editingWord = current && current.kind === "word" && current.start < cursor ? current : undefined;

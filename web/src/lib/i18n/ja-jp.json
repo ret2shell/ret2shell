@@ -488,9 +488,7 @@
           "submissions": "Flag 提出",
           "submissionsDesc": "問題の提出記録",
           "module": "モジュールで絞り込み",
-          "moduleDesc": "target プレフィックスでモジュールをマッチ",
-          "stats": "レベル別統計",
-          "statsDesc": "レベルごとのログ数を集計"
+          "moduleDesc": "target プレフィックスでモジュールをマッチ"
         }
       }
     },

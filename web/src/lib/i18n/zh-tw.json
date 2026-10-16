@@ -488,9 +488,7 @@
           "submissions": "Flag 提交",
           "submissionsDesc": "題目提交記錄",
           "module": "按模組過濾",
-          "moduleDesc": "按 target 前綴匹配模組",
-          "stats": "按級別統計",
-          "statsDesc": "統計各級別日誌數量"
+          "moduleDesc": "按 target 前綴匹配模組"
         }
       }
     },

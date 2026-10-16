@@ -488,9 +488,7 @@
           "submissions": "Flag 提交",
           "submissionsDesc": "题目提交记录",
           "module": "按模块过滤",
-          "moduleDesc": "按 target 前缀匹配模块",
-          "stats": "按级别统计",
-          "statsDesc": "统计各级别日志数量"
+          "moduleDesc": "按 target 前缀匹配模块"
         }
       }
     },

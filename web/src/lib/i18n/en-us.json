@@ -488,9 +488,7 @@
           "submissions": "Flag submissions",
           "submissionsDesc": "Challenge submission records",
           "module": "Filter by module",
-          "moduleDesc": "Match module by target prefix",
-          "stats": "Stats by level",
-          "statsDesc": "Count logs of each level"
+          "moduleDesc": "Match module by target prefix"
         }
       }
     },

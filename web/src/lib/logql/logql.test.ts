@@ -3,8 +3,17 @@ import { getCompletions } from "./complete";
 import { lex } from "./lexer";
 import { parse } from "./parser";
 
+import { QUERY_PRESETS } from "./schema";
+
+type CompletionRange = { from: number; to: number; labels: string[] };
+
+function complete(source: string, cursor = source.length): CompletionRange {
+  const result = getCompletions(source, cursor);
+  return { from: result.from, to: result.to, labels: result.items.map((i) => i.label) };
+}
+
 function labels(source: string, cursor = source.length): string[] {
-  return getCompletions(source, cursor).items.map((i) => i.label);
+  return complete(source, cursor).labels;
 }
 
 function diagCodes(source: string): string[] {
@@ -137,5 +146,51 @@ describe("completion", () => {
 
   it("suggests fields after AND", () => {
     expect(labels("level:ERROR AND ")).toContain("target:");
+  });
+
+  it("accepts NOT as the operand of AND", () => {
+    expect(diagCodes("level:ERROR AND NOT span.uri:/health")).toEqual([]);
+  });
+});
+
+describe("regressions from review", () => {
+  it("lexer terminates on exotic characters like braces", () => {
+    const tokens = lex("{}");
+    expect(tokens.map((t) => t.kind)).toEqual(["word", "word", "eof"]);
+  });
+
+  it("flags unbalanced parens inside pipe arguments", () => {
+    expect(diagCodes("* | sort by (_time")).toContain("unclosedParen");
+    expect(diagCodes("* | sort by (_time))")).toContain("unexpectedParen");
+    expect(diagCodes("* | sort by (_time) desc")).toEqual([]);
+  });
+
+  it("value completion replaces the whole token, not just up to the caret", () => {
+    // caret between ER and ROR in level:ERROR
+    const result = complete("level:ERROR", 8);
+    expect(result.labels).toEqual(["ERROR"]);
+    expect([result.from, result.to]).toEqual([6, 11]);
+  });
+
+  it("field completion swallows an existing colon", () => {
+    // caret between lev and el in level:ERROR
+    const result = complete("level:ERROR", 3);
+    expect(result.labels).toContain("level:");
+    expect([result.from, result.to]).toEqual([0, 6]);
+  });
+
+  it("tokens after the caret do not steer pipe argument completion", () => {
+    // caret inside _time of a complete sort command
+    const source = "level:ERROR | sort by (_time) desc";
+    const caret = source.indexOf("_time") + 2;
+    const result = complete(source, caret);
+    expect(result.labels).toContain("_time");
+    expect(result.labels).not.toContain("desc");
+  });
+
+  it("all presets parse without diagnostics", () => {
+    for (const preset of QUERY_PRESETS) {
+      expect(diagCodes(preset.query), preset.id).toEqual([]);
+    }
   });
 });
