@@ -223,7 +223,7 @@ export default function LogQueryInput(props: {
         <div class="rounded-l-md flex shrink-0 flex-row items-center justify-center h-8 w-8 bg-layer-content/10">
           <span class="icon-[fluent--code-16-regular]" />
         </div>
-        <div class="relative min-w-0 flex-1 h-8">
+        <div class="relative min-w-0 flex-1 h-8 rounded-md rounded-l-none backdrop-blur-sm bg-layer-content/5">
           <div
             aria-hidden="true"
             class="pointer-events-none absolute inset-0 flex flex-row items-center overflow-hidden font-mono px-2"
@@ -238,7 +238,7 @@ export default function LogQueryInput(props: {
           </div>
           <input
             ref={inputRef}
-            class="input w-full h-8 input-sm border-0 outline-none rounded-l-none! relative bg-transparent! text-transparent caret-layer-content placeholder:text-layer-content/40 selection:bg-primary/30"
+            class="input w-full h-8 input-sm border-0 outline-none rounded-l-none! relative bg-transparent! backdrop-filter-none! text-transparent caret-layer-content placeholder:text-layer-content/40 selection:bg-primary/30"
             type="text"
             role="combobox"
             aria-autocomplete="list"
