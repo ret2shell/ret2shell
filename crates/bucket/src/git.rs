@@ -352,30 +352,26 @@ impl Git {
 
   pub async fn try_open(path: impl AsRef<Path>) -> Result<Self, BucketError> {
     let path = path.as_ref();
-    if path.exists() {
-      trace!(?path, "opening git repository");
-    } else {
+    if !path.exists() {
       warn!(?path, "git repository does not exist");
       return Err(BucketError::PathDoesNotExist(path.display().to_string()));
     }
-    let output = Command::new("git")
-      .current_dir(path)
-      .arg("describe")
-      .arg("--all")
-      .arg("--long")
-      .output()
-      .await?;
-    if output.status.success() {
-      trace!(stdio=?output, "opened git repository");
-      Ok(Self {
-        path: path.to_path_buf().canonicalize()?,
-      })
-    } else {
-      warn!(stdio=?output, "failed to open git repository");
-      Err(BucketError::GitCommandFailed(String::from_utf8(
-        output.stderr,
-      )?))
+    // A repository always exposes a `.git` entry (directory for normal
+    // checkouts, file for worktrees), so a filesystem lookup is enough to
+    // detect it. Avoid shelling out to `git describe` here: this runs on
+    // every bucket open, including every read-only request, and spawning a
+    // subprocess per request exhausts the file descriptor limit under load.
+    if !path.join(".git").exists() {
+      warn!(?path, "path is not a git repository");
+      return Err(BucketError::GitCommandFailed(format!(
+        "{} is not a git repository",
+        path.display()
+      )));
     }
+    trace!(?path, "opening git repository");
+    Ok(Self {
+      path: path.to_path_buf().canonicalize()?,
+    })
   }
 
   pub async fn new(path: impl AsRef<Path>) -> Result<Self, BucketError> {
@@ -1004,6 +1000,7 @@ mod tests {
   use super::{
     Git, entry_paths_for_changed_path, listed_entry_for_changed_path, parse_ls_tree_objects,
   };
+  use crate::BucketError;
 
   fn temp_repo_path(name: &str) -> PathBuf {
     let nanos = SystemTime::now()
@@ -1248,5 +1245,16 @@ mod tests {
     assert_eq!(asset.subject.as_deref(), Some("update nested asset"));
 
     fs::remove_dir_all(repo).expect("remove temp repo");
+  }
+
+  #[tokio::test]
+  async fn try_open_rejects_a_directory_that_is_not_a_git_repository() {
+    let dir = temp_repo_path("git-not-a-repo");
+    fs::create_dir_all(&dir).expect("create plain directory");
+
+    let result = Git::try_open(&dir).await;
+    assert!(matches!(result, Err(BucketError::GitCommandFailed(_))));
+
+    fs::remove_dir_all(dir).expect("remove plain directory");
   }
 }
