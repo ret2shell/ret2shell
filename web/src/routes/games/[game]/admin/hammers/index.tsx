@@ -83,6 +83,7 @@ export default function () {
   let chatBottomEl: HTMLDivElement | undefined;
 
   const [hasMoreHistory, setHasMoreHistory] = createSignal(false);
+  const [checkedThroughId, setCheckedThroughId] = createSignal(0);
 
   const maxLoadedId = createMemo(() => {
     let max = 0;
@@ -101,6 +102,10 @@ export default function () {
     return Number.isFinite(min) ? min : 0;
   });
 
+  // client-owned monotone sync cursor: the highest message id merged so far.
+  // the session-wide checked watermark must never anchor fetches: the team
+  // reading the thread would move it past messages this client never fetched.
+  let cursor = 0;
   let lastSessionKey = "";
 
   createEffect(() => {
@@ -110,7 +115,10 @@ export default function () {
     const sessionKey = `${currentTeamId}:${currentChallengeId}`;
 
     if (!enabledSession() || !data || !currentChallengeId || !currentTeamId) {
-      lastSessionKey = sessionKey;
+      // do not mark the session as loaded here: the first page that arrives
+      // must count as a session change so `has_more` initializes history paging
+      cursor = 0;
+      setCheckedThroughId(0);
       setHasMoreHistory(false);
       setChats(reconcile([]));
       return;
@@ -124,9 +132,25 @@ export default function () {
       solves.data?.find((item) => item.challenge_id === currentChallengeId)?.created_at ?? null
     );
 
-    if (sessionKey !== lastSessionKey) {
+    const sessionChanged = sessionKey !== lastSessionKey;
+    if (sessionChanged) {
       lastSessionKey = sessionKey;
+      // reset per-session state before adopting the new session's page
+      cursor = 0;
+      setCheckedThroughId(0);
       setHasMoreHistory(data.has_more);
+    }
+
+    // the latest page (re)initializes the sync cursor; the poll loop must not
+    // issue after_id=0 syncs before it lands (that would rescan from id 1)
+    for (const item of data.items) {
+      if (item.id > cursor) cursor = item.id;
+    }
+    // the watermark is monotone server-side; a stale response must not regress it
+    const watermark = data.checked_through_id;
+    if (watermark !== null) setCheckedThroughId((prev) => Math.max(prev, watermark));
+
+    if (sessionChanged) {
       setChats(reconcile(merged, { key: "id" }));
       return;
     }
@@ -179,6 +203,7 @@ export default function () {
     setLoadingOlder(true);
     try {
       const page = await getGameAdminChatMessages(gameId(), currentChallengeId, currentTeamId, {
+        mode: "before",
         before_id: beforeId,
       });
       setHasMoreHistory(page.has_more);
@@ -203,26 +228,39 @@ export default function () {
     const currentChallengeId = challengeId();
     const currentTeamId = teamId();
     if (!enabledSession() || !currentChallengeId || !currentTeamId || pollInFlight) return;
+    // wait for the first latest page; syncing from after_id=0 before it lands
+    // would rescan the whole history in limit-sized chunks
+    if (cursor === 0 && !chatsQuery.data) return;
     pollInFlight = true;
     pollTick += 1;
+    // pin the session for the whole drain: a team/challenge change mid-flight
+    // must not merge the old session's rows or advance the new cursor
+    const tickGameId = gameId();
+    const tickSessionKey = `${tickGameId}:${currentTeamId}:${currentChallengeId}`;
     try {
-      if (pollTick % 6 === 0 || maxLoadedId() === 0) {
-        // reconcile the newest page and solves every ~30s (and until the first page arrives)
-        await chatsQuery.refetch();
-        await solves.refetch();
-      } else {
-        const page = await getGameAdminChatMessages(gameId(), currentChallengeId, currentTeamId, {
-          after_id: maxLoadedId(),
+      // drain every message newer than the cursor; the server caps each
+      // response, so loop (bounded) until the session is fully caught up
+      for (let drained = 0; drained < 20; drained += 1) {
+        const page = await getGameAdminChatMessages(tickGameId, currentChallengeId, currentTeamId, {
+          mode: "sync",
+          after_id: cursor,
         });
-        if (page.items.length > 0) {
-          setChats(
-            mergeChatItems(
-              untrack(() => Array.from(chats)),
-              page.items
-            )
-          );
-        }
+        if (`${gameId()}:${teamId()}:${challengeId()}` !== tickSessionKey) break;
+        const watermark = page.checked_through_id;
+        if (watermark !== null) setCheckedThroughId((prev) => Math.max(prev, watermark));
+        if (page.items.length === 0) break;
+        const lastId = page.items[page.items.length - 1].id;
+        if (lastId > cursor) cursor = lastId;
+        setChats(
+          mergeChatItems(
+            untrack(() => Array.from(chats)),
+            page.items
+          )
+        );
+        if (!page.has_more) break;
       }
+      // the chat reconcile is gone; refresh the solved marker on a slower cadence
+      if (pollTick % 6 === 0) await solves.refetch();
     } catch (error) {
       console.error(error);
     } finally {
@@ -311,7 +349,7 @@ export default function () {
                       labelClasses={chat.id === 0 ? "text-primary" : chat.is_admin ? "text-success" : "text-warning"}
                       content={chat.content}
                       sendAt={chat.created_at}
-                      isChecked={chat.checked}
+                      isChecked={chat.checked || chat.id <= checkedThroughId()}
                     />
                   )}
                 </For>

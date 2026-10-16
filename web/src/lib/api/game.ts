@@ -503,6 +503,7 @@ export function useGameAdminChatSessions({
 }
 
 export type ChatMessageListParams = {
+  mode?: "latest" | "before" | "sync";
   after_id?: number;
   before_id?: number;
   limit?: number;
@@ -544,7 +545,7 @@ export function useGameAdminChatMessages({
   return useQuery(
     () => ({
       queryKey: keys(),
-      queryFn: async () => await getGameAdminChatMessages(game_id(), challenge_id(), team_id()),
+      queryFn: async () => await getGameAdminChatMessages(game_id(), challenge_id(), team_id(), { mode: "latest" }),
       enabled: enabled?.(),
       throwOnError: (err: Error) => {
         handleHttpError(err, t("challenge.hammer.errors.fetch.title"));
@@ -619,7 +620,7 @@ export function useGamePlayerChatMessages({
   return useQuery(
     () => ({
       queryKey: keys(),
-      queryFn: async () => await getGamePlayerChatMessages(game_id(), challenge_id()),
+      queryFn: async () => await getGamePlayerChatMessages(game_id(), challenge_id(), { mode: "latest" }),
       enabled: enabled?.(),
       throwOnError: (err: Error) => {
         handleHttpError(err, t("challenge.hammer.errors.fetch.title"));

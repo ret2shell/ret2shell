@@ -283,6 +283,48 @@ where
   Ok(chat)
 }
 
+/// Inclusive id upper bound of the checked prefix of a session: every message
+/// with `id <= result` is checked. Returns `None` for an empty session.
+///
+/// `checked` is bulk-updated by `mark_checked`, so unchecked rows always form
+/// an id suffix of the session; the watermark is therefore exact. It is
+/// conservative in every case: no unchecked row can satisfy
+/// `id <= checked_through_id`.
+pub async fn get_checked_through_id<C>(
+  conn: &C, team_id: i64, challenge_id: i64,
+) -> Result<Option<i64>, DbErr>
+where
+  C: sea_orm::ConnectionTrait, {
+  let first_unchecked = Entity::find()
+    .select_only()
+    .column(Column::Id)
+    .filter(Column::TeamId.eq(team_id))
+    .filter(Column::ChallengeId.eq(challenge_id))
+    .filter(Column::Checked.eq(false))
+    .order_by_asc(Column::Id)
+    .limit(1)
+    .into_tuple::<i64>()
+    .one(conn)
+    .await?;
+
+  if let Some(first_unchecked) = first_unchecked {
+    return Ok(Some(first_unchecked - 1));
+  }
+
+  // no unchecked rows: the whole session is read, so the watermark is the
+  // newest message id (None when the session is empty)
+  Entity::find()
+    .select_only()
+    .column(Column::Id)
+    .filter(Column::TeamId.eq(team_id))
+    .filter(Column::ChallengeId.eq(challenge_id))
+    .order_by_desc(Column::Id)
+    .limit(1)
+    .into_tuple::<i64>()
+    .one(conn)
+    .await
+}
+
 pub async fn get_unchecked<C>(conn: &C, team_id: i64, is_admin: bool) -> Result<Vec<Model>, DbErr>
 where
   C: sea_orm::ConnectionTrait, {

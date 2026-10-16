@@ -11,7 +11,6 @@ import { mediaPath } from "@lib/utils/media";
 import type { Chat } from "@models/chat";
 import { createBreakpoints } from "@solid-primitives/media";
 import { A } from "@solidjs/router";
-import { accountStore } from "@storage/account";
 import { isAdminOfGame, isGameInProgress } from "@storage/game";
 import { breakpoints, t } from "@storage/theme";
 import Article from "@widgets/article";
@@ -37,6 +36,10 @@ import { createStore, reconcile } from "solid-js/store";
 
 import type { ChallengeWidgetProps } from ".";
 import { mergeChatItems, mergeChats } from "./hammer.utils";
+
+// kept in sync with CHAT_REPLY_MESSAGE_LIMIT on the server; only used as the
+// quota fallback before the first authoritative `remaining` arrives
+const FREE_MESSAGE_LIMIT = 3;
 
 export function ChatBlock(props: {
   avatar?: string;
@@ -112,14 +115,8 @@ export default function (props: ChallengeWidgetProps) {
   });
 
   const [hasMoreHistory, setHasMoreHistory] = createSignal(false);
-
-  const maxLoadedId = createMemo(() => {
-    let max = 0;
-    for (const item of chats) {
-      if (item.id > max) max = item.id;
-    }
-    return max;
-  });
+  const [checkedThroughId, setCheckedThroughId] = createSignal(0);
+  const [remaining, setRemaining] = createSignal<number | null>(null);
 
   const minLoadedId = createMemo(() => {
     let min = Number.POSITIVE_INFINITY;
@@ -130,6 +127,10 @@ export default function (props: ChallengeWidgetProps) {
     return Number.isFinite(min) ? min : 0;
   });
 
+  // client-owned monotone sync cursor: the highest message id merged so far.
+  // the session-wide checked watermark must never anchor fetches: a teammate
+  // reading the thread would move it past messages this client never fetched.
+  let cursor = 0;
   let lastSessionKey = "";
 
   createEffect(() => {
@@ -137,7 +138,11 @@ export default function (props: ChallengeWidgetProps) {
     const sessionKey = `${props.gameId}:${props.challengeId}:${team.data?.id ?? 0}`;
 
     if (!data || !solvesQuery.data) {
-      lastSessionKey = sessionKey;
+      // do not mark the session as loaded here: the first page that arrives
+      // must count as a session change so `has_more` initializes history paging
+      cursor = 0;
+      setCheckedThroughId(0);
+      setRemaining(null);
       setHasMoreHistory(false);
       setChats(reconcile([]));
       return;
@@ -151,9 +156,27 @@ export default function (props: ChallengeWidgetProps) {
       solvesQuery.data.find((v) => v.challenge_id === props.challengeId)?.created_at ?? null
     );
 
-    if (sessionKey !== lastSessionKey) {
+    const sessionChanged = sessionKey !== lastSessionKey;
+    if (sessionChanged) {
       lastSessionKey = sessionKey;
+      // reset per-session state before adopting the new session's page
+      cursor = 0;
+      setCheckedThroughId(0);
+      setRemaining(null);
       setHasMoreHistory(data.has_more);
+    }
+
+    // the latest page (re)initializes the sync cursor; the poll loop must not
+    // issue after_id=0 syncs before it lands (that would rescan from id 1)
+    for (const item of data.items) {
+      if (item.id > cursor) cursor = item.id;
+    }
+    // the watermark is monotone server-side; a stale response must not regress it
+    const watermark = data.checked_through_id;
+    if (watermark !== null) setCheckedThroughId((prev) => Math.max(prev, watermark));
+    if (data.remaining !== null) setRemaining(data.remaining);
+
+    if (sessionChanged) {
       setChats(reconcile(merged, { key: "id" }));
       return;
     }
@@ -175,25 +198,42 @@ export default function (props: ChallengeWidgetProps) {
   let pollTick = 0;
   const interval = setInterval(async () => {
     if (pollInFlight) return;
+    // wait for the first latest page; syncing from after_id=0 before it lands
+    // would rescan the whole history in limit-sized chunks
+    if (cursor === 0 && !chatsQuery.data) return;
     pollInFlight = true;
     pollTick += 1;
+    // pin the session for the whole drain: if the challenge changes while a
+    // request is in flight, its response must not be merged into the new
+    // session or advance the new session's cursor past unmerged ids
+    const tickGameId = props.gameId;
+    const tickChallengeId = props.challengeId;
+    const tickSessionKey = `${tickGameId}:${tickChallengeId}:${team.data?.id ?? 0}`;
     try {
-      if (pollTick % 6 === 0 || maxLoadedId() === 0) {
-        // reconcile the newest page every ~30s (and until the first page arrives)
-        await chatsQuery.refetch();
-      } else {
-        const page = await getGamePlayerChatMessages(props.gameId, props.challengeId, {
-          after_id: maxLoadedId(),
+      // drain every message newer than the cursor; the server caps each
+      // response, so loop (bounded) until the session is fully caught up
+      for (let drained = 0; drained < 20; drained += 1) {
+        const page = await getGamePlayerChatMessages(tickGameId, tickChallengeId, {
+          mode: "sync",
+          after_id: cursor,
         });
-        if (page.items.length > 0) {
-          setChats(
-            mergeChatItems(
-              untrack(() => Array.from(chats)),
-              page.items
-            )
-          );
-        }
+        if (`${props.gameId}:${props.challengeId}:${team.data?.id ?? 0}` !== tickSessionKey) break;
+        const watermark = page.checked_through_id;
+        if (watermark !== null) setCheckedThroughId((prev) => Math.max(prev, watermark));
+        if (page.remaining !== null) setRemaining(page.remaining);
+        if (page.items.length === 0) break;
+        const lastId = page.items[page.items.length - 1].id;
+        if (lastId > cursor) cursor = lastId;
+        setChats(
+          mergeChatItems(
+            untrack(() => Array.from(chats)),
+            page.items
+          )
+        );
+        if (!page.has_more) break;
       }
+      // the chat reconcile is gone; refresh the solved marker on a slower cadence
+      if (pollTick % 6 === 0) await solvesQuery.refetch();
     } catch (error) {
       console.error(error);
     } finally {
@@ -210,6 +250,7 @@ export default function (props: ChallengeWidgetProps) {
     setLoadingOlder(true);
     try {
       const page = await getGamePlayerChatMessages(props.gameId, props.challengeId, {
+        mode: "before",
         before_id: beforeId,
       });
       setHasMoreHistory(page.has_more);
@@ -230,15 +271,9 @@ export default function (props: ChallengeWidgetProps) {
 
   let chatBottomEl: HTMLDivElement;
 
-  const availableMsg = createMemo(() => {
-    // every player could send up to 3 messages before admin reply
-    let count = 0;
-    for (let i = chats.length - 1; i >= 0; i--) {
-      if (chats.at(i)?.user_id === accountStore.id) count++;
-      if (chats.at(i)?.is_admin && chats.at(i)?.user_id !== 0) break;
-    }
-    return 3 - count;
-  });
+  // the server is authoritative for the send quota; fall back to the cap
+  // until the first response with `remaining` arrives
+  const availableMsg = createMemo(() => remaining() ?? FREE_MESSAGE_LIMIT);
   const [editorExpanded, setEditorExpanded] = createSignal(false);
 
   onMount(() => {
@@ -340,7 +375,7 @@ export default function (props: ChallengeWidgetProps) {
               labelClasses={chat.is_admin ? "text-success" : "text-warning"}
               content={chat.content}
               sendAt={chat.created_at}
-              isChecked={chat.checked}
+              isChecked={chat.checked || chat.id <= checkedThroughId()}
             />
           )}
         </For>

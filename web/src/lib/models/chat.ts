@@ -35,6 +35,8 @@ export type ChatSession = {
 export type ChatMessagePage = {
   items: Chat[];
   has_more: boolean;
+  checked_through_id: number | null;
+  remaining: number | null;
 };
 
 export type ChatSessionPage = {
