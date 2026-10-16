@@ -38,7 +38,14 @@ import {
 } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import type { ChallengeWidgetProps } from ".";
-import { mergeChatItems, mergeChats, parseChatReference, resolveChatReference } from "./hammer.utils";
+import {
+  type AggregatedReaction,
+  aggregateReactions,
+  mergeChatItems,
+  mergeChats,
+  parseChatReference,
+  resolveChatReference,
+} from "./hammer.utils";
 import ChatHistorySentinel from "./hammer-sentinel";
 import ChatToolbarActions from "./hammer-toolbar";
 
@@ -46,12 +53,7 @@ import ChatToolbarActions from "./hammer-toolbar";
 // quota fallback before the first authoritative `remaining` arrives
 const FREE_MESSAGE_LIMIT = 3;
 
-export type ChatReaction = {
-  /** icon class of the reaction emoji */
-  icon: string;
-  /** display name of the user who reacted */
-  label: string;
-};
+type ChatReaction = AggregatedReaction;
 
 export function ChatBlock(props: {
   avatar?: string;
@@ -148,11 +150,17 @@ export function ChatBlock(props: {
             <For each={props.reactions}>
               {(reaction) => (
                 <Tag
+                  size="sm"
                   level="layer-content"
-                  title={reaction.label}
-                  icon={<span class={clsx("w-4 h-4 shrink-0", reaction.icon)} />}
+                  title={[...reaction.labels, ...reaction.overflow].join(", ")}
+                  icon={<span class={clsx("w-3.5 h-3.5 shrink-0", reaction.icon)} />}
                 >
-                  <span>{reaction.label}</span>
+                  <span>
+                    {reaction.labels.join(", ")}
+                    <Show when={reaction.overflow.length > 0}>
+                      <span title={reaction.overflow.join(", ")}> +{reaction.overflow.length}</span>
+                    </Show>
+                  </span>
                 </Tag>
               )}
             </For>
@@ -378,17 +386,10 @@ export default function (props: ChallengeWidgetProps) {
     const beforeId = minLoadedId();
     if (beforeId <= 0 || loadingOlder()) return;
     setLoadingOlder(true);
-    // keep the scroll anchor stable while older messages are prepended
-    const scroller = document.scrollingElement;
-    const prevHeight = scroller?.scrollHeight ?? 0;
-    const prevTop = scroller?.scrollTop ?? 0;
     try {
       const page = await getGamePlayerChatMessages(props.gameId, props.challengeId, {
         mode: "before",
         before_id: beforeId,
-      });
-      requestAnimationFrame(() => {
-        if (scroller) scroller.scrollTop = prevTop + (scroller.scrollHeight - prevHeight);
       });
       setHasMoreHistory(page.has_more);
       if (page.items.length > 0) {
@@ -467,7 +468,10 @@ export default function (props: ChallengeWidgetProps) {
       list.push({ icon: info.moji, label: message.user_name || message.user_account || "?" });
       targets.set(info.message.id, list);
     }
-    return targets;
+    // same-emoji reactions merge into one tag with overflow collapsing
+    const aggregated = new Map<number, ChatReaction[]>();
+    for (const [id, list] of targets) aggregated.set(id, aggregateReactions(list));
+    return aggregated;
   });
 
   function resolveReference(message: Chat) {

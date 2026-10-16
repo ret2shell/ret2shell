@@ -85,3 +85,43 @@ export function resolveChatReference(
 function restIsSingleMoji(rest: string): boolean {
   return singleMojiOf(rest) !== undefined;
 }
+
+export type AggregatedReaction = {
+  /** icon class of the reaction emoji */
+  icon: string;
+  /** at most 4 display labels, repeated reactors carry ×count */
+  labels: string[];
+  /** labels hidden behind the +N overflow hint */
+  overflow: string[];
+  /** distinct reacting users */
+  users: number;
+  /** total reactions including repeats */
+  count: number;
+};
+
+/**
+ * Merge the reactions collected under one message: same-emoji reactions
+ * collapse into a single tag with comma-separated names; beyond four names
+ * the rest go behind a +N overflow hint; repeated reactions from the same
+ * user render as `name ×count`.
+ */
+export function aggregateReactions(reactions: { icon: string; label: string }[]): AggregatedReaction[] {
+  // icon -> (label -> count), insertion ordered
+  const byIcon = new Map<string, Map<string, number>>();
+  for (const reaction of reactions) {
+    const users = byIcon.get(reaction.icon) ?? new Map();
+    users.set(reaction.label, (users.get(reaction.label) ?? 0) + 1);
+    byIcon.set(reaction.icon, users);
+  }
+  return [...byIcon.entries()].map(([icon, users]) => {
+    const entries = [...users.entries()];
+    const decorate = ([name, n]: [string, number]) => (n > 1 ? `${name}×${n}` : name);
+    return {
+      icon,
+      labels: entries.slice(0, 4).map(decorate),
+      overflow: entries.slice(4).map(decorate),
+      users: entries.length,
+      count: entries.reduce((sum, [, n]) => sum + n, 0),
+    };
+  });
+}

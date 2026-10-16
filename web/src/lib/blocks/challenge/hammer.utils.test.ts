@@ -7,7 +7,13 @@ vi.mock("@storage/theme", () => ({
   t: (key: string) => key,
 }));
 
-import { mergeChatItems, mergeChats, parseChatReference, resolveChatReference } from "./hammer.utils";
+import {
+  aggregateReactions,
+  mergeChatItems,
+  mergeChats,
+  parseChatReference,
+  resolveChatReference,
+} from "./hammer.utils";
 
 function createChat(overrides: Partial<Chat> = {}): Chat {
   return {
@@ -171,5 +177,44 @@ describe("chat references", () => {
     expect(resolveChatReference(session, parsed!.reference, parsed!.rest)?.reaction).toBe(true);
     const reply = parseChatReference("@alice#10 :fire: 还有文字");
     expect(resolveChatReference(session, reply!.reference, reply!.rest)?.reaction).toBe(false);
+  });
+});
+
+describe("aggregateReactions", () => {
+  it("merges same-emoji reactions with comma separated names", () => {
+    const merged = aggregateReactions([
+      { icon: "a", label: "Alice" },
+      { icon: "b", label: "Bob" },
+      { icon: "a", label: "Carol" },
+    ]);
+    expect(merged).toHaveLength(2);
+    expect(merged[0]).toMatchObject({ icon: "a", labels: ["Alice", "Carol"], overflow: [] });
+    expect(merged[1]).toMatchObject({ icon: "b", labels: ["Bob"], overflow: [] });
+  });
+
+  it("puts names beyond four behind the +N overflow hint", () => {
+    const merged = aggregateReactions([
+      { icon: "a", label: "u1" },
+      { icon: "a", label: "u2" },
+      { icon: "a", label: "u3" },
+      { icon: "a", label: "u4" },
+      { icon: "a", label: "u5" },
+      { icon: "a", label: "u6" },
+    ]);
+    expect(merged[0].labels).toEqual(["u1", "u2", "u3", "u4"]);
+    expect(merged[0].overflow).toEqual(["u5", "u6"]);
+    expect(merged[0].users).toBe(6);
+  });
+
+  it("appends ×count for repeated reactions from the same user", () => {
+    const merged = aggregateReactions([
+      { icon: "a", label: "Alice" },
+      { icon: "a", label: "Alice" },
+      { icon: "a", label: "Alice" },
+      { icon: "a", label: "Bob" },
+    ]);
+    expect(merged[0].labels).toEqual(["Alice×3", "Bob"]);
+    expect(merged[0].count).toBe(4);
+    expect(merged[0].users).toBe(2);
   });
 });

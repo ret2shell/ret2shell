@@ -8,8 +8,15 @@ import {
 import { useTeamInfo, useTeamSolves } from "@api/team";
 // import xdsecMascotCiallo from "@assets/imgs/xdsec-mascot-ciallo.webp";
 import platformAvatar from "@assets/imgs/rx.webp";
-import { ChatBlock, type ChatReaction } from "@blocks/challenge/hammer";
-import { mergeChatItems, mergeChats, parseChatReference, resolveChatReference } from "@blocks/challenge/hammer.utils";
+import { ChatBlock } from "@blocks/challenge/hammer";
+import {
+  type AggregatedReaction,
+  aggregateReactions,
+  mergeChatItems,
+  mergeChats,
+  parseChatReference,
+  resolveChatReference,
+} from "@blocks/challenge/hammer.utils";
 import ChatHistorySentinel from "@blocks/challenge/hammer-sentinel";
 import ChatToolbarActions from "@blocks/challenge/hammer-toolbar";
 import { singleMojiOf } from "@lib/moji";
@@ -133,7 +140,7 @@ export default function () {
   });
 
   const reactionTargets = createMemo(() => {
-    const targets = new Map<number, ChatReaction[]>();
+    const targets = new Map<number, AggregatedReaction[]>();
     for (const message of chats) {
       const info = classify(message);
       if (info?.kind !== "reaction" || !info.moji || !info.message) continue;
@@ -141,7 +148,10 @@ export default function () {
       list.push({ icon: info.moji, label: message.user_name || message.user_account || "?" });
       targets.set(info.message.id, list);
     }
-    return targets;
+    // same-emoji reactions merge into one tag with overflow collapsing
+    const aggregated = new Map<number, AggregatedReaction[]>();
+    for (const [id, list] of targets) aggregated.set(id, aggregateReactions(list));
+    return aggregated;
   });
 
   function resolveReference(message: Chat) {
@@ -280,9 +290,6 @@ export default function () {
 
   const [editorExpanded, setEditorExpanded] = createSignal(false);
   const [loadingOlder, setLoadingOlder] = createSignal(false);
-  // the overlay scrollbars instance resolves its viewport asynchronously;
-  // the sentinel re-arms its observer once this signal settles
-  const [chatViewport, setChatViewport] = createSignal<HTMLElement | null>(null);
 
   async function loadOlder() {
     const currentChallengeId = challengeId();
@@ -290,17 +297,10 @@ export default function () {
     const beforeId = minLoadedId();
     if (!currentChallengeId || !currentTeamId || beforeId <= 0 || loadingOlder()) return;
     setLoadingOlder(true);
-    // keep the scroll anchor stable while older messages are prepended
-    const scroller = chatViewport();
-    const prevHeight = scroller?.scrollHeight ?? 0;
-    const prevTop = scroller?.scrollTop ?? 0;
     try {
       const page = await getGameAdminChatMessages(gameId(), currentChallengeId, currentTeamId, {
         mode: "before",
         before_id: beforeId,
-      });
-      requestAnimationFrame(() => {
-        if (scroller) scroller.scrollTop = prevTop + (scroller.scrollHeight - prevHeight);
       });
       setHasMoreHistory(page.has_more);
       if (page.items.length > 0) {
@@ -399,11 +399,6 @@ export default function () {
           </Show>
         </div>
         <OverlayScrollbarsComponent
-          ref={(instance) => {
-            // the solid binding hands over the OverlayScrollbars instance
-            // (not the DOM element) once it is initialized
-            setChatViewport(instance?.elements?.().viewport ?? null);
-          }}
           class="w-full flex-1 relative"
           options={{
             scrollbars: {
@@ -435,12 +430,7 @@ export default function () {
                   sendAt={game.data?.start_at ?? DateTime.now()}
                   isChecked
                 />
-                <ChatHistorySentinel
-                  onLoad={loadOlder}
-                  hasMore={hasMoreHistory()}
-                  loading={loadingOlder()}
-                  root={chatViewport()}
-                />
+                <ChatHistorySentinel onLoad={loadOlder} hasMore={hasMoreHistory()} loading={loadingOlder()} />
                 <For each={chats.filter((m) => !classify(m) || classify(m)!.kind === "reply")}>
                   {(chat, index) => (
                     <ChatBlock
