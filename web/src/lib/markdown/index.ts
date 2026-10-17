@@ -88,6 +88,10 @@ export class Markdown {
 
     // rehype (the structure may be changed)
     this.processor?.use(rehypeSanitize, schema);
+    // moji spans are trusted markup generated from a fixed dictionary, so
+    // they are inserted after sanitize instead of whitelisting icon classes
+    const moji = await import("./plugins/moji");
+    this.processor?.use(moji.rehypeMoji);
     this.processor?.use(rehypeExternalLinks, {
       target: "_blank",
       content: [

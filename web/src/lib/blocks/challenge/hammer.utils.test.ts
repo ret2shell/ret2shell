@@ -7,7 +7,13 @@ vi.mock("@storage/theme", () => ({
   t: (key: string) => key,
 }));
 
-import { mergeChats } from "./hammer.utils";
+import {
+  aggregateReactions,
+  mergeChatItems,
+  mergeChats,
+  parseChatReference,
+  resolveChatReference,
+} from "./hammer.utils";
 
 function createChat(overrides: Partial<Chat> = {}): Chat {
   return {
@@ -28,6 +34,41 @@ function createChat(overrides: Partial<Chat> = {}): Chat {
     ...overrides,
   };
 }
+
+describe("mergeChatItems", () => {
+  it("dedupes by id and keeps ascending order", () => {
+    const merged = mergeChatItems(
+      [createChat({ id: 2, created_at: DateTime.fromSeconds(2) })],
+      [
+        createChat({ id: 3, created_at: DateTime.fromSeconds(3) }),
+        createChat({ id: 1, created_at: DateTime.fromSeconds(1) }),
+        createChat({ id: 2, created_at: DateTime.fromSeconds(2) }),
+      ]
+    );
+
+    expect(merged.map((chat) => chat.id)).toEqual([1, 2, 3]);
+  });
+
+  it("replaces existing items with incoming ones sharing the same id", () => {
+    const merged = mergeChatItems(
+      [createChat({ id: 1, checked: false, content: "old" })],
+      [createChat({ id: 1, checked: true, content: "new" })]
+    );
+
+    expect(merged).toHaveLength(1);
+    expect(merged[0]).toMatchObject({ id: 1, checked: true, content: "new" });
+  });
+
+  it("breaks created_at ties by id", () => {
+    const at = DateTime.fromSeconds(5);
+    const merged = mergeChatItems(
+      [createChat({ id: 3, created_at: at })],
+      [createChat({ id: 2, created_at: at }), createChat({ id: 1, created_at: at })]
+    );
+
+    expect(merged.map((chat) => chat.id)).toEqual([1, 2, 3]);
+  });
+});
 
 describe("mergeChats", () => {
   it("keeps only current session chats and appends the solved system message", () => {
@@ -77,5 +118,103 @@ describe("mergeChats", () => {
     expect(current[0]).toBe(firstChat);
     expect(current[0]).toMatchObject({ id: 1, checked: true });
     expect(current[1]).toMatchObject({ id: 2, content: "next" });
+  });
+});
+
+describe("chat references", () => {
+  const session = [
+    createChat({ id: 10, user_account: "alice", user_id: 2, content: "被引用的消息" }),
+    createChat({ id: 11, user_account: "admin", user_id: 1, content: "管理员的回复", is_admin: true }),
+  ];
+
+  it("parses the @account#id prefix", () => {
+    expect(parseChatReference("@alice#10 你好")).toEqual({
+      reference: { account: "alice", messageId: 10 },
+      rest: "你好",
+    });
+    expect(parseChatReference("@alice#10 :fire:")).toEqual({
+      reference: { account: "alice", messageId: 10 },
+      rest: ":fire:",
+    });
+  });
+
+  it("rejects malformed prefixes", () => {
+    expect(parseChatReference("普通消息")).toBeNull();
+    expect(parseChatReference("@alice#10无空格")).toBeNull();
+    expect(parseChatReference("前置文本 @alice#10 你好")).toBeNull();
+  });
+
+  it("accepts a bare prefix (empty reply body sent as-is)", () => {
+    expect(parseChatReference("@alice#10")).toEqual({
+      reference: { account: "alice", messageId: 10 },
+      rest: "",
+    });
+    expect(parseChatReference("@alice#10 ")).toEqual({
+      reference: { account: "alice", messageId: 10 },
+      rest: "",
+    });
+  });
+
+  it("resolves when account and id match any session message, admin included", () => {
+    expect(resolveChatReference(session, { account: "alice", messageId: 10 }, "你好")).toEqual({
+      message: session[0],
+      reaction: false,
+    });
+    // 账号不匹配
+    expect(resolveChatReference(session, { account: "bob", messageId: 10 }, "你好")).toBeNull();
+    // 消息不存在
+    expect(resolveChatReference(session, { account: "alice", messageId: 99 }, "你好")).toBeNull();
+    // 管理员消息也可以被引用
+    expect(resolveChatReference(session, { account: "admin", messageId: 11 }, "你好")).toEqual({
+      message: session[1],
+      reaction: false,
+    });
+  });
+
+  it("classifies a single moji rest as a reaction", () => {
+    expect(resolveChatReference(session, { account: "alice", messageId: 10 }, "你好")?.reaction).toBe(false);
+    const parsed = parseChatReference("@alice#10 :fire:");
+    expect(resolveChatReference(session, parsed!.reference, parsed!.rest)?.reaction).toBe(true);
+    const reply = parseChatReference("@alice#10 :fire: 还有文字");
+    expect(resolveChatReference(session, reply!.reference, reply!.rest)?.reaction).toBe(false);
+  });
+});
+
+describe("aggregateReactions", () => {
+  it("merges same-emoji reactions with comma separated names", () => {
+    const merged = aggregateReactions([
+      { icon: "a", label: "Alice" },
+      { icon: "b", label: "Bob" },
+      { icon: "a", label: "Carol" },
+    ]);
+    expect(merged).toHaveLength(2);
+    expect(merged[0]).toMatchObject({ icon: "a", labels: ["Alice", "Carol"], overflow: [] });
+    expect(merged[1]).toMatchObject({ icon: "b", labels: ["Bob"], overflow: [] });
+  });
+
+  it("puts names beyond four behind the +N overflow hint", () => {
+    const merged = aggregateReactions([
+      { icon: "a", label: "u1" },
+      { icon: "a", label: "u2" },
+      { icon: "a", label: "u3" },
+      { icon: "a", label: "u4" },
+      { icon: "a", label: "u5" },
+      { icon: "a", label: "u6" },
+    ]);
+    expect(merged[0].labels).toEqual(["u1", "u2", "u3", "u4"]);
+    expect(merged[0].overflow).toEqual(["u5", "u6"]);
+    expect(merged[0].users).toBe(6);
+  });
+
+  it("appends ×count for repeated reactions from the same user", () => {
+    const merged = aggregateReactions([
+      { icon: "a", label: "Alice" },
+      { icon: "a", label: "Alice" },
+      { icon: "a", label: "Alice" },
+      { icon: "a", label: "Bob" },
+    ]);
+    expect(merged[0].labels).toEqual(["Alice×3", "Bob"]);
+    expect(merged[0].count).toBe(4);
+    expect(merged[0].users).toBe(2);
   });
 });

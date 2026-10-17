@@ -1181,8 +1181,9 @@
       "outerFollow": "Hammer is not enabled for this game. Please follow the organizer's requirements and provide feedback through other channels.",
       "tips": {
         "0": "The message you send here will be forwarded to the challenge setter along with your status. The challenge setter may reply here or contact you through other IMs.",
-        "1": "Please note that before the challenge setter replies, you can only send three messages, so please try to combine your questions in one message.",
-        "2": "For long messages such as logs and code, it is recommended to use an online clipboard to send, for example:"
+        "1": "Note that you can only send five messages before the challenge author replies, so try to combine your questions.",
+        "2": "For long messages such as logs and code, it is recommended to use an online clipboard to send, for example:",
+        "3": "Heads up~ emoji reactions count towards your message quota too!"
       },
       "role": {
         "admin": "Admin",
@@ -1204,7 +1205,17 @@
         "maxMessageLimit": {
           "title": "Message limit reached, please wait for response..."
         }
-      }
+      },
+      "toolbar": {
+        "uploadImage": "Upload image",
+        "insertMoji": "Insert moji",
+        "notImage": "Only image files can be uploaded",
+        "uploaded": "Image uploaded",
+        "uploadFailed": "Failed to upload image",
+        "react": "React with moji",
+        "reply": "Reply"
+      },
+      "jumpToReferenced": "Jump to the referenced message"
     },
     "submission": {
       "submit": "Submitted",
@@ -2408,5 +2419,18 @@
     "title": "Institute management",
     "manual": "Manual",
     "withOAuth": "Use 3rd auth service"
+  },
+  "moji": {
+    "search": "Search moji…",
+    "notFound": "No moji found",
+    "categories": {
+      "smileys": "Smileys",
+      "gestures": "Gestures",
+      "animals": "Animals",
+      "food": "Food",
+      "activities": "Activities",
+      "objects": "Objects",
+      "symbols": "Symbols"
+    }
   }
 }

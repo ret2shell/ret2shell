@@ -1,6 +1,9 @@
 pub const DEFAULT_PAGE: u64 = 1;
 pub const DEFAULT_PAGE_SIZE: u64 = 15;
-pub const DEFAULT_CHAT_PAGE_SIZE: u64 = 30;
+pub const DEFAULT_CHAT_MESSAGE_LIMIT: u64 = 50;
+pub const DEFAULT_CHAT_SESSION_LIMIT: u64 = 20;
+pub const DEFAULT_CHAT_SYNC_LIMIT: u64 = 100; // unread chunk cap for mode=sync
+pub const CHAT_SYNC_CONTEXT_SIZE: u64 = 16; // read context returned by mode=sync
 pub const DEFAULT_SUBMISSION_PAGE_SIZE: u64 = 10;
 pub const MAX_PAGE_SIZE: u64 = 100;
 pub const DEFAULT_LOG_LIMIT: usize = 1000;
