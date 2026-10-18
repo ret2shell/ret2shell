@@ -122,8 +122,8 @@ external_https  = true
 # ? Rate limit use Generic cell rate algorithm.
 # ? https://en.wikipedia.org/wiki/Generic_cell_rate_algorithm
 [server.rate_limit]
-burst_limit        = 32
-burst_restore_rate = 500 # ? in milliseconds
+burst_limit               = 32
+burst_restore_interval_ms = 500 # ? interval between token replenishments, in milliseconds
 
 # ? Following settings could be changed at web admin panel.
 # ? Configuration in database will overwrite the following settings.

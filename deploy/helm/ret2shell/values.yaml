@@ -103,6 +103,7 @@ platform:
       zenGame: 0
       rateLimit:
         burstLimit: 32
+        # Interval between token replenishments, in milliseconds (larger = stricter).
         burstRestoreRate: 500
     extraToml: ""
   blocked:

@@ -270,7 +270,7 @@ zen_game = {{ .Values.platform.config.server.zenGame }}
 
 [server.rate_limit]
 burst_limit = {{ .Values.platform.config.server.rateLimit.burstLimit }}
-burst_restore_rate = {{ .Values.platform.config.server.rateLimit.burstRestoreRate }}
+burst_restore_interval_ms = {{ .Values.platform.config.server.rateLimit.burstRestoreRate }}
 
 [server.frontend]
 serve_type = 'static'
