@@ -141,7 +141,7 @@ fn construct_router(state: &GlobalState) -> Router<GlobalState> {
   let route = if let Some(config) = state.config.server.clone().unwrap_or_default().rate_limit {
     let governor_conf = Arc::new(
       GovernorConfigBuilder::default()
-        .per_millisecond(config.burst_restore_rate.unwrap_or(500))
+        .per_millisecond(config.burst_restore_interval_ms.unwrap_or(500))
         .burst_size(config.burst_limit.unwrap_or(32))
         .key_extractor(ProxiedIpExtractor)
         .use_headers()

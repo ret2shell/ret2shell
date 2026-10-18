@@ -18,14 +18,19 @@ pub struct FrontendConfig {
   pub path: String,
 }
 
+/// Rate limiting uses the Generic Cell Rate Algorithm.
+/// https://en.wikipedia.org/wiki/Generic_cell_rate_algorithm
 #[derive(Serialize, Deserialize, Clone, Debug, Default, FromJsonQueryResult, PartialEq, Eq)]
 pub struct RateLimitConfig {
-  // /// request rate per 5 seconds
-  // pub api_rate_limit: Option<i32>,
-  /// Rate limit use Generic cell rate algorithm
-  /// https://en.wikipedia.org/wiki/Generic_cell_rate_algorithm
+  /// Maximum number of requests allowed in a burst before requests start
+  /// being rejected.
   pub burst_limit: Option<u32>,
-  pub burst_restore_rate: Option<u64>, // in milliseconds
+  /// Interval, in milliseconds, after which one request token is replenished.
+  /// Larger values mean a stricter sustained request rate.
+  ///
+  /// The legacy key `burst_restore_rate` is still accepted when deserializing.
+  #[serde(alias = "burst_restore_rate")]
+  pub burst_restore_interval_ms: Option<u64>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default, FromJsonQueryResult, PartialEq, Eq)]
@@ -167,7 +172,7 @@ mod tests {
       cors_origins: "https://app.example".to_owned(),
       rate_limit: Some(RateLimitConfig {
         burst_limit: Some(60),
-        burst_restore_rate: Some(500),
+        burst_restore_interval_ms: Some(500),
       }),
       frontend: Some(FrontendConfig {
         serve_type: FrontendServeType::Proxy,
@@ -183,6 +188,31 @@ mod tests {
       highlight_banner: Some("Welcome banner".to_owned()),
       zen_game: Some(7),
     }
+  }
+
+  #[test]
+  fn rate_limit_accepts_legacy_restore_rate_key() {
+    let current: RateLimitConfig = toml::from_str(
+      r#"
+burst_limit = 32
+burst_restore_interval_ms = 500
+"#,
+    )
+    .expect("parse current interval key");
+    let legacy: RateLimitConfig = toml::from_str(
+      r#"
+burst_limit = 32
+burst_restore_rate = 500
+"#,
+    )
+    .expect("parse legacy rate key");
+
+    assert_eq!(legacy.burst_restore_interval_ms, Some(500));
+    assert_eq!(legacy, current);
+
+    let serialized = toml::to_string(&legacy).expect("serialize rate limit config");
+    assert!(serialized.contains("burst_restore_interval_ms"));
+    assert!(!serialized.contains("burst_restore_rate"));
   }
 
   #[test]
@@ -228,7 +258,7 @@ mod tests {
       cors_origins: "https://ignored.example".to_owned(),
       rate_limit: Some(RateLimitConfig {
         burst_limit: Some(1),
-        burst_restore_rate: Some(1),
+        burst_restore_interval_ms: Some(1),
       }),
       frontend: Some(FrontendConfig {
         serve_type: FrontendServeType::Static,
@@ -257,7 +287,7 @@ mod tests {
       merged.rate_limit,
       Some(RateLimitConfig {
         burst_limit: Some(60),
-        burst_restore_rate: Some(500),
+        burst_restore_interval_ms: Some(500),
       })
     );
     assert_eq!(
