@@ -20,6 +20,7 @@ import Button from "@widgets/button";
 import Link from "@widgets/link";
 import LoadingTips from "@widgets/loading-tips";
 import clsx from "clsx";
+import { HTTPError } from "ky";
 import { DateTime } from "luxon";
 import { createEffect, createMemo, createSignal, Match, onCleanup, Show, Switch } from "solid-js";
 import { Transition } from "solid-transition-group";
@@ -53,7 +54,12 @@ export default function () {
     game_id: () => gameId(),
     challenge_id: () => selectedChallengeId() || 0,
     enabled: () => !!selectedChallengeId(),
-    onError: () => {
+    onError: (err) => {
+      // Rate limiting is transient; keep the current challenge selected so a
+      // quick click does not bounce the player back to the welcome page.
+      if (err instanceof HTTPError && err.response.status === 429) {
+        return false;
+      }
       setSearchParams({ challenge: null, create: null });
       return false;
     },

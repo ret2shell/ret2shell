@@ -26,6 +26,11 @@
           "title": "I'm a teapot",
           "message": "Does brewing coffee with a teapot really not cause flavor transfer"
         },
+        "429": {
+          "title": "Too many requests",
+          "message": "Too many requests. Please retry in {{ seconds }}s",
+          "messageGeneric": "Too many requests. Please try again later"
+        },
         "500": {
           "title": "Internal server error",
           "message": "The server is on fire"
