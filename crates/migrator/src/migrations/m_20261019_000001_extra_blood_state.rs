@@ -64,11 +64,29 @@ impl MigrationTrait for Migration {
           .to_owned(),
       )
       .await?;
+    // Only blood rewards are scanned when a challenge score changes; keep the
+    // index tiny so the lookup stays O(3) even when a challenge has many hint
+    // or manually granted extras.
+    manager
+      .create_index(
+        Index::create()
+          .name("idx_extra_challenge_blood")
+          .table(Extra::Table)
+          .col(Extra::ChallengeId)
+          .col(Extra::BloodState)
+          .cond_where(Expr::col(Extra::BloodState).is_not_null())
+          .if_not_exists()
+          .to_owned(),
+      )
+      .await?;
 
     Ok(())
   }
 
   async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+    manager
+      .drop_index(Index::drop().name("idx_extra_challenge_blood").to_owned())
+      .await?;
     manager
       .drop_index(Index::drop().name("idx_extra_challenge_id").to_owned())
       .await?;
