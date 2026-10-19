@@ -547,6 +547,7 @@ async fn create_team_extra(
     extra::Model {
       id: 0,
       team_id: team.id,
+      blood_state: None,
       ..req
     },
   )

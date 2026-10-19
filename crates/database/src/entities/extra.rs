@@ -20,6 +20,9 @@ pub struct Model {
   pub hint_id: Option<i64>,
   pub team_id: i64,
   pub challenge_id: Option<i64>,
+  /// Which blood reward this row represents: `1`, `2`, `3`, or `None` for
+  /// hints and manually granted extras.
+  pub blood_state: Option<i32>,
 }
 
 #[derive(Clone, Serialize, Deserialize, FromQueryResult)]
@@ -105,6 +108,30 @@ where
   let sql = Entity::find().filter(Column::TeamId.eq(team_id));
   sql.all(db).await
 }
+
+pub async fn get_list_by_challenge<C>(db: &C, challenge_id: i64) -> Result<Vec<Model>, DbErr>
+where
+  C: ConnectionTrait, {
+  Entity::find()
+    .filter(Column::ChallengeId.eq(challenge_id))
+    .filter(Column::BloodState.is_not_null())
+    .all(db)
+    .await
+}
+
+pub async fn update_score<C>(db: &C, id: i64, score: i32) -> Result<(), DbErr>
+where
+  C: ConnectionTrait, {
+  ActiveModel {
+    id: ActiveValue::Unchanged(id),
+    score: ActiveValue::Set(score),
+    ..Default::default()
+  }
+  .update(db)
+  .await?;
+  Ok(())
+}
+
 pub async fn get_list_ex<C>(db: &C, team_id: i64) -> Result<Vec<ExModel>, DbErr>
 where
   C: ConnectionTrait, {

@@ -10,4 +10,5 @@ export type Extra = {
   team_name?: string;
   challenge_id: number | null;
   challenge_name?: string;
+  blood_state: number | null;
 };

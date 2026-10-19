@@ -454,6 +454,7 @@ async fn submission_worker_exec(
               challenge.id, challenge.name
             ),
             hint_id: None,
+            blood_state: Some(blood_state),
           },
         )
         .await?;
