@@ -698,6 +698,9 @@ async fn create_challenge_from_bucket(
     ref_id: None,
     release_at: None,
     archive_at: None,
+    // a freshly imported challenge has never been placed by hand
+    layout_col: None,
+    layout_row: None,
     prerequisites: challenge::PrerequisiteList(prerequisites),
     avatar: config.avatar,
     unlock_limit: config.unlock_limit,
@@ -743,6 +746,10 @@ async fn sync_challenge_record(
     ref_id: previous.ref_id,
     release_at: previous.release_at,
     archive_at: previous.archive_at,
+    // the graph layout lives only in the database — the bucket knows nothing
+    // about it, so a repository sync must never clobber a hand-placed node
+    layout_col: previous.layout_col,
+    layout_row: previous.layout_row,
     prerequisites: challenge::PrerequisiteList(prerequisites),
     avatar: config.avatar,
     unlock_limit: config.unlock_limit,
@@ -798,6 +805,8 @@ async fn sync_milestones_from_bucket(
       avatar: bucket_milestone.avatar.clone(),
       bonus_score: bucket_milestone.bonus_score,
       name: bucket_milestone.name.clone(),
+      layout_col: None,
+      layout_row: None,
       description: bucket_milestone.description.clone(),
       unlock_limit: bucket_milestone.unlock_limit,
     };

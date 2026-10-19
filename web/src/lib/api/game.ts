@@ -15,6 +15,40 @@ import type { DateTime } from "luxon";
 import { createMemo } from "solid-js";
 import api, { api_root, handleHttpError, inflyClient, safeJson, toastSuccess } from ".";
 
+/// One node of the milestone graph an administrator has placed by hand.
+/// Coordinates are logical grid units, not pixels.
+export type LayoutNodeInput = { id: number; col: number; row: number };
+
+/// Persists manual node positions of the milestone graph. Only the nodes that
+/// actually moved are sent, so a node nobody touched keeps a `null` position
+/// and stays owned by the automatic layout.
+export async function updateGameLayout(game_id: number, challenges: LayoutNodeInput[], milestones: LayoutNodeInput[]) {
+  return await api
+    .patch(`${api_root}/game/${game_id}/layout`, { json: { challenges, milestones } })
+    .json<{ updated: number }>();
+}
+
+export function useUpdateGameLayoutMutation(
+  props: { silenced?: boolean; onSuccess?: () => void; onError?: (err: Error) => void } = {}
+) {
+  return useMutation(() => ({
+    mutationFn: (req: { game_id: number; challenges: LayoutNodeInput[]; milestones: LayoutNodeInput[] }) =>
+      updateGameLayout(req.game_id, req.challenges, req.milestones),
+    onSuccess: () => {
+      if (!props.silenced) {
+        toastSuccess(t("general.actions.save.status.success"));
+      }
+      props.onSuccess?.();
+    },
+    onError: (err: Error) => {
+      if (!props.silenced) {
+        handleHttpError(err, t("general.actions.save.status.fail"));
+      }
+      props.onError?.(err);
+    },
+  }));
+}
+
 export async function getGames(page?: number, page_size?: number, host_type?: HostType, weight?: number) {
   return (
     await api.get(`${api_root}/game`, {

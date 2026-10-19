@@ -4,7 +4,7 @@ import {
   useUpdateChallengeAvatarMutation,
   useUpdateChallengePrerequisitesMutation,
 } from "@api/challenge";
-import { useGame, useSelfSolves } from "@api/game";
+import { type LayoutNodeInput, useGame, useSelfSolves, useUpdateGameLayoutMutation } from "@api/game";
 import { uploadMedia } from "@api/media";
 import {
   requiredPrerequisiteCount,
@@ -1081,9 +1081,34 @@ export default function Milestones(props: { gameId: number }) {
     return { nodes, edges, selected: sel };
   });
 
+  // positions persisted on the server, keyed like the graph nodes. A node
+  // without stored coordinates is still owned by the automatic layout, which
+  // is what keeps a game nobody has arranged rendering exactly as before.
+  const storedPositions = createMemo(() => {
+    const result: Record<string, NodePos> = {};
+    for (const c of challenges.data?.[0] ?? []) {
+      const col = c.layout_col;
+      const row = c.layout_row;
+      if (col === null || row === null) continue;
+      result[`c${c.id}`] = { x: columnX(col), y: row * GRID_Y };
+    }
+    for (const m of milestones.data ?? []) {
+      const col = m.layout_col;
+      const row = m.layout_row;
+      if (col === null || row === null) continue;
+      result[`m${m.id}`] = { x: columnX(col), y: row * GRID_Y };
+    }
+    return result;
+  });
+
+  // keys of the nodes dragged since the last save. A finished drag is the only
+  // thing that counts as human intent, so this set is the unit of persistence:
+  // nodes the overlap effect pushes around stay session-only.
+  const [movedKeys, setMovedKeys] = createSignal<Set<string>>(new Set());
+
   const dirty = createMemo(() => {
     const pack = (list: Edge[]) => list.map(edgeKey).sort().join("|");
-    return pack(validEdges()) !== pack(baseline().filter(isValidEdge));
+    return pack(validEdges()) !== pack(baseline().filter(isValidEdge)) || movedKeys().size > 0;
   });
 
   // follow server state whenever there is no local unsaved edit
@@ -1099,6 +1124,26 @@ export default function Milestones(props: { gameId: number }) {
   // the auto layout, so admins always preview the same graph players see
   const [positions, setPositions] = createSignal<Record<string, NodePos>>({});
 
+  /// Lays the graph out and puts the saved positions on top of the result.
+  ///
+  /// The saved positions are a sparse overlay and never part of `existing`:
+  /// feeding a partial set into `autoLayout` takes its incremental branch,
+  /// which only behaves when nearly every node is already placed — with a
+  /// single saved node it rearranges the whole graph.
+  ///
+  /// `keep` holds positions that outrank the saved value. A normal load
+  /// passes whatever this session already placed, so an unsaved drag is not
+  /// thrown away; a reset passes nothing, so every node returns to the spot
+  /// it was last saved at.
+  function layoutWithStored(ns: GNode[], es: Edge[], keep: Record<string, NodePos>) {
+    const placed = autoLayout(ns, es, keep);
+    for (const [key, at] of Object.entries(storedPositions())) {
+      if (keep[key]) continue;
+      placed[key] = at;
+    }
+    return placed;
+  }
+
   // layout nodes that do not have a position yet; wait until both queries
   // resolve, otherwise nodes arriving first would be laid out with an empty
   // edge set and pile up in the first column. edges are derived from
@@ -1110,7 +1155,7 @@ export default function Milestones(props: { gameId: number }) {
       const current = untrack(() => baseEdges().filter(isValidEdge));
       setPositions((prev) => {
         if (ns.every((node) => prev[node.key])) return prev;
-        return autoLayout(ns, current, prev);
+        return layoutWithStored(ns, current, prev);
       });
     })
   );
@@ -1163,6 +1208,7 @@ export default function Milestones(props: { gameId: number }) {
   const updatePrerequisitesMutation = useUpdateChallengePrerequisitesMutation({
     silenced: true,
   });
+  const updateLayoutMutation = useUpdateGameLayoutMutation({ silenced: true });
   const challengeAvatarMutation = useUpdateChallengeAvatarMutation();
   const milestoneAvatarMutation = useUpdateMilestoneMutation();
 
@@ -1699,12 +1745,16 @@ export default function Milestones(props: { gameId: number }) {
       el.removeEventListener("pointermove", onMove);
       el.removeEventListener("pointerup", onUp);
       draggingKey = null;
-      if (!moved) {
-        // a click selects the node and highlights its ancestor chain; the
-        // former click action (detail dialog / challenge page) moved to
-        // double click
-        setSelectedNode(node.key);
+      if (moved) {
+        // only mark the node dirty — persisting happens on save, so merely
+        // opening the page can never write anything
+        if (admin()) setMovedKeys((prev) => new Set(prev).add(node.key));
+        return;
       }
+      // a click selects the node and highlights its ancestor chain; the
+      // former click action (detail dialog / challenge page) moved to
+      // double click
+      setSelectedNode(node.key);
     };
     el.addEventListener("pointermove", onMove);
     el.addEventListener("pointerup", onUp);
@@ -1796,8 +1846,15 @@ export default function Milestones(props: { gameId: number }) {
   }
 
   function resetChanges() {
-    setEdges(baseline().filter(isValidEdge));
+    const restored = baseline().filter(isValidEdge);
+    setEdges(restored);
     setSelectedEdge(null);
+    // node positions are part of the unsaved state now, so resetting has to
+    // cover them too: drop every drag made in this session and fall back to
+    // the saved layout. Without this the button would light up on a drag and
+    // then visibly do nothing.
+    setMovedKeys(new Set());
+    setPositions(layoutWithStored(nodes(), restored, {}));
   }
 
   // re-run the full layout over the current unsaved graph; positions are
@@ -1867,6 +1924,36 @@ export default function Milestones(props: { gameId: number }) {
     setSaving(true);
     let count = 0;
     try {
+      // positions go first: they are a plain database write that cannot fail on
+      // the game bucket, so a later prerequisite error never costs the
+      // administrator the layout work
+      const moved = movedKeys();
+      if (moved.size > 0) {
+        const placed = positions();
+        const challengeNodes: LayoutNodeInput[] = [];
+        const milestoneNodes: LayoutNodeInput[] = [];
+        for (const key of moved) {
+          const at = placed[key];
+          if (!at) continue;
+          const node = { id: Number.parseInt(key.slice(1), 10), col: columnOf(at.x), row: Math.round(at.y / GRID_Y) };
+          if (key.startsWith("m")) milestoneNodes.push(node);
+          else challengeNodes.push(node);
+        }
+        if (challengeNodes.length > 0 || milestoneNodes.length > 0) {
+          const saved = await updateLayoutMutation.mutateAsync({
+            game_id: props.gameId,
+            challenges: challengeNodes,
+            milestones: milestoneNodes,
+          });
+          // report what the server actually wrote: a key that no longer
+          // resolves to a row of this game is filtered out there, and must
+          // not inflate the count shown to the administrator
+          count += saved.updated;
+        }
+        // clear the dirty set even when nothing was sent, so a stale key
+        // can never leave the editor permanently marked as unsaved
+        setMovedKeys(new Set());
+      }
       for (const m of milestones.data ?? []) {
         const next = [...(prereqs.get(`m${m.id}`) ?? [])].sort((a, b) => a - b);
         const prev = [...m.prerequisites].sort((a, b) => a - b);

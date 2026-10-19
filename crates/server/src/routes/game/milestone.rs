@@ -148,6 +148,9 @@ pub(super) async fn update_milestone(
     &txn,
     challenge_milestone::Model {
       id: prev_milestone.id,
+      // as for challenges, only the layout endpoint may move a node
+      layout_col: prev_milestone.layout_col,
+      layout_row: prev_milestone.layout_row,
       ..milestone
     },
   )
