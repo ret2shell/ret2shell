@@ -17,7 +17,7 @@ use r2s_event::{
 };
 use r2s_migrator::Database;
 use r2s_queue::{Queue, TracedMessage};
-use sea_orm::TransactionTrait;
+use sea_orm::{ConnectionTrait, TransactionTrait};
 use serde::{Deserialize, Serialize};
 use tracing::{Instrument, Span, debug, error, error_span, info, warn};
 
@@ -157,6 +157,10 @@ async fn score_maintenance_worker_exec(
   db: Database, challenge: challenge::Model,
 ) -> Result<(), ResponseError> {
   let txn = db.conn.begin().await?;
+  let game = game::get(&txn, challenge.game_id)
+    .await?
+    .ok_or_else(|| DbErr::Custom(format!("game {} not found", challenge.game_id)))?;
+  sync_blood_bonus(&txn, &challenge, &game).await?;
   let submissions = submission::get_list(
     &txn,
     true,
@@ -321,6 +325,30 @@ fn get_award_rate(game: &game::Model, blood_state: i32) -> i32 {
   0
 }
 
+fn blood_bonus(challenge_score: i32, award_rate: i32) -> i32 {
+  challenge_score * award_rate / 100
+}
+
+/// Refreshes the blood rewards of a challenge so their score follows the
+/// current challenge score instead of the initial score they were created
+/// with.
+async fn sync_blood_bonus<C>(
+  db: &C, challenge: &challenge::Model, game: &game::Model,
+) -> Result<(), DbErr>
+where
+  C: ConnectionTrait, {
+  for reward in extra::get_list_by_challenge(db, challenge.id).await? {
+    let Some(blood_state) = reward.blood_state else {
+      continue;
+    };
+    let score = blood_bonus(challenge.score, get_award_rate(game, blood_state));
+    if score != reward.score {
+      extra::update_score(db, reward.id, score).await?;
+    }
+  }
+  Ok(())
+}
+
 #[allow(clippy::too_many_arguments)]
 async fn submission_worker_exec(
   queue: Queue, db: Database, cache: Cache, engine: Engine, checker: Checker, bucket: Bucket,
@@ -439,7 +467,7 @@ async fn submission_worker_exec(
     let changed_at = submission.created_at;
     let mut team = team.clone();
     if let Some(blood_state) = blood_state {
-      let score = challenge.score_rule.initial * get_award_rate(&game, blood_state) / 100;
+      let score = blood_bonus(challenge.score, get_award_rate(&game, blood_state));
       if score > 0 {
         extra::create(
           &txn,
@@ -583,6 +611,14 @@ async fn submission_worker_exec(
 /// achievement. Per-team failures are logged and skipped; only listing the
 /// teams can fail.
 async fn score_maintenance_worker_exec_game(db: Database, game_id: i64) -> Result<(), DbErr> {
+  let txn = db.conn.begin().await?;
+  if let Some(game) = game::get(&txn, game_id).await? {
+    for challenge in challenge::get_list(&txn, game_id, true).await? {
+      sync_blood_bonus(&txn, &challenge, &game).await?;
+    }
+  }
+  txn.commit().await?;
+
   for team in team::get_list_by_game_id(&db.conn, game_id).await? {
     update_team_state(&db, team).await.ok();
   }
@@ -621,4 +657,29 @@ pub async fn update_team_state(db: &Database, team: team::Model) -> Result<(), R
   }
   txn.commit().await?;
   Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+  use super::blood_bonus;
+
+  #[test]
+  fn blood_bonus_follows_the_challenge_score() {
+    assert_eq!(blood_bonus(1000, 5), 50);
+    assert_eq!(blood_bonus(500, 5), 25);
+    assert_eq!(blood_bonus(100, 100), 100);
+  }
+
+  #[test]
+  fn blood_bonus_handles_zero_values() {
+    assert_eq!(blood_bonus(100, 0), 0);
+    assert_eq!(blood_bonus(0, 100), 0);
+    assert_eq!(blood_bonus(0, 0), 0);
+  }
+
+  #[test]
+  fn blood_bonus_truncates_like_the_legacy_formula() {
+    assert_eq!(blood_bonus(101, 33), 33);
+    assert_eq!(blood_bonus(199, 33), 65);
+  }
 }
