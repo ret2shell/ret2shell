@@ -684,7 +684,7 @@
         "label": "雜項設置"
       },
       "awardRate": {
-        "label": "額外獎勵分數比例",
+        "label": "額外獎勵分數比例（按題目目前分數計算）",
         "firstBlood": "一血獎勵分數比例",
         "secondBlood": "二血獎勵分數比例",
         "thirdBlood": "三血獎勵分數比例",
