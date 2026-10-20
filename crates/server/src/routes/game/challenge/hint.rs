@@ -50,7 +50,7 @@ pub(super) async fn get_challenge_hints(
       return Ok(Json(hints));
     }
 
-    let extras = extra::get_list(&db.conn, team.id).await?;
+    let extras = extra::get_list(&db.conn, Some(team.id), None, false).await?;
     let hints = hints
       .iter()
       .map(|h| {
@@ -125,7 +125,7 @@ pub(super) async fn unlock_hint(
         "you does not have enough score to unlock this hint".to_owned(),
       ));
     }
-    if extra::get_list(&txn, team.id)
+    if extra::get_list(&txn, Some(team.id), None, false)
       .await?
       .iter()
       .any(|e| e.hint_id == Some(hint.id))

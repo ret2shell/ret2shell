@@ -444,7 +444,7 @@ where
   let solves =
     super::submission::get_list(db, true, false, None, None, Some(id), None, false).await?;
   let score: i32 = solves.iter().map(|s| s.score).sum();
-  let extras = super::extra::get_list(db, id).await?;
+  let extras = super::extra::get_list(db, Some(id), None, false).await?;
   let extra_score: i32 = extras.iter().map(|e| e.score).sum();
   let milestone_score = if let Some(team) = get(db, id).await? {
     let milestones = super::challenge_milestone::get_list(db, team.game_id).await?;

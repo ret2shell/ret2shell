@@ -37,6 +37,7 @@ pub struct ExModel {
   pub team_name: String,
   pub challenge_id: Option<i64>,
   pub challenge_name: Option<String>,
+  pub blood_state: Option<i32>,
 }
 
 impl ExModel {
@@ -102,21 +103,22 @@ where
   Entity::find_by_id(id).one(db).await
 }
 
-pub async fn get_list<C>(db: &C, team_id: i64) -> Result<Vec<Model>, DbErr>
+pub async fn get_list<C>(
+  db: &C, team_id: Option<i64>, challenge_id: Option<i64>, blood_only: bool,
+) -> Result<Vec<Model>, DbErr>
 where
   C: ConnectionTrait, {
-  let sql = Entity::find().filter(Column::TeamId.eq(team_id));
+  let mut sql = Entity::find();
+  if let Some(team_id) = team_id {
+    sql = sql.filter(Column::TeamId.eq(team_id));
+  }
+  if let Some(challenge_id) = challenge_id {
+    sql = sql.filter(Column::ChallengeId.eq(challenge_id));
+  }
+  if blood_only {
+    sql = sql.filter(Column::BloodState.is_not_null());
+  }
   sql.all(db).await
-}
-
-pub async fn get_list_by_challenge<C>(db: &C, challenge_id: i64) -> Result<Vec<Model>, DbErr>
-where
-  C: ConnectionTrait, {
-  Entity::find()
-    .filter(Column::ChallengeId.eq(challenge_id))
-    .filter(Column::BloodState.is_not_null())
-    .all(db)
-    .await
 }
 
 pub async fn update_score<C>(db: &C, id: i64, score: i32) -> Result<(), DbErr>

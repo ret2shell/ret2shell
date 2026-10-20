@@ -17,7 +17,7 @@ use r2s_event::{
 };
 use r2s_migrator::Database;
 use r2s_queue::{Queue, TracedMessage};
-use sea_orm::{ConnectionTrait, TransactionTrait};
+use sea_orm::TransactionTrait;
 use serde::{Deserialize, Serialize};
 use tracing::{Instrument, Span, debug, error, error_span, info, warn};
 
@@ -156,11 +156,12 @@ async fn score_maintenance_worker(queue: Queue, db: Database) {
 async fn score_maintenance_worker_exec(
   db: Database, challenge: challenge::Model,
 ) -> Result<(), ResponseError> {
-  let txn = db.conn.begin().await?;
-  let game = game::get(&txn, challenge.game_id)
+  let game = game::get(&db.conn, challenge.game_id)
     .await?
     .ok_or_else(|| DbErr::Custom(format!("game {} not found", challenge.game_id)))?;
-  sync_blood_bonus(&txn, &challenge, &game).await?;
+  sync_blood_bonus(&db, &game, &challenge).await?;
+
+  let txn = db.conn.begin().await?;
   let submissions = submission::get_list(
     &txn,
     true,
@@ -332,20 +333,20 @@ fn blood_bonus(challenge_score: i32, award_rate: i32) -> i32 {
 /// Refreshes the blood rewards of a challenge so their score follows the
 /// current challenge score instead of the initial score they were created
 /// with.
-async fn sync_blood_bonus<C>(
-  db: &C, challenge: &challenge::Model, game: &game::Model,
-) -> Result<(), DbErr>
-where
-  C: ConnectionTrait, {
-  for reward in extra::get_list_by_challenge(db, challenge.id).await? {
+async fn sync_blood_bonus(
+  db: &Database, game: &game::Model, challenge: &challenge::Model,
+) -> Result<(), DbErr> {
+  let txn = db.conn.begin().await?;
+  for reward in extra::get_list(&txn, None, Some(challenge.id), true).await? {
     let Some(blood_state) = reward.blood_state else {
       continue;
     };
     let score = blood_bonus(challenge.score, get_award_rate(game, blood_state));
     if score != reward.score {
-      extra::update_score(db, reward.id, score).await?;
+      extra::update_score(&txn, reward.id, score).await?;
     }
   }
+  txn.commit().await?;
   Ok(())
 }
 
@@ -611,13 +612,11 @@ async fn submission_worker_exec(
 /// achievement. Per-team failures are logged and skipped; only listing the
 /// teams can fail.
 async fn score_maintenance_worker_exec_game(db: Database, game_id: i64) -> Result<(), DbErr> {
-  let txn = db.conn.begin().await?;
-  if let Some(game) = game::get(&txn, game_id).await? {
-    for challenge in challenge::get_list(&txn, game_id, true).await? {
-      sync_blood_bonus(&txn, &challenge, &game).await?;
+  if let Some(game) = game::get(&db.conn, game_id).await? {
+    for challenge in challenge::get_list(&db.conn, game_id, true).await? {
+      sync_blood_bonus(&db, &game, &challenge).await?;
     }
   }
-  txn.commit().await?;
 
   for team in team::get_list_by_game_id(&db.conn, game_id).await? {
     update_team_state(&db, team).await.ok();
