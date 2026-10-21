@@ -68,6 +68,14 @@ impl ScoreMaintenance {
       scope: GameMaintenanceScope::All,
     }
   }
+
+  /// Refresh blood rewards and rescore only the teams they belong to.
+  pub fn blood_rates(game_id: i64) -> Self {
+    Self::Game {
+      game_id,
+      scope: GameMaintenanceScope::BloodRates,
+    }
+  }
 }
 
 pub async fn spawn_game_workers(state: GlobalState) {
@@ -746,10 +754,7 @@ mod tests {
 
   #[test]
   fn blood_rate_maintenance_round_trips() {
-    let message = ScoreMaintenance::Game {
-      game_id: 7,
-      scope: GameMaintenanceScope::BloodRates,
-    };
+    let message = ScoreMaintenance::blood_rates(7);
     let encoded = serde_json::to_string(&message).unwrap();
     assert!(encoded.contains("blood_rates"));
     let decoded: ScoreMaintenance = serde_json::from_str(&encoded).unwrap();

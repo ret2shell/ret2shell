@@ -84,6 +84,7 @@ struct SyncOutcome {
   challenge_ids: BTreeSet<i64>,
   scoreboard_updates: Vec<challenge::Model>,
   milestones_changed: bool,
+  blood_rates_changed: bool,
 }
 
 #[derive(Default)]
@@ -428,6 +429,25 @@ async fn execute_post_receive(
         .error(format!("failed to publish the rescore request: {err}"))
         .await;
     }
+  } else if outcome.blood_rates_changed {
+    logger
+      .info("Refreshing blood rewards after rate changes...")
+      .await;
+    if let Err(err) = state
+      .queue
+      .publish(
+        crate::worker::game::SCOREBOARD_TOPIC,
+        crate::worker::game::ScoreMaintenance::blood_rates(game.id),
+        &session.trace_id,
+      )
+      .await
+    {
+      logger
+        .error(format!(
+          "failed to publish the blood rate rescore request: {err}"
+        ))
+        .await;
+    }
   }
   schedule_game_repo_index_refresh(&state, game.id, &session.game_bucket).await;
 
@@ -490,7 +510,11 @@ async fn synchronize_repository(
   let mut current_game = game.clone();
   if game_config_changed {
     logger.info("Synchronizing game config...").await;
+    let previous_award_rate = current_game.award_rate;
+    let previous_award_rates = current_game.award_rates.clone();
     current_game = sync_game_config(txn, &current_game, game_bucket).await?;
+    outcome.blood_rates_changed = current_game.award_rate != previous_award_rate
+      || current_game.award_rates != previous_award_rates;
     outcome.invalidate_game = true;
   }
   if doc_changed {
