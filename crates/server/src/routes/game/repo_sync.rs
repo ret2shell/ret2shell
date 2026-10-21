@@ -419,7 +419,7 @@ async fn execute_post_receive(
       .queue
       .publish(
         crate::worker::game::SCOREBOARD_TOPIC,
-        crate::worker::game::ScoreMaintenance::Game { game_id: game.id },
+        crate::worker::game::ScoreMaintenance::game(game.id),
         &session.trace_id,
       )
       .await

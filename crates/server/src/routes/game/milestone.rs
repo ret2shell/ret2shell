@@ -97,7 +97,7 @@ pub(super) async fn create_milestone(
   queue
     .publish(
       SCOREBOARD_TOPIC,
-      ScoreMaintenance::Game { game_id: game.id },
+      ScoreMaintenance::game(game.id),
       trace.header_value().to_str().unwrap_or("UNKNOWN"),
     )
     .await
@@ -164,7 +164,7 @@ pub(super) async fn update_milestone(
   queue
     .publish(
       SCOREBOARD_TOPIC,
-      ScoreMaintenance::Game { game_id: game.id },
+      ScoreMaintenance::game(game.id),
       trace.header_value().to_str().unwrap_or("UNKNOWN"),
     )
     .await
@@ -193,7 +193,7 @@ pub(super) async fn delete_milestone(
   queue
     .publish(
       SCOREBOARD_TOPIC,
-      ScoreMaintenance::Game { game_id: game.id },
+      ScoreMaintenance::game(game.id),
       trace.header_value().to_str().unwrap_or("UNKNOWN"),
     )
     .await
@@ -221,7 +221,7 @@ pub(super) async fn delete_milestones(
   queue
     .publish(
       SCOREBOARD_TOPIC,
-      ScoreMaintenance::Game { game_id: game.id },
+      ScoreMaintenance::game(game.id),
       trace.header_value().to_str().unwrap_or("UNKNOWN"),
     )
     .await

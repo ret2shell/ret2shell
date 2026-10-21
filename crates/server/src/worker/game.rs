@@ -31,17 +31,43 @@ const GAME_REPO_INDEX_REFRESH_INTERVAL_SECS: u64 = 30;
 /// Topic carrying score maintenance work for the scoreboard worker.
 pub const SCOREBOARD_TOPIC: &str = "scoreboard";
 
-/// Maintenance payload of [`SCOREBOARD_TOPIC`]. A challenge payload
-/// rescores the teams that solved it (e.g. after score decay); a game
-/// payload rescores every team of the game, since any game-wide change may
-/// push teams across a milestone or an extra. Untagged on purpose: the
-/// challenge arm keeps the historical bare-model shape, so pending messages
-/// published by an older binary still deserialize after a hot upgrade.
+/// Scope of a game-wide score maintenance request.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum GameMaintenanceScope {
+  /// Rescore every team of the game, e.g. after milestone edits or imports.
+  #[default]
+  All,
+  /// Refresh blood rewards and rescore only the teams they belong to.
+  BloodRates,
+}
+
+/// Maintenance payload of [`SCOREBOARD_TOPIC`]. A challenge payload rescores
+/// the teams that solved it (e.g. after score decay); a game payload rescores
+/// the whole game by default, or only the teams affected by blood rewards when
+/// its scope is [`GameMaintenanceScope::BloodRates`]. Untagged on purpose: the
+/// challenge arm keeps the historical bare-model shape, and a missing `scope`
+/// keeps the historical full-game rescore, so pending messages published by an
+/// older binary still deserialize after a hot upgrade.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum ScoreMaintenance {
   Challenge(Box<challenge::Model>),
-  Game { game_id: i64 },
+  Game {
+    game_id: i64,
+    #[serde(default)]
+    scope: GameMaintenanceScope,
+  },
+}
+
+impl ScoreMaintenance {
+  /// Rescore every team of the game.
+  pub fn game(game_id: i64) -> Self {
+    Self::Game {
+      game_id,
+      scope: GameMaintenanceScope::All,
+    }
+  }
 }
 
 pub async fn spawn_game_workers(state: GlobalState) {
@@ -140,12 +166,23 @@ async fn score_maintenance_worker(queue: Queue, db: Database) {
             .ok();
           message.double_ack().await.ok();
         }
-        Some(ScoreMaintenance::Game { game_id }) => {
-          score_maintenance_worker_exec_game(db.clone(), game_id)
-            .instrument(span)
-            .await
-            .inspect_err(|e| error!(error=?e, "failed to process message"))
-            .ok();
+        Some(ScoreMaintenance::Game { game_id, scope }) => {
+          match scope {
+            GameMaintenanceScope::All => {
+              score_maintenance_worker_exec_game(db.clone(), game_id)
+                .instrument(span)
+                .await
+                .inspect_err(|e| error!(error=?e, "failed to process message"))
+                .ok();
+            }
+            GameMaintenanceScope::BloodRates => {
+              score_maintenance_worker_exec_blood_rates(db.clone(), game_id)
+                .instrument(span)
+                .await
+                .inspect_err(|e| error!(error=?e, "failed to process message"))
+                .ok();
+            }
+          }
           message.double_ack().await.ok();
         }
       }
@@ -159,6 +196,8 @@ async fn score_maintenance_worker_exec(
   let game = game::get(&db.conn, challenge.game_id)
     .await?
     .ok_or_else(|| DbErr::Custom(format!("game {} not found", challenge.game_id)))?;
+  // Every team that solved the challenge is rescaled below, so the affected
+  // team set returned by the sync is not needed here.
   sync_blood_bonus(&db, &game, &challenge).await?;
 
   let txn = db.conn.begin().await?;
@@ -332,10 +371,11 @@ fn blood_bonus(challenge_score: i32, award_rate: i32) -> i32 {
 
 /// Refreshes the blood rewards of a challenge so their score follows the
 /// current challenge score instead of the initial score they were created
-/// with.
+/// with, returning the teams whose reward value changed.
 async fn sync_blood_bonus(
   db: &Database, game: &game::Model, challenge: &challenge::Model,
-) -> Result<(), DbErr> {
+) -> Result<HashSet<i64>, DbErr> {
+  let mut affected_teams = HashSet::new();
   let txn = db.conn.begin().await?;
   for reward in extra::get_list(&txn, None, Some(challenge.id), true).await? {
     let Some(blood_state) = reward.blood_state else {
@@ -344,10 +384,11 @@ async fn sync_blood_bonus(
     let score = blood_bonus(challenge.score, get_award_rate(game, blood_state));
     if score != reward.score {
       extra::update_score(&txn, reward.id, score).await?;
+      affected_teams.insert(reward.team_id);
     }
   }
   txn.commit().await?;
-  Ok(())
+  Ok(affected_teams)
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -614,11 +655,40 @@ async fn submission_worker_exec(
 async fn score_maintenance_worker_exec_game(db: Database, game_id: i64) -> Result<(), DbErr> {
   if let Some(game) = game::get(&db.conn, game_id).await? {
     for challenge in challenge::get_list(&db.conn, game_id, true).await? {
+      // Every team of the game is rescaled below, so the affected team set
+      // returned by the sync is not needed here.
       sync_blood_bonus(&db, &game, &challenge).await?;
     }
   }
 
   for team in team::get_list_by_game_id(&db.conn, game_id).await? {
+    update_team_state(&db, team).await.ok();
+  }
+  Ok(())
+}
+
+/// Refreshes blood rewards after the game's award rates changed, then rescores
+/// only the teams whose reward value actually changed.
+async fn score_maintenance_worker_exec_blood_rates(
+  db: Database, game_id: i64,
+) -> Result<(), DbErr> {
+  let Some(game) = game::get(&db.conn, game_id).await? else {
+    return Ok(());
+  };
+
+  let mut affected_teams = HashSet::new();
+  for challenge in challenge::get_list(&db.conn, game_id, true).await? {
+    affected_teams.extend(sync_blood_bonus(&db, &game, &challenge).await?);
+  }
+
+  debug!(
+    teams = affected_teams.len(),
+    "rescoring teams after blood rate change"
+  );
+  for team_id in affected_teams {
+    let Some(team) = team::get(&db.conn, team_id).await? else {
+      continue;
+    };
     update_team_state(&db, team).await.ok();
   }
   Ok(())
@@ -660,7 +730,37 @@ pub async fn update_team_state(db: &Database, team: team::Model) -> Result<(), R
 
 #[cfg(test)]
 mod tests {
-  use super::blood_bonus;
+  use super::{GameMaintenanceScope, ScoreMaintenance, blood_bonus};
+
+  #[test]
+  fn legacy_game_maintenance_keeps_full_rescore() {
+    let message: ScoreMaintenance = serde_json::from_str(r#"{"game_id":7}"#).unwrap();
+    assert!(matches!(
+      message,
+      ScoreMaintenance::Game {
+        game_id: 7,
+        scope: GameMaintenanceScope::All,
+      }
+    ));
+  }
+
+  #[test]
+  fn blood_rate_maintenance_round_trips() {
+    let message = ScoreMaintenance::Game {
+      game_id: 7,
+      scope: GameMaintenanceScope::BloodRates,
+    };
+    let encoded = serde_json::to_string(&message).unwrap();
+    assert!(encoded.contains("blood_rates"));
+    let decoded: ScoreMaintenance = serde_json::from_str(&encoded).unwrap();
+    assert!(matches!(
+      decoded,
+      ScoreMaintenance::Game {
+        game_id: 7,
+        scope: GameMaintenanceScope::BloodRates,
+      }
+    ));
+  }
 
   #[test]
   fn blood_bonus_follows_the_challenge_score() {
