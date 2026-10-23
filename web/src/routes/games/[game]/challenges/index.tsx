@@ -1,6 +1,7 @@
 import { useChallenge, useChallenges, useCreateChallengeMutation } from "@api/challenge";
 import { useCheckUnreadMessages, useGame } from "@api/game";
 import { useSelfTeam } from "@api/team";
+import { isHttpStatus } from "@api/utils";
 import Challenge from "@blocks/challenge";
 import Form, { type ChallengeForm } from "@blocks/challenge/form";
 import ChallengeList from "@blocks/challenge/list";
@@ -19,6 +20,7 @@ import { addToast, removeToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Link from "@widgets/link";
 import LoadingTips from "@widgets/loading-tips";
+import RetryTips from "@widgets/retry-tips";
 import clsx from "clsx";
 import { DateTime } from "luxon";
 import { createEffect, createMemo, createSignal, Match, onCleanup, Show, Switch } from "solid-js";
@@ -53,7 +55,11 @@ export default function () {
     game_id: () => gameId(),
     challenge_id: () => selectedChallengeId() || 0,
     enabled: () => !!selectedChallengeId(),
-    onError: () => {
+    onError: (err) => {
+      if (isHttpStatus(err, 429)) {
+        // 429 is transient: keep the current selection so the player can retry.
+        return false;
+      }
       setSearchParams({ challenge: null, create: null });
       return false;
     },
@@ -203,6 +209,14 @@ export default function () {
               <div class="flex-1 flex flex-row space-x-2 items-center justify-center">
                 <LoadingTips />
               </div>
+            </Match>
+            <Match when={selectedChallengeId() && challenge.isError && isHttpStatus(challenge.error, 429)}>
+              <RetryTips
+                title={t("challenge.errors.rateLimited.title")}
+                description={t("challenge.errors.rateLimited.message")}
+                loading={challenge.isFetching}
+                onRetry={() => void challenge.refetch()}
+              />
             </Match>
             <Match when={inCreate()}>
               <Form onDone={onCreateChallenge} gameId={gameId()} challengeId={0} />

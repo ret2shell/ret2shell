@@ -1,5 +1,6 @@
 import { useChallenge, useChallenges, useCreateChallengeMutation } from "@api/challenge";
 import { useGame, useUpdateGameDocMutation, useUpdateGameMutation } from "@api/game";
+import { isHttpStatus } from "@api/utils";
 import Challenge from "@blocks/challenge";
 import Form, { type ChallengeForm } from "@blocks/challenge/form";
 import Tabs from "@blocks/challenge/tabs";
@@ -17,6 +18,7 @@ import { Title } from "@storage/header";
 import { fullTheme, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import LoadingTips from "@widgets/loading-tips";
+import RetryTips from "@widgets/retry-tips";
 import Tag from "@widgets/tag";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
@@ -57,7 +59,11 @@ export default function () {
     game_id: () => gameId(),
     challenge_id: () => selectedChallengeId() || 0,
     enabled: () => !!selectedChallengeId(),
-    onError: () => {
+    onError: (err) => {
+      if (isHttpStatus(err, 429)) {
+        // 429 is transient: keep the current selection so the player can retry.
+        return false;
+      }
       setSearchParams({ challenge: null, create: null });
       return false;
     },
@@ -244,6 +250,14 @@ export default function () {
             <div class="flex-1 flex flex-row space-x-2 items-center justify-center">
               <LoadingTips />
             </div>
+          </Match>
+          <Match when={selectedChallengeId() && challenge.isError && isHttpStatus(challenge.error, 429)}>
+            <RetryTips
+              title={t("challenge.errors.rateLimited.title")}
+              description={t("challenge.errors.rateLimited.message")}
+              loading={challenge.isFetching}
+              onRetry={() => void challenge.refetch()}
+            />
           </Match>
           <Match when={inCreate()}>
             <Form training gameId={gameId()} challengeId={0} onDone={onCreateChallenge} />
