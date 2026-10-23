@@ -9,6 +9,10 @@ export function toastSuccess(description: string, duration = 5000) {
   });
 }
 
+export function isHttpStatus(err: unknown, status: number) {
+  return err instanceof HTTPError && err.response.status === status;
+}
+
 export function toastError(description: string, duration = 5000) {
   addToast({
     level: "error",

@@ -1097,6 +1097,10 @@
       "fetch": {
         "title": "Failed to fetch challenge"
       },
+      "rateLimited": {
+        "title": "Too many requests",
+        "message": "You switched challenges too quickly. Please wait a moment and try again."
+      },
       "up": {
         "title": "Failed to publish challenge"
       },
