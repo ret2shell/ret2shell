@@ -5,6 +5,7 @@ import Form, { type ChallengeForm } from "@blocks/challenge/form";
 import Tabs from "@blocks/challenge/tabs";
 import AdministratorsManagement from "@blocks/game/administrators";
 import GameEdit, { type GameForm } from "@blocks/game/form";
+import GitBlock from "@blocks/game/git";
 import { SubmissionList } from "@blocks/game/lists";
 import GameStatistics from "@blocks/game/statistics";
 import type { Challenge as ChallengeModel } from "@models/challenge";
@@ -20,7 +21,7 @@ import LoadingTips from "@widgets/loading-tips";
 import Tag from "@widgets/tag";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { createMemo, Match, Switch } from "solid-js";
+import { createMemo, Match, Show, Switch } from "solid-js";
 import Intro from "../_blocks/intro";
 
 export default function () {
@@ -167,6 +168,10 @@ export default function () {
                     <div class="h-16" />
                     <div class="w-full max-w-5xl flex flex-col space-y-2 relative">
                       <AdministratorsManagement gameId={gameId()} />
+                      <Show when={isAdmin()}>
+                        <div class="h-16" />
+                        <GitBlock gameId={gameId()} basePath={`/training/${gameId()}?edit=true`} />
+                      </Show>
                     </div>
                   </div>
                 </OverlayScrollbarsComponent>
