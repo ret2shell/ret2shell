@@ -1,9 +1,37 @@
-use anyhow::Context;
+use r2s_bucket::BucketError;
+use r2s_cache::CacheError;
 use r2s_database::game;
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
+use thiserror::Error;
 use tracing::{error, info, warn};
 
 use crate::traits::GlobalState;
+
+/// Errors of the background game repo path index refresh. The messages match
+/// the former anyhow context strings so the worker warnings stay identical.
+#[derive(Debug, Error)]
+enum RepoIndexError {
+  #[error("failed to open bucket `{bucket}` for repo index refresh")]
+  OpenBucket {
+    bucket: String,
+    #[source]
+    source: BucketError,
+  },
+  #[error("failed to read head for bucket `{bucket}`")]
+  ReadHead {
+    bucket: String,
+    #[source]
+    source: BucketError,
+  },
+  #[error("failed to build repo path index for bucket `{bucket}`")]
+  BuildIndex {
+    bucket: String,
+    #[source]
+    source: BucketError,
+  },
+  #[error(transparent)]
+  Cache(#[from] CacheError),
+}
 
 pub(crate) const GAME_REPO_INDEX_CACHE_TTL: i64 = 60 * 60 * 24;
 const GAME_REPO_INDEX_REFRESH_LOCK_TTL: i64 = 60 * 5;
@@ -106,17 +134,24 @@ pub(crate) async fn schedule_next_missing_game_repo_index_refresh(state: &Global
 
 async fn refresh_game_repo_index(
   state: &GlobalState, game_id: i64, bucket_name: &str,
-) -> anyhow::Result<()> {
-  let game_bucket = state
-    .bucket
-    .at(bucket_name)
-    .await
-    .with_context(|| format!("failed to open bucket `{bucket_name}` for repo index refresh"))?;
+) -> Result<(), RepoIndexError> {
+  let game_bucket =
+    state
+      .bucket
+      .at(bucket_name)
+      .await
+      .map_err(|source| RepoIndexError::OpenBucket {
+        bucket: bucket_name.to_owned(),
+        source,
+      })?;
   let head = game_bucket
     .git
     .get_head()
     .await
-    .with_context(|| format!("failed to read head for bucket `{bucket_name}`"))?;
+    .map_err(|source| RepoIndexError::ReadHead {
+      bucket: bucket_name.to_owned(),
+      source,
+    })?;
   let cache_key = game_repo_index_cache_key(game_id, &head);
   let cache = state.cache.at("game-repo-index");
   if cache.exists(&cache_key).await? {
@@ -128,7 +163,10 @@ async fn refresh_game_repo_index(
     .git
     .build_path_index(&head)
     .await
-    .with_context(|| format!("failed to build repo path index for bucket `{bucket_name}`"))?;
+    .map_err(|source| RepoIndexError::BuildIndex {
+      bucket: bucket_name.to_owned(),
+      source,
+    })?;
   cache
     .set_ex(&cache_key, &index, GAME_REPO_INDEX_CACHE_TTL)
     .await?;

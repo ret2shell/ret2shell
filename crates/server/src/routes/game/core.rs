@@ -26,14 +26,13 @@ use serde::Deserialize;
 use serde_json::Value;
 use tower_http::request_id::RequestId;
 use tracing::{info, warn};
+use validator::Validate;
 
 use crate::{
   middleware::auth::{Token, is_game_admin},
   traits::ResponseError,
-  utility::{
-    pagination::{DEFAULT_PAGE_SIZE, page, page_size},
-    validation::validate_game_model,
-  },
+  utility::pagination::{DEFAULT_PAGE_SIZE, page, page_size},
+  worker::game::{SCOREBOARD_TOPIC, ScoreMaintenance},
 };
 
 const GAME_DOC_CACHE_TTL: i64 = 60 * 5;
@@ -263,7 +262,7 @@ pub(super) async fn create_game(
   State(ref db): State<Database>, State(ref bucket): State<Bucket>,
   Extension(token): Extension<Token>, Json(mut model): Json<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  validate_game_model(&model)?;
+  model.validate()?;
   let txn = db.conn.begin().await?;
   let game_bucket = bucket.create(serde_json::to_value(&model)?).await?;
   model.bucket = Some(game_bucket.name.clone());
@@ -300,7 +299,16 @@ pub(super) async fn update_game(
   Extension(trace): Extension<RequestId>, Extension(token): Extension<Token>,
   Json(model): Json<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  validate_game_model(&model)?;
+  model.validate()?;
+  // Weight decides which games are promoted on the home page, so it stays a
+  // host-level attribute even though game admins may edit the rest of the game.
+  if model.weight != game.weight && !token.permissions.0.contains(&Permission::Host) {
+    return Err(ResponseError::Forbidden(
+      "only host operators can change game weight".to_owned(),
+    ));
+  }
+  let blood_rates_changed =
+    game.award_rate != model.award_rate || game.award_rates != model.award_rates;
   let txn = db.conn.begin().await?;
   let model = game::update(
     &txn,
@@ -328,6 +336,17 @@ pub(super) async fn update_game(
     )
     .await?;
   txn.commit().await?;
+  if blood_rates_changed {
+    info!("blood reward rates changed, scheduling targeted rescore");
+    queue
+      .publish(
+        SCOREBOARD_TOPIC,
+        ScoreMaintenance::blood_rates(model.id),
+        &trace.header_value().to_str().unwrap_or("UNKNOWN"),
+      )
+      .await
+      .ok();
+  }
   if game.frozen != model.frozen {
     info!(
       "user {} the game",
@@ -335,7 +354,7 @@ pub(super) async fn update_game(
     );
     let payload = EventContainer {
       game_id: game.id,
-      event: Event::Game(GameEvent {
+      event: Event::Game(Box::new(GameEvent {
         event_type: if model.frozen {
           GameEventType::Freeze
         } else {
@@ -351,7 +370,7 @@ pub(super) async fn update_game(
           "{} the game",
           if model.frozen { "Freeze" } else { "Unfreeze" }
         ),
-      }),
+      })),
     };
     queue
       .publish(

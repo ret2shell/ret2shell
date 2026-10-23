@@ -411,7 +411,86 @@
       },
       "streamingEnabled": "Streaming logs in real time...",
       "notStreaming": "After enabling log stream, logs will be displayed here",
-      "enableStreamWarning": "Be cautious when enabling it if there are a lot of logs, only display the logs of the current day according to the server time, please download the log file for other logs"
+      "enableStreamWarning": "Be cautious when enabling it if there are a lot of logs, only display the logs of the current day according to the server time, please download the log file for other logs",
+      "assist": {
+        "placeholder": "LogsQL query, with auto-completion…",
+        "presetsTitle": "Common query presets",
+        "suggestionsTitle": "Suggestions",
+        "hint": "↑↓ select · Tab/Enter complete · Esc close",
+        "diag": {
+          "unclosedString": "String is missing a closing quote",
+          "unclosedParen": "Parenthesis ( is not closed",
+          "unexpectedParen": "Unexpected )",
+          "unclosedBracket": "Range bracket is not closed",
+          "unexpectedBracket": "Unexpected ]",
+          "missingValue": "Field {{field}} is missing a filter value",
+          "danglingOperator": "Operator {{operator}} is missing an operand",
+          "emptyGroup": "Empty parenthesized group",
+          "missingCommand": "Missing pipe command after |",
+          "unknownCommand": "Unknown pipe command \"{{command}}\""
+        },
+        "fields": {
+          "time": "Log timestamp",
+          "msg": "Log message",
+          "stream": "Log stream",
+          "level": "Log level",
+          "target": "Emitting module",
+          "spans": "Span chain JSON",
+          "spanName": "Span name",
+          "spanTrace": "Request trace ID",
+          "spanFrom": "Source IP",
+          "spanMethod": "HTTP method",
+          "spanUri": "Request path",
+          "spanUserId": "User ID",
+          "spanUserAccount": "User account",
+          "spanUserNickname": "User nickname",
+          "spanDataGameId": "Game ID",
+          "spanDataChallengeId": "Challenge ID",
+          "fields": "Event fields (fields.*)",
+          "spanData": "Span data (span.data-*)"
+        },
+        "detail": {
+          "sort": "Sort by field",
+          "limit": "Limit result count",
+          "fields": "Keep only given fields",
+          "filterPipe": "Filter again in pipe",
+          "stats": "Aggregate statistics",
+          "uniq": "Deduplicate",
+          "extract": "Extract fields by regexp",
+          "copy": "Copy field",
+          "delete": "Delete fields",
+          "format": "Format output",
+          "anyValue": "Field exists (any value)",
+          "regexp": "Regexp match",
+          "timeRange": "Time range",
+          "timeSince": "Start time",
+          "timeDuration": "Relative duration",
+          "and": "Logical AND",
+          "or": "Logical OR",
+          "not": "Logical NOT",
+          "group": "Parenthesized group"
+        },
+        "presets": {
+          "errors": "All errors",
+          "errorsDesc": "ERROR logs, newest first",
+          "warnAndError": "Warnings & errors",
+          "warnAndErrorDesc": "WARN level and above",
+          "recentErrors": "Errors in last hour",
+          "recentErrorsDesc": "With relative time range",
+          "byUser": "Query by user",
+          "byUserDesc": "Replace * with an account",
+          "byIp": "By source IP",
+          "byIpDesc": "Replace * with an IP address",
+          "byTrace": "By trace ID",
+          "byTraceDesc": "Replace * with a trace ID, ascending for full chain",
+          "loginAudit": "Login audit",
+          "loginAuditDesc": "All login requests",
+          "submissions": "Flag submissions",
+          "submissionsDesc": "Challenge submission records",
+          "module": "Filter by module",
+          "moduleDesc": "Match module by target prefix"
+        }
+      }
     },
     "statistics": {
       "title": "Platform stats",
@@ -684,7 +763,7 @@
         "label": "Misc settings"
       },
       "awardRate": {
-        "label": "Extra reward score ratio",
+        "label": "Extra reward score ratio (of the current challenge score)",
         "firstBlood": "First blood reward score ratio",
         "secondBlood": "Second blood reward score ratio",
         "thirdBlood": "Third Blood Reward Ratio",
@@ -956,6 +1035,11 @@
         "title": "Hidden",
         "message": "This challenge is hidden, only for admin testing.",
         "alert": "Please click the \"Up\" button when the challenge is ready. The platform will not automatically change the visibility of the challenge. The auto-publishing function will use time points and the hidden state to calculate the final visibility for players."
+      },
+      "locked": {
+        "message": "This challenge is locked",
+        "hint": "Solve the following prerequisite challenges to unlock",
+        "dismiss": "Friendly, don't shoot!"
       }
     },
     "actions": {
@@ -1214,6 +1298,15 @@
             "label": "Image version",
             "placeholder": "Please enter the image version"
           },
+          "pullPolicy": {
+            "label": "Image pull policy",
+            "placeholder": "Please select an image pull policy",
+            "items": {
+              "always": "Always",
+              "ifNotPresent": "IfNotPresent",
+              "never": "Never"
+            }
+          },
           "restrict": {
             "label": "Restrict root privileges",
             "placeholder": "Whether to restrict root privileges",
@@ -1374,10 +1467,55 @@
       }
     },
     "settings": {
-      "title": "Settings"
+      "title": "Settings",
+      "unlockLimit": {
+        "label": "Unlock requirements",
+        "all": "All"
+      }
     },
     "inGame": "In-game challenges",
-    "total": "All challenges"
+    "total": "All challenges",
+    "milestone": {
+      "title": "Milestones",
+      "unknown": "Mysterious unknown challenge/achievement",
+      "empty": "No milestones yet",
+      "achieved": "Achieved",
+      "newAchievement": "New achievement unlocked: {{milestone}}!",
+      "prerequisites": "Prerequisites",
+      "form": {
+        "name": {
+          "label": "Milestone Name",
+          "placeholder": "Please enter a name",
+          "required": "Name is required"
+        },
+        "description": {
+          "label": "Milestone Description",
+          "placeholder": "Please enter a description",
+          "required": "Description is required"
+        },
+        "bonusScore": {
+          "label": "Bonus Score",
+          "placeholder": "Please enter the bonus score"
+        }
+      },
+      "editor": {
+        "hint": "Drag ports to connect, click an edge to delete; click a node to highlight its prerequisite chain, double-click for details",
+        "unsaved": "Unsaved changes",
+        "saved": "Saved {{count}} change(s)",
+        "tidy": "Tidy up",
+        "cycle": "Cannot connect: this would create a dependency cycle",
+        "duplicate": "This dependency already exists",
+        "deleteEdge": "Delete edge",
+        "fit": "Fit to view",
+        "zoomIn": "Zoom in",
+        "zoomOut": "Zoom out"
+      },
+      "errors": {
+        "fetchList": {
+          "title": "Failed to fetch milestones"
+        }
+      }
+    }
   },
   "wsrx": {
     "title": "WebSocket Reflector X",
@@ -1592,7 +1730,7 @@
       "password": {
         "required": "Password cannot be empty",
         "minimumLength": "Password must be at least 8 characters",
-        "tooWeak": "Password must be between 8-40 characters, and must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+        "tooWeak": "Password must be between 8-40 characters, and must contain at least one uppercase letter, one lowercase letter, and one number",
         "placeholder": "Please enter your password",
         "label": "Password",
         "confirmRequired": "Confirm password cannot be empty",
@@ -2046,7 +2184,6 @@
         "label": "Team name",
         "required": "Team name cannot be empty",
         "maximumLength": "Name can be at most 32 characters",
-        "customDisabled": "Team name cannot be changed",
         "placeholder": "Please enter team name",
         "chuunibyouGenerator": "Chuunibyou Generator"
       },
@@ -2084,6 +2221,7 @@
     "noSolves": "No solves yet",
     "solvesJournal": "Player {{user}} solved challenge {{challenge}}.",
     "extras": "Extra score changes",
+    "milestoneJournal": "Achieved milestone {{milestone}}.",
     "noExtras": "No extra score changes here"
   },
   "notification": {

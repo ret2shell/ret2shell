@@ -75,7 +75,7 @@ export default function () {
       content: chat(),
     });
   }
-  let chatBottomEl: HTMLDivElement;
+  let chatBottomEl: HTMLDivElement | undefined;
 
   createEffect(() => {
     const currentChallengeId = challengeId();
@@ -256,7 +256,7 @@ export default function () {
                   onValueChanged={(v) => setChat(v)}
                 />
               </div>
-              <div ref={chatBottomEl!} />
+              <div ref={chatBottomEl} />
             </div>
           </Show>
         </OverlayScrollbarsComponent>

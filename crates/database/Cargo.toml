@@ -18,6 +18,7 @@ ignored = [
 ] # required by sea-orm `FromJsonResult`
 
 [dependencies]
+thiserror          = { workspace = true }
 chrono = { workspace = true }
 num-derive = { workspace = true }
 num-traits = { workspace = true }
@@ -29,6 +30,7 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 serde_repr = { workspace = true }
 tracing = { workspace = true }
+validator = { workspace = true }
 
 r2s-config = { workspace = true }
 

@@ -1,13 +1,22 @@
 import { useGame } from "@api/game";
+import { Permission } from "@models/user";
 import { createForm, maxRange, minRange, required, setValues } from "@modular-forms/solid";
+import { accountStore } from "@storage/account";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Checkbox from "@widgets/checkbox";
 import Input from "@widgets/input";
 import Slider from "@widgets/slider";
 import TimePicker from "@widgets/timepicker";
+import clsx from "clsx";
 import { DateTime } from "luxon";
-import { createEffect, Show, untrack } from "solid-js";
+import { createEffect, For, Show, untrack } from "solid-js";
+
+const WEIGHT_OPTIONS = [
+  { value: 1, corner: "rounded-r-none!" },
+  { value: 2, corner: "rounded-none!" },
+  { value: 3, corner: "rounded-l-none!" },
+];
 
 export type GameForm = {
   name: string;
@@ -30,6 +39,7 @@ export type GameForm = {
   enable_hammer?: boolean;
   outer_hammer_label?: string;
   outer_hammer_url?: string;
+  weight?: number;
 };
 
 export default function GameEdit(props: { onDone: (result: GameForm) => void; gameId?: number; training?: boolean }) {
@@ -191,6 +201,41 @@ export default function GameEdit(props: { onDone: (result: GameForm) => void; ga
               </Checkbox>
             )}
           </Field>
+          <Show when={accountStore.permissions.includes(Permission.Host)}>
+            <Field name="weight" type="number">
+              {(field, props) => (
+                <div class="flex flex-col space-y-1 flex-1">
+                  <span class="label">{t("game.form.weight.label")}</span>
+                  <div class="flex flex-row" role="radiogroup" aria-label={t("game.form.weight.label")}>
+                    <For each={WEIGHT_OPTIONS}>
+                      {(option) => (
+                        <label
+                          class={clsx(
+                            "btn flex-1 justify-center",
+                            "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-layer-content/60",
+                            option.corner,
+                            field.value === option.value && "text-primary"
+                          )}
+                        >
+                          <input
+                            type="radio"
+                            class="sr-only"
+                            name={props.name}
+                            value={option.value}
+                            checked={field.value === option.value}
+                            onChange={() => {
+                              setValues(form, { weight: option.value });
+                            }}
+                          />
+                          {option.value}
+                        </label>
+                      )}
+                    </For>
+                  </div>
+                </div>
+              )}
+            </Field>
+          </Show>
         </Show>
       </div>
 

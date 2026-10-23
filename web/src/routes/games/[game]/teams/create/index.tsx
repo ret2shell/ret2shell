@@ -59,13 +59,11 @@ export default function () {
     navigate(`/games/${gameId()}`, { replace: true });
   });
 
-  const [customDisabled, setCustomDisabled] = createSignal(false);
   const [form, { Form, Field }] = createForm<TeamCreateForm>();
   createEffect(() => {
-    if (game.data) {
+    if (game.data?.team_size === 1) {
       untrack(() => {
-        setCustomDisabled(game.data?.team_size === 1);
-        if (game.data?.team_size === 1) setValue(form, "name", accountStore.nickname!);
+        setValue(form, "name", accountStore.nickname!);
       });
     }
   });
@@ -116,20 +114,18 @@ export default function () {
               {(field, props) => (
                 <Input
                   icon={<span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />}
-                  title={customDisabled() ? t("team.form.name.customDisabled") : t("team.form.name.label")}
+                  title={t("team.form.name.label")}
                   placeholder={t("team.form.name.placeholder")}
                   {...props}
                   value={field.value}
                   error={field.error}
                   required
-                  disabled={customDisabled()}
                   extraBtn={
                     <>
                       <Button
                         class="rounded-none!"
                         square
                         type="button"
-                        disabled={customDisabled()}
                         onClick={async () => {
                           const name = await generateRandomName(generator());
                           setValue(form, "name", name);
@@ -141,7 +137,6 @@ export default function () {
                         class="rounded-l-none!"
                         square
                         type="button"
-                        disabled={customDisabled()}
                         btnContent={<span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />}
                       >
                         <Card contentClass="p-2 flex flex-col space-y-2">

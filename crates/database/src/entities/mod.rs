@@ -4,6 +4,7 @@ pub mod article;
 pub mod audit;
 pub mod calendar;
 pub mod challenge;
+pub mod challenge_milestone;
 pub mod chat;
 pub mod comment;
 pub mod config;

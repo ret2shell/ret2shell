@@ -41,6 +41,17 @@ pub struct ChallengeConfig {
   pub name: String,
   pub tag: TagList,
   pub score_rule: ScoreRule,
+  /// Media hash of the challenge avatar, same convention as `game.logo`.
+  pub avatar: Option<String>,
+  /// Bucket names of the prerequisite challenges. Challenge ids are not
+  /// persistent, so the git repository always refers to challenges by their
+  /// bucket names.
+  #[serde(default)]
+  pub prerequisites: Vec<String>,
+  /// How many of the prerequisites must be solved before the challenge
+  /// unlocks. `0` means all of them.
+  #[serde(default)]
+  pub unlock_limit: i32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -304,7 +315,11 @@ impl ChallengeBucket {
 
   pub async fn get_static_files(&self) -> Result<Vec<String>, BucketError> {
     let mut files = vec![];
-    let mut dir = read_dir(&self.path.join("static")).await?;
+    // challenges synced from a git repository may not carry the folder at all
+    let mut dir = match read_dir(&self.path.join("static")).await {
+      Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(files),
+      other => other?,
+    };
     while let Some(entry) = dir.next_entry().await? {
       let entry_file = entry.file_name().to_string_lossy().to_string();
       if entry_file.starts_with('.') {
@@ -317,7 +332,11 @@ impl ChallengeBucket {
 
   pub async fn get_mapped_files(&self) -> Result<Vec<String>, BucketError> {
     let mut files = vec![];
-    let mut dir = read_dir(&self.path.join("mapped")).await?;
+    // challenges synced from a git repository may not carry the folder at all
+    let mut dir = match read_dir(&self.path.join("mapped")).await {
+      Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(files),
+      other => other?,
+    };
     while let Some(entry) = dir.next_entry().await? {
       let entry_file = entry.file_name().to_string_lossy().to_string();
       if entry_file.starts_with('.') {
@@ -340,7 +359,11 @@ impl ChallengeBucket {
 
   pub async fn get_checker_files(&self) -> Result<Vec<String>, BucketError> {
     let mut files = vec![];
-    let mut dir = read_dir(&self.path.join("checker")).await?;
+    // challenges synced from a git repository may not carry the folder at all
+    let mut dir = match read_dir(&self.path.join("checker")).await {
+      Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(files),
+      other => other?,
+    };
     while let Some(entry) = dir.next_entry().await? {
       let entry_file = entry.file_name().to_string_lossy().to_string();
       if entry_file.starts_with('.') {
@@ -417,6 +440,38 @@ fn to_file_name(file: &str) -> String {
 #[cfg(test)]
 mod tests {
   use super::*;
+
+  #[test]
+  fn challenge_config_round_trips_avatar_and_prerequisites() {
+    let config = ChallengeConfig {
+      name: "test".to_owned(),
+      tag: TagList(vec![]),
+      score_rule: ScoreRule {
+        initial: 1000,
+        minimum: 100,
+        decay: 10,
+      },
+      unlock_limit: 0,
+      avatar: Some("avatar-hash".to_owned()),
+      prerequisites: vec!["web_1700000000".to_owned()],
+    };
+    let value = serde_json::to_value(&config).unwrap();
+    let parsed: ChallengeConfig = serde_json::from_value(value).unwrap();
+    assert_eq!(parsed.avatar.as_deref(), Some("avatar-hash"));
+    assert_eq!(parsed.prerequisites, vec!["web_1700000000".to_owned()]);
+  }
+
+  #[test]
+  fn challenge_config_tolerates_legacy_files_without_new_fields() {
+    let value = serde_json::json!({
+      "name": "legacy",
+      "tag": [],
+      "score_rule": {"initial": 1000, "minimum": 100, "decay": 10}
+    });
+    let parsed: ChallengeConfig = serde_json::from_value(value).unwrap();
+    assert_eq!(parsed.avatar, None);
+    assert!(parsed.prerequisites.is_empty());
+  }
 
   fn test_bucket() -> ChallengeBucket {
     let root = std::env::temp_dir().join(format!(

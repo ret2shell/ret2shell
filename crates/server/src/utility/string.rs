@@ -55,13 +55,6 @@ pub fn deunicode_str(s: impl AsRef<str>, keep_case: bool) -> String {
   }
 }
 
-pub fn account_str(s: impl AsRef<str>) -> String {
-  deunicode_str(s, true)
-    .chars()
-    .filter(|c| c.is_ascii_alphanumeric() || *c == '_')
-    .collect()
-}
-
 pub fn leet_str(s: impl AsRef<str>) -> String {
   let mut result = String::new();
   for c in s.as_ref().bytes() {

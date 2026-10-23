@@ -411,7 +411,86 @@
       },
       "streamingEnabled": "正在即時串流日誌...",
       "notStreaming": "開啟日誌串流後，日誌會顯示在這裡",
-      "enableStreamWarning": "日誌量大時請謹慎開啟，僅顯示服務器時間的當天日誌，其他日誌請下載日誌文件進行審計"
+      "enableStreamWarning": "日誌量大時請謹慎開啟，僅顯示服務器時間的當天日誌，其他日誌請下載日誌文件進行審計",
+      "assist": {
+        "placeholder": "LogsQL 查詢語句，支援自動補全…",
+        "presetsTitle": "常用查詢模板",
+        "suggestionsTitle": "補全建議",
+        "hint": "↑↓ 選擇 · Tab/Enter 補全 · Esc 關閉",
+        "diag": {
+          "unclosedString": "字串缺少結束引號",
+          "unclosedParen": "括號 ( 未閉合",
+          "unexpectedParen": "多餘的 )",
+          "unclosedBracket": "區間括弧未閉合",
+          "unexpectedBracket": "多餘的 ]",
+          "missingValue": "欄位 {{field}} 缺少過濾值",
+          "danglingOperator": "運算子 {{operator}} 後缺少條件",
+          "emptyGroup": "空的括號分組",
+          "missingCommand": "| 後缺少管道命令",
+          "unknownCommand": "未知的管道命令 \"{{command}}\""
+        },
+        "fields": {
+          "time": "日誌時間",
+          "msg": "日誌內容",
+          "stream": "日誌流",
+          "level": "日誌級別",
+          "target": "產生日誌的模組",
+          "spans": "呼叫鏈 JSON",
+          "spanName": "span 名稱",
+          "spanTrace": "請求 Trace ID",
+          "spanFrom": "來源 IP",
+          "spanMethod": "HTTP 方法",
+          "spanUri": "請求路徑",
+          "spanUserId": "使用者 ID",
+          "spanUserAccount": "使用者名稱",
+          "spanUserNickname": "使用者暱稱",
+          "spanDataGameId": "比賽 ID",
+          "spanDataChallengeId": "題目 ID",
+          "fields": "事件欄位 (fields.*)",
+          "spanData": "span 資料 (span.data-*)"
+        },
+        "detail": {
+          "sort": "按欄位排序",
+          "limit": "限制回傳筆數",
+          "fields": "僅保留指定欄位",
+          "filterPipe": "管道內再過濾",
+          "stats": "聚合統計",
+          "uniq": "去重",
+          "extract": "正則提取欄位",
+          "copy": "複製欄位",
+          "delete": "刪除欄位",
+          "format": "格式化輸出",
+          "anyValue": "欄位存在（任意值）",
+          "regexp": "正則匹配",
+          "timeRange": "時間區間",
+          "timeSince": "起始時間",
+          "timeDuration": "相對時長",
+          "and": "邏輯與",
+          "or": "邏輯或",
+          "not": "邏輯非",
+          "group": "括弧分組"
+        },
+        "presets": {
+          "errors": "全部錯誤",
+          "errorsDesc": "ERROR 級日誌，按時間倒序",
+          "warnAndError": "警告與錯誤",
+          "warnAndErrorDesc": "WARN 及以上級別",
+          "recentErrors": "近一小時錯誤",
+          "recentErrorsDesc": "帶相對時間範圍",
+          "byUser": "按使用者查詢",
+          "byUserDesc": "把 * 換成使用者名稱",
+          "byIp": "按來源 IP",
+          "byIpDesc": "把 * 換成 IP 位址",
+          "byTrace": "按 Trace ID",
+          "byTraceDesc": "把 * 換成 Trace ID，正序看完整鏈路",
+          "loginAudit": "登入稽核",
+          "loginAuditDesc": "所有登入請求",
+          "submissions": "Flag 提交",
+          "submissionsDesc": "題目提交記錄",
+          "module": "按模組過濾",
+          "moduleDesc": "按 target 前綴匹配模組"
+        }
+      }
     },
     "statistics": {
       "title": "平臺統計信息",
@@ -684,7 +763,7 @@
         "label": "雜項設置"
       },
       "awardRate": {
-        "label": "額外獎勵分數比例",
+        "label": "額外獎勵分數比例（按題目目前分數計算）",
         "firstBlood": "一血獎勵分數比例",
         "secondBlood": "二血獎勵分數比例",
         "thirdBlood": "三血獎勵分數比例",
@@ -956,6 +1035,11 @@
         "title": "已隱藏",
         "message": "題目已隱藏，僅供管理員測試。",
         "alert": "請在題目準備好後點擊“公開”按鈕公開題目。平臺不會主動更改題目可見性，自動放題功能會使用時間節點與隱藏狀態來計算題目的最終可見性。"
+      },
+      "locked": {
+        "message": "本題已鎖定",
+        "hint": "完成以下前置題目後解鎖",
+        "dismiss": "自己人，別開槍"
       }
     },
     "actions": {
@@ -1214,6 +1298,15 @@
             "label": "鏡像版本",
             "placeholder": "請輸入鏡像版本"
           },
+          "pullPolicy": {
+            "label": "鏡像拉取策略",
+            "placeholder": "請選擇鏡像拉取策略",
+            "items": {
+              "always": "Always（始終拉取）",
+              "ifNotPresent": "IfNotPresent（本地不存在時拉取）",
+              "never": "Never（從不拉取）"
+            }
+          },
           "restrict": {
             "label": "限制 Root 權限",
             "placeholder": "是否限制 Root 權限",
@@ -1374,10 +1467,55 @@
       }
     },
     "settings": {
-      "title": "設置"
+      "title": "設置",
+      "unlockLimit": {
+        "label": "解鎖要求数量",
+        "all": "全部"
+      }
     },
     "inGame": "賽中題目",
-    "total": "所有題目"
+    "total": "所有題目",
+    "milestone": {
+      "title": "里程碑",
+      "unknown": "神秘的未知題目/成就",
+      "empty": "暫無里程碑",
+      "achieved": "已達成",
+      "newAchievement": "獲得了新成就：{{milestone}}！",
+      "prerequisites": "前置題目",
+      "form": {
+        "name": {
+          "label": "里程碑名稱",
+          "placeholder": "請輸入名稱",
+          "required": "名稱不能為空"
+        },
+        "description": {
+          "label": "里程碑描述",
+          "placeholder": "請輸入描述",
+          "required": "描述不能為空"
+        },
+        "bonusScore": {
+          "label": "獎勵分數",
+          "placeholder": "請輸入獎勵分數"
+        }
+      },
+      "editor": {
+        "hint": "拖曳端口連線，點擊連線刪除；點擊節點高亮前置鏈，雙擊開啟詳情",
+        "unsaved": "有未儲存的更改",
+        "saved": "已儲存 {{count}} 項更改",
+        "tidy": "整理",
+        "cycle": "無法連線：會產生循環依賴",
+        "duplicate": "該依賴已存在",
+        "deleteEdge": "刪除連線",
+        "fit": "適應畫布",
+        "zoomIn": "放大",
+        "zoomOut": "縮小"
+      },
+      "errors": {
+        "fetchList": {
+          "title": "取得里程碑列表失敗"
+        }
+      }
+    }
   },
   "wsrx": {
     "title": "WebSocket Reflector X",
@@ -1592,7 +1730,7 @@
       "password": {
         "required": "密碼不能為空",
         "minimumLength": "密碼至少 8 位",
-        "tooWeak": "密碼在 8 - 40 字符之間，至少包含一個大寫字母、一個小寫字母、一個數字和一個特殊字符",
+        "tooWeak": "密碼在 8 - 40 字符之間，至少包含一個大寫字母、一個小寫字母和一個數字",
         "placeholder": "請輸入密碼",
         "label": "密碼",
         "confirmRequired": "確認密碼不能為空",
@@ -2046,7 +2184,6 @@
         "label": "隊伍名稱",
         "required": "隊伍名稱不能為空",
         "maximumLength": "名稱最長 32 個字符",
-        "customDisabled": "無法更改隊名",
         "placeholder": "請輸入隊伍名稱",
         "chuunibyouGenerator": "中二病生成器"
       },
@@ -2084,6 +2221,7 @@
     "noSolves": "沒有已解出題目",
     "solvesJournal": "成員 {{user}} 解出了題目 {{challenge}}。",
     "extras": "額外分數變動",
+    "milestoneJournal": "獲得了成就 {{milestone}}。",
     "noExtras": "沒有額外分數變動"
   },
   "notification": {

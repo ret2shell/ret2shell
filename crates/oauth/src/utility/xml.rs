@@ -21,13 +21,12 @@ pub fn get_info_from_yale_xml(xml_response: &str) -> Result<IdsInfo, io::Error> 
 fn get_info_from_yale_xml_impl(xml_response: &str) -> Result<IdsInfo, io::Error> {
   let doc = roxmltree::Document::parse(xml_response)
     .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-  let name_node = doc
+  let name = doc
     .descendants()
     .find(|node| node.tag_name().name() == "cn")
-    .ok_or(io::Error::new(
-      io::ErrorKind::InvalidData,
-      "missing field: cn",
-    ))?;
+    .and_then(|node| node.text())
+    .unwrap_or("")
+    .to_owned();
   let uid_node = doc
     .descendants()
     .find(|node| node.tag_name().name() == "user")
@@ -35,13 +34,6 @@ fn get_info_from_yale_xml_impl(xml_response: &str) -> Result<IdsInfo, io::Error>
       io::ErrorKind::InvalidData,
       "missing field: user",
     ))?;
-  let name = name_node
-    .text()
-    .ok_or(io::Error::new(
-      io::ErrorKind::InvalidData,
-      "missing field: cn",
-    ))?
-    .to_owned();
   let uid = uid_node
     .text()
     .ok_or(io::Error::new(
@@ -92,6 +84,41 @@ mod tests {
         "#;
     let info = get_info_from_yale_xml_impl(dx_xml).unwrap();
     assert_eq!(info.name, "田所浩二");
+    assert_eq!(info.id, "1145141919810");
+  }
+
+  #[test]
+  fn test_xml_without_cn_parse() {
+    let xml_without_cn = r#"
+<cas:serviceResponse xmlns:cas='http://www.yale.edu/tp/cas'>
+    <cas:authenticationSuccess>
+        <cas:user>1145141919810</cas:user>
+        <cas:attributes>
+          <cas:uid>1145141919810</cas:uid>
+        </cas:attributes>
+    </cas:authenticationSuccess>
+</cas:serviceResponse>
+        "#;
+    let info = get_info_from_yale_xml_impl(xml_without_cn).unwrap();
+    assert_eq!(info.name, "");
+    assert_eq!(info.id, "1145141919810");
+  }
+
+  #[test]
+  fn test_xml_with_null_cn_parse() {
+    let xml_with_null_cn = r#"
+<cas:serviceResponse xmlns:cas='http://www.yale.edu/tp/cas'>
+    <cas:authenticationSuccess>
+        <cas:user>1145141919810</cas:user>
+        <cas:attributes>
+          <cas:cn></cas:cn>
+          <cas:uid>1145141919810</cas:uid>
+        </cas:attributes>
+    </cas:authenticationSuccess>
+</cas:serviceResponse>
+        "#;
+    let info = get_info_from_yale_xml_impl(xml_with_null_cn).unwrap();
+    assert_eq!(info.name, "");
     assert_eq!(info.id, "1145141919810");
   }
 }

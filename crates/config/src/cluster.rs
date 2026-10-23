@@ -14,6 +14,18 @@ pub struct RegistryConfig {
   pub enabled: Option<bool>,
 }
 
+impl RegistryConfig {
+  /// HTTP Basic credentials for registry API calls, when both are configured.
+  pub fn basic_auth(&self) -> Option<(&str, &str)> {
+    let username = self
+      .username
+      .as_deref()
+      .filter(|username| !username.is_empty())?;
+    let password = self.password.as_deref()?;
+    Some((username, password))
+  }
+}
+
 /// `ClusterConfig` is a configuration struct for managing service settings.
 #[derive(Serialize, Deserialize, Clone, Debug, Default, FromJsonQueryResult, PartialEq, Eq)]
 pub struct Config {
@@ -93,10 +105,32 @@ pub enum AppProtocol {
   Http,
 }
 
+#[derive(Clone, Copy, Debug, Default, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "PascalCase")]
+pub enum ImagePullPolicy {
+  #[default]
+  Always,
+  IfNotPresent,
+  Never,
+}
+
+impl ImagePullPolicy {
+  pub const fn as_str(self) -> &'static str {
+    match self {
+      Self::Always => "Always",
+      Self::IfNotPresent => "IfNotPresent",
+      Self::Never => "Never",
+    }
+  }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ChallengeImage {
   pub name: String,
   pub tag: String,
+  /// Kubernetes image pull policy for this challenge container.
+  #[serde(default)]
+  pub pull_policy: ImagePullPolicy,
   pub cpu: f64,
   #[serde(default = "default_cpu_req")]
   pub cpu_req: f64,
@@ -165,7 +199,9 @@ impl ChallengeEnv {
 
 #[cfg(test)]
 mod tests {
-  use super::{AppProtocol, ChallengeEnv, ChallengeImage, Config, Protocol, RegistryConfig};
+  use super::{
+    AppProtocol, ChallengeEnv, ChallengeImage, Config, ImagePullPolicy, Protocol, RegistryConfig,
+  };
   use crate::traits::Merge;
 
   fn registry() -> RegistryConfig {
@@ -184,6 +220,7 @@ mod tests {
     ChallengeImage {
       name: name.to_owned(),
       tag: "challenge:latest".to_owned(),
+      pull_policy: ImagePullPolicy::Always,
       cpu: 1.5,
       cpu_req: 1.0,
       mem: "512Mi".to_owned(),
@@ -244,6 +281,19 @@ mod tests {
   }
 
   #[test]
+  fn basic_auth_requires_username_and_password() {
+    let mut config = registry();
+    assert_eq!(config.basic_auth(), Some(("ci", "secret")));
+
+    config.username = Some(String::new());
+    assert_eq!(config.basic_auth(), None);
+
+    config.username = Some("ci".to_owned());
+    config.password = None;
+    assert_eq!(config.basic_auth(), None);
+  }
+
+  #[test]
   fn challenge_image_desensitize_redacts_resource_details_but_preserves_identity() {
     let desensitized = image("web").desensitize();
 
@@ -258,6 +308,17 @@ mod tests {
     assert_eq!(desensitized.port, Some(8080));
     assert_eq!(desensitized.protocol, Some(Protocol::Tcp));
     assert_eq!(desensitized.app_protocol, Some(AppProtocol::Http));
+  }
+
+  #[test]
+  fn challenge_image_pull_policy_defaults_to_always_for_legacy_configs() {
+    let mut legacy = serde_json::to_value(image("web")).unwrap();
+    legacy.as_object_mut().unwrap().remove("pull_policy");
+
+    let image: ChallengeImage = serde_json::from_value(legacy).unwrap();
+
+    assert_eq!(image.pull_policy, ImagePullPolicy::Always);
+    assert_eq!(image.pull_policy.as_str(), "Always");
   }
 
   #[test]

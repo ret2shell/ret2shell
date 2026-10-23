@@ -46,8 +46,8 @@ export default function ScorePicker(props: {
             value={[props.min, props.max]}
             onValueChange={(details) => {
               const value = details.value;
-              const maxOne = value[0] > value[1] ? value[0] : value[1];
-              const minOne = value[0] < value[1] ? value[0] : value[1];
+              const maxOne = Math.max(value[0], value[1]);
+              const minOne = Math.min(value[0], value[1]);
               if (maxOne !== props.max) props.onChangeMax(maxOne);
               if (minOne !== props.min) props.onChangeMin(minOne);
             }}

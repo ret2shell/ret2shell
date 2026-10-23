@@ -71,7 +71,7 @@ async fn create_notification(
   .await?;
   let event = EventContainer {
     game_id: game.id,
-    event: Event::Game(GameEvent {
+    event: Event::Game(Box::new(GameEvent {
       event_type: GameEventType::NewNotification,
       operator: user::Model {
         id: token.id,
@@ -80,7 +80,7 @@ async fn create_notification(
         ..Default::default()
       },
       message: notification.title.clone(),
-    }),
+    })),
   };
   queue
     .publish(

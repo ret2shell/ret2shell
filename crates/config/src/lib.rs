@@ -89,7 +89,8 @@ impl GlobalConfig {
       let path = match Path::new(path).canonicalize() {
         Ok(p) => p,
         Err(_) => {
-          // println!("[stage 1] config path error: {err:?}, original path: {path}");
+          // println!("[stage 1] config path error: {err:?}, original path:
+          // {path}");
           continue;
         }
       };
@@ -102,7 +103,8 @@ impl GlobalConfig {
           break;
         }
         Err(_) => {
-          // println!("[stage 2] config path error: {err:?}, original path: {path:?}");
+          // println!("[stage 2] config path error: {err:?}, original path:
+          // {path:?}");
           continue;
         }
       }

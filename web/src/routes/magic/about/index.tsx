@@ -148,6 +148,21 @@ export default function () {
                         HydrogenE7
                       </a>
                     </Tag>
+                    <Tag level="info" class="m-1">
+                      <a href="https://github.com/chunzhennn" target="_blank" rel="noreferrer">
+                        chunzhennn
+                      </a>
+                    </Tag>
+                    <Tag level="info" class="m-1">
+                      <a href="https://github.com/avasummer" target="_blank" rel="noreferrer">
+                        avasummer
+                      </a>
+                    </Tag>
+                    <Tag level="info" class="m-1">
+                      <a href="https://github.com/starnotes-xj" target="_blank" rel="noreferrer">
+                        starnotes-xj
+                      </a>
+                    </Tag>
                   </div>
                   <h3 class="font-bold">Opensource projects & 3rd libraries</h3>
                   <div class="flex flex-row flex-wrap justify-center">

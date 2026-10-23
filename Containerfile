@@ -1,4 +1,4 @@
-FROM rust:1.95-alpine AS server
+FROM rust:1.98-alpine AS server
 
 # hadolint ignore=DL3018
 RUN apk add --update --no-cache musl-dev clang lld ca-certificates
@@ -29,7 +29,7 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 
-COPY ./web/package.json ./web/pnpm-lock.yaml /var/lib/ret2shell/web/
+COPY ./web/package.json ./web/pnpm-lock.yaml ./web/pnpm-workspace.yaml /var/lib/ret2shell/web/
 WORKDIR /var/lib/ret2shell/web
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile

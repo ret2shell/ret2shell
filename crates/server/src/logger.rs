@@ -465,8 +465,8 @@ pub async fn initialize(config: &Option<logging::Config>) -> Result<Vec<WorkerGu
     let worker_client = client.clone();
     tokio::spawn(async move { run_vl_worker(rx, victoria_url, worker_client).await });
 
-    // Hook tracing to VictoriaLogs writer (as a Layer so we can flatten events and
-    // add span events)
+    // Hook tracing to VictoriaLogs writer (as a Layer so we can flatten events
+    // and add span events)
     let make_writer = VlMakeWriter::new(tx);
     let (non_blocking_victoria, victoria_guard) = non_blocking(make_writer.make_writer());
     let victoria_log_layer = Layer::new()

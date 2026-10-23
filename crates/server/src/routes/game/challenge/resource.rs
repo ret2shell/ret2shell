@@ -23,15 +23,13 @@ use sea_orm::TransactionTrait;
 use serde::Deserialize;
 use tower_http::request_id::RequestId;
 use tracing::{info, warn};
+use validator::Validate;
 
 use crate::{
   middleware::auth::{Token, is_game_admin},
   routes::game::lifecycle,
   traits::{GlobalState, ResponseError},
-  utility::{
-    pagination::{DEFAULT_PAGE_SIZE, DEFAULT_SUBMISSION_PAGE_SIZE, page, page_size},
-    validation::validate_challenge_model,
-  },
+  utility::pagination::{DEFAULT_PAGE_SIZE, DEFAULT_SUBMISSION_PAGE_SIZE, page, page_size},
 };
 
 #[derive(Deserialize)]
@@ -99,8 +97,11 @@ pub(super) async fn create_challenge(
   State(ref db): State<Database>, State(bucket): State<Bucket>, Extension(token): Extension<Token>,
   Extension(game): Extension<game::Model>, Json(challenge): Json<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  validate_challenge_model(&challenge)?;
+  challenge.validate()?;
   let txn = db.conn.begin().await?;
+  let referenced =
+    challenge::resolve_prerequisites(&txn, game.id, None, &challenge.prerequisites).await?;
+  let prerequisite_buckets = super::prerequisite_bucket_names(&referenced)?;
   let game_bucket = bucket
     .at_mut(
       game
@@ -112,7 +113,10 @@ pub(super) async fn create_challenge(
     )
     .await?;
   let challenge_bucket = game_bucket
-    .create(serde_json::to_value(&challenge)?)
+    .create(serde_json::to_value(super::challenge_bucket_config(
+      &challenge,
+      prerequisite_buckets,
+    )?)?)
     .await?;
   challenge_bucket
     .set_description(challenge.content.clone().unwrap_or_default())
@@ -146,9 +150,19 @@ pub(super) async fn update_challenge(
   Extension(game): Extension<game::Model>, Extension(prev_challenge): Extension<challenge::Model>,
   Extension(trace): Extension<RequestId>, Json(challenge): Json<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  validate_challenge_model(&challenge)?;
+  challenge.validate()?;
   super::check_challenge_publishing(&prev_challenge)?;
   let txn = db.conn.begin().await?;
+  let referenced = challenge::resolve_prerequisites(
+    &txn,
+    game.id,
+    Some(prev_challenge.id),
+    &challenge.prerequisites,
+  )
+  .await?;
+  super::ensure_acyclic_prerequisites(&txn, &game, prev_challenge.id, &challenge.prerequisites)
+    .await?;
+  let prerequisite_buckets = super::prerequisite_bucket_names(&referenced)?;
   let score_changed = prev_challenge.score_rule != challenge.score_rule;
   let challenge = challenge::update(
     &txn,
@@ -176,7 +190,10 @@ pub(super) async fn update_challenge(
   let (game_bucket, challenge_bucket) =
     super::get_challenge_bucket_mut(&bucket, &game, &challenge).await?;
   challenge_bucket
-    .set_config(serde_json::to_value(&challenge)?)
+    .set_config(serde_json::to_value(super::challenge_bucket_config(
+      &challenge,
+      prerequisite_buckets,
+    )?)?)
     .await?;
   challenge_bucket
     .set_description(challenge.content.clone().unwrap_or_default())
@@ -207,6 +224,117 @@ pub(super) async fn update_challenge(
   Ok(Json(challenge))
 }
 
+/// Payload of [`update_challenge_prerequisites`]. `unlock_limit` rides along
+/// because it only makes sense together with the prerequisite set: how many
+/// of them must be solved before the challenge unlocks, `0` meaning all.
+#[derive(Deserialize, Validate)]
+pub(super) struct UpdateChallengePrerequisitesRequest {
+  pub prerequisites: challenge::PrerequisiteList,
+  #[validate(range(
+    min = 0,
+    max = 1000,
+    message = "challenge unlock limit must be between 0 and 1000"
+  ))]
+  pub unlock_limit: i32,
+}
+
+/// Updates only the prerequisites and the unlock limit of a challenge.
+/// Unlike `update_challenge`, this endpoint does not require the full
+/// challenge model (content etc.) and is allowed on published challenges,
+/// since neither field alters the scoring configuration.
+pub(super) async fn update_challenge_prerequisites(
+  State(ref db): State<Database>, State(cache): State<Cache>, State(bucket): State<Bucket>,
+  Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
+  Extension(prev_challenge): Extension<challenge::Model>,
+  Json(req): Json<UpdateChallengePrerequisitesRequest>,
+) -> Result<impl IntoResponse, ResponseError> {
+  req.validate()?;
+  let prerequisites = req.prerequisites;
+  let txn = db.conn.begin().await?;
+  let referenced =
+    challenge::resolve_prerequisites(&txn, game.id, Some(prev_challenge.id), &prerequisites)
+      .await?;
+  super::ensure_acyclic_prerequisites(&txn, &game, prev_challenge.id, &prerequisites).await?;
+  let prerequisite_buckets = super::prerequisite_bucket_names(&referenced)?;
+  let challenge = challenge::update(
+    &txn,
+    challenge::Model {
+      prerequisites,
+      unlock_limit: req.unlock_limit,
+      ..prev_challenge
+    },
+  )
+  .await?;
+  let (game_bucket, challenge_bucket) =
+    super::get_challenge_bucket_mut(&bucket, &game, &challenge).await?;
+  challenge_bucket
+    .set_config(serde_json::to_value(super::challenge_bucket_config(
+      &challenge,
+      prerequisite_buckets,
+    )?)?)
+    .await?;
+  game_bucket
+    .commit(
+      format!(":link: update challenge prerequisites {}", challenge.name),
+      &token.account,
+      format!("{}@private.ret.sh.cn", token.account),
+    )
+    .await?;
+  txn.commit().await?;
+  cache.at("challenge").del(challenge.id).await.ok();
+
+  Ok(Json(challenge))
+}
+
+/// Updates only the avatar of a challenge. Like
+/// `update_challenge_prerequisites`, this endpoint does not require the full
+/// challenge model and is allowed on published challenges.
+pub(super) async fn update_challenge_avatar(
+  State(ref db): State<Database>, State(cache): State<Cache>, State(bucket): State<Bucket>,
+  Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
+  Extension(prev_challenge): Extension<challenge::Model>, Json(avatar): Json<Option<String>>,
+) -> Result<impl IntoResponse, ResponseError> {
+  if let Some(avatar) = &avatar
+    && r2s_database::validation::char_len(avatar)
+      > r2s_database::validation::AVATAR_MAX_LEN as usize
+  {
+    return Err(ResponseError::BadRequest(
+      "challenge avatar must be at most 255 characters".to_owned(),
+    ));
+  }
+  let txn = db.conn.begin().await?;
+  let challenge = challenge::update(
+    &txn,
+    challenge::Model {
+      avatar,
+      ..prev_challenge
+    },
+  )
+  .await?;
+  let referenced =
+    challenge::resolve_prerequisites(&txn, game.id, None, &challenge.prerequisites).await?;
+  let prerequisite_buckets = super::prerequisite_bucket_names(&referenced)?;
+  let (game_bucket, challenge_bucket) =
+    super::get_challenge_bucket_mut(&bucket, &game, &challenge).await?;
+  challenge_bucket
+    .set_config(serde_json::to_value(super::challenge_bucket_config(
+      &challenge,
+      prerequisite_buckets,
+    )?)?)
+    .await?;
+  game_bucket
+    .commit(
+      format!(":art: update challenge avatar {}", challenge.name),
+      &token.account,
+      format!("{}@private.ret.sh.cn", token.account),
+    )
+    .await?;
+  txn.commit().await?;
+  cache.at("challenge").del(challenge.id).await.ok();
+
+  Ok(Json(challenge))
+}
+
 #[allow(clippy::too_many_arguments)]
 pub(super) async fn up_challenge(
   State(ref db): State<Database>, State(cache): State<Cache>, State(bucket): State<Bucket>,
@@ -231,7 +359,7 @@ pub(super) async fn up_challenge(
   cache.at("challenge").del(challenge.id).await.ok();
   let event = EventContainer {
     game_id: challenge.game_id,
-    event: Event::Challenge(ChallengeEvent {
+    event: Event::Challenge(Box::new(ChallengeEvent {
       event_type: ChallengeEventType::Up,
       challenge: challenge.clone(),
       operator: user::Model {
@@ -240,7 +368,7 @@ pub(super) async fn up_challenge(
         account: token.account.clone(),
         ..Default::default()
       },
-    }),
+    })),
   };
   queue
     .publish(
@@ -286,7 +414,7 @@ pub(super) async fn down_challenge(
   cache.at("challenge").del(challenge.id).await.ok();
   let event = EventContainer {
     game_id: challenge.game_id,
-    event: Event::Challenge(ChallengeEvent {
+    event: Event::Challenge(Box::new(ChallengeEvent {
       event_type: ChallengeEventType::Down,
       challenge: challenge.clone(),
       operator: user::Model {
@@ -295,7 +423,7 @@ pub(super) async fn down_challenge(
         account: token.account.clone(),
         ..Default::default()
       },
-    }),
+    })),
   };
   queue
     .publish(
@@ -327,6 +455,7 @@ pub(super) async fn delete_challenge(
   );
 
   let txn = db.conn.begin().await?;
+  super::ensure_challenge_unreferenced(&txn, &game, &challenge).await?;
   challenge::delete(&txn, challenge.id).await?;
   let game_bucket = bucket
     .at_mut(

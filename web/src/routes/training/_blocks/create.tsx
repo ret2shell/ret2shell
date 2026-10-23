@@ -40,6 +40,7 @@ export default function CreatePlayground(props: { onDone: (game: Game) => void }
       token: null,
       offline: false,
       team_size: 1,
+      env_limit: null,
       can_register_after_started: true,
       enable_audit: false,
       weight: 1,

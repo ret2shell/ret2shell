@@ -13,6 +13,7 @@ import Select from "@widgets/select";
 import clsx from "clsx";
 import { DateTime } from "luxon";
 import { createEffect, createSignal, For, Match, onCleanup, Show, Switch } from "solid-js";
+import LogQueryInput from "./_blocks/query-input";
 
 function LogField(log: Log) {
   if (!log) return null;
@@ -190,16 +191,12 @@ export default function () {
             }}
           >
             <Field name="query">
-              {(field, props) => (
-                <Input
-                  size="sm"
+              {(field) => (
+                <LogQueryInput
                   class="flex-1"
-                  icon={<span class="icon-[fluent--code-16-regular]" />}
-                  {...props}
-                  noLabel
-                  value={field.value}
-                  error={field.error}
-                  placeholder="Log Query SQL..."
+                  value={(field.value as string) ?? ""}
+                  onChange={(v) => setValue(form, "query", v)}
+                  placeholder={t("platform.logs.assist.placeholder")}
                 />
               )}
             </Field>

@@ -5,7 +5,7 @@ import { base64 } from "@scure/base";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Input, { type TextInputProps } from "@widgets/input";
-import { type ComponentProps, createEffect, createSignal, splitProps, untrack } from "solid-js";
+import { type ComponentProps, createEffect, createSignal, on, splitProps, untrack } from "solid-js";
 
 export default function (
   props: TextInputProps &
@@ -23,7 +23,20 @@ export default function (
   const [calculating, setCalculating] = createSignal(false);
   const [manuallyFill, setManuallyFill] = createSignal(true);
 
-  const captcha = useCaptcha({ timestamp: props.timestamp });
+  const captcha = useCaptcha({ timestamp: () => props.timestamp });
+
+  function resetCaptchaFields() {
+    setValue(props.captchaForm, "captcha_answer", "");
+    setValue(props.captchaForm, "captcha_id", "");
+  }
+
+  createEffect(
+    on(
+      () => props.timestamp,
+      () => resetCaptchaFields(),
+      { defer: true }
+    )
+  );
 
   createEffect(() => {
     if (!captcha.isLoading && captcha.data) {
@@ -103,8 +116,7 @@ export default function (
             class="rounded-l-none!"
             loading={calculating() || captcha.isLoading}
             onClick={() => {
-              setValue(props.captchaForm, "captcha_answer", "");
-              setValue(props.captchaForm, "captcha_id", "");
+              resetCaptchaFields();
               captcha.refetch();
             }}
             disabled={calculating() || captcha.isLoading}

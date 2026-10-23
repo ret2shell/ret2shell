@@ -18,7 +18,10 @@ use tower_http::request_id::RequestId;
 use tracing::{debug, info, warn};
 
 use crate::{
-  middleware::{auth::Token, data::extract_team},
+  middleware::{
+    auth::{Token, is_game_admin},
+    data::extract_team,
+  },
   routes::game::{get_pod_field, lifecycle},
   traits::{GlobalState, ResponseError},
 };
@@ -55,6 +58,22 @@ pub(super) async fn start_challenge_instance(
   let checker = state.checker.clone();
   let engine = state.engine.clone();
   let team = extract_team!(game, team_ext, token);
+  // game admins are exempt from prerequisite gating
+  if !is_game_admin!(token, game) {
+    let gating_team_id = team.as_ref().map(|t| t.id);
+    let unsatisfied =
+      challenge::unsatisfied_prerequisites(&state.db.conn, &challenge, gating_team_id, token.id)
+        .await?;
+    if !unsatisfied.is_empty() {
+      info!(
+        count = unsatisfied.len(),
+        "player tried to start instance before solving the prerequisite challenges"
+      );
+      return Err(ResponseError::Forbidden(
+        "please solve the prerequisite challenges first".to_owned(),
+      ));
+    }
+  }
   let team = if team.is_some()
     && game.in_progress()
     && challenge.archive_at.is_none_or(|t| t > Utc::now())

@@ -4,6 +4,7 @@ import { useSelfTeam } from "@api/team";
 import Challenge from "@blocks/challenge";
 import Form, { type ChallengeForm } from "@blocks/challenge/form";
 import ChallengeList from "@blocks/challenge/list";
+import Milestones from "@blocks/challenge/milestones";
 import Tabs from "@blocks/challenge/tabs";
 import SidebarLayout from "@blocks/sidebar-layout";
 import type { Challenge as ChallengeModel } from "@models/challenge";
@@ -39,6 +40,7 @@ export default function () {
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedChallengeId = createMemo(() => Number.parseInt((searchParams.challenge as string) || "", 10) || null);
   const inCreate = createMemo(() => searchParams.create === "true");
+  const inMilestones = createMemo(() => searchParams.milestones === "true");
 
   const game = useGame({ id: () => gameId(), enabled: () => !!gameId() });
   const team = useSelfTeam({
@@ -147,6 +149,7 @@ export default function () {
       const toastId = addToast({
         level: "info",
         description: `${t("game.hammer.newMessages", { challenge: challengeName })}: ${msg}`,
+        duration: 5000,
         accept: () => {
           navigate(`/games/${gameId()}/challenges?challenge=${chat.challenge_id}&tab=hammer`);
           setTimeout(() => removeToast(toastId), 50);
@@ -203,6 +206,9 @@ export default function () {
             </Match>
             <Match when={inCreate()}>
               <Form onDone={onCreateChallenge} gameId={gameId()} challengeId={0} />
+            </Match>
+            <Match when={inMilestones()}>
+              <Milestones gameId={gameId()} />
             </Match>
             <Match when={selectedChallengeId() && challenge.data}>
               <Challenge challengeId={selectedChallengeId()!} gameId={gameId()} archived={archived()} />

@@ -331,7 +331,8 @@ impl Cluster {
     );
     let pods = api
       .list(&ListParams {
-        // field_selector: Some("status.phase!=Succeeded,status.phase!=Failed".to_owned()),
+        // field_selector:
+        // Some("status.phase!=Succeeded,status.phase!=Failed".to_owned()),
         ..Default::default()
       })
       .await?;
@@ -407,7 +408,8 @@ impl Cluster {
     );
     let services = api.list(&ListParams::default()).await?;
     for service in services.items {
-      // get service's label `ret.sh.cn/traffic`, and check the pod is still alive
+      // get service's label `ret.sh.cn/traffic`, and check the pod is still
+      // alive
       let traffic_label = service
         .metadata
         .labels
@@ -567,7 +569,7 @@ impl Cluster {
           .map(|image| Container {
             name: image.name.clone(),
             image: Some(image.tag.clone()),
-            image_pull_policy: Some(String::from("Always")),
+            image_pull_policy: Some(image.pull_policy.as_str().to_owned()),
             env: Some(
               envs
                 .clone()

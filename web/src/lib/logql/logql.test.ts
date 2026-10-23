@@ -1,0 +1,323 @@
+import { describe, expect, it } from "vitest";
+import { getCompletions } from "./complete";
+import { highlight } from "./highlight";
+import { lex } from "./lexer";
+import { parse } from "./parser";
+
+import { QUERY_PRESETS } from "./schema";
+
+type CompletionRange = { from: number; to: number; labels: string[] };
+
+function complete(source: string, cursor = source.length): CompletionRange {
+  const result = getCompletions(source, cursor);
+  return { from: result.from, to: result.to, labels: result.items.map((i) => i.label) };
+}
+
+function labels(source: string, cursor = source.length): string[] {
+  return complete(source, cursor).labels;
+}
+
+function diagCodes(source: string): string[] {
+  return parse(source).diagnostics.map((d) => d.code);
+}
+
+describe("lexer", () => {
+  it("splits field filters into word/colon/value", () => {
+    const tokens = lex("level:INFO");
+    expect(tokens.map((t) => t.kind)).toEqual(["word", "colon", "word", "eof"]);
+    expect(tokens[0].value).toBe("level");
+    expect(tokens[2].value).toBe("INFO");
+  });
+
+  it("keeps dots and dashes inside words", () => {
+    const tokens = lex("span.user-account:admin");
+    expect(tokens[0].value).toBe("span.user-account");
+  });
+
+  it("marks unterminated strings", () => {
+    const tokens = lex('_msg:"hello');
+    expect(tokens[2]).toMatchObject({ kind: "string", terminated: false });
+  });
+});
+
+describe("parser diagnostics", () => {
+  it("accepts a valid full query", () => {
+    expect(diagCodes("level:ERROR AND span.uri:/account/login | sort by (_time) desc | limit 100")).toEqual([]);
+  });
+
+  it("flags unclosed strings", () => {
+    expect(diagCodes('_msg:"hello')).toContain("unclosedString");
+  });
+
+  it("flags unclosed parens", () => {
+    expect(diagCodes("(level:ERROR")).toContain("unclosedParen");
+  });
+
+  it("flags unexpected parens", () => {
+    expect(diagCodes("level:ERROR)")).toContain("unexpectedParen");
+  });
+
+  it("flags missing field values", () => {
+    expect(diagCodes("level:")).toContain("missingValue");
+    expect(diagCodes("level: AND target:x")).toContain("missingValue");
+  });
+
+  it("flags dangling boolean operators", () => {
+    expect(diagCodes("level:ERROR AND")).toContain("danglingOperator");
+    expect(diagCodes("NOT")).toContain("danglingOperator");
+  });
+
+  it("flags empty groups", () => {
+    expect(diagCodes("()")).toContain("emptyGroup");
+  });
+
+  it("flags missing pipe commands", () => {
+    expect(diagCodes("level:ERROR |")).toContain("missingCommand");
+  });
+
+  it("flags unknown pipe commands", () => {
+    expect(diagCodes("level:ERROR | frobnicate 1")).toContain("unknownCommand");
+  });
+
+  it("accepts time ranges and comparisons", () => {
+    expect(diagCodes("_time:[2026-01-01, 2026-01-02] | limit 10")).toEqual([]);
+    expect(diagCodes("_time:>=1h")).toEqual([]);
+  });
+});
+
+describe("completion", () => {
+  it("suggests fields at predicate start", () => {
+    const items = labels("");
+    expect(items).toContain("level:");
+    expect(items).toContain("span.user-account:");
+    expect(items).toContain("NOT");
+  });
+
+  it("filters fields by prefix", () => {
+    const items = labels("span.user-a");
+    expect(items).toEqual(["span.user-account:"]);
+  });
+
+  it("suggests known values after a field colon", () => {
+    expect(labels("level:")).toEqual(expect.arrayContaining(["INFO", "ERROR", "*"]));
+  });
+
+  it("filters values by typed prefix", () => {
+    expect(labels("level:ERR")).toEqual(["ERROR"]);
+  });
+
+  it("suggests http methods for span.method", () => {
+    expect(labels("span.method:")).toEqual(expect.arrayContaining(["GET", "POST"]));
+  });
+
+  it("suggests boolean keywords and pipes after a predicate", () => {
+    const items = labels("level:ERROR ");
+    expect(items).toEqual(expect.arrayContaining(["AND", "OR", "| sort by (_time) desc", "| limit N"]));
+  });
+
+  it("suggests pipe commands after a pipe", () => {
+    const items = labels("level:ERROR | ");
+    expect(items).toEqual(expect.arrayContaining(["sort by (_time) desc", "limit N"]));
+  });
+
+  it("filters pipe commands by prefix", () => {
+    expect(labels("level:ERROR | so")).toEqual(["sort by (_time) desc"]);
+  });
+
+  it("suggests fields inside sort by parens", () => {
+    const items = labels("level:ERROR | sort by (");
+    expect(items).toContain("_time");
+  });
+
+  it("suggests sort direction after closing paren", () => {
+    expect(labels("level:ERROR | sort by (_time) ")).toEqual(expect.arrayContaining(["desc", "asc"]));
+  });
+
+  it("suggests limit values", () => {
+    expect(labels("level:ERROR | limit ")).toEqual(expect.arrayContaining(["100", "1000"]));
+  });
+
+  it("suggests chained pipes after a finished command", () => {
+    expect(labels("level:ERROR | limit 100 ")).toEqual(expect.arrayContaining(["| sort by (_time) desc"]));
+  });
+
+  it("does not offer value helpers for free-form fields while typing", () => {
+    expect(labels("span.user-account:adm")).toEqual([]);
+  });
+
+  it("suggests fields after AND", () => {
+    expect(labels("level:ERROR AND ")).toContain("target:");
+  });
+
+  it("accepts NOT as the operand of AND", () => {
+    expect(diagCodes("level:ERROR AND NOT span.uri:/health")).toEqual([]);
+  });
+
+  it("accepts function-style filters like field:in(...)", () => {
+    expect(diagCodes('level:in("INFO","ERROR")')).toEqual([]);
+    expect(diagCodes('level:in("INFO","ERROR"')).toContain("unclosedParen");
+  });
+
+  it("absorbs adjacent colons inside bare values", () => {
+    expect(diagCodes("target:r2s_server::worker* | sort by (_time) desc | limit 100")).toEqual([]);
+  });
+
+  it("supports single-quoted strings", () => {
+    expect(diagCodes("_msg:'a | b'")).toEqual([]);
+  });
+
+  it("keeps subquery pipes inside parens", () => {
+    expect(diagCodes("* | union (level:ERROR | limit 10)")).toEqual([]);
+  });
+
+  it("supports half-open time ranges in filters and pipe args", () => {
+    expect(diagCodes("_time:[2026-01-01,2026-01-02)")).toEqual([]);
+    expect(diagCodes("* | filter _time:[2026-01-01,2026-01-02)")).toEqual([]);
+  });
+
+  it("caret at the start of a value selects the whole value token", () => {
+    const result = complete("level:ERROR", 6);
+    expect(result.labels).toEqual(["TRACE", "DEBUG", "INFO", "WARN", "ERROR", "*", '~"regexp"']);
+    expect([result.from, result.to]).toEqual([6, 11]);
+  });
+
+  it("filter pipe completes predicates and values", () => {
+    expect(labels("* | filter ")).toContain("level:");
+    expect(labels("* | filter level:")).toContain("ERROR");
+  });
+
+  it("caret at field-name start replaces the whole field and colon", () => {
+    const result = complete("level:ERROR", 0);
+    expect(result.labels).toContain("level:");
+    expect([result.from, result.to]).toEqual([0, 6]);
+  });
+
+  it("command completion replaces existing arguments", () => {
+    // caret inside `limit` of `* | limit 100`
+    const result = complete("* | limit 100", 5);
+    expect(result.labels).toContain("limit N");
+    expect([result.from, result.to]).toEqual([4, 13]);
+  });
+
+  it("caret at pipe-argument start replaces the argument", () => {
+    // caret at the start of `100`
+    const result = complete("* | limit 100", 10);
+    expect([result.from, result.to]).toEqual([10, 13]);
+  });
+
+  it("supports backtick raw strings", () => {
+    expect(diagCodes("_msg:~`(timeout|error)`")).toEqual([]);
+  });
+
+  it("tracks nested delimiters in field-scoped filters", () => {
+    expect(diagCodes("_msg:(x OR (y AND z))")).toEqual([]);
+    expect(diagCodes("_msg:(x OR (y AND z)")).toContain("unclosedParen");
+  });
+
+  it("completes enum values inside quotes using the decoded prefix", () => {
+    const result = complete('level:"ER');
+    expect(result.labels).toContain("ERROR");
+    expect([result.from, result.to]).toEqual([6, 9]);
+  });
+
+  it("flags unterminated strings after a bare tilde", () => {
+    expect(diagCodes('~"timeout"')).toEqual([]);
+    expect(diagCodes('~"timeout')).toContain("unclosedString");
+  });
+});
+
+describe("regressions from review", () => {
+  it("lexer terminates on exotic characters like braces", () => {
+    const tokens = lex("{}");
+    expect(tokens.map((t) => t.kind)).toEqual(["word", "word", "eof"]);
+  });
+
+  it("flags unbalanced parens inside pipe arguments", () => {
+    expect(diagCodes("* | sort by (_time")).toContain("unclosedParen");
+    expect(diagCodes("* | sort by (_time))")).toContain("unexpectedParen");
+    expect(diagCodes("* | sort by (_time) desc")).toEqual([]);
+  });
+
+  it("value completion replaces the whole token, not just up to the caret", () => {
+    // caret between ER and ROR in level:ERROR
+    const result = complete("level:ERROR", 8);
+    expect(result.labels).toEqual(["ERROR"]);
+    expect([result.from, result.to]).toEqual([6, 11]);
+  });
+
+  it("field completion swallows an existing colon", () => {
+    // caret between lev and el in level:ERROR
+    const result = complete("level:ERROR", 3);
+    expect(result.labels).toContain("level:");
+    expect([result.from, result.to]).toEqual([0, 6]);
+  });
+
+  it("tokens after the caret do not steer pipe argument completion", () => {
+    // caret inside _time of a complete sort command
+    const source = "level:ERROR | sort by (_time) desc";
+    const caret = source.indexOf("_time") + 2;
+    const result = complete(source, caret);
+    expect(result.labels).toContain("_time");
+    expect(result.labels).not.toContain("desc");
+  });
+
+  it("all presets parse without diagnostics", () => {
+    for (const preset of QUERY_PRESETS) {
+      expect(diagCodes(preset.query), preset.id).toEqual([]);
+    }
+  });
+});
+
+describe("highlight", () => {
+  it("colors field names, keywords, strings and pipe commands", () => {
+    const source = 'level:ERROR AND _msg:"login" | stats by (account) count()';
+    const segments = highlight(source, []);
+    expect(segments.map((s) => source.slice(s.start, s.end))).toEqual([
+      "level",
+      ":",
+      "AND",
+      "_msg",
+      ":",
+      '"login"',
+      "|",
+      "stats",
+      "(",
+      ")",
+      "count",
+      "(",
+      ")",
+    ]);
+    expect(segments[0].cls).toContain("text-primary");
+    expect(segments[3].cls).toContain("text-primary");
+    expect(segments[2].cls).toContain("text-warning");
+    expect(segments[5].cls).toContain("text-success");
+    expect(segments[7].cls).toContain("text-info");
+    expect(segments[10].cls).toContain("text-info");
+  });
+
+  it("underlines unterminated strings", () => {
+    const segments = highlight('_msg:"oops', parse('_msg:"oops').diagnostics);
+    const str = segments.find((s) => s.start === 5);
+    expect(str?.cls).toContain("decoration-wavy");
+  });
+
+  it("does not color plain words or numbers-as-commands outside pipes", () => {
+    const segments = highlight("stats limit", []);
+    expect(segments).toEqual([]);
+  });
+
+  it("colors numeric words", () => {
+    const segments = highlight("| limit 100", []);
+    expect(segments.some((s) => s.cls.includes("text-warning") && !s.cls.includes("font-bold"))).toBe(true);
+  });
+
+  it("keeps segments sorted and non-overlapping", () => {
+    const source = "(level:ERROR OR span.uri:/api) AND NOT _time:[1..2] | top 3 (target)";
+    const segments = highlight(source, parse(source).diagnostics);
+    let cursor = 0;
+    for (const seg of segments) {
+      expect(seg.start).toBeGreaterThanOrEqual(cursor);
+      cursor = seg.end;
+    }
+  });
+});

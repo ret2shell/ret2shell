@@ -326,7 +326,7 @@ export class TerminalCursor {
   public syncFromTerminal() {
     const cursor = this.terminal.buffer.active.cursorY;
     this.x = this.terminal.buffer.active.cursorX;
-    this.y = cursor < 0 ? 0 : cursor;
+    this.y = Math.max(cursor, 0);
   }
 
   public write(text: string | Uint8Array, forward: boolean) {

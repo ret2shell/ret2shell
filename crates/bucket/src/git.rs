@@ -352,30 +352,31 @@ impl Git {
 
   pub async fn try_open(path: impl AsRef<Path>) -> Result<Self, BucketError> {
     let path = path.as_ref();
-    if path.exists() {
-      trace!(?path, "opening git repository");
-    } else {
+    if !path.exists() {
       warn!(?path, "git repository does not exist");
       return Err(BucketError::PathDoesNotExist(path.display().to_string()));
     }
-    let output = Command::new("git")
-      .current_dir(path)
-      .arg("describe")
-      .arg("--all")
-      .arg("--long")
-      .output()
-      .await?;
-    if output.status.success() {
-      trace!(stdio=?output, "opened git repository");
-      Ok(Self {
-        path: path.to_path_buf().canonicalize()?,
-      })
-    } else {
-      warn!(stdio=?output, "failed to open git repository");
-      Err(BucketError::GitCommandFailed(String::from_utf8(
-        output.stderr,
-      )?))
+    // Validate the repository with cheap filesystem lookups instead of
+    // shelling out to `git`: this runs on every bucket open, including every
+    // read-only request, and spawning a subprocess per request exhausts the
+    // file descriptor limit under load. Buckets are always regular
+    // repositories created by `git init`, so the core layout under `.git` is
+    // enough; worktree `gitdir` indirection is not supported.
+    let git_dir = path.join(".git");
+    if !git_dir.join("HEAD").exists()
+      || !git_dir.join("objects").exists()
+      || !git_dir.join("refs").exists()
+    {
+      warn!(?path, "path is not a git repository");
+      return Err(BucketError::GitCommandFailed(format!(
+        "{} is not a git repository",
+        path.display()
+      )));
     }
+    trace!(?path, "opening git repository");
+    Ok(Self {
+      path: path.to_path_buf().canonicalize()?,
+    })
   }
 
   pub async fn new(path: impl AsRef<Path>) -> Result<Self, BucketError> {
@@ -847,11 +848,14 @@ impl Git {
   pub async fn diff_name_status(
     &self, old_oid: impl AsRef<str>, new_oid: impl AsRef<str>,
   ) -> Result<Vec<DiffEntry>, BucketError> {
+    // `-z` terminates every field with NUL: paths are passed through raw
+    // bytes and never C-quoted, so non-ASCII bucket names survive the trip
     let output = Command::new("git")
       .current_dir(&self.path)
       .arg("diff")
       .arg("--name-status")
       .arg("--find-renames")
+      .arg("-z")
       .arg(old_oid.as_ref())
       .arg(new_oid.as_ref())
       .output()
@@ -864,20 +868,24 @@ impl Git {
     }
 
     let output = String::from_utf8(output.stdout)?;
+    let mut fields = output.split('\0').filter(|field| !field.is_empty());
     let mut entries = Vec::new();
-    for line in output.lines() {
-      let mut parts = line.split('\t');
-      let Some(status) = parts.next() else {
-        continue;
-      };
-      let Some(first_path) = parts.next() else {
-        continue;
-      };
-      let second_path = parts.next();
-      let (old_path, path) = if let Some(path) = second_path {
-        (Some(first_path.to_string()), path.to_string())
+    while let Some(status) = fields.next() {
+      // renames and copies carry the source path before the destination
+      let is_rename = matches!(status.chars().next(), Some('R' | 'C'));
+      let (old_path, path) = if is_rename {
+        let Some(old_path) = fields.next() else {
+          break;
+        };
+        let Some(path) = fields.next() else {
+          break;
+        };
+        (Some(old_path.to_string()), path.to_string())
       } else {
-        (None, first_path.to_string())
+        let Some(path) = fields.next() else {
+          break;
+        };
+        (None, path.to_string())
       };
       entries.push(DiffEntry {
         status: status.to_string(),
@@ -905,10 +913,30 @@ impl Git {
       .arg(self.path.as_os_str());
     debug!(?cmd, "run command for git repo stream internal rpc");
     let mut child = cmd.spawn()?;
-    let stdout_fd = child.stdout.take().unwrap();
-    let mut stdin_fd = child.stdin.take().unwrap();
+    let stdout_fd = child
+      .stdout
+      .take()
+      .ok_or_else(|| BucketError::GitCommandFailed("failed to capture git stdout".to_owned()))?;
+    let mut stdin_fd = child
+      .stdin
+      .take()
+      .ok_or_else(|| BucketError::GitCommandFailed("failed to capture git stdin".to_owned()))?;
     tokio::spawn(async move {
-      tokio::io::copy(&mut stdin, &mut stdin_fd).await.unwrap();
+      // Feed the request body into git, then close stdin so the process sees
+      // EOF even when the copy fails halfway through.
+      if let Err(error) = tokio::io::copy(&mut stdin, &mut stdin_fd).await {
+        warn!(?error, "failed to pipe request body into git process");
+      }
+      drop(stdin_fd);
+      // Always reap the child: without `wait` it lingers as a zombie and keeps
+      // its pipe file descriptors alive until the parent process exits.
+      match child.wait().await {
+        Ok(status) if !status.success() => {
+          warn!(?status, "git process exited with failure");
+        }
+        Ok(_) => {}
+        Err(error) => warn!(?error, "failed to wait for git process"),
+      }
     });
     Ok(stdout_fd)
   }
@@ -997,6 +1025,7 @@ mod tests {
   use super::{
     Git, entry_paths_for_changed_path, listed_entry_for_changed_path, parse_ls_tree_objects,
   };
+  use crate::BucketError;
 
   fn temp_repo_path(name: &str) -> PathBuf {
     let nanos = SystemTime::now()
@@ -1241,5 +1270,27 @@ mod tests {
     assert_eq!(asset.subject.as_deref(), Some("update nested asset"));
 
     fs::remove_dir_all(repo).expect("remove temp repo");
+  }
+
+  #[tokio::test]
+  async fn try_open_rejects_a_directory_that_is_not_a_git_repository() {
+    let dir = temp_repo_path("git-not-a-repo");
+    fs::create_dir_all(&dir).expect("create plain directory");
+
+    let result = Git::try_open(&dir).await;
+    assert!(matches!(result, Err(BucketError::GitCommandFailed(_))));
+
+    fs::remove_dir_all(dir).expect("remove plain directory");
+  }
+
+  #[tokio::test]
+  async fn try_open_rejects_an_incomplete_git_directory() {
+    let dir = temp_repo_path("git-incomplete");
+    fs::create_dir_all(dir.join(".git")).expect("create bare .git directory");
+
+    let result = Git::try_open(&dir).await;
+    assert!(matches!(result, Err(BucketError::GitCommandFailed(_))));
+
+    fs::remove_dir_all(dir).expect("remove incomplete repository");
   }
 }

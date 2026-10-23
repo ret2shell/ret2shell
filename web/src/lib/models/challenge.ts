@@ -13,11 +13,15 @@ export type Challenge = {
   bucket: string | null;
   release_at: DateTime | null;
   archive_at: DateTime | null;
+  prerequisites: number[];
+  unlock_limit: number;
+  avatar: string | null;
 };
 
 export type ChallengeImage = {
   name: string;
   tag: string;
+  pull_policy?: "Always" | "IfNotPresent" | "Never";
   cpu: number;
   cpu_req: number;
   mem: string;

@@ -11,7 +11,7 @@ import { useMutation, useQuery } from "@tanstack/solid-query";
 import type { DiagnosticMarker } from "@widgets/editor";
 import { HTTPError } from "ky";
 import type { DateTime } from "luxon";
-import { createMemo } from "solid-js";
+import { type Accessor, createMemo } from "solid-js";
 import api, { api_root, handleHttpError, inflyClient, safeJson } from ".";
 
 export type OAuthProviderResponse = {
@@ -28,13 +28,13 @@ export function useCaptcha({
   enabled,
   onError,
 }: {
-  timestamp?: number;
+  timestamp?: Accessor<number | undefined>;
   enabled?: () => boolean;
   onError?: (err: Error) => void;
 } = {}) {
   return useQuery(
     () => ({
-      queryKey: ["account", "captcha", timestamp],
+      queryKey: ["account", "captcha", timestamp?.()],
       queryFn: async () => await getCaptcha(),
       enabled: enabled?.(),
       throwOnError: (err: Error) => {

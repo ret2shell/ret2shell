@@ -19,15 +19,13 @@ use sea_orm::TransactionTrait;
 use serde::Deserialize;
 use tower_http::request_id::RequestId;
 use tracing::{error, info, warn};
+use validator::Validate;
 
 use super::worker;
 use crate::{
   middleware::{auth, auth::is_game_admin, data},
   traits::{GlobalState, ResponseError},
-  utility::{
-    pagination::{DEFAULT_PAGE_SIZE, page, page_size},
-    validation::validate_team_form,
-  },
+  utility::pagination::{DEFAULT_PAGE_SIZE, page, page_size},
 };
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
@@ -102,17 +100,13 @@ struct UpdateTeamRequest {
 
 async fn update_self_team(
   State(ref db): State<Database>, State(ref auditor): State<Auditor>,
-  Extension(token): Extension<auth::Token>, Extension(game): Extension<game::Model>,
-  Extension(team): Extension<Option<team::Model>>, Json(req): Json<UpdateTeamRequest>,
+  Extension(game): Extension<game::Model>, Extension(team): Extension<Option<team::Model>>,
+  Json(req): Json<UpdateTeamRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
   let mut team = team.ok_or_else(|| ResponseError::NotFound("team not found".to_owned()))?;
-  if game.team_size != 1 {
-    team.name = req.name;
-  } else {
-    team.name = token.nickname.clone();
-  }
+  team.name = req.name;
   team.tag = req.tag;
-  validate_team_form(&team.name, team.tag.as_deref())?;
+  team.validate()?;
   if game.archived() {
     warn!("user try to update team in archived game");
     return Err(ResponseError::PreconditionFailed(
@@ -364,7 +358,6 @@ async fn create_team(
       "can not join multiple teams".to_owned(),
     ));
   }
-  validate_team_form(&req.name, req.tag.as_deref())?;
   let state = if game.enable_audit {
     if auditor.audit_content(&req.name) {
       team::State::Pending
@@ -374,20 +367,17 @@ async fn create_team(
   } else {
     team::State::Passed
   };
-  let team_token = Some(nanoid!());
-  let team = team::create(
-    &db.conn,
-    team::Model {
-      name: req.name,
-      game_id: game.id,
-      state,
-      token: team_token,
-      institute_id: user.institute_id,
-      tag: req.tag,
-      ..Default::default()
-    },
-  )
-  .await?;
+  let team = team::Model {
+    name: req.name,
+    game_id: game.id,
+    state,
+    token: Some(nanoid!()),
+    institute_id: user.institute_id,
+    tag: req.tag,
+    ..Default::default()
+  };
+  team.validate()?;
+  let team = team::create(&db.conn, team).await?;
   user2_team::user_join_team(&db.conn, token.id, team.id).await?;
   info!(
     team_id=%team.id, team_name=%team.name,
@@ -474,7 +464,7 @@ async fn update_team_info(
   Extension(trace): Extension<RequestId>, Json(req): Json<team::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
   ensure_team_in_game(&game, &team)?;
-  validate_team_form(&req.name, req.tag.as_deref())?;
+  req.validate()?;
   let result = team::update(
     &db.conn,
     team::Model {
@@ -557,6 +547,7 @@ async fn create_team_extra(
     extra::Model {
       id: 0,
       team_id: team.id,
+      blood_state: None,
       ..req
     },
   )

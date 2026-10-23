@@ -7,12 +7,17 @@ export async function downloadFile(
   searchParams?: { [key: string]: string },
   onDownloadProgress?: (progress: Progress) => void
 ) {
-  return await api
-    .get(url, {
-      searchParams,
-      onDownloadProgress,
-    })
-    .blob();
+  // Since ky v2, the `timeout` option (10s by default) also bounds body reads
+  // in shortcut methods like `.blob()`. The timeout should only cover the
+  // request until the response headers arrive; downloading the body may
+  // legitimately take longer. Awaiting the raw Response and consuming the body
+  // with the native method skips ky's body-read race while keeping the
+  // request-phase timeout intact.
+  const response = await api.get(url, {
+    searchParams,
+    onDownloadProgress,
+  });
+  return await response.blob();
 }
 
 export async function uploadFile(url: string, file: File[], onUploadProgress?: (progress: Progress) => void) {

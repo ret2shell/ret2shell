@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use chrono::Utc;
 use deunicode::deunicode_with_tofu;
 use r2s_config::cluster::RegistryConfig;
 use regex::Regex;
@@ -68,6 +69,26 @@ impl Registry {
     ))
   }
 
+  fn authenticate(&self, request: reqwest::RequestBuilder) -> reqwest::RequestBuilder {
+    match self
+      .credentials
+      .as_ref()
+      .and_then(RegistryConfig::basic_auth)
+    {
+      Some((username, password)) => request.basic_auth(username, Some(password)),
+      None => request,
+    }
+  }
+
+  async fn get(&self, url: &str) -> Result<reqwest::Response, ClusterError> {
+    Ok(
+      self
+        .authenticate(reqwest::Client::new().get(url))
+        .send()
+        .await?,
+    )
+  }
+
   pub async fn sync_repo(&mut self) -> Result<HashMap<String, Vec<String>>, ClusterError> {
     let api_base = self.api_base()?;
     let mut result: Vec<String> = Vec::new();
@@ -75,8 +96,12 @@ impl Registry {
     let mut orgs: HashMap<String, Vec<String>> = HashMap::new();
     loop {
       let res = match last {
-        ref s if s.is_empty() => reqwest::get(&format!("{api_base}/_catalog?n=1000")).await?,
-        ref s => reqwest::get(&format!("{api_base}/_catalog?n=1000&last={s}")).await?,
+        ref s if s.is_empty() => self.get(&format!("{api_base}/_catalog?n=1000")).await?,
+        ref s => {
+          self
+            .get(&format!("{api_base}/_catalog?n=1000&last={s}"))
+            .await?
+        }
       };
       let body: Repository = res.json().await?;
       let repositories = body.repositories;
@@ -103,7 +128,9 @@ impl Registry {
 
   pub async fn images(&self, repository: &str) -> Result<Vec<String>, ClusterError> {
     let api_base = self.api_base()?;
-    let res = reqwest::get(&format!("{api_base}/{repository}/tags/list")).await?;
+    let res = self
+      .get(&format!("{api_base}/{repository}/tags/list"))
+      .await?;
     let body: Tags = res.json().await?;
     Ok(body.tags)
   }
@@ -140,10 +167,11 @@ impl Registry {
     tokio::io::copy(&mut stdin, &mut file).await?;
     // get tag name without file extension
     let repo = to_image_name(name.split('.').next().unwrap());
+    let version = Utc::now().timestamp();
     let mut args = vec![
       "copy".to_string(),
       format!("docker-archive:{}", name),
-      format!("docker://{}/{org}/{repo}:latest", self.base()?),
+      format!("docker://{}/{org}/{repo}:{version}", self.base()?),
     ];
     if self.credentials.clone().is_some_and(|c| c.insecure) {
       args.push("--dest-tls-verify=false".to_string());
@@ -154,7 +182,7 @@ impl Registry {
       .output()
       .await?;
     if output.status.success() {
-      info!(?name, ?org, ?repo, "uploaded image");
+      info!(?name, ?org, ?repo, ?version, "uploaded image");
       Ok(())
     } else {
       let error = String::from_utf8_lossy(&output.stderr).to_string();
@@ -173,4 +201,45 @@ fn to_image_name(file: &str) -> String {
     .replace_all(&file, "")
     .to_string()
     .to_lowercase()
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  fn config(username: Option<&str>, password: Option<&str>) -> RegistryConfig {
+    RegistryConfig {
+      username: username.map(str::to_owned),
+      password: password.map(str::to_owned),
+      server: "registry.example.com".to_owned(),
+      insecure: true,
+      external: "registry.example.com".to_owned(),
+      enabled: Some(true),
+    }
+  }
+
+  fn authorization(config: RegistryConfig) -> Option<String> {
+    let request = Registry::new(config)
+      .authenticate(reqwest::Client::new().get("http://registry.example.com/v2/_catalog"))
+      .build()
+      .unwrap();
+    request
+      .headers()
+      .get(reqwest::header::AUTHORIZATION)
+      .and_then(|value| value.to_str().ok())
+      .map(str::to_owned)
+  }
+
+  #[test]
+  fn catalog_requests_include_basic_auth() {
+    assert_eq!(
+      authorization(config(Some("ci"), Some("secret"))).as_deref(),
+      Some("Basic Y2k6c2VjcmV0")
+    );
+  }
+
+  #[test]
+  fn catalog_requests_stay_anonymous_without_credentials() {
+    assert_eq!(authorization(config(None, None)), None);
+  }
 }

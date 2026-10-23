@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="1300" height="256">
   <path
     d="M23.192 49.689 5.783 39.49v-3.169l14.639-8.425 1.663 2.319-13.516 7.69 15.519 9.161zm25.01-1.772-1.664-2.32 13.516-7.69-7.56-4.302 2.468-1.464 7.878 4.181v3.17z"
-    style="font-size:36.9236px;font-family:&quot;Sarasa Term TC&quot;;-inkscape-font-specification:&quot;Sarasa Term TC&quot;;fill:#0078d6;stroke:#0078d6;stroke-width:1.5875;stroke-dasharray:none;stroke-opacity:.564706"
+    style="font-size:36.9236px;font-family:'Sarasa Term TC',sans-serif;fill:#0078d6;stroke:#0078d6;stroke-width:1.5875;stroke-dasharray:none;stroke-opacity:.564706"
     transform="translate(45.747 -5.66) scale(3.9033)" />
   <path fill="red"
     d="m151.006 75.62 37.088 62.89 23.56-22.568 29.018 4.318 35.858-18.537-24.673-61.7-23.206 34.66-54.137-24.982z"
@@ -13,7 +13,7 @@
     style="font-size:36.9236px;fill:gray;fill-opacity:1;stroke:gray;stroke-width:1.53716172;stroke-dasharray:none;stroke-opacity:.56470603"
     transform="rotate(-11.958 161.852 -100.048) scale(3.9033)" />
   <g aria-label="Ret2Shell"
-    style="font-size:139.541px;font-family:SDMiniRobotDemo;-inkscape-font-specification:SDMiniRobotDemo;fill:#0078d6;stroke-width:6.54099">
+    style="font-size:139.541px;font-family:SDMiniRobotDemo,sans-serif;fill:#0078d6;stroke-width:6.54099">
     <path
       d="M374.669 174.514V81.486h52.328l17.442 17.443v17.443l-17.442 17.442h-17.443l34.885 34.885v5.815h-11.628l-40.7-40.7h-5.814v40.7zm11.628-52.328h34.885l11.629-11.629v-5.814l-11.629-11.628h-34.885z"
       style="stroke:#0078d6;stroke-opacity:.564706" />

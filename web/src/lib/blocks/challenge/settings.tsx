@@ -37,8 +37,14 @@ export default function (props: ChallengeWidgetProps) {
       },
       release_at: result.release_at ? DateTime.fromSeconds(result.release_at) : null,
       archive_at: result.archive_at ? DateTime.fromSeconds(result.archive_at) : null,
+      prerequisites: challenge.data?.prerequisites ?? [],
+      unlock_limit: challenge.data?.unlock_limit ?? 0,
+      avatar: challenge.data?.avatar ?? null,
     };
-    await updateChallengeMutation.mutateAsync({ game_id: props.gameId, challenge: data });
+    await updateChallengeMutation.mutateAsync({
+      game_id: props.gameId,
+      challenge: data,
+    });
   }
   return (
     <div class="flex flex-col p-3 lg:p-6 w-full items-center">

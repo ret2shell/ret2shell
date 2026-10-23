@@ -1,0 +1,29 @@
+[package]
+description = "A feature-riches CTF challenge platform."
+name        = "ret2shell"
+
+authors      = { workspace = true }
+edition      = { workspace = true }
+homepage     = { workspace = true }
+publish      = { workspace = true }
+repository   = { workspace = true }
+rust-version = { workspace = true }
+version      = { workspace = true }
+
+[dependencies]
+r2s-auditor  = { workspace = true }
+r2s-bucket   = { workspace = true }
+r2s-cache    = { workspace = true }
+r2s-captcha  = { workspace = true }
+r2s-checker  = { workspace = true }
+r2s-cluster  = { workspace = true }
+r2s-config   = { workspace = true }
+r2s-database = { workspace = true }
+r2s-email    = { workspace = true }
+r2s-engine   = { workspace = true }
+r2s-event    = { workspace = true }
+r2s-media    = { workspace = true }
+r2s-migrator = { workspace = true }
+r2s-oauth    = { workspace = true }
+r2s-queue    = { workspace = true }
+r2s-server   = { workspace = true }

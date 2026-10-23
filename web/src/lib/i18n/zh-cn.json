@@ -411,7 +411,86 @@
       },
       "streamingEnabled": "正在实时串流日志...",
       "notStreaming": "开启日志串流后，日志会显示在这里",
-      "enableStreamWarning": "日志量大时请谨慎开启，仅显示服务器时间的当天日志，其他日志请下载日志文件进行审计"
+      "enableStreamWarning": "日志量大时请谨慎开启，仅显示服务器时间的当天日志，其他日志请下载日志文件进行审计",
+      "assist": {
+        "placeholder": "LogsQL 查询语句，支持自动补全…",
+        "presetsTitle": "常用查询模板",
+        "suggestionsTitle": "补全建议",
+        "hint": "↑↓ 选择 · Tab/Enter 补全 · Esc 关闭",
+        "diag": {
+          "unclosedString": "字符串缺少结束引号",
+          "unclosedParen": "括号 ( 未闭合",
+          "unexpectedParen": "多余的 )",
+          "unclosedBracket": "区间括号未闭合",
+          "unexpectedBracket": "多余的 ]",
+          "missingValue": "字段 {{field}} 缺少过滤值",
+          "danglingOperator": "运算符 {{operator}} 后缺少条件",
+          "emptyGroup": "空的括号分组",
+          "missingCommand": "| 后缺少管道命令",
+          "unknownCommand": "未知的管道命令 \"{{command}}\""
+        },
+        "fields": {
+          "time": "日志时间",
+          "msg": "日志内容",
+          "stream": "日志流",
+          "level": "日志级别",
+          "target": "产生日志的模块",
+          "spans": "调用链 JSON",
+          "spanName": "span 名称",
+          "spanTrace": "请求 Trace ID",
+          "spanFrom": "来源 IP",
+          "spanMethod": "HTTP 方法",
+          "spanUri": "请求路径",
+          "spanUserId": "用户 ID",
+          "spanUserAccount": "用户名",
+          "spanUserNickname": "用户昵称",
+          "spanDataGameId": "比赛 ID",
+          "spanDataChallengeId": "题目 ID",
+          "fields": "事件字段 (fields.*)",
+          "spanData": "span 数据 (span.data-*)"
+        },
+        "detail": {
+          "sort": "按字段排序",
+          "limit": "限制返回条数",
+          "fields": "仅保留指定字段",
+          "filterPipe": "管道内再过滤",
+          "stats": "聚合统计",
+          "uniq": "去重",
+          "extract": "正则提取字段",
+          "copy": "复制字段",
+          "delete": "删除字段",
+          "format": "格式化输出",
+          "anyValue": "字段存在（任意值）",
+          "regexp": "正则匹配",
+          "timeRange": "时间区间",
+          "timeSince": "起始时间",
+          "timeDuration": "相对时长",
+          "and": "逻辑与",
+          "or": "逻辑或",
+          "not": "逻辑非",
+          "group": "括号分组"
+        },
+        "presets": {
+          "errors": "全部错误",
+          "errorsDesc": "ERROR 级日志，按时间倒序",
+          "warnAndError": "警告与错误",
+          "warnAndErrorDesc": "WARN 及以上级别",
+          "recentErrors": "近一小时错误",
+          "recentErrorsDesc": "带相对时间范围",
+          "byUser": "按用户查询",
+          "byUserDesc": "把 * 换成用户名",
+          "byIp": "按来源 IP",
+          "byIpDesc": "把 * 换成 IP 地址",
+          "byTrace": "按 Trace ID",
+          "byTraceDesc": "把 * 换成 Trace ID，正序看完整链路",
+          "loginAudit": "登录审计",
+          "loginAuditDesc": "所有登录请求",
+          "submissions": "Flag 提交",
+          "submissionsDesc": "题目提交记录",
+          "module": "按模块过滤",
+          "moduleDesc": "按 target 前缀匹配模块"
+        }
+      }
     },
     "statistics": {
       "title": "平台统计信息",
@@ -684,7 +763,7 @@
         "label": "杂项设置"
       },
       "awardRate": {
-        "label": "额外奖励分数比例",
+        "label": "额外奖励分数比例（按题目当前分数计算）",
         "firstBlood": "一血奖励分数比例",
         "secondBlood": "二血奖励分数比例",
         "thirdBlood": "三血奖励分数比例",
@@ -956,6 +1035,11 @@
         "title": "已隐藏",
         "message": "题目已隐藏，仅供管理员测试。",
         "alert": "请在题目准备好后点击“公开”按钮公开题目。平台不会主动更改题目可见性，自动放题功能会使用时间节点与隐藏状态来计算题目的最终可见性。"
+      },
+      "locked": {
+        "message": "本题已锁定",
+        "hint": "完成以下前置题目后解锁",
+        "dismiss": "自己人，别开枪"
       }
     },
     "actions": {
@@ -1214,6 +1298,15 @@
             "label": "镜像版本",
             "placeholder": "请输入镜像版本"
           },
+          "pullPolicy": {
+            "label": "镜像拉取策略",
+            "placeholder": "请选择镜像拉取策略",
+            "items": {
+              "always": "Always（始终拉取）",
+              "ifNotPresent": "IfNotPresent（本地不存在时拉取）",
+              "never": "Never（从不拉取）"
+            }
+          },
           "restrict": {
             "label": "限制 Root 权限",
             "placeholder": "是否限制 Root 权限",
@@ -1374,10 +1467,55 @@
       }
     },
     "settings": {
-      "title": "设置"
+      "title": "设置",
+      "unlockLimit": {
+        "label": "解锁要求数量",
+        "all": "全部"
+      }
     },
     "inGame": "赛中题目",
-    "total": "所有题目"
+    "total": "所有题目",
+    "milestone": {
+      "title": "里程碑",
+      "unknown": "神秘的未知题目/成就",
+      "empty": "暂无里程碑",
+      "achieved": "已达成",
+      "newAchievement": "获得了新成就：{{milestone}}！",
+      "prerequisites": "前置题目",
+      "form": {
+        "name": {
+          "label": "里程碑名称",
+          "placeholder": "请输入名称",
+          "required": "名称不能为空"
+        },
+        "description": {
+          "label": "里程碑描述",
+          "placeholder": "请输入描述",
+          "required": "描述不能为空"
+        },
+        "bonusScore": {
+          "label": "奖励分数",
+          "placeholder": "请输入奖励分数"
+        }
+      },
+      "editor": {
+        "hint": "拖拽端口连线，点击连线删除；点击节点高亮前置链，双击打开详情",
+        "unsaved": "有未保存的更改",
+        "saved": "已保存 {{count}} 项更改",
+        "tidy": "整理",
+        "cycle": "无法连线：会产生循环依赖",
+        "duplicate": "该依赖已存在",
+        "deleteEdge": "删除连线",
+        "fit": "适应画布",
+        "zoomIn": "放大",
+        "zoomOut": "缩小"
+      },
+      "errors": {
+        "fetchList": {
+          "title": "获取里程碑列表失败"
+        }
+      }
+    }
   },
   "wsrx": {
     "title": "WebSocket Reflector X",
@@ -1592,7 +1730,7 @@
       "password": {
         "required": "密码不能为空",
         "minimumLength": "密码至少 8 位",
-        "tooWeak": "密码在 8 - 40 字符之间，至少包含一个大写字母、一个小写字母、一个数字和一个特殊字符",
+        "tooWeak": "密码在 8 - 40 字符之间，至少包含一个大写字母、一个小写字母和一个数字",
         "placeholder": "请输入密码",
         "label": "密码",
         "confirmRequired": "确认密码不能为空",
@@ -2046,7 +2184,6 @@
         "label": "队伍名称",
         "required": "队伍名称不能为空",
         "maximumLength": "名称最长 32 个字符",
-        "customDisabled": "无法更改队名",
         "placeholder": "请输入队伍名称",
         "chuunibyouGenerator": "中二病生成器"
       },
@@ -2084,6 +2221,7 @@
     "noSolves": "没有已解出题目",
     "solvesJournal": "成员 {{user}} 解出了题目 {{challenge}}。",
     "extras": "额外分数变动",
+    "milestoneJournal": "获得了成就 {{milestone}}。",
     "noExtras": "没有额外分数变动"
   },
   "notification": {

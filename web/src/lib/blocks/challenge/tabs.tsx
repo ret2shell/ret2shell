@@ -31,6 +31,7 @@ export default function Tabs(props: { training?: boolean; archived?: boolean; ga
   });
   const [challengeHistory, setChallengeHistory] = createSignal<{ id: number; name: string }[]>([]);
   const inCreate = createMemo(() => searchParams.create === "true");
+  const inMilestones = createMemo(() => searchParams.milestones === "true");
   const inEditGame = createMemo(() => searchParams.edit === "true");
   const inStatistics = createMemo(() => searchParams.statistics === "true");
   const inMonitor = createMemo(() => searchParams.monitor === "true");
@@ -92,6 +93,7 @@ export default function Tabs(props: { training?: boolean; archived?: boolean; ga
               active={
                 !props.challengeId &&
                 inCreate() === false &&
+                inMilestones() === false &&
                 inEditGame() === false &&
                 inStatistics() === false &&
                 inMonitor() === false
@@ -102,6 +104,21 @@ export default function Tabs(props: { training?: boolean; archived?: boolean; ga
                 <span>{t("game.welcome")}</span>
               </Show>
             </Button>
+            <Show when={!props.training}>
+              <Button
+                active={inMilestones()}
+                title={t("challenge.milestone.title")}
+                square={challengeHistory().length > 0}
+                ghost
+                class="transition-all duration-300 overflow-hidden"
+                onClick={() => navigate(`${baseUrl()}?milestones=true`)}
+              >
+                <span class="shrink-0 icon-[fluent--trophy-20-regular] w-5 h-5" />
+                <Show when={challengeHistory().length === 0}>
+                  <span>{t("challenge.milestone.title")}</span>
+                </Show>
+              </Button>
+            </Show>
             <Show when={isAdminOfGame(game.data)}>
               <Show when={props.training}>
                 <Button
