@@ -14,11 +14,18 @@ import clsx from "clsx";
 import { DateTime } from "luxon";
 import { createEffect, createSignal, For, onCleanup, Show, untrack } from "solid-js";
 
-export default function (props: { gameId: number }) {
+export default function (props: { gameId: number; basePath?: string }) {
   const game = useGame({ id: () => props.gameId });
   const [repoName, setRepoName] = createSignal<string>(game.data?.name || "");
   const [loading, setLoading] = createSignal(false);
   const [indexing, setIndexing] = createSignal(false);
+
+  const basePath = () => props.basePath ?? `/games/${game.data?.id}/admin/git`;
+  const repoLink = (repoPath?: string) => {
+    const base = basePath();
+    if (!repoPath) return base;
+    return `${base}${base.includes("?") ? "&" : "?"}path=${repoPath}`;
+  };
 
   const [searchParams] = useSearchParams();
   const path = () => ((searchParams.path ?? "") as string).trim().replace(/^[/]+|[/]+$/g, "") || ".";
@@ -115,17 +122,14 @@ export default function (props: { gameId: number }) {
       <Clipboard value={`${window.location.origin}/api/game/${game.data?.id}/repo/${repoName()}.git`} />
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
         <span class="shrink-0 icon-[fluent--branch-fork-20-regular] w-5 h-5" />
-        <A class="font-bold" href={`/games/${game.data?.id}/admin/git`}>
+        <A class="font-bold" href={repoLink()}>
           {repoName()}
         </A>
         <span>/</span>
         <For each={path().split("/")}>
           {(p) => (
             <>
-              <A
-                class="text-layer-content/60"
-                href={`/games/${game.data?.id}/admin/git?path=${path().split(p)[0]}${p}`}
-              >
+              <A class="text-layer-content/60" href={repoLink(`${path().split(p)[0]}${p}`)}>
                 {p}
               </A>
               <span>/</span>
@@ -149,7 +153,7 @@ export default function (props: { gameId: number }) {
               <Link
                 ghost
                 justify="start"
-                href={`/games/${game.data?.id}/admin/git?path=${object.path}`}
+                href={repoLink(object.path)}
                 class={clsx(
                   "overflow-hidden relative",
                   (loading() || indexing()) && object.path === path() && "bg-layer-content/5!"
