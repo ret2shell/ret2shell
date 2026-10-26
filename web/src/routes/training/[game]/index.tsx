@@ -5,6 +5,7 @@ import Form, { type ChallengeForm } from "@blocks/challenge/form";
 import Tabs from "@blocks/challenge/tabs";
 import AdministratorsManagement from "@blocks/game/administrators";
 import GameEdit, { type GameForm } from "@blocks/game/form";
+import GitBlock from "@blocks/game/git";
 import { SubmissionList } from "@blocks/game/lists";
 import GameStatistics from "@blocks/game/statistics";
 import type { Challenge as ChallengeModel } from "@models/challenge";
@@ -50,6 +51,7 @@ export default function () {
   const inEdit = createMemo(() => searchParams.edit === "true");
   const inStatistics = createMemo(() => searchParams.statistics === "true");
   const inMonitor = createMemo(() => searchParams.monitor === "true");
+  const inGit = createMemo(() => searchParams.git === "true");
 
   const game = useGame({ id: () => gameId(), enabled: () => gameId() > 0 });
   const isAdmin = createMemo(() => isAdminOfGame(game.data));
@@ -235,6 +237,26 @@ export default function () {
                       </Tag>
                     </h3>
                     <SubmissionList training gameId={gameId()} />
+                  </div>
+                </OverlayScrollbarsComponent>
+              </div>
+            </div>
+          </Match>
+          <Match when={inGit()}>
+            <div class="flex-1 w-full relative">
+              <div class="absolute top-0 left-0 w-full h-full overflow-hidden">
+                <OverlayScrollbarsComponent
+                  options={{
+                    scrollbars: {
+                      theme: `os-theme-${fullTheme()}`,
+                      autoHide: "scroll",
+                    },
+                  }}
+                  class="relative w-full h-full print:h-auto print:overflow-auto"
+                  defer
+                >
+                  <div class="w-full flex flex-col p-3 lg:p-6 items-center">
+                    <GitBlock gameId={gameId()} training basePath={`/training/${gameId()}?git=true`} />
                   </div>
                 </OverlayScrollbarsComponent>
               </div>

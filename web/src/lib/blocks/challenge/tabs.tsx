@@ -35,6 +35,7 @@ export default function Tabs(props: { training?: boolean; archived?: boolean; ga
   const inEditGame = createMemo(() => searchParams.edit === "true");
   const inStatistics = createMemo(() => searchParams.statistics === "true");
   const inMonitor = createMemo(() => searchParams.monitor === "true");
+  const inGit = createMemo(() => searchParams.git === "true");
   function appendChallengeHistory(challenge: Challenge) {
     const existing = challengeHistory().find((c) => c.id === challenge.id);
     if (existing) {
@@ -96,7 +97,8 @@ export default function Tabs(props: { training?: boolean; archived?: boolean; ga
                 inMilestones() === false &&
                 inEditGame() === false &&
                 inStatistics() === false &&
-                inMonitor() === false
+                inMonitor() === false &&
+                inGit() === false
               }
             >
               <span class="shrink-0 icon-[fluent--home-20-regular] w-5 h-5" />
@@ -147,6 +149,19 @@ export default function Tabs(props: { training?: boolean; archived?: boolean; ga
                   <span class="shrink-0 icon-[fluent--flash-flow-20-regular] w-5 h-5" />
                   <Show when={challengeHistory().length === 0}>
                     <span>{t("game.monitor.title")}</span>
+                  </Show>
+                </Button>
+                <Button
+                  active={inGit()}
+                  title={t("game.git.title")}
+                  square={challengeHistory().length > 0}
+                  ghost
+                  class="transition-all duration-300 overflow-hidden"
+                  onClick={() => navigate(`${baseUrl()}?git=true`)}
+                >
+                  <span class="shrink-0 icon-[fluent--branch-fork-20-regular] w-5 h-5" />
+                  <Show when={challengeHistory().length === 0}>
+                    <span>{t("game.git.title")}</span>
                   </Show>
                 </Button>
                 <Button

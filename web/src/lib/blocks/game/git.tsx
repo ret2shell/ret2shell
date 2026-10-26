@@ -14,14 +14,25 @@ import clsx from "clsx";
 import { DateTime } from "luxon";
 import { createEffect, createSignal, For, onCleanup, Show, untrack } from "solid-js";
 
-export default function (props: { gameId: number }) {
+export default function (props: { gameId: number; basePath?: string; training?: boolean }) {
   const game = useGame({ id: () => props.gameId });
   const [repoName, setRepoName] = createSignal<string>(game.data?.name || "");
   const [loading, setLoading] = createSignal(false);
   const [indexing, setIndexing] = createSignal(false);
 
+  const gitText = (key: string) => t(`${props.training ? "training" : "game"}.git.${key}`);
+  const basePath = () => props.basePath ?? `/games/${game.data?.id}/admin/git`;
+  const repoLink = (repoPath?: string) => {
+    const base = basePath();
+    if (!repoPath) return base;
+    const url = new URL(base, window.location.origin);
+    url.searchParams.set("path", repoPath);
+    return `${url.pathname}${url.search}`;
+  };
+
   const [searchParams] = useSearchParams();
   const path = () => ((searchParams.path ?? "") as string).trim().replace(/^[/]+|[/]+$/g, "") || ".";
+  const segments = () => path().split("/");
   const [objects, setObjects] = createSignal<ObjectInfo[]>([]);
 
   createEffect(() => {
@@ -104,29 +115,33 @@ export default function (props: { gameId: number }) {
       </h3>
       <Card level="info" contentClass="p-2 flex flex-row space-x-2 items-center">
         <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5" />
-        <span>{t("game.git.cloneTip")}</span>
+        <span>{gitText("cloneTip")}</span>
       </Card>
       <Card level="warning" contentClass="p-2 flex flex-row space-x-2 items-center">
         <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5" />
-        <Show when={game.data?.hidden} fallback={<span>{t("game.git.status.readonly.message")}</span>}>
-          <span>{t("game.git.status.writable.message")}</span>
+        <Show when={game.data?.hidden} fallback={<span>{gitText("status.readonly.message")}</span>}>
+          <span>{gitText("status.writable.message")}</span>
         </Show>
       </Card>
       <Clipboard value={`${window.location.origin}/api/game/${game.data?.id}/repo/${repoName()}.git`} />
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
         <span class="shrink-0 icon-[fluent--branch-fork-20-regular] w-5 h-5" />
-        <A class="font-bold" href={`/games/${game.data?.id}/admin/git`}>
+        <A class="font-bold" href={repoLink()}>
           {repoName()}
         </A>
         <span>/</span>
-        <For each={path().split("/")}>
-          {(p) => (
+        <For each={segments()}>
+          {(segment, index) => (
             <>
               <A
                 class="text-layer-content/60"
-                href={`/games/${game.data?.id}/admin/git?path=${path().split(p)[0]}${p}`}
+                href={repoLink(
+                  segments()
+                    .slice(0, index() + 1)
+                    .join("/")
+                )}
               >
-                {p}
+                {segment}
               </A>
               <span>/</span>
             </>
@@ -149,7 +164,7 @@ export default function (props: { gameId: number }) {
               <Link
                 ghost
                 justify="start"
-                href={`/games/${game.data?.id}/admin/git?path=${object.path}`}
+                href={repoLink(object.path)}
                 class={clsx(
                   "overflow-hidden relative",
                   (loading() || indexing()) && object.path === path() && "bg-layer-content/5!"
