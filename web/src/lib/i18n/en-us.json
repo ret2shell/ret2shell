@@ -584,6 +584,17 @@
         "required": "Brief cannot be empty"
       }
     },
+    "git": {
+      "cloneTip": "Using the following link, you can clone the training data to your local machine. The account used to access the repository should be consistent with the platform account, which makes it easier to back up and migrate later. Please note that user and team information is not included here.",
+      "status": {
+        "readonly": {
+          "message": "When the training is visible to players, this repository is read-only and local changes cannot be pushed or branches merged. Hide the training first, or use the web interface to manage the training data."
+        },
+        "writable": {
+          "message": "The training has been hidden, and this repository can be written to via a Git client. After pushing, the platform will automatically synchronize the database and run availability checks. Please wait for synchronization to finish before performing other operations."
+        }
+      }
+    },
     "gotoGamePage": "View game information"
   },
   "calendar": {

@@ -256,7 +256,7 @@ export default function () {
                   defer
                 >
                   <div class="w-full flex flex-col p-3 lg:p-6 items-center">
-                    <GitBlock gameId={gameId()} basePath={`/training/${gameId()}?git=true`} />
+                    <GitBlock gameId={gameId()} training basePath={`/training/${gameId()}?git=true`} />
                   </div>
                 </OverlayScrollbarsComponent>
               </div>
