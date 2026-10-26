@@ -25,7 +25,9 @@ export default function (props: { gameId: number; basePath?: string; training?: 
   const repoLink = (repoPath?: string) => {
     const base = basePath();
     if (!repoPath) return base;
-    return `${base}${base.includes("?") ? "&" : "?"}path=${repoPath}`;
+    const url = new URL(base, window.location.origin);
+    url.searchParams.set("path", repoPath);
+    return `${url.pathname}${url.search}`;
   };
 
   const [searchParams] = useSearchParams();
