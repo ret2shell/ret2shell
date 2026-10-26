@@ -32,6 +32,7 @@ export default function (props: { gameId: number; basePath?: string; training?: 
 
   const [searchParams] = useSearchParams();
   const path = () => ((searchParams.path ?? "") as string).trim().replace(/^[/]+|[/]+$/g, "") || ".";
+  const segments = () => path().split("/");
   const [objects, setObjects] = createSignal<ObjectInfo[]>([]);
 
   createEffect(() => {
@@ -129,11 +130,18 @@ export default function (props: { gameId: number; basePath?: string; training?: 
           {repoName()}
         </A>
         <span>/</span>
-        <For each={path().split("/")}>
-          {(p) => (
+        <For each={segments()}>
+          {(segment, index) => (
             <>
-              <A class="text-layer-content/60" href={repoLink(`${path().split(p)[0]}${p}`)}>
-                {p}
+              <A
+                class="text-layer-content/60"
+                href={repoLink(
+                  segments()
+                    .slice(0, index() + 1)
+                    .join("/")
+                )}
+              >
+                {segment}
               </A>
               <span>/</span>
             </>
