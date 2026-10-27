@@ -778,69 +778,100 @@ impl Cluster {
       .await
   }
 
+  /// Returns `true` when the error means the requested resource is already
+  /// absent. Deletion is idempotent, so callers should treat it as success.
+  fn is_not_found(err: &ClusterError) -> bool {
+    matches!(
+      err,
+      ClusterError::KubeError(kube::Error::Api(status))
+        if status.code == 404 || status.is_not_found()
+    )
+  }
+
+  /// Stops every challenge environment matching the given label selector.
+  ///
+  /// A single failing pod or service must not abort the whole cleanup: admin
+  /// hide/delete has to stop as many instances as possible, and every stopped
+  /// instance has to be reported so its traffic cache and lifecycle hooks are
+  /// handled. Errors are logged and the remaining pods are still processed.
+  /// Only when no environment could be stopped at all is the error returned.
+  async fn stop_challenge_env_by_selector(
+    &self, selector: &str,
+  ) -> Result<Vec<ChallengeEnvSnapshot>, ClusterError> {
+    let pods = self.get_pods_by_label(selector).await?;
+    let mut snapshots = Vec::with_capacity(pods.len());
+    let mut first_error: Option<ClusterError> = None;
+
+    for pod in pods {
+      let Some(name) = pod.metadata.name.clone() else {
+        warn!(pod=?pod.metadata.name, "pod has no name, skipping cleanup");
+        continue;
+      };
+      let service = self.capture_service_snapshot(&pod).await;
+
+      let removed = match self.delete_pod(&name).await {
+        Ok(()) => {
+          snapshots.push(ChallengeEnvSnapshot { pod, service });
+          true
+        }
+        Err(err) if Self::is_not_found(&err) => {
+          // Another actor (the player, the timeout worker or a previous
+          // attempt) already removed this pod. It owns the snapshot for that
+          // instance, so do not report a second stop event for it.
+          debug!(pod=%name, "pod is already removed, skipping snapshot");
+          true
+        }
+        Err(err) => {
+          warn!(pod=%name, error=?err, "failed to delete pod, continuing");
+          first_error.get_or_insert(err);
+          false
+        }
+      };
+
+      if removed
+        && let Err(err) = self.delete_service(&name).await
+        && !Self::is_not_found(&err)
+      {
+        warn!(pod=%name, error=?err, "failed to delete service, continuing");
+      }
+    }
+
+    match first_error {
+      Some(err) if snapshots.is_empty() => Err(err),
+      _ => Ok(snapshots),
+    }
+  }
+
   pub async fn stop_challenge_env_by_user(
     &self, challenge_id: i64, user_id: i64,
   ) -> Result<Vec<ChallengeEnvSnapshot>, ClusterError> {
-    let pods = self
-      .get_pods_by_label(&format!(
-        "ret.sh.cn/challenge={challenge_id},ret.sh.cn/user={user_id}"
+    self
+      .stop_challenge_env_by_selector(&Self::challenge_member_selector(
+        challenge_id,
+        "user",
+        user_id,
       ))
-      .await?;
-    let mut snapshots = Vec::new();
-    for p in pods.iter() {
-      let service = self.capture_service_snapshot(p).await;
-      self.delete_pod(p.metadata.name.as_ref().unwrap()).await?;
-      self
-        .delete_service(p.metadata.name.as_ref().unwrap())
-        .await?;
-      snapshots.push(ChallengeEnvSnapshot {
-        pod: p.clone(),
-        service,
-      });
-    }
-    Ok(snapshots)
+      .await
   }
 
   pub async fn stop_challenge_env_by_team(
     &self, challenge_id: i64, team_id: i64,
   ) -> Result<Vec<ChallengeEnvSnapshot>, ClusterError> {
-    let pod = self
-      .get_pods_by_label(&format!(
-        "ret.sh.cn/challenge={challenge_id},ret.sh.cn/team={team_id}"
+    self
+      .stop_challenge_env_by_selector(&Self::challenge_member_selector(
+        challenge_id,
+        "team",
+        team_id,
       ))
-      .await?;
-    let mut snapshots = Vec::new();
-    for p in pod.iter() {
-      let service = self.capture_service_snapshot(p).await;
-      self.delete_pod(p.metadata.name.as_ref().unwrap()).await?;
-      self
-        .delete_service(p.metadata.name.as_ref().unwrap())
-        .await?;
-      snapshots.push(ChallengeEnvSnapshot {
-        pod: p.clone(),
-        service,
-      });
-    }
-    Ok(snapshots)
+      .await
   }
 
   pub async fn stop_challenge_env(
     &self, challenge_id: i64,
   ) -> Result<Vec<ChallengeEnvSnapshot>, ClusterError> {
-    let pods = self.get_challenge_env(challenge_id).await?;
-    let mut snapshots = Vec::new();
-    for pod in pods.iter() {
-      let service = self.capture_service_snapshot(pod).await;
-      self.delete_pod(pod.metadata.name.as_ref().unwrap()).await?;
-      self
-        .delete_service(pod.metadata.name.as_ref().unwrap())
-        .await?;
-      snapshots.push(ChallengeEnvSnapshot {
-        pod: pod.clone(),
-        service,
-      });
-    }
-    Ok(snapshots)
+    self
+      .stop_challenge_env_by_selector(&format!("ret.sh.cn/challenge={challenge_id}"))
+      .await
   }
 
   pub async fn wsrx_link(&self, token: &str, port: u16, ws: WebSocket) -> Result<(), ClusterError> {
@@ -870,5 +901,37 @@ impl Cluster {
       wsrx::proxy::proxy_stream(stream, ws, cancel_token).await?;
     }
     Ok(())
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  fn kube_status_error(code: u16) -> ClusterError {
+    ClusterError::KubeError(kube::Error::Api(
+      kube::core::Status {
+        code,
+        ..Default::default()
+      }
+      .boxed(),
+    ))
+  }
+
+  #[test]
+  fn is_not_found_only_matches_missing_resources() {
+    assert!(Cluster::is_not_found(&kube_status_error(404)));
+    assert!(Cluster::is_not_found(&ClusterError::KubeError(
+      kube::Error::Api(
+        kube::core::Status {
+          reason: "NotFound".to_owned(),
+          ..Default::default()
+        }
+        .boxed(),
+      )
+    )));
+    assert!(!Cluster::is_not_found(&kube_status_error(409)));
+    assert!(!Cluster::is_not_found(&kube_status_error(500)));
+    assert!(!Cluster::is_not_found(&ClusterError::ClusterDisabled));
   }
 }
