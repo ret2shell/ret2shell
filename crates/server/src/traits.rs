@@ -323,6 +323,13 @@ impl IntoResponse for ResponseError {
             s
           )
         }
+        r2s_cluster::ClusterError::PodRenewTooEarly(s) => {
+          log_with_resp!(
+            StatusCode::CONFLICT,
+            "pod renew requested too early".to_owned(),
+            s
+          )
+        }
         r2s_cluster::ClusterError::InvalidImageFileType(e) => (
           StatusCode::BAD_REQUEST,
           format!("invalid image file type: {e:?}"),
