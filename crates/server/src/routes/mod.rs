@@ -36,7 +36,7 @@ mod bulletin;
 mod calendar;
 mod cluster;
 mod event;
-mod game;
+pub(crate) mod game;
 mod media;
 mod platform;
 mod rpc;

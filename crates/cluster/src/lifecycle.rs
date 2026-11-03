@@ -19,6 +19,7 @@ pub enum LifecycleStopReason {
   Manual,
   Timeout,
   Admin,
+  Solved,
 }
 
 impl LifecycleStopReason {
@@ -27,6 +28,7 @@ impl LifecycleStopReason {
       Self::Manual => "manual",
       Self::Timeout => "timeout",
       Self::Admin => "admin",
+      Self::Solved => "solved",
     }
   }
 }
@@ -917,5 +919,15 @@ impl LifecycleMapper {
     };
     let _: () = parse_value(value, "`()` inside `Ok`")?;
     Ok(LifecycleExecutionStatus::Executed)
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::LifecycleStopReason;
+
+  #[test]
+  fn solved_stop_reason_is_reported_to_lifecycle_scripts() {
+    assert_eq!(LifecycleStopReason::Solved.as_str(), "solved");
   }
 }

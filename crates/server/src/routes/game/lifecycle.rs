@@ -551,6 +551,68 @@ pub fn spawn_admin_stop_hooks(
   });
 }
 
+pub fn spawn_solved_stop(
+  state: GlobalState, game: game::Model, challenge: challenge::Model, user: user::Model,
+  team: Option<team::Model>,
+) {
+  tokio::spawn(async move {
+    let cluster = state.cluster.at(CHALLENGE_NS);
+    let snapshots = if let Some(team) = team.as_ref() {
+      cluster
+        .stop_challenge_env_by_team(challenge.id, team.id)
+        .await
+    } else {
+      cluster
+        .stop_challenge_env_by_user(challenge.id, user.id)
+        .await
+    };
+    match snapshots {
+      Ok(snapshots) if !snapshots.is_empty() => {
+        spawn_solved_stop_hooks(state, game, challenge, user, team, snapshots);
+      }
+      Ok(_) => {}
+      Err(err) => {
+        error!(
+          challenge_id=%challenge.id,
+          user_id=user.id,
+          error=?err,
+          "failed to stop the challenge env after a correct submission"
+        );
+      }
+    }
+  });
+}
+
+pub fn spawn_solved_stop_hooks(
+  state: GlobalState, game: game::Model, challenge: challenge::Model, user: user::Model,
+  team: Option<team::Model>, snapshots: Vec<ChallengeEnvSnapshot>,
+) {
+  if snapshots.is_empty() {
+    return;
+  }
+  tokio::spawn(async move {
+    cleanup_traffic_cache(state.cache.clone(), &snapshots).await;
+    let Some(config) = load_platform_config(&state).await else {
+      return;
+    };
+    trigger_lifecycle_for_snapshots(
+      LifecycleHookContext {
+        cluster: state.cluster.clone(),
+        engine: state.engine.clone(),
+        config,
+        game,
+        challenge: challenge_info_from_model(&challenge),
+        user: user_info_from_model(&user),
+        team: team.as_ref().map(team_info_from_model),
+        trace_id: None,
+      },
+      snapshots,
+      LifecycleEvent::Stop(LifecycleStopReason::Solved),
+    )
+    .await;
+  });
+}
+
 pub fn spawn_challenge_stop(
   state: GlobalState, game: game::Model, challenge: challenge::Model, trace_id: String,
 ) {
