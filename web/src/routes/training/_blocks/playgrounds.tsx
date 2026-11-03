@@ -1,40 +1,62 @@
-import { useGames } from "@api/game";
+import { getGames } from "@api/game";
 import { type Game, HostType } from "@models/game";
 import { Permission } from "@models/user";
 import { accountStore } from "@storage/account";
 import { fullTheme, t } from "@storage/theme";
+import { useInfiniteQuery } from "@tanstack/solid-query";
 import Button from "@widgets/button";
 import Divider from "@widgets/divider";
 import Link from "@widgets/link";
 import clsx from "clsx";
 import { DateTime } from "luxon";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { createMemo, createSignal, For, Show } from "solid-js";
+import { createEffect, createMemo, createSignal, For, onCleanup, Show } from "solid-js";
 
 export default function Playgrounds() {
-  const [playgroundPage, setPlaygroundPage] = createSignal(1);
   const pageSize = 6;
-  const [gamePage, setGamePage] = createSignal(1);
 
-  const playgroundsQuery = useGames({
-    page: () => playgroundPage(),
-    page_size: () => pageSize,
-    host_type: () => HostType.Training,
-  });
-  const playgroundTotalPages = createMemo(() => {
-    const total = playgroundsQuery.data?.[1] ?? 0;
-    return Math.max(1, Math.ceil(total / pageSize));
-  });
+  const playgroundsQuery = useInfiniteQuery(() => ({
+    queryKey: ["game", "list", HostType.Training],
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) => getGames(pageParam, pageSize, HostType.Training),
+    getNextPageParam: (lastPage, pages) => {
+      const loaded = pages.reduce((total, page) => total + page[0].length, 0);
+      return loaded < lastPage[1] ? pages.length + 1 : undefined;
+    },
+  }));
+  const playgrounds = createMemo(() => playgroundsQuery.data?.pages.flatMap((page) => page[0]) ?? []);
+  const [playgroundSentinel, setPlaygroundSentinel] = createSignal<HTMLElement>();
 
-  const gamesQuery = useGames({
-    page: () => gamePage(),
-    page_size: () => pageSize,
-    host_type: () => HostType.Game,
-  });
-  const gameTotalPages = createMemo(() => {
-    const total = gamesQuery.data?.[1] ?? 0;
-    return Math.max(1, Math.ceil(total / pageSize));
-  });
+  const gamesQuery = useInfiniteQuery(() => ({
+    queryKey: ["game", "list", HostType.Game],
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) => getGames(pageParam, pageSize, HostType.Game),
+    getNextPageParam: (lastPage, pages) => {
+      const loaded = pages.reduce((total, page) => total + page[0].length, 0);
+      return loaded < lastPage[1] ? pages.length + 1 : undefined;
+    },
+  }));
+  const games = createMemo(() => gamesQuery.data?.pages.flatMap((page) => page[0]) ?? []);
+  const [gameSentinel, setGameSentinel] = createSignal<HTMLElement>();
+
+  function observeSentinel(
+    getSentinel: () => HTMLElement | undefined,
+    query: typeof playgroundsQuery | typeof gamesQuery
+  ) {
+    const sentinel = getSentinel();
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry?.isIntersecting && query.hasNextPage && !query.isFetchingNextPage) {
+        void query.fetchNextPage();
+      }
+    });
+    observer.observe(sentinel);
+    onCleanup(() => observer.disconnect());
+  }
+
+  createEffect(() => observeSentinel(playgroundSentinel, playgroundsQuery));
+  createEffect(() => observeSentinel(gameSentinel, gamesQuery));
 
   return (
     <div class="flex-1 overflow-hidden">
@@ -56,36 +78,11 @@ export default function Playgrounds() {
             </Link>
             <Divider class="mt-3! lg:mt-6!" />
           </Show>
-          <div class="flex flex-row space-x-2">
-            <Button ghost disabled justify="start" class="flex-1" size="sm">
-              <span>{t("training.title")}</span>
-            </Button>
-            <Button
-              square
-              ghost
-              size="sm"
-              disabled={playgroundPage() <= 1}
-              onClick={() => setPlaygroundPage(playgroundPage() - 1)}
-            >
-              <span class="shrink-0 icon-[fluent--chevron-double-left-20-regular] w-5 h-5" />
-            </Button>
-            <Button ghost size="sm" class="min-w-8" loading={playgroundsQuery.isFetching}>
-              <Show when={!playgroundsQuery.isFetching}>
-                <span>{playgroundPage()}</span>
-              </Show>
-            </Button>
-            <Button
-              square
-              ghost
-              size="sm"
-              disabled={playgroundPage() >= playgroundTotalPages()}
-              onClick={() => setPlaygroundPage(playgroundPage() + 1)}
-            >
-              <span class="shrink-0 icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
-            </Button>
-          </div>
+          <Button ghost disabled justify="start" size="sm">
+            <span>{t("training.title")}</span>
+          </Button>
           <For
-            each={(playgroundsQuery.data?.[0] as Game[] | undefined) || []}
+            each={playgrounds() as Game[]}
             fallback={
               <Button ghost disabled>
                 <span class="shrink-0 icon-[fluent--text-bullet-list-dismiss-20-regular] w-5 h-5" />
@@ -110,31 +107,20 @@ export default function Playgrounds() {
               </Link>
             )}
           </For>
+          <Show when={playgroundsQuery.hasNextPage}>
+            <div ref={setPlaygroundSentinel} class="h-1" />
+          </Show>
+          <Show when={playgroundsQuery.isFetchingNextPage}>
+            <div class="flex justify-center p-2">
+              <Button ghost loading disabled />
+            </div>
+          </Show>
           <Divider class="mt-6!" />
-          <div class="flex flex-row space-x-2">
-            <Button ghost disabled justify="start" size="sm" class="flex-1">
-              <span>{t("game.title")}</span>
-            </Button>
-            <Button square ghost size="sm" disabled={gamePage() <= 1} onClick={() => setGamePage(gamePage() - 1)}>
-              <span class="shrink-0 icon-[fluent--chevron-double-left-20-regular] w-5 h-5" />
-            </Button>
-            <Button ghost size="sm" class="min-w-8" loading={gamesQuery.isFetching}>
-              <Show when={!gamesQuery.isFetching}>
-                <span>{gamePage()}</span>
-              </Show>
-            </Button>
-            <Button
-              square
-              ghost
-              size="sm"
-              disabled={gamePage() >= gameTotalPages()}
-              onClick={() => setGamePage(gamePage() + 1)}
-            >
-              <span class="shrink-0 icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
-            </Button>
-          </div>
+          <Button ghost disabled justify="start" size="sm">
+            <span>{t("game.title")}</span>
+          </Button>
           <For
-            each={(gamesQuery.data?.[0] as Game[] | undefined) || []}
+            each={games() as Game[]}
             fallback={
               <Button ghost disabled>
                 <span class="shrink-0 icon-[fluent--text-bullet-list-dismiss-20-regular] w-5 h-5" />
@@ -162,6 +148,14 @@ export default function Playgrounds() {
               </Link>
             )}
           </For>
+          <Show when={gamesQuery.hasNextPage}>
+            <div ref={setGameSentinel} class="h-1" />
+          </Show>
+          <Show when={gamesQuery.isFetchingNextPage}>
+            <div class="flex justify-center p-2">
+              <Button ghost loading disabled />
+            </div>
+          </Show>
         </div>
       </OverlayScrollbarsComponent>
     </div>
