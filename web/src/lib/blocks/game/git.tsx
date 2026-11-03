@@ -20,7 +20,6 @@ export default function (props: { gameId: number; basePath?: string; training?: 
   const [loading, setLoading] = createSignal(false);
   const [indexing, setIndexing] = createSignal(false);
 
-  const gitText = (key: string) => t(`${props.training ? "training" : "game"}.git.${key}`);
   const basePath = () => props.basePath ?? `/games/${game.data?.id}/admin/git`;
   const repoLink = (repoPath?: string) => {
     const base = basePath();
@@ -115,12 +114,21 @@ export default function (props: { gameId: number; basePath?: string; training?: 
       </h3>
       <Card level="info" contentClass="p-2 flex flex-row space-x-2 items-center">
         <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5" />
-        <span>{gitText("cloneTip")}</span>
+        <span>{props.training ? t("training.git.cloneTip") : t("game.git.cloneTip")}</span>
       </Card>
       <Card level="warning" contentClass="p-2 flex flex-row space-x-2 items-center">
         <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5" />
-        <Show when={game.data?.hidden} fallback={<span>{gitText("status.readonly.message")}</span>}>
-          <span>{gitText("status.writable.message")}</span>
+        <Show
+          when={game.data?.hidden}
+          fallback={
+            <span>
+              {props.training ? t("training.git.status.readonly.message") : t("game.git.status.readonly.message")}
+            </span>
+          }
+        >
+          <span>
+            {props.training ? t("training.git.status.writable.message") : t("game.git.status.writable.message")}
+          </span>
         </Show>
       </Card>
       <Clipboard value={`${window.location.origin}/api/game/${game.data?.id}/repo/${repoName()}.git`} />
