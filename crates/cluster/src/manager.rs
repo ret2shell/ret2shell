@@ -30,6 +30,8 @@ use super::traits::ClusterError;
 use crate::{lifecycle::LifecycleMapper, registry::Registry, traffic::TrafficMapper};
 
 pub const CHALLENGE_NS: &str = "ret2shell-challenge";
+const CHALLENGE_ENV_LIFETIME_SECS: i64 = 3600;
+const CHALLENGE_ENV_RENEW_WINDOW_SECS: i64 = 30 * 60;
 
 #[derive(Clone, Debug)]
 pub struct ChallengeEnvSnapshot {
@@ -256,6 +258,11 @@ impl Cluster {
       warn!(pod=?name, "pod renew exceed limit");
       return Err(ClusterError::PodRenewExceedLimit(name.to_owned()));
     }
+    let remaining = Self::remaining_lifetime_secs(&pod, Utc::now().timestamp())?;
+    if remaining > CHALLENGE_ENV_RENEW_WINDOW_SECS {
+      warn!(pod=?name, remaining, "pod renew requested too early");
+      return Err(ClusterError::PodRenewTooEarly(name.to_owned()));
+    }
     let mut annotations = pod.metadata.annotations.clone().unwrap_or_default();
     annotations.insert("ret.sh.cn/renew".to_owned(), (prev_renew + 1).to_string());
     let metadata = ObjectMeta {
@@ -284,7 +291,7 @@ impl Cluster {
     Ok(())
   }
 
-  async fn check_outdated_pod(&self, pod: &Pod) -> Result<bool, ClusterError> {
+  fn remaining_lifetime_secs(pod: &Pod, now: i64) -> Result<i64, ClusterError> {
     let renew = pod
       .metadata
       .annotations
@@ -300,8 +307,11 @@ impl Cluster {
       .ok_or(ClusterError::MissingField("creation_timestamp".to_string()))?
       .0
       .as_second();
-    let now = Utc::now().timestamp();
-    Ok(now - started_at > 3600 * (renew + 1) as i64)
+    Ok(started_at + CHALLENGE_ENV_LIFETIME_SECS * (renew as i64 + 1) - now)
+  }
+
+  async fn check_outdated_pod(&self, pod: &Pod) -> Result<bool, ClusterError> {
+    Ok(Self::remaining_lifetime_secs(pod, Utc::now().timestamp())? < 0)
   }
 
   pub async fn delete_outdated_envs(&self) -> Result<DeleteOutdatedEnvsResult, ClusterError> {
@@ -916,6 +926,55 @@ mod tests {
       }
       .boxed(),
     ))
+  }
+
+  fn pod_started_ago(now: i64, seconds_ago: i64, renew: i32) -> Pod {
+    Pod {
+      metadata: ObjectMeta {
+        creation_timestamp: Some(k8s_openapi::apimachinery::pkg::apis::meta::v1::Time(
+          jiff::Timestamp::from_second(now - seconds_ago).unwrap(),
+        )),
+        annotations: Some(BTreeMap::from([(
+          "ret.sh.cn/renew".to_owned(),
+          renew.to_string(),
+        )])),
+        ..Default::default()
+      },
+      ..Default::default()
+    }
+  }
+
+  #[test]
+  fn remaining_lifetime_accounts_for_renewals() {
+    let now = 1_700_000_000;
+    let fresh = pod_started_ago(now, 10 * 60, 0);
+    let renewed = pod_started_ago(now, 70 * 60, 1);
+    assert_eq!(
+      Cluster::remaining_lifetime_secs(&fresh, now).unwrap(),
+      50 * 60
+    );
+    assert_eq!(
+      Cluster::remaining_lifetime_secs(&renewed, now).unwrap(),
+      50 * 60
+    );
+  }
+
+  #[test]
+  fn renew_only_allowed_within_the_last_30_minutes() {
+    let now = 1_700_000_000;
+    let early = pod_started_ago(now, 10 * 60, 0);
+    let boundary = pod_started_ago(now, 30 * 60, 0);
+    let late = pod_started_ago(now, 45 * 60, 0);
+    assert!(
+      Cluster::remaining_lifetime_secs(&early, now).unwrap() > CHALLENGE_ENV_RENEW_WINDOW_SECS
+    );
+    assert_eq!(
+      Cluster::remaining_lifetime_secs(&boundary, now).unwrap(),
+      CHALLENGE_ENV_RENEW_WINDOW_SECS
+    );
+    assert!(
+      Cluster::remaining_lifetime_secs(&late, now).unwrap() < CHALLENGE_ENV_RENEW_WINDOW_SECS
+    );
   }
 
   #[test]
