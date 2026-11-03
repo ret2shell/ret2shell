@@ -26,18 +26,40 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     .route("/", get(get_wiki_tree))
 }
 
+/// Cache key of the table of contents shown to regular visitors.
+const TOC_KEY: &str = "toc";
+/// Cache key of the table of contents shown to wiki administrators, which also
+/// contains drafts and unpublished articles.
+const TOC_ADMIN_KEY: &str = "toc:admin";
+
+/// The cached table of contents depends on the caller's permissions, so the
+/// anonymous and the administrative views must never share a cache slot.
+fn toc_cache_key(is_admin: bool) -> &'static str {
+  if is_admin { TOC_ADMIN_KEY } else { TOC_KEY }
+}
+
+/// Drop both cached views of the table of contents.
+async fn invalidate_toc(cache: &Cache) -> Result<(), r2s_cache::CacheError> {
+  let wiki = cache.at("wiki");
+  wiki.del(TOC_KEY).await?;
+  wiki.del(TOC_ADMIN_KEY).await?;
+  Ok(())
+}
+
 async fn get_wiki_tree(
   State(ref db): State<Database>, State(ref cache): State<Cache>,
   Extension(token): Extension<Token>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  let result = cache.at("wiki").get("toc").await?;
+  let is_admin = token.permissions.0.contains(&Permission::Wiki);
+  let wiki = cache.at("wiki");
+  let key = toc_cache_key(is_admin);
+  let result = wiki.get(key).await?;
   if let Some(result) = result {
     Ok(Json(result))
   } else {
-    let is_admin = token.permissions.0.contains(&Permission::Wiki);
     let result =
       article::get_tree(&db.conn, article::AccessPolicy::Wiki, is_admin, is_admin).await?;
-    cache.at("wiki").set("toc", &result).await?;
+    wiki.set(key, &result).await?;
     Ok(Json(result))
   }
 }
@@ -64,7 +86,7 @@ async fn create_wiki(
     },
   )
   .await?;
-  cache.at("wiki").del("toc").await?; // remove cache
+  invalidate_toc(cache).await?;
   info!(title=%result.title, "wiki article created");
 
   Ok(Json(result))
@@ -84,7 +106,7 @@ async fn update_wiki(
     },
   )
   .await?;
-  cache.at("wiki").del("toc").await?; // remove cache
+  invalidate_toc(cache).await?;
   Ok(Json(result))
 }
 
@@ -92,6 +114,18 @@ async fn delete_wiki(
   State(ref db): State<Database>, State(ref cache): State<Cache>, Path(article_id): Path<i64>,
 ) -> Result<impl IntoResponse, ResponseError> {
   article::delete(&db.conn, article_id).await?;
-  cache.at("wiki").del("toc").await?; // remove cache
+  invalidate_toc(cache).await?;
   Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+  use super::{TOC_ADMIN_KEY, TOC_KEY, toc_cache_key};
+
+  #[test]
+  fn admin_and_public_toc_use_separate_cache_keys() {
+    assert_eq!(toc_cache_key(false), TOC_KEY);
+    assert_eq!(toc_cache_key(true), TOC_ADMIN_KEY);
+    assert_ne!(toc_cache_key(false), toc_cache_key(true));
+  }
 }
