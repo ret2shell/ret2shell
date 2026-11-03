@@ -656,6 +656,16 @@ async fn sync_game_config(
   txn: &DatabaseTransaction, game: &game::Model, game_bucket: &GameBucket,
 ) -> Result<game::Model, SyncError> {
   let bucket_config = game_bucket.config().await?;
+  let config_host_type = bucket_config.host_type;
+  let host_type = convert_game_host_type(config_host_type.clone())?;
+  if host_type != game.host_type {
+    return Err(SyncError::PushRejected(format!(
+      "config.toml sets host_type = {}, but the target game requires host_type = {}; \
+       changing host_type through the repository is not supported",
+      config_host_type as i32,
+      game.host_type.clone() as i32,
+    )));
+  }
   Ok(
     game::update(
       txn,
@@ -672,7 +682,7 @@ async fn sync_game_config(
         hidden: game.hidden,
         offline: game.offline,
         frozen: game.frozen,
-        host_type: convert_game_host_type(bucket_config.host_type)?,
+        host_type,
         team_size: bucket_config.team_size,
         env_limit: bucket_config.env_limit.filter(|&v| v > 0),
         access_policy: game::AccessPolicy {
