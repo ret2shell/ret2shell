@@ -1162,7 +1162,9 @@ mod tests {
     fs::write(repo.join("challenges/alpha/README.md"), "feature\n").expect("write feature readme");
     commit_all(&repo, "feature", "1700000060 +0000");
 
-    run_git(&repo, &["checkout", "master"]);
+    // Switch back to whichever branch `git init` created; its name depends on
+    // the user's `init.defaultBranch` setting.
+    run_git(&repo, &["checkout", "-"]);
     fs::write(repo.join("challenges/alpha/README.md"), "master\n").expect("write master readme");
     commit_all(&repo, "master", "1700000120 +0000");
 
