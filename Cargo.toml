@@ -149,7 +149,7 @@ version  = "1.7"
 
 [workspace.dependencies.kube]
 features = ["config", "client", "rustls-tls", "runtime", "derive", "ws"]
-version  = "4.2"
+version  = "5.0"
 
 [workspace.dependencies.wsrx]
 default-features = false
