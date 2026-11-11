@@ -1879,6 +1879,56 @@
         }
       }
     },
+    "passkey": {
+      "title": "通行密钥",
+      "login": {
+        "title": "使用通行密钥登录"
+      },
+      "form": {
+        "name": {
+          "label": "名称",
+          "placeholder": "为这台设备起个名字"
+        }
+      },
+      "actions": {
+        "add": {
+          "title": "添加通行密钥"
+        },
+        "rename": {
+          "title": "重命名"
+        },
+        "delete": {
+          "title": "删除"
+        }
+      },
+      "info": {
+        "created_at": "添加时间",
+        "last_used_at": "最后使用",
+        "credential_id": "凭据 ID"
+      },
+      "status": {
+        "registered": "通行密钥已添加"
+      },
+      "empty": "尚未添加通行密钥",
+      "unnamed": "未命名",
+      "errors": {
+        "fetch": {
+          "title": "获取通行密钥列表失败"
+        },
+        "register": {
+          "title": "添加通行密钥失败"
+        },
+        "rename": {
+          "title": "重命名通行密钥失败"
+        },
+        "delete": {
+          "title": "删除通行密钥失败"
+        },
+        "login": {
+          "title": "通行密钥登录失败"
+        }
+      }
+    },
     "register": {
       "tips": "没有账号？现在注册！",
       "status": {
