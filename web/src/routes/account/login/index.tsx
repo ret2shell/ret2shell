@@ -229,7 +229,7 @@ export default function () {
                   class="w-full mt-4!"
                   btnContent={
                     <>
-                      <span class="shrink-0 icon-[fluent--person-passkey-20-regular] w-5 h-5" />
+                      <span class="shrink-0 icon-[fluent--key-multiple-20-regular] w-5 h-5" />
                       <span>{t("account.oauth.select")}</span>
                     </>
                   }
