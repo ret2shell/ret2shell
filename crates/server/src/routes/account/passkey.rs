@@ -485,24 +485,23 @@ mod tests {
   }
 
   #[test]
-  fn build_webauthn_rejects_mismatched_rp_id() {
+  fn build_webauthn_derives_rp_id_from_pinned_port_origin() {
+    // the origin carries the port, the relying party id must not
     let config = config::Model {
       server: Some(r2s_config::server::Config {
-        external_domain: "example.com".to_owned(),
-        external_https: true,
+        external_domain: "localhost:8088".to_owned(),
+        external_https: false,
         ..Default::default()
       }),
       ..Default::default()
     };
-    // origin is https://example.com, rp id matches -> ok
     assert!(build_webauthn(&config).is_ok());
+  }
 
+  #[test]
+  fn build_webauthn_rejects_missing_server_config() {
     let config = config::Model {
-      server: Some(r2s_config::server::Config {
-        external_domain: "other.com".to_owned(),
-        external_https: true,
-        ..Default::default()
-      }),
+      server: None,
       ..Default::default()
     };
     assert!(build_webauthn(&config).is_err());
