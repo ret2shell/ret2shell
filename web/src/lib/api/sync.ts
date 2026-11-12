@@ -8,6 +8,7 @@ import type {
 import { isRunningStatus } from "@models/sync";
 import { t } from "@storage/theme";
 import { useMutation, useQuery } from "@tanstack/solid-query";
+import { DateTime } from "luxon";
 import api, { api_root, handleHttpError, inflyClient, toastSuccess } from ".";
 
 export type SyncDistributionUpdateRequest = {
@@ -17,8 +18,64 @@ export type SyncDistributionUpdateRequest = {
   enabled?: boolean;
 };
 
+/**
+ * The sync API serializes timestamps as unix seconds; the view models work
+ * with luxon DateTime, so every response is normalized at the API boundary.
+ * ISO-8601 strings are tolerated as well, so a serializer change can never
+ * crash the page.
+ */
+type Timestamp = number | string | null;
+
+type WireDistribution = Omit<
+  SyncDistribution,
+  "next_sync_at" | "last_attempt_at" | "last_success_at" | "created_at" | "updated_at"
+> & {
+  next_sync_at: Timestamp;
+  last_attempt_at: Timestamp;
+  last_success_at: Timestamp;
+  created_at: Timestamp;
+  updated_at: Timestamp;
+};
+
+type WireJob = Omit<SyncJob, "created_at" | "started_at" | "finished_at"> & {
+  created_at: Timestamp;
+  started_at: Timestamp;
+  finished_at: Timestamp;
+};
+
+const toDateTime = (value: Timestamp | undefined): DateTime | null => {
+  if (value == null) {
+    return null;
+  }
+  const parsed = typeof value === "number" ? DateTime.fromSeconds(value) : DateTime.fromISO(value);
+  return parsed.isValid ? parsed : null;
+};
+
+const toRequiredDateTime = (value: Timestamp | undefined): DateTime => toDateTime(value) ?? DateTime.fromMillis(0);
+
+function fromWireDistribution(wire: WireDistribution): SyncDistribution {
+  return {
+    ...wire,
+    next_sync_at: toDateTime(wire.next_sync_at),
+    last_attempt_at: toDateTime(wire.last_attempt_at),
+    last_success_at: toDateTime(wire.last_success_at),
+    created_at: toRequiredDateTime(wire.created_at),
+    updated_at: toRequiredDateTime(wire.updated_at),
+  };
+}
+
+function fromWireJob(wire: WireJob): SyncJob {
+  return {
+    ...wire,
+    created_at: toRequiredDateTime(wire.created_at),
+    started_at: toDateTime(wire.started_at),
+    finished_at: toDateTime(wire.finished_at),
+  };
+}
+
 export async function getSyncDistributions() {
-  return await api.get(`${api_root}/platform/sync/distributions`).json<SyncDistribution[]>();
+  const wires = await api.get(`${api_root}/platform/sync/distributions`).json<WireDistribution[]>();
+  return wires.map(fromWireDistribution);
 }
 
 export function useSyncDistributions({
@@ -50,7 +107,8 @@ export function useSyncDistributions({
 }
 
 export async function updateSyncDistribution(id: number, req: SyncDistributionUpdateRequest) {
-  return await api.patch(`${api_root}/platform/sync/distributions/${id}`, { json: req }).json<SyncDistribution>();
+  const wire = await api.patch(`${api_root}/platform/sync/distributions/${id}`, { json: req }).json<WireDistribution>();
+  return fromWireDistribution(wire);
 }
 
 export function useUpdateSyncDistributionMutation(
@@ -70,7 +128,8 @@ export function useUpdateSyncDistributionMutation(
 }
 
 export async function unbindSyncDistribution(id: number) {
-  return await api.post(`${api_root}/platform/sync/distributions/${id}/unbind`).json<SyncDistribution>();
+  const wire = await api.post(`${api_root}/platform/sync/distributions/${id}/unbind`).json<WireDistribution>();
+  return fromWireDistribution(wire);
 }
 
 export function useUnbindSyncDistributionMutation(
@@ -110,11 +169,12 @@ export function useDeleteSyncDistributionMutation(
 }
 
 export async function bindSyncDistribution(id: number, localGameId: number) {
-  return await api
+  const wire = await api
     .post(`${api_root}/platform/sync/distributions/${id}/bind`, {
       json: { local_game_id: localGameId },
     })
-    .json<SyncDistribution>();
+    .json<WireDistribution>();
+  return fromWireDistribution(wire);
 }
 
 export async function triggerSyncJob(id: number) {
@@ -138,7 +198,8 @@ export function useTriggerSyncJobMutation(
 }
 
 export async function getSyncJobs(id: number) {
-  return await api.get(`${api_root}/platform/sync/distributions/${id}/jobs`).json<SyncJob[]>();
+  const wires = await api.get(`${api_root}/platform/sync/distributions/${id}/jobs`).json<WireJob[]>();
+  return wires.map(fromWireJob);
 }
 
 export function useSyncJobs({
@@ -168,7 +229,8 @@ export function useSyncJobs({
 }
 
 export async function getSyncJob(id: number) {
-  return await api.get(`${api_root}/platform/sync/jobs/${id}`).json<SyncJob>();
+  const wire = await api.get(`${api_root}/platform/sync/jobs/${id}`).json<WireJob>();
+  return fromWireJob(wire);
 }
 
 export function useSyncJob({
