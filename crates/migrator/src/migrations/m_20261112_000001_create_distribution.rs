@@ -28,6 +28,7 @@ pub enum Distribution {
   LastStatus,
   LastError,
   ConsecutiveFailures,
+  ImageDigests,
   CreatedAt,
   UpdatedAt,
 }

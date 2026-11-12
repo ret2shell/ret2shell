@@ -34,11 +34,25 @@ const LABEL_ALPHABET: [char; 62] = [
 ];
 
 pub(super) async fn get_challenge_env_config(
-  State(ref bucket): State<Bucket>, Extension(token): Extension<Token>,
+  State(state): State<GlobalState>, Extension(token): Extension<Token>,
   Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  let challenge_bucket = super::get_challenge_bucket(bucket, &game, &challenge).await?;
-  let env_config = challenge_bucket.env().await?;
+  let challenge_bucket = super::get_challenge_bucket(&state.bucket, &game, &challenge).await?;
+  let mut env_config = challenge_bucket.env().await?;
+  if let (Some(config), Some(bucket_id), Some(local_registry)) = (
+    env_config.as_mut(),
+    game.bucket.as_deref(),
+    state
+      .config
+      .cluster
+      .as_ref()
+      .and_then(|cluster| cluster.registry.as_ref()),
+  ) && game.managed_distribution.is_some()
+  {
+    // managed games run their copied images from the local registry: rewrite
+    // the source-registry references for display, the bucket stays untouched
+    crate::sync::images::localize_env_images(config, bucket_id, &local_registry.external);
+  }
   if crate::middleware::auth::is_game_admin!(token, game) {
     Ok(Json(env_config))
   } else {
@@ -140,6 +154,24 @@ pub(super) async fn start_challenge_instance(
   let challenge_bucket = super::get_challenge_bucket(&bucket, &game, &challenge).await?;
 
   if let Some(env_config) = challenge_bucket.env().await? {
+    let mut env_config = env_config;
+    if let Some(bucket_id) = game.bucket.as_deref()
+      && game.managed_distribution.is_some()
+      && let Some(local_registry) = state
+        .config
+        .cluster
+        .as_ref()
+        .and_then(|cluster| cluster.registry.as_ref())
+    {
+      // managed games pull their images from the local registry where the
+      // sync copied them; the source-registry references in env.toml are
+      // mapped at read time, the bucket content stays pristine
+      crate::sync::images::localize_env_images(
+        &mut env_config,
+        bucket_id,
+        &local_registry.external,
+      );
+    }
     if env_config.images.is_empty() || env_config.images.iter().all(|i| i.port.is_none()) {
       return Err(ResponseError::PreconditionFailed(
         "at least one service with its exposed port is required".to_owned(),

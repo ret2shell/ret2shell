@@ -47,6 +47,14 @@ pub(crate) enum UpdateError {
   CandidateUnresolved(String),
   Validation(String),
   Materialization(String),
+  /// Copying or digest-verifying env images failed.
+  ImageSyncFailed(String),
+  /// An approved image tag resolves to different content on the source.
+  ImageDigestMismatch {
+    reference: String,
+    expected: String,
+    actual: String,
+  },
   RollbackFailed {
     cause: String,
     rollback: String,
@@ -70,6 +78,8 @@ impl UpdateError {
       Self::CandidateUnresolved(_) => "candidate_unresolved",
       Self::Validation(_) => "validation_failed",
       Self::Materialization(_) => "materialization_failed",
+      Self::ImageSyncFailed(_) => "image_sync_failed",
+      Self::ImageDigestMismatch { .. } => "image_digest_mismatch",
       Self::RollbackFailed { .. } => "rollback_failed",
       Self::Timeout => "timeout",
       Self::Internal(_) => "internal_error",
@@ -111,6 +121,17 @@ impl UpdateError {
       Self::Materialization(message) => {
         format!("failed to materialize the upstream revision: {message}")
       }
+      Self::ImageSyncFailed(message) => {
+        format!("failed to synchronize challenge images: {message}")
+      }
+      Self::ImageDigestMismatch {
+        reference,
+        expected,
+        actual,
+      } => format!(
+        "image {reference} changed content under the same tag: expected digest {expected}, \
+         got {actual}; the source must publish a new tag before syncing"
+      ),
       Self::RollbackFailed { cause, rollback } => format!(
         "synchronization failed ({cause}) and restoring the local repository also failed ({rollback}); \
          the repository needs manual inspection"
@@ -120,6 +141,23 @@ impl UpdateError {
         crate::sync::job::JOB_TIMEOUT_SECONDS
       ),
       Self::Internal(message) => message.clone(),
+    }
+  }
+}
+
+impl From<crate::sync::images::ImageSyncError> for UpdateError {
+  fn from(error: crate::sync::images::ImageSyncError) -> Self {
+    match error {
+      crate::sync::images::ImageSyncError::DigestMismatch {
+        reference,
+        expected,
+        actual,
+      } => UpdateError::ImageDigestMismatch {
+        reference,
+        expected,
+        actual,
+      },
+      crate::sync::images::ImageSyncError::Failed(message) => UpdateError::ImageSyncFailed(message),
     }
   }
 }
@@ -206,9 +244,13 @@ pub(crate) struct UpdateReport {
 /// Runs one incremental sync of a managed distribution against the admission
 /// head pinned for this run. On any failure the database, the branch ref and
 /// the working tree are restored, leaving no half-synchronized state behind.
+/// `source_registry` is the registry advertised by this run's discovery; env
+/// images living on it are copied into the local registry with digest
+/// verification, on fast-forwards and no-ops alike.
 pub(crate) async fn execute_update(
   state: &GlobalState, source: &distribution::Model, repository_url: &Url, expected_head: &str,
-  trace_id: &str, logger: &StreamLogger,
+  source_registry: Option<&r2s_config::cluster::RegistryConfig>, trace_id: &str,
+  logger: &StreamLogger,
 ) -> Result<UpdateReport, UpdateError> {
   let game = game::get_by_managed_distribution(&state.db.conn, source.id)
     .await
@@ -253,6 +295,31 @@ pub(crate) async fn execute_update(
       logger
         .info("Upstream revision matches the local baseline, nothing to do.")
         .await;
+      // image digests are verified even on no-ops: a source re-tagging an
+      // image under an approved reference is a supply-chain violation that
+      // must surface instead of silently passing
+      let mut admission = source.image_digests.clone().unwrap_or_default().0;
+      let images = crate::sync::images::synchronize_images(
+        state,
+        logger,
+        &game_bucket,
+        source_registry,
+        &mut admission,
+      )
+      .await?;
+      if images.admission_changed {
+        let txn = state.db.conn.begin().await.map_err(internal)?;
+        distribution::update(
+          &txn,
+          distribution::Model {
+            image_digests: Some(distribution::ImageDigests(admission)),
+            ..source.clone()
+          },
+        )
+        .await
+        .map_err(internal)?;
+        txn.commit().await.map_err(internal)?;
+      }
       UpdateReport {
         old_oid: oid.clone(),
         new_oid: oid,
@@ -333,6 +400,17 @@ pub(crate) async fn execute_update(
             &source.credential,
           ))
         })?;
+        // env images are copied and digest-verified against the admission
+        // list; the updated list is persisted with the distribution below
+        let mut admission = source.image_digests.clone().unwrap_or_default().0;
+        crate::sync::images::synchronize_images(
+          state,
+          logger,
+          &game_bucket,
+          source_registry,
+          &mut admission,
+        )
+        .await?;
         let now = chrono::Utc::now();
         distribution::update(
           &txn,
@@ -345,6 +423,7 @@ pub(crate) async fn execute_update(
             last_status: distribution::STATUS_SUCCEEDED.to_owned(),
             last_error: None,
             consecutive_failures: 0,
+            image_digests: Some(distribution::ImageDigests(admission)),
             next_sync_at: if source.enabled {
               crate::sync::distribution::next_after_success(now, source.interval_seconds)
             } else {
