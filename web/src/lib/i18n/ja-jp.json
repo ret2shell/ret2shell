@@ -301,6 +301,10 @@
     "sync": {
       "title": "リソース同期",
       "subtitle": "他の ret2shell インスタンスから問題集をインポートし、fast-forward 同期を維持します。同期の識別子はソース实例の実際の bucket id に固定され、承認された HEAD のみ同期されます。",
+      "tabs": {
+        "direct": "直接インポート",
+        "community": "コミュニティ"
+      },
       "warnings": {
         "import": "インポートされたゲームは既定で非表示になり、自動公開されません。定期同期を有効にすると、上游の将来のコミット(checker・イメージ・環境の変更を含む)を信頼することになります。",
         "unbind": "管理解除は同期を停止するだけで、ローカルのゲームとデータは削除されません。解除後は編集フォームから再バインドできます。",
@@ -321,6 +325,7 @@
         "oid": "同期ベースライン",
         "failures": "{count} 回連続失敗",
         "enabled": "有効",
+        "community": "コミュニティ",
         "disabled": "一時停止中"
       },
       "status": {
@@ -371,6 +376,27 @@
         "submit": {
           "import": "インポート開始",
           "bind": "ゲームをバインド"
+        }
+      },
+      "community": {
+        "indexUrl": {
+          "label": "コミュニティ registry index のアドレス",
+          "placeholder": "https://example.org/ret2shell-registry/index.json",
+          "hint": "index はサーバー側で取得・検証され、エントリの token がブラウザに渡ることはありません。アドレスはこのブラウザにのみ保存されます。"
+        },
+        "fetch": {
+          "title": "取得"
+        },
+        "search": "名前または bucket id で検索",
+        "empty": "一致するエントリはありません",
+        "noToken": "token なし",
+        "list": {
+          "bucketId": "Bucket ID",
+          "endpoint": "ソース",
+          "headRef": "承認 HEAD"
+        },
+        "actions": {
+          "import": "インポート"
         }
       },
       "actions": {
@@ -429,6 +455,9 @@
         "fetchJob": {
           "title": "同期タスク詳細の取得に失敗しました"
         },
+        "fetchRegistry": {
+          "title": "コミュニティ registry の取得に失敗しました"
+        },
         "unknown": {
           "title": "同期に失敗しました"
         },
@@ -471,6 +500,10 @@
         "discover_failed": {
           "title": "ソースの検出に失敗",
           "hint": "ソースから bucket id と現在の HEAD を取得できません。アドレスと token を確認してください。"
+        },
+        "registry_fetch_failed": {
+          "title": "コミュニティ registry の読み取りに失敗",
+          "hint": "registry index の読み取り、またはエントリの取得に失敗しました。アドレスとネットワークを確認してください。エントリが削除された場合は、管理を解除するか再インポートしてください。"
         },
         "fetch_failed": {
           "title": "ソースリポジトリの取得に失敗",

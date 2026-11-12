@@ -301,6 +301,10 @@
     "sync": {
       "title": "資源同步",
       "subtitle": "從其他 ret2shell 實例導入題庫並保持快進同步:同步身份錨定源實例真實 bucket id,只同步通過准入 HEAD 驗證的版本。",
+      "tabs": {
+        "direct": "直填導入",
+        "community": "社區下載"
+      },
       "warnings": {
         "import": "導入的比賽預設隱藏,不會自動發布;啟用定時同步意味著信任上游未來的提交(包括 checker、鏡像與環境變化)。",
         "unbind": "解除託管只會停止同步,不會刪除本地比賽與題庫資料;解除後可在編輯表單中重新綁定。",
@@ -321,6 +325,7 @@
         "oid": "同步基線",
         "failures": "連續失敗 {count} 次",
         "enabled": "啟用中",
+        "community": "社區",
         "disabled": "已暫停"
       },
       "status": {
@@ -373,6 +378,27 @@
           "bind": "綁定比賽"
         }
       },
+      "community": {
+        "indexUrl": {
+          "label": "社區 registry index 地址",
+          "placeholder": "https://example.org/ret2shell-registry/index.json",
+          "hint": "index 由後端拉取並驗證,條目 token 不會進入瀏覽器;地址只保存在本機瀏覽器中。"
+        },
+        "fetch": {
+          "title": "拉取"
+        },
+        "search": "按名稱或 bucket id 搜尋",
+        "empty": "沒有符合的條目",
+        "noToken": "缺少 token",
+        "list": {
+          "bucketId": "Bucket ID",
+          "endpoint": "源地址",
+          "headRef": "准入 HEAD"
+        },
+        "actions": {
+          "import": "導入"
+        }
+      },
       "actions": {
         "sync": {
           "title": "手動同步",
@@ -420,6 +446,9 @@
         "fetchJob": {
           "title": "獲取同步任務詳情失敗"
         },
+        "fetchRegistry": {
+          "title": "拉取社區 registry 失敗"
+        },
         "unknown": {
           "title": "同步失敗"
         },
@@ -462,6 +491,10 @@
         "discover_failed": {
           "title": "源實例發現失敗",
           "hint": "無法從源實例獲取 bucket id 與當前 HEAD,請檢查地址與 token。"
+        },
+        "registry_fetch_failed": {
+          "title": "社區 registry 讀取失敗",
+          "hint": "無法讀取 registry index 或條目已被移除,請檢查地址與網路;若條目被刪除,請解除託管或重新導入該分發。"
         },
         "fetch_failed": {
           "title": "拉取源倉庫失敗",

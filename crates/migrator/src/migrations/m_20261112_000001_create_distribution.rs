@@ -29,6 +29,7 @@ pub enum Distribution {
   LastError,
   ConsecutiveFailures,
   ImageDigests,
+  RegistryUrl,
   CreatedAt,
   UpdatedAt,
 }

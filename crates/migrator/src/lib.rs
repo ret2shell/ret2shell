@@ -58,6 +58,7 @@ impl MigratorTrait for Migrator {
       Box::new(migrations::m_20261112_000001_create_distribution::Migration),
       Box::new(migrations::m_20261112_000002_rework_managed_sync::Migration),
       Box::new(migrations::m_20261112_000003_distribution_image_digests::Migration),
+      Box::new(migrations::m_20261112_000004_distribution_registry_url::Migration),
     ]
   }
 }

@@ -54,6 +54,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
     .merge(
       Router::<GlobalState>::new()
         .route("/sync/import", post(sync::import_game))
+        .route("/sync/registry/index", post(sync::list_registry_entries))
         .route("/sync/distributions", get(sync::list_distributions))
         .route(
           "/sync/distributions/{id}",

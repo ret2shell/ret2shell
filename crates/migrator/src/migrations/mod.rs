@@ -43,3 +43,4 @@ pub mod m_20261111_000003_create_sync_job;
 pub mod m_20261112_000001_create_distribution;
 pub mod m_20261112_000002_rework_managed_sync;
 pub mod m_20261112_000003_distribution_image_digests;
+pub mod m_20261112_000004_distribution_registry_url;

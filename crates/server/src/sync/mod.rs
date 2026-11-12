@@ -1,3 +1,4 @@
+pub(crate) mod community;
 pub(crate) mod discover;
 pub(crate) mod distribution;
 pub(crate) mod images;
