@@ -13,7 +13,9 @@ const BACKOFF_BASE: i64 = 2;
 /// Maximum backoff exponent, capping the delay independently of the interval.
 const BACKOFF_MAX_EXPONENT: u32 = 5;
 
-/// Sanitized distribution view: the credential never leaves the server.
+/// Sanitized distribution view: the credential never leaves the server. All
+/// timestamps serialize as unix seconds, matching the job model and the
+/// frontend wire contract.
 #[derive(Serialize)]
 pub(crate) struct PublicDistribution {
   pub id: i64,
@@ -30,15 +32,20 @@ pub(crate) struct PublicDistribution {
   pub enabled: bool,
   pub interval_seconds: Option<i64>,
   pub last_synced_oid: Option<String>,
+  #[serde(with = "chrono::serde::ts_seconds_option")]
   pub next_sync_at: Option<DateTime<Utc>>,
+  #[serde(with = "chrono::serde::ts_seconds_option")]
   pub last_attempt_at: Option<DateTime<Utc>>,
+  #[serde(with = "chrono::serde::ts_seconds_option")]
   pub last_success_at: Option<DateTime<Utc>>,
   pub last_status: String,
   pub last_error: Option<String>,
   pub consecutive_failures: i32,
   pub managed_game_id: Option<i64>,
   pub managed_game_name: Option<String>,
+  #[serde(with = "chrono::serde::ts_seconds")]
   pub created_at: DateTime<Utc>,
+  #[serde(with = "chrono::serde::ts_seconds")]
   pub updated_at: DateTime<Utc>,
 }
 
