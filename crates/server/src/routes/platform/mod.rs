@@ -5,7 +5,7 @@ use axum::{
   extract::{Query, State},
   middleware,
   response::{IntoResponse, Response},
-  routing::{get, post},
+  routing::{get, patch, post},
 };
 
 mod sync;
@@ -31,7 +31,8 @@ use crate::{
   },
 };
 
-pub fn router(_state: &GlobalState) -> Router<GlobalState> {
+pub fn router(state: &GlobalState) -> Router<GlobalState> {
+  tokio::spawn(crate::worker::sync::spawn_sync_worker(state.clone()));
   Router::<GlobalState>::new()
     .merge(
       Router::<GlobalState>::new()
@@ -53,6 +54,19 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
     .merge(
       Router::<GlobalState>::new()
         .route("/sync/import", post(sync::import_game))
+        .route(
+          "/sync/sources",
+          get(sync::list_sync_sources).post(sync::create_sync_source),
+        )
+        .route(
+          "/sync/sources/{id}",
+          patch(sync::patch_sync_source).delete(sync::delete_sync_source),
+        )
+        .route(
+          "/sync/sources/{id}/jobs",
+          get(sync::list_sync_jobs).post(sync::trigger_sync_job),
+        )
+        .route("/sync/jobs/{id}", get(sync::get_sync_job))
         .route_layer(middleware::from_fn(auth::permission_required_all!(
           Permission::DevOps
         ))),

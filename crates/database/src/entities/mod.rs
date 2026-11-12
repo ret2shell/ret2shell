@@ -19,6 +19,8 @@ pub mod oauth;
 pub mod oauth_provider;
 pub mod passkey;
 pub mod submission;
+pub mod sync_job;
+pub mod sync_source;
 pub mod team;
 pub mod user;
 pub mod user2_ip;
