@@ -774,6 +774,7 @@ async fn sync_game_config(
         node_selector: game.node_selector.clone(),
         traffic: game.traffic.clone(),
         lifecycle: game.lifecycle.clone(),
+        managed_distribution: game.managed_distribution,
       },
     )
     .await?,

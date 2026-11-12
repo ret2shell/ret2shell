@@ -76,6 +76,7 @@ pub(super) async fn upload_image(
   State(cluster): State<Cluster>, State(cache): State<Cache>,
   Extension(game): Extension<game::Model>, mut multipart: Multipart,
 ) -> Result<impl IntoResponse, ResponseError> {
+  crate::routes::game::ensure_not_managed(&game)?;
   let registry = if let Some(registry) = cluster.registry {
     registry
   } else {

@@ -55,6 +55,8 @@ impl MigratorTrait for Migrator {
       Box::new(migrations::m_20261111_000001_create_passkey::Migration),
       Box::new(migrations::m_20261111_000002_create_sync_source::Migration),
       Box::new(migrations::m_20261111_000003_create_sync_job::Migration),
+      Box::new(migrations::m_20261112_000001_create_distribution::Migration),
+      Box::new(migrations::m_20261112_000002_rework_managed_sync::Migration),
     ]
   }
 }

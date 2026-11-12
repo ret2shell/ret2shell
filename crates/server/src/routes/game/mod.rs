@@ -177,6 +177,20 @@ pub(super) async fn get_game_bucket_mut(
     .map_err(Into::into)
 }
 
+/// Rejects content modifications on games managed by an upstream
+/// distribution. Read access, sync actions, local permission management and
+/// unbinding stay available; everything that rewrites challenge content must
+/// go through the distribution sync.
+pub(crate) fn ensure_not_managed(game: &game::Model) -> Result<(), ResponseError> {
+  if let Some(distribution_id) = game.managed_distribution {
+    return Err(ResponseError::Conflict(format!(
+      "this game is managed by distribution #{distribution_id}; \
+       unbind it before modifying its content locally"
+    )));
+  }
+  Ok(())
+}
+
 #[derive(Serialize, Clone, Deserialize)]
 pub struct Instance {
   pub state: String,

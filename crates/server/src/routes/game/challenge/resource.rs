@@ -97,6 +97,7 @@ pub(super) async fn create_challenge(
   State(ref db): State<Database>, State(bucket): State<Bucket>, Extension(token): Extension<Token>,
   Extension(game): Extension<game::Model>, Json(challenge): Json<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  crate::routes::game::ensure_not_managed(&game)?;
   challenge.validate()?;
   let txn = db.conn.begin().await?;
   let referenced =
@@ -150,6 +151,7 @@ pub(super) async fn update_challenge(
   Extension(game): Extension<game::Model>, Extension(prev_challenge): Extension<challenge::Model>,
   Extension(trace): Extension<RequestId>, Json(challenge): Json<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  crate::routes::game::ensure_not_managed(&game)?;
   challenge.validate()?;
   super::check_challenge_publishing(&prev_challenge)?;
   let txn = db.conn.begin().await?;
@@ -248,6 +250,7 @@ pub(super) async fn update_challenge_prerequisites(
   Extension(prev_challenge): Extension<challenge::Model>,
   Json(req): Json<UpdateChallengePrerequisitesRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  crate::routes::game::ensure_not_managed(&game)?;
   req.validate()?;
   let prerequisites = req.prerequisites;
   let txn = db.conn.begin().await?;
@@ -294,6 +297,7 @@ pub(super) async fn update_challenge_avatar(
   Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
   Extension(prev_challenge): Extension<challenge::Model>, Json(avatar): Json<Option<String>>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  crate::routes::game::ensure_not_managed(&game)?;
   if let Some(avatar) = &avatar
     && r2s_database::validation::char_len(avatar)
       > r2s_database::validation::AVATAR_MAX_LEN as usize
@@ -342,6 +346,7 @@ pub(super) async fn up_challenge(
   Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
   Extension(trace): Extension<RequestId>, Extension(challenge): Extension<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  crate::routes::game::ensure_not_managed(&game)?;
   let txn = db.conn.begin().await?;
   let challenge_bucket = super::get_challenge_bucket(&bucket, &game, &challenge).await?;
   let challenge = challenge::update(
@@ -388,6 +393,7 @@ pub(super) async fn down_challenge(
   Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
   Extension(trace): Extension<RequestId>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  crate::routes::game::ensure_not_managed(&game)?;
   let txn = db.conn.begin().await?;
   let challenge = challenge::update(
     &txn,
@@ -443,6 +449,7 @@ pub(super) async fn delete_challenge(
   Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
   Extension(trace): Extension<RequestId>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  crate::routes::game::ensure_not_managed(&game)?;
   lifecycle::spawn_challenge_stop(
     state.clone(),
     game.clone(),
@@ -580,6 +587,7 @@ pub(super) async fn update_answer(
   Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
   Json(answer): Json<String>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  crate::routes::game::ensure_not_managed(&game)?;
   let (game_bucket, challenge_bucket) =
     super::get_challenge_bucket_mut(&bucket, &game, &challenge).await?;
   challenge_bucket.set_answer(answer.clone()).await?;
