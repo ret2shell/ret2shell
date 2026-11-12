@@ -27,7 +27,12 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
 }
 
 /// Cache key of the table of contents shown to regular visitors.
-const TOC_KEY: &str = "toc";
+///
+/// This is a fresh key rather than the legacy `toc` one: cache entries carry no
+/// TTL, so an entry written by a previous deployment under the old shared key
+/// may still hold the draft-inclusive tree and would otherwise be served to
+/// regular visitors until the next mutation.
+const TOC_KEY: &str = "toc:public";
 /// Cache key of the table of contents shown to wiki administrators, which also
 /// contains drafts and unpublished articles.
 const TOC_ADMIN_KEY: &str = "toc:admin";
