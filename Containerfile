@@ -1,7 +1,11 @@
 FROM rust:1.98-alpine AS server
 
+# openssl-dev: the webauthn dependency chain links OpenSSL. Alpine ships no
+# static OpenSSL, so it links dynamically and the runtime layer installs the
+# shared library.
 # hadolint ignore=DL3018
-RUN apk add --update --no-cache musl-dev clang lld
+RUN apk add --update --no-cache musl-dev clang lld openssl-dev pkgconfig
+ENV OPENSSL_DIR=/usr
 
 WORKDIR /var/lib/ret2shell
 
@@ -24,7 +28,9 @@ FROM node:lts-alpine AS frontend
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+# node 25+ no longer bundles corepack, install it explicitly for older and
+# newer images alike
+RUN npm install -g corepack && corepack enable
 
 COPY ./web/package.json ./web/pnpm-lock.yaml ./web/pnpm-workspace.yaml /var/lib/ret2shell/web/
 WORKDIR /var/lib/ret2shell/web
@@ -38,8 +44,9 @@ RUN pnpm build && \
 
 FROM alpine:3
 
+# openssl: the server links OpenSSL dynamically (see the server stage)
 # hadolint ignore=DL3018
-RUN apk add --update --no-cache curl git skopeo tini && \
+RUN apk add --update --no-cache curl git skopeo tini openssl && \
     git config --global user.email platform@ret.sh.cn && \
     git config --global user.name Ret2Shell
 
