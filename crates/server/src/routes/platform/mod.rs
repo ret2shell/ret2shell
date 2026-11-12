@@ -5,8 +5,10 @@ use axum::{
   extract::{Query, State},
   middleware,
   response::{IntoResponse, Response},
-  routing::get,
+  routing::{get, post},
 };
+
+mod sync;
 use chrono::{DateTime, Utc};
 use futures::future::join_all;
 use r2s_database::{
@@ -45,6 +47,13 @@ pub fn router(_state: &GlobalState) -> Router<GlobalState> {
         .route("/logs", get(get_logs_list))
         .route_layer(middleware::from_fn(auth::permission_required_any!(
           Permission::Statistics,
+          Permission::DevOps
+        ))),
+    )
+    .merge(
+      Router::<GlobalState>::new()
+        .route("/sync/import", post(sync::import_game))
+        .route_layer(middleware::from_fn(auth::permission_required_all!(
           Permission::DevOps
         ))),
     )

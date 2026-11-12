@@ -30,6 +30,7 @@ mod repo;
 pub(crate) mod repo_sync;
 mod runtime;
 mod statistics;
+mod sync;
 mod sync_error;
 mod team;
 
@@ -58,25 +59,6 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .route(
           "/node-selector",
           patch(runtime::update_game_node_selector).delete(runtime::delete_game_node_selector),
-        )
-        .nest(
-          "/repo",
-          Router::new().route("/", get(repo::get_game_repo_git)).nest(
-            "/{repo}",
-            Router::new()
-              .route(
-                "/git-upload-pack",
-                post(repo::game_repo_git_upload_pack).options(repo::game_repo_git_upload_pack),
-              )
-              .route(
-                "/git-receive-pack",
-                post(repo::game_repo_git_receive_pack).options(repo::game_repo_git_receive_pack),
-              )
-              .route(
-                "/info/refs",
-                get(repo::game_repo_info_refs).options(repo::game_repo_info_refs),
-              ),
-          ),
         )
         .nest(
           "/registry",
@@ -113,6 +95,47 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         )
         .route("/", patch(core::update_game).delete(core::delete_game))
         .route_layer(middleware::from_fn(auth::game_admin_required))
+        .nest(
+          "/repo",
+          Router::new()
+            .merge(
+              Router::new()
+                .route("/", get(repo::get_game_repo_git))
+                .route_layer(middleware::from_fn(auth::game_admin_required)),
+            )
+            .nest(
+              "/{repo}",
+              Router::new()
+                .merge(
+                  Router::new()
+                    .route(
+                      "/git-upload-pack",
+                      post(repo::game_repo_git_upload_pack)
+                        .options(repo::game_repo_git_upload_pack),
+                    )
+                    .route(
+                      "/info/refs",
+                      get(repo::game_repo_info_refs).options(repo::game_repo_info_refs),
+                    )
+                    .route_layer(middleware::from_fn(auth::game_sync_read_required)),
+                )
+                .merge(
+                  Router::new()
+                    .route(
+                      "/git-receive-pack",
+                      post(repo::game_repo_git_receive_pack)
+                        .options(repo::game_repo_git_receive_pack),
+                    )
+                    .route_layer(middleware::from_fn(auth::game_admin_required)),
+                ),
+            ),
+        )
+        .nest(
+          "/sync",
+          Router::new()
+            .route("/media/{hash}", get(sync::get_sync_media))
+            .route_layer(middleware::from_fn(auth::game_sync_read_required)),
+        )
         .route("/solve", get(participant::get_self_solves))
         .route("/instance", get(participant::get_self_instances))
         .nest("/challenge", challenge::router(state))

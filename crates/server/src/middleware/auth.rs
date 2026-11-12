@@ -444,6 +444,53 @@ pub async fn game_admin_required(
   }
 }
 
+fn sync_policy_allows(host_type: &game::HostType, archived: bool, sync: i32) -> bool {
+  matches!(sync, 0 | 1) && (host_type == &game::HostType::Training || archived)
+}
+
+fn sync_token_matches(expected: Option<&str>, authorization: Option<&str>) -> bool {
+  let Some(expected) = expected.filter(|token| !token.is_empty()) else {
+    return false;
+  };
+  let Some(candidate) = authorization.and_then(|value| value.strip_prefix("Bearer ")) else {
+    return false;
+  };
+  expected == candidate
+}
+
+fn is_receive_pack_advertisement(path: &str, query: Option<&str>) -> bool {
+  path.ends_with("/info/refs")
+    && query.is_some_and(|query| {
+      query
+        .split('&')
+        .any(|pair| pair == "service=git-receive-pack")
+    })
+}
+
+pub async fn game_sync_read_required(
+  Extension(token): Extension<Token>, Extension(game): Extension<game::Model>, req: Request,
+  next: Next,
+) -> Result<impl IntoResponse, ResponseError> {
+  if is_game_admin!(token, game) {
+    return Ok(next.run(req).await);
+  }
+  let authorization = req
+    .headers()
+    .get(header::AUTHORIZATION)
+    .and_then(|value| value.to_str().ok());
+  let allowed = !is_receive_pack_advertisement(req.uri().path(), req.uri().query())
+    && sync_policy_allows(&game.host_type, game.archived(), game.access_policy.sync)
+    && sync_token_matches(game.token.as_deref(), authorization);
+  if allowed {
+    return Ok(next.run(req).await);
+  }
+  if token.id <= 0 && authorization.is_none() {
+    return Err(ResponseError::Unauthorized("please login first".to_owned()));
+  }
+  warn!(game_id = game.id, "rejected game sync read attempt");
+  Err(ResponseError::Forbidden("permission denied".to_owned()))
+}
+
 pub async fn game_access_required(
   Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
   team_ext: Extension<Option<team::Model>>, req: Request, next: Next,
@@ -508,4 +555,52 @@ pub async fn challenge_access_required(
   }
   let _team = extract_team!(game, team_ext, token);
   Ok(next.run(req).await)
+}
+
+#[cfg(test)]
+mod tests {
+  use r2s_database::game::HostType;
+
+  use super::{is_receive_pack_advertisement, sync_policy_allows, sync_token_matches};
+
+  #[test]
+  fn sync_policy_allows_training_but_rejects_disabled_sync() {
+    assert!(sync_policy_allows(&HostType::Training, false, 0));
+    assert!(sync_policy_allows(&HostType::Training, false, 1));
+    assert!(!sync_policy_allows(&HostType::Training, false, 2));
+    assert!(!sync_policy_allows(&HostType::Training, false, 99));
+  }
+
+  #[test]
+  fn sync_policy_requires_archived_games() {
+    assert!(!sync_policy_allows(&HostType::Game, false, 0));
+    assert!(sync_policy_allows(&HostType::Game, true, 0));
+    assert!(!sync_policy_allows(&HostType::Game, true, 2));
+  }
+
+  #[test]
+  fn sync_token_requires_an_exact_bearer_match() {
+    assert!(sync_token_matches(Some("secret"), Some("Bearer secret")));
+    assert!(!sync_token_matches(Some("secret"), Some("Bearer wrong")));
+    assert!(!sync_token_matches(Some("secret"), Some("secret")));
+    assert!(!sync_token_matches(Some(""), Some("Bearer ")));
+    assert!(!sync_token_matches(None, Some("Bearer secret")));
+    assert!(!sync_token_matches(Some("secret"), None));
+  }
+
+  #[test]
+  fn receive_pack_advertisement_is_not_a_sync_read_capability() {
+    assert!(is_receive_pack_advertisement(
+      "/api/game/1/repo/game.git/info/refs",
+      Some("service=git-receive-pack")
+    ));
+    assert!(!is_receive_pack_advertisement(
+      "/api/game/1/repo/game.git/info/refs",
+      Some("service=git-upload-pack")
+    ));
+    assert!(!is_receive_pack_advertisement(
+      "/api/game/1/repo/game.git/git-receive-pack",
+      None
+    ));
+  }
 }
