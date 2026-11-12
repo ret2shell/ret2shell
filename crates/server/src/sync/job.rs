@@ -257,17 +257,69 @@ fn execution_slot() -> &'static tokio::sync::Mutex<()> {
   SYNC_EXECUTION_SLOT.get_or_init(|| tokio::sync::Mutex::new(()))
 }
 
-/// The sync body of a job run: discovers the current source admission head,
-/// pins it on the job, and executes the incremental sync against it. The
-/// discovery result travels as the pinned head so a mirror swap between
-/// discovery and fetch is rejected by the admission check. The pinned head is
-/// returned even when the sync fails, keeping the audit trail truthful.
+/// The sync body of a job run. Direct distributions pin the source's current
+/// HEAD; community distributions re-read their registry entry first and pin
+/// the entry's published head_ref, so a source version the registry has not
+/// approved is rejected by the admission check. The pinned head travels to
+/// the fetch, so a mirror swap between pinning and fetch is also rejected,
+/// and is returned even when the sync fails, keeping the audit trail
+/// truthful.
 async fn run_sync_body(
   state: &GlobalState, model: &distribution::Model, job: &sync_job::Model, logger: &StreamLogger,
 ) -> (
   Option<String>,
   Result<crate::sync::update::UpdateReport, crate::sync::update::UpdateError>,
 ) {
+  let mut model = model.clone();
+  if let Some(registry_url) = model
+    .registry_url
+    .as_deref()
+    .map(crate::sync::community::normalize_registry_url)
+  {
+    // the registry entry is authoritative for community distributions: its
+    // endpoint, token and published head_ref define this run
+    let registry_url = match registry_url {
+      Ok(url) => url,
+      Err(error) => {
+        return (
+          None,
+          Err(crate::sync::update::UpdateError::RegistryFetchFailed(
+            format!("the stored registry index URL is invalid: {error}"),
+          )),
+        );
+      }
+    };
+    let entry = match crate::sync::community::get_entry(&registry_url, &model.bucket_id).await {
+      Ok(entry) => entry,
+      Err(message) => {
+        return (
+          None,
+          Err(crate::sync::update::UpdateError::RegistryFetchFailed(
+            message,
+          )),
+        );
+      }
+    };
+    if entry.token.is_empty() {
+      return (
+        None,
+        Err(crate::sync::update::UpdateError::RegistryFetchFailed(
+          "the registry entry carries no token".to_owned(),
+        )),
+      );
+    }
+    if let Err(error) = crate::sync::discover::normalize_endpoint(&entry.endpoint) {
+      return (
+        None,
+        Err(crate::sync::update::UpdateError::RegistryFetchFailed(
+          format!("the registry entry endpoint is invalid: {error}"),
+        )),
+      );
+    }
+    model.endpoint = entry.endpoint;
+    model.credential = entry.token;
+    model.head_ref = entry.head_ref.clone();
+  }
   let endpoint = match url::Url::parse(&model.endpoint) {
     Ok(endpoint) => endpoint,
     Err(error) => {
@@ -290,14 +342,20 @@ async fn run_sync_body(
       );
     }
   };
-  let pinned_head = discovered.descriptor.head.clone();
+  let pinned_head = if model.registry_url.is_some() {
+    // community admission: the registry-published version, never the source's
+    // current HEAD
+    model.head_ref.clone()
+  } else {
+    discovered.descriptor.head.clone()
+  };
   if let Err(error) = set_expected_head(state, job.id, &pinned_head).await {
     tracing::error!(job_id = job.id, error=%error, "failed to pin the expected head");
   }
   logger
     .info(format!(
-      "Discovered upstream bucket {} at HEAD {}.",
-      discovered.descriptor.bucket_id, discovered.descriptor.head
+      "Discovered upstream bucket {} at HEAD {} (admission HEAD {}).",
+      discovered.descriptor.bucket_id, discovered.descriptor.head, pinned_head
     ))
     .await;
   let source_registry = discovered
@@ -307,7 +365,7 @@ async fn run_sync_body(
     .map(|registry| registry.registry_config());
   let result = crate::sync::update::execute_update(
     state,
-    model,
+    &model,
     &discovered.repository_url,
     &pinned_head,
     source_registry.as_ref(),

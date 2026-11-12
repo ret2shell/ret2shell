@@ -43,6 +43,8 @@ pub(crate) enum UpdateError {
   BucketLocked,
   MissingBaseline,
   DiscoverFailed(String),
+  /// Fetching the community registry index failed, or the entry vanished.
+  RegistryFetchFailed(String),
   FetchFailed(String),
   CandidateUnresolved(String),
   Validation(String),
@@ -74,6 +76,7 @@ impl UpdateError {
       Self::BucketLocked => "bucket_locked",
       Self::MissingBaseline => "missing_baseline",
       Self::DiscoverFailed(_) => "discover_failed",
+      Self::RegistryFetchFailed(_) => "registry_fetch_failed",
       Self::FetchFailed(_) => "fetch_failed",
       Self::CandidateUnresolved(_) => "candidate_unresolved",
       Self::Validation(_) => "validation_failed",
@@ -112,6 +115,9 @@ impl UpdateError {
       }
       Self::DiscoverFailed(message) => {
         format!("failed to discover the source admission head: {message}")
+      }
+      Self::RegistryFetchFailed(message) => {
+        format!("failed to read the community registry index: {message}")
       }
       Self::FetchFailed(message) => format!("failed to fetch the source repository: {message}"),
       Self::CandidateUnresolved(message) => {

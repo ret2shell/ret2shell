@@ -57,6 +57,10 @@ pub struct Model {
   /// Digest admission list for env images, written by the sync pipeline.
   #[sea_orm(column_type = "JsonBinary", nullable)]
   pub image_digests: Option<ImageDigests>,
+  /// The community registry index this distribution came from; `None` marks
+  /// a direct import whose admission head advances with the source.
+  #[serde(default = "Option::default")]
+  pub registry_url: Option<String>,
   #[serde(with = "ts_seconds")]
   pub created_at: DateTime<Utc>,
   #[serde(with = "ts_seconds")]
@@ -183,6 +187,7 @@ mod tests {
         .into_iter()
         .collect(),
       )),
+      registry_url: None,
       created_at: chrono::Utc::now(),
       updated_at: chrono::Utc::now(),
     };

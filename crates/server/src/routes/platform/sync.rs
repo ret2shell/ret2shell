@@ -16,26 +16,59 @@ use tower_http::request_id::RequestId;
 use super::super::game::{hook::GitHookFormatter, repo_sync::AbortOnDropStream};
 use crate::{
   middleware::auth::Token,
-  sync::{discover, distribution, import::execute_import, job},
+  sync::{
+    community, discover, distribution,
+    import::{ImportMode, execute_import, resolve_import_source},
+    job,
+  },
   traits::{GlobalState, ResponseError},
 };
 
+/// One import request, in exactly one of two modes: direct (`endpoint` +
+/// `token`) or community (`registry_url` + `bucket_id`). The community mode
+/// never receives a token — the registry entry token is consumed server-side.
 #[derive(Deserialize)]
 pub(super) struct ImportRequest {
-  endpoint: String,
-  token: String,
+  endpoint: Option<String>,
+  token: Option<String>,
+  registry_url: Option<String>,
+  bucket_id: Option<String>,
 }
 
 pub(super) async fn import_game(
   State(state): State<GlobalState>, Extension(operator): Extension<Token>,
   Extension(trace): Extension<RequestId>, headers: HeaderMap, Json(request): Json<ImportRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  let endpoint = discover::normalize_endpoint(&request.endpoint)?;
-  if request.token.trim().is_empty() {
-    return Err(ResponseError::BadRequest(
-      "source credential is required".to_owned(),
-    ));
-  }
+  let mode = match (
+    request.endpoint.as_deref(),
+    request.token.as_deref(),
+    request.registry_url.as_deref(),
+    request.bucket_id.as_deref(),
+  ) {
+    (Some(endpoint), Some(token), None, None) => {
+      let endpoint = discover::normalize_endpoint(endpoint)?;
+      if token.trim().is_empty() {
+        return Err(ResponseError::BadRequest(
+          "source credential is required".to_owned(),
+        ));
+      }
+      ImportMode::Direct {
+        endpoint,
+        credential: token.to_owned(),
+      }
+    }
+    (None, None, Some(registry_url), Some(bucket_id)) => ImportMode::Community {
+      registry_url: community::normalize_registry_url(registry_url)?,
+      bucket_id: bucket_id.to_owned(),
+    },
+    _ => {
+      return Err(ResponseError::BadRequest(
+        "provide either endpoint + token (direct import) or registry_url + bucket_id \
+         (community import), never both"
+          .to_owned(),
+      ));
+    }
+  };
   let (tx, rx) = mpsc::channel::<Result<Bytes, std::io::Error>>(64);
   let logger =
     crate::routes::game::repo_sync::StreamLogger::new(tx, GitHookFormatter::from_headers(&headers));
@@ -46,28 +79,24 @@ pub(super) async fn import_game(
     .unwrap_or("UNKNOWN")
     .to_owned();
   let handle = tokio::spawn(async move {
-    match tokio::time::timeout(
-      Duration::from_secs(600),
+    let resolution = match tokio::time::timeout(Duration::from_secs(600), async {
+      let source = resolve_import_source(mode, &task_logger).await?;
       execute_import(
         state.clone(),
-        endpoint.clone(),
-        request.token.clone(),
+        source,
         operator.id,
         trace_id,
         task_logger.clone(),
-      ),
-    )
+      )
+      .await
+    })
     .await
     {
-      Ok(Ok(_model)) => {}
-      Ok(Err(error)) => {
-        task_logger.error(format!("Import failed: {error}")).await;
-      }
-      Err(_) => {
-        task_logger
-          .error("Import timed out; partial data was cleaned up.")
-          .await;
-      }
+      Ok(outcome) => outcome,
+      Err(_) => Err("Import timed out; partial data was cleaned up.".to_owned()),
+    };
+    if let Err(error) = resolution {
+      task_logger.error(format!("Import failed: {error}")).await;
     }
   });
   let stream = AbortOnDropStream::new(ReceiverStream::new(rx), handle.abort_handle());
@@ -76,6 +105,23 @@ pub(super) async fn import_game(
     [("Content-Type", "text/plain; charset=utf-8")],
     Body::from_stream(stream),
   ))
+}
+
+#[derive(Deserialize)]
+pub(super) struct RegistryIndexRequest {
+  url: String,
+}
+
+/// Fetches a community registry index server-side and returns a sanitized
+/// listing: entry tokens never leave the server.
+pub(super) async fn list_registry_entries(
+  State(_state): State<GlobalState>, Json(request): Json<RegistryIndexRequest>,
+) -> Result<impl IntoResponse, ResponseError> {
+  let url = community::normalize_registry_url(&request.url)?;
+  let entries = community::list_entries(&url)
+    .await
+    .map_err(ResponseError::BadRequest)?;
+  Ok(Json(entries))
 }
 
 pub(super) async fn list_distributions(

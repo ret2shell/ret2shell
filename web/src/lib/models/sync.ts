@@ -23,6 +23,9 @@ export type SyncDistribution = {
   name: string | null;
   avatar: string | null;
   description: string | null;
+  // the community registry index this distribution came from; null marks a
+  // direct import whose admission head advances with the source
+  registry_url: string | null;
   has_credential: boolean;
   enabled: boolean;
   // null means the distribution only syncs manually
@@ -61,6 +64,21 @@ export type SyncJob = {
 };
 
 /**
+ * One entry of the community registry index. The backend fetches the index
+ * server-side and strips the token: only whether one is published travels to
+ * the browser, so community imports never handle credentials.
+ */
+export type RegistryIndexEntry = {
+  bucket_id: string;
+  name: string;
+  avatar: string | null;
+  description: string | null;
+  endpoint: string;
+  head_ref: string;
+  has_token: boolean;
+};
+
+/**
  * Stable error codes surfaced by the sync service. Each known code maps to an
  * actionable explanation in the admin UI; unknown codes fall back to the raw
  * `error_message`.
@@ -76,6 +94,7 @@ export type SyncErrorCode =
   | "bucket_locked"
   | "missing_baseline"
   | "discover_failed"
+  | "registry_fetch_failed"
   | "fetch_failed"
   | "candidate_unresolved"
   | "validation_failed"
@@ -97,6 +116,7 @@ const SYNC_ERROR_CODES: ReadonlySet<string> = new Set([
   "bucket_locked",
   "missing_baseline",
   "discover_failed",
+  "registry_fetch_failed",
   "fetch_failed",
   "candidate_unresolved",
   "validation_failed",

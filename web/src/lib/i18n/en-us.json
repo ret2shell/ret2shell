@@ -301,6 +301,10 @@
     "sync": {
       "title": "Resource Sync",
       "subtitle": "Import game repositories from other ret2shell instances and keep them fast-forward synchronized. The sync identity is anchored on the source bucket id; only versions passing the admission HEAD check are synced.",
+      "tabs": {
+        "direct": "Direct import",
+        "community": "Community"
+      },
       "warnings": {
         "import": "Imported games are hidden by default and never auto-published. Enabling scheduled sync means trusting future upstream commits (including checkers, images and environments).",
         "unbind": "Unbinding only stops the synchronization; the local game and its data are kept. You can rebind later from the edit form.",
@@ -321,6 +325,7 @@
         "oid": "Baseline",
         "failures": "{count} consecutive failures",
         "enabled": "Enabled",
+        "community": "Community",
         "disabled": "Paused"
       },
       "status": {
@@ -371,6 +376,27 @@
         "submit": {
           "import": "Start import",
           "bind": "Bind game"
+        }
+      },
+      "community": {
+        "indexUrl": {
+          "label": "Community registry index URL",
+          "placeholder": "https://example.org/ret2shell-registry/index.json",
+          "hint": "The index is fetched and validated by the backend; entry tokens never reach the browser. The URL is only remembered in this browser."
+        },
+        "fetch": {
+          "title": "Fetch"
+        },
+        "search": "Search by name or bucket id",
+        "empty": "No matching entries",
+        "noToken": "No token",
+        "list": {
+          "bucketId": "Bucket ID",
+          "endpoint": "Endpoint",
+          "headRef": "Admission HEAD"
+        },
+        "actions": {
+          "import": "Import"
         }
       },
       "actions": {
@@ -426,6 +452,9 @@
         "fetchJob": {
           "title": "Failed to load the sync job"
         },
+        "fetchRegistry": {
+          "title": "Failed to fetch the community registry"
+        },
         "unknown": {
           "title": "Sync failed"
         },
@@ -468,6 +497,10 @@
         "discover_failed": {
           "title": "Source discovery failed",
           "hint": "Could not fetch the bucket id and current HEAD from the source. Check the endpoint and the token."
+        },
+        "registry_fetch_failed": {
+          "title": "Community registry read failed",
+          "hint": "The registry index could not be read or the entry was removed. Check the URL and the network; if the entry was deleted, unbind or re-import the distribution."
         },
         "fetch_failed": {
           "title": "Failed to fetch the source repository",

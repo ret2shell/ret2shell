@@ -23,6 +23,9 @@ pub(crate) struct PublicDistribution {
   pub name: Option<String>,
   pub avatar: Option<String>,
   pub description: Option<String>,
+  /// The community registry index this distribution came from; `None` marks
+  /// a direct import.
+  pub registry_url: Option<String>,
   pub has_credential: bool,
   pub enabled: bool,
   pub interval_seconds: Option<i64>,
@@ -49,6 +52,7 @@ impl From<distribution::Model> for PublicDistribution {
       name: distribution.name,
       avatar: distribution.avatar,
       description: distribution.description,
+      registry_url: distribution.registry_url,
       has_credential: !distribution.credential.is_empty(),
       enabled: distribution.enabled,
       interval_seconds: distribution.interval_seconds,

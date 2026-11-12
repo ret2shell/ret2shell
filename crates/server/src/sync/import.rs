@@ -97,46 +97,181 @@ fn local_game_model(
   Ok(model)
 }
 
+/// A fully resolved import target: both the direct and the community mode
+/// converge here with a pinned admission head and the source credential.
+pub(crate) struct ImportSource {
+  pub(crate) endpoint: Url,
+  pub(crate) credential: String,
+  pub(crate) bucket_id: String,
+  /// The admission commit every clone is verified against.
+  pub(crate) head_ref: String,
+  /// The community registry index this import came from, if any.
+  pub(crate) registry_url: Option<Url>,
+  pub(crate) repository_url: Url,
+  /// Cached source metadata for the distribution row.
+  pub(crate) name: String,
+  pub(crate) avatar: Option<String>,
+  pub(crate) description: Option<String>,
+  /// Registry advertised by the source, for the image sync step.
+  pub(crate) registry: Option<crate::sync::discover::SourceRegistryDescriptor>,
+}
+
+/// The two import modes accepted by the platform API.
+pub(crate) enum ImportMode {
+  /// Direct import: the admin trusts a chosen source instance; discovery
+  /// pins its current HEAD as the admission head.
+  Direct { endpoint: Url, credential: String },
+  /// Community import: the registry entry is the trust anchor — its bucket
+  /// id and head_ref are the admission, never the source's current HEAD.
+  Community {
+    registry_url: Url,
+    bucket_id: String,
+  },
+}
+
+/// Resolves an import mode into a pinned source. Community entries are
+/// cross-checked against the live source: the bucket id must match and the
+/// source HEAD must sit exactly on the registry-approved version, so an
+/// import can never follow a version the registry has not published.
+pub(crate) async fn resolve_import_source(
+  mode: ImportMode, logger: &StreamLogger,
+) -> Result<ImportSource, String> {
+  match mode {
+    ImportMode::Direct {
+      endpoint,
+      credential,
+    } => {
+      logger
+        .info(format!(
+          "Discovering source instance at {}...",
+          endpoint.host_str().unwrap_or("source instance")
+        ))
+        .await;
+      let discovered = crate::sync::discover::discover(&endpoint, &credential).await?;
+      let descriptor = discovered.descriptor.clone();
+      logger
+        .info(format!(
+          "Discovered game \"{}\" with bucket id {} at HEAD {}.",
+          descriptor.name, descriptor.bucket_id, descriptor.head
+        ))
+        .await;
+      Ok(ImportSource {
+        endpoint,
+        credential,
+        bucket_id: descriptor.bucket_id,
+        head_ref: descriptor.head,
+        registry_url: None,
+        repository_url: discovered.repository_url,
+        name: descriptor.name,
+        avatar: descriptor.avatar,
+        description: Some(descriptor.description),
+        registry: descriptor.registry,
+      })
+    }
+    ImportMode::Community {
+      registry_url,
+      bucket_id,
+    } => {
+      logger
+        .info(format!(
+          "Reading community registry index at {}...",
+          registry_url.host_str().unwrap_or("registry")
+        ))
+        .await;
+      let entry = crate::sync::community::get_entry(&registry_url, &bucket_id)
+        .await
+        .map_err(|message| format!("failed to read the registry entry: {message}"))?;
+      if entry.token.is_empty() {
+        return Err(
+          "the registry entry carries no token; ask the source to publish one".to_owned(),
+        );
+      }
+      let endpoint = crate::sync::discover::normalize_endpoint(&entry.endpoint)
+        .map_err(|error| format!("the registry entry endpoint is invalid: {error}"))?;
+      let credential = entry.token.clone();
+      let discovered = crate::sync::discover::discover(&endpoint, &credential).await?;
+      if discovered.descriptor.bucket_id != bucket_id {
+        return Err(format!(
+          "the source reports bucket id {} but the registry entry is keyed {bucket_id}",
+          discovered.descriptor.bucket_id
+        ));
+      }
+      if !discovered
+        .descriptor
+        .head
+        .eq_ignore_ascii_case(&entry.head_ref)
+      {
+        return Err(format!(
+          "the source HEAD {} has moved past the registry-approved head_ref {}; \
+           wait for the registry to publish the new version",
+          discovered.descriptor.head, entry.head_ref
+        ));
+      }
+      logger
+        .info(format!(
+          "Community entry \"{}\" approved at HEAD {}.",
+          entry.name, entry.head_ref
+        ))
+        .await;
+      Ok(ImportSource {
+        endpoint,
+        credential,
+        bucket_id,
+        head_ref: entry.head_ref,
+        registry_url: Some(registry_url),
+        repository_url: discovered.repository_url,
+        name: entry.name,
+        avatar: entry.avatar,
+        description: entry.description,
+        registry: discovered.descriptor.registry,
+      })
+    }
+  }
+}
+
 pub(crate) async fn execute_import(
-  state: GlobalState, endpoint: Url, credential: String, operator_id: i64, trace_id: String,
+  state: GlobalState, source: ImportSource, operator_id: i64, trace_id: String,
   logger: StreamLogger,
 ) -> Result<game::Model, String> {
-  logger.header("Ret2Shell instance import").await;
+  let ImportSource {
+    endpoint,
+    credential,
+    bucket_id,
+    head_ref,
+    registry_url,
+    repository_url,
+    name,
+    avatar,
+    description,
+    registry,
+  } = source;
+  let community = registry_url.is_some();
   logger
-    .info(format!(
-      "Discovering source instance at {}...",
-      endpoint.host_str().unwrap_or("source instance")
-    ))
+    .header(if community {
+      "Ret2Shell community import"
+    } else {
+      "Ret2Shell instance import"
+    })
     .await;
-  let discovered = crate::sync::discover::discover(&endpoint, &credential).await?;
-  let descriptor = &discovered.descriptor;
-  logger
-    .info(format!(
-      "Discovered game \"{}\" with bucket id {} at HEAD {}.",
-      descriptor.name, descriptor.bucket_id, descriptor.head
-    ))
-    .await;
-  if game::get_by_bucket(&state.db.conn, &descriptor.bucket_id)
+  if game::get_by_bucket(&state.db.conn, &bucket_id)
     .await
     .map_err(|error| format!("failed to check for existing games: {error}"))?
     .is_some()
   {
     return Err(format!(
-      "a game with bucket id {} already exists on this instance",
-      descriptor.bucket_id
+      "a game with bucket id {bucket_id} already exists on this instance"
     ));
   }
-  if r2s_database::distribution::get_by_bucket(&state.db.conn, &descriptor.bucket_id)
+  if r2s_database::distribution::get_by_bucket(&state.db.conn, &bucket_id)
     .await
     .map_err(|error| format!("failed to check for existing distributions: {error}"))?
     .is_some()
   {
     return Err(format!(
-      "a distribution for bucket id {} already exists on this instance",
-      descriptor.bucket_id
+      "a distribution for bucket id {bucket_id} already exists on this instance"
     ));
   }
-  let repository_url = discovered.repository_url.clone();
+  let repository_url = repository_url.clone();
   logger
     .info(format!(
       "Cloning source repository from {}...",
@@ -148,8 +283,8 @@ pub(crate) async fn execute_import(
     .import_game(
       repository_url.as_str(),
       Some(&credential),
-      &descriptor.bucket_id,
-      &descriptor.head,
+      &bucket_id,
+      &head_ref,
     )
     .await
     .map_err(|error| format!("failed to clone source repository: {error}"))?;
@@ -207,10 +342,7 @@ pub(crate) async fn execute_import(
     .await?;
     // env images on the source registry are copied and digest-verified; the
     // admission list starts empty, so every reference met here is approved
-    let source_registry = descriptor
-      .registry
-      .as_ref()
-      .map(|registry| registry.registry_config());
+    let source_registry = registry.as_ref().map(|registry| registry.registry_config());
     let mut admission = std::collections::BTreeMap::new();
     if let Err(error) = crate::sync::images::synchronize_images(
       &state,
@@ -235,21 +367,24 @@ pub(crate) async fn execute_import(
       });
     }
     // the import pinned its admission head and verified the clone against it,
-    // so the distribution starts with that head as the approved baseline
+    // so the distribution starts with that head as the approved baseline;
+    // community distributions remember their registry index so incremental
+    // jobs re-read the entry for every newly approved version
     let distribution = r2s_database::distribution::create(
       &txn,
       r2s_database::distribution::Model {
         id: 0,
-        bucket_id: descriptor.bucket_id.clone(),
+        bucket_id: bucket_id.clone(),
         endpoint: endpoint.to_string(),
         credential: credential.clone(),
-        head_ref: descriptor.head.clone(),
-        name: Some(descriptor.name.clone()),
-        avatar: descriptor.avatar.clone(),
-        description: Some(descriptor.description.clone()),
+        head_ref: head_ref.clone(),
+        name: Some(name.clone()),
+        avatar: avatar.clone(),
+        description: description.clone(),
+        registry_url: registry_url.as_ref().map(|url| url.to_string()),
         enabled: false,
         interval_seconds: None,
-        last_synced_oid: Some(descriptor.head.clone()),
+        last_synced_oid: Some(head_ref.clone()),
         next_sync_at: None,
         last_attempt_at: None,
         last_success_at: None,

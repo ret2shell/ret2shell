@@ -1,4 +1,10 @@
-import type { SyncDistribution, SyncDistributionLastStatus, SyncJob, SyncJobStatus } from "@models/sync";
+import type {
+  RegistryIndexEntry,
+  SyncDistribution,
+  SyncDistributionLastStatus,
+  SyncJob,
+  SyncJobStatus,
+} from "@models/sync";
 import { isRunningStatus } from "@models/sync";
 import { t } from "@storage/theme";
 import { useMutation, useQuery } from "@tanstack/solid-query";
@@ -191,19 +197,17 @@ export function useSyncJob({
 }
 
 /**
- * One-shot import. The endpoint answers with a streamed plain-text sync log,
- * so the body is consumed incrementally: every chunk is forwarded to
- * `onLog` for live display and the accumulated text is returned once the
- * stream finishes. The request body carries the credential; it never appears
- * in the URL.
+ * One-shot import against the streamed log endpoint. Both import modes share
+ * this reader: every chunk is forwarded to `onLog` for live display and the
+ * accumulated text is returned once the stream finishes.
  */
-export async function importRepository(
-  req: { endpoint: string; token: string },
+async function streamImport(
+  request: Record<string, string>,
   onLog?: (chunk: string) => void,
   signal?: AbortSignal
 ): Promise<{ log: string; gameId?: number }> {
   const response = await api.post(`${api_root}/platform/sync/import`, {
-    json: req,
+    json: request,
     signal,
   });
   const reader = response.body?.getReader();
@@ -221,6 +225,52 @@ export async function importRepository(
     }
   }
   return { log, gameId: parseImportedGameId(log) };
+}
+
+/**
+ * Direct import: the admin-chosen source endpoint plus its credential. The
+ * credential travels in the request body only; it never appears in the URL.
+ */
+export async function importRepository(
+  req: { endpoint: string; token: string },
+  onLog?: (chunk: string) => void,
+  signal?: AbortSignal
+): Promise<{ log: string; gameId?: number }> {
+  return await streamImport({ endpoint: req.endpoint, token: req.token }, onLog, signal);
+}
+
+/**
+ * Community import: only the registry index URL and the entry's bucket id.
+ * The backend re-reads the entry server-side for its credential and the
+ * admission head, so no token ever reaches the browser.
+ */
+export async function importFromRegistry(
+  req: { registry_url: string; bucket_id: string },
+  onLog?: (chunk: string) => void,
+  signal?: AbortSignal
+): Promise<{ log: string; gameId?: number }> {
+  return await streamImport({ registry_url: req.registry_url, bucket_id: req.bucket_id }, onLog, signal);
+}
+
+/**
+ * Fetches the sanitized listing of a community registry index. The backend
+ * proxies the index and strips entry tokens.
+ */
+export async function fetchRegistryIndex(url: string) {
+  return await api.post(`${api_root}/platform/sync/registry/index`, { json: { url } }).json<RegistryIndexEntry[]>();
+}
+
+export function useRegistryIndexMutation(
+  props: { onSuccess?: (entries: RegistryIndexEntry[]) => void; onError?: (err: Error) => void } = {}
+) {
+  return useMutation(() => ({
+    mutationFn: (url: string) => fetchRegistryIndex(url),
+    onSuccess: (entries: RegistryIndexEntry[]) => props.onSuccess?.(entries),
+    onError: (err: Error) => {
+      handleHttpError(err, t("platform.sync.errors.fetchRegistry.title"));
+      props.onError?.(err);
+    },
+  }));
 }
 
 /**

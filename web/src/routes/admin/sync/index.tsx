@@ -16,6 +16,7 @@ import LoadingTips from "@widgets/loading-tips";
 import Popover from "@widgets/popover";
 import Tag from "@widgets/tag";
 import { createSignal, For, Show } from "solid-js";
+import CommunityPanel from "./_blocks/community-panel";
 import { describeSyncError, formatSyncTime, syncStatusLevel, syncStatusText } from "./_blocks/display";
 import DistributionForm from "./_blocks/distribution-form";
 import JobsDialog from "./_blocks/jobs-dialog";
@@ -34,6 +35,7 @@ export default function () {
   const triggerMutation = useTriggerSyncJobMutation();
 
   const [creationFormOpen, setCreationFormOpen] = createSignal(false);
+  const [creationMode, setCreationMode] = createSignal<"direct" | "community">("direct");
   const [jobsDistribution, setJobsDistribution] = createSignal<SyncDistribution | null>(null);
   const [jobsSelected, setJobsSelected] = createSignal<number | null>(null);
   const [jobsOpen, setJobsOpen] = createSignal(false);
@@ -96,12 +98,44 @@ export default function () {
               open={creationFormOpen()}
               onOpenChange={(detail) => setCreationFormOpen(detail.open)}
             >
-              <DistributionForm
-                onDone={() => {
-                  setCreationFormOpen(false);
-                  distributions.refetch();
-                }}
-              />
+              <div class="flex flex-col space-y-2">
+                <div class="flex items-center space-x-1">
+                  <Button
+                    size="sm"
+                    type="button"
+                    level={creationMode() === "direct" ? "primary" : null}
+                    onClick={() => setCreationMode("direct")}
+                  >
+                    <span>{t("platform.sync.tabs.direct")}</span>
+                  </Button>
+                  <Button
+                    size="sm"
+                    type="button"
+                    level={creationMode() === "community" ? "primary" : null}
+                    onClick={() => setCreationMode("community")}
+                  >
+                    <span>{t("platform.sync.tabs.community")}</span>
+                  </Button>
+                </div>
+                <Show
+                  when={creationMode() === "direct"}
+                  fallback={
+                    <CommunityPanel
+                      onDone={() => {
+                        setCreationFormOpen(false);
+                        distributions.refetch();
+                      }}
+                    />
+                  }
+                >
+                  <DistributionForm
+                    onDone={() => {
+                      setCreationFormOpen(false);
+                      distributions.refetch();
+                    }}
+                  />
+                </Show>
+              </div>
             </Dialog>
           </h3>
           <p class="text-sm opacity-60 py-2">{t("platform.sync.subtitle")}</p>
@@ -137,6 +171,9 @@ export default function () {
                           <span class="flex-1 text-start truncate font-mono text-sm" title={distribution.endpoint}>
                             {distribution.endpoint}
                           </span>
+                          <Show when={distribution.registry_url}>
+                            <Tag level="info">{t("platform.sync.list.community")}</Tag>
+                          </Show>
                           <Tag level={distribution.enabled ? "success" : "layer-content"}>
                             {distribution.enabled ? t("platform.sync.list.enabled") : t("platform.sync.list.disabled")}
                           </Tag>
