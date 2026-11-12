@@ -210,6 +210,9 @@ pub(crate) async fn unbind_distribution(
   let mut unmanaged = managed.clone();
   unmanaged.managed_distribution = None;
   game::update(&state.db.conn, unmanaged).await?;
+  // the game row is served from the cache; without invalidation the managed
+  // guard would keep rejecting edits until the entry expires
+  invalidate_game_cache(state, managed.id).await?;
   let mut disabled = model.clone();
   disabled.enabled = false;
   disabled.next_sync_at = None;
@@ -220,6 +223,15 @@ pub(crate) async fn unbind_distribution(
     "unbound a distribution, the game content is locally editable again"
   );
   Ok(PublicDistribution::from(disabled))
+}
+
+/// Drops the cached game row so the next request sees the new management
+/// state. Cache failures are logged, not fatal: the database is authoritative.
+async fn invalidate_game_cache(state: &GlobalState, game_id: i64) -> Result<(), ResponseError> {
+  if let Err(error) = state.cache.at("game").del(game_id).await {
+    tracing::warn!(game_id, error=?error, "failed to invalidate the game cache");
+  }
+  Ok(())
 }
 
 /// Re-binds a game to an existing distribution. The bucket id must match, the
@@ -271,6 +283,7 @@ pub(crate) async fn bind_distribution(
   }
   managed.managed_distribution = Some(id);
   game::update(&state.db.conn, managed).await?;
+  invalidate_game_cache(state, local_game_id).await?;
   tracing::info!(
     distribution_id = id,
     game_id = local_game_id,
