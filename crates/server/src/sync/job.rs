@@ -258,12 +258,13 @@ fn execution_slot() -> &'static tokio::sync::Mutex<()> {
 }
 
 /// The sync body of a job run. Direct distributions pin the source's current
-/// HEAD; community distributions re-read their registry entry first and pin
-/// the entry's published head_ref, so a source version the registry has not
-/// approved is rejected by the admission check. The pinned head travels to
-/// the fetch, so a mirror swap between pinning and fetch is also rejected,
-/// and is returned even when the sync fails, keeping the audit trail
-/// truthful.
+/// HEAD; community distributions re-read their registry entry first, race the
+/// entry's primary endpoint against its mirrors for the fastest responder
+/// and pin the entry's published head_ref — a source version the registry
+/// has not approved, or a mirror serving different content, is rejected by
+/// the admission checks. The pinned head travels to the fetch, so a mirror
+/// swap between pinning and fetch is also rejected, and is returned even
+/// when the sync fails, keeping the audit trail truthful.
 async fn run_sync_body(
   state: &GlobalState, model: &distribution::Model, job: &sync_job::Model, logger: &StreamLogger,
 ) -> (
@@ -271,13 +272,14 @@ async fn run_sync_body(
   Result<crate::sync::update::UpdateReport, crate::sync::update::UpdateError>,
 ) {
   let mut model = model.clone();
+  let mut raced: Option<crate::sync::discover::DiscoveredSource> = None;
   if let Some(registry_url) = model
     .registry_url
     .as_deref()
     .map(crate::sync::community::normalize_registry_url)
   {
     // the registry entry is authoritative for community distributions: its
-    // endpoint, token and published head_ref define this run
+    // candidates, token and published head_ref define this run
     let registry_url = match registry_url {
       Ok(url) => url,
       Err(error) => {
@@ -308,38 +310,87 @@ async fn run_sync_body(
         )),
       );
     }
-    if let Err(error) = crate::sync::discover::normalize_endpoint(&entry.endpoint) {
-      return (
-        None,
-        Err(crate::sync::update::UpdateError::RegistryFetchFailed(
-          format!("the registry entry endpoint is invalid: {error}"),
-        )),
-      );
+    let candidates = entry.candidates();
+    logger
+      .info(format!(
+        "Racing {} download candidate(s) for the fastest source...",
+        candidates.len()
+      ))
+      .await;
+    let (discovered, winner, elapsed_ms) =
+      match crate::sync::community::race_discover(&candidates, &entry.token).await {
+        Ok(winner) => winner,
+        Err(failures) => {
+          return (
+            None,
+            Err(crate::sync::update::UpdateError::RegistryFetchFailed(
+              format!("every download candidate failed: {}", failures.join("; ")),
+            )),
+          );
+        }
+      };
+    logger
+      .info(format!(
+        "Candidate {winner} won the race in {elapsed_ms} ms."
+      ))
+      .await;
+    // a mismatch is a supply-chain violation: the run aborts instead of
+    // falling through to the remaining candidates
+    if let Err(mismatch) = crate::sync::community::verify_entry_match(
+      &discovered.descriptor.bucket_id,
+      &discovered.descriptor.head,
+      &model.bucket_id,
+      &entry.head_ref,
+    ) {
+      let error = match mismatch {
+        crate::sync::community::EntryMismatch::Head { found, expected } => {
+          crate::sync::update::UpdateError::HeadRefMismatch {
+            actual: found,
+            expected,
+          }
+        }
+        mismatch @ crate::sync::community::EntryMismatch::Bucket { .. } => {
+          crate::sync::update::UpdateError::RegistryFetchFailed(mismatch.to_string())
+        }
+      };
+      return (None, Err(error));
     }
-    model.endpoint = entry.endpoint;
+    logger
+      .info(format!(
+        "Source sharing policy: sync={} (0 open, 1 game-admin, 2 closed).",
+        discovered.descriptor.access_policy_sync
+      ))
+      .await;
+    model.endpoint = winner;
     model.credential = entry.token;
     model.head_ref = entry.head_ref.clone();
+    raced = Some(discovered);
   }
-  let endpoint = match url::Url::parse(&model.endpoint) {
-    Ok(endpoint) => endpoint,
-    Err(error) => {
-      return (
-        None,
-        Err(crate::sync::update::UpdateError::Internal(format!(
-          "the stored distribution endpoint is no longer valid: {error}"
-        ))),
-      );
-    }
-  };
-  let discovered = match crate::sync::discover::discover(&endpoint, &model.credential).await {
-    Ok(discovered) => discovered,
-    Err(message) => {
-      return (
-        None,
-        Err(crate::sync::update::UpdateError::DiscoverFailed(
-          crate::sync::job::redact_credential(&message, &model.credential),
-        )),
-      );
+  let discovered = match raced {
+    Some(discovered) => discovered,
+    None => {
+      let endpoint = match url::Url::parse(&model.endpoint) {
+        Ok(endpoint) => endpoint,
+        Err(error) => {
+          return (
+            None,
+            Err(crate::sync::update::UpdateError::Internal(format!(
+              "the stored distribution endpoint is no longer valid: {error}"
+            ))),
+          );
+        }
+      };
+      match crate::sync::discover::discover(&endpoint, &model.credential).await {
+        Ok(discovered) => discovered,
+        Err(message) => {
+          return (
+            None,
+            Err(crate::sync::update::UpdateError::DiscoverFailed(
+              crate::sync::job::redact_credential(&message, &model.credential),
+            )),
+          );
+        }
+      }
     }
   };
   let pinned_head = if model.registry_url.is_some() {

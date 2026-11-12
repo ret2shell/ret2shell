@@ -74,6 +74,9 @@ export type RegistryIndexEntry = {
   avatar: string | null;
   description: string | null;
   endpoint: string;
+  // number of alternate download addresses published for this entry; the
+  // importer races the primary endpoint against the mirrors
+  mirror_count: number;
   head_ref: string;
   has_token: boolean;
 };

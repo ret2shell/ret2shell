@@ -393,7 +393,8 @@
         "list": {
           "bucketId": "Bucket ID",
           "endpoint": "Endpoint",
-          "headRef": "Admission HEAD"
+          "headRef": "Admission HEAD",
+          "mirrors": "Mirrors"
         },
         "actions": {
           "import": "Import"

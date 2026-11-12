@@ -393,7 +393,8 @@
         "list": {
           "bucketId": "Bucket ID",
           "endpoint": "源地址",
-          "headRef": "准入 HEAD"
+          "headRef": "准入 HEAD",
+          "mirrors": "鏡像"
         },
         "actions": {
           "import": "導入"

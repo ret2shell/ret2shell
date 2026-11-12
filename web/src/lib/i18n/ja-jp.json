@@ -393,7 +393,8 @@
         "list": {
           "bucketId": "Bucket ID",
           "endpoint": "ソース",
-          "headRef": "承認 HEAD"
+          "headRef": "承認 HEAD",
+          "mirrors": "ミラー"
         },
         "actions": {
           "import": "インポート"

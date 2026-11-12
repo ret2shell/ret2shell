@@ -164,6 +164,8 @@ export default function CommunityPanel(props: { onDone?: () => void }) {
                       <span class="font-mono" title={entry.head_ref}>
                         {shortOid(entry.head_ref)}
                       </span>
+                      <span class="opacity-70">{t("platform.sync.community.list.mirrors")}</span>
+                      <span title={t("platform.sync.community.list.mirrors")}>×{entry.mirror_count}</span>
                     </div>
                   </Card>
                 </Card>

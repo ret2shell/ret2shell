@@ -110,9 +110,8 @@ pub(crate) struct SourceDescriptor {
   pub(crate) name: String,
   pub(crate) avatar: Option<String>,
   pub(crate) description: String,
-  // part of the wire contract; consumed once the community registry mode
-  // (R4) starts filtering entries by the source sharing policy
-  #[allow(dead_code)]
+  /// Sharing policy of the source game; the importer logs it for audit —
+  /// a closed source (sync=2) fails discovery itself.
   pub(crate) access_policy_sync: i32,
   pub(crate) repository_path: String,
   #[serde(default)]
