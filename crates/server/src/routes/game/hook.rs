@@ -198,6 +198,13 @@ pub async fn run_post_receive(
   Ok(())
 }
 
+/// The server emits the sentinel through `GitHookFormatter::success`, which
+/// prefixes it with a level marker (`[ OK ] `, colored or plain), so the
+/// completion check must match the line tail instead of the whole line.
+fn is_completion_line(line: &str) -> bool {
+  strip_git_hook_ansi(line).ends_with(SYNC_COMPLETION_SENTINEL)
+}
+
 /// Streams the post-receive response to stdout and reports whether the
 /// completion sentinel was seen. Chunks may split or coalesce lines, so the
 /// sentinel check runs on reassembled lines rather than raw chunks.
@@ -210,7 +217,7 @@ async fn forward_response(body: Body) -> anyhow::Result<bool> {
     pending.push_str(&String::from_utf8_lossy(&chunk));
     while let Some(pos) = pending.find('\n') {
       let line = pending[..pos].trim_end();
-      if strip_git_hook_ansi(line) == SYNC_COMPLETION_SENTINEL {
+      if is_completion_line(line) {
         completed = true;
       }
       stdout.write_all(&pending.as_bytes()[..=pos]).await?;
@@ -221,7 +228,7 @@ async fn forward_response(body: Body) -> anyhow::Result<bool> {
   if let Some(last) = pending.strip_suffix('\n').or(Some(pending.as_str())) {
     let line = last.trim_end();
     if !line.is_empty() {
-      if strip_git_hook_ansi(line) == SYNC_COMPLETION_SENTINEL {
+      if is_completion_line(line) {
         completed = true;
       }
       stdout.write_all(pending.as_bytes()).await?;
@@ -353,8 +360,21 @@ pub(crate) fn parse_post_receive_updates(payload: &[u8]) -> anyhow::Result<Vec<U
   Ok(updates)
 }
 
+/// git receive-pack exports `GIT_DIR` (usually `.`) into hook processes;
+/// every git command here targets an absolute repository path, so those
+/// inherited variables must go or git resolves `.` relative to them.
+fn clean_git_environment(command: &mut Command) {
+  command.env_remove("GIT_DIR");
+  command.env_remove("GIT_WORK_TREE");
+  command.env_remove("GIT_INDEX_FILE");
+  command.env_remove("GIT_OBJECT_DIRECTORY");
+  command.env_remove("GIT_QUARANTINE_PATH");
+}
+
 async fn reset_hard(repo_path: &Path, rev: &str) -> anyhow::Result<()> {
-  let output = Command::new("git")
+  let mut command = Command::new("git");
+  clean_git_environment(&mut command);
+  let output = command
     .current_dir(repo_path)
     .arg("reset")
     .arg("--hard")
@@ -375,7 +395,9 @@ async fn reset_hard(repo_path: &Path, rev: &str) -> anyhow::Result<()> {
 async fn update_ref(
   repo_path: &Path, ref_name: &str, new_oid: &str, old_oid: &str,
 ) -> anyhow::Result<()> {
-  let output = Command::new("git")
+  let mut command = Command::new("git");
+  clean_git_environment(&mut command);
+  let output = command
     .current_dir(repo_path)
     .arg("update-ref")
     .arg(ref_name)
@@ -395,7 +417,9 @@ async fn update_ref(
 }
 
 async fn delete_ref(repo_path: &Path, ref_name: &str, old_oid: &str) -> anyhow::Result<()> {
-  let output = Command::new("git")
+  let mut command = Command::new("git");
+  clean_git_environment(&mut command);
+  let output = command
     .current_dir(repo_path)
     .arg("update-ref")
     .arg("-d")
@@ -419,7 +443,8 @@ pub async fn cleanup_hook_session(cache: &Cache, session_id: &str) {
 #[cfg(test)]
 mod tests {
   use super::{
-    GitHookFormatter, GitHookMessageLevel, format_git_hook_line_with_color, strip_git_hook_ansi,
+    GitHookFormatter, GitHookMessageLevel, SYNC_COMPLETION_SENTINEL,
+    format_git_hook_line_with_color, is_completion_line, strip_git_hook_ansi,
   };
 
   #[test]
@@ -470,5 +495,23 @@ mod tests {
     );
 
     assert_eq!(strip_git_hook_ansi(&line), "main abc1234 -> def5678");
+  }
+
+  #[test]
+  fn completion_line_matches_through_level_prefixes_and_colors() {
+    // the server always emits the sentinel through the success formatter,
+    // which adds a `[ OK ] ` prefix — plain or colored
+    let plain =
+      GitHookFormatter::new(false).line(GitHookMessageLevel::Success, SYNC_COMPLETION_SENTINEL);
+    assert_eq!(plain, "[ OK ] ret2shell git sync completed successfully");
+    assert!(is_completion_line(&plain));
+    let colored =
+      GitHookFormatter::new(true).line(GitHookMessageLevel::Success, SYNC_COMPLETION_SENTINEL);
+    assert!(colored.starts_with("\u{1b}["));
+    assert!(is_completion_line(&colored));
+    // a bare sentinel still matches, unrelated lines do not
+    assert!(is_completion_line(SYNC_COMPLETION_SENTINEL));
+    assert!(!is_completion_line("[ OK ] repository rollback completed."));
+    assert!(!is_completion_line(""));
   }
 }

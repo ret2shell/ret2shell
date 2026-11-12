@@ -89,6 +89,34 @@ impl Bucket {
     Ok(count)
   }
 
+  /// Removes `.lock` files left behind by a killed process. `RepoLock` only
+  /// deletes its file from `Drop`, so a SIGKILL or a host crash leaves the
+  /// lock behind and every write to that bucket would fail with `LockError`
+  /// until someone removes it by hand. `Bucket::open` runs once at startup,
+  /// when no in-process writer can exist, so clearing locks there is safe.
+  fn clear_stale_locks(&self) -> Result<usize, BucketError> {
+    let mut cleared = 0;
+    for entry in std::fs::read_dir(&self.path).map_err(BucketError::IoError)? {
+      let entry = entry.map_err(BucketError::IoError)?;
+      if !entry.file_type().map_err(BucketError::IoError)?.is_dir() {
+        continue;
+      }
+      let lock_path = entry.path().join(".lock");
+      if lock_path.exists() {
+        match std::fs::remove_file(&lock_path) {
+          Ok(()) => {
+            cleared += 1;
+            warn!(path=?lock_path, "removed a stale bucket lock left by a previous run");
+          }
+          Err(error) => {
+            warn!(path=?lock_path, error=?error, "failed to remove a stale bucket lock");
+          }
+        }
+      }
+    }
+    Ok(cleared)
+  }
+
   pub async fn open(path: PathBuf) -> Self {
     let result = Self { path };
     match result.check_git_safe_directories().await {
@@ -103,6 +131,9 @@ impl Bucket {
       Err(e) => {
         error!(error=?e, "failed to check game buckets, games may not be accessible");
       }
+    }
+    if let Err(error) = result.clear_stale_locks() {
+      error!(error=?error, "failed to clear stale bucket locks");
     }
     result
   }
@@ -474,6 +505,35 @@ mod import_tests {
         "unexpected error for ({bucket_id:?}, {head_ref:?}): {error:?}"
       );
     }
+
+    fs::remove_dir_all(source).unwrap();
+    fs::remove_dir_all(root).unwrap();
+  }
+
+  #[tokio::test]
+  async fn opening_the_bucket_root_clears_locks_left_by_a_crashed_process() {
+    let source = temp_path("source");
+    let root = temp_path("root");
+    build_source_repo(&source);
+    fs::create_dir_all(&root).unwrap();
+    let head = git_output(&source, &["rev-parse", "HEAD"]);
+
+    let bucket = Bucket::open(root.clone()).await;
+    let imported = bucket
+      .import_game(&source.to_string_lossy(), None, "crash_lock_bucket", &head)
+      .await
+      .unwrap();
+    let bucket_path = imported.git.path().to_path_buf();
+    drop(imported);
+    // simulate a SIGKILL: the lock file survives because Drop never ran
+    fs::write(bucket_path.join(".lock"), b"").unwrap();
+    assert!(bucket_path.join(".lock").exists());
+
+    let _reopened = Bucket::open(root.clone()).await;
+    assert!(
+      !bucket_path.join(".lock").exists(),
+      "a stale lock must be cleared when the bucket root is opened"
+    );
 
     fs::remove_dir_all(source).unwrap();
     fs::remove_dir_all(root).unwrap();
