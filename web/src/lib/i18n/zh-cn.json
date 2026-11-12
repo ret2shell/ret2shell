@@ -300,14 +300,18 @@
     },
     "sync": {
       "title": "资源同步",
-      "subtitle": "从其他 ret2shell 实例导入题库并保持快进同步,导入的比赛默认隐藏。",
+      "subtitle": "从其他 ret2shell 实例导入题库并保持快进同步:同步身份锚定源实例真实 bucket id,只同步通过准入 HEAD 校验的版本。",
       "warnings": {
         "import": "导入的比赛默认隐藏,不会自动发布;启用定时同步意味着信任上游未来的提交(包括 checker、镜像与环境变化)。",
-        "unbind": "解除绑定只会停止同步,不会删除本地比赛与题库数据。"
+        "unbind": "解除托管只会停止同步,不会删除本地比赛与题库数据;解除后可在编辑表单中重新绑定。",
+        "delete": "删除分发配置会移除同步历史与任务记录,本地比赛保留并转为可编辑状态。"
       },
       "list": {
-        "empty": "还没有同步源",
-        "game": "本地比赛",
+        "empty": "还没有同步分发",
+        "bucketId": "Bucket ID",
+        "headRef": "准入 HEAD",
+        "game": "托管比赛",
+        "unbound": "未绑定",
         "interval": "同步间隔",
         "intervalSeconds": "每 {seconds} 秒",
         "manual": "仅手动",
@@ -332,12 +336,14 @@
         "retry": "重试"
       },
       "form": {
-        "createTitle": "导入 / 注册同步源",
-        "repositoryUrl": {
-          "label": "源仓库地址",
-          "placeholder": "https://ctf.example.org/api/game/1/repo/example.git",
-          "required": "源仓库地址不能为空",
-          "invalid": "源仓库地址必须是合法 URL"
+        "createTitle": "从源实例导入",
+        "editTitle": "编辑分发配置",
+        "endpoint": {
+          "label": "源实例地址",
+          "placeholder": "https://ctf.example.org/api",
+          "required": "源实例地址不能为空",
+          "invalid": "源实例地址必须是合法 URL",
+          "hint": "填写源实例的基础地址(含 API 前缀,如 /api);bucket id 与准入 HEAD 会自动发现并严格校验。"
         },
         "token": {
           "label": "源实例 token",
@@ -348,9 +354,9 @@
         },
         "game": {
           "label": "绑定本地比赛 ID",
-          "placeholder": "留空则先执行一次性导入",
+          "placeholder": "例如:3",
           "invalid": "本地比赛 ID 必须是正整数",
-          "hint": "填写已存在的本地比赛 ID 可直接绑定;留空会先从源实例完整导入,再自动注册同步源。"
+          "hint": "仅当分发未托管任何比赛时可绑定;本地比赛 bucket 必须与分发一致,且本地 HEAD 必须等于同步基线。"
         },
         "interval": {
           "label": "同步间隔(秒)",
@@ -363,13 +369,14 @@
           "title": "导入日志"
         },
         "submit": {
-          "import": "开始导入并注册",
-          "bind": "注册同步源"
+          "import": "开始导入",
+          "bind": "绑定比赛"
         }
       },
       "actions": {
         "sync": {
           "title": "手动同步",
+          "noGame": "分发未绑定比赛,请先在编辑表单绑定",
           "status": {
             "success": "已创建同步任务",
             "fail": "创建同步任务失败"
@@ -378,17 +385,13 @@
         "jobs": "任务与日志",
         "pause": "暂停",
         "resume": "启用",
-        "unbind": { "title": "解除绑定", "status": { "success": "已解除同步源绑定", "fail": "解除绑定失败" } },
-        "create": {
-          "status": {
-            "success": "同步源已注册",
-            "fail": "注册同步源失败"
-          }
-        },
+        "unbind": { "title": "解除托管", "status": { "success": "已解除托管,本地内容可编辑", "fail": "解除托管失败" } },
+        "delete": { "title": "删除分发", "status": { "success": "分发已删除", "fail": "删除分发失败" } },
+        "bind": { "status": { "success": "比赛已绑定到分发", "fail": "绑定比赛失败" } },
         "import": {
           "status": {
             "fail": "导入失败",
-            "noGameId": "导入已结束,但未能从日志中解析出本地比赛 ID,请手动绑定。"
+            "noGameId": "导入已结束,但未能从日志中解析出本地比赛 ID。"
           }
         }
       },
@@ -399,6 +402,7 @@
         "retry": "重试同步",
         "trigger": "触发方式",
         "oids": "OID 变化",
+        "expectedHead": "准入 HEAD",
         "created": "创建时间",
         "started": "开始时间",
         "finished": "结束时间",
@@ -407,8 +411,8 @@
         "noLog": "暂无日志"
       },
       "errors": {
-        "fetchSources": {
-          "title": "获取同步源列表失败"
+        "fetchDistributions": {
+          "title": "获取同步分发列表失败"
         },
         "fetchJobs": {
           "title": "获取同步任务列表失败"
@@ -421,7 +425,7 @@
         },
         "unauthorized": {
           "title": "源实例认证失败",
-          "hint": "同步 token 无效或已在源实例轮换,请编辑同步源并更新 token。"
+          "hint": "同步 token 无效或已在源实例轮换,请编辑分发并更新 token。"
         },
         "forbidden": {
           "title": "源实例拒绝同步",
@@ -429,15 +433,63 @@
         },
         "local_diverged": {
           "title": "本地仓库已偏离同步基线",
-          "hint": "本地比赛仓库在上次同步后被修改过。可暂停同步并转为本地维护,或解除绑定。"
+          "hint": "本地比赛仓库在上次同步后被修改过。可暂停同步并转为本地维护,或解除托管。"
         },
         "upstream_diverged": {
           "title": "上游历史已分叉",
-          "hint": "上游发生了强制推送或历史重写。请修复上游后重新绑定,或联系源实例管理员。"
+          "hint": "上游发生了强制推送或历史重写。请修复上游后重新导入,或联系源实例管理员。"
         },
-        "target_visible": {
-          "title": "目标比赛已对外可见",
-          "hint": "同步只允许写入隐藏比赛,请先将本地比赛设为隐藏。"
+        "head_ref_mismatch": {
+          "title": "准入 HEAD 不匹配",
+          "hint": "拉取到的提交与本次固定的准入 HEAD 不一致,源或镜像可能返回了被替换的内容,已拒绝同步。"
+        },
+        "game_missing": {
+          "title": "托管比赛不存在",
+          "hint": "本地比赛已被删除,请删除或重新绑定分发。"
+        },
+        "bucket_missing": {
+          "title": "本地 bucket 缺失",
+          "hint": "托管比赛没有仓库 bucket。"
+        },
+        "bucket_locked": {
+          "title": "仓库正在被其他操作写入",
+          "hint": "另一个仓库写操作正在进行,请稍后重试。"
+        },
+        "missing_baseline": {
+          "title": "缺少同步基线",
+          "hint": "分发没有基线版本,请重新导入。"
+        },
+        "discover_failed": {
+          "title": "源实例发现失败",
+          "hint": "无法从源实例获取 bucket id 与当前 HEAD,请检查地址与 token。"
+        },
+        "fetch_failed": {
+          "title": "拉取源仓库失败",
+          "hint": "无法从源实例拉取更新,请检查网络与凭据。"
+        },
+        "candidate_unresolved": {
+          "title": "候选提交无法解析",
+          "hint": "拉取后的候选提交无法解析为完整 commit hash。"
+        },
+        "validation_failed": {
+          "title": "上游版本被拒绝",
+          "hint": "拉取的内容未通过安全校验(树规模、路径、文件类型等)。"
+        },
+        "materialization_failed": {
+          "title": "物化失败",
+          "hint": "内容写入本地数据库失败,已回滚。"
+        },
+        "rollback_failed": {
+          "title": "回滚失败",
+          "hint": "同步失败且回滚也失败,仓库需要人工检查。"
+        },
+        "timeout": {
+          "title": "同步超时",
+          "hint": "同步超出时间预算被取消,请稍后重试。"
+        },
+        "internal_error": {
+          "title": "内部错误",
+          "hint": "服务端内部错误,请查看服务端日志。"
         }
       }
     },

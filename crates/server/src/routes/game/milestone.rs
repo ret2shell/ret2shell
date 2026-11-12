@@ -67,6 +67,7 @@ pub(super) async fn create_milestone(
   Extension(token): Extension<Token>, Extension(trace): Extension<RequestId>,
   Extension(game): Extension<game::Model>, Json(milestone): Json<challenge_milestone::Model>,
 ) -> Result<impl IntoResponse, crate::traits::ResponseError> {
+  crate::routes::game::ensure_not_managed(&game)?;
   milestone.validate()?;
   let txn = db.conn.begin().await?;
   challenge::resolve_prerequisites(&txn, game.id, None, &milestone.prerequisites).await?;
@@ -130,6 +131,7 @@ pub(super) async fn update_milestone(
   Extension(prev_milestone): Extension<challenge_milestone::Model>,
   Json(milestone): Json<challenge_milestone::Model>,
 ) -> Result<impl IntoResponse, crate::traits::ResponseError> {
+  crate::routes::game::ensure_not_managed(&game)?;
   ensure_milestone_in_game(&game, &prev_milestone)?;
   milestone.validate()?;
   let txn = db.conn.begin().await?;
@@ -178,6 +180,7 @@ pub(super) async fn delete_milestone(
   Extension(game): Extension<game::Model>,
   Extension(milestone): Extension<challenge_milestone::Model>,
 ) -> Result<impl IntoResponse, crate::traits::ResponseError> {
+  crate::routes::game::ensure_not_managed(&game)?;
   ensure_milestone_in_game(&game, &milestone)?;
   let txn = db.conn.begin().await?;
   challenge_milestone::delete(&txn, milestone.id).await?;
@@ -207,6 +210,7 @@ pub(super) async fn delete_milestones(
   Extension(token): Extension<Token>, Extension(trace): Extension<RequestId>,
   Extension(game): Extension<game::Model>,
 ) -> Result<impl IntoResponse, crate::traits::ResponseError> {
+  crate::routes::game::ensure_not_managed(&game)?;
   let txn = db.conn.begin().await?;
   challenge_milestone::delete_by_game_id(&txn, game.id).await?;
   write_milestones_to_bucket(

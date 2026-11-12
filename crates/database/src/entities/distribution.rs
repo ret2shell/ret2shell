@@ -4,7 +4,7 @@ use chrono::{DateTime, Utc, serde::ts_seconds};
 use sea_orm::{ActiveValue, IntoActiveModel, QueryOrder, entity::prelude::*};
 use serde::{Deserialize, Serialize};
 
-/// The source is idle, no sync has been attempted yet.
+/// The distribution is idle, no sync has been attempted yet.
 pub const STATUS_IDLE: &str = "idle";
 /// A sync attempt is queued or running.
 pub const STATUS_SYNCING: &str = "syncing";
@@ -14,17 +14,24 @@ pub const STATUS_SUCCEEDED: &str = "succeeded";
 pub const STATUS_FAILED: &str = "failed";
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
-#[sea_orm(table_name = "sync_source")]
+#[sea_orm(table_name = "distribution")]
 pub struct Model {
   #[sea_orm(primary_key)]
   pub id: i64,
+  /// The real bucket id of the source game, the stable sync identity.
   #[sea_orm(unique)]
-  pub repository_url: String,
-  #[sea_orm(unique)]
-  pub local_game_id: i64,
+  pub bucket_id: String,
+  /// Base endpoint (scheme + host + api base path) of the source instance.
+  pub endpoint: String,
   /// Credential of the source instance, write-only from the API perspective.
   #[serde(skip_serializing, default)]
   pub credential: String,
+  /// The approved admission commit the distribution may sync to.
+  pub head_ref: String,
+  /// Cached source metadata.
+  pub name: Option<String>,
+  pub avatar: Option<String>,
+  pub description: Option<String>,
   #[sea_orm(default_value = false)]
   pub enabled: bool,
   pub interval_seconds: Option<i64>,
@@ -46,22 +53,7 @@ pub struct Model {
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-  #[sea_orm(
-    belongs_to = "super::game::Entity",
-    from = "Column::LocalGameId",
-    to = "super::game::Column::Id",
-    on_update = "Cascade",
-    on_delete = "Cascade"
-  )]
-  Game,
-}
-
-impl Related<super::game::Entity> for Entity {
-  fn to() -> RelationDef {
-    Relation::Game.def()
-  }
-}
+pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}
 
@@ -71,20 +63,11 @@ where
   Entity::find_by_id(id).one(db).await
 }
 
-pub async fn get_by_game<C>(db: &C, local_game_id: i64) -> Result<Option<Model>, DbErr>
+pub async fn get_by_bucket<C>(db: &C, bucket_id: &str) -> Result<Option<Model>, DbErr>
 where
   C: ConnectionTrait, {
   Entity::find()
-    .filter(Column::LocalGameId.eq(local_game_id))
-    .one(db)
-    .await
-}
-
-pub async fn get_by_repository<C>(db: &C, repository_url: &str) -> Result<Option<Model>, DbErr>
-where
-  C: ConnectionTrait, {
-  Entity::find()
-    .filter(Column::RepositoryUrl.eq(repository_url))
+    .filter(Column::BucketId.eq(bucket_id))
     .one(db)
     .await
 }
@@ -95,7 +78,7 @@ where
   Entity::find().order_by_asc(Column::Id).all(db).await
 }
 
-/// Sources that are due for a scheduled sync right now.
+/// Distributions that are due for a scheduled sync right now.
 pub async fn get_due_list<C>(db: &C, now: DateTime<Utc>) -> Result<Vec<Model>, DbErr>
 where
   C: ConnectionTrait, {
@@ -108,26 +91,27 @@ where
     .await
 }
 
-pub async fn create<C>(db: &C, source: Model) -> Result<Model, DbErr>
+pub async fn create<C>(db: &C, distribution: Model) -> Result<Model, DbErr>
 where
   C: ConnectionTrait, {
-  let source = ActiveModel {
+  let distribution = ActiveModel {
     id: ActiveValue::NotSet,
     created_at: ActiveValue::Set(Utc::now()),
     updated_at: ActiveValue::Set(Utc::now()),
-    ..source.into_active_model().reset_all()
+    ..distribution.into_active_model().reset_all()
   };
-  source.insert(db).await
+  distribution.insert(db).await
 }
 
-pub async fn update<C>(db: &C, source: Model) -> Result<Model, DbErr>
+pub async fn update<C>(db: &C, distribution: Model) -> Result<Model, DbErr>
 where
   C: ConnectionTrait, {
-  let source = ActiveModel {
+  let distribution = ActiveModel {
+    id: ActiveValue::Unchanged(distribution.id),
     updated_at: ActiveValue::Set(Utc::now()),
-    ..source.into_active_model().reset_all()
+    ..distribution.into_active_model().reset_all()
   };
-  source.update(db).await
+  distribution.update(db).await
 }
 
 pub async fn delete<C>(db: &C, id: i64) -> Result<(), DbErr>
@@ -137,16 +121,16 @@ where
   Ok(())
 }
 
-/// Resets sources stuck in the `syncing` status after a server restart. The
-/// matching job was already marked failed, this only keeps the source view
-/// truthful so the scheduler and the UI can move on.
-pub async fn fail_interrupted_sources<C>(db: &C) -> Result<u64, DbErr>
+/// Resets distributions stuck in the `syncing` status after a server restart.
+/// The matching job was already marked failed, this only keeps the
+/// distribution view truthful so the scheduler and the UI can move on.
+pub async fn fail_interrupted_distributions<C>(db: &C) -> Result<u64, DbErr>
 where
   C: ConnectionTrait, {
   let mut patch = ActiveModel::new();
   patch.last_status = ActiveValue::Set(STATUS_FAILED.to_owned());
   patch.last_error = ActiveValue::Set(Some(
-    "the server restarted while the source was syncing".to_owned(),
+    "the server restarted while the distribution was syncing".to_owned(),
   ));
   let result = Entity::update_many()
     .set(patch)
@@ -161,15 +145,19 @@ mod tests {
   use super::Model;
 
   #[test]
-  fn source_serialization_never_leaks_the_credential() {
+  fn distribution_serialization_never_leaks_the_credential() {
     let model = Model {
       id: 1,
-      repository_url: "https://ctf.example.org/api/game/1/repo/example.git".to_owned(),
-      local_game_id: 2,
+      bucket_id: "upstream_bucket_9f2c".to_owned(),
+      endpoint: "https://ctf.example.org/api".to_owned(),
       credential: "super-secret-token".to_owned(),
+      head_ref: "0123456789abcdef0123456789abcdef01234567".to_owned(),
+      name: Some("Upstream".to_owned()),
+      avatar: None,
+      description: Some("upstream game".to_owned()),
       enabled: false,
       interval_seconds: None,
-      last_synced_oid: Some("0123456789abcdef".to_owned()),
+      last_synced_oid: Some("0123456789abcdef0123456789abcdef01234567".to_owned()),
       next_sync_at: None,
       last_attempt_at: None,
       last_success_at: None,

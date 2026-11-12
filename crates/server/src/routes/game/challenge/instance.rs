@@ -386,6 +386,7 @@ pub(super) async fn update_challenge_env_config(
   Extension(token): Extension<Token>, Extension(challenge): Extension<challenge::Model>,
   Json(env): Json<ChallengeEnv>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  crate::routes::game::ensure_not_managed(&game)?;
   super::check_challenge_publishing(&challenge)?;
 
   let mut ports = HashSet::new();
@@ -417,6 +418,7 @@ pub(super) async fn delete_challenge_env_config(
   State(ref bucket): State<Bucket>, Extension(game): Extension<game::Model>,
   Extension(token): Extension<Token>, Extension(challenge): Extension<challenge::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  crate::routes::game::ensure_not_managed(&game)?;
   super::check_challenge_publishing(&challenge)?;
   let (game_bucket, challenge_bucket) =
     super::get_challenge_bucket_mut(bucket, &game, &challenge).await?;

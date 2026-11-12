@@ -1,10 +1,11 @@
 import {
-  useDeleteSyncSourceMutation,
-  useSyncSources,
+  useDeleteSyncDistributionMutation,
+  useSyncDistributions,
   useTriggerSyncJobMutation,
-  useUpdateSyncSourceMutation,
+  useUnbindSyncDistributionMutation,
+  useUpdateSyncDistributionMutation,
 } from "@api/sync";
-import type { SyncSource } from "@models/sync";
+import type { SyncDistribution } from "@models/sync";
 import { shortOid } from "@models/sync";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
@@ -16,44 +17,53 @@ import Popover from "@widgets/popover";
 import Tag from "@widgets/tag";
 import { createSignal, For, Show } from "solid-js";
 import { describeSyncError, formatSyncTime, syncStatusLevel, syncStatusText } from "./_blocks/display";
+import DistributionForm from "./_blocks/distribution-form";
 import JobsDialog from "./_blocks/jobs-dialog";
-import SourceForm from "./_blocks/source-form";
 
 export default function () {
-  const sources = useSyncSources();
-  const updateMutation = useUpdateSyncSourceMutation({ onSuccess: () => sources.refetch() });
-  const deleteMutation = useDeleteSyncSourceMutation({ onSuccess: () => sources.refetch() });
+  const distributions = useSyncDistributions();
+  const updateMutation = useUpdateSyncDistributionMutation({
+    onSuccess: () => distributions.refetch(),
+  });
+  const unbindMutation = useUnbindSyncDistributionMutation({
+    onSuccess: () => distributions.refetch(),
+  });
+  const deleteMutation = useDeleteSyncDistributionMutation({
+    onSuccess: () => distributions.refetch(),
+  });
   const triggerMutation = useTriggerSyncJobMutation();
 
   const [creationFormOpen, setCreationFormOpen] = createSignal(false);
-  const [jobsSource, setJobsSource] = createSignal<SyncSource | null>(null);
+  const [jobsDistribution, setJobsDistribution] = createSignal<SyncDistribution | null>(null);
   const [jobsSelected, setJobsSelected] = createSignal<number | null>(null);
   const [jobsOpen, setJobsOpen] = createSignal(false);
 
-  function openJobs(source: SyncSource, jobId?: number) {
-    setJobsSource(source);
+  function openJobs(distribution: SyncDistribution, jobId?: number) {
+    setJobsDistribution(distribution);
     setJobsSelected(jobId ?? null);
     setJobsOpen(true);
   }
 
-  function syncNow(source: SyncSource) {
-    triggerMutation.mutate(source.id, {
-      onSuccess: (jobId) => openJobs(source, jobId),
+  function syncNow(distribution: SyncDistribution) {
+    triggerMutation.mutate(distribution.id, {
+      onSuccess: (jobId) => openJobs(distribution, jobId),
     });
   }
 
-  function toggleEnabled(source: SyncSource) {
-    updateMutation.mutate({ id: source.id, req: { enabled: !source.enabled } });
+  function toggleEnabled(distribution: SyncDistribution) {
+    updateMutation.mutate({ id: distribution.id, req: { enabled: !distribution.enabled } });
   }
 
-  function intervalText(source: SyncSource): string {
-    return source.interval_seconds
-      ? t("platform.sync.list.intervalSeconds", { seconds: source.interval_seconds })
+  function intervalText(distribution: SyncDistribution): string {
+    return distribution.interval_seconds
+      ? t("platform.sync.list.intervalSeconds", { seconds: distribution.interval_seconds })
       : t("platform.sync.list.manual");
   }
 
-  function gameText(source: SyncSource): string {
-    return source.local_game_name ?? `#${source.local_game_id}`;
+  function gameText(distribution: SyncDistribution): string {
+    return distribution.managed_game_id
+      ? (distribution.managed_game_name ?? `#${distribution.managed_game_id}`)
+      : t("platform.sync.list.unbound");
   }
 
   return (
@@ -69,7 +79,7 @@ export default function () {
               ghost
               type="button"
               title={t("general.actions.refresh.title")}
-              onClick={() => sources.refetch()}
+              onClick={() => distributions.refetch()}
             >
               <span class="shrink-0 icon-[fluent--arrow-clockwise-20-regular] w-5 h-5" />
             </Button>
@@ -86,17 +96,17 @@ export default function () {
               open={creationFormOpen()}
               onOpenChange={(detail) => setCreationFormOpen(detail.open)}
             >
-              <SourceForm
+              <DistributionForm
                 onDone={() => {
                   setCreationFormOpen(false);
-                  sources.refetch();
+                  distributions.refetch();
                 }}
               />
             </Dialog>
           </h3>
           <p class="text-sm opacity-60 py-2">{t("platform.sync.subtitle")}</p>
           <Show
-            when={!sources.isLoading}
+            when={!distributions.isLoading}
             fallback={
               <div class="flex items-center justify-center p-6">
                 <LoadingTips />
@@ -104,7 +114,7 @@ export default function () {
             }
           >
             <Show
-              when={(sources.data?.length ?? 0) > 0}
+              when={(distributions.data?.length ?? 0) > 0}
               fallback={
                 <div class="flex flex-col items-center space-y-2 p-6 opacity-60">
                   <span class="shrink-0 icon-[fluent--cloud-off-20-regular] w-8 h-8" />
@@ -112,52 +122,62 @@ export default function () {
                 </div>
               }
             >
-              <For each={sources.data}>
-                {(source) => {
+              <For each={distributions.data}>
+                {(distribution) => {
                   const [editFormOpen, setEditFormOpen] = createSignal(false);
                   const error = () =>
-                    describeSyncError(source.last_status === "failed" ? source.last_error : null, null);
+                    describeSyncError(distribution.last_status === "failed" ? distribution.last_error : null, null);
                   return (
                     <Card class="my-2">
                       <Card contentClass="p-2 lg:p-3 flex flex-col space-y-2">
                         <div class="flex items-center space-x-2 min-w-0">
-                          <Tag level={syncStatusLevel(source.last_status)}>{syncStatusText(source.last_status)}</Tag>
-                          <span class="flex-1 text-start truncate font-mono text-sm" title={source.repository_url}>
-                            {source.repository_url}
+                          <Tag level={syncStatusLevel(distribution.last_status)}>
+                            {syncStatusText(distribution.last_status)}
+                          </Tag>
+                          <span class="flex-1 text-start truncate font-mono text-sm" title={distribution.endpoint}>
+                            {distribution.endpoint}
                           </span>
-                          <Tag level={source.enabled ? "success" : "layer-content"}>
-                            {source.enabled ? t("platform.sync.list.enabled") : t("platform.sync.list.disabled")}
+                          <Tag level={distribution.enabled ? "success" : "layer-content"}>
+                            {distribution.enabled ? t("platform.sync.list.enabled") : t("platform.sync.list.disabled")}
                           </Tag>
                         </div>
                         <div class="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-1 text-sm">
+                          <span class="opacity-70">{t("platform.sync.list.bucketId")}</span>
+                          <span class="truncate font-mono" title={distribution.bucket_id}>
+                            {distribution.bucket_id}
+                          </span>
                           <span class="opacity-70">{t("platform.sync.list.game")}</span>
-                          <span class="truncate" title={gameText(source)}>
-                            {gameText(source)}
+                          <span class="truncate" title={gameText(distribution)}>
+                            {gameText(distribution)}
+                          </span>
+                          <span class="opacity-70">{t("platform.sync.list.headRef")}</span>
+                          <span class="font-mono" title={distribution.head_ref}>
+                            {shortOid(distribution.head_ref)}
                           </span>
                           <span class="opacity-70">{t("platform.sync.list.interval")}</span>
-                          <span>{intervalText(source)}</span>
+                          <span>{intervalText(distribution)}</span>
                           <span class="opacity-70">{t("platform.sync.list.lastSuccess")}</span>
-                          <span>{formatSyncTime(source.last_success_at)}</span>
+                          <span>{formatSyncTime(distribution.last_success_at)}</span>
                           <span class="opacity-70">{t("platform.sync.list.lastAttempt")}</span>
-                          <span>{formatSyncTime(source.last_attempt_at)}</span>
+                          <span>{formatSyncTime(distribution.last_attempt_at)}</span>
                           <span class="opacity-70">{t("platform.sync.list.nextSync")}</span>
-                          <span>{formatSyncTime(source.next_sync_at)}</span>
+                          <span>{formatSyncTime(distribution.next_sync_at)}</span>
                           <span class="opacity-70">{t("platform.sync.list.oid")}</span>
-                          <span class="font-mono" title={source.last_synced_oid ?? undefined}>
-                            {shortOid(source.last_synced_oid)}
+                          <span class="font-mono" title={distribution.last_synced_oid ?? undefined}>
+                            {shortOid(distribution.last_synced_oid)}
                           </span>
                         </div>
-                        <Show when={source.consecutive_failures > 0}>
+                        <Show when={distribution.consecutive_failures > 0}>
                           <div class="text-warning text-sm flex items-center space-x-2">
                             <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5" />
                             <span>
                               {t("platform.sync.list.failures", {
-                                count: source.consecutive_failures,
+                                count: distribution.consecutive_failures,
                               })}
                             </span>
                           </div>
                         </Show>
-                        <Show when={source.last_status === "failed"}>
+                        <Show when={distribution.last_status === "failed"}>
                           <div class="text-error text-sm flex flex-col space-y-1">
                             <div class="flex items-center space-x-2">
                               <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5" />
@@ -174,13 +194,14 @@ export default function () {
                             level="primary"
                             type="button"
                             loading={triggerMutation.isPending}
-                            disabled={triggerMutation.isPending}
-                            onClick={() => syncNow(source)}
+                            disabled={triggerMutation.isPending || !distribution.managed_game_id}
+                            title={distribution.managed_game_id ? undefined : t("platform.sync.actions.sync.noGame")}
+                            onClick={() => syncNow(distribution)}
                           >
                             <span class="shrink-0 icon-[fluent--sync-20-regular] w-5 h-5" />
                             <span>{t("platform.sync.actions.sync.title")}</span>
                           </Button>
-                          <Button size="sm" type="button" onClick={() => openJobs(source)}>
+                          <Button size="sm" type="button" onClick={() => openJobs(distribution)}>
                             <span class="shrink-0 icon-[fluent--task-list-ltr-20-regular] w-5 h-5" />
                             <span>{t("platform.sync.actions.jobs")}</span>
                           </Button>
@@ -189,17 +210,19 @@ export default function () {
                             type="button"
                             loading={updateMutation.isPending}
                             disabled={updateMutation.isPending}
-                            onClick={() => toggleEnabled(source)}
+                            onClick={() => toggleEnabled(distribution)}
                           >
                             <span
                               class={
-                                source.enabled
+                                distribution.enabled
                                   ? "shrink-0 icon-[fluent--pause-20-regular] w-5 h-5"
                                   : "shrink-0 icon-[fluent--play-20-regular] w-5 h-5"
                               }
                             />
                             <span>
-                              {source.enabled ? t("platform.sync.actions.pause") : t("platform.sync.actions.resume")}
+                              {distribution.enabled
+                                ? t("platform.sync.actions.pause")
+                                : t("platform.sync.actions.resume")}
                             </span>
                           </Button>
                           <span class="flex-1" />
@@ -212,11 +235,11 @@ export default function () {
                             open={editFormOpen()}
                             onOpenChange={(detail) => setEditFormOpen(detail.open)}
                           >
-                            <SourceForm
-                              source={source}
+                            <DistributionForm
+                              distribution={distribution}
                               onDone={() => {
                                 setEditFormOpen(false);
-                                sources.refetch();
+                                distributions.refetch();
                               }}
                             />
                           </Dialog>
@@ -230,12 +253,33 @@ export default function () {
                             <Card contentClass="p-2 flex flex-col space-y-2 items-start">
                               <span class="text-start">{t("platform.sync.warnings.unbind")}</span>
                               <Button
+                                level="warning"
+                                size="sm"
+                                title={t("general.actions.confirm.title")}
+                                loading={unbindMutation.isPending}
+                                disabled={unbindMutation.isPending || !distribution.managed_game_id}
+                                onClick={() => unbindMutation.mutate(distribution.id)}
+                              >
+                                <span>{t("general.actions.confirm.title")}</span>
+                              </Button>
+                            </Card>
+                          </Popover>
+                          <Popover
+                            size="sm"
+                            ghost
+                            square
+                            title={t("platform.sync.actions.delete.title")}
+                            btnContent={<span class="shrink-0 icon-[fluent--delete-20-regular] w-5 h-5" />}
+                          >
+                            <Card contentClass="p-2 flex flex-col space-y-2 items-start">
+                              <span class="text-start">{t("platform.sync.warnings.delete")}</span>
+                              <Button
                                 level="error"
                                 size="sm"
                                 title={t("general.actions.confirm.title")}
                                 loading={deleteMutation.isPending}
                                 disabled={deleteMutation.isPending}
-                                onClick={() => deleteMutation.mutate(source.id)}
+                                onClick={() => deleteMutation.mutate(distribution.id)}
                               >
                                 <span>{t("general.actions.confirm.title")}</span>
                               </Button>
@@ -253,7 +297,7 @@ export default function () {
         </div>
       </div>
       <JobsDialog
-        source={jobsSource}
+        distribution={jobsDistribution}
         selectedJobId={jobsSelected}
         open={jobsOpen}
         onOpenChange={setJobsOpen}

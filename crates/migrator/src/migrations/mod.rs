@@ -40,3 +40,5 @@ pub mod m_20261019_000001_extra_blood_state;
 pub mod m_20261111_000001_create_passkey;
 pub mod m_20261111_000002_create_sync_source;
 pub mod m_20261111_000003_create_sync_job;
+pub mod m_20261112_000001_create_distribution;
+pub mod m_20261112_000002_rework_managed_sync;

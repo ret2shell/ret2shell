@@ -299,28 +299,32 @@
       "title": "Switch protocol"
     },
     "sync": {
-      "title": "Sync resources",
-      "subtitle": "Import repositories from other ret2shell instances and keep them fast-forward synchronized. Imported games stay hidden.",
+      "title": "Resource Sync",
+      "subtitle": "Import game repositories from other ret2shell instances and keep them fast-forward synchronized. The sync identity is anchored on the source bucket id; only versions passing the admission HEAD check are synced.",
       "warnings": {
-        "import": "Imported games are hidden by default and are never published automatically. Enabling scheduled sync means trusting the upstream's future commits, including checkers, images and environments.",
-        "unbind": "Unbinding only stops the synchronization; the local game and its repository are kept."
+        "import": "Imported games are hidden by default and never auto-published. Enabling scheduled sync means trusting future upstream commits (including checkers, images and environments).",
+        "unbind": "Unbinding only stops the synchronization; the local game and its data are kept. You can rebind later from the edit form.",
+        "delete": "Deleting the distribution removes its sync history and jobs. The local game is kept and becomes editable."
       },
       "list": {
-        "empty": "No sync sources yet",
-        "game": "Local game",
+        "empty": "No distributions yet",
+        "bucketId": "Bucket ID",
+        "headRef": "Admission HEAD",
+        "game": "Managed game",
+        "unbound": "Unbound",
         "interval": "Interval",
         "intervalSeconds": "Every {seconds}s",
         "manual": "Manual only",
         "lastSuccess": "Last success",
         "lastAttempt": "Last attempt",
         "nextSync": "Next sync",
-        "oid": "Baseline OID",
-        "failures": "{count} consecutive failure(s)",
+        "oid": "Baseline",
+        "failures": "{count} consecutive failures",
         "enabled": "Enabled",
         "disabled": "Paused"
       },
       "status": {
-        "never": "Never synced",
+        "never": "Never",
         "queued": "Queued",
         "running": "Running",
         "succeeded": "Succeeded",
@@ -332,44 +336,47 @@
         "retry": "Retry"
       },
       "form": {
-        "createTitle": "Import / register source",
-        "repositoryUrl": {
-          "label": "Source repository URL",
-          "placeholder": "https://ctf.example.org/api/game/1/repo/example.git",
-          "required": "The source repository URL is required",
-          "invalid": "The source repository URL must be a valid URL"
+        "createTitle": "Import from source",
+        "editTitle": "Edit distribution",
+        "endpoint": {
+          "label": "Source endpoint",
+          "placeholder": "https://ctf.example.org/api",
+          "required": "The source endpoint is required",
+          "invalid": "The source endpoint must be a valid URL",
+          "hint": "Enter the base address of the source instance including the API prefix (e.g. /api). The bucket id and admission HEAD are discovered automatically and verified strictly."
         },
         "token": {
           "label": "Source token",
-          "placeholder": "Enter the sync token of the source instance",
+          "placeholder": "Enter the source instance sync token",
           "required": "The sync token is required",
           "keep": "Leave empty to keep the stored token",
-          "hint": "The token is only submitted when saving; it is never echoed back nor stored in the browser."
+          "hint": "The token is only submitted when saving; it is never echoed back or stored in the browser."
         },
         "game": {
           "label": "Bind local game ID",
-          "placeholder": "Leave empty to run a one-shot import",
-          "invalid": "The local game ID must be a positive integer",
-          "hint": "Fill in an existing local game ID to bind it directly; leaving it empty performs a full import from the source instance first and then registers the source."
+          "placeholder": "e.g. 3",
+          "invalid": "The game ID must be a positive integer",
+          "hint": "Binding is only possible while the distribution manages no game; the local bucket must match and the local HEAD must equal the sync baseline."
         },
         "interval": {
           "label": "Sync interval (seconds)",
-          "placeholder": "Leave empty for manual-only sync",
-          "invalid": "The sync interval must be a positive integer of seconds",
-          "hint": "Make sure you trust the upstream's future commits before enabling scheduled sync."
+          "placeholder": "Empty for manual sync only",
+          "invalid": "The interval must be a positive integer of seconds",
+          "hint": "Confirm you trust future upstream commits before enabling scheduled sync."
         },
         "enabled": { "label": "Enable scheduled sync" },
         "importLog": {
           "title": "Import log"
         },
         "submit": {
-          "import": "Import & register",
-          "bind": "Register source"
+          "import": "Start import",
+          "bind": "Bind game"
         }
       },
       "actions": {
         "sync": {
           "title": "Sync now",
+          "noGame": "The distribution has no bound game; bind one in the edit form first",
           "status": {
             "success": "Sync job created",
             "fail": "Failed to create the sync job"
@@ -377,21 +384,20 @@
         },
         "jobs": "Jobs & logs",
         "pause": "Pause",
-        "resume": "Enable",
+        "resume": "Resume",
         "unbind": {
           "title": "Unbind",
-          "status": { "success": "Sync source unbound", "fail": "Failed to unbind the sync source" }
+          "status": { "success": "Unbound; local content is editable again", "fail": "Failed to unbind" }
         },
-        "create": {
-          "status": {
-            "success": "Sync source registered",
-            "fail": "Failed to register the sync source"
-          }
+        "delete": {
+          "title": "Delete distribution",
+          "status": { "success": "Distribution deleted", "fail": "Failed to delete the distribution" }
         },
+        "bind": { "status": { "success": "Game bound to the distribution", "fail": "Failed to bind the game" } },
         "import": {
           "status": {
             "fail": "Import failed",
-            "noGameId": "The import finished but no local game ID could be parsed from the log; please bind one manually."
+            "noGameId": "The import finished but no local game ID could be parsed from the log."
           }
         }
       },
@@ -401,7 +407,8 @@
         "empty": "No sync jobs yet",
         "retry": "Retry sync",
         "trigger": "Trigger",
-        "oids": "OID changes",
+        "oids": "OID change",
+        "expectedHead": "Admission HEAD",
         "created": "Created",
         "started": "Started",
         "finished": "Finished",
@@ -410,37 +417,85 @@
         "noLog": "No log yet"
       },
       "errors": {
-        "fetchSources": {
-          "title": "Failed to load the sync sources"
+        "fetchDistributions": {
+          "title": "Failed to load the distribution list"
         },
         "fetchJobs": {
-          "title": "Failed to load the sync jobs"
+          "title": "Failed to load the sync job list"
         },
         "fetchJob": {
           "title": "Failed to load the sync job"
         },
         "unknown": {
-          "title": "Synchronization failed"
+          "title": "Sync failed"
         },
         "unauthorized": {
-          "title": "Upstream authentication failed",
-          "hint": "The sync token is invalid or was rotated on the source instance; update it by editing the source."
+          "title": "Source authentication failed",
+          "hint": "The sync token is invalid or was rotated on the source. Edit the distribution and update the token."
         },
         "forbidden": {
-          "title": "Upstream refused the synchronization",
-          "hint": "The upstream may forbid instance sync (sync=2) or the game is not archived yet; contact the source administrators."
+          "title": "Source refused the sync",
+          "hint": "The upstream may disallow instance sync (sync=2) or the game is not archived yet. Contact the source administrators."
         },
         "local_diverged": {
-          "title": "Local repository diverged from the sync baseline",
-          "hint": "The local game repository was modified after the last sync. Pause the source and maintain it locally, or unbind it."
+          "title": "Local repository diverged from the baseline",
+          "hint": "The local repository changed after the last sync. Pause the sync and maintain the game locally, or unbind it."
         },
         "upstream_diverged": {
-          "title": "Upstream history diverged",
-          "hint": "The upstream was force-pushed or rewritten. Fix the upstream and rebind it, or contact the source administrators."
+          "title": "Upstream history rewritten",
+          "hint": "The upstream was force-pushed or its history was rewritten. Repair the upstream and re-import, or contact the source administrators."
         },
-        "target_visible": {
-          "title": "Target game is visible",
-          "hint": "Synchronization only writes to hidden games; hide the local game first."
+        "head_ref_mismatch": {
+          "title": "Admission HEAD mismatch",
+          "hint": "The fetched commit does not match the admission HEAD pinned for this run; the source or a mirror served replaced content and the sync was rejected."
+        },
+        "game_missing": {
+          "title": "Managed game missing",
+          "hint": "The local game was deleted. Delete or rebind the distribution."
+        },
+        "bucket_missing": {
+          "title": "Local bucket missing",
+          "hint": "The managed game has no repository bucket."
+        },
+        "bucket_locked": {
+          "title": "Repository locked by another writer",
+          "hint": "Another repository write is in progress. Retry later."
+        },
+        "missing_baseline": {
+          "title": "Missing sync baseline",
+          "hint": "The distribution has no baseline revision. Re-import it."
+        },
+        "discover_failed": {
+          "title": "Source discovery failed",
+          "hint": "Could not fetch the bucket id and current HEAD from the source. Check the endpoint and the token."
+        },
+        "fetch_failed": {
+          "title": "Failed to fetch the source repository",
+          "hint": "Updates could not be fetched from the source. Check the network and the credential."
+        },
+        "candidate_unresolved": {
+          "title": "Candidate commit unresolved",
+          "hint": "The fetched candidate could not be resolved to a full commit hash."
+        },
+        "validation_failed": {
+          "title": "Upstream revision rejected",
+          "hint": "The fetched content failed the safety validation (tree size, paths, file types, ...)."
+        },
+        "materialization_failed": {
+          "title": "Materialization failed",
+          "hint": "Writing the content into the local database failed and was rolled back."
+        },
+        "rollback_failed": {
+          "title": "Rollback failed",
+          "hint": "The sync failed and the rollback failed too; the repository needs manual inspection."
+        },
+        "timeout": {
+          "title": "Sync timed out",
+          "hint": "The sync exceeded its time budget and was cancelled. Retry later."
+        },
+        "internal_error": {
+          "title": "Internal error",
+          "hint": "A server-side error occurred. Check the server logs."
         }
       }
     },

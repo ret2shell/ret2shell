@@ -5,7 +5,6 @@ use axum::{
   http::{HeaderMap, HeaderValue, StatusCode},
   response::IntoResponse,
 };
-use r2s_bucket::Bucket;
 use r2s_database::{game, media as media_db};
 use r2s_media::Media;
 use r2s_migrator::Database;
@@ -14,18 +13,10 @@ use tokio_util::io::ReaderStream;
 use crate::traits::ResponseError;
 
 pub(super) async fn get_sync_media(
-  State(db): State<Database>, State(media): State<Media>, State(bucket): State<Bucket>,
-  Extension(game): Extension<game::Model>, Path(hash): Path<String>,
+  State(db): State<Database>, State(media): State<Media>, Extension(game): Extension<game::Model>,
+  Path(hash): Path<String>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  let game_bucket = bucket
-    .at(
-      game
-        .bucket
-        .as_deref()
-        .ok_or_else(|| ResponseError::PreconditionFailed("game bucket not found".to_owned()))?,
-    )
-    .await?;
-  let references = crate::sync::media::referenced_media_hashes(&game_bucket)
+  let references = crate::sync::media::referenced_media_hashes_from_db(&db.conn, game.id)
     .await
     .map_err(ResponseError::InternalServerError)?;
   if !references.contains(&hash) || media_db::get_by_hash(&db.conn, &hash).await?.is_none() {

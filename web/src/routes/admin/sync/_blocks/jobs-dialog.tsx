@@ -1,5 +1,5 @@
 import { useSyncJob, useSyncJobs, useTriggerSyncJobMutation } from "@api/sync";
-import { isRunningStatus, type SyncJob, type SyncSource, shortOid } from "@models/sync";
+import { isRunningStatus, type SyncDistribution, type SyncJob, shortOid } from "@models/sync";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
@@ -9,20 +9,20 @@ import { For, Show } from "solid-js";
 import { describeSyncError, formatSyncTime, syncStatusLevel, syncStatusText, syncTriggerText } from "./display";
 
 /**
- * Job history and live log panel for one sync source. While any listed job is
- * queued or running both the list and the selected job detail poll every 3
+ * Job history and live log panel for one distribution. While any listed job
+ * is queued or running both the list and the selected job detail poll every 3
  * seconds (wired in the query hooks), so the panel follows the job until it
  * settles without manual refreshes.
  */
 export default function JobsDialog(props: {
-  source: () => SyncSource | null;
+  distribution: () => SyncDistribution | null;
   selectedJobId: () => number | null;
   open: () => boolean;
   onOpenChange: (open: boolean) => void;
   onSelectJob: (jobId: number | null) => void;
 }) {
-  const sourceId = () => props.source()?.id ?? 0;
-  const jobs = useSyncJobs({ sourceId, enabled: props.open });
+  const distributionId = () => props.distribution()?.id ?? 0;
+  const jobs = useSyncJobs({ distributionId, enabled: props.open });
   const jobId = () => props.selectedJobId() ?? 0;
   const job = useSyncJob({
     jobId,
@@ -53,9 +53,10 @@ export default function JobsDialog(props: {
       <div class="w-screen max-w-3xl flex flex-col space-y-3">
         <h3 class="flex items-center space-x-2 font-bold">
           <span class="shrink-0 icon-[fluent--task-list-ltr-20-regular] w-5 h-5" />
-          <span class="flex-1 text-start truncate" title={props.source()?.repository_url}>
-            {props.source()?.repository_url}
+          <span class="flex-1 text-start truncate" title={props.distribution()?.endpoint}>
+            {props.distribution()?.endpoint}
           </span>
+          <span class="shrink-0 font-mono text-sm opacity-70">{props.distribution()?.bucket_id}</span>
         </h3>
         <Show
           when={!jobs.isLoading}
@@ -100,7 +101,7 @@ export default function JobsDialog(props: {
                     level="warning"
                     loading={triggerMutation.isPending}
                     disabled={triggerMutation.isPending}
-                    onClick={() => triggerMutation.mutate(sourceId())}
+                    onClick={() => triggerMutation.mutate(distributionId())}
                   >
                     <span class="shrink-0 icon-[fluent--arrow-counterclockwise-20-regular] w-5 h-5" />
                     <span>{t("platform.sync.jobs.retry")}</span>
@@ -112,6 +113,10 @@ export default function JobsDialog(props: {
                 <span>{syncTriggerText(detail().trigger)}</span>
                 <span class="opacity-70">{t("platform.sync.jobs.oids")}</span>
                 <span class="font-mono">{jobOids(detail())}</span>
+                <span class="opacity-70">{t("platform.sync.jobs.expectedHead")}</span>
+                <span class="font-mono" title={detail().expected_head ?? undefined}>
+                  {shortOid(detail().expected_head)}
+                </span>
                 <span class="opacity-70">{t("platform.sync.jobs.created")}</span>
                 <span>{formatSyncTime(detail().created_at)}</span>
                 <span class="opacity-70">{t("platform.sync.jobs.started")}</span>

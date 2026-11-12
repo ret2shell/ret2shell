@@ -30,7 +30,7 @@ pub const ERROR_INTERRUPTED: &str = "interrupted";
 pub struct Model {
   #[sea_orm(primary_key)]
   pub id: i64,
-  pub source_id: i64,
+  pub distribution_id: i64,
   pub local_game_id: i64,
   #[sea_orm(default_value = "manual")]
   pub trigger: String,
@@ -38,6 +38,9 @@ pub struct Model {
   pub status: String,
   pub old_oid: Option<String>,
   pub new_oid: Option<String>,
+  /// The admission head approved for this specific run, kept for audit even
+  /// when the run fails.
+  pub expected_head: Option<String>,
   #[sea_orm(default_value = "")]
   pub trace_id: String,
   pub error_code: Option<String>,
@@ -55,36 +58,39 @@ pub struct Model {
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
   #[sea_orm(
-    belongs_to = "super::sync_source::Entity",
-    from = "Column::SourceId",
-    to = "super::sync_source::Column::Id",
+    belongs_to = "super::distribution::Entity",
+    from = "Column::DistributionId",
+    to = "super::distribution::Column::Id",
     on_update = "Cascade",
     on_delete = "Cascade"
   )]
-  Source,
+  Distribution,
 }
 
-impl Related<super::sync_source::Entity> for Entity {
+impl Related<super::distribution::Entity> for Entity {
   fn to() -> RelationDef {
-    Relation::Source.def()
+    Relation::Distribution.def()
   }
 }
 
 impl ActiveModelBehavior for ActiveModel {}
 
 impl Model {
-  /// Whether the job still occupies the single-slot-per-source invariant.
+  /// Whether the job still occupies the single-slot-per-distribution
+  /// invariant.
   pub fn is_active(&self) -> bool {
     matches!(self.status.as_str(), STATUS_QUEUED | STATUS_RUNNING)
   }
 }
 
-/// Returns the queued or running job of the source, if any.
-pub async fn get_active_by_source<C>(db: &C, source_id: i64) -> Result<Option<Model>, DbErr>
+/// Returns the queued or running job of the distribution, if any.
+pub async fn get_active_by_distribution<C>(
+  db: &C, distribution_id: i64,
+) -> Result<Option<Model>, DbErr>
 where
   C: ConnectionTrait, {
   Entity::find()
-    .filter(Column::SourceId.eq(source_id))
+    .filter(Column::DistributionId.eq(distribution_id))
     .filter(
       Condition::any()
         .add(Column::Status.eq(STATUS_QUEUED))
@@ -101,13 +107,13 @@ where
   Entity::find_by_id(id).one(db).await
 }
 
-pub async fn get_list_by_source<C>(
-  db: &C, source_id: i64, limit: u64,
+pub async fn get_list_by_distribution<C>(
+  db: &C, distribution_id: i64, limit: u64,
 ) -> Result<Vec<Model>, DbErr>
 where
   C: ConnectionTrait, {
   Entity::find()
-    .filter(Column::SourceId.eq(source_id))
+    .filter(Column::DistributionId.eq(distribution_id))
     .order_by_desc(Column::Id)
     .limit(limit)
     .all(db)
@@ -123,6 +129,16 @@ where
     ..job.into_active_model().reset_all()
   };
   job.insert(db).await
+}
+
+pub async fn update<C>(db: &C, job: Model) -> Result<Model, DbErr>
+where
+  C: ConnectionTrait, {
+  let job = ActiveModel {
+    id: ActiveValue::Unchanged(job.id),
+    ..job.into_active_model().reset_all()
+  };
+  job.update(db).await
 }
 
 /// Marks all leftover `running` jobs as interrupted failures. Job states only
@@ -152,12 +168,13 @@ mod tests {
   fn job(status: &str) -> Model {
     Model {
       id: 1,
-      source_id: 1,
+      distribution_id: 1,
       local_game_id: 2,
       trigger: "manual".to_owned(),
       status: status.to_owned(),
       old_oid: None,
       new_oid: None,
+      expected_head: None,
       trace_id: "trace".to_owned(),
       error_code: None,
       error_message: None,

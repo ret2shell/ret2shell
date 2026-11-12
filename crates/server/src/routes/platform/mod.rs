@@ -54,16 +54,21 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
     .merge(
       Router::<GlobalState>::new()
         .route("/sync/import", post(sync::import_game))
+        .route("/sync/distributions", get(sync::list_distributions))
         .route(
-          "/sync/sources",
-          get(sync::list_sync_sources).post(sync::create_sync_source),
+          "/sync/distributions/{id}",
+          patch(sync::patch_distribution).delete(sync::delete_distribution),
         )
         .route(
-          "/sync/sources/{id}",
-          patch(sync::patch_sync_source).delete(sync::delete_sync_source),
+          "/sync/distributions/{id}/unbind",
+          post(sync::unbind_distribution),
         )
         .route(
-          "/sync/sources/{id}/jobs",
+          "/sync/distributions/{id}/bind",
+          post(sync::bind_distribution),
+        )
+        .route(
+          "/sync/distributions/{id}/jobs",
           get(sync::list_sync_jobs).post(sync::trigger_sync_job),
         )
         .route("/sync/jobs/{id}", get(sync::get_sync_job))

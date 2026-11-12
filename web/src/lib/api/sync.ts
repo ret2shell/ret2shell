@@ -1,31 +1,21 @@
-import type { SyncJob, SyncJobStatus, SyncSource, SyncSourceLastStatus } from "@models/sync";
+import type { SyncDistribution, SyncDistributionLastStatus, SyncJob, SyncJobStatus } from "@models/sync";
 import { isRunningStatus } from "@models/sync";
 import { t } from "@storage/theme";
 import { useMutation, useQuery } from "@tanstack/solid-query";
 import api, { api_root, handleHttpError, inflyClient, toastSuccess } from ".";
 
-export type SyncSourceRequest = {
-  repository_url: string;
-  // write-only: only sent when the admin provides one, never echoed back
-  token?: string;
-  local_game_id: number;
-  // null means the source only syncs manually
-  interval_seconds: number | null;
-  enabled: boolean;
-};
-
-export type SyncSourceUpdateRequest = {
+export type SyncDistributionUpdateRequest = {
   // omitted token keeps the stored one
   token?: string;
   interval_seconds?: number | null;
   enabled?: boolean;
 };
 
-export async function getSyncSources() {
-  return await api.get(`${api_root}/platform/sync/sources`).json<SyncSource[]>();
+export async function getSyncDistributions() {
+  return await api.get(`${api_root}/platform/sync/distributions`).json<SyncDistribution[]>();
 }
 
-export function useSyncSources({
+export function useSyncDistributions({
   enabled,
   onError,
 }: {
@@ -34,14 +24,18 @@ export function useSyncSources({
 } = {}) {
   return useQuery(
     () => ({
-      queryKey: ["platform", "sync", "sources"],
-      queryFn: getSyncSources,
+      queryKey: ["platform", "sync", "distributions"],
+      queryFn: getSyncDistributions,
       enabled: enabled?.(),
       // deliberately no persister: sync metadata must not land in localStorage
-      refetchInterval: (query: { state: { data?: SyncSource[] } }): number | false =>
-        query.state.data?.some((source) => isRunningStatus(source.last_status)) ? 3000 : false,
+      refetchInterval: (query: { state: { data?: SyncDistribution[] } }): number | false =>
+        query.state.data?.some((distribution) =>
+          isRunningStatus(distribution.last_status as SyncDistributionLastStatus)
+        )
+          ? 3000
+          : false,
       throwOnError: (err: Error) => {
-        handleHttpError(err, t("platform.sync.errors.fetchSources.title"));
+        handleHttpError(err, t("platform.sync.errors.fetchDistributions.title"));
         return onError?.(err) ?? false;
       },
     }),
@@ -49,38 +43,18 @@ export function useSyncSources({
   );
 }
 
-export async function createSyncSource(req: SyncSourceRequest) {
-  return await api.post(`${api_root}/platform/sync/sources`, { json: req }).json<SyncSource>();
+export async function updateSyncDistribution(id: number, req: SyncDistributionUpdateRequest) {
+  return await api.patch(`${api_root}/platform/sync/distributions/${id}`, { json: req }).json<SyncDistribution>();
 }
 
-export function useCreateSyncSourceMutation(
-  props: { onSuccess?: (source: SyncSource) => void; onError?: (err: Error) => void } = {}
+export function useUpdateSyncDistributionMutation(
+  props: { onSuccess?: (distribution: SyncDistribution) => void; onError?: (err: Error) => void } = {}
 ) {
   return useMutation(() => ({
-    mutationFn: (req: SyncSourceRequest) => createSyncSource(req),
-    onSuccess: (source: SyncSource) => {
-      toastSuccess(t("platform.sync.actions.create.status.success"));
-      props.onSuccess?.(source);
-    },
-    onError: (err: Error) => {
-      handleHttpError(err, t("platform.sync.actions.create.status.fail"));
-      props.onError?.(err);
-    },
-  }));
-}
-
-export async function updateSyncSource(id: number, req: SyncSourceUpdateRequest) {
-  return await api.patch(`${api_root}/platform/sync/sources/${id}`, { json: req }).json<SyncSource>();
-}
-
-export function useUpdateSyncSourceMutation(
-  props: { onSuccess?: (source: SyncSource) => void; onError?: (err: Error) => void } = {}
-) {
-  return useMutation(() => ({
-    mutationFn: ({ id, req }: { id: number; req: SyncSourceUpdateRequest }) => updateSyncSource(id, req),
-    onSuccess: (source: SyncSource) => {
+    mutationFn: ({ id, req }: { id: number; req: SyncDistributionUpdateRequest }) => updateSyncDistribution(id, req),
+    onSuccess: (distribution: SyncDistribution) => {
       toastSuccess(t("general.actions.save.status.success"));
-      props.onSuccess?.(source);
+      props.onSuccess?.(distribution);
     },
     onError: (err: Error) => {
       handleHttpError(err, t("general.actions.save.status.fail"));
@@ -89,13 +63,15 @@ export function useUpdateSyncSourceMutation(
   }));
 }
 
-export async function deleteSyncSource(id: number) {
-  return await api.delete(`${api_root}/platform/sync/sources/${id}`).json<void>();
+export async function unbindSyncDistribution(id: number) {
+  return await api.post(`${api_root}/platform/sync/distributions/${id}/unbind`).json<SyncDistribution>();
 }
 
-export function useDeleteSyncSourceMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
+export function useUnbindSyncDistributionMutation(
+  props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}
+) {
   return useMutation(() => ({
-    mutationFn: (id: number) => deleteSyncSource(id),
+    mutationFn: (id: number) => unbindSyncDistribution(id),
     onSuccess: () => {
       toastSuccess(t("platform.sync.actions.unbind.status.success"));
       props.onSuccess?.();
@@ -107,8 +83,36 @@ export function useDeleteSyncSourceMutation(props: { onSuccess?: () => void; onE
   }));
 }
 
+export async function deleteSyncDistribution(id: number) {
+  return await api.delete(`${api_root}/platform/sync/distributions/${id}`).json<void>();
+}
+
+export function useDeleteSyncDistributionMutation(
+  props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}
+) {
+  return useMutation(() => ({
+    mutationFn: (id: number) => deleteSyncDistribution(id),
+    onSuccess: () => {
+      toastSuccess(t("platform.sync.actions.delete.status.success"));
+      props.onSuccess?.();
+    },
+    onError: (err: Error) => {
+      handleHttpError(err, t("platform.sync.actions.delete.status.fail"));
+      props.onError?.(err);
+    },
+  }));
+}
+
+export async function bindSyncDistribution(id: number, localGameId: number) {
+  return await api
+    .post(`${api_root}/platform/sync/distributions/${id}/bind`, {
+      json: { local_game_id: localGameId },
+    })
+    .json<SyncDistribution>();
+}
+
 export async function triggerSyncJob(id: number) {
-  return await api.post(`${api_root}/platform/sync/sources/${id}/jobs`).json<Pick<SyncJob, "id">>();
+  return await api.post(`${api_root}/platform/sync/distributions/${id}/jobs`).json<Pick<SyncJob, "id">>();
 }
 
 export function useTriggerSyncJobMutation(
@@ -128,23 +132,23 @@ export function useTriggerSyncJobMutation(
 }
 
 export async function getSyncJobs(id: number) {
-  return await api.get(`${api_root}/platform/sync/sources/${id}/jobs`).json<SyncJob[]>();
+  return await api.get(`${api_root}/platform/sync/distributions/${id}/jobs`).json<SyncJob[]>();
 }
 
 export function useSyncJobs({
-  sourceId,
+  distributionId,
   enabled,
   onError,
 }: {
-  sourceId: () => number;
+  distributionId: () => number;
   enabled?: () => boolean;
   onError?: (err: Error) => boolean;
 }) {
   return useQuery(
     () => ({
-      queryKey: ["platform", "sync", "sources", sourceId(), "jobs"] as const,
-      queryFn: () => getSyncJobs(sourceId()),
-      enabled: enabled?.() && sourceId() > 0,
+      queryKey: ["platform", "sync", "distributions", distributionId(), "jobs"] as const,
+      queryFn: () => getSyncJobs(distributionId()),
+      enabled: enabled?.() && distributionId() > 0,
       // poll the job list every 3 seconds while a job is queued or running
       refetchInterval: (query: { state: { data?: SyncJob[] } }): number | false =>
         query.state.data?.some((job) => isRunningStatus(job.status)) ? 3000 : false,
@@ -194,7 +198,7 @@ export function useSyncJob({
  * in the URL.
  */
 export async function importRepository(
-  req: { repository_url: string; token: string },
+  req: { endpoint: string; token: string },
   onLog?: (chunk: string) => void,
   signal?: AbortSignal
 ): Promise<{ log: string; gameId?: number }> {
@@ -245,4 +249,4 @@ export function parseImportedGameId(log: string): number | undefined {
   return undefined;
 }
 
-export type { SyncJobStatus, SyncSourceLastStatus };
+export type { SyncDistributionLastStatus, SyncJobStatus };

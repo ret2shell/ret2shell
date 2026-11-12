@@ -300,21 +300,25 @@
     },
     "sync": {
       "title": "資源同步",
-      "subtitle": "從其他 ret2shell 實例匯入題庫並保持快進同步,匯入的比賽預設隱藏。",
+      "subtitle": "從其他 ret2shell 實例導入題庫並保持快進同步:同步身份錨定源實例真實 bucket id,只同步通過准入 HEAD 驗證的版本。",
       "warnings": {
-        "import": "匯入的比賽預設隱藏,不會自動發布;啟用定時同步意味著信任上游未來的提交(包括 checker、映像檔與環境變化)。",
-        "unbind": "解除綁定只會停止同步,不會刪除本地比賽與題庫資料。"
+        "import": "導入的比賽預設隱藏,不會自動發布;啟用定時同步意味著信任上游未來的提交(包括 checker、鏡像與環境變化)。",
+        "unbind": "解除託管只會停止同步,不會刪除本地比賽與題庫資料;解除後可在編輯表單中重新綁定。",
+        "delete": "刪除分發設定會移除同步歷史與任務記錄,本地比賽保留並轉為可編輯狀態。"
       },
       "list": {
-        "empty": "還沒有同步來源",
-        "game": "本地比賽",
+        "empty": "還沒有同步分發",
+        "bucketId": "Bucket ID",
+        "headRef": "准入 HEAD",
+        "game": "託管比賽",
+        "unbound": "未綁定",
         "interval": "同步間隔",
         "intervalSeconds": "每 {seconds} 秒",
         "manual": "僅手動",
         "lastSuccess": "最近成功",
         "lastAttempt": "最近嘗試",
         "nextSync": "下次同步",
-        "oid": "同步基準",
+        "oid": "同步基線",
         "failures": "連續失敗 {count} 次",
         "enabled": "啟用中",
         "disabled": "已暫停"
@@ -332,25 +336,27 @@
         "retry": "重試"
       },
       "form": {
-        "createTitle": "匯入 / 註冊同步來源",
-        "repositoryUrl": {
-          "label": "來源儲存庫地址",
-          "placeholder": "https://ctf.example.org/api/game/1/repo/example.git",
-          "required": "來源儲存庫地址不能為空",
-          "invalid": "來源儲存庫地址必須是合法 URL"
+        "createTitle": "從源實例導入",
+        "editTitle": "編輯分發設定",
+        "endpoint": {
+          "label": "源實例地址",
+          "placeholder": "https://ctf.example.org/api",
+          "required": "源實例地址不能為空",
+          "invalid": "源實例地址必須是合法 URL",
+          "hint": "填寫源實例的基礎地址(含 API 前綴,如 /api);bucket id 與准入 HEAD 會自動發現並嚴格驗證。"
         },
         "token": {
-          "label": "來源實例 token",
-          "placeholder": "請輸入來源實例的同步 token",
+          "label": "源實例 token",
+          "placeholder": "請輸入源實例的同步 token",
           "required": "同步 token 不能為空",
           "keep": "留空保留已儲存的 token",
           "hint": "token 只在儲存時提交,不會回顯,也不會寫入瀏覽器儲存。"
         },
         "game": {
           "label": "綁定本地比賽 ID",
-          "placeholder": "留空則先執行一次性匯入",
+          "placeholder": "例如:3",
           "invalid": "本地比賽 ID 必須是正整數",
-          "hint": "填寫已存在的本地比賽 ID 可直接綁定;留空會先從來源實例完整匯入,再自動註冊同步來源。"
+          "hint": "僅當分發未託管任何比賽時可綁定;本地比賽 bucket 必須與分發一致,且本地 HEAD 必須等於同步基線。"
         },
         "interval": {
           "label": "同步間隔(秒)",
@@ -360,16 +366,17 @@
         },
         "enabled": { "label": "啟用定時同步" },
         "importLog": {
-          "title": "匯入日誌"
+          "title": "導入日誌"
         },
         "submit": {
-          "import": "開始匯入並註冊",
-          "bind": "註冊同步來源"
+          "import": "開始導入",
+          "bind": "綁定比賽"
         }
       },
       "actions": {
         "sync": {
           "title": "手動同步",
+          "noGame": "分發未綁定比賽,請先在編輯表單綁定",
           "status": {
             "success": "已建立同步任務",
             "fail": "建立同步任務失敗"
@@ -378,17 +385,13 @@
         "jobs": "任務與日誌",
         "pause": "暫停",
         "resume": "啟用",
-        "unbind": { "title": "解除綁定", "status": { "success": "已解除同步來源綁定", "fail": "解除綁定失敗" } },
-        "create": {
-          "status": {
-            "success": "同步來源已註冊",
-            "fail": "註冊同步來源失敗"
-          }
-        },
+        "unbind": { "title": "解除託管", "status": { "success": "已解除託管,本地內容可編輯", "fail": "解除託管失敗" } },
+        "delete": { "title": "刪除分發", "status": { "success": "分發已刪除", "fail": "刪除分發失敗" } },
+        "bind": { "status": { "success": "比賽已綁定到分發", "fail": "綁定比賽失敗" } },
         "import": {
           "status": {
-            "fail": "匯入失敗",
-            "noGameId": "匯入已結束,但未能從日誌中解析出本地比賽 ID,請手動綁定。"
+            "fail": "導入失敗",
+            "noGameId": "導入已結束,但未能從日誌中解析出本地比賽 ID。"
           }
         }
       },
@@ -399,6 +402,7 @@
         "retry": "重試同步",
         "trigger": "觸發方式",
         "oids": "OID 變化",
+        "expectedHead": "准入 HEAD",
         "created": "建立時間",
         "started": "開始時間",
         "finished": "結束時間",
@@ -407,37 +411,85 @@
         "noLog": "暫無日誌"
       },
       "errors": {
-        "fetchSources": {
-          "title": "取得同步來源列表失敗"
+        "fetchDistributions": {
+          "title": "獲取同步分發列表失敗"
         },
         "fetchJobs": {
-          "title": "取得同步任務列表失敗"
+          "title": "獲取同步任務列表失敗"
         },
         "fetchJob": {
-          "title": "取得同步任務詳情失敗"
+          "title": "獲取同步任務詳情失敗"
         },
         "unknown": {
           "title": "同步失敗"
         },
         "unauthorized": {
-          "title": "來源實例認證失敗",
-          "hint": "同步 token 無效或已在來源實例輪換,請編輯同步來源並更新 token。"
+          "title": "源實例認證失敗",
+          "hint": "同步 token 無效或已在源實例輪換,請編輯分發並更新 token。"
         },
         "forbidden": {
-          "title": "來源實例拒絕同步",
-          "hint": "上游可能禁止了實例同步(sync=2)或正式比賽尚未封存,請聯絡來源實例管理員。"
+          "title": "源實例拒絕同步",
+          "hint": "上游可能禁止了實例同步(sync=2)或正式比賽尚未歸檔,請聯繫源實例管理員。"
         },
         "local_diverged": {
-          "title": "本地儲存庫已偏離同步基準",
-          "hint": "本地比賽儲存庫在上次同步後被修改過。可暫停同步並轉為本地維護,或解除綁定。"
+          "title": "本地倉庫已偏離同步基線",
+          "hint": "本地比賽倉庫在上次同步後被修改過。可暫停同步並轉為本地維護,或解除託管。"
         },
         "upstream_diverged": {
           "title": "上游歷史已分叉",
-          "hint": "上游發生了強制推送或歷史重寫。請修復上游後重新綁定,或聯絡來源實例管理員。"
+          "hint": "上游發生了強制推送或歷史重寫。請修復上游後重新導入,或聯繫源實例管理員。"
         },
-        "target_visible": {
-          "title": "目標比賽已對外可見",
-          "hint": "同步只允許寫入隱藏比賽,請先將本地比賽設為隱藏。"
+        "head_ref_mismatch": {
+          "title": "准入 HEAD 不匹配",
+          "hint": "拉取到的提交與本次固定的准入 HEAD 不一致,源或鏡像可能返回了被替換的內容,已拒絕同步。"
+        },
+        "game_missing": {
+          "title": "託管比賽不存在",
+          "hint": "本地比賽已被刪除,請刪除或重新綁定分發。"
+        },
+        "bucket_missing": {
+          "title": "本地 bucket 缺失",
+          "hint": "託管比賽沒有倉庫 bucket。"
+        },
+        "bucket_locked": {
+          "title": "倉庫正在被其他操作寫入",
+          "hint": "另一個倉庫寫操作正在進行,請稍後重試。"
+        },
+        "missing_baseline": {
+          "title": "缺少同步基線",
+          "hint": "分發沒有基線版本,請重新導入。"
+        },
+        "discover_failed": {
+          "title": "源實例發現失敗",
+          "hint": "無法從源實例獲取 bucket id 與當前 HEAD,請檢查地址與 token。"
+        },
+        "fetch_failed": {
+          "title": "拉取源倉庫失敗",
+          "hint": "無法從源實例拉取更新,請檢查網路與憑證。"
+        },
+        "candidate_unresolved": {
+          "title": "候選提交無法解析",
+          "hint": "拉取後的候選提交無法解析為完整 commit hash。"
+        },
+        "validation_failed": {
+          "title": "上游版本被拒絕",
+          "hint": "拉取的內容未通過安全驗證(樹規模、路徑、檔案類型等)。"
+        },
+        "materialization_failed": {
+          "title": "物化失敗",
+          "hint": "內容寫入本地資料庫失敗,已回滾。"
+        },
+        "rollback_failed": {
+          "title": "回滾失敗",
+          "hint": "同步失敗且回滾也失敗,倉庫需要人工檢查。"
+        },
+        "timeout": {
+          "title": "同步超時",
+          "hint": "同步超出時間預算被取消,請稍後重試。"
+        },
+        "internal_error": {
+          "title": "內部錯誤",
+          "hint": "伺服器內部錯誤,請查看伺服器日誌。"
         }
       }
     },

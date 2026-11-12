@@ -1,5 +1,5 @@
 use r2s_bucket::git::{Git, SYNC_CANDIDATE_REF};
-use r2s_database::{game, sync_source};
+use r2s_database::{distribution, game};
 use sea_orm::TransactionTrait;
 use tracing::{error, info, warn};
 use url::Url;
@@ -16,7 +16,7 @@ use crate::{
 pub(crate) enum SyncPlan {
   /// The upstream candidate matches the baseline, nothing to do.
   NoOp { oid: String },
-  /// The upstream candidate is a strict descendant of the baseline.
+  /// The pinned admission head is a strict descendant of the baseline.
   FastForward { old_oid: String, new_oid: String },
 }
 
@@ -24,18 +24,33 @@ pub(crate) enum SyncPlan {
 /// frontend verbatim.
 #[derive(Clone, Debug)]
 pub(crate) enum UpdateError {
-  LocalDiverged { head: String, expected: String },
-  UpstreamDiverged { old_oid: String, new_oid: String },
+  LocalDiverged {
+    head: String,
+    expected: String,
+  },
+  UpstreamDiverged {
+    old_oid: String,
+    new_oid: String,
+  },
+  /// The fetched candidate does not match the admission head pinned for this
+  /// run: the source (or a mirror) served unexpected content.
+  HeadRefMismatch {
+    expected: String,
+    actual: String,
+  },
   GameMissing,
-  GameVisible,
   BucketMissing,
   BucketLocked,
   MissingBaseline,
+  DiscoverFailed(String),
   FetchFailed(String),
   CandidateUnresolved(String),
   Validation(String),
   Materialization(String),
-  RollbackFailed { cause: String, rollback: String },
+  RollbackFailed {
+    cause: String,
+    rollback: String,
+  },
   Timeout,
   Internal(String),
 }
@@ -45,11 +60,12 @@ impl UpdateError {
     match self {
       Self::LocalDiverged { .. } => "local_diverged",
       Self::UpstreamDiverged { .. } => "upstream_diverged",
+      Self::HeadRefMismatch { .. } => "head_ref_mismatch",
       Self::GameMissing => "game_missing",
-      Self::GameVisible => "game_visible",
       Self::BucketMissing => "bucket_missing",
       Self::BucketLocked => "bucket_locked",
       Self::MissingBaseline => "missing_baseline",
+      Self::DiscoverFailed(_) => "discover_failed",
       Self::FetchFailed(_) => "fetch_failed",
       Self::CandidateUnresolved(_) => "candidate_unresolved",
       Self::Validation(_) => "validation_failed",
@@ -64,22 +80,28 @@ impl UpdateError {
     match self {
       Self::LocalDiverged { head, expected } => format!(
         "the local repository HEAD `{head}` no longer matches the last synced revision `{expected}`; \
-         fix the local repository, pause the source, or unbind it to maintain the game locally"
+         unbind the distribution to maintain the game locally"
       ),
       Self::UpstreamDiverged { old_oid, new_oid } => format!(
         "the upstream repository rewrote history: `{new_oid}` is not a descendant of `{old_oid}`; \
          the source must be repaired before syncing again"
       ),
-      Self::GameMissing => "the local game bound to this sync source no longer exists".to_owned(),
-      Self::GameVisible => {
-        "the local game is visible; syncing into a published game is not allowed".to_owned()
+      Self::HeadRefMismatch { expected, actual } => format!(
+        "the fetched candidate `{actual}` does not match the admission head `{expected}` pinned \
+         for this run; the source or mirror served unexpected content and was rejected"
+      ),
+      Self::GameMissing => {
+        "the local game managed by this distribution no longer exists".to_owned()
       }
       Self::BucketMissing => "the local game has no repository bucket".to_owned(),
       Self::BucketLocked => {
         "another repository write operation is already in progress for this game".to_owned()
       }
       Self::MissingBaseline => {
-        "the sync source has no baseline revision; re-register the source".to_owned()
+        "the distribution has no baseline revision; re-import the distribution".to_owned()
+      }
+      Self::DiscoverFailed(message) => {
+        format!("failed to discover the source admission head: {message}")
       }
       Self::FetchFailed(message) => format!("failed to fetch the source repository: {message}"),
       Self::CandidateUnresolved(message) => {
@@ -116,12 +138,16 @@ fn head_branch(head_ref: &str) -> Result<&str, UpdateError> {
 }
 
 /// Derives the sync plan from the local repository state. The candidate ref
-/// must already be populated by a fetch. Order matters: the local divergence
-/// check runs before anything else, a matching candidate is a successful
+/// must already be populated by a fetch, and `expected_head` is the admission
+/// head pinned for this run. Order matters: the local divergence check runs
+/// before anything else, a candidate that is not the pinned admission head is
+/// rejected outright, a candidate matching the baseline is a successful
 /// no-op, and only a strict descendant may be applied.
-pub(crate) async fn plan_update(git: &Git, last_oid: &str) -> Result<SyncPlan, UpdateError> {
+pub(crate) async fn plan_update(
+  git: &Git, last_oid: &str, expected_head: &str,
+) -> Result<SyncPlan, UpdateError> {
   let head = git.get_head().await.map_err(internal)?;
-  if head != last_oid {
+  if !head.eq_ignore_ascii_case(last_oid) {
     return Err(UpdateError::LocalDiverged {
       head,
       expected: last_oid.to_owned(),
@@ -131,7 +157,13 @@ pub(crate) async fn plan_update(git: &Git, last_oid: &str) -> Result<SyncPlan, U
     .resolve_ref(SYNC_CANDIDATE_REF)
     .await
     .map_err(|error| UpdateError::CandidateUnresolved(error.to_string()))?;
-  if candidate == last_oid {
+  if !candidate.eq_ignore_ascii_case(expected_head) {
+    return Err(UpdateError::HeadRefMismatch {
+      expected: expected_head.to_owned(),
+      actual: candidate,
+    });
+  }
+  if candidate.eq_ignore_ascii_case(last_oid) {
     return Ok(SyncPlan::NoOp { oid: candidate });
   }
   if !git
@@ -171,19 +203,17 @@ pub(crate) struct UpdateReport {
   pub applied: bool,
 }
 
-/// Runs one incremental sync of a source. On any failure the database, the
-/// branch ref and the working tree are restored, leaving no half-synchronized
-/// state behind.
+/// Runs one incremental sync of a managed distribution against the admission
+/// head pinned for this run. On any failure the database, the branch ref and
+/// the working tree are restored, leaving no half-synchronized state behind.
 pub(crate) async fn execute_update(
-  state: &GlobalState, source: &sync_source::Model, trace_id: &str, logger: &StreamLogger,
+  state: &GlobalState, source: &distribution::Model, repository_url: &Url, expected_head: &str,
+  trace_id: &str, logger: &StreamLogger,
 ) -> Result<UpdateReport, UpdateError> {
-  let game = game::get(&state.db.conn, source.local_game_id)
+  let game = game::get_by_managed_distribution(&state.db.conn, source.id)
     .await
     .map_err(internal)?
     .ok_or(UpdateError::GameMissing)?;
-  if !game.hidden {
-    return Err(UpdateError::GameVisible);
-  }
   let bucket_name = game.bucket.clone().ok_or(UpdateError::BucketMissing)?;
   let repo_lock = state.bucket.lock(&bucket_name).map_err(|bucket_error| {
     if matches!(bucket_error, r2s_bucket::BucketError::LockError) {
@@ -203,12 +233,12 @@ pub(crate) async fn execute_update(
   logger
     .info(format!(
       "Fetching source repository from {}...",
-      source.repository_url
+      repository_url.host_str().unwrap_or("source instance")
     ))
     .await;
   game_bucket
     .git
-    .fetch(&source.repository_url, &branch, Some(&source.credential))
+    .fetch(repository_url.as_str(), &branch, Some(&source.credential))
     .await
     .map_err(|error| {
       UpdateError::FetchFailed(crate::sync::job::redact_credential(
@@ -217,7 +247,7 @@ pub(crate) async fn execute_update(
       ))
     })?;
 
-  let plan = plan_update(&game_bucket.git, &last_oid).await?;
+  let plan = plan_update(&game_bucket.git, &last_oid, expected_head).await?;
   let report = match plan {
     SyncPlan::NoOp { oid } => {
       logger
@@ -275,17 +305,23 @@ pub(crate) async fn execute_update(
       // consumes it, so the commit happens after the block to keep the
       // repository rollback path reachable
       let materialize = async {
-        let repository_url = Url::parse(&source.repository_url).map_err(|error| {
-          UpdateError::Validation(format!(
-            "the stored repository URL is no longer valid: {error}"
-          ))
-        })?;
         let operator_id = game.admins.0.first().copied().unwrap_or_default();
+        let outcome =
+          synchronize_repository_import(state, &txn, &game, &game_bucket, &diff, logger)
+            .await
+            .map_err(|sync_error| {
+              UpdateError::Materialization(crate::sync::job::redact_credential(
+                &sync_error.to_string(),
+                &source.credential,
+              ))
+            })?;
+        // media sync runs after materialization so the reference set is read
+        // from the database rows of the current game state
         crate::sync::media::synchronize_media(
           state,
           &txn,
-          &repository_url,
-          &game_bucket,
+          repository_url,
+          &game,
           &source.credential,
           operator_id,
           logger,
@@ -297,27 +333,20 @@ pub(crate) async fn execute_update(
             &source.credential,
           ))
         })?;
-        let outcome =
-          synchronize_repository_import(state, &txn, &game, &game_bucket, &diff, logger)
-            .await
-            .map_err(|sync_error| {
-              UpdateError::Materialization(crate::sync::job::redact_credential(
-                &sync_error.to_string(),
-                &source.credential,
-              ))
-            })?;
         let now = chrono::Utc::now();
-        sync_source::update(
+        distribution::update(
           &txn,
-          sync_source::Model {
+          distribution::Model {
+            // the applied revision becomes the newly approved admission head
+            head_ref: new_oid.clone(),
             last_synced_oid: Some(new_oid.clone()),
             last_attempt_at: Some(now),
             last_success_at: Some(now),
-            last_status: sync_source::STATUS_SUCCEEDED.to_owned(),
+            last_status: distribution::STATUS_SUCCEEDED.to_owned(),
             last_error: None,
             consecutive_failures: 0,
             next_sync_at: if source.enabled {
-              crate::sync::source::next_after_success(now, source.interval_seconds)
+              crate::sync::distribution::next_after_success(now, source.interval_seconds)
             } else {
               None
             },
@@ -340,7 +369,7 @@ pub(crate) async fn execute_update(
             }
             Err(rollback_error) => {
               error!(
-                source_id = source.id,
+                distribution_id = source.id,
                 game_id = game.id,
                 error = %rollback_error,
                 "repository rollback after a failed incremental sync failed"
@@ -366,7 +395,7 @@ pub(crate) async fn execute_update(
           }
           Err(rollback_error) => {
             error!(
-              source_id = source.id,
+              distribution_id = source.id,
               game_id = game.id,
               error = %rollback_error,
               "repository rollback after a failed commit failed"
@@ -385,7 +414,7 @@ pub(crate) async fn execute_update(
         // effects are logged and retried by the next sync instead of failing
         // the job after a successful commit
         warn!(
-          source_id = source.id,
+          distribution_id = source.id,
           game_id = game.id,
           error = %finalize_error,
           "failed to finalize the incremental sync side effects"
@@ -405,7 +434,7 @@ pub(crate) async fn execute_update(
   };
   drop(repo_lock);
   info!(
-    source_id = source.id,
+    distribution_id = source.id,
     game_id = game.id,
     from = %report.old_oid,
     to = %report.new_oid,
@@ -487,13 +516,33 @@ mod tests {
   async fn plan_rejects_a_locally_diverged_repository() {
     let (repo, git, first) = setup("local-diverged").await;
     let second = commit(&repo, "second");
-    let error = plan_update(&git, &first).await.unwrap_err();
+    let error = plan_update(&git, &first, &second).await.unwrap_err();
     assert!(matches!(
       &error,
       UpdateError::LocalDiverged { head, expected }
-      if *head == second && *expected == first
+        if *head == second && *expected == first
     ));
     assert_eq!(error.code(), "local_diverged");
+    cleanup(&repo);
+  }
+
+  #[tokio::test]
+  async fn plan_rejects_a_candidate_that_is_not_the_pinned_admission_head() {
+    let (repo, git, first) = setup("head-mismatch").await;
+    // the upstream advances twice, but the run pinned a different head than
+    // what the fetch actually delivered (e.g. a mirror swap)
+    run_git(&repo, &["checkout", "-q", "-b", "upstream-next"]);
+    let second = commit(&repo, "second");
+    let third = commit(&repo, "third");
+    run_git(&repo, &["checkout", "-q", "master"]);
+    set_candidate(&repo, &second);
+    let error = plan_update(&git, &first, &third).await.unwrap_err();
+    assert!(matches!(
+      &error,
+      UpdateError::HeadRefMismatch { expected, actual }
+        if *expected == third && *actual == second
+    ));
+    assert_eq!(error.code(), "head_ref_mismatch");
     cleanup(&repo);
   }
 
@@ -501,7 +550,7 @@ mod tests {
   async fn plan_is_a_noop_when_the_candidate_matches_the_baseline() {
     let (repo, git, first) = setup("noop").await;
     set_candidate(&repo, &first);
-    let plan = plan_update(&git, &first).await.unwrap();
+    let plan = plan_update(&git, &first, &first).await.unwrap();
     assert_eq!(plan, SyncPlan::NoOp { oid: first.clone() });
     cleanup(&repo);
   }
@@ -513,18 +562,18 @@ mod tests {
     let unrelated = commit(&repo, "unrelated root");
     run_git(&repo, &["checkout", "master"]);
     set_candidate(&repo, &unrelated);
-    let error = plan_update(&git, &first).await.unwrap_err();
+    let error = plan_update(&git, &first, &unrelated).await.unwrap_err();
     assert!(matches!(
       &error,
       UpdateError::UpstreamDiverged { old_oid, new_oid }
-      if *old_oid == first && *new_oid == unrelated
+        if *old_oid == first && *new_oid == unrelated
     ));
     assert_eq!(error.code(), "upstream_diverged");
     cleanup(&repo);
   }
 
   #[tokio::test]
-  async fn plan_accepts_a_fast_forward_candidate() {
+  async fn plan_accepts_a_pinned_fast_forward_candidate() {
     let (repo, git, first) = setup("fast-forward").await;
     // the new upstream commit is created on a side branch so the local HEAD
     // stays on the baseline revision, like a real pre-sync repository
@@ -532,7 +581,7 @@ mod tests {
     let second = commit(&repo, "second");
     run_git(&repo, &["checkout", "-q", "master"]);
     set_candidate(&repo, &second);
-    let plan = plan_update(&git, &first).await.unwrap();
+    let plan = plan_update(&git, &first, &second).await.unwrap();
     assert_eq!(
       plan,
       SyncPlan::FastForward {
@@ -546,7 +595,7 @@ mod tests {
   #[tokio::test]
   async fn plan_requires_a_resolved_candidate() {
     let (repo, git, first) = setup("missing-candidate").await;
-    let error = plan_update(&git, &first).await.unwrap_err();
+    let error = plan_update(&git, &first, &first).await.unwrap_err();
     assert!(matches!(error, UpdateError::CandidateUnresolved(_)));
     assert_eq!(error.code(), "candidate_unresolved");
     cleanup(&repo);

@@ -50,6 +50,7 @@ pub(super) async fn update_checker_script(
   Extension(token): Extension<Token>, Extension(game): Extension<game::Model>,
   Extension(challenge): Extension<challenge::Model>, Json(req): Json<UpdateCheckerScriptRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  crate::routes::game::ensure_not_managed(&game)?;
   super::check_challenge_publishing(&challenge)?;
   let (game_bucket, challenge_bucket) =
     super::get_challenge_bucket_mut(&bucket, &game, &challenge).await?;

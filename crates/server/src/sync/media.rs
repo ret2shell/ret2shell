@@ -1,8 +1,7 @@
 use std::{collections::BTreeSet, path::PathBuf, process::Stdio};
 
-use r2s_bucket::game::GameBucket;
-use r2s_database::media;
-use sea_orm::DatabaseTransaction;
+use r2s_database::{challenge, challenge_milestone, game, media};
+use sea_orm::{ConnectionTrait, DatabaseTransaction};
 use tokio::{io::AsyncWriteExt, process::Command};
 use url::Url;
 
@@ -33,60 +32,36 @@ pub(crate) fn media_endpoints(repository_url: &Url, hash: &str) -> Result<(Url, 
   Ok((protected, fallback))
 }
 
-pub(crate) async fn referenced_media_hashes(
-  game_bucket: &GameBucket,
-) -> Result<BTreeSet<String>, String> {
+/// Collects every media hash referenced by the current database rows of the
+/// game: its cover/logo, all challenge avatars and all milestone avatars.
+/// Runs inside the materialization transaction, so it sees the game state
+/// the ongoing import or sync just wrote.
+pub(crate) async fn referenced_media_hashes_from_db<C>(
+  db: &C, game_id: i64,
+) -> Result<BTreeSet<String>, String>
+where
+  C: ConnectionTrait, {
   let mut hashes = BTreeSet::new();
-  let config = game_bucket
-    .config()
-    .await
-    .map_err(|error| error.to_string())?;
-  for hash in [config.cover, config.logo].into_iter().flatten() {
-    hashes.insert(hash);
-  }
-  for milestone in game_bucket
-    .milestones()
+  let game = game::get(db, game_id)
     .await
     .map_err(|error| error.to_string())?
-    .milestones
+    .ok_or_else(|| "the game row disappeared while collecting media references".to_owned())?;
+  for hash in [game.cover, game.logo].into_iter().flatten() {
+    hashes.insert(hash);
+  }
+  for challenge in challenge::get_list(db, game_id, true)
+    .await
+    .map_err(|error| error.to_string())?
   {
-    if let Some(hash) = milestone.avatar {
+    if let Some(hash) = challenge.avatar {
       hashes.insert(hash);
     }
   }
-  let challenges_root = game_bucket.git.path().join("challenges");
-  let mut entries = match tokio::fs::read_dir(&challenges_root).await {
-    Ok(entries) => entries,
-    Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(hashes),
-    Err(error) => return Err(error.to_string()),
-  };
-  while let Some(entry) = entries
-    .next_entry()
+  for milestone in challenge_milestone::get_list(db, game_id)
     .await
     .map_err(|error| error.to_string())?
   {
-    if !entry
-      .file_type()
-      .await
-      .map_err(|error| error.to_string())?
-      .is_dir()
-    {
-      continue;
-    }
-    let name = entry.file_name().to_string_lossy().to_string();
-    if name.starts_with('.') {
-      continue;
-    }
-    let challenge_bucket = game_bucket
-      .at(&name)
-      .await
-      .map_err(|error| error.to_string())?;
-    if let Some(hash) = challenge_bucket
-      .config()
-      .await
-      .map_err(|error| error.to_string())?
-      .avatar
-    {
+    if let Some(hash) = milestone.avatar {
       hashes.insert(hash);
     }
   }
@@ -144,10 +119,10 @@ async fn download(url: &Url, credential: &str, destination: &PathBuf) -> Result<
 }
 
 pub(crate) async fn synchronize_media(
-  state: &GlobalState, txn: &DatabaseTransaction, repository_url: &Url, game_bucket: &GameBucket,
+  state: &GlobalState, txn: &DatabaseTransaction, repository_url: &Url, game: &game::Model,
   credential: &str, operator_id: i64, logger: &StreamLogger,
 ) -> Result<(), String> {
-  let hashes = referenced_media_hashes(game_bucket).await?;
+  let hashes = referenced_media_hashes_from_db(txn, game.id).await?;
   for hash in hashes {
     if state.media.get(&hash).await.is_ok() {
       if media::get_by_hash(txn, &hash)

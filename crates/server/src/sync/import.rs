@@ -1,5 +1,3 @@
-use std::{net::IpAddr, str::FromStr};
-
 use chrono::Utc;
 use r2s_bucket::game::GameBucket;
 use r2s_database::game;
@@ -11,48 +9,8 @@ use crate::{
   routes::game::repo_sync::{
     StreamLogger, finalize_repository_sync, synchronize_repository_import,
   },
-  traits::{GlobalState, ResponseError},
+  traits::GlobalState,
 };
-
-pub(crate) fn normalize_repository_url(input: &str) -> Result<Url, ResponseError> {
-  if input.len() > 2048 {
-    return Err(ResponseError::BadRequest(
-      "repository URL is too long".to_owned(),
-    ));
-  }
-  let mut url = Url::parse(input)
-    .map_err(|_| ResponseError::BadRequest("invalid repository URL".to_owned()))?;
-  let host = url
-    .host_str()
-    .ok_or_else(|| ResponseError::BadRequest("repository URL has no host".to_owned()))?
-    .to_owned();
-  if !url.username().is_empty() || url.password().is_some() {
-    return Err(ResponseError::BadRequest(
-      "repository URL must not contain user information".to_owned(),
-    ));
-  }
-  if url.query().is_some() || url.fragment().is_some() {
-    return Err(ResponseError::BadRequest(
-      "repository URL must not contain a query or fragment".to_owned(),
-    ));
-  }
-  let local_http = IpAddr::from_str(&host).is_ok_and(|ip| ip.is_loopback())
-    || host == "localhost"
-    || !host.contains('.');
-  if url.scheme() != "https" && !(url.scheme() == "http" && local_http) {
-    return Err(ResponseError::BadRequest(
-      "repository URL must use HTTPS, or HTTP only for a local instance".to_owned(),
-    ));
-  }
-  let path = url.path().trim_end_matches('/').to_owned();
-  if !path.ends_with(".git") || !path.contains("/game/") || !path.contains("/repo/") {
-    return Err(ResponseError::BadRequest(
-      "repository URL is not a ret2shell game Git endpoint".to_owned(),
-    ));
-  }
-  url.set_path(&path);
-  Ok(url)
-}
 
 struct ImportBucketGuard {
   bucket: Option<GameBucket>,
@@ -133,6 +91,7 @@ fn local_game_model(
     node_selector: None,
     traffic: None,
     lifecycle: None,
+    managed_distribution: None,
   };
   model.validate().map_err(|error| error.to_string())?;
   Ok(model)
@@ -141,7 +100,7 @@ fn local_game_model(
 pub(crate) async fn execute_import(
   state: GlobalState, endpoint: Url, credential: String, operator_id: i64, trace_id: String,
   logger: StreamLogger,
-) -> Result<(game::Model, crate::sync::discover::DiscoveredSource), String> {
+) -> Result<game::Model, String> {
   logger.header("Ret2Shell instance import").await;
   logger
     .info(format!(
@@ -164,6 +123,16 @@ pub(crate) async fn execute_import(
   {
     return Err(format!(
       "a game with bucket id {} already exists on this instance",
+      descriptor.bucket_id
+    ));
+  }
+  if r2s_database::distribution::get_by_bucket(&state.db.conn, &descriptor.bucket_id)
+    .await
+    .map_err(|error| format!("failed to check for existing distributions: {error}"))?
+    .is_some()
+  {
+    return Err(format!(
+      "a distribution for bucket id {} already exists on this instance",
       descriptor.bucket_id
     ));
   }
@@ -220,20 +189,55 @@ pub(crate) async fn execute_import(
     let model = game::create(&txn, model)
       .await
       .map_err(|error| format!("failed to create the local game: {error}"))?;
+    let outcome =
+      synchronize_repository_import(&state, &txn, &model, guard.bucket(), &diff, &logger)
+        .await
+        .map_err(|error| format!("failed to materialize the source repository: {error}"))?;
+    // media sync runs after materialization so the reference set is read from
+    // the database rows of the freshly imported game
     crate::sync::media::synchronize_media(
       &state,
       &txn,
       &repository_url,
-      guard.bucket(),
+      &model,
       &credential,
       operator_id,
       &logger,
     )
     .await?;
-    let outcome =
-      synchronize_repository_import(&state, &txn, &model, guard.bucket(), &diff, &logger)
-        .await
-        .map_err(|error| format!("failed to materialize the source repository: {error}"))?;
+    // the import pinned its admission head and verified the clone against it,
+    // so the distribution starts with that head as the approved baseline
+    let distribution = r2s_database::distribution::create(
+      &txn,
+      r2s_database::distribution::Model {
+        id: 0,
+        bucket_id: descriptor.bucket_id.clone(),
+        endpoint: endpoint.to_string(),
+        credential: credential.clone(),
+        head_ref: descriptor.head.clone(),
+        name: Some(descriptor.name.clone()),
+        avatar: descriptor.avatar.clone(),
+        description: Some(descriptor.description.clone()),
+        enabled: false,
+        interval_seconds: None,
+        last_synced_oid: Some(descriptor.head.clone()),
+        next_sync_at: None,
+        last_attempt_at: None,
+        last_success_at: None,
+        last_status: r2s_database::distribution::STATUS_IDLE.to_owned(),
+        last_error: None,
+        consecutive_failures: 0,
+        created_at: chrono::Utc::now(),
+        updated_at: chrono::Utc::now(),
+      },
+    )
+    .await
+    .map_err(|error| format!("failed to create the distribution: {error}"))?;
+    let mut managed = model.clone();
+    managed.managed_distribution = Some(distribution.id);
+    let model = game::update(&txn, managed)
+      .await
+      .map_err(|error| format!("failed to mark the game as managed: {error}"))?;
     txn
       .commit()
       .await
@@ -254,9 +258,15 @@ pub(crate) async fn execute_import(
       .await;
   }
   logger
+    .info(format!(
+      "Registered distribution #{} managing the imported game.",
+      model.managed_distribution.unwrap_or_default()
+    ))
+    .await;
+  logger
     .success(format!("SYNC_IMPORT_GAME_ID={}", model.id))
     .await;
-  Ok((model, discovered))
+  Ok(model)
 }
 
 #[cfg(test)]
@@ -264,29 +274,7 @@ mod tests {
   use chrono::Utc;
   use r2s_bucket::game::{AccessPolicy, GameConfig, HostType};
 
-  use super::{local_game_model, normalize_repository_url};
-
-  #[test]
-  fn repository_url_accepts_https_and_local_http() {
-    assert!(
-      normalize_repository_url("https://ctf.example.org/api/game/1/repo/example.git").is_ok()
-    );
-    assert!(normalize_repository_url("http://127.0.0.1:8080/api/game/1/repo/example.git").is_ok());
-    assert!(normalize_repository_url("http://platform-a/api/game/1/repo/example.git").is_ok());
-  }
-
-  #[test]
-  fn repository_url_rejects_unsafe_or_unrelated_endpoints() {
-    for input in [
-      "file:///tmp/game.git",
-      "http://ctf.example.org/api/game/1/repo/example.git",
-      "https://user:password@ctf.example.org/api/game/1/repo/example.git",
-      "https://ctf.example.org/api/game/1/repo/example.git?token=secret",
-      "https://ctf.example.org/api/game/1",
-    ] {
-      assert!(normalize_repository_url(input).is_err(), "accepted {input}");
-    }
-  }
+  use super::local_game_model;
 
   #[test]
   fn imported_game_uses_local_security_defaults() {
@@ -317,5 +305,6 @@ mod tests {
     assert_eq!(model.bucket.as_deref(), Some("imported_bucket"));
     assert_ne!(model.token.as_deref(), Some("source token"));
     assert_eq!(model.env_limit, None);
+    assert_eq!(model.managed_distribution, None);
   }
 }

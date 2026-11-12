@@ -1,7 +1,7 @@
 use std::sync::{Arc, Mutex};
 
 use chrono::Utc;
-use r2s_database::sync_job;
+use r2s_database::{distribution, game, sync_job};
 use sea_orm::{ActiveValue, ColumnTrait, EntityTrait, QueryFilter};
 use tokio::sync::mpsc;
 use tower_http::request_id::RequestId;
@@ -117,20 +117,28 @@ impl JobLogger {
   }
 }
 
-/// Creates a queued job for the source. A source keeps at most one queued or
-/// running job, so a concurrent trigger is rejected instead of queued up.
+/// Creates a queued job for the distribution. A distribution keeps at most
+/// one queued or running job, so a concurrent trigger is rejected instead of
+/// queued up, and a distribution without a managed game cannot sync at all.
 pub(crate) async fn enqueue_job(
-  state: &GlobalState, source_id: i64, trigger: &str, trace: Option<&RequestId>,
+  state: &GlobalState, distribution_id: i64, trigger: &str, trace: Option<&RequestId>,
 ) -> Result<sync_job::Model, ResponseError> {
-  let source = r2s_database::sync_source::get(&state.db.conn, source_id)
+  let model = distribution::get(&state.db.conn, distribution_id)
     .await?
-    .ok_or_else(|| ResponseError::NotFound("sync source".to_owned()))?;
-  if sync_job::get_active_by_source(&state.db.conn, source_id)
+    .ok_or_else(|| ResponseError::NotFound("distribution".to_owned()))?;
+  let managed = game::get_by_managed_distribution(&state.db.conn, distribution_id)
+    .await?
+    .ok_or_else(|| {
+      ResponseError::PreconditionFailed(
+        "this distribution has no managed game; bind a game before syncing".to_owned(),
+      )
+    })?;
+  if sync_job::get_active_by_distribution(&state.db.conn, distribution_id)
     .await?
     .is_some()
   {
     return Err(ResponseError::Conflict(
-      "this sync source already has a queued or running job".to_owned(),
+      "this distribution already has a queued or running job".to_owned(),
     ));
   }
   let trace_id = trace
@@ -141,12 +149,13 @@ pub(crate) async fn enqueue_job(
     &state.db.conn,
     sync_job::Model {
       id: 0,
-      source_id,
-      local_game_id: source.local_game_id,
+      distribution_id,
+      local_game_id: managed.id,
       trigger: trigger.to_owned(),
       status: sync_job::STATUS_QUEUED.to_owned(),
-      old_oid: source.last_synced_oid.clone(),
+      old_oid: model.last_synced_oid.clone(),
       new_oid: None,
+      expected_head: None,
       trace_id,
       error_code: None,
       error_message: None,
@@ -182,18 +191,45 @@ pub(crate) async fn claim_job(
   Ok(sync_job::get(&state.db.conn, job_id).await?)
 }
 
+/// Pins the admission head of this run on the job row for audit, before any
+/// repository content is touched.
+async fn set_expected_head(
+  state: &GlobalState, job_id: i64, expected_head: &str,
+) -> Result<(), ResponseError> {
+  let patch = sync_job::ActiveModel {
+    expected_head: ActiveValue::Set(Some(expected_head.to_owned())),
+    ..Default::default()
+  };
+  sync_job::Entity::update_many()
+    .set(patch)
+    .filter(sync_job::Column::Id.eq(job_id))
+    .exec(&state.db.conn)
+    .await?;
+  Ok(())
+}
+
+/// Terminal fields written when a job settles.
+pub(crate) struct JobOutcome {
+  pub(crate) status: &'static str,
+  pub(crate) error_code: Option<String>,
+  pub(crate) error_message: Option<String>,
+  pub(crate) new_oid: Option<String>,
+  pub(crate) expected_head: Option<String>,
+  pub(crate) log: String,
+}
+
 /// Moves a running job to its terminal state. Only the transition from
 /// `running` is accepted so a finished job can never be rewritten.
 pub(crate) async fn finish_job(
-  state: &GlobalState, job_id: i64, status: &str, error_code: Option<String>,
-  error_message: Option<String>, new_oid: Option<String>, log: String,
+  state: &GlobalState, job_id: i64, outcome: JobOutcome,
 ) -> Result<(), ResponseError> {
   let patch = sync_job::ActiveModel {
-    status: ActiveValue::Set(status.to_owned()),
-    error_code: ActiveValue::Set(error_code),
-    error_message: ActiveValue::Set(error_message),
-    new_oid: ActiveValue::Set(new_oid),
-    log: ActiveValue::Set(log),
+    status: ActiveValue::Set(outcome.status.to_owned()),
+    error_code: ActiveValue::Set(outcome.error_code),
+    error_message: ActiveValue::Set(outcome.error_message),
+    new_oid: ActiveValue::Set(outcome.new_oid),
+    expected_head: ActiveValue::Set(outcome.expected_head),
+    log: ActiveValue::Set(outcome.log),
     finished_at: ActiveValue::Set(Some(Utc::now())),
     ..Default::default()
   };
@@ -221,10 +257,65 @@ fn execution_slot() -> &'static tokio::sync::Mutex<()> {
   SYNC_EXECUTION_SLOT.get_or_init(|| tokio::sync::Mutex::new(()))
 }
 
+/// The sync body of a job run: discovers the current source admission head,
+/// pins it on the job, and executes the incremental sync against it. The
+/// discovery result travels as the pinned head so a mirror swap between
+/// discovery and fetch is rejected by the admission check. The pinned head is
+/// returned even when the sync fails, keeping the audit trail truthful.
+async fn run_sync_body(
+  state: &GlobalState, model: &distribution::Model, job: &sync_job::Model, logger: &StreamLogger,
+) -> (
+  Option<String>,
+  Result<crate::sync::update::UpdateReport, crate::sync::update::UpdateError>,
+) {
+  let endpoint = match url::Url::parse(&model.endpoint) {
+    Ok(endpoint) => endpoint,
+    Err(error) => {
+      return (
+        None,
+        Err(crate::sync::update::UpdateError::Internal(format!(
+          "the stored distribution endpoint is no longer valid: {error}"
+        ))),
+      );
+    }
+  };
+  let discovered = match crate::sync::discover::discover(&endpoint, &model.credential).await {
+    Ok(discovered) => discovered,
+    Err(message) => {
+      return (
+        None,
+        Err(crate::sync::update::UpdateError::DiscoverFailed(
+          crate::sync::job::redact_credential(&message, &model.credential),
+        )),
+      );
+    }
+  };
+  let pinned_head = discovered.descriptor.head.clone();
+  if let Err(error) = set_expected_head(state, job.id, &pinned_head).await {
+    tracing::error!(job_id = job.id, error=%error, "failed to pin the expected head");
+  }
+  logger
+    .info(format!(
+      "Discovered upstream bucket {} at HEAD {}.",
+      discovered.descriptor.bucket_id, discovered.descriptor.head
+    ))
+    .await;
+  let result = crate::sync::update::execute_update(
+    state,
+    model,
+    &discovered.repository_url,
+    &pinned_head,
+    &job.trace_id,
+    logger,
+  )
+  .await;
+  (Some(pinned_head), result)
+}
+
 /// Claims and runs one job to its terminal state, then records the outcome on
-/// both the job and its source. Shared by the manual API trigger and the
-/// scheduled worker.
-pub(crate) async fn run_job(state: GlobalState, source_id: i64, job_id: i64) {
+/// both the job and its distribution. Shared by the manual API trigger and
+/// the scheduled worker.
+pub(crate) async fn run_job(state: GlobalState, distribution_id: i64, job_id: i64) {
   let job = match claim_job(&state, job_id).await {
     Ok(Some(job)) => job,
     Ok(None) => {
@@ -236,45 +327,46 @@ pub(crate) async fn run_job(state: GlobalState, source_id: i64, job_id: i64) {
       return;
     }
   };
-  let Some(source) = r2s_database::sync_source::get(&state.db.conn, source_id)
+  let Some(model) = distribution::get(&state.db.conn, distribution_id)
     .await
     .ok()
     .flatten()
   else {
     tracing::error!(
       job_id,
-      source_id,
-      "sync source disappeared before the job ran"
+      distribution_id,
+      "distribution disappeared before the job ran"
     );
     return;
   };
   let collector = JobLogger::new();
   let logger = collector.bridge();
   logger.header("Ret2Shell instance sync").await;
+  logger.info(format!("Game id: {}", job.local_game_id)).await;
   logger
-    .info(format!("Game id: {}", source.local_game_id))
+    .info(format!(
+      "Source : {} (bucket {})",
+      model.endpoint, model.bucket_id
+    ))
     .await;
-  logger
-    .info(format!("Source : {}", source.repository_url))
-    .await;
-  let mut syncing = source.clone();
-  syncing.last_status = r2s_database::sync_source::STATUS_SYNCING.to_owned();
+  let mut syncing = model.clone();
+  syncing.last_status = distribution::STATUS_SYNCING.to_owned();
   syncing.last_attempt_at = Some(Utc::now());
-  if let Err(error) = r2s_database::sync_source::update(&state.db.conn, syncing).await {
-    tracing::error!(job_id, error = %error, "failed to mark the sync source as syncing");
+  if let Err(error) = distribution::update(&state.db.conn, syncing).await {
+    tracing::error!(job_id, error = %error, "failed to mark the distribution as syncing");
   }
 
-  // the execution slot serializes concurrent triggers; the timeout only
-  // bounds the sync itself
+  // the execution slot serializes concurrent triggers; the timeout bounds
+  // discovery and the sync itself
   let slot = execution_slot().lock().await;
   let result = tokio::time::timeout(
     std::time::Duration::from_secs(JOB_TIMEOUT_SECONDS),
-    crate::sync::update::execute_update(&state, &source, &job.trace_id, &logger),
+    run_sync_body(&state, &model, &job, &logger),
   )
   .await;
-  let outcome = match result {
-    Ok(outcome) => outcome,
-    Err(_) => Err(crate::sync::update::UpdateError::Timeout),
+  let (expected_head, outcome) = match result {
+    Ok((pinned_head, outcome)) => (pinned_head, outcome),
+    Err(_) => (None, Err(crate::sync::update::UpdateError::Timeout)),
   };
   drop(slot);
 
@@ -291,26 +383,29 @@ pub(crate) async fn run_job(state: GlobalState, source_id: i64, job_id: i64) {
           update_error.code(),
           update_error.message()
         ))
-        .await;
+        .await
     }
   }
   drop(logger);
   let log = truncate_log(&redact_credential(
     &collector.finalize().await,
-    &source.credential,
+    &model.credential,
   ));
   let now = Utc::now();
-  let mut updated = source.clone();
+  let mut updated = model.clone();
   match outcome {
     Ok(report) => {
       if let Err(error) = finish_job(
         &state,
         job_id,
-        sync_job::STATUS_SUCCEEDED,
-        None,
-        None,
-        Some(report.new_oid.clone()),
-        log,
+        JobOutcome {
+          status: sync_job::STATUS_SUCCEEDED,
+          error_code: None,
+          error_message: None,
+          new_oid: Some(report.new_oid.clone()),
+          expected_head,
+          log,
+        },
       )
       .await
       {
@@ -318,14 +413,15 @@ pub(crate) async fn run_job(state: GlobalState, source_id: i64, job_id: i64) {
       }
       // the materialization transaction already persisted these for applied
       // updates; writing them again covers the no-op path and late restarts
-      updated.last_synced_oid = Some(report.new_oid);
+      updated.last_synced_oid = Some(report.new_oid.clone());
+      updated.head_ref = report.new_oid;
       updated.last_attempt_at = Some(now);
       updated.last_success_at = Some(now);
-      updated.last_status = r2s_database::sync_source::STATUS_SUCCEEDED.to_owned();
+      updated.last_status = distribution::STATUS_SUCCEEDED.to_owned();
       updated.last_error = None;
       updated.consecutive_failures = 0;
       updated.next_sync_at = if updated.enabled {
-        crate::sync::source::next_after_success(now, updated.interval_seconds)
+        crate::sync::distribution::next_after_success(now, updated.interval_seconds)
       } else {
         None
       };
@@ -334,35 +430,38 @@ pub(crate) async fn run_job(state: GlobalState, source_id: i64, job_id: i64) {
       if let Err(error) = finish_job(
         &state,
         job_id,
-        sync_job::STATUS_FAILED,
-        Some(update_error.code().to_owned()),
-        Some(redact_credential(
-          &update_error.message(),
-          &source.credential,
-        )),
-        None,
-        log,
+        JobOutcome {
+          status: sync_job::STATUS_FAILED,
+          error_code: Some(update_error.code().to_owned()),
+          error_message: Some(redact_credential(
+            &update_error.message(),
+            &model.credential,
+          )),
+          new_oid: None,
+          expected_head,
+          log,
+        },
       )
       .await
       {
         tracing::error!(job_id, error = %error, "failed to record the sync job failure");
       }
       updated.last_attempt_at = Some(now);
-      updated.last_status = r2s_database::sync_source::STATUS_FAILED.to_owned();
+      updated.last_status = distribution::STATUS_FAILED.to_owned();
       updated.last_error = Some(redact_credential(
         &update_error.message(),
-        &source.credential,
+        &model.credential,
       ));
       updated.consecutive_failures += 1;
-      updated.next_sync_at = crate::sync::source::next_after_failure(
+      updated.next_sync_at = crate::sync::distribution::next_after_failure(
         now,
         updated.interval_seconds,
         updated.consecutive_failures,
       );
     }
   }
-  if let Err(error) = r2s_database::sync_source::update(&state.db.conn, updated).await {
-    tracing::error!(job_id, error = %error, "failed to record the sync source outcome");
+  if let Err(error) = distribution::update(&state.db.conn, updated).await {
+    tracing::error!(job_id, error = %error, "failed to record the distribution outcome");
   }
 }
 
