@@ -485,6 +485,14 @@
           "title": "Materialization failed",
           "hint": "Writing the content into the local database failed and was rolled back."
         },
+        "image_sync_failed": {
+          "title": "Image sync failed",
+          "hint": "Copying or verifying challenge images failed. Check the local registry configuration and the source registry reachability; see the job log."
+        },
+        "image_digest_mismatch": {
+          "title": "Image digest mismatch",
+          "hint": "The same image tag resolves to different content (digest) on the source. The source must publish a new tag before syncing; this run was rejected."
+        },
         "rollback_failed": {
           "title": "Rollback failed",
           "hint": "The sync failed and the rollback failed too; the repository needs manual inspection."

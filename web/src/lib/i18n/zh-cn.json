@@ -479,6 +479,14 @@
           "title": "物化失败",
           "hint": "内容写入本地数据库失败,已回滚。"
         },
+        "image_sync_failed": {
+          "title": "镜像同步失败",
+          "hint": "复制或校验题目镜像失败,请检查本地 registry 配置与源 registry 可达性,详见任务日志。"
+        },
+        "image_digest_mismatch": {
+          "title": "镜像 digest 不匹配",
+          "hint": "同一镜像 tag 在源端指向了不同内容(digest 变化)。源必须发布新 tag 后才能同步,已拒绝本次同步。"
+        },
         "rollback_failed": {
           "title": "回滚失败",
           "hint": "同步失败且回滚也失败,仓库需要人工检查。"

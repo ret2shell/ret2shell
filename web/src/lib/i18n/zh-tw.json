@@ -479,6 +479,14 @@
           "title": "物化失敗",
           "hint": "內容寫入本地資料庫失敗,已回滾。"
         },
+        "image_sync_failed": {
+          "title": "鏡像同步失敗",
+          "hint": "複製或驗證題目鏡像失敗,請檢查本地 registry 設定與源 registry 可達性,詳見任務日誌。"
+        },
+        "image_digest_mismatch": {
+          "title": "鏡像 digest 不匹配",
+          "hint": "同一鏡像 tag 在源端指向了不同內容(digest 變化)。源必須發布新 tag 後才能同步,已拒絕本次同步。"
+        },
         "rollback_failed": {
           "title": "回滾失敗",
           "hint": "同步失敗且回滾也失敗,倉庫需要人工檢查。"

@@ -80,6 +80,8 @@ export type SyncErrorCode =
   | "candidate_unresolved"
   | "validation_failed"
   | "materialization_failed"
+  | "image_sync_failed"
+  | "image_digest_mismatch"
   | "rollback_failed"
   | "timeout"
   | "internal_error";
@@ -99,6 +101,8 @@ const SYNC_ERROR_CODES: ReadonlySet<string> = new Set([
   "candidate_unresolved",
   "validation_failed",
   "materialization_failed",
+  "image_sync_failed",
+  "image_digest_mismatch",
   "rollback_failed",
   "timeout",
   "internal_error",

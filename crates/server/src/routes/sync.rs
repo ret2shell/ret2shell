@@ -22,6 +22,18 @@ struct SyncCapabilities {
   media: bool,
 }
 
+/// Registry access for image sync. The address is the externally reachable
+/// registry endpoint (the same one embedded in image references); the pull
+/// credentials are the registry-level basic auth, already shared with game
+/// administrators through the registry config endpoint.
+#[derive(Serialize)]
+struct SourceRegistryInfo {
+  address: String,
+  insecure: bool,
+  username: Option<String>,
+  password: Option<String>,
+}
+
 /// Descriptor of a game exposed for instance sync, anchored on the real
 /// bucket id of this instance.
 #[derive(Serialize)]
@@ -39,6 +51,26 @@ struct SyncDescriptor {
   /// this instance, e.g. `/api/game/3/repo/<bucket_id>.git`.
   repository_path: String,
   capabilities: SyncCapabilities,
+  /// Present when this instance runs a private registry: image references
+  /// under this registry are copied by the importer and verified by digest.
+  registry: Option<SourceRegistryInfo>,
+}
+
+fn source_registry(config: &r2s_config::GlobalConfig) -> Option<SourceRegistryInfo> {
+  let registry = config
+    .cluster
+    .as_ref()
+    .and_then(|cluster| cluster.registry.as_ref())?;
+  let address = registry.external.trim().to_owned();
+  if address.is_empty() {
+    return None;
+  }
+  Some(SourceRegistryInfo {
+    address,
+    insecure: registry.insecure,
+    username: registry.username.clone(),
+    password: registry.password.clone(),
+  })
 }
 
 fn repository_path(api_base_path: &str, game_id: i64, bucket_id: &str) -> String {
@@ -98,6 +130,7 @@ async fn discover(
       git: true,
       media: true,
     },
+    registry: source_registry(&state.config),
   }))
 }
 

@@ -205,6 +205,35 @@ pub(crate) async fn execute_import(
       &logger,
     )
     .await?;
+    // env images on the source registry are copied and digest-verified; the
+    // admission list starts empty, so every reference met here is approved
+    let source_registry = descriptor
+      .registry
+      .as_ref()
+      .map(|registry| registry.registry_config());
+    let mut admission = std::collections::BTreeMap::new();
+    if let Err(error) = crate::sync::images::synchronize_images(
+      &state,
+      &logger,
+      guard.bucket(),
+      source_registry.as_ref(),
+      &mut admission,
+    )
+    .await
+    {
+      return Err(match error {
+        crate::sync::images::ImageSyncError::DigestMismatch {
+          reference,
+          expected,
+          actual,
+        } => format!(
+          "image {reference} changed content under the same tag: expected {expected}, got {actual}"
+        ),
+        crate::sync::images::ImageSyncError::Failed(message) => {
+          format!("failed to synchronize challenge images: {message}")
+        }
+      });
+    }
     // the import pinned its admission head and verified the clone against it,
     // so the distribution starts with that head as the approved baseline
     let distribution = r2s_database::distribution::create(
@@ -227,6 +256,7 @@ pub(crate) async fn execute_import(
         last_status: r2s_database::distribution::STATUS_IDLE.to_owned(),
         last_error: None,
         consecutive_failures: 0,
+        image_digests: Some(r2s_database::distribution::ImageDigests(admission)),
         created_at: chrono::Utc::now(),
         updated_at: chrono::Utc::now(),
       },

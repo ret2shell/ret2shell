@@ -300,11 +300,17 @@ async fn run_sync_body(
       discovered.descriptor.bucket_id, discovered.descriptor.head
     ))
     .await;
+  let source_registry = discovered
+    .descriptor
+    .registry
+    .as_ref()
+    .map(|registry| registry.registry_config());
   let result = crate::sync::update::execute_update(
     state,
     model,
     &discovered.repository_url,
     &pinned_head,
+    source_registry.as_ref(),
     &job.trace_id,
     logger,
   )

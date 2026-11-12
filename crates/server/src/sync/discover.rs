@@ -56,20 +56,67 @@ pub(crate) fn normalize_endpoint(input: &str) -> Result<Url, ResponseError> {
   Ok(url.clone())
 }
 
+/// Registry access advertised by the source instance for image sync.
+#[derive(Clone, Debug, Deserialize)]
+pub(crate) struct SourceRegistryDescriptor {
+  pub(crate) address: String,
+  #[serde(default)]
+  pub(crate) insecure: bool,
+  #[serde(default)]
+  pub(crate) username: Option<String>,
+  #[serde(default)]
+  pub(crate) password: Option<String>,
+}
+
+impl SourceRegistryDescriptor {
+  fn validate(&self) -> Result<(), String> {
+    let address = self.address.trim();
+    if address.is_empty() || address.len() > 512 {
+      return Err("source registry address is empty or too long".to_owned());
+    }
+    if address.contains("://")
+      || address.contains('/')
+      || address.contains('\\')
+      || address.contains("..")
+      || address.contains('@')
+    {
+      return Err(format!(
+        "source registry address must be a bare host[:port], got: {address}"
+      ));
+    }
+    Ok(())
+  }
+
+  /// Registry client configuration for the advertised source registry. The
+  /// `server` is the externally reachable address, the same host embedded in
+  /// the image references of the source game.
+  pub(crate) fn registry_config(&self) -> r2s_config::cluster::RegistryConfig {
+    r2s_config::cluster::RegistryConfig {
+      username: self.username.clone(),
+      password: self.password.clone(),
+      server: self.address.trim().to_owned(),
+      insecure: self.insecure,
+      external: self.address.trim().to_owned(),
+      enabled: Some(true),
+    }
+  }
+}
+
 /// Descriptor returned by the source instance `POST /sync/discover` endpoint.
 #[derive(Clone, Debug, Deserialize)]
 pub(crate) struct SourceDescriptor {
   pub(crate) bucket_id: String,
   pub(crate) head: String,
   pub(crate) name: String,
-  // cached by the managed-distribution model once it lands
-  #[allow(dead_code)]
   pub(crate) avatar: Option<String>,
-  #[allow(dead_code)]
   pub(crate) description: String,
+  // part of the wire contract; consumed once the community registry mode
+  // (R4) starts filtering entries by the source sharing policy
   #[allow(dead_code)]
   pub(crate) access_policy_sync: i32,
   pub(crate) repository_path: String,
+  #[serde(default)]
+  pub(crate) registry: Option<SourceRegistryDescriptor>,
 }
 
 /// A source pinned for one import or sync run: the descriptor plus the fully
@@ -119,6 +166,11 @@ fn resolve(descriptor: &SourceDescriptor, endpoint: &Url) -> Result<Url, String>
   let path = &descriptor.repository_path;
   if !path.starts_with('/') || path.contains("..") || path.contains('\\') {
     return Err(format!("discovered repository path is not safe: {path}"));
+  }
+  if let Some(registry) = &descriptor.registry
+    && let Err(error) = registry.validate()
+  {
+    return Err(error);
   }
   let repository_url = endpoint
     .join(path)
@@ -176,7 +228,9 @@ pub(crate) async fn discover(endpoint: &Url, token: &str) -> Result<DiscoveredSo
 
 #[cfg(test)]
 mod tests {
-  use super::{SourceDescriptor, curl_config, normalize_endpoint, resolve};
+  use super::{
+    SourceDescriptor, SourceRegistryDescriptor, curl_config, normalize_endpoint, resolve,
+  };
 
   fn descriptor(repository_path: &str) -> SourceDescriptor {
     SourceDescriptor {
@@ -187,6 +241,7 @@ mod tests {
       description: "upstream game".to_owned(),
       access_policy_sync: 0,
       repository_path: repository_path.to_owned(),
+      registry: None,
     }
   }
 
@@ -248,5 +303,41 @@ mod tests {
     // quote and the JSON backslash again for the config file format
     assert!(config.contains(r#"bad\\\"token"#));
     assert!(!config.contains("\"token\":\"bad\"token\""));
+  }
+
+  #[test]
+  fn registry_descriptor_accepts_bare_hosts_and_builds_a_client_config() {
+    let endpoint = normalize_endpoint("https://ctf.example.org/api").unwrap();
+    let mut with_registry = descriptor("/api/game/3/repo/upstream_bucket_9f2c.git");
+    with_registry.registry = Some(SourceRegistryDescriptor {
+      address: "registry.example.org:5000".to_owned(),
+      insecure: true,
+      username: Some("pull".to_owned()),
+      password: Some("secret".to_owned()),
+    });
+    assert!(resolve(&with_registry, &endpoint).is_ok());
+    let config = with_registry.registry.unwrap().registry_config();
+    assert_eq!(config.server, "registry.example.org:5000");
+    assert!(config.insecure);
+    assert_eq!(config.basic_auth(), Some(("pull", "secret")));
+
+    for rejected in [
+      "",
+      "https://registry.example.org",
+      "registry.example.org/path",
+      "user:pass@registry.example.org",
+    ] {
+      let mut bad = descriptor("/api/game/3/repo/upstream_bucket_9f2c.git");
+      bad.registry = Some(SourceRegistryDescriptor {
+        address: rejected.to_owned(),
+        insecure: false,
+        username: None,
+        password: None,
+      });
+      assert!(
+        resolve(&bad, &endpoint).is_err(),
+        "accepted registry address {rejected:?}"
+      );
+    }
   }
 }
