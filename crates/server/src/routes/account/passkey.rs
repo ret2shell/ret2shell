@@ -18,8 +18,8 @@ use serde::{Deserialize, Serialize};
 use tracing::{info, warn};
 use url::Url;
 use webauthn_rs::prelude::{
-  CredentialID, DiscoverableAuthentication, DiscoverableKey, Passkey, RegisterPublicKeyCredential,
-  Webauthn, WebauthnBuilder, WebauthnError,
+  CredentialID, DiscoverableAuthentication, Passkey, RegisterPublicKeyCredential, Webauthn,
+  WebauthnBuilder, WebauthnError,
 };
 
 use crate::{
@@ -435,11 +435,7 @@ async fn login_with_passkey(
   let mut key = passkey_from_model(&item)
     .ok_or_else(|| ResponseError::NotFound("passkey credential".to_owned()))?;
 
-  let result = match webauthn.finish_discoverable_authentication(
-    &body.credential,
-    state,
-    &[DiscoverableKey::from(&key)],
-  ) {
+  let result = match webauthn.finish_discoverable_authentication_v2(&body.credential, state, &key) {
     Ok(result) => result,
     Err(err) => return Err(webauthn_error(err)),
   };

@@ -1,11 +1,9 @@
 FROM rust:1.98-alpine AS server
 
-# openssl-dev: the webauthn dependency chain links OpenSSL. Alpine ships no
-# static OpenSSL, so it links dynamically and the runtime layer installs the
-# shared library.
+# webauthn-rs 0.6 switched to pure-rust crypto, so the server links no
+# OpenSSL and the musl binary stays fully static.
 # hadolint ignore=DL3018
-RUN apk add --update --no-cache musl-dev clang lld openssl-dev pkgconfig
-ENV OPENSSL_DIR=/usr
+RUN apk add --update --no-cache musl-dev clang lld
 
 WORKDIR /var/lib/ret2shell
 
@@ -44,9 +42,8 @@ RUN pnpm build && \
 
 FROM alpine:3
 
-# openssl: the server links OpenSSL dynamically (see the server stage)
 # hadolint ignore=DL3018
-RUN apk add --update --no-cache curl git skopeo tini openssl && \
+RUN apk add --update --no-cache curl git skopeo tini && \
     git config --global user.email platform@ret.sh.cn && \
     git config --global user.name Ret2Shell
 

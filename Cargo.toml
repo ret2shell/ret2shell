@@ -76,7 +76,7 @@ urlencoding        = "2.1"
 url                = "2"
 uuid               = "1"
 validator          = { version = "0.21", features = ["derive"] }
-webauthn-rs        = { version = "0.5", default-features = false, features = [
+webauthn-rs        = { version = "0.6.2", default-features = false, features = [
   "conditional-ui",
   "danger-allow-state-serialisation",
 ] }
