@@ -53,6 +53,8 @@ impl MigratorTrait for Migrator {
       Box::new(migrations::m_20260925_000001_challenge_milestone_unlock_limit::Migration),
       Box::new(migrations::m_20261019_000001_extra_blood_state::Migration),
       Box::new(migrations::m_20261111_000001_create_passkey::Migration),
+      Box::new(migrations::m_20261111_000002_create_sync_source::Migration),
+      Box::new(migrations::m_20261111_000003_create_sync_job::Migration),
     ]
   }
 }

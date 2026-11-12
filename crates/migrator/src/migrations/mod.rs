@@ -38,3 +38,5 @@ pub mod m_20260924_000001_challenge_milestone_unique_name;
 pub mod m_20260925_000001_challenge_milestone_unlock_limit;
 pub mod m_20261019_000001_extra_blood_state;
 pub mod m_20261111_000001_create_passkey;
+pub mod m_20261111_000002_create_sync_source;
+pub mod m_20261111_000003_create_sync_job;
