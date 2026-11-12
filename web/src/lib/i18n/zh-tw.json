@@ -299,7 +299,147 @@
       "title": "替換協議"
     },
     "sync": {
-      "title": "資源同步"
+      "title": "資源同步",
+      "subtitle": "從其他 ret2shell 實例匯入題庫並保持快進同步,匯入的比賽預設隱藏。",
+      "warnings": {
+        "import": "匯入的比賽預設隱藏,不會自動發布;啟用定時同步意味著信任上游未來的提交(包括 checker、映像檔與環境變化)。",
+        "unbind": "解除綁定只會停止同步,不會刪除本地比賽與題庫資料。"
+      },
+      "list": {
+        "empty": "還沒有同步來源",
+        "game": "本地比賽",
+        "interval": "同步間隔",
+        "intervalSeconds": "每 {seconds} 秒",
+        "manual": "僅手動",
+        "lastSuccess": "最近成功",
+        "lastAttempt": "最近嘗試",
+        "nextSync": "下次同步",
+        "oid": "同步基準",
+        "failures": "連續失敗 {count} 次",
+        "enabled": "啟用中",
+        "disabled": "已暫停"
+      },
+      "status": {
+        "never": "未同步",
+        "queued": "排隊中",
+        "running": "同步中",
+        "succeeded": "成功",
+        "failed": "失敗"
+      },
+      "trigger": {
+        "manual": "手動",
+        "scheduled": "定時",
+        "retry": "重試"
+      },
+      "form": {
+        "createTitle": "匯入 / 註冊同步來源",
+        "repositoryUrl": {
+          "label": "來源儲存庫地址",
+          "placeholder": "https://ctf.example.org/api/game/1/repo/example.git",
+          "required": "來源儲存庫地址不能為空",
+          "invalid": "來源儲存庫地址必須是合法 URL"
+        },
+        "token": {
+          "label": "來源實例 token",
+          "placeholder": "請輸入來源實例的同步 token",
+          "required": "同步 token 不能為空",
+          "keep": "留空保留已儲存的 token",
+          "hint": "token 只在儲存時提交,不會回顯,也不會寫入瀏覽器儲存。"
+        },
+        "game": {
+          "label": "綁定本地比賽 ID",
+          "placeholder": "留空則先執行一次性匯入",
+          "invalid": "本地比賽 ID 必須是正整數",
+          "hint": "填寫已存在的本地比賽 ID 可直接綁定;留空會先從來源實例完整匯入,再自動註冊同步來源。"
+        },
+        "interval": {
+          "label": "同步間隔(秒)",
+          "placeholder": "留空表示僅手動同步",
+          "invalid": "同步間隔必須是正整數秒",
+          "hint": "啟用定時同步前請確認信任上游未來的提交。"
+        },
+        "enabled": { "label": "啟用定時同步" },
+        "importLog": {
+          "title": "匯入日誌"
+        },
+        "submit": {
+          "import": "開始匯入並註冊",
+          "bind": "註冊同步來源"
+        }
+      },
+      "actions": {
+        "sync": {
+          "title": "手動同步",
+          "status": {
+            "success": "已建立同步任務",
+            "fail": "建立同步任務失敗"
+          }
+        },
+        "jobs": "任務與日誌",
+        "pause": "暫停",
+        "resume": "啟用",
+        "unbind": { "title": "解除綁定", "status": { "success": "已解除同步來源綁定", "fail": "解除綁定失敗" } },
+        "create": {
+          "status": {
+            "success": "同步來源已註冊",
+            "fail": "註冊同步來源失敗"
+          }
+        },
+        "import": {
+          "status": {
+            "fail": "匯入失敗",
+            "noGameId": "匯入已結束,但未能從日誌中解析出本地比賽 ID,請手動綁定。"
+          }
+        }
+      },
+      "jobs": {
+        "title": "同步任務",
+        "loading": "正在載入任務列表...",
+        "empty": "還沒有同步任務",
+        "retry": "重試同步",
+        "trigger": "觸發方式",
+        "oids": "OID 變化",
+        "created": "建立時間",
+        "started": "開始時間",
+        "finished": "結束時間",
+        "trace": "追蹤 ID",
+        "log": "任務日誌",
+        "noLog": "暫無日誌"
+      },
+      "errors": {
+        "fetchSources": {
+          "title": "取得同步來源列表失敗"
+        },
+        "fetchJobs": {
+          "title": "取得同步任務列表失敗"
+        },
+        "fetchJob": {
+          "title": "取得同步任務詳情失敗"
+        },
+        "unknown": {
+          "title": "同步失敗"
+        },
+        "unauthorized": {
+          "title": "來源實例認證失敗",
+          "hint": "同步 token 無效或已在來源實例輪換,請編輯同步來源並更新 token。"
+        },
+        "forbidden": {
+          "title": "來源實例拒絕同步",
+          "hint": "上游可能禁止了實例同步(sync=2)或正式比賽尚未封存,請聯絡來源實例管理員。"
+        },
+        "local_diverged": {
+          "title": "本地儲存庫已偏離同步基準",
+          "hint": "本地比賽儲存庫在上次同步後被修改過。可暫停同步並轉為本地維護,或解除綁定。"
+        },
+        "upstream_diverged": {
+          "title": "上游歷史已分叉",
+          "hint": "上游發生了強制推送或歷史重寫。請修復上游後重新綁定,或聯絡來源實例管理員。"
+        },
+        "target_visible": {
+          "title": "目標比賽已對外可見",
+          "hint": "同步只允許寫入隱藏比賽,請先將本地比賽設為隱藏。"
+        }
+      }
     },
     "email": {
       "title": "平臺發信郵箱",
