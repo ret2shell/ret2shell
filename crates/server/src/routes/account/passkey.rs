@@ -176,7 +176,10 @@ async fn register_passkey_options(
   // login flow is discoverable (no username is entered), so the credential has
   // to live on the authenticator. The library derives `residentKey` from a
   // builder flag it does not expose, so the serialised options are adjusted
-  // here before they reach the browser.
+  // here before they reach the browser. `residentKey` is a request to the
+  // client, not something the server can enforce: see the `credProps` check
+  // in `register_passkey` for the best-effort rejection of credentials that
+  // were not stored on the authenticator.
   let mut options = serde_json::to_value(&ccr)?;
   let selection = options
     .get_mut("publicKey")
@@ -220,6 +223,33 @@ async fn register_passkey(
   let key = webauthn
     .finish_passkey_registration(&body.credential, &state)
     .map_err(webauthn_error)?;
+
+  // `residentKey: required` cannot be enforced by the server: webauthn-rs-core
+  // does not verify that the authenticator actually created a discoverable
+  // credential, so a client that ignores the hint would otherwise register a
+  // credential that `start_discoverable_authentication` can never find. The
+  // unsigned `credProps` extension output is the only signal about what
+  // happened on the client: when a browser reports `rk: false`, reject the
+  // registration instead of storing a passkey that cannot log in. Browsers
+  // that do not return `credProps` are accepted — the signal is best-effort,
+  // and password login remains available either way.
+  if body
+    .credential
+    .extensions
+    .cred_props
+    .as_ref()
+    .and_then(|cred_props| cred_props.rk)
+    == Some(false)
+  {
+    warn!(
+      user_id = user.id,
+      "rejecting passkey registration: the client reported a non-resident credential"
+    );
+    return Err(ResponseError::BadRequest(
+      "the authenticator did not store this passkey locally, so it could not be used to log in"
+        .to_owned(),
+    ));
+  }
 
   let credential_id = credential_id_string(key.cred_id());
   if passkey::get_by_credential_id(&db.conn, &credential_id)
