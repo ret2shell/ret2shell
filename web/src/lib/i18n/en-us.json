@@ -299,7 +299,150 @@
       "title": "Switch protocol"
     },
     "sync": {
-      "title": "Sync resources"
+      "title": "Sync resources",
+      "subtitle": "Import repositories from other ret2shell instances and keep them fast-forward synchronized. Imported games stay hidden.",
+      "warnings": {
+        "import": "Imported games are hidden by default and are never published automatically. Enabling scheduled sync means trusting the upstream's future commits, including checkers, images and environments.",
+        "unbind": "Unbinding only stops the synchronization; the local game and its repository are kept."
+      },
+      "list": {
+        "empty": "No sync sources yet",
+        "game": "Local game",
+        "interval": "Interval",
+        "intervalSeconds": "Every {seconds}s",
+        "manual": "Manual only",
+        "lastSuccess": "Last success",
+        "lastAttempt": "Last attempt",
+        "nextSync": "Next sync",
+        "oid": "Baseline OID",
+        "failures": "{count} consecutive failure(s)",
+        "enabled": "Enabled",
+        "disabled": "Paused"
+      },
+      "status": {
+        "never": "Never synced",
+        "queued": "Queued",
+        "running": "Running",
+        "succeeded": "Succeeded",
+        "failed": "Failed"
+      },
+      "trigger": {
+        "manual": "Manual",
+        "scheduled": "Scheduled",
+        "retry": "Retry"
+      },
+      "form": {
+        "createTitle": "Import / register source",
+        "repositoryUrl": {
+          "label": "Source repository URL",
+          "placeholder": "https://ctf.example.org/api/game/1/repo/example.git",
+          "required": "The source repository URL is required",
+          "invalid": "The source repository URL must be a valid URL"
+        },
+        "token": {
+          "label": "Source token",
+          "placeholder": "Enter the sync token of the source instance",
+          "required": "The sync token is required",
+          "keep": "Leave empty to keep the stored token",
+          "hint": "The token is only submitted when saving; it is never echoed back nor stored in the browser."
+        },
+        "game": {
+          "label": "Bind local game ID",
+          "placeholder": "Leave empty to run a one-shot import",
+          "invalid": "The local game ID must be a positive integer",
+          "hint": "Fill in an existing local game ID to bind it directly; leaving it empty performs a full import from the source instance first and then registers the source."
+        },
+        "interval": {
+          "label": "Sync interval (seconds)",
+          "placeholder": "Leave empty for manual-only sync",
+          "invalid": "The sync interval must be a positive integer of seconds",
+          "hint": "Make sure you trust the upstream's future commits before enabling scheduled sync."
+        },
+        "enabled": { "label": "Enable scheduled sync" },
+        "importLog": {
+          "title": "Import log"
+        },
+        "submit": {
+          "import": "Import & register",
+          "bind": "Register source"
+        }
+      },
+      "actions": {
+        "sync": {
+          "title": "Sync now",
+          "status": {
+            "success": "Sync job created",
+            "fail": "Failed to create the sync job"
+          }
+        },
+        "jobs": "Jobs & logs",
+        "pause": "Pause",
+        "resume": "Enable",
+        "unbind": {
+          "title": "Unbind",
+          "status": { "success": "Sync source unbound", "fail": "Failed to unbind the sync source" }
+        },
+        "create": {
+          "status": {
+            "success": "Sync source registered",
+            "fail": "Failed to register the sync source"
+          }
+        },
+        "import": {
+          "status": {
+            "fail": "Import failed",
+            "noGameId": "The import finished but no local game ID could be parsed from the log; please bind one manually."
+          }
+        }
+      },
+      "jobs": {
+        "title": "Sync jobs",
+        "loading": "Loading jobs...",
+        "empty": "No sync jobs yet",
+        "retry": "Retry sync",
+        "trigger": "Trigger",
+        "oids": "OID changes",
+        "created": "Created",
+        "started": "Started",
+        "finished": "Finished",
+        "trace": "Trace ID",
+        "log": "Job log",
+        "noLog": "No log yet"
+      },
+      "errors": {
+        "fetchSources": {
+          "title": "Failed to load the sync sources"
+        },
+        "fetchJobs": {
+          "title": "Failed to load the sync jobs"
+        },
+        "fetchJob": {
+          "title": "Failed to load the sync job"
+        },
+        "unknown": {
+          "title": "Synchronization failed"
+        },
+        "unauthorized": {
+          "title": "Upstream authentication failed",
+          "hint": "The sync token is invalid or was rotated on the source instance; update it by editing the source."
+        },
+        "forbidden": {
+          "title": "Upstream refused the synchronization",
+          "hint": "The upstream may forbid instance sync (sync=2) or the game is not archived yet; contact the source administrators."
+        },
+        "local_diverged": {
+          "title": "Local repository diverged from the sync baseline",
+          "hint": "The local game repository was modified after the last sync. Pause the source and maintain it locally, or unbind it."
+        },
+        "upstream_diverged": {
+          "title": "Upstream history diverged",
+          "hint": "The upstream was force-pushed or rewritten. Fix the upstream and rebind it, or contact the source administrators."
+        },
+        "target_visible": {
+          "title": "Target game is visible",
+          "hint": "Synchronization only writes to hidden games; hide the local game first."
+        }
+      }
     },
     "email": {
       "title": "Platform email",

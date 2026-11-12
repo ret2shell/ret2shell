@@ -299,7 +299,147 @@
       "title": "替换协议"
     },
     "sync": {
-      "title": "资源同步"
+      "title": "资源同步",
+      "subtitle": "从其他 ret2shell 实例导入题库并保持快进同步,导入的比赛默认隐藏。",
+      "warnings": {
+        "import": "导入的比赛默认隐藏,不会自动发布;启用定时同步意味着信任上游未来的提交(包括 checker、镜像与环境变化)。",
+        "unbind": "解除绑定只会停止同步,不会删除本地比赛与题库数据。"
+      },
+      "list": {
+        "empty": "还没有同步源",
+        "game": "本地比赛",
+        "interval": "同步间隔",
+        "intervalSeconds": "每 {seconds} 秒",
+        "manual": "仅手动",
+        "lastSuccess": "最近成功",
+        "lastAttempt": "最近尝试",
+        "nextSync": "下次同步",
+        "oid": "同步基线",
+        "failures": "连续失败 {count} 次",
+        "enabled": "启用中",
+        "disabled": "已暂停"
+      },
+      "status": {
+        "never": "未同步",
+        "queued": "排队中",
+        "running": "同步中",
+        "succeeded": "成功",
+        "failed": "失败"
+      },
+      "trigger": {
+        "manual": "手动",
+        "scheduled": "定时",
+        "retry": "重试"
+      },
+      "form": {
+        "createTitle": "导入 / 注册同步源",
+        "repositoryUrl": {
+          "label": "源仓库地址",
+          "placeholder": "https://ctf.example.org/api/game/1/repo/example.git",
+          "required": "源仓库地址不能为空",
+          "invalid": "源仓库地址必须是合法 URL"
+        },
+        "token": {
+          "label": "源实例 token",
+          "placeholder": "请输入源实例的同步 token",
+          "required": "同步 token 不能为空",
+          "keep": "留空保留已保存的 token",
+          "hint": "token 只在保存时提交,不会回显,也不会写入浏览器存储。"
+        },
+        "game": {
+          "label": "绑定本地比赛 ID",
+          "placeholder": "留空则先执行一次性导入",
+          "invalid": "本地比赛 ID 必须是正整数",
+          "hint": "填写已存在的本地比赛 ID 可直接绑定;留空会先从源实例完整导入,再自动注册同步源。"
+        },
+        "interval": {
+          "label": "同步间隔(秒)",
+          "placeholder": "留空表示仅手动同步",
+          "invalid": "同步间隔必须是正整数秒",
+          "hint": "启用定时同步前请确认信任上游未来的提交。"
+        },
+        "enabled": { "label": "启用定时同步" },
+        "importLog": {
+          "title": "导入日志"
+        },
+        "submit": {
+          "import": "开始导入并注册",
+          "bind": "注册同步源"
+        }
+      },
+      "actions": {
+        "sync": {
+          "title": "手动同步",
+          "status": {
+            "success": "已创建同步任务",
+            "fail": "创建同步任务失败"
+          }
+        },
+        "jobs": "任务与日志",
+        "pause": "暂停",
+        "resume": "启用",
+        "unbind": { "title": "解除绑定", "status": { "success": "已解除同步源绑定", "fail": "解除绑定失败" } },
+        "create": {
+          "status": {
+            "success": "同步源已注册",
+            "fail": "注册同步源失败"
+          }
+        },
+        "import": {
+          "status": {
+            "fail": "导入失败",
+            "noGameId": "导入已结束,但未能从日志中解析出本地比赛 ID,请手动绑定。"
+          }
+        }
+      },
+      "jobs": {
+        "title": "同步任务",
+        "loading": "正在加载任务列表...",
+        "empty": "还没有同步任务",
+        "retry": "重试同步",
+        "trigger": "触发方式",
+        "oids": "OID 变化",
+        "created": "创建时间",
+        "started": "开始时间",
+        "finished": "结束时间",
+        "trace": "追踪 ID",
+        "log": "任务日志",
+        "noLog": "暂无日志"
+      },
+      "errors": {
+        "fetchSources": {
+          "title": "获取同步源列表失败"
+        },
+        "fetchJobs": {
+          "title": "获取同步任务列表失败"
+        },
+        "fetchJob": {
+          "title": "获取同步任务详情失败"
+        },
+        "unknown": {
+          "title": "同步失败"
+        },
+        "unauthorized": {
+          "title": "源实例认证失败",
+          "hint": "同步 token 无效或已在源实例轮换,请编辑同步源并更新 token。"
+        },
+        "forbidden": {
+          "title": "源实例拒绝同步",
+          "hint": "上游可能禁止了实例同步(sync=2)或正式比赛尚未归档,请联系源实例管理员。"
+        },
+        "local_diverged": {
+          "title": "本地仓库已偏离同步基线",
+          "hint": "本地比赛仓库在上次同步后被修改过。可暂停同步并转为本地维护,或解除绑定。"
+        },
+        "upstream_diverged": {
+          "title": "上游历史已分叉",
+          "hint": "上游发生了强制推送或历史重写。请修复上游后重新绑定,或联系源实例管理员。"
+        },
+        "target_visible": {
+          "title": "目标比赛已对外可见",
+          "hint": "同步只允许写入隐藏比赛,请先将本地比赛设为隐藏。"
+        }
+      }
     },
     "email": {
       "title": "平台发信邮箱",

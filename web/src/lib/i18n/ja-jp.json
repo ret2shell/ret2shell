@@ -299,7 +299,150 @@
       "title": "代替プロトコル"
     },
     "sync": {
-      "title": "リソースの同期"
+      "title": "リソースの同期",
+      "subtitle": "他の ret2shell インスタンスからリポジトリを取り込み、fast-forward で同期し続けます。取り込まれたゲームは既定で非表示です。",
+      "warnings": {
+        "import": "取り込まれたゲームは既定で非表示になり、自動公開されません。定期同期を有効にすると、上流の今後のコミット(checker・イメージ・環境の変更を含む)を信頼することになります。",
+        "unbind": "連結解除は同期を停止するだけで、ローカルのゲームとリポジトリは削除されません。"
+      },
+      "list": {
+        "empty": "同期ソースはまだありません",
+        "game": "ローカルゲーム",
+        "interval": "同期間隔",
+        "intervalSeconds": "{seconds} 秒ごと",
+        "manual": "手動のみ",
+        "lastSuccess": "最終成功",
+        "lastAttempt": "最終試行",
+        "nextSync": "次回の同期",
+        "oid": "同期ベースライン",
+        "failures": "{count} 回連続失敗",
+        "enabled": "有効",
+        "disabled": "停止中"
+      },
+      "status": {
+        "never": "未同期",
+        "queued": "待機中",
+        "running": "同期中",
+        "succeeded": "成功",
+        "failed": "失敗"
+      },
+      "trigger": {
+        "manual": "手動",
+        "scheduled": "定期",
+        "retry": "再試行"
+      },
+      "form": {
+        "createTitle": "取り込み / ソース登録",
+        "repositoryUrl": {
+          "label": "元リポジトリ URL",
+          "placeholder": "https://ctf.example.org/api/game/1/repo/example.git",
+          "required": "元リポジトリ URL は必須です",
+          "invalid": "元リポジトリ URL は有効な URL である必要があります"
+        },
+        "token": {
+          "label": "ソースの token",
+          "placeholder": "ソースインスタンスの同期 token を入力してください",
+          "required": "同期 token は必須です",
+          "keep": "空のままにすると保存済みの token を維持します",
+          "hint": "token は保存時のみ送信され、画面に表示されず、ブラウザーにも保存されません。"
+        },
+        "game": {
+          "label": "バインドするローカルゲーム ID",
+          "placeholder": "空の場合は一括取り込みを実行します",
+          "invalid": "ローカルゲーム ID は正の整数である必要があります",
+          "hint": "既存のローカルゲーム ID を入力すると直接バインドします。空の場合は先にソースから完全取り込みを行い、その後ソースを登録します。"
+        },
+        "interval": {
+          "label": "同期間隔(秒)",
+          "placeholder": "空の場合は手動同期のみ",
+          "invalid": "同期間隔は正の整数(秒)である必要があります",
+          "hint": "定期同期を有効にする前に、上流の今後のコミットを信頼できるか確認してください。"
+        },
+        "enabled": { "label": "定期同期を有効化" },
+        "importLog": {
+          "title": "取り込みログ"
+        },
+        "submit": {
+          "import": "取り込んで登録",
+          "bind": "ソースを登録"
+        }
+      },
+      "actions": {
+        "sync": {
+          "title": "今すぐ同期",
+          "status": {
+            "success": "同期ジョブを作成しました",
+            "fail": "同期ジョブの作成に失敗しました"
+          }
+        },
+        "jobs": "ジョブとログ",
+        "pause": "一時停止",
+        "resume": "有効化",
+        "unbind": {
+          "title": "連結解除",
+          "status": { "success": "同期ソースの連結を解除しました", "fail": "連結解除に失敗しました" }
+        },
+        "create": {
+          "status": {
+            "success": "同期ソースを登録しました",
+            "fail": "同期ソースの登録に失敗しました"
+          }
+        },
+        "import": {
+          "status": {
+            "fail": "取り込みに失敗しました",
+            "noGameId": "取り込みは終了しましたが、ログからローカルゲーム ID を解析できませんでした。手動でバインドしてください。"
+          }
+        }
+      },
+      "jobs": {
+        "title": "同期ジョブ",
+        "loading": "ジョブを読み込み中...",
+        "empty": "同期ジョブはまだありません",
+        "retry": "再同期",
+        "trigger": "トリガー",
+        "oids": "OID の変化",
+        "created": "作成時刻",
+        "started": "開始時刻",
+        "finished": "終了時刻",
+        "trace": "トレース ID",
+        "log": "ジョブログ",
+        "noLog": "ログはまだありません"
+      },
+      "errors": {
+        "fetchSources": {
+          "title": "同期ソース一覧の取得に失敗しました"
+        },
+        "fetchJobs": {
+          "title": "同期ジョブ一覧の取得に失敗しました"
+        },
+        "fetchJob": {
+          "title": "同期ジョブの取得に失敗しました"
+        },
+        "unknown": {
+          "title": "同期に失敗しました"
+        },
+        "unauthorized": {
+          "title": "上流の認証に失敗しました",
+          "hint": "同期 token が無効か、ソース側で更新されました。ソースを編集して token を更新してください。"
+        },
+        "forbidden": {
+          "title": "上流が同期を拒否しました",
+          "hint": "上流がインスタンス同期を禁止している(sync=2)か、ゲームが未アーカイブの可能性があります。ソース管理者に連絡してください。"
+        },
+        "local_diverged": {
+          "title": "ローカルリポジトリが同期ベースラインから乖離しました",
+          "hint": "最終同期後にローカルのゲームリポジトリが変更されました。ソースを一時停止してローカル管理に移行するか、連結を解除してください。"
+        },
+        "upstream_diverged": {
+          "title": "上流の履歴が分岐しました",
+          "hint": "上流で force push や履歴の書き換えが発生しました。上流を修復して再連結するか、ソース管理者に連絡してください。"
+        },
+        "target_visible": {
+          "title": "対象ゲームが公開状態です",
+          "hint": "同期は非表示のゲームにのみ書き込めます。先にローカルゲームを非表示にしてください。"
+        }
+      }
     },
     "email": {
       "title": "プラットフォームメールアドレス",
