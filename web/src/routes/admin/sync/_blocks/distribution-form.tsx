@@ -232,6 +232,10 @@ export default function DistributionForm(props: {
         <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5" />
         <span>{t("platform.sync.warnings.import")}</span>
       </p>
+      <p class="text-sm opacity-70 flex items-start space-x-2">
+        <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5" />
+        <span>{t("platform.sync.warnings.authorship")}</span>
+      </p>
       <Button type="submit" level="primary" class="mt-2!" loading={pending()} disabled={pending()}>
         {editing() ? t("general.actions.save.title") : t("platform.sync.form.submit.import")}
       </Button>

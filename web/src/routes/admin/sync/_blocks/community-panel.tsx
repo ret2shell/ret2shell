@@ -195,6 +195,10 @@ export default function CommunityPanel(props: { onDone?: () => void }) {
         <span class="shrink-0 icon-[fluent--warning-20-regular] w-5 h-5" />
         <span>{t("platform.sync.warnings.import")}</span>
       </p>
+      <p class="text-sm opacity-70 flex items-start space-x-2">
+        <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5" />
+        <span>{t("platform.sync.warnings.authorship")}</span>
+      </p>
     </div>
   );
 }

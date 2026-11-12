@@ -307,6 +307,7 @@
       },
       "warnings": {
         "import": "Imported games are hidden by default and never auto-published. Enabling scheduled sync means trusting future upstream commits (including checkers, images and environments).",
+        "authorship": "Git commit history, including author and email metadata, is imported verbatim and stays visible to this instance's administrators through the repository.",
         "unbind": "Unbinding only stops the synchronization; the local game and its data are kept. You can rebind later from the edit form.",
         "delete": "Deleting the distribution removes its sync history and jobs. The local game is kept and becomes editable."
       },
