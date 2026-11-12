@@ -275,6 +275,13 @@ pub(crate) async fn execute_import(
       "Ret2Shell instance import"
     })
     .await;
+  logger
+    .info(
+      "The imported Git history carries its original authorship metadata \
+       (names and emails); it stays visible to local administrators through \
+       the repository.",
+    )
+    .await;
   if game::get_by_bucket(&state.db.conn, &bucket_id)
     .await
     .map_err(|error| format!("failed to check for existing games: {error}"))?
