@@ -1,5 +1,7 @@
 FROM rust:1.98-alpine AS server
 
+# webauthn-rs 0.6 switched to pure-rust crypto, so the server links no
+# OpenSSL and the musl binary stays fully static.
 # hadolint ignore=DL3018
 RUN apk add --update --no-cache musl-dev clang lld
 
@@ -24,7 +26,9 @@ FROM node:lts-alpine AS frontend
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+# node 25+ no longer bundles corepack, install it explicitly for older and
+# newer images alike
+RUN npm install -g corepack && corepack enable
 
 COPY ./web/package.json ./web/pnpm-lock.yaml ./web/pnpm-workspace.yaml /var/lib/ret2shell/web/
 WORKDIR /var/lib/ret2shell/web

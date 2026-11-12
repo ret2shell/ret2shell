@@ -1879,6 +1879,56 @@
         }
       }
     },
+    "passkey": {
+      "title": "通行金鑰",
+      "login": {
+        "title": "使用通行金鑰登入"
+      },
+      "form": {
+        "name": {
+          "label": "名稱",
+          "placeholder": "為這台裝置取個名字"
+        }
+      },
+      "actions": {
+        "add": {
+          "title": "新增通行金鑰"
+        },
+        "rename": {
+          "title": "重新命名"
+        },
+        "delete": {
+          "title": "刪除"
+        }
+      },
+      "info": {
+        "created_at": "新增時間",
+        "last_used_at": "最後使用",
+        "credential_id": "憑證 ID"
+      },
+      "status": {
+        "registered": "通行金鑰已新增"
+      },
+      "empty": "尚未新增通行金鑰",
+      "unnamed": "未命名",
+      "errors": {
+        "fetch": {
+          "title": "取得通行金鑰清單失敗"
+        },
+        "register": {
+          "title": "新增通行金鑰失敗"
+        },
+        "rename": {
+          "title": "重新命名通行金鑰失敗"
+        },
+        "delete": {
+          "title": "刪除通行金鑰失敗"
+        },
+        "login": {
+          "title": "通行金鑰登入失敗"
+        }
+      }
+    },
     "register": {
       "tips": "沒有賬號？現在註冊！",
       "status": {

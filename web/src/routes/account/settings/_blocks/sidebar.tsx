@@ -18,6 +18,12 @@ export default function SideBar() {
         </Link>
       </li>
       <li class="w-full">
+        <Link activeMatch="exact" class="w-full" ghost href="/account/settings/passkey" justify="start">
+          <span class="shrink-0 icon-[fluent--person-passkey-20-regular] w-5 h-5" />
+          <span>{t("account.passkey.title")}</span>
+        </Link>
+      </li>
+      <li class="w-full">
         <Link activeMatch="exact" class="w-full" ghost href="/account/settings/oauth" justify="start">
           <span class="shrink-0 icon-[fluent--key-multiple-20-regular] w-5 h-5" />
           <span>{t("account.oauth.title")}</span>
