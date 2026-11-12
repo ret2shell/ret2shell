@@ -186,27 +186,49 @@ pub(crate) async fn resolve_import_source(
           "the registry entry carries no token; ask the source to publish one".to_owned(),
         );
       }
+      // the registry entry stays the authority for the stored endpoint; the
+      // race winner only drives this import's clone
       let endpoint = crate::sync::discover::normalize_endpoint(&entry.endpoint)
         .map_err(|error| format!("the registry entry endpoint is invalid: {error}"))?;
       let credential = entry.token.clone();
-      let discovered = crate::sync::discover::discover(&endpoint, &credential).await?;
-      if discovered.descriptor.bucket_id != bucket_id {
-        return Err(format!(
-          "the source reports bucket id {} but the registry entry is keyed {bucket_id}",
-          discovered.descriptor.bucket_id
-        ));
-      }
-      if !discovered
-        .descriptor
-        .head
-        .eq_ignore_ascii_case(&entry.head_ref)
-      {
-        return Err(format!(
-          "the source HEAD {} has moved past the registry-approved head_ref {}; \
-           wait for the registry to publish the new version",
-          discovered.descriptor.head, entry.head_ref
-        ));
-      }
+      let candidates = entry.candidates();
+      logger
+        .info(format!(
+          "Racing {} download candidate(s) for the fastest source...",
+          candidates.len()
+        ))
+        .await;
+      let discovered = match crate::sync::community::race_discover(&candidates, &credential).await {
+        Ok((discovered, winner, elapsed_ms)) => {
+          logger
+            .info(format!(
+              "Candidate {winner} won the race in {elapsed_ms} ms."
+            ))
+            .await;
+          discovered
+        }
+        Err(failures) => {
+          return Err(format!(
+            "every download candidate failed: {}",
+            failures.join("; ")
+          ));
+        }
+      };
+      // a mismatch is a supply-chain violation: the run aborts here instead
+      // of falling through to the remaining candidates
+      crate::sync::community::verify_entry_match(
+        &discovered.descriptor.bucket_id,
+        &discovered.descriptor.head,
+        &bucket_id,
+        &entry.head_ref,
+      )
+      .map_err(|mismatch| mismatch.to_string())?;
+      logger
+        .info(format!(
+          "Source sharing policy: sync={} (0 open, 1 game-admin, 2 closed).",
+          discovered.descriptor.access_policy_sync
+        ))
+        .await;
       logger
         .info(format!(
           "Community entry \"{}\" approved at HEAD {}.",
