@@ -444,7 +444,7 @@ pub async fn game_admin_required(
   }
 }
 
-fn sync_policy_allows(host_type: &game::HostType, archived: bool, sync: i32) -> bool {
+pub(crate) fn sync_policy_allows(host_type: &game::HostType, archived: bool, sync: i32) -> bool {
   matches!(sync, 0 | 1) && (host_type == &game::HostType::Training || archived)
 }
 

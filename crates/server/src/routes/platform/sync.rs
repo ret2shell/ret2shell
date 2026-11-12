@@ -25,7 +25,7 @@ use crate::{
 
 #[derive(Deserialize)]
 pub(super) struct ImportRequest {
-  repository_url: String,
+  endpoint: String,
   token: String,
 }
 
@@ -33,7 +33,7 @@ pub(super) async fn import_game(
   State(state): State<GlobalState>, Extension(operator): Extension<Token>,
   Extension(trace): Extension<RequestId>, headers: HeaderMap, Json(request): Json<ImportRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
-  let repository_url = normalize_repository_url(&request.repository_url)?;
+  let endpoint = crate::sync::discover::normalize_endpoint(&request.endpoint)?;
   if request.token.trim().is_empty() {
     return Err(ResponseError::BadRequest(
       "source credential is required".to_owned(),
@@ -53,7 +53,7 @@ pub(super) async fn import_game(
       Duration::from_secs(600),
       execute_import(
         state.clone(),
-        repository_url.clone(),
+        endpoint.clone(),
         request.token.clone(),
         operator.id,
         trace_id,
@@ -62,11 +62,17 @@ pub(super) async fn import_game(
     )
     .await
     {
-      Ok(Ok(model)) => {
+      Ok(Ok((model, discovered))) => {
         // the import itself is complete and durable; auto-registration only
         // wires up future incremental updates, so its failure is reported
         // without failing the import
-        match source::register_imported_game(&state, &model, &repository_url, &request.token).await
+        match source::register_imported_game(
+          &state,
+          &model,
+          &discovered.repository_url,
+          &request.token,
+        )
+        .await
         {
           Ok(source) => {
             task_logger

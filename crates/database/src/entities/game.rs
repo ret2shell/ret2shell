@@ -347,6 +347,14 @@ where
     .await
 }
 
+/// Looks up a game by its sync token for source-instance discovery. Tokens are
+/// random per game, so the first match is authoritative.
+pub async fn get_by_token<C>(db: &C, token: &str) -> Result<Option<Model>, DbErr>
+where
+  C: ConnectionTrait, {
+  Entity::find().filter(Column::Token.eq(token)).one(db).await
+}
+
 pub async fn get_page<C>(
   db: &C, page: u64, page_size: u64, host_type: Option<HostType>, weight: Option<i32>,
   with_hidden: bool,
