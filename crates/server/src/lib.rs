@@ -18,6 +18,7 @@ use crate::traits::GlobalState;
 mod logger;
 mod middleware;
 mod routes;
+mod sync;
 mod traits;
 mod utility;
 mod worker;
