@@ -139,10 +139,35 @@ fn local_game_model(
 }
 
 pub(crate) async fn execute_import(
-  state: GlobalState, repository_url: Url, credential: String, operator_id: i64, trace_id: String,
+  state: GlobalState, endpoint: Url, credential: String, operator_id: i64, trace_id: String,
   logger: StreamLogger,
-) -> Result<game::Model, String> {
+) -> Result<(game::Model, crate::sync::discover::DiscoveredSource), String> {
   logger.header("Ret2Shell instance import").await;
+  logger
+    .info(format!(
+      "Discovering source instance at {}...",
+      endpoint.host_str().unwrap_or("source instance")
+    ))
+    .await;
+  let discovered = crate::sync::discover::discover(&endpoint, &credential).await?;
+  let descriptor = &discovered.descriptor;
+  logger
+    .info(format!(
+      "Discovered game \"{}\" with bucket id {} at HEAD {}.",
+      descriptor.name, descriptor.bucket_id, descriptor.head
+    ))
+    .await;
+  if game::get_by_bucket(&state.db.conn, &descriptor.bucket_id)
+    .await
+    .map_err(|error| format!("failed to check for existing games: {error}"))?
+    .is_some()
+  {
+    return Err(format!(
+      "a game with bucket id {} already exists on this instance",
+      descriptor.bucket_id
+    ));
+  }
+  let repository_url = discovered.repository_url.clone();
   logger
     .info(format!(
       "Cloning source repository from {}...",
@@ -151,7 +176,12 @@ pub(crate) async fn execute_import(
     .await;
   let game_bucket = state
     .bucket
-    .import_game(repository_url.as_str(), Some(&credential))
+    .import_game(
+      repository_url.as_str(),
+      Some(&credential),
+      &descriptor.bucket_id,
+      &descriptor.head,
+    )
     .await
     .map_err(|error| format!("failed to clone source repository: {error}"))?;
   let mut guard = ImportBucketGuard::new(game_bucket);
@@ -212,6 +242,10 @@ pub(crate) async fn execute_import(
   }
   .await?;
   let (model, outcome) = sync_result;
+  // the transaction is committed, so the bucket is durable now: adopt it
+  // before the post-commit finalization, otherwise a timeout or disconnect
+  // during finalize would delete the bucket of an already imported game
+  guard.keep();
   if let Err(error) =
     finalize_repository_sync(&state, &model, outcome, &bucket_name, &trace_id, &logger).await
   {
@@ -219,11 +253,10 @@ pub(crate) async fn execute_import(
       .error(format!("failed to finalize the import: {error}"))
       .await;
   }
-  guard.keep();
   logger
     .success(format!("SYNC_IMPORT_GAME_ID={}", model.id))
     .await;
-  Ok(model)
+  Ok((model, discovered))
 }
 
 #[cfg(test)]

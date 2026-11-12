@@ -1,3 +1,4 @@
+pub(crate) mod discover;
 pub(crate) mod import;
 pub(crate) mod job;
 pub(crate) mod media;

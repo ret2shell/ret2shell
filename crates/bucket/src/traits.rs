@@ -26,6 +26,10 @@ pub enum BucketError {
   NeedLocking,
   #[error("path traversal detected")]
   PathTraversal,
+  #[error("invalid bucket id: {0}")]
+  InvalidBucketId(String),
+  #[error("admission head mismatch: expected {expected}, got {actual}")]
+  HeadRefMismatch { expected: String, actual: String },
 }
 
 macro_rules! init_dir {
