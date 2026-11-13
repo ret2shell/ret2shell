@@ -52,6 +52,13 @@ impl MigratorTrait for Migrator {
       Box::new(migrations::m_20260924_000001_challenge_milestone_unique_name::Migration),
       Box::new(migrations::m_20260925_000001_challenge_milestone_unlock_limit::Migration),
       Box::new(migrations::m_20261019_000001_extra_blood_state::Migration),
+      Box::new(migrations::m_20261111_000001_create_passkey::Migration),
+      Box::new(migrations::m_20261111_000002_create_sync_source::Migration),
+      Box::new(migrations::m_20261111_000003_create_sync_job::Migration),
+      Box::new(migrations::m_20261112_000001_create_distribution::Migration),
+      Box::new(migrations::m_20261112_000002_rework_managed_sync::Migration),
+      Box::new(migrations::m_20261112_000003_distribution_image_digests::Migration),
+      Box::new(migrations::m_20261112_000004_distribution_registry_url::Migration),
     ]
   }
 }

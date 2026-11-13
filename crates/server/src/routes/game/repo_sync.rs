@@ -52,9 +52,17 @@ pub(crate) fn router() -> Router<GlobalState> {
 /// Streams the sync log to the push client and aborts the sync task as soon
 /// as the response body is dropped, which happens exactly when the push
 /// client disconnects mid-sync.
-struct AbortOnDropStream {
+pub(crate) struct AbortOnDropStream {
   inner: ReceiverStream<Result<Bytes, std::io::Error>>,
   handle: tokio::task::AbortHandle,
+}
+
+impl AbortOnDropStream {
+  pub(crate) fn new(
+    inner: ReceiverStream<Result<Bytes, std::io::Error>>, handle: tokio::task::AbortHandle,
+  ) -> Self {
+    Self { inner, handle }
+  }
 }
 
 impl Stream for AbortOnDropStream {
@@ -78,13 +86,13 @@ pub(crate) struct PostReceiveQuery {
 }
 
 #[derive(Default)]
-struct SyncOutcome {
-  invalidate_game: bool,
-  invalidate_game_docs: bool,
-  challenge_ids: BTreeSet<i64>,
-  scoreboard_updates: Vec<challenge::Model>,
-  milestones_changed: bool,
-  blood_rates_changed: bool,
+pub(crate) struct SyncOutcome {
+  pub(crate) invalidate_game: bool,
+  pub(crate) invalidate_game_docs: bool,
+  pub(crate) challenge_ids: BTreeSet<i64>,
+  pub(crate) scoreboard_updates: Vec<challenge::Model>,
+  pub(crate) milestones_changed: bool,
+  pub(crate) blood_rates_changed: bool,
 }
 
 #[derive(Default)]
@@ -97,13 +105,15 @@ struct ChallengeChangeSet {
 }
 
 #[derive(Clone)]
-struct StreamLogger {
+pub(crate) struct StreamLogger {
   tx: mpsc::Sender<Result<Bytes, std::io::Error>>,
   formatter: GitHookFormatter,
 }
 
 impl StreamLogger {
-  fn new(tx: mpsc::Sender<Result<Bytes, std::io::Error>>, formatter: GitHookFormatter) -> Self {
+  pub(crate) fn new(
+    tx: mpsc::Sender<Result<Bytes, std::io::Error>>, formatter: GitHookFormatter,
+  ) -> Self {
     Self { tx, formatter }
   }
 
@@ -127,7 +137,7 @@ impl StreamLogger {
     self.formatter.count(value)
   }
 
-  async fn header(&self, line: impl AsRef<str>) {
+  pub(crate) async fn header(&self, line: impl AsRef<str>) {
     self
       .send(self.formatter.line(GitHookMessageLevel::Header, line))
       .await;
@@ -139,7 +149,7 @@ impl StreamLogger {
       .await;
   }
 
-  async fn info(&self, line: impl AsRef<str>) {
+  pub(crate) async fn info(&self, line: impl AsRef<str>) {
     let line = line.as_ref().to_owned();
     let message = strip_git_hook_ansi(&line);
     info!(message=%message, "git push sync");
@@ -148,7 +158,7 @@ impl StreamLogger {
       .await;
   }
 
-  async fn warn(&self, line: impl AsRef<str>) {
+  pub(crate) async fn warn(&self, line: impl AsRef<str>) {
     let line = line.as_ref().to_owned();
     let message = strip_git_hook_ansi(&line);
     warn!(message=%message, "git push sync");
@@ -157,7 +167,7 @@ impl StreamLogger {
       .await;
   }
 
-  async fn error(&self, line: impl AsRef<str>) {
+  pub(crate) async fn error(&self, line: impl AsRef<str>) {
     let line = line.as_ref().to_owned();
     let message = strip_git_hook_ansi(&line);
     error!(message=%message, "git push sync");
@@ -166,7 +176,7 @@ impl StreamLogger {
       .await;
   }
 
-  async fn success(&self, line: impl AsRef<str>) {
+  pub(crate) async fn success(&self, line: impl AsRef<str>) {
     let line = line.as_ref().to_owned();
     let message = strip_git_hook_ansi(&line);
     info!(message=%message, "git push sync");
@@ -376,6 +386,23 @@ async fn execute_post_receive(
     }
   };
 
+  finalize_repository_sync(
+    &state,
+    &game,
+    outcome,
+    &session.game_bucket,
+    &session.trace_id,
+    &logger,
+  )
+  .await?;
+
+  Ok(())
+}
+
+pub(crate) async fn finalize_repository_sync(
+  state: &GlobalState, game: &game::Model, outcome: SyncOutcome, game_bucket: &str, trace_id: &str,
+  logger: &StreamLogger,
+) -> Result<(), SyncError> {
   if outcome.invalidate_game
     && let Err(err) = state.cache.at("game").del(game.id).await
   {
@@ -400,11 +427,7 @@ async fn execute_post_receive(
   for challenge in outcome.scoreboard_updates {
     if let Err(err) = state
       .queue
-      .publish(
-        crate::worker::game::SCOREBOARD_TOPIC,
-        challenge,
-        &session.trace_id,
-      )
+      .publish(crate::worker::game::SCOREBOARD_TOPIC, challenge, trace_id)
       .await
     {
       logger
@@ -421,7 +444,7 @@ async fn execute_post_receive(
       .publish(
         crate::worker::game::SCOREBOARD_TOPIC,
         crate::worker::game::ScoreMaintenance::game(game.id),
-        &session.trace_id,
+        trace_id,
       )
       .await
     {
@@ -438,7 +461,7 @@ async fn execute_post_receive(
       .publish(
         crate::worker::game::SCOREBOARD_TOPIC,
         crate::worker::game::ScoreMaintenance::blood_rates(game.id),
-        &session.trace_id,
+        trace_id,
       )
       .await
     {
@@ -449,14 +472,52 @@ async fn execute_post_receive(
         .await;
     }
   }
-  schedule_game_repo_index_refresh(&state, game.id, &session.game_bucket).await;
+  schedule_game_repo_index_refresh(state, game.id, game_bucket).await;
 
   Ok(())
 }
 
-async fn synchronize_repository(
+#[derive(Clone, Copy)]
+enum RepositorySyncMode {
+  Push,
+  InitialImport,
+}
+
+pub(crate) async fn synchronize_repository(
   state: &GlobalState, txn: &DatabaseTransaction, game: &game::Model, game_bucket: &GameBucket,
   diff: &[DiffEntry], logger: &StreamLogger,
+) -> Result<SyncOutcome, SyncError> {
+  synchronize_repository_with_mode(
+    state,
+    txn,
+    game,
+    game_bucket,
+    diff,
+    logger,
+    RepositorySyncMode::Push,
+  )
+  .await
+}
+
+pub(crate) async fn synchronize_repository_import(
+  state: &GlobalState, txn: &DatabaseTransaction, game: &game::Model, game_bucket: &GameBucket,
+  diff: &[DiffEntry], logger: &StreamLogger,
+) -> Result<SyncOutcome, SyncError> {
+  synchronize_repository_with_mode(
+    state,
+    txn,
+    game,
+    game_bucket,
+    diff,
+    logger,
+    RepositorySyncMode::InitialImport,
+  )
+  .await
+}
+
+async fn synchronize_repository_with_mode(
+  state: &GlobalState, txn: &DatabaseTransaction, game: &game::Model, game_bucket: &GameBucket,
+  diff: &[DiffEntry], logger: &StreamLogger, mode: RepositorySyncMode,
 ) -> Result<SyncOutcome, SyncError> {
   let mut outcome = SyncOutcome::default();
   let mut challenge_changes = ChallengeChangeSet::default();
@@ -512,7 +573,7 @@ async fn synchronize_repository(
     logger.info("Synchronizing game config...").await;
     let previous_award_rate = current_game.award_rate;
     let previous_award_rates = current_game.award_rates.clone();
-    current_game = sync_game_config(txn, &current_game, game_bucket).await?;
+    current_game = sync_game_config(txn, &current_game, game_bucket, mode).await?;
     outcome.blood_rates_changed = current_game.award_rate != previous_award_rate
       || current_game.award_rates != previous_award_rates;
     outcome.invalidate_game = true;
@@ -653,7 +714,7 @@ async fn synchronize_repository(
 }
 
 async fn sync_game_config(
-  txn: &DatabaseTransaction, game: &game::Model, game_bucket: &GameBucket,
+  txn: &DatabaseTransaction, game: &game::Model, game_bucket: &GameBucket, mode: RepositorySyncMode,
 ) -> Result<game::Model, SyncError> {
   let bucket_config = game_bucket.config().await?;
   let config_host_type = bucket_config.host_type;
@@ -685,9 +746,13 @@ async fn sync_game_config(
         host_type,
         team_size: bucket_config.team_size,
         env_limit: bucket_config.env_limit.filter(|&v| v > 0),
-        access_policy: game::AccessPolicy {
-          sync: bucket_config.access_policy.sync,
-          ..game.access_policy.clone()
+        access_policy: if matches!(mode, RepositorySyncMode::InitialImport) {
+          game.access_policy.clone()
+        } else {
+          game::AccessPolicy {
+            sync: bucket_config.access_policy.sync,
+            ..game.access_policy.clone()
+          }
         },
         archive_policy: game.archive_policy.clone(),
         hammer_policy: game.hammer_policy.clone(),
@@ -698,13 +763,18 @@ async fn sync_game_config(
         award_rate: bucket_config.award_rate,
         award_rates: game.award_rates.clone(),
         admins: game.admins.clone(),
-        weight: bucket_config.weight,
+        weight: if matches!(mode, RepositorySyncMode::InitialImport) {
+          game.weight
+        } else {
+          bucket_config.weight
+        },
         bucket: game.bucket.clone(),
         token: game.token.clone(),
         timeline_presets: game.timeline_presets.clone(),
         node_selector: game.node_selector.clone(),
         traffic: game.traffic.clone(),
         lifecycle: game.lifecycle.clone(),
+        managed_distribution: game.managed_distribution,
       },
     )
     .await?,
@@ -1048,7 +1118,10 @@ fn classify_path(
   if parts.next() != Some("challenges") {
     return;
   }
-  let Some(bucket_name) = parts.next().filter(|segment| !segment.is_empty()) else {
+  let Some(bucket_name) = parts
+    .next()
+    .filter(|segment| !segment.is_empty() && !segment.starts_with('.'))
+  else {
     return;
   };
   let bucket_name = bucket_name.to_owned();
@@ -1217,6 +1290,26 @@ mod tests {
     assert!(challenge_changes.env.contains("web"));
     assert!(challenge_changes.checker.contains("web"));
     assert_eq!(challenge_changes.buckets.len(), 1);
+  }
+
+  #[test]
+  fn classify_path_ignores_dotfiles_at_the_challenges_root() {
+    let mut game_config_changed = false;
+    let mut doc_changed = false;
+    let mut milestones_changed = false;
+    let mut challenge_changes = ChallengeChangeSet::default();
+    classify_path(
+      "challenges/.gitkeep",
+      &mut game_config_changed,
+      &mut doc_changed,
+      &mut milestones_changed,
+      &mut challenge_changes,
+    );
+    assert!(challenge_changes.buckets.is_empty());
+    assert!(challenge_changes.db_backed.is_empty());
+    assert!(challenge_changes.hints.is_empty());
+    assert!(challenge_changes.env.is_empty());
+    assert!(challenge_changes.checker.is_empty());
   }
 
   #[test]

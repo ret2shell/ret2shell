@@ -237,6 +237,10 @@ pub struct Model {
   pub traffic: Option<String>,
   #[serde(default = "Option::default")]
   pub lifecycle: Option<String>,
+  /// Set while the game content is managed by an upstream distribution: all
+  /// local content edits are rejected until the game is unbound.
+  #[serde(default = "Option::default")]
+  pub managed_distribution: Option<i64>,
 }
 
 impl Model {
@@ -304,6 +308,14 @@ pub enum Relation {
   Notification,
   #[sea_orm(has_many = "super::team::Entity")]
   Team,
+  #[sea_orm(
+    belongs_to = "super::distribution::Entity",
+    from = "Column::ManagedDistribution",
+    to = "super::distribution::Column::Id",
+    on_update = "Cascade",
+    on_delete = "SetNull"
+  )]
+  Distribution,
 }
 
 impl Related<super::article::Entity> for Entity {
@@ -330,6 +342,12 @@ impl Related<super::team::Entity> for Entity {
   }
 }
 
+impl Related<super::distribution::Entity> for Entity {
+  fn to() -> RelationDef {
+    Relation::Distribution.def()
+  }
+}
+
 impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn get<C>(db: &C, game_id: i64) -> Result<Option<Model>, DbErr>
@@ -343,6 +361,26 @@ where
   C: ConnectionTrait, {
   Entity::find()
     .filter(Column::Bucket.eq(bucket))
+    .one(db)
+    .await
+}
+
+/// Looks up a game by its sync token for source-instance discovery. Tokens are
+/// random per game, so the first match is authoritative.
+pub async fn get_by_token<C>(db: &C, token: &str) -> Result<Option<Model>, DbErr>
+where
+  C: ConnectionTrait, {
+  Entity::find().filter(Column::Token.eq(token)).one(db).await
+}
+
+/// The game whose content is currently managed by the given distribution.
+pub async fn get_by_managed_distribution<C>(
+  db: &C, distribution_id: i64,
+) -> Result<Option<Model>, DbErr>
+where
+  C: ConnectionTrait, {
+  Entity::find()
+    .filter(Column::ManagedDistribution.eq(distribution_id))
     .one(db)
     .await
 }
@@ -508,6 +546,7 @@ mod tests {
       node_selector: Some("node-a".to_owned()),
       traffic: Some("traffic script".to_owned()),
       lifecycle: Some("lifecycle script".to_owned()),
+      managed_distribution: None,
     }
   }
 

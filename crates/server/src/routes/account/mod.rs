@@ -36,6 +36,7 @@ use crate::{
 mod captcha;
 mod institute;
 mod oauth;
+mod passkey;
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
   Router::new()
@@ -58,6 +59,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
       Permission::Basic
     )))
     .nest("/oauth", oauth::router(state))
+    .nest("/passkey", passkey::router(state))
     .route("/verify", post(verify_email))
     .route("/reset", post(reset_password))
     .route("/forgot", post(forgot_password))
@@ -938,6 +940,7 @@ async fn delete_self(
   }
   cache.at("token").del(format!("user-{}", user.id)).await?;
   r2s_database::oauth::delete_by_user_id(&txn, user.id).await?;
+  r2s_database::passkey::delete_by_user_id(&txn, user.id).await?;
   user::update(&txn, user.clone()).await?;
 
   txn.commit().await?;

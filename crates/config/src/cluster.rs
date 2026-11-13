@@ -124,7 +124,7 @@ impl ImagePullPolicy {
   }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct ChallengeImage {
   pub name: String,
   pub tag: String,
@@ -161,7 +161,7 @@ fn default_storage_req() -> Option<String> {
   Some("64Mi".to_string())
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct ChallengeEnv {
   pub internet: bool,
   pub restricted: Option<bool>,

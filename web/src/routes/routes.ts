@@ -57,6 +57,10 @@ export const routes = {
               component: lazy(() => import("./account/settings/password/index")),
             },
             {
+              path: "/passkey",
+              component: lazy(() => import("./account/settings/passkey/index")),
+            },
+            {
               path: "/oauth",
               component: lazy(() => import("./account/settings/oauth/index")),
             },

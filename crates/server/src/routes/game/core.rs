@@ -273,6 +273,9 @@ pub(super) async fn create_game(
       introduction_id: None,
       token: Some(nanoid!()),
       archive_policy: ArchivePolicy::default(),
+      // a locally created game is never managed; binding happens through the
+      // distribution API only
+      managed_distribution: None,
       ..model
     },
   )
@@ -299,6 +302,7 @@ pub(super) async fn update_game(
   Extension(trace): Extension<RequestId>, Extension(token): Extension<Token>,
   Json(model): Json<game::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  crate::routes::game::ensure_not_managed(&game)?;
   model.validate()?;
   // Weight decides which games are promoted on the home page, so it stays a
   // host-level attribute even though game admins may edit the rest of the game.
@@ -319,6 +323,8 @@ pub(super) async fn update_game(
       lifecycle: game.lifecycle.clone(),
       node_selector: game.node_selector.clone(),
       introduction_id: game.introduction_id,
+      // managed status is controlled through the distribution API only
+      managed_distribution: game.managed_distribution,
       ..model
     },
   )
@@ -394,6 +400,7 @@ pub(super) async fn delete_game(
   State(ref db): State<Database>, State(ref cache): State<Cache>, State(ref bucket): State<Bucket>,
   Extension(game): Extension<game::Model>, Query(query): Query<DeleteGameQuery>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  crate::routes::game::ensure_not_managed(&game)?;
   let challenges = challenge_db::count(&db.conn, Some(game.id), Some(game.host_type), true).await?;
   if challenges > 0 && !query.force.unwrap_or(false) {
     return Err(ResponseError::PreconditionFailed(
@@ -420,6 +427,7 @@ pub(super) async fn update_game_intro_compat(
   Extension(game): Extension<game::Model>, Extension(token): Extension<Token>,
   Json(payload): Json<Value>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  crate::routes::game::ensure_not_managed(&game)?;
   let content = extract_legacy_intro_content(payload)?;
   Ok(Json(
     persist_game_doc(cache, bucket, &game, &token, GameDocKind::Readme, &content).await?,
@@ -466,6 +474,7 @@ pub(super) async fn update_game_doc(
   Extension(game): Extension<game::Model>, Extension(token): Extension<Token>,
   Path((_, doc)): Path<(String, GameDocKind)>, Json(content): Json<String>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  crate::routes::game::ensure_not_managed(&game)?;
   Ok(Json(
     persist_game_doc(cache, bucket, &game, &token, doc, &content).await?,
   ))

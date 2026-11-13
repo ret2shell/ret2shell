@@ -1,8 +1,16 @@
 import { sleep } from "@lib/utils/timeout";
+import {
+  isUserCancelled,
+  serializeCreationCredential,
+  serializeRequestCredential,
+  toCreationOptions,
+  toRequestOptions,
+} from "@lib/utils/webauthn";
 import type { Captcha } from "@models/captcha";
 import type { Institute } from "@models/institute";
 import type { OAuth } from "@models/oauth";
 import type { OAuthProvider } from "@models/oauth-provider";
+import type { Passkey, ServerCreationOptions, ServerRequestOptions } from "@models/passkey";
 import type { User } from "@models/user";
 import type { CaptchaRequest } from "@models/utils";
 import { t } from "@storage/theme";
@@ -723,4 +731,139 @@ export function useDeleteInstituteMutation(props: { onSuccess?: () => void; onEr
       props.onError?.(err);
     },
   }));
+}
+
+// ---------------------------------------------------------------- passkey ---
+
+export type PasskeyCreationOptionsResponse = {
+  token: string;
+  options: ServerCreationOptions;
+};
+
+export type PasskeyRequestOptionsResponse = {
+  token: string;
+  options: ServerRequestOptions;
+};
+
+export async function getPasskeys() {
+  return await api.get(`${api_root}/account/passkey`).json<Passkey[]>();
+}
+
+export function usePasskeys(props: { enabled?: () => boolean; onError?: (err: Error) => boolean } = {}) {
+  return useQuery(
+    () => ({
+      queryKey: ["account", "passkey", "list"],
+      queryFn: async () => await getPasskeys(),
+      enabled: props.enabled?.(),
+      throwOnError: (err: Error) => {
+        handleHttpError(err, t("account.passkey.errors.fetch.title"));
+        return props.onError?.(err) ?? false;
+      },
+    }),
+    () => inflyClient
+  );
+}
+
+export async function registerPasskey(name: string) {
+  const { token, options } = await api
+    .post(`${api_root}/account/passkey/register/options`)
+    .json<PasskeyCreationOptionsResponse>();
+  const credential = (await navigator.credentials.create(toCreationOptions(options))) as PublicKeyCredential;
+  await sleep(500);
+  return await safeJson(
+    api
+      .post(`${api_root}/account/passkey/register`, {
+        json: {
+          token,
+          name,
+          credential: serializeCreationCredential(credential),
+        },
+      })
+      .json()
+  );
+}
+
+export function useRegisterPasskeyMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
+  return useMutation(() => ({
+    mutationFn: ({ name }: { name: string }) => registerPasskey(name),
+    onSuccess: () => {
+      addToast({
+        level: "success",
+        description: t("account.passkey.status.registered"),
+        duration: 5000,
+      });
+      props.onSuccess?.();
+    },
+    onError: (err: Error) => {
+      if (!isUserCancelled(err)) {
+        handleHttpError(err, t("account.passkey.errors.register.title"));
+      }
+      props.onError?.(err);
+    },
+  }));
+}
+
+export async function renamePasskey(id: number, name: string) {
+  return await safeJson(
+    api
+      .patch(`${api_root}/account/passkey/${id}`, {
+        json: {
+          name,
+        },
+      })
+      .json()
+  );
+}
+
+export function useRenamePasskeyMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
+  return useMutation(() => ({
+    mutationFn: ({ id, name }: { id: number; name: string }) => renamePasskey(id, name),
+    onSuccess: () => {
+      props.onSuccess?.();
+    },
+    onError: (err: Error) => {
+      handleHttpError(err, t("account.passkey.errors.rename.title"));
+      props.onError?.(err);
+    },
+  }));
+}
+
+export async function deletePasskey(id: number) {
+  return await safeJson(api.delete(`${api_root}/account/passkey/${id}`).json());
+}
+
+export function useDeletePasskeyMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
+  return useMutation(() => ({
+    mutationFn: ({ id }: { id: number }) => deletePasskey(id),
+    onSuccess: () => {
+      addToast({
+        level: "success",
+        description: t("general.actions.delete.status.success"),
+        duration: 5000,
+      });
+      props.onSuccess?.();
+    },
+    onError: (err: Error) => {
+      handleHttpError(err, t("account.passkey.errors.delete.title"));
+      props.onError?.(err);
+    },
+  }));
+}
+
+export async function loginWithPasskey() {
+  const { token, options } = await api
+    .post(`${api_root}/account/passkey/login/options`)
+    .json<PasskeyRequestOptionsResponse>();
+  const credential = (await navigator.credentials.get(toRequestOptions(options))) as PublicKeyCredential;
+  await sleep(500);
+  return await safeJson(
+    api
+      .post(`${api_root}/account/passkey/login`, {
+        json: {
+          token,
+          credential: serializeRequestCredential(credential),
+        },
+      })
+      .json()
+  );
 }
