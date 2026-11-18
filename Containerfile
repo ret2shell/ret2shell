@@ -15,7 +15,7 @@ RUN --mount=type=cache,target=/var/lib/ret2shell/target cargo update && \
     cargo build --release --bin r2s-server --target x86_64-unknown-linux-musl && \
     cp /var/lib/ret2shell/target/x86_64-unknown-linux-musl/release/r2s-server /usr/local/bin/r2s-server
 
-FROM node:lts-alpine AS frontend
+FROM node:24-alpine AS frontend
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
