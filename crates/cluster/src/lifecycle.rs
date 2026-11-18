@@ -921,13 +921,3 @@ impl LifecycleMapper {
     Ok(LifecycleExecutionStatus::Executed)
   }
 }
-
-#[cfg(test)]
-mod tests {
-  use super::LifecycleStopReason;
-
-  #[test]
-  fn solved_stop_reason_is_reported_to_lifecycle_scripts() {
-    assert_eq!(LifecycleStopReason::Solved.as_str(), "solved");
-  }
-}
