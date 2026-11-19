@@ -1879,6 +1879,56 @@
         }
       }
     },
+    "passkey": {
+      "title": "パスキー",
+      "login": {
+        "title": "パスキーでログイン"
+      },
+      "form": {
+        "name": {
+          "label": "名前",
+          "placeholder": "このデバイスに名前を付ける"
+        }
+      },
+      "actions": {
+        "add": {
+          "title": "パスキーを追加"
+        },
+        "rename": {
+          "title": "名前を変更"
+        },
+        "delete": {
+          "title": "削除"
+        }
+      },
+      "info": {
+        "created_at": "追加日時",
+        "last_used_at": "最終使用",
+        "credential_id": "クレデンシャル ID"
+      },
+      "status": {
+        "registered": "パスキーを追加しました"
+      },
+      "empty": "パスキーはまだ追加されていません",
+      "unnamed": "名前なし",
+      "errors": {
+        "fetch": {
+          "title": "パスキー一覧の取得に失敗しました"
+        },
+        "register": {
+          "title": "パスキーの追加に失敗しました"
+        },
+        "rename": {
+          "title": "パスキー名の変更に失敗しました"
+        },
+        "delete": {
+          "title": "パスキーの削除に失敗しました"
+        },
+        "login": {
+          "title": "パスキーログインに失敗しました"
+        }
+      }
+    },
     "register": {
       "tips": "アカウントをお持ちではありませんか？今すぐ登録！",
       "status": {
