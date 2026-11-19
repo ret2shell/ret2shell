@@ -136,9 +136,17 @@ export default function (props: ChallengeWidgetProps) {
 
   const startInstanceMutation = useStartChallengeInstanceMutation({
     onSuccess: () => {
+      // The server starts the cooldown before responding; refresh it so the
+      // start button on other challenges shows the countdown immediately.
+      calmdownStatus.refetch();
       setTimeout(() => {
         maintainInstances();
       }, 500);
+    },
+    onError: () => {
+      // A 412 caused by a cooldown the client has not seen yet should surface
+      // the countdown instead of letting the user keep clicking.
+      calmdownStatus.refetch();
     },
   });
   async function handleStartChallengeInstance() {
@@ -354,6 +362,7 @@ export default function (props: ChallengeWidgetProps) {
                       loading={startInstanceMutation.isPending}
                       disabled={
                         startInstanceMutation.isPending ||
+                        calmdownStatus.isFetching ||
                         gating.gated() ||
                         !!calmdownStatus.data ||
                         env.data?.images.every((image) => !image.port)

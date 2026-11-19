@@ -161,6 +161,10 @@ export class Service implements Command {
         const text = typeof e.data === "string" ? e.data : JSON.stringify(e.data);
         io.error(`${t("challenge.instance.errors.start.title")}: ${text}`);
       }
+    } finally {
+      // Refresh the server-side cooldown for both success and 412 responses so
+      // the web UI reflects the authoritative state instead of staying stale.
+      await inflyClient.invalidateQueries({ queryKey: ["cluster", "calmdown"] });
     }
     await this.status(io, envVars);
     return 0;
