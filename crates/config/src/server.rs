@@ -56,6 +56,10 @@ pub struct Config {
   pub hide_maker: Option<bool>,
   pub highlight_banner: Option<String>,
   pub zen_game: Option<i64>,
+  /// Maximum number of non-competition challenge environments (training
+  /// grounds and archived games) one user may run at the same time. This is a
+  /// per-user pool shared by every non-competition context on the platform.
+  pub non_game_env_limit: Option<i32>,
 }
 
 impl Config {
@@ -85,6 +89,7 @@ impl Config {
   ///   hide_maker: None,
   ///   highlight_banner: None,
   ///   zen_game: None,
+  ///   non_game_env_limit: None,
   /// };
   ///
   /// assert_eq!(config.external_origin(), "https://example.com");
@@ -95,6 +100,13 @@ impl Config {
     } else {
       format!("http://{}", self.external_domain)
     }
+  }
+
+  /// Resolved personal challenge environment quota. Values outside `1..=99`
+  /// fall back to the nearest valid bound so a bad config can never disable
+  /// challenge environments completely or exhaust the cluster.
+  pub fn non_game_env_limit(&self) -> i32 {
+    self.non_game_env_limit.unwrap_or(1).clamp(1, 99)
   }
 
   pub fn desensitize(&self) -> Self {
@@ -117,6 +129,7 @@ impl Config {
       // api_rate_limit: self.api_rate_limit,
       rate_limit: None,
       zen_game: self.zen_game,
+      non_game_env_limit: self.non_game_env_limit,
     }
   }
 }
@@ -144,6 +157,7 @@ impl Merge for Option<Config> {
         // api_rate_limit: b.api_rate_limit.or(a.api_rate_limit),
         rate_limit: a.rate_limit,
         zen_game: b.zen_game.or(a.zen_game),
+        non_game_env_limit: b.non_game_env_limit.or(a.non_game_env_limit),
       }),
       (Some(a), None) => Some(a),
       (None, Some(b)) => Some(b),
@@ -182,6 +196,7 @@ mod tests {
       hide_maker: Some(false),
       highlight_banner: Some("Welcome banner".to_owned()),
       zen_game: Some(7),
+      non_game_env_limit: Some(3),
     }
   }
 
@@ -214,6 +229,35 @@ mod tests {
       Some("Welcome banner")
     );
     assert_eq!(desensitized.zen_game, Some(7));
+    assert_eq!(desensitized.non_game_env_limit, Some(3));
+  }
+
+  #[test]
+  fn non_game_env_limit_defaults_to_one_and_clamps_to_valid_range() {
+    let limit = |value: Option<i32>| {
+      Config {
+        non_game_env_limit: value,
+        ..Default::default()
+      }
+      .non_game_env_limit()
+    };
+
+    assert_eq!(limit(None), 1);
+    assert_eq!(limit(Some(0)), 1);
+    assert_eq!(limit(Some(-5)), 1);
+    assert_eq!(limit(Some(4)), 4);
+    assert_eq!(limit(Some(500)), 99);
+  }
+
+  #[test]
+  fn legacy_server_config_without_non_game_env_limit_still_deserializes() {
+    let mut legacy = serde_json::to_value(server_config()).unwrap();
+    legacy.as_object_mut().unwrap().remove("non_game_env_limit");
+
+    let config: Config = serde_json::from_value(legacy).unwrap();
+
+    assert_eq!(config.non_game_env_limit, None);
+    assert_eq!(config.non_game_env_limit(), 1);
   }
 
   #[test]
@@ -243,6 +287,7 @@ mod tests {
       hide_maker: Some(true),
       highlight_banner: None,
       zen_game: None,
+      non_game_env_limit: Some(5),
     });
 
     let merged = base.merge(overlay).unwrap();
@@ -282,5 +327,19 @@ mod tests {
     assert_eq!(merged.hide_maker, Some(true));
     assert_eq!(merged.highlight_banner.as_deref(), Some("Welcome banner"));
     assert_eq!(merged.zen_game, Some(7));
+    assert_eq!(merged.non_game_env_limit, Some(5));
+  }
+
+  #[test]
+  fn merge_falls_back_to_base_non_game_env_limit_when_overlay_is_unset() {
+    let base = Some(server_config());
+    let overlay = Some(Config {
+      non_game_env_limit: None,
+      ..server_config()
+    });
+
+    let merged = base.merge(overlay).unwrap();
+
+    assert_eq!(merged.non_game_env_limit, Some(3));
   }
 }

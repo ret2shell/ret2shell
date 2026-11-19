@@ -394,6 +394,12 @@
       "zenGame": {
         "label": "Zen game mode",
         "placeholder": "Select game..."
+      },
+      "nonGameEnvLimit": {
+        "label": "Non-competition env limit",
+        "placeholder": "Max environments per user across training grounds and archived games",
+        "minimum": "Limit cannot be less than 1",
+        "maximum": "Limit cannot be more than 99"
       }
     },
     "logs": {

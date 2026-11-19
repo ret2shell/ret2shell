@@ -394,6 +394,12 @@
       "zenGame": {
         "label": "独立比赛模式",
         "placeholder": "选择比赛……"
+      },
+      "nonGameEnvLimit": {
+        "label": "非比赛环境上限",
+        "placeholder": "每个用户在训练场和已归档赛事中可同时运行的环境总数",
+        "minimum": "上限不能少于 1",
+        "maximum": "上限不能多于 99"
       }
     },
     "logs": {

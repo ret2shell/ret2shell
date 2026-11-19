@@ -10,6 +10,7 @@ import {
 } from "@api/challenge";
 import { useCalmdownStatus } from "@api/cluster";
 import { useGame, useGameInstances } from "@api/game";
+import { usePlatformInfo } from "@api/platform";
 import { useSelfTeam } from "@api/team";
 import Spin from "@assets/animates/spin";
 import { getWsrxLink, wsrx } from "@lib/wsrx";
@@ -45,15 +46,13 @@ passiveSupport({
 
 export default function (props: ChallengeWidgetProps) {
   const instances = useGameInstances({ game_id: () => props.gameId });
-  const instance = createMemo(() => {
-    return instances.data?.find((s) => s.challenge_id === props.challengeId) ?? null;
-  });
   const calmdownStatus = useCalmdownStatus();
   const game = useGame({ id: () => props.gameId });
   const challenge = useChallenge({
     game_id: () => props.gameId,
     challenge_id: () => props.challengeId,
   });
+  const platformInfo = usePlatformInfo();
   const attachments = useChallengeAttachments({
     game_id: () => props.gameId,
     challenge_id: () => props.challengeId,
@@ -69,6 +68,25 @@ export default function (props: ChallengeWidgetProps) {
   const team = useSelfTeam({
     game_id: () => props.gameId,
     enabled: () => !props.training && !!game.data && isGameInProgress(game.data) && !isAdminOfGame(game.data),
+  });
+  // Team quota applies only while the game is running and the challenge is not
+  // archived; everything else uses the platform-wide personal quota.
+  const teamScoped = createMemo(
+    () =>
+      isGameInProgress(game.data) &&
+      !!team.data &&
+      !(challenge.data?.archive_at && challenge.data.archive_at <= DateTime.now())
+  );
+  const scopedInstances = createMemo(() => {
+    if (!instances.data) return undefined;
+    if (teamScoped()) {
+      const teamId = team.data?.id;
+      return teamId ? instances.data.filter((s) => s.team_id === teamId) : [];
+    }
+    return instances.data.filter((s) => s.team_id === 0);
+  });
+  const instance = createMemo(() => {
+    return instances.data?.find((s) => s.challenge_id === props.challengeId) ?? null;
   });
   const gating = usePrerequisiteGating({ gameId: () => props.gameId, challengeId: () => props.challengeId });
   const [layerDismissed, setLayerDismissed] = createSignal(false);
@@ -95,8 +113,14 @@ export default function (props: ChallengeWidgetProps) {
     const limit = game.data?.env_limit;
     return limit && limit > 0 ? limit : game.data?.team_size || 1;
   });
+  const nonGameEnvLimit = createMemo(() => {
+    const limit = platformInfo.data?.non_game_env_limit;
+    return typeof limit === "number" && limit > 0 ? Math.min(limit, 99) : 1;
+  });
   const instanceCountExceeded = createMemo(() => {
-    return instances.data && instances.data.length >= (isGameInProgress(game.data) && team.data ? envLimit() : 1);
+    const scoped = scopedInstances();
+    if (!scoped) return false;
+    return scoped.length >= (teamScoped() ? envLimit() : nonGameEnvLimit());
   });
 
   const timer = setInterval(maintainInstancesWorker(), 1000);
@@ -408,7 +432,7 @@ export default function (props: ChallengeWidgetProps) {
                     </Button>
                   </Match>
                   <Match when={instanceCountExceeded()}>
-                    <For each={instances.data}>
+                    <For each={scopedInstances() ?? []}>
                       {(inst) => (
                         <Button
                           ghost
@@ -421,7 +445,10 @@ export default function (props: ChallengeWidgetProps) {
                           <Show when={stoppingExplicit() !== inst.challenge_id}>
                             <span class="shrink-0 icon-[fluent--record-stop-20-regular] w-5 h-5 text-error" />
                           </Show>
-                          <span>{inst.challenge_name}</span>
+                          <span>
+                            {inst.challenge_name}
+                            {inst.game_id !== props.gameId && inst.game_name ? ` (${inst.game_name})` : ""}
+                          </span>
                         </Button>
                       )}
                     </For>

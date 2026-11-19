@@ -132,6 +132,9 @@ burst_restore_rate = 500 # ? in milliseconds
 # subject_url  = 'https://ret.sh.cn/'
 # record       = '豫ICP备xxxxxxxx号-1'                     # ? China ICP record
 # hide_maker   = false
+# ? Max non-competition challenge environments one user may run at the same time.
+# ? It is a per-user pool shared by training grounds and archived games.
+# non_game_env_limit = 1
 
 # ? Integrated static server.
 # ? It's recommended to use external high-performance static server like nginx/apache.

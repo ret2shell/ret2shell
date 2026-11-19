@@ -516,6 +516,7 @@ mod tests {
         hide_maker: None,
         highlight_banner: None,
         zen_game: None,
+        non_game_env_limit: None,
       }),
     }
   }

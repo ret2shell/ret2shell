@@ -1,6 +1,7 @@
 import { inflyClient } from "@api";
 import { delayChallengeInstance, getChallengeEnv, startChallengeInstance, stopChallengeInstance } from "@api/challenge";
 import { getGameInstances } from "@api/game";
+import { getPlatformInfo } from "@api/platform";
 import { deunicode } from "@api/rpc";
 import { getWsrxLink, wsrx } from "@lib/wsrx";
 import type { Challenge } from "@models/challenge";
@@ -12,10 +13,21 @@ import { t } from "@storage/theme";
 import { WsrxState } from "@xdsec/wsrx";
 import ansiColors from "ansi-colors";
 import { HTTPError } from "ky";
+import { DateTime } from "luxon";
 import type { ParseEntry } from "shell-quote";
 import { link } from "../escapes";
 import type { Stdio } from "../stdio";
 import type { Command } from "./interface";
+
+/** Team quota applies only while the game is running and the challenge is not archived. */
+function isTeamScoped(game: Game, challenge: Challenge, team?: Team) {
+  return isGameInProgress(game) && !!team && !(challenge.archive_at && challenge.archive_at <= DateTime.now());
+}
+
+/** Keeps instances belonging to the same quota scope as the current request. */
+function filterScopedInstances(instances: Instance[] | undefined, teamScoped: boolean, team?: Team) {
+  return (instances ?? []).filter((inst) => (teamScoped ? inst.team_id === team?.id : inst.team_id === 0));
+}
 
 export class Service implements Command {
   name = "service";
@@ -87,18 +99,27 @@ export class Service implements Command {
       io.error(t("challenge.instance.errors.noConfig.title"));
       return 1;
     }
-    const envLimit = envVars.game.env_limit ?? (envVars.game.team_size || 1);
-    if (instances && instances.length > (isGameInProgress(envVars.game) ? envLimit : 1)) {
-      if (instances?.find((v) => v.challenge_id === envVars.challenge.id)) {
-        await this.status(io, envVars);
-        return 0;
-      }
+    if (instances?.find((inst) => inst.challenge_id === envVars.challenge.id)) {
+      await this.status(io, envVars);
+      return 0;
+    }
+    const teamScoped = isTeamScoped(envVars.game, envVars.challenge, envVars.team);
+    const platformInfo = teamScoped ? null : await getPlatformInfo().catch(() => null);
+    const teamLimit =
+      envVars.game.env_limit && envVars.game.env_limit > 0 ? envVars.game.env_limit : envVars.game.team_size || 1;
+    const nonGameLimit =
+      platformInfo?.non_game_env_limit && platformInfo.non_game_env_limit > 0
+        ? Math.min(platformInfo.non_game_env_limit, 99)
+        : 1;
+    const limit = teamScoped ? teamLimit : nonGameLimit;
+    const scopedInstances = filterScopedInstances(instances, teamScoped, envVars.team);
+    if (scopedInstances.length >= limit) {
       io.warning(t("challenge.instance.errors.singleton.title"));
       io.info(
-        `${t("challenge.instance.errors.singleton.current")}:\n\t${instances
+        `${t("challenge.instance.errors.singleton.current")}:\n\t${scopedInstances
           .map(
             (inst) =>
-              `${link(ansiColors.bold(inst.challenge_id.toString()), `rnix://command/${inst.challenge_id}`)}: ${link(inst.challenge_name!, `rnix://challenge/${inst.challenge_id}`)}`
+              `${link(ansiColors.bold(inst.challenge_id.toString()), `rnix://command/${inst.challenge_id}`)}: ${link(inst.challenge_name!, `rnix://challenge/${inst.challenge_id}`)}${inst.game_name ? ` (${inst.game_name})` : ""}`
           )
           .join("\n\t")}`
       );
@@ -113,7 +134,7 @@ export class Service implements Command {
         return 1;
       }
       try {
-        const inst = instances.find((v) => v.challenge_id === chall_id);
+        const inst = scopedInstances.find((v) => v.challenge_id === chall_id);
         if (!inst) {
           io.warning(t("challenge.instance.errors.noAction.title"));
           return 1;

@@ -713,6 +713,17 @@ impl Cluster {
     Ok(pod)
   }
 
+  /// Lists the personal (non-team) challenge environments started by a user,
+  /// across every game. Used by the platform-wide non-competition quota.
+  pub async fn get_personal_challenge_env_by_user(
+    &self, user_id: i64,
+  ) -> Result<Vec<Pod>, ClusterError> {
+    let pod = self
+      .get_pods_by_label(&format!("ret.sh.cn/user={user_id},ret.sh.cn/team=0"))
+      .await?;
+    Ok(pod)
+  }
+
   pub async fn get_challenge_env_by_team(&self, team_id: i64) -> Result<Vec<Pod>, ClusterError> {
     let pod = self
       .get_pods_by_label(&format!("ret.sh.cn/team={team_id}"))

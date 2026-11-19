@@ -2,7 +2,7 @@ import { useGames } from "@api/game";
 import { usePlatformConfig, usePlatformInfo, useUpdatePlatformConfigMutation } from "@api/platform";
 import LogoAnimate from "@assets/animates/logo-animate";
 import type { Config } from "@models/config";
-import { createForm, setValues } from "@modular-forms/solid";
+import { createForm, maxRange, minRange, setValues } from "@modular-forms/solid";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
@@ -21,6 +21,7 @@ type PlatformConfigForm = {
   hide_maker: boolean;
   highlight_banner?: string;
   zen_game?: number | null;
+  non_game_env_limit?: number;
 };
 
 export default function () {
@@ -29,6 +30,7 @@ export default function () {
   const [form, { Form, Field }] = createForm<PlatformConfigForm>({
     initialValues: {
       ...JSON.parse(JSON.stringify(config.data?.server || {})),
+      non_game_env_limit: config.data?.server.non_game_env_limit ?? undefined,
     },
   });
   const games = useGames({
@@ -54,6 +56,7 @@ export default function () {
         hide_maker: false,
         highlight_banner: result.highlight_banner,
         zen_game: result.zen_game,
+        non_game_env_limit: result.non_game_env_limit ?? null,
       },
     } as Config;
     mutation.mutate(mergedConfig);
@@ -71,6 +74,7 @@ export default function () {
           hide_maker: false,
           highlight_banner: config.data.server.highlight_banner || "",
           zen_game: config.data.server.zen_game || null,
+          non_game_env_limit: config.data.server.non_game_env_limit ?? undefined,
         });
       });
   });
@@ -177,6 +181,29 @@ export default function () {
                   const gameId = val.value.length > 0 ? Number.parseInt(val.value[0], 10) : null;
                   setValues(form, { zen_game: gameId });
                 }}
+              />
+            )}
+          </Field>
+          <Field
+            name="non_game_env_limit"
+            type="number"
+            validate={[
+              minRange(1, t("platform.form.nonGameEnvLimit.minimum")),
+              maxRange(99, t("platform.form.nonGameEnvLimit.maximum")),
+            ]}
+          >
+            {(field, props) => (
+              <Input
+                class="flex-1"
+                icon={<span class="shrink-0 icon-[fluent--box-20-regular] w-5 h-5" />}
+                placeholder={t("platform.form.nonGameEnvLimit.placeholder")}
+                title={t("platform.form.nonGameEnvLimit.label")}
+                {...props}
+                value={field.value ?? ""}
+                error={field.error}
+                type="number"
+                min={1}
+                max={99}
               />
             )}
           </Field>
