@@ -19,6 +19,7 @@ pub enum LifecycleStopReason {
   Manual,
   Timeout,
   Admin,
+  Solved,
 }
 
 impl LifecycleStopReason {
@@ -27,6 +28,7 @@ impl LifecycleStopReason {
       Self::Manual => "manual",
       Self::Timeout => "timeout",
       Self::Admin => "admin",
+      Self::Solved => "solved",
     }
   }
 }

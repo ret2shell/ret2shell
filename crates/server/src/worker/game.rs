@@ -22,6 +22,7 @@ use serde::{Deserialize, Serialize};
 use tracing::{Instrument, Span, debug, error, error_span, info, warn};
 
 use crate::{
+  routes::game::lifecycle,
   traits::{GlobalState, ResponseError},
   utility::game_repo::schedule_next_missing_game_repo_index_refresh,
 };
@@ -86,6 +87,7 @@ pub async fn spawn_game_workers(state: GlobalState) {
   let cache = state.cache.clone();
   let engine = state.engine.clone();
   tokio::spawn(submission_worker(
+    state.clone(),
     queue.clone(),
     database.clone(),
     cache,
@@ -255,7 +257,8 @@ async fn score_maintenance_worker_exec(
 }
 
 async fn submission_worker(
-  queue: Queue, db: Database, cache: Cache, engine: Engine, checker: Checker, bucket: Bucket,
+  state: GlobalState, queue: Queue, db: Database, cache: Cache, engine: Engine, checker: Checker,
+  bucket: Bucket,
 ) {
   let messages = queue
     .subscribe("check")
@@ -326,6 +329,7 @@ async fn submission_worker(
         "data-game-name"=tracing::field::Empty
       );
       let result = submission_worker_exec(
+        state.clone(),
         queue.clone(),
         db.clone(),
         cache.clone(),
@@ -401,8 +405,8 @@ async fn sync_blood_bonus(
 
 #[allow(clippy::too_many_arguments)]
 async fn submission_worker_exec(
-  queue: Queue, db: Database, cache: Cache, engine: Engine, checker: Checker, bucket: Bucket,
-  submission: &submission::Model, trace: impl AsRef<str>,
+  state: GlobalState, queue: Queue, db: Database, cache: Cache, engine: Engine, checker: Checker,
+  bucket: Bucket, submission: &submission::Model, trace: impl AsRef<str>,
 ) -> Result<submission::Model, ResponseError> {
   // stage 1: get all necessary data
   let txn = db.conn.begin().await?;
@@ -493,6 +497,13 @@ async fn submission_worker_exec(
 
   if solved {
     info!(correct = true, "submission is correct");
+    lifecycle::spawn_solved_stop(
+      state.clone(),
+      game.clone(),
+      challenge.clone(),
+      user.clone(),
+      team.clone(),
+    );
   } else {
     info!(correct = false, "submission is incorrect");
   }
