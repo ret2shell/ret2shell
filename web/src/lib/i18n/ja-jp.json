@@ -299,7 +299,251 @@
       "title": "代替プロトコル"
     },
     "sync": {
-      "title": "リソースの同期"
+      "title": "リソース同期",
+      "subtitle": "他の ret2shell インスタンスから問題集をインポートし、fast-forward 同期を維持します。同期の識別子はソース实例の実際の bucket id に固定され、承認された HEAD のみ同期されます。",
+      "tabs": {
+        "direct": "直接インポート",
+        "community": "コミュニティ"
+      },
+      "warnings": {
+        "import": "インポートされたゲームは既定で非表示になり、自動公開されません。定期同期を有効にすると、上游の将来のコミット(checker・イメージ・環境の変更を含む)を信頼することになります。",
+        "authorship": "Git コミット履歴(作者・メールのメタデータを含む)は題庫とともにそのままインポートされ、本インスタンスの管理者がリポジトリから閲覧できます。",
+        "unbind": "管理解除は同期を停止するだけで、ローカルのゲームとデータは削除されません。解除後は編集フォームから再バインドできます。",
+        "delete": "ディストリビューションを削除すると同期履歴とタスク記録が削除されます。ローカルのゲームは残り、編集可能になります。"
+      },
+      "list": {
+        "empty": "ディストリビューションはまだありません",
+        "bucketId": "Bucket ID",
+        "headRef": "承認 HEAD",
+        "game": "管理中のゲーム",
+        "unbound": "未バインド",
+        "interval": "同期間隔",
+        "intervalSeconds": "{{ seconds }} 秒ごと",
+        "manual": "手動のみ",
+        "lastSuccess": "最終成功",
+        "lastAttempt": "最終試行",
+        "nextSync": "次回の同期",
+        "oid": "同期ベースライン",
+        "failures": "{{ count }} 回連続失敗",
+        "enabled": "有効",
+        "community": "コミュニティ",
+        "disabled": "一時停止中"
+      },
+      "status": {
+        "never": "未同期",
+        "queued": "待機中",
+        "running": "同期中",
+        "succeeded": "成功",
+        "failed": "失敗"
+      },
+      "trigger": {
+        "manual": "手動",
+        "scheduled": "定期",
+        "retry": "再試行"
+      },
+      "form": {
+        "createTitle": "ソースからインポート",
+        "editTitle": "ディストリビューション編集",
+        "endpoint": {
+          "label": "ソースインスタンスのアドレス",
+          "placeholder": "https://ctf.example.org/api",
+          "required": "ソースアドレスは必須です",
+          "invalid": "ソースアドレスは有効な URL である必要があります",
+          "hint": "API プレフィックスを含むベースアドレス(例: /api)を入力してください。bucket id と承認 HEAD は自動検出され、厳格に検証されます。"
+        },
+        "token": {
+          "label": "ソースの token",
+          "placeholder": "ソースインスタンスの同期 token を入力",
+          "required": "同期 token は必須です",
+          "keep": "空欄で保存済み token を維持",
+          "hint": "token は保存時のみ送信され、表示もブラウザ保存もされません。"
+        },
+        "game": {
+          "label": "ローカルゲーム ID をバインド",
+          "placeholder": "例:3",
+          "invalid": "ゲーム ID は正の整数である必要があります",
+          "hint": "ディストリビューションがゲームを管理していない場合のみバインドできます。ローカルの bucket は一致し、HEAD は同期ベースラインと等しい必要があります。"
+        },
+        "interval": {
+          "label": "同期間隔(秒)",
+          "placeholder": "空欄で手動同期のみ",
+          "invalid": "同期間隔は正の整数秒である必要があります",
+          "hint": "定期同期を有効にする前に、上游の将来のコミットを信頼できるか確認してください。"
+        },
+        "enabled": { "label": "定期同期を有効化" },
+        "importLog": {
+          "title": "インポートログ"
+        },
+        "submit": {
+          "import": "インポート開始",
+          "bind": "ゲームをバインド"
+        }
+      },
+      "community": {
+        "indexUrl": {
+          "label": "コミュニティ registry index のアドレス",
+          "placeholder": "https://example.org/ret2shell-registry/index.json",
+          "hint": "index はサーバー側で取得・検証され、エントリの token がブラウザに渡ることはありません。アドレスはこのブラウザにのみ保存されます。"
+        },
+        "fetch": {
+          "title": "取得"
+        },
+        "search": "名前または bucket id で検索",
+        "empty": "一致するエントリはありません",
+        "noToken": "token なし",
+        "list": {
+          "bucketId": "Bucket ID",
+          "endpoint": "ソース",
+          "headRef": "承認 HEAD",
+          "mirrors": "ミラー"
+        },
+        "actions": {
+          "import": "インポート"
+        }
+      },
+      "actions": {
+        "sync": {
+          "title": "手動同期",
+          "noGame": "ゲームが未バインドです。編集フォームで先にバインドしてください",
+          "status": {
+            "success": "同期タスクを作成しました",
+            "fail": "同期タスクの作成に失敗しました"
+          }
+        },
+        "jobs": "タスクとログ",
+        "pause": "一時停止",
+        "resume": "有効化",
+        "unbind": {
+          "title": "管理解除",
+          "status": { "success": "管理を解除しました。ローカル内容は編集可能です", "fail": "管理解除に失敗しました" }
+        },
+        "delete": {
+          "title": "ディストリビューション削除",
+          "status": {
+            "success": "ディストリビューションを削除しました",
+            "fail": "ディストリビューションの削除に失敗しました"
+          }
+        },
+        "bind": { "status": { "success": "ゲームをバインドしました", "fail": "バインドに失敗しました" } },
+        "import": {
+          "status": {
+            "fail": "インポートに失敗しました",
+            "noGameId": "インポートは終了しましたが、ログからゲーム ID を解析できませんでした。"
+          }
+        }
+      },
+      "jobs": {
+        "title": "同期タスク",
+        "loading": "タスク一覧を読み込み中...",
+        "empty": "同期タスクはまだありません",
+        "retry": "同期を再試行",
+        "trigger": "トリガー",
+        "oids": "OID の変化",
+        "expectedHead": "承認 HEAD",
+        "created": "作成時刻",
+        "started": "開始時刻",
+        "finished": "終了時刻",
+        "trace": "トレース ID",
+        "log": "タスクログ",
+        "noLog": "ログはまだありません"
+      },
+      "errors": {
+        "fetchDistributions": {
+          "title": "ディストリビューション一覧の取得に失敗しました"
+        },
+        "fetchJobs": {
+          "title": "同期タスク一覧の取得に失敗しました"
+        },
+        "fetchJob": {
+          "title": "同期タスク詳細の取得に失敗しました"
+        },
+        "fetchRegistry": {
+          "title": "コミュニティ registry の取得に失敗しました"
+        },
+        "unknown": {
+          "title": "同期に失敗しました"
+        },
+        "unauthorized": {
+          "title": "ソースインスタンスの認証に失敗",
+          "hint": "同期 token が無効か、ソース側で更新されました。ディストリビューションを編集して token を更新してください。"
+        },
+        "forbidden": {
+          "title": "ソースインスタンスが同期を拒否",
+          "hint": "上游が同期を禁止している(sync=2)か、ゲームが未アーカイブの可能性があります。ソース管理者に連絡してください。"
+        },
+        "local_diverged": {
+          "title": "ローカルリポジトリがベースラインから逸脱",
+          "hint": "前回の同期後にローカルのリポジトリが変更されました。同期を一時停止してローカル管理に移行するか、管理を解除してください。"
+        },
+        "upstream_diverged": {
+          "title": "上游の履歴が分岐",
+          "hint": "上游で強制プッシュや履歴の書き換えが発生しました。上游を修復して再インポートするか、ソース管理者に連絡してください。"
+        },
+        "head_ref_mismatch": {
+          "title": "承認 HEAD の不一致",
+          "hint": "取得したコミットが今回固定した承認 HEAD と一致しません。ソースまたはミラーが差し替えられた内容を返した可能性があり、同期を拒否しました。"
+        },
+        "game_missing": {
+          "title": "管理中のゲームが存在しません",
+          "hint": "ローカルゲームが削除されました。ディストリビューションを削除するか再バインドしてください。"
+        },
+        "bucket_missing": {
+          "title": "ローカル bucket がありません",
+          "hint": "管理中のゲームにリポジトリ bucket がありません。"
+        },
+        "bucket_locked": {
+          "title": "リポジトリが他の操作で書き込み中",
+          "hint": "別の書き込み操作が進行中です。しばらくしてから再試行してください。"
+        },
+        "missing_baseline": {
+          "title": "同期ベースラインがありません",
+          "hint": "ディストリビューションにベースラインがないため、再インポートしてください。"
+        },
+        "discover_failed": {
+          "title": "ソースの検出に失敗",
+          "hint": "ソースから bucket id と現在の HEAD を取得できません。アドレスと token を確認してください。"
+        },
+        "registry_fetch_failed": {
+          "title": "コミュニティ registry の読み取りに失敗",
+          "hint": "registry index の読み取り、またはエントリの取得に失敗しました。アドレスとネットワークを確認してください。エントリが削除された場合は、管理を解除するか再インポートしてください。"
+        },
+        "fetch_failed": {
+          "title": "ソースリポジトリの取得に失敗",
+          "hint": "ソースから更新を取得できません。ネットワークと資格情報を確認してください。"
+        },
+        "candidate_unresolved": {
+          "title": "候補コミットを解決できません",
+          "hint": "取得後の候補コミットを完全な commit hash として解決できません。"
+        },
+        "validation_failed": {
+          "title": "上游のバージョンが拒否されました",
+          "hint": "取得した内容がセキュリティ検証(ツリー規模・パス・ファイル種別など)を通過しませんでした。"
+        },
+        "materialization_failed": {
+          "title": "マテリアライズに失敗",
+          "hint": "ローカルデータベースへの書き込みに失敗し、ロールバックしました。"
+        },
+        "image_sync_failed": {
+          "title": "イメージ同期に失敗",
+          "hint": "課題イメージのコピーまたは検証に失敗しました。ローカル registry の設定とソース registry への到達性を確認し、タスクログを参照してください。"
+        },
+        "image_digest_mismatch": {
+          "title": "イメージ digest の不一致",
+          "hint": "同じイメージ tag がソース側で別の内容(digest)を指しています。ソースが新しい tag を公開するまで同期を拒否しました。"
+        },
+        "rollback_failed": {
+          "title": "ロールバックに失敗",
+          "hint": "同期とロールバックの両方が失敗しました。リポジトリの手動確認が必要です。"
+        },
+        "timeout": {
+          "title": "同期がタイムアウト",
+          "hint": "同期が時間制限を超えてキャンセルされました。しばらくしてから再試行してください。"
+        },
+        "internal_error": {
+          "title": "内部エラー",
+          "hint": "サーバー内部エラーです。サーバーログを確認してください。"
+        }
+      }
     },
     "email": {
       "title": "プラットフォームメールアドレス",
@@ -1876,6 +2120,56 @@
         },
         "unbind": {
           "title": "アンバインド"
+        }
+      }
+    },
+    "passkey": {
+      "title": "パスキー",
+      "login": {
+        "title": "パスキーでログイン"
+      },
+      "form": {
+        "name": {
+          "label": "名前",
+          "placeholder": "このデバイスに名前を付ける"
+        }
+      },
+      "actions": {
+        "add": {
+          "title": "パスキーを追加"
+        },
+        "rename": {
+          "title": "名前を変更"
+        },
+        "delete": {
+          "title": "削除"
+        }
+      },
+      "info": {
+        "created_at": "追加日時",
+        "last_used_at": "最終使用",
+        "credential_id": "クレデンシャル ID"
+      },
+      "status": {
+        "registered": "パスキーを追加しました"
+      },
+      "empty": "パスキーはまだ追加されていません",
+      "unnamed": "名前なし",
+      "errors": {
+        "fetch": {
+          "title": "パスキー一覧の取得に失敗しました"
+        },
+        "register": {
+          "title": "パスキーの追加に失敗しました"
+        },
+        "rename": {
+          "title": "パスキー名の変更に失敗しました"
+        },
+        "delete": {
+          "title": "パスキーの削除に失敗しました"
+        },
+        "login": {
+          "title": "パスキーログインに失敗しました"
         }
       }
     },

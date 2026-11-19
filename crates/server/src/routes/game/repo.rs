@@ -116,6 +116,12 @@ fn get_protocol(headers: &HeaderMap) -> Result<String, ResponseError> {
 }
 
 fn ensure_receive_pack_writable(game: &game::Model) -> Result<(), ResponseError> {
+  if let Some(distribution_id) = game.managed_distribution {
+    return Err(ResponseError::Conflict(format!(
+      "The repository is managed by distribution #{distribution_id}; \
+       unbind it before pushing local changes."
+    )));
+  }
   if game.hidden {
     Ok(())
   } else {

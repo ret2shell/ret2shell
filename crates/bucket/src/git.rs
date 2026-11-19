@@ -19,6 +19,12 @@ const GIT_LOG_RECORD_SEPARATOR: u8 = 0x1E;
 const GIT_LOG_FIELD_SEPARATOR: u8 = 0x1F;
 const REPO_ROOT_PATH: &str = ".";
 
+/// Ref that incremental instance synchronization fetches into. Fetching only
+/// ever updates this ref: the checked-out branch and the working tree stay
+/// untouched until the caller has validated the fast-forward relationship
+/// and resets explicitly.
+pub const SYNC_CANDIDATE_REF: &str = "refs/ret2shell-sync/candidate";
+
 #[derive(Clone, Debug)]
 pub struct Git {
   path: PathBuf,
@@ -345,6 +351,109 @@ fn populate_path_index_commits(
   }
 }
 
+/// Hardening shared by every remote Git transfer (`clone` and `fetch`): no
+/// terminal prompts, no system config, http(s) as the only production
+/// transport, no redirect following, protected path components, fscked
+/// objects and no hooks. `allow_file` additionally permits the local
+/// `file://` transport and exists only for tests driving real repositories
+/// on disk.
+struct RemoteGitTransfer {
+  hooks_path: PathBuf,
+}
+
+impl RemoteGitTransfer {
+  async fn new() -> Result<Self, BucketError> {
+    let hooks_path = std::env::temp_dir().join(format!(
+      "ret2shell-sync-hooks-{}-{}",
+      std::process::id(),
+      std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_nanos()
+    ));
+    create_dir_all(&hooks_path).await?;
+    Ok(Self { hooks_path })
+  }
+
+  fn command(&self, allow_file: bool) -> Command {
+    let mut command = Command::new("git");
+    command.kill_on_drop(true);
+    command
+      .env("GIT_TERMINAL_PROMPT", "0")
+      .env("GIT_CONFIG_NOSYSTEM", "1")
+      .arg("-c")
+      .arg(if allow_file {
+        "protocol.file.allow=always"
+      } else {
+        "protocol.file.allow=never"
+      })
+      .arg("-c")
+      .arg("protocol.ssh.allow=never")
+      .arg("-c")
+      .arg("protocol.ext.allow=never")
+      .arg("-c")
+      .arg("http.followRedirects=false")
+      .arg("-c")
+      .arg("core.protectNTFS=true")
+      .arg("-c")
+      .arg("core.protectHFS=true")
+      .arg("-c")
+      .arg("transfer.fsckObjects=true")
+      .arg("-c")
+      .arg(format!("core.hooksPath={}", self.hooks_path.display()));
+    command
+  }
+
+  /// Credentials travel through the environment instead of argv so they
+  /// never show up in process listings or command logs.
+  fn apply_bearer_token(command: &mut Command, bearer_token: Option<&str>) {
+    if let Some(token) = bearer_token {
+      command
+        .env("GIT_CONFIG_COUNT", "1")
+        .env("GIT_CONFIG_KEY_0", "http.extraHeader")
+        .env(
+          "GIT_CONFIG_VALUE_0",
+          format!("Authorization: Bearer {token}"),
+        );
+    }
+  }
+
+  async fn cleanup(self) {
+    tokio::fs::remove_dir_all(&self.hooks_path).await.ok();
+  }
+}
+
+/// Branch names are embedded into a fetch refspec, so they must satisfy the
+/// git reference format before they reach the command line: a branch like
+/// `--upload-pack=...` must never be interpreted as a git option.
+fn validate_sync_branch(branch: &str) -> Result<(), BucketError> {
+  const MAX_BRANCH_LENGTH: usize = 255;
+  let invalid = branch.is_empty()
+    || branch.len() > MAX_BRANCH_LENGTH
+    || branch.starts_with(['.', '-', '/'])
+    || branch.ends_with(['.', '/'])
+    || branch.ends_with(".lock")
+    || branch == "@"
+    || branch.contains("..")
+    || branch.contains("@{")
+    || branch.contains('\\')
+    || branch.chars().any(|c| {
+      matches!(
+        c,
+        ' ' | '~' | '^' | ':' | '?' | '[' | '*' | '\0'..='\x1f' | '\x7f'
+      )
+    })
+    || branch
+      .split('/')
+      .any(|part| part.is_empty() || part.starts_with('.') || part == "@");
+  if invalid {
+    return Err(BucketError::GitCommandFailed(format!(
+      "invalid branch name for instance synchronization: {branch}"
+    )));
+  }
+  Ok(())
+}
+
 impl Git {
   pub fn path(&self) -> &Path {
     &self.path
@@ -387,6 +496,233 @@ impl Git {
     }
     create_dir_all(&path).await?;
     Self::init(&path).await
+  }
+
+  pub async fn clone(
+    repository_url: impl AsRef<str>, destination: impl AsRef<Path>, bearer_token: Option<&str>,
+  ) -> Result<Self, BucketError> {
+    Self::clone_with_file_policy(repository_url, destination, bearer_token, false).await
+  }
+
+  #[cfg(test)]
+  pub(crate) async fn clone_for_test(
+    repository_url: impl AsRef<str>, destination: impl AsRef<Path>, bearer_token: Option<&str>,
+  ) -> Result<Self, BucketError> {
+    Self::clone_with_file_policy(repository_url, destination, bearer_token, true).await
+  }
+
+  async fn clone_with_file_policy(
+    repository_url: impl AsRef<str>, destination: impl AsRef<Path>, bearer_token: Option<&str>,
+    allow_file: bool,
+  ) -> Result<Self, BucketError> {
+    let repository_url = repository_url.as_ref();
+    let destination = destination.as_ref();
+    if destination.exists() {
+      return Err(BucketError::PathConflict(destination.display().to_string()));
+    }
+    let transfer = RemoteGitTransfer::new().await?;
+    let mut command = transfer.command(allow_file);
+    command
+      .arg("clone")
+      .arg("--no-hardlinks")
+      .arg("--no-checkout")
+      .arg("--")
+      .arg(repository_url)
+      .arg(destination);
+    RemoteGitTransfer::apply_bearer_token(&mut command, bearer_token);
+    let output = command.output().await;
+    transfer.cleanup().await;
+    let output = output?;
+    if !output.status.success() {
+      return Err(BucketError::GitCommandFailed(String::from_utf8(
+        output.stderr,
+      )?));
+    }
+    let result = async {
+      let git = Self::try_open(&destination).await?;
+      git.reset_hard("HEAD").await?;
+      git.validate_sync_tree("HEAD").await?;
+      Ok(git)
+    }
+    .await;
+    if result.is_err() {
+      tokio::fs::remove_dir_all(&destination).await.ok();
+    }
+    result
+  }
+
+  /// Fetches a branch from a source instance into [`SYNC_CANDIDATE_REF`].
+  /// The refspec is forced so an upstream history rewrite still updates the
+  /// candidate; whether the update is a fast-forward is decided separately
+  /// by [`Git::is_ancestor`] against the local HEAD. The current branch and
+  /// the working tree are never touched.
+  pub async fn fetch(
+    &self, repository_url: impl AsRef<str>, branch: impl AsRef<str>, bearer_token: Option<&str>,
+  ) -> Result<(), BucketError> {
+    self
+      .fetch_with_file_policy(repository_url, branch, bearer_token, false)
+      .await
+  }
+
+  #[cfg(test)]
+  pub(crate) async fn fetch_for_test(
+    &self, repository_url: impl AsRef<str>, branch: impl AsRef<str>, bearer_token: Option<&str>,
+  ) -> Result<(), BucketError> {
+    self
+      .fetch_with_file_policy(repository_url, branch, bearer_token, true)
+      .await
+  }
+
+  async fn fetch_with_file_policy(
+    &self, repository_url: impl AsRef<str>, branch: impl AsRef<str>, bearer_token: Option<&str>,
+    allow_file: bool,
+  ) -> Result<(), BucketError> {
+    let repository_url = repository_url.as_ref();
+    let branch = branch.as_ref();
+    validate_sync_branch(branch)?;
+    if repository_url.starts_with('-') {
+      return Err(BucketError::GitCommandFailed(
+        "invalid repository URL for instance synchronization".to_owned(),
+      ));
+    }
+    let transfer = RemoteGitTransfer::new().await?;
+    let mut command = transfer.command(allow_file);
+    command
+      .current_dir(&self.path)
+      .arg("fetch")
+      .arg("--no-tags")
+      .arg("--")
+      .arg(repository_url)
+      .arg(format!("+refs/heads/{branch}:{SYNC_CANDIDATE_REF}"));
+    RemoteGitTransfer::apply_bearer_token(&mut command, bearer_token);
+    let output = command.output().await;
+    transfer.cleanup().await;
+    let output = output?;
+    if output.status.success() {
+      trace!(stdio=?output, "fetched sync candidate ref from source repository");
+      Ok(())
+    } else {
+      warn!(
+        stdio=?output,
+        "failed to fetch sync candidate ref from source repository"
+      );
+      Err(BucketError::GitCommandFailed(String::from_utf8(
+        output.stderr,
+      )?))
+    }
+  }
+
+  pub async fn snapshot_changes(
+    &self, rev: impl AsRef<str>,
+  ) -> Result<Vec<DiffEntry>, BucketError> {
+    let output = Command::new("git")
+      .current_dir(&self.path)
+      .arg("ls-tree")
+      .arg("-r")
+      .arg("--name-only")
+      .arg("-z")
+      .arg(rev.as_ref())
+      .output()
+      .await?;
+    if !output.status.success() {
+      return Err(BucketError::GitCommandFailed(String::from_utf8(
+        output.stderr,
+      )?));
+    }
+    output
+      .stdout
+      .split(|byte| *byte == 0)
+      .filter(|path| !path.is_empty())
+      .map(|path| {
+        Ok(DiffEntry {
+          status: "A".to_owned(),
+          old_path: None,
+          path: String::from_utf8(path.to_vec())?,
+        })
+      })
+      .collect()
+  }
+
+  pub async fn validate_sync_tree(&self, rev: impl AsRef<str>) -> Result<(), BucketError> {
+    const MAX_FILES: usize = 50_000;
+    const MAX_FILE_SIZE: u64 = 512 * 1024 * 1024;
+    const MAX_TOTAL_SIZE: u64 = 2 * 1024 * 1024 * 1024;
+
+    let output = Command::new("git")
+      .current_dir(&self.path)
+      .arg("ls-tree")
+      .arg("-r")
+      .arg("-l")
+      .arg("-z")
+      .arg(rev.as_ref())
+      .output()
+      .await?;
+    if !output.status.success() {
+      return Err(BucketError::GitCommandFailed(String::from_utf8(
+        output.stderr,
+      )?));
+    }
+    let mut files = 0usize;
+    let mut total_size = 0u64;
+    for record in output
+      .stdout
+      .split(|byte| *byte == 0)
+      .filter(|record| !record.is_empty())
+    {
+      files += 1;
+      if files > MAX_FILES {
+        return Err(BucketError::GitCommandFailed(format!(
+          "synchronized repository contains more than {MAX_FILES} files"
+        )));
+      }
+      let separator = record
+        .iter()
+        .position(|byte| *byte == b'\t')
+        .ok_or_else(|| {
+          BucketError::GitCommandFailed("failed to parse synchronized tree entry".to_owned())
+        })?;
+      let metadata = &record[..separator];
+      let path = String::from_utf8(record[separator + 1..].to_vec())?;
+      if path.starts_with('/')
+        || path.contains('\\')
+        || path
+          .split('/')
+          .any(|part| matches!(part, "" | "." | ".." | ".git"))
+      {
+        return Err(BucketError::GitCommandFailed(format!(
+          "synchronized repository contains an unsafe path: {path}"
+        )));
+      }
+      let mut fields = metadata
+        .split(|byte| *byte == b' ')
+        .filter(|field| !field.is_empty());
+      let mode = fields.next().unwrap_or_default();
+      let object_type = fields.next().unwrap_or_default();
+      let _object_id = fields.next().unwrap_or_default();
+      let size = fields.next().unwrap_or_default();
+      if object_type != b"blob" || !matches!(mode, b"100644" | b"100755") {
+        return Err(BucketError::GitCommandFailed(format!(
+          "synchronized repository contains an unsupported file type at {path}"
+        )));
+      }
+      let size = String::from_utf8(size.to_vec())?
+        .parse::<u64>()
+        .map_err(|_| BucketError::GitCommandFailed("invalid synchronized file size".to_owned()))?;
+      if size > MAX_FILE_SIZE {
+        return Err(BucketError::GitCommandFailed(format!(
+          "synchronized file exceeds the {MAX_FILE_SIZE}-byte limit: {path}"
+        )));
+      }
+      total_size = total_size.checked_add(size).ok_or_else(|| {
+        BucketError::GitCommandFailed("synchronized repository size overflow".to_owned())
+      })?;
+      if total_size > MAX_TOTAL_SIZE {
+        return Err(BucketError::GitCommandFailed(format!(
+          "synchronized repository exceeds the {MAX_TOTAL_SIZE}-byte limit"
+        )));
+      }
+    }
+    Ok(())
   }
 
   async fn init(path: impl AsRef<Path>) -> Result<Self, BucketError> {
@@ -798,6 +1134,83 @@ impl Git {
       Err(BucketError::GitCommandFailed(String::from_utf8(
         output.stderr,
       )?))
+    }
+  }
+
+  /// Resolves any revision (a ref like [`SYNC_CANDIDATE_REF`], `HEAD` or an
+  /// OID) to the full commit OID. Annotated tags are peeled to their commit
+  /// so callers always compare commits; `--end-of-options` keeps revisions
+  /// that look like flags from being parsed as git options.
+  pub async fn resolve_ref(&self, rev: impl AsRef<str>) -> Result<String, BucketError> {
+    let rev = rev.as_ref();
+    if rev.starts_with('-') {
+      return Err(BucketError::GitCommandFailed(format!(
+        "invalid revision for instance synchronization: {rev}"
+      )));
+    }
+    let output = Command::new("git")
+      .current_dir(&self.path)
+      .arg("rev-parse")
+      .arg("--verify")
+      .arg("--end-of-options")
+      .arg(format!("{rev}^{{commit}}"))
+      .output()
+      .await?;
+    if output.status.success() {
+      trace!(stdio=?output, rev, "resolved revision in git repository");
+      Ok(String::from_utf8(output.stdout)?.trim().to_owned())
+    } else {
+      warn!(stdio=?output, rev, "failed to resolve revision in git repository");
+      Err(BucketError::GitCommandFailed(String::from_utf8(
+        output.stderr,
+      )?))
+    }
+  }
+
+  /// Returns whether `old_oid` is an ancestor of (or equal to) `new_oid`.
+  /// Exit code 0 means yes, exit code 1 means no, anything else is a real
+  /// command failure and surfaces as an error instead of a verdict.
+  pub async fn is_ancestor(
+    &self, old_oid: impl AsRef<str>, new_oid: impl AsRef<str>,
+  ) -> Result<bool, BucketError> {
+    let old_oid = old_oid.as_ref();
+    let new_oid = new_oid.as_ref();
+    if old_oid.starts_with('-') || new_oid.starts_with('-') {
+      return Err(BucketError::GitCommandFailed(
+        "invalid revision for instance synchronization".to_owned(),
+      ));
+    }
+    let output = Command::new("git")
+      .current_dir(&self.path)
+      .arg("merge-base")
+      .arg("--is-ancestor")
+      .arg("--")
+      .arg(old_oid)
+      .arg(new_oid)
+      .output()
+      .await?;
+    match output.status.code() {
+      Some(0) => {
+        trace!(stdio=?output, old=%old_oid, new=%new_oid, "revisions are related by ancestry");
+        Ok(true)
+      }
+      Some(1) => {
+        trace!(stdio=?output, old=%old_oid, new=%new_oid, "revisions are not related by ancestry");
+        Ok(false)
+      }
+      status => {
+        warn!(
+          ?status,
+          stdio=?output,
+          old=%old_oid,
+          new=%new_oid,
+          "failed to check ancestry in git repository"
+        );
+        Err(BucketError::GitCommandFailed(format!(
+          "merge-base --is-ancestor failed with status {status:?}: {}",
+          String::from_utf8_lossy(&output.stderr).trim()
+        )))
+      }
     }
   }
 
@@ -1292,5 +1705,333 @@ mod tests {
     assert!(matches!(result, Err(BucketError::GitCommandFailed(_))));
 
     fs::remove_dir_all(dir).expect("remove incomplete repository");
+  }
+}
+
+#[cfg(test)]
+mod sync_tests {
+  use std::{
+    fs,
+    path::{Path, PathBuf},
+    process::Command,
+    time::{SystemTime, UNIX_EPOCH},
+  };
+
+  use super::{Git, RemoteGitTransfer, SYNC_CANDIDATE_REF, validate_sync_branch};
+
+  fn temp_path(name: &str) -> PathBuf {
+    let nanos = SystemTime::now()
+      .duration_since(UNIX_EPOCH)
+      .expect("system clock before unix epoch")
+      .as_nanos();
+    std::env::temp_dir().join(format!(
+      "ret2shell-sync-{name}-{}-{nanos}",
+      std::process::id()
+    ))
+  }
+
+  fn run_git(repo: &Path, args: &[&str]) {
+    let status = Command::new("git")
+      .arg("-C")
+      .arg(repo)
+      .args(args)
+      .status()
+      .expect("run git command");
+    assert!(status.success(), "git command failed: {args:?}");
+  }
+
+  fn commit_all(repo: &Path) {
+    run_git(repo, &["add", "--all"]);
+    let status = Command::new("git")
+      .arg("-C")
+      .arg(repo)
+      .env("GIT_AUTHOR_NAME", "Tester")
+      .env("GIT_AUTHOR_EMAIL", "tester@example.com")
+      .env("GIT_COMMITTER_NAME", "Tester")
+      .env("GIT_COMMITTER_EMAIL", "tester@example.com")
+      .args(["commit", "-m", "sync fixture"])
+      .status()
+      .expect("commit fixture");
+    assert!(status.success(), "git commit failed");
+  }
+
+  fn rev_parse(repo: &Path, rev: &str) -> String {
+    let output = Command::new("git")
+      .arg("-C")
+      .arg(repo)
+      .arg("rev-parse")
+      .arg(rev)
+      .output()
+      .expect("run git rev-parse");
+    assert!(output.status.success(), "git rev-parse failed for {rev}");
+    String::from_utf8(output.stdout)
+      .expect("utf-8 oid")
+      .trim()
+      .to_owned()
+  }
+
+  fn commit_file(repo: &Path, name: &str, content: &str) -> String {
+    fs::write(repo.join(name), content).unwrap();
+    commit_all(repo);
+    rev_parse(repo, "HEAD")
+  }
+
+  fn file_url(repo: &Path) -> String {
+    format!("file://{}", repo.display())
+  }
+
+  #[tokio::test]
+  async fn snapshot_changes_marks_every_tracked_file_as_added() {
+    let repo = temp_path("snapshot");
+    fs::create_dir_all(repo.join("challenges/web/checker")).unwrap();
+    fs::create_dir_all(repo.join("challenges/web/static")).unwrap();
+    fs::write(repo.join("challenges/web/config.toml"), "name = 'web'").unwrap();
+    fs::write(
+      repo.join("challenges/web/checker/main.rx"),
+      "pub async fn check() {}",
+    )
+    .unwrap();
+    fs::write(repo.join("challenges/web/static/handout.txt"), "handout").unwrap();
+    run_git(&repo, &["init"]);
+    commit_all(&repo);
+
+    let git = Git::try_open(&repo).await.unwrap();
+    let mut changes = git.snapshot_changes("HEAD").await.unwrap();
+    changes.sort_by(|left, right| left.path.cmp(&right.path));
+    assert_eq!(changes.len(), 3);
+    assert!(changes.iter().all(|change| change.status == "A"));
+    assert!(changes.iter().all(|change| change.old_path.is_none()));
+    assert!(
+      changes
+        .iter()
+        .any(|change| change.path == "challenges/web/checker/main.rx")
+    );
+    assert!(
+      changes
+        .iter()
+        .any(|change| change.path == "challenges/web/static/handout.txt")
+    );
+
+    fs::remove_dir_all(repo).unwrap();
+  }
+
+  #[cfg(unix)]
+  #[tokio::test]
+  async fn sync_tree_rejects_symbolic_links() {
+    let repo = temp_path("symlink");
+    fs::create_dir_all(&repo).unwrap();
+    fs::write(repo.join("target.txt"), "target").unwrap();
+    std::os::unix::fs::symlink("target.txt", repo.join("link.txt")).unwrap();
+    run_git(&repo, &["init"]);
+    commit_all(&repo);
+
+    let git = Git::try_open(&repo).await.unwrap();
+    let error = git.validate_sync_tree("HEAD").await.unwrap_err();
+    assert!(error.to_string().contains("unsupported file type"));
+
+    fs::remove_dir_all(repo).unwrap();
+  }
+
+  #[tokio::test]
+  async fn clone_rejects_local_file_transport() {
+    let destination = temp_path("clone-file");
+    let result = Git::clone("file:///tmp/ret2shell-sync-source", &destination, None).await;
+    assert!(result.is_err());
+    assert!(!destination.exists());
+  }
+
+  #[test]
+  fn sync_branch_validation_rejects_dangerous_names() {
+    for branch in [
+      "",
+      "--upload-pack=/bin/sh",
+      "-oProxyCommand=evil",
+      ".hidden",
+      "trailing.",
+      "release.lock",
+      "a..b",
+      "a/.hidden",
+      "/leading",
+      "trailing/",
+      "double//slash",
+      "with space",
+      "with~tilde",
+      "with^caret",
+      "with:colon",
+      "with?question",
+      "with[bracket",
+      "with*star",
+      "with\\backslash",
+      "with@{brace",
+      "@",
+    ] {
+      assert!(validate_sync_branch(branch).is_err(), "accepted {branch:?}");
+    }
+    for branch in ["main", "master", "release/1.0", "dev_feature", "v1.0.x"] {
+      assert!(validate_sync_branch(branch).is_ok(), "rejected {branch:?}");
+    }
+  }
+
+  #[tokio::test]
+  async fn remote_transfer_keeps_the_bearer_token_out_of_argv() {
+    let transfer = RemoteGitTransfer::new().await.unwrap();
+    let mut command = transfer.command(false);
+    command
+      .arg("fetch")
+      .arg("--no-tags")
+      .arg("--")
+      .arg("https://ctf.example.org/api/game/1/repo/poc.git")
+      .arg(format!("+refs/heads/main:{SYNC_CANDIDATE_REF}"));
+    RemoteGitTransfer::apply_bearer_token(&mut command, Some("sync-top-secret-token"));
+
+    let command = command.as_std();
+    assert_eq!(command.get_program().to_string_lossy(), "git");
+    let argv: Vec<String> = command
+      .get_args()
+      .map(|arg| arg.to_string_lossy().to_string())
+      .collect();
+    assert!(!argv.join(" ").contains("sync-top-secret-token"));
+    // the credential still rides along through the environment, not argv
+    let header = command
+      .get_envs()
+      .find(|(key, _)| *key == std::ffi::OsStr::new("GIT_CONFIG_VALUE_0"))
+      .and_then(|(_, value)| value)
+      .map(|value| value.to_string_lossy().to_string());
+    assert_eq!(
+      header.as_deref(),
+      Some("Authorization: Bearer sync-top-secret-token")
+    );
+
+    transfer.cleanup().await;
+  }
+
+  #[tokio::test]
+  async fn fetch_rejects_local_file_transport() {
+    let repo = temp_path("fetch-file");
+    fs::create_dir_all(&repo).unwrap();
+    fs::write(repo.join("one.txt"), "one").unwrap();
+    run_git(&repo, &["init"]);
+    commit_all(&repo);
+    let git = Git::try_open(&repo).await.unwrap();
+    let result = git
+      .fetch("file:///tmp/ret2shell-sync-source", "main", None)
+      .await;
+    assert!(result.is_err());
+    // the rejected transfer must not have created the candidate ref either
+    assert!(git.resolve_ref(SYNC_CANDIDATE_REF).await.is_err());
+    fs::remove_dir_all(repo).unwrap();
+  }
+
+  #[tokio::test]
+  async fn resolve_ref_returns_the_full_commit_oid() {
+    let repo = temp_path("resolve");
+    fs::create_dir_all(&repo).unwrap();
+    fs::write(repo.join("config.toml"), "name = 'x'").unwrap();
+    run_git(&repo, &["init"]);
+    run_git(&repo, &["branch", "-M", "main"]);
+    commit_all(&repo);
+    let head = rev_parse(&repo, "HEAD");
+
+    let git = Git::try_open(&repo).await.unwrap();
+    assert_eq!(git.resolve_ref("HEAD").await.unwrap(), head);
+    assert_eq!(git.resolve_ref("refs/heads/main").await.unwrap(), head);
+    assert_eq!(git.resolve_ref(head.as_str()).await.unwrap(), head);
+    assert!(git.resolve_ref("refs/heads/missing").await.is_err());
+
+    fs::remove_dir_all(repo).unwrap();
+  }
+
+  #[tokio::test]
+  async fn is_ancestor_classifies_ancestry_and_equality() {
+    let repo = temp_path("ancestor");
+    fs::create_dir_all(&repo).unwrap();
+    run_git(&repo, &["init"]);
+    run_git(&repo, &["branch", "-M", "main"]);
+    let first = commit_file(&repo, "one.txt", "one");
+    let second = commit_file(&repo, "two.txt", "two");
+    let third = commit_file(&repo, "three.txt", "three");
+    // an orphan branch yields a commit in the same repository that shares no
+    // history with main; the OIDs of other repositories are simply unknown
+    // objects here and are command errors, not ancestry verdicts
+    run_git(&repo, &["checkout", "--orphan", "unrelated"]);
+    let unrelated = commit_file(&repo, "other.txt", "other");
+    run_git(&repo, &["checkout", "main"]);
+
+    let git = Git::try_open(&repo).await.unwrap();
+    assert!(git.is_ancestor(&first, &third).await.unwrap());
+    assert!(git.is_ancestor(&second, &third).await.unwrap());
+    assert!(!git.is_ancestor(&third, &first).await.unwrap());
+    assert!(git.is_ancestor(&second, &second).await.unwrap());
+    assert!(!git.is_ancestor(&unrelated, &third).await.unwrap());
+
+    fs::remove_dir_all(repo).unwrap();
+  }
+
+  #[cfg(unix)]
+  #[tokio::test]
+  async fn fetch_updates_the_candidate_ref_without_moving_head() {
+    let source = temp_path("fetch-src");
+    fs::create_dir_all(&source).unwrap();
+    run_git(&source, &["init"]);
+    run_git(&source, &["branch", "-M", "main"]);
+    let first = commit_file(&source, "one.txt", "one");
+    let destination = temp_path("fetch-dst");
+    let git = Git::clone_for_test(file_url(&source), &destination, None)
+      .await
+      .unwrap();
+    assert_eq!(git.get_head().await.unwrap(), first);
+
+    let second = commit_file(&source, "two.txt", "two");
+    git
+      .fetch_for_test(&file_url(&source), "main", None)
+      .await
+      .unwrap();
+
+    assert_eq!(git.get_head_ref().await.unwrap(), "refs/heads/main");
+    assert_eq!(git.get_head().await.unwrap(), first);
+    assert_eq!(git.resolve_ref(SYNC_CANDIDATE_REF).await.unwrap(), second);
+    // fetching never checks the candidate out into the working tree
+    assert!(!destination.join("two.txt").exists());
+
+    fs::remove_dir_all(&source).unwrap();
+    fs::remove_dir_all(&destination).unwrap();
+  }
+
+  #[cfg(unix)]
+  #[tokio::test]
+  async fn forced_candidate_updates_are_reported_as_non_fast_forward() {
+    let source = temp_path("force-src");
+    fs::create_dir_all(&source).unwrap();
+    run_git(&source, &["init"]);
+    run_git(&source, &["branch", "-M", "main"]);
+    let base = commit_file(&source, "one.txt", "one");
+    let original = commit_file(&source, "two.txt", "two");
+    let destination = temp_path("force-dst");
+    let git = Git::clone_for_test(file_url(&source), &destination, None)
+      .await
+      .unwrap();
+    let local_head = git.get_head().await.unwrap();
+    assert_eq!(local_head, original);
+
+    // rewrite the upstream history so master no longer contains `original`
+    run_git(&source, &["reset", "--hard", base.as_str()]);
+    let rewritten = commit_file(&source, "three.txt", "three");
+
+    git
+      .fetch_for_test(&file_url(&source), "main", None)
+      .await
+      .unwrap();
+
+    assert_eq!(
+      git.resolve_ref(SYNC_CANDIDATE_REF).await.unwrap(),
+      rewritten
+    );
+    // the candidate moved, but the move is not a fast-forward of local HEAD
+    assert!(!git.is_ancestor(&local_head, &rewritten).await.unwrap());
+    assert!(git.is_ancestor(&base, &rewritten).await.unwrap());
+    assert_eq!(git.get_head().await.unwrap(), local_head);
+
+    fs::remove_dir_all(&source).unwrap();
+    fs::remove_dir_all(&destination).unwrap();
   }
 }

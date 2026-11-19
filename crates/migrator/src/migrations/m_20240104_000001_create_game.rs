@@ -46,6 +46,7 @@ pub enum Game {
   Traffic,
   NodeSelector,
   Lifecycle,
+  ManagedDistribution,
 }
 
 #[async_trait::async_trait]
