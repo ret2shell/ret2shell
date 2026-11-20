@@ -1,3 +1,4 @@
+import { handleHttpError } from "@api";
 import { getGames } from "@api/game";
 import { type Game, HostType } from "@models/game";
 import { Permission } from "@models/user";
@@ -15,14 +16,22 @@ import { createEffect, createMemo, createSignal, For, onCleanup, Show } from "so
 export default function Playgrounds() {
   const pageSize = 6;
 
+  async function loadPage(page: number, hostType: HostType) {
+    try {
+      return await getGames(page, pageSize, hostType);
+    } catch (error) {
+      const message =
+        hostType === HostType.Training ? "training.errors.fetchList.title" : "training.errors.fetchArchives.title";
+      void handleHttpError(error, t(message));
+      throw error;
+    }
+  }
+
   const playgroundsQuery = useInfiniteQuery(() => ({
     queryKey: ["game", "list", HostType.Training],
     initialPageParam: 1,
-    queryFn: ({ pageParam }) => getGames(pageParam, pageSize, HostType.Training),
-    getNextPageParam: (lastPage, pages) => {
-      const loaded = pages.reduce((total, page) => total + page[0].length, 0);
-      return loaded < lastPage[1] ? pages.length + 1 : undefined;
-    },
+    queryFn: ({ pageParam }) => loadPage(pageParam, HostType.Training),
+    getNextPageParam: (lastPage, _pages, page) => (page < Math.ceil(lastPage[1] / pageSize) ? page + 1 : undefined),
   }));
   const playgrounds = createMemo(() => playgroundsQuery.data?.pages.flatMap((page) => page[0]) ?? []);
   const [playgroundSentinel, setPlaygroundSentinel] = createSignal<HTMLElement>();
@@ -30,11 +39,8 @@ export default function Playgrounds() {
   const gamesQuery = useInfiniteQuery(() => ({
     queryKey: ["game", "list", HostType.Game],
     initialPageParam: 1,
-    queryFn: ({ pageParam }) => getGames(pageParam, pageSize, HostType.Game),
-    getNextPageParam: (lastPage, pages) => {
-      const loaded = pages.reduce((total, page) => total + page[0].length, 0);
-      return loaded < lastPage[1] ? pages.length + 1 : undefined;
-    },
+    queryFn: ({ pageParam }) => loadPage(pageParam, HostType.Game),
+    getNextPageParam: (lastPage, _pages, page) => (page < Math.ceil(lastPage[1] / pageSize) ? page + 1 : undefined),
   }));
   const games = createMemo(() => gamesQuery.data?.pages.flatMap((page) => page[0]) ?? []);
   const [gameSentinel, setGameSentinel] = createSignal<HTMLElement>();
