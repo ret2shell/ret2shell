@@ -103,10 +103,12 @@ export default function Playgrounds() {
           <For
             each={playgrounds() as Game[]}
             fallback={
-              <Button ghost disabled>
-                <span class="shrink-0 icon-[fluent--text-bullet-list-dismiss-20-regular] w-5 h-5" />
-                <span>{t("training.empty")}</span>
-              </Button>
+              <Show when={playgroundsQuery.isSuccess && !playgroundsQuery.hasNextPage}>
+                <Button ghost disabled>
+                  <span class="shrink-0 icon-[fluent--text-bullet-list-dismiss-20-regular] w-5 h-5" />
+                  <span>{t("training.empty")}</span>
+                </Button>
+              </Show>
             }
           >
             {(item) => (
@@ -126,13 +128,18 @@ export default function Playgrounds() {
               </Link>
             )}
           </For>
-          <Show when={playgroundsQuery.hasNextPage}>
+          <Show when={playgroundsQuery.hasNextPage && !playgroundsQuery.isError}>
             <div ref={setPlaygroundSentinel} class="h-1" />
           </Show>
-          <Show when={playgroundsQuery.isFetchingNextPage}>
+          <Show when={playgroundsQuery.isLoading || playgroundsQuery.isFetchingNextPage}>
             <div class="flex justify-center p-2">
               <Button ghost loading disabled />
             </div>
+          </Show>
+          <Show when={playgroundsQuery.isError}>
+            <Button ghost disabled={playgroundsQuery.isFetching} onClick={() => loadMore(playgroundsQuery)}>
+              {t("general.actions.refresh.title")}
+            </Button>
           </Show>
           <Divider class="mt-6!" />
           <Button ghost disabled justify="start" size="sm">
@@ -141,10 +148,12 @@ export default function Playgrounds() {
           <For
             each={games() as Game[]}
             fallback={
-              <Button ghost disabled>
-                <span class="shrink-0 icon-[fluent--text-bullet-list-dismiss-20-regular] w-5 h-5" />
-                <span>{t("training.noArchives")}</span>
-              </Button>
+              <Show when={gamesQuery.isSuccess && !gamesQuery.hasNextPage}>
+                <Button ghost disabled>
+                  <span class="shrink-0 icon-[fluent--text-bullet-list-dismiss-20-regular] w-5 h-5" />
+                  <span>{t("training.noArchives")}</span>
+                </Button>
+              </Show>
             }
           >
             {(item) => (
@@ -167,13 +176,18 @@ export default function Playgrounds() {
               </Link>
             )}
           </For>
-          <Show when={gamesQuery.hasNextPage}>
+          <Show when={gamesQuery.hasNextPage && !gamesQuery.isError}>
             <div ref={setGameSentinel} class="h-1" />
           </Show>
-          <Show when={gamesQuery.isFetchingNextPage}>
+          <Show when={gamesQuery.isLoading || gamesQuery.isFetchingNextPage}>
             <div class="flex justify-center p-2">
               <Button ghost loading disabled />
             </div>
+          </Show>
+          <Show when={gamesQuery.isError}>
+            <Button ghost disabled={gamesQuery.isFetching} onClick={() => loadMore(gamesQuery)}>
+              {t("general.actions.refresh.title")}
+            </Button>
           </Show>
         </div>
       </OverlayScrollbarsComponent>
