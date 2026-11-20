@@ -45,18 +45,31 @@ export default function Playgrounds() {
   const games = createMemo(() => gamesQuery.data?.pages.flatMap((page) => page[0]) ?? []);
   const [gameSentinel, setGameSentinel] = createSignal<HTMLElement>();
 
+  function loadMore(query: typeof playgroundsQuery | typeof gamesQuery) {
+    if (query.isFetching) return;
+
+    if (query.isError && !query.isFetchNextPageError) {
+      void query.refetch();
+      return;
+    }
+
+    void query.fetchNextPage({ cancelRefetch: false });
+  }
+
   function observeSentinel(
     getSentinel: () => HTMLElement | undefined,
     query: typeof playgroundsQuery | typeof gamesQuery
   ) {
     const sentinel = getSentinel();
-    if (!sentinel) return;
+    if (!sentinel || !query.hasNextPage || query.isFetching || query.isError) return;
 
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry?.isIntersecting && query.hasNextPage && !query.isFetchingNextPage) {
-        void query.fetchNextPage();
+      if (entry?.isIntersecting) {
+        observer.disconnect();
+        loadMore(query);
       }
     });
+
     observer.observe(sentinel);
     onCleanup(() => observer.disconnect());
   }
