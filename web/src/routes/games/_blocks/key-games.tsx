@@ -170,7 +170,14 @@ export default function () {
       </div>
       <div class="w-16 hidden lg:inline-block" />
       <Card class="block lg:hidden mx-3 mt-3" contentClass="p-2 flex flex-row space-x-2">
-        <Button ghost square>
+        <Button
+          ghost
+          square
+          disabled={page() <= 1}
+          onClick={() => {
+            setSearchParams({ "key-page": (page() - 1).toString(), selected: undefined });
+          }}
+        >
           <span class="shrink-0 icon-[fluent--chevron-double-left-20-regular] w-5 h-5" />
         </Button>
         <Popover
@@ -194,7 +201,7 @@ export default function () {
                   ghost
                   class={clsx(selectedGameId() === game.id && "btn-active")}
                   justify="start"
-                  href={`/games?selected=${game.id}`}
+                  href={`/games?selected=${game.id}&key-page=${page()}`}
                 >
                   <span
                     class={clsx(
@@ -226,7 +233,14 @@ export default function () {
             </For>
           </Card>
         </Popover>
-        <Button ghost square>
+        <Button
+          ghost
+          square
+          disabled={page() >= totalPages()}
+          onClick={() => {
+            setSearchParams({ "key-page": (page() + 1).toString(), selected: undefined });
+          }}
+        >
           <span class="shrink-0 icon-[fluent--chevron-double-right-20-regular] w-5 h-5" />
         </Button>
       </Card>
