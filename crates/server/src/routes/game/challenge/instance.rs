@@ -123,10 +123,18 @@ pub(super) async fn start_challenge_instance(
       }
     }
     None => {
-      let pods = cluster
+      let mut pods = cluster
         .at(CHALLENGE_NS)
-        .get_personal_challenge_env_by_user(token.id)
+        .get_challenge_env_by_user(token.id)
         .await?;
+      pods.retain(|pod| {
+        pod
+          .metadata
+          .labels
+          .as_ref()
+          .and_then(|labels| labels.get("ret.sh.cn/team"))
+          .is_some_and(|team| team.as_str() == "0")
+      });
       let env_limit = config_model
         .server
         .as_ref()
