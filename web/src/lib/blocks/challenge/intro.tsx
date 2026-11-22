@@ -86,7 +86,7 @@ export default function (props: ChallengeWidgetProps) {
     return instances.data.filter((s) => s.team_id === 0);
   });
   const instance = createMemo(() => {
-    return instances.data?.find((s) => s.challenge_id === props.challengeId) ?? null;
+    return scopedInstances()?.find((s) => s.challenge_id === props.challengeId) ?? null;
   });
   const gating = usePrerequisiteGating({ gameId: () => props.gameId, challengeId: () => props.challengeId });
   const [layerDismissed, setLayerDismissed] = createSignal(false);

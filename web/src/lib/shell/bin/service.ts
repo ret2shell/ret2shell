@@ -115,12 +115,12 @@ export class Service implements Command {
       io.error(t("challenge.instance.errors.noConfig.title"));
       return 1;
     }
-    if (instances?.find((inst) => inst.challenge_id === envVars.challenge.id)) {
-      await this.status(io, envVars);
-      return 0;
+    const teamScoped = isTeamScoped(envVars.game, envVars.challenge, envVars.team);
+    const scopedInstances = filterScopedInstances(instances, teamScoped, envVars.team);
+    if (scopedInstances.some((inst) => inst.challenge_id === envVars.challenge.id)) {
+      return await this.status(io, envVars);
     }
     if (!(await this.ensureNoCalmdown(io))) return 1;
-    const teamScoped = isTeamScoped(envVars.game, envVars.challenge, envVars.team);
     const platformInfo = teamScoped ? null : await getPlatformInfo().catch(() => null);
     const teamLimit =
       envVars.game.env_limit && envVars.game.env_limit > 0 ? envVars.game.env_limit : envVars.game.team_size || 1;
@@ -129,7 +129,6 @@ export class Service implements Command {
         ? Math.min(platformInfo.non_game_env_limit, 99)
         : 1;
     const limit = teamScoped ? teamLimit : nonGameLimit;
-    const scopedInstances = filterScopedInstances(instances, teamScoped, envVars.team);
     if (scopedInstances.length >= limit) {
       io.warning(t("challenge.instance.errors.singleton.title"));
       io.info(
@@ -236,7 +235,10 @@ export class Service implements Command {
       return 1;
     }
     const instances = await getGameInstances(envVars.game.id);
-    const inst = instances.find((instance) => instance.challenge_id === envVars.challenge.id);
+    const teamScoped = isTeamScoped(envVars.game, envVars.challenge, envVars.team);
+    const inst = filterScopedInstances(instances, teamScoped, envVars.team).find(
+      (instance) => instance.challenge_id === envVars.challenge.id
+    );
     const d_service_name = await deunicode(envVars.challenge.name);
     io.println(`${inst ? ansiColors.greenBright("●") : ansiColors.dim("○")} ${d_service_name}.service`);
     function getInstState(inst?: Instance, with_time = true) {

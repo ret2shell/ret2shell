@@ -6,6 +6,7 @@ import type { Challenge } from "@models/challenge";
 import type { Game } from "@models/game";
 import type { Instance } from "@models/instance";
 import type { Team } from "@models/team";
+import { isGameInProgress } from "@storage/game";
 import { DateTime } from "luxon";
 import type { ParseEntry } from "shell-quote";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -72,6 +73,7 @@ describe("Service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(getCalmdownStatus).mockResolvedValue(null);
+    vi.mocked(isGameInProgress).mockReturnValue(false);
   });
 
   it("counts only personal instances when starting outside a team quota", async () => {
@@ -161,6 +163,104 @@ describe("Service", () => {
     expect(io.warning).toHaveBeenCalledWith("challenge.instance.errors.calmdown.title");
     expect(stopChallengeInstance).not.toHaveBeenCalled();
     expect(startChallengeInstance).not.toHaveBeenCalled();
+  });
+
+  it("starts a personal instance when only a team instance exists for an archived challenge", async () => {
+    vi.mocked(isGameInProgress).mockReturnValue(true);
+    const service = new Service();
+    const io = {
+      error: vi.fn(),
+      warning: vi.fn(),
+      info: vi.fn(),
+      print: vi.fn(),
+      println: vi.fn(),
+      input: vi.fn(async () => "quit"),
+    } as unknown as Stdio;
+
+    vi.mocked(getChallengeEnv).mockResolvedValue({ images: [] } as never);
+    vi.mocked(getGameInstances).mockResolvedValue([
+      { team_id: 3, challenge_id: 12, game_id: 1, game_name: "SparkCTF" },
+    ] as unknown as Instance[]);
+    vi.mocked(getPlatformInfo).mockResolvedValue({ non_game_env_limit: 1 } as never);
+
+    await expect(
+      service.start(io, {
+        game: { id: 1, env_limit: null, team_size: 1 } as Game,
+        challenge: {
+          id: 12,
+          game_id: 1,
+          name: "new",
+          archive_at: DateTime.now().minus({ minutes: 1 }),
+        } as Challenge,
+        team: { id: 3, name: "team" } as Team,
+      })
+    ).resolves.toBe(0);
+
+    expect(startChallengeInstance).toHaveBeenCalledWith(1, 12);
+    expect(stopChallengeInstance).not.toHaveBeenCalled();
+  });
+
+  it("treats a running team instance as already started in the team scope", async () => {
+    vi.mocked(isGameInProgress).mockReturnValue(true);
+    const service = new Service();
+    const io = {
+      error: vi.fn(),
+      warning: vi.fn(),
+      info: vi.fn(),
+      print: vi.fn(),
+      println: vi.fn(),
+      input: vi.fn(async () => "quit"),
+    } as unknown as Stdio;
+
+    vi.mocked(getChallengeEnv).mockResolvedValue({ images: [] } as never);
+    vi.mocked(getGameInstances).mockResolvedValue([
+      { team_id: 3, challenge_id: 12, game_id: 1, game_name: "SparkCTF" },
+    ] as unknown as Instance[]);
+
+    await expect(
+      service.start(io, {
+        game: { id: 1, env_limit: 1, team_size: 1 } as Game,
+        challenge: { id: 12, game_id: 1, name: "new", archive_at: null } as Challenge,
+        team: { id: 3, name: "team" } as Team,
+      })
+    ).resolves.toBe(0);
+
+    expect(startChallengeInstance).not.toHaveBeenCalled();
+    expect(stopChallengeInstance).not.toHaveBeenCalled();
+  });
+
+  it("does not report another scope's instance as the personal one", async () => {
+    vi.mocked(isGameInProgress).mockReturnValue(true);
+    const service = new Service();
+    const io = {
+      error: vi.fn(),
+      warning: vi.fn(),
+      info: vi.fn(),
+      print: vi.fn(),
+      println: vi.fn(),
+      input: vi.fn(async () => "quit"),
+    } as unknown as Stdio;
+
+    vi.mocked(getChallengeEnv).mockResolvedValue({ images: [] } as never);
+    vi.mocked(getGameInstances).mockResolvedValue([
+      { team_id: 3, challenge_id: 12, game_id: 1, game_name: "SparkCTF" },
+    ] as unknown as Instance[]);
+
+    await expect(
+      service.status(io, {
+        game: { id: 1, env_limit: 1, team_size: 1 } as Game,
+        challenge: {
+          id: 12,
+          game_id: 1,
+          name: "new",
+          archive_at: DateTime.now().minus({ minutes: 1 }),
+        } as Challenge,
+        team: { id: 3, name: "team" } as Team,
+      })
+    ).resolves.toBe(0);
+
+    expect(io.println).toHaveBeenCalledWith(expect.stringContaining("inactive (dead)"));
+    expect(io.println).not.toHaveBeenCalledWith(expect.stringContaining("active (running)"));
   });
 
   it("dispatches subcommands with the service instance context preserved", async () => {
