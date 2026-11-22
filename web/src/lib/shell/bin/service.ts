@@ -1,5 +1,6 @@
 import { inflyClient } from "@api";
 import { delayChallengeInstance, getChallengeEnv, startChallengeInstance, stopChallengeInstance } from "@api/challenge";
+import { getCalmdownStatus } from "@api/cluster";
 import { getGameInstances } from "@api/game";
 import { getPlatformInfo } from "@api/platform";
 import { deunicode } from "@api/rpc";
@@ -92,6 +93,21 @@ export class Service implements Command {
     }
   }
 
+  /** Refuse destructive start/restart flows while the server-side cooldown is active. */
+  private async ensureNoCalmdown(io: Stdio) {
+    try {
+      if (await getCalmdownStatus()) {
+        io.warning(t("challenge.instance.errors.calmdown.title"));
+        return false;
+      }
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      io.error(`${t("challenge.instance.errors.start.title")}: ${detail}`);
+      return false;
+    }
+    return true;
+  }
+
   async start(io: Stdio, envVars: { game: Game; challenge: Challenge; team: Team }) {
     const env = await this.getEnv(io, envVars);
     const instances = await getGameInstances(envVars.game.id);
@@ -103,6 +119,7 @@ export class Service implements Command {
       await this.status(io, envVars);
       return 0;
     }
+    if (!(await this.ensureNoCalmdown(io))) return 1;
     const teamScoped = isTeamScoped(envVars.game, envVars.challenge, envVars.team);
     const platformInfo = teamScoped ? null : await getPlatformInfo().catch(() => null);
     const teamLimit =
@@ -205,6 +222,7 @@ export class Service implements Command {
       io.error(t("challenge.instance.errors.noConfig.title"));
       return 1;
     }
+    if (!(await this.ensureNoCalmdown(io))) return 1;
     await this.stop(io, envVars);
     await new Promise((r) => setTimeout(r, 500));
     await this.start(io, envVars);
