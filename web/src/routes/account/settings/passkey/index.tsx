@@ -4,6 +4,8 @@ import {
   useRegisterPasskeyMutation,
   useRenamePasskeyMutation,
 } from "@api/account";
+import type { Passkey } from "@models/passkey";
+import { createForm, setValues } from "@modular-forms/solid";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
@@ -11,7 +13,7 @@ import Card from "@widgets/card";
 import Input from "@widgets/input";
 import Popover from "@widgets/popover";
 import { DateTime } from "luxon";
-import { createSignal, For, Show } from "solid-js";
+import { For, Show } from "solid-js";
 
 function formatTime(time: DateTime | string | number | null | undefined): string {
   if (time === null || time === undefined) {
@@ -24,26 +26,91 @@ function formatTime(time: DateTime | string | number | null | undefined): string
   return parsed.isValid ? parsed.toFormat("yyyy-MM-dd HH:mm") : "-";
 }
 
-export default function () {
-  const passkeys = usePasskeys();
+type PasskeyNameForm = {
+  name: string;
+};
+
+function RegisterPasskeyForm(props: { onRegistered: () => void }) {
+  const [form, { Form, Field }] = createForm<PasskeyNameForm>();
   const registerMutation = useRegisterPasskeyMutation({
     onSuccess: () => {
-      passkeys.refetch();
+      setValues(form, { name: "" });
+      props.onRegistered();
     },
+  });
+
+  return (
+    <Form
+      class="h-14 flex flex-row items-center border-b border-b-layer-content/10 space-x-2"
+      onSubmit={(result) => registerMutation.mutate({ name: result.name })}
+    >
+      <Field name="name">
+        {(field, fieldProps) => (
+          <Input
+            class="flex-1"
+            placeholder={t("account.passkey.form.name.placeholder")}
+            title={t("account.passkey.form.name.label")}
+            {...fieldProps}
+            value={field.value}
+            error={field.error}
+          />
+        )}
+      </Field>
+      <Button type="submit" level="primary" loading={registerMutation.isPending} disabled={registerMutation.isPending}>
+        <span class="shrink-0 icon-[fluent--add-20-regular] w-5 h-5" />
+        <span>{t("account.passkey.actions.add.title")}</span>
+      </Button>
+    </Form>
+  );
+}
+
+function RenamePasskeyForm(props: { item: Passkey; onRenamed: () => void }) {
+  const [, { Form, Field }] = createForm<PasskeyNameForm>({
+    initialValues: { name: props.item.name },
   });
   const renameMutation = useRenamePasskeyMutation({
     onSuccess: () => {
-      passkeys.refetch();
+      props.onRenamed();
     },
   });
+
+  return (
+    <Form
+      class="p-2 flex flex-row items-center space-x-2"
+      onSubmit={(result) => renameMutation.mutate({ id: props.item.id, name: result.name })}
+    >
+      <Field name="name">
+        {(field, fieldProps) => (
+          <Input
+            class="w-48"
+            placeholder={props.item.name}
+            title={t("account.passkey.form.name.label")}
+            {...fieldProps}
+            value={field.value}
+            error={field.error}
+          />
+        )}
+      </Field>
+      <Button
+        type="submit"
+        size="sm"
+        level="primary"
+        loading={renameMutation.isPending}
+        disabled={renameMutation.isPending}
+      >
+        {t("account.passkey.actions.rename.title")}
+      </Button>
+    </Form>
+  );
+}
+
+export default function () {
+  const passkeys = usePasskeys();
   const deleteMutation = useDeletePasskeyMutation({
     onSuccess: () => {
       passkeys.refetch();
     },
   });
-
-  const [newName, setNewName] = createSignal("");
-  const [renaming, setRenaming] = createSignal<{ id: number; value: string }>();
 
   return (
     <>
@@ -55,24 +122,7 @@ export default function () {
             <span>{t("account.passkey.title")}</span>
           </h3>
 
-          <div class="h-14 flex flex-row items-center border-b border-b-layer-content/10 space-x-2">
-            <Input
-              class="flex-1"
-              placeholder={t("account.passkey.form.name.placeholder")}
-              title={t("account.passkey.form.name.label")}
-              value={newName()}
-              onInput={(event) => setNewName(event.currentTarget.value)}
-            />
-            <Button
-              level="primary"
-              loading={registerMutation.isPending}
-              disabled={registerMutation.isPending}
-              onClick={() => registerMutation.mutate({ name: newName() })}
-            >
-              <span class="shrink-0 icon-[fluent--add-20-regular] w-5 h-5" />
-              <span>{t("account.passkey.actions.add.title")}</span>
-            </Button>
-          </div>
+          <RegisterPasskeyForm onRegistered={() => passkeys.refetch()} />
 
           <Show when={passkeys.data?.length === 0}>
             <div class="h-14 flex items-center opacity-60">{t("account.passkey.empty")}</div>
@@ -108,27 +158,8 @@ export default function () {
                   </Card>
                 </Popover>
                 <Popover size="sm" square btnContent={<span class="shrink-0 icon-[fluent--edit-20-regular] w-5 h-5" />}>
-                  <Card contentClass="p-2 flex flex-row items-center space-x-2">
-                    <Input
-                      class="w-48"
-                      placeholder={item.name}
-                      title={t("account.passkey.form.name.label")}
-                      value={renaming()?.id === item.id ? renaming()?.value : ""}
-                      onInput={(event) => setRenaming({ id: item.id, value: event.currentTarget.value })}
-                    />
-                    <Button
-                      size="sm"
-                      level="primary"
-                      loading={renameMutation.isPending}
-                      disabled={renameMutation.isPending || renaming()?.id !== item.id}
-                      onClick={() => {
-                        const value = renaming()?.id === item.id ? renaming()?.value : "";
-                        setRenaming(undefined);
-                        renameMutation.mutate({ id: item.id, name: value ?? "" });
-                      }}
-                    >
-                      {t("account.passkey.actions.rename.title")}
-                    </Button>
+                  <Card>
+                    <RenamePasskeyForm item={item} onRenamed={() => passkeys.refetch()} />
                   </Card>
                 </Popover>
                 <Button
