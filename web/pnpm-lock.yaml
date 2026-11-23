@@ -209,8 +209,8 @@ importers:
         specifier: 4.4.0
         version: 4.4.0(solid-js@1.9.17)
       '@solidjs/router':
-        specifier: ^1.0.0
-        version: 1.0.0(solid-js@1.9.17)
+        specifier: ^1.0.3
+        version: 1.0.3(solid-js@1.9.17)
       '@tanstack/query-persist-client-core':
         specifier: ^5.104.5
         version: 5.104.5
@@ -847,8 +847,8 @@ packages:
     peerDependencies:
       solid-js: ^1.6.12
 
-  '@solidjs/router@1.0.0':
-    resolution: {integrity: sha512-cCSk1hvgCowiMa9bzzYWHiLu1U4E22+DfJe6/rOwAyECKrxc3jrd5QnoW3sDDJtW+e077cz/M67bPl3DqOBw1Q==}
+  '@solidjs/router@1.0.3':
+    resolution: {integrity: sha512-EULOxZNMGISNgQU+uXLtt6o4X5bIE+0HiPW0gGSOyl3HJmyClSDDHLGJ5JTHkbiyUSc6DttVvnVZYfK1a+70BA==}
     peerDependencies:
       solid-js: ^1.8.6
 
@@ -2883,7 +2883,7 @@ snapshots:
     dependencies:
       solid-js: 1.9.17
 
-  '@solidjs/router@1.0.0(solid-js@1.9.17)':
+  '@solidjs/router@1.0.3(solid-js@1.9.17)':
     dependencies:
       solid-js: 1.9.17
 
