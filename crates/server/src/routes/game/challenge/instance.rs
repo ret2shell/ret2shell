@@ -123,16 +123,38 @@ pub(super) async fn start_challenge_instance(
       }
     }
     None => {
-      if !cluster
+      let mut pods = cluster
         .at(CHALLENGE_NS)
         .get_challenge_env_by_user(token.id)
-        .await?
-        .is_empty()
-      {
-        warn!("user tried to start more instances at the same time");
-        return Err(ResponseError::PreconditionFailed(
-          "you can only start one instance at the same time".to_owned(),
-        ));
+        .await?;
+      pods.retain(|pod| {
+        pod
+          .metadata
+          .labels
+          .as_ref()
+          .and_then(|labels| labels.get("ret.sh.cn/team"))
+          .is_some_and(|team| team.as_str() == "0")
+      });
+      let env_limit = config_model
+        .server
+        .as_ref()
+        .map_or(1, r2s_config::server::Config::non_game_env_limit);
+      if pods.len() >= env_limit as usize {
+        warn!(
+          limit=%env_limit,
+          "user tried to start more instances at the same time",
+        );
+        return Err(ResponseError::PreconditionFailed(format!(
+          "you can only start {} instance(s) at the same time",
+          env_limit
+        )));
+      }
+      for pod in pods.iter() {
+        if get_pod_field!(pod, labels, "ret.sh.cn/challenge") == challenge.id.to_string() {
+          return Err(ResponseError::Conflict(
+            "this challenge instance is already launched".to_owned(),
+          ));
+        }
       }
     }
   }

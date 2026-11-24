@@ -101,6 +101,8 @@ export type ServerConfig = {
   hide_maker: boolean | null;
   highlight_banner: string | null;
   zen_game: number | null;
+  /** Max non-competition envs one user may run at the same time (per-user global pool). */
+  non_game_env_limit?: number | null;
 };
 export type Config = {
   auditor: AuditorConfig;

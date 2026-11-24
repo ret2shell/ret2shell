@@ -75,6 +75,10 @@ export function useCalmdownStatus({
       queryKey: ["cluster", "calmdown"],
       queryFn: async () => await getCalmdownStatus(),
       enabled: enabled?.(),
+      // The cooldown is authoritative on the server. Poll while it is active so
+      // a stale timestamp or a small client/server clock skew cannot leave the
+      // UI stuck at 00:00.
+      refetchInterval: (query) => (query.state.data ? 5_000 : false),
       throwOnError: (err: Error) => {
         return onError?.(err) ?? false;
       },

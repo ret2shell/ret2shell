@@ -394,6 +394,12 @@
       "zenGame": {
         "label": "Zen大会モード",
         "placeholder": "ゲームを選択してください"
+      },
+      "nonGameEnvLimit": {
+        "label": "非競技環境の上限",
+        "placeholder": "トレーニング場とアーカイブ済み大会で、1ユーザーが同時に実行できる環境数",
+        "minimum": "上限は1未満にできません",
+        "maximum": "上限は99を超えられません"
       }
     },
     "logs": {

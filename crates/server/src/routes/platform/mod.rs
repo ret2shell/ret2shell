@@ -63,6 +63,14 @@ async fn get_config(
 async fn update_config(
   State(state): State<GlobalState>, Json(config): Json<config::Model>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  if let Some(server) = &config.server
+    && let Some(limit) = server.non_game_env_limit
+    && !(1..=99).contains(&limit)
+  {
+    return Err(ResponseError::BadRequest(
+      "non-game environment limit must be between 1 and 99".to_owned(),
+    ));
+  }
   let result = config::update(&state.db.conn, config).await?;
   state.cache.at("platform").del("config").await?;
   Ok(Json(result))

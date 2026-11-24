@@ -1,30 +1,62 @@
 import { DateTime, Duration } from "luxon";
 import { type ComponentProps, createEffect, createSignal, onCleanup, untrack } from "solid-js";
 
+const ZERO = Duration.fromObject({ seconds: 0 });
+
 export default function (
   props: ComponentProps<"span"> & { end: DateTime; hasHours?: boolean; onTimeout?: () => void }
 ) {
-  const [duration, setDuration] = createSignal(props.end.diffNow());
-  let interval: NodeJS.Timeout;
-  function setup() {
+  // A timer can be mounted after its end (stale query data, a page restored
+  // from the background, or a clock that is slightly ahead). Never render a
+  // negative duration, and make sure `onTimeout` still fires so the caller can
+  // refresh the stale value instead of getting stuck at 00:00.
+  const [duration, setDuration] = createSignal(props.end > DateTime.now() ? props.end.diffNow() : ZERO);
+  let interval: ReturnType<typeof setInterval> | undefined;
+  // `onTimeout` must fire at most once for a given deadline. Without this guard
+  // a parent that refetches the same overdue deadline would keep retriggering
+  // the callback on every effect run.
+  let firedFor: number | undefined;
+
+  function clear() {
+    if (interval !== undefined) {
+      clearInterval(interval);
+      interval = undefined;
+    }
+  }
+
+  function expire(end: DateTime) {
+    clear();
+    setDuration(ZERO);
+    const deadline = end.toMillis();
+    if (firedFor !== deadline) {
+      firedFor = deadline;
+      props.onTimeout?.();
+    }
+  }
+
+  function setup(end: DateTime) {
+    clear();
+    if (end <= DateTime.now()) {
+      expire(end);
+      return;
+    }
+    setDuration(end.diffNow());
     interval = setInterval(() => {
-      setDuration(props.end > DateTime.now() ? props.end.diffNow() : Duration.fromObject({ seconds: 0 }));
-      if (props.end <= DateTime.now()) {
-        props.onTimeout?.();
-        clearInterval(interval);
+      if (end <= DateTime.now()) {
+        expire(end);
+      } else {
+        setDuration(end.diffNow());
       }
     }, 1000);
   }
+
   createEffect(() => {
-    if (props.end > DateTime.now()) {
-      untrack(() => {
-        clearInterval(interval);
-        setup();
-      });
-    }
+    const end = props.end;
+    untrack(() => setup(end));
   });
-  const cleanup = () => clearInterval(interval);
-  onCleanup(cleanup);
+
+  onCleanup(clear);
+
   const format = props.hasHours ? "hh:mm:ss" : "mm:ss";
   return <span {...props}>{duration().toFormat(format)}</span>;
 }
