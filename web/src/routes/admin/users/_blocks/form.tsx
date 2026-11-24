@@ -1,7 +1,7 @@
 import { handleHttpError } from "@api";
 import { useInstitutes } from "@api/account";
 import { uploadMedia } from "@api/media";
-import { useDeleteUserMutation, useUserIpList, useUserOAuthList } from "@api/user";
+import { useDeleteUserMutation, useResetUserPasswordMutation, useUserIpList, useUserOAuthList } from "@api/user";
 import { mediaPath } from "@lib/utils/media";
 import { Permission, permissionToString, type User } from "@models/user";
 import {
@@ -139,6 +139,14 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
   async function handleDeleteUser() {
     if (!compProps.editSource) return;
     deleteMutation.mutate({ id: compProps.editSource.id });
+  }
+  const [resetPassword, setResetPassword] = createSignal("");
+  const resetPasswordMutation = useResetUserPasswordMutation({
+    onSuccess: () => setResetPassword(""),
+  });
+  async function handleResetPassword() {
+    if (!compProps.editSource || resetPassword().length < 8) return;
+    resetPasswordMutation.mutate({ id: compProps.editSource.id, password: resetPassword() });
   }
 
   const institutesSelect = createMemo(() => {
@@ -456,6 +464,34 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
           {t("general.actions.save.title")}
         </Button>
       </Form>
+      <Show when={compProps.editSource}>
+        <div class="w-full max-w-5xl flex flex-col space-y-2">
+          <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
+            <span class="shrink-0 icon-[fluent--key-20-regular] w-5 h-5" />
+            <span class="flex-1 text-start">{t("user.management.resetPassword.title")}</span>
+          </h3>
+          <div class="flex flex-row space-x-2 items-center">
+            <Input
+              class="flex-1"
+              type="password"
+              title={t("user.management.resetPassword.label")}
+              placeholder={t("user.management.resetPassword.placeholder")}
+              icon={<span class="shrink-0 icon-[fluent--password-20-regular] w-5 h-5" />}
+              value={resetPassword()}
+              onInput={(e) => setResetPassword(e.currentTarget.value)}
+            />
+            <Button
+              level="warning"
+              disabled={resetPassword().length < 8 || resetPasswordMutation.isPending}
+              loading={resetPasswordMutation.isPending}
+              onClick={handleResetPassword}
+            >
+              {t("user.management.resetPassword.title")}
+            </Button>
+          </div>
+          <p class="text-xs text-layer-content/60">{t("user.management.resetPassword.tips")}</p>
+        </div>
+      </Show>
       <div class="w-full flex flex-col">
         <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2 w-full">
           <span class="shrink-0 icon-[fluent--settings-20-regular] w-5 h-5" />

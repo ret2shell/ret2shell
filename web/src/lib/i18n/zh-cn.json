@@ -1716,6 +1716,14 @@
     "management": {
       "confirmDelete": "请输入用户名称 {{name}} 来确认删除",
       "goToUserDetailPage": "转到用户信息页面",
+      "resetPassword": {
+        "fail": "重置密码失败",
+        "label": "新密码",
+        "placeholder": "输入新密码（至少 8 位，含大小写字母和数字）",
+        "success": "密码已重置",
+        "tips": "重置后该用户的所有登录会话将立即失效，请将新密码安全地告知用户。",
+        "title": "重置密码"
+      },
       "title": "用户管理"
     },
     "sortBy": "排序",

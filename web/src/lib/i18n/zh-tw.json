@@ -1716,6 +1716,14 @@
     "management": {
       "confirmDelete": "請輸入用戶名稱 {{name}} 來確認刪除",
       "goToUserDetailPage": "轉到用戶信息頁面",
+      "resetPassword": {
+        "fail": "重設密碼失敗",
+        "label": "新密碼",
+        "placeholder": "輸入新密碼（至少 8 位，含大小寫字母和數字）",
+        "success": "密碼已重設",
+        "tips": "重設後該用戶的所有登入工作階段將立即失效，請將新密碼安全地告知用戶。",
+        "title": "重設密碼"
+      },
       "title": "用戶管理"
     },
     "sortBy": "排序",

@@ -21,7 +21,10 @@ use crate::{
     data,
   },
   traits::{GlobalState, ResponseError},
-  utility::pagination::{DEFAULT_PAGE_SIZE, page, page_size},
+  utility::{
+    pagination::{DEFAULT_PAGE_SIZE, page, page_size},
+    password::hash_password,
+  },
 };
 
 pub fn router(state: &GlobalState) -> Router<GlobalState> {
@@ -32,6 +35,7 @@ pub fn router(state: &GlobalState) -> Router<GlobalState> {
         .route("/oauth", get(get_oauth_list))
         .route("/ip", get(get_user_ip_list))
         .route("/", patch(update_user).delete(delete_user))
+        .route("/password", patch(reset_user_password))
         .route_layer(middleware::from_fn(auth::permission_required_all!(
           Permission::User
         )))
@@ -121,6 +125,33 @@ async fn logout_user(cache: &Cache, user_id: i64) -> Result<(), ResponseError> {
   }
   cache.del(format!("user-{user_id}")).await.ok();
   Ok(())
+}
+
+#[derive(Deserialize, Validate)]
+struct ResetUserPasswordRequest {
+  #[validate(custom(function = "r2s_database::validation::password_strength"))]
+  pub password: String,
+}
+
+async fn reset_user_password(
+  State(ref db): State<Database>, State(ref cache): State<Cache>,
+  Extension(user): Extension<user::Model>, Extension(token): Extension<Token>,
+  Json(body): Json<ResetUserPasswordRequest>,
+) -> Result<impl IntoResponse, ResponseError> {
+  if token.id == user.id {
+    return Err(ResponseError::BadRequest(
+      "please change your own password in account settings".to_owned(),
+    ));
+  }
+  body.validate()?;
+  let password = hash_password(&body.password)?;
+  user::update_password(&db.conn, user.id, password).await?;
+  logout_user(cache, user.id).await?;
+  info!(
+    id=%user.id, account=%user.account, operator=%token.account,
+    "user password reset by administrator"
+  );
+  Ok(Json(user))
 }
 
 async fn update_user(

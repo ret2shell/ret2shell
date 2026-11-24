@@ -149,6 +149,26 @@ export async function deleteUser(id: number) {
   return await safeJson(api.delete(`${api_root}/user/${id}`).json());
 }
 
+export async function resetUserPassword(id: number, password: string) {
+  return await api.patch(`${api_root}/user/${id}/password`, { json: { password } }).json<User>();
+}
+
+export function useResetUserPasswordMutation(
+  props: { onSuccess?: (user: User) => void; onError?: (err: Error) => void } = {}
+) {
+  return useMutation(() => ({
+    mutationFn: ({ id, password }: { id: number; password: string }) => resetUserPassword(id, password),
+    onSuccess: (data: User) => {
+      toastSuccess(t("user.management.resetPassword.success"));
+      props.onSuccess?.(data);
+    },
+    onError: (err: Error) => {
+      handleHttpError(err, t("user.management.resetPassword.fail"));
+      props.onError?.(err);
+    },
+  }));
+}
+
 export function useDeleteUserMutation(props: { onSuccess?: () => void; onError?: (err: Error) => void } = {}) {
   return useMutation(() => ({
     mutationFn: ({ id }: { id: number }) => deleteUser(id),

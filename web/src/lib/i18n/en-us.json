@@ -1716,6 +1716,14 @@
     "management": {
       "confirmDelete": "Please enter the account {{name}} to confirm deletion",
       "goToUserDetailPage": "Go to user information page",
+      "resetPassword": {
+        "fail": "Failed to reset password",
+        "label": "New password",
+        "placeholder": "New password (min 8 chars, with upper/lowercase letters and digits)",
+        "success": "Password reset",
+        "tips": "All active sessions of this user will be revoked immediately. Share the new password with the user securely.",
+        "title": "Reset password"
+      },
       "title": "User management"
     },
     "sortBy": "Sort by",
