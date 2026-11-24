@@ -1,13 +1,16 @@
-import { useLoginMutation, useOAuthProviders } from "@api/account";
+import { handleHttpError } from "@api";
+import { loginWithPasskey, useLoginMutation, useOAuthProviders } from "@api/account";
 import LogoAnimate from "@assets/animates/logo-animate";
 import Captcha from "@blocks/captcha";
 import { mediaPath } from "@lib/utils/media";
 import { checkSameOrigin } from "@lib/utils/url";
+import { isUserCancelled } from "@lib/utils/webauthn";
 import { createForm, minLength, pattern, required, setValue } from "@modular-forms/solid";
 import { A, useLocation, useNavigate } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
+import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Divider from "@widgets/divider";
@@ -15,7 +18,7 @@ import Input from "@widgets/input";
 import Link from "@widgets/link";
 import Popover from "@widgets/popover";
 import { DateTime } from "luxon";
-import { createSignal, For, Match, Switch } from "solid-js";
+import { createSignal, For, Match, Show, Switch } from "solid-js";
 
 type LoginForm = {
   account: string;
@@ -35,21 +38,26 @@ export default function () {
   const oauthProviders = useOAuthProviders();
 
   const [timestamp, setTimestamp] = createSignal(DateTime.now().toMillis());
+  const [passkeyPending, setPasskeyPending] = createSignal(false);
+
+  function redirectToNext() {
+    const redirectUrl = location.query.redirect;
+    if (redirectUrl) {
+      const url = checkSameOrigin(Array.isArray(redirectUrl) ? redirectUrl[0] : redirectUrl);
+      if (/^(\w+):\/\//.test(url)) {
+        navigate("/", { replace: true });
+        window.location.replace(url);
+      } else {
+        navigate(url, { replace: true });
+      }
+    } else {
+      navigate("/", { replace: true });
+    }
+  }
 
   const loginMutation = useLoginMutation({
     onSuccess: () => {
-      const redirectUrl = location.query.redirect;
-      if (redirectUrl) {
-        const url = checkSameOrigin(Array.isArray(redirectUrl) ? redirectUrl[0] : redirectUrl);
-        if (/^(\w+):\/\//.test(url)) {
-          navigate("/", { replace: true });
-          window.location.replace(url);
-        } else {
-          navigate(url, { replace: true });
-        }
-      } else {
-        navigate("/", { replace: true });
-      }
+      redirectToNext();
     },
     onError: () => {
       setTimestamp(DateTime.now().toMillis());
@@ -58,6 +66,25 @@ export default function () {
   });
   function handleLogin(result: LoginForm) {
     loginMutation.mutate(result);
+  }
+
+  async function handlePasskeyLogin() {
+    setPasskeyPending(true);
+    try {
+      await loginWithPasskey();
+      addToast({
+        level: "success",
+        description: t("account.login.status.success.message"),
+        duration: 5000,
+      });
+      redirectToNext();
+    } catch (err) {
+      if (!isUserCancelled(err)) {
+        handleHttpError(err, t("account.passkey.errors.login.title"));
+      }
+    } finally {
+      setPasskeyPending(false);
+    }
   }
   return (
     <>
@@ -174,6 +201,17 @@ export default function () {
             <Link class="w-full" href="/account/register">
               {t("account.register.tips")}
             </Link>
+            <Show when={typeof window.PublicKeyCredential !== "undefined"}>
+              <Button
+                class="w-full mt-4!"
+                loading={passkeyPending()}
+                disabled={passkeyPending()}
+                onClick={() => handlePasskeyLogin()}
+              >
+                <span class="shrink-0 icon-[fluent--person-passkey-20-regular] w-5 h-5" />
+                <span>{t("account.passkey.login.title")}</span>
+              </Button>
+            </Show>
             <Switch>
               <Match when={oauthProviders.data?.filter((s) => s.portal).length === 1}>
                 {(() => {
@@ -191,7 +229,7 @@ export default function () {
                   class="w-full mt-4!"
                   btnContent={
                     <>
-                      <span class="shrink-0 icon-[fluent--person-passkey-20-regular] w-5 h-5" />
+                      <span class="shrink-0 icon-[fluent--key-multiple-20-regular] w-5 h-5" />
                       <span>{t("account.oauth.select")}</span>
                     </>
                   }

@@ -1879,6 +1879,56 @@
         }
       }
     },
+    "passkey": {
+      "title": "Passkeys",
+      "login": {
+        "title": "Sign in with a passkey"
+      },
+      "form": {
+        "name": {
+          "label": "Name",
+          "placeholder": "Name this device"
+        }
+      },
+      "actions": {
+        "add": {
+          "title": "Add passkey"
+        },
+        "rename": {
+          "title": "Rename"
+        },
+        "delete": {
+          "title": "Delete"
+        }
+      },
+      "info": {
+        "created_at": "Added at",
+        "last_used_at": "Last used",
+        "credential_id": "Credential ID"
+      },
+      "status": {
+        "registered": "Passkey added"
+      },
+      "empty": "No passkey added yet",
+      "unnamed": "Unnamed",
+      "errors": {
+        "fetch": {
+          "title": "Failed to fetch passkeys"
+        },
+        "register": {
+          "title": "Failed to add passkey"
+        },
+        "rename": {
+          "title": "Failed to rename passkey"
+        },
+        "delete": {
+          "title": "Failed to delete passkey"
+        },
+        "login": {
+          "title": "Passkey login failed"
+        }
+      }
+    },
     "register": {
       "tips": "No account? Register now!",
       "status": {
