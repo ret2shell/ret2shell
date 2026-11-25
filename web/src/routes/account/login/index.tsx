@@ -194,59 +194,68 @@ export default function () {
           </Form>
           <Divider class="md:hidden" />
           <Divider class="hidden md:inline-block" direction="vertical" />
-          <div class="md:w-0 flex-1 shrink-0 flex flex-col items-center space-y-2">
+          <div class="md:w-0 flex-1 shrink-0 flex flex-col items-center">
             <div class="flex-1 flex flex-col items-center justify-center">
-              <LogoAnimate class="w-36 h-36 hidden md:inline-block my-6" />
+              <LogoAnimate class="w-36 h-36 hidden md:inline-block" />
             </div>
-            <Link class="w-full" href="/account/register">
-              {t("account.register.tips")}
-            </Link>
-            <Show when={typeof window.PublicKeyCredential !== "undefined"}>
-              <Button
-                class="w-full mt-4!"
-                loading={passkeyPending()}
-                disabled={passkeyPending()}
-                onClick={() => handlePasskeyLogin()}
-              >
-                <span class="shrink-0 icon-[fluent--person-passkey-20-regular] w-5 h-5" />
-                <span>{t("account.passkey.login.title")}</span>
-              </Button>
-            </Show>
-            <Switch>
-              <Match when={oauthProviders.data?.filter((s) => s.portal).length === 1}>
-                {(() => {
-                  const svc = oauthProviders.data?.find((s) => s.portal);
-                  return (
-                    <Link class="w-full mt-4!" href={svc?.portal} title={svc?.name}>
-                      <img src={mediaPath(svc?.avatar)} alt={svc?.name} width={24} height={24} />
-                      <span>{svc?.name}</span>
-                    </Link>
-                  );
-                })()}
-              </Match>
-              <Match when={oauthProviders.data && oauthProviders.data.filter((s) => s.portal).length > 1}>
-                <Popover
-                  class="w-full mt-4!"
-                  btnContent={
-                    <>
-                      <span class="shrink-0 icon-[fluent--key-multiple-20-regular] w-5 h-5" />
-                      <span>{t("account.oauth.select")}</span>
-                    </>
-                  }
+            <div class="w-full flex flex-col space-y-3">
+              <Link class="w-full" href="/account/register">
+                {t("account.register.tips")}
+              </Link>
+              <Show when={typeof window.PublicKeyCredential !== "undefined"}>
+                <Button
+                  class="w-full"
+                  loading={passkeyPending()}
+                  disabled={passkeyPending()}
+                  onClick={() => handlePasskeyLogin()}
                 >
-                  <Card contentClass="p-2 flex flex-col space-y-2">
-                    <For each={oauthProviders.data?.filter((s) => s.portal)}>
-                      {(service) => (
-                        <Link class="w-full" justify="start" size="sm" href={service.portal} title={service.name} ghost>
-                          <img src={mediaPath(service.avatar)} alt={service.name} width={24} height={24} />
-                          <span>{service.name}</span>
-                        </Link>
-                      )}
-                    </For>
-                  </Card>
-                </Popover>
-              </Match>
-            </Switch>
+                  <span class="shrink-0 icon-[fluent--person-passkey-20-regular] w-5 h-5" />
+                  <span>{t("account.passkey.login.title")}</span>
+                </Button>
+              </Show>
+              <Switch>
+                <Match when={oauthProviders.data?.filter((s) => s.portal).length === 1}>
+                  {(() => {
+                    const svc = oauthProviders.data?.find((s) => s.portal);
+                    return (
+                      <Link class="w-full" href={svc?.portal} title={svc?.name}>
+                        <img src={mediaPath(svc?.avatar)} alt={svc?.name} width={24} height={24} />
+                        <span>{svc?.name}</span>
+                      </Link>
+                    );
+                  })()}
+                </Match>
+                <Match when={oauthProviders.data && oauthProviders.data.filter((s) => s.portal).length > 1}>
+                  <Popover
+                    class="w-full"
+                    btnContent={
+                      <>
+                        <span class="shrink-0 icon-[fluent--key-multiple-20-regular] w-5 h-5" />
+                        <span>{t("account.oauth.select")}</span>
+                      </>
+                    }
+                  >
+                    <Card contentClass="p-2 flex flex-col space-y-2">
+                      <For each={oauthProviders.data?.filter((s) => s.portal)}>
+                        {(service) => (
+                          <Link
+                            class="w-full"
+                            justify="start"
+                            size="sm"
+                            href={service.portal}
+                            title={service.name}
+                            ghost
+                          >
+                            <img src={mediaPath(service.avatar)} alt={service.name} width={24} height={24} />
+                            <span>{service.name}</span>
+                          </Link>
+                        )}
+                      </For>
+                    </Card>
+                  </Popover>
+                </Match>
+              </Switch>
+            </div>
           </div>
         </Card>
       </div>
