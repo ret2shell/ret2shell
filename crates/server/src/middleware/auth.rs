@@ -40,11 +40,15 @@ pub struct TokenTracker {
 }
 
 pub async fn decode_token(token: &str, key: &str) -> Token {
-  let token_data = match decode::<Token>(
-    token,
-    &DecodingKey::from_secret(key.as_ref()),
-    &Validation::new(Algorithm::HS256),
-  ) {
+  let decoding_key = match DecodingKey::from_secret(key.as_ref()) {
+    Ok(key) => key,
+    Err(err) => {
+      error!(error=?err, "failed to load decoding key");
+      return Token::default();
+    }
+  };
+
+  let token_data = match decode::<Token>(token, &decoding_key, &Validation::new(Algorithm::HS256)) {
     Ok(c) => c,
     Err(err) => {
       debug!(error=?err, token=?token, "decode token failed");
@@ -61,12 +65,14 @@ async fn distribute_token(
     exp: Utc::now().timestamp() + expires_time,
     ..token.clone()
   };
-  encode(
-    &Header::default(),
-    &new_token,
-    &EncodingKey::from_secret(key.as_ref()),
-  )
-  .map_err(|err| {
+  let encoding_key = EncodingKey::from_secret(key.as_ref()).map_err(|err| {
+    error!(error=?err, "failed to load encoding key");
+    ResponseError::InternalServerError(
+      "failed to encode token, please contact server admin".to_owned(),
+    )
+  })?;
+
+  encode(&Header::default(), &new_token, &encoding_key).map_err(|err| {
     error!(error=?err, "failed to encode token");
     ResponseError::InternalServerError(
       "failed to encode token, please contact server admin".to_owned(),

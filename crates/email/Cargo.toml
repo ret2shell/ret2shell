@@ -11,8 +11,6 @@ rust-version = { workspace = true }
 version      = { workspace = true }
 
 [dependencies]
-async-nats = { workspace = true }
-futures    = { workspace = true }
 lettre     = { workspace = true }
 serde      = { workspace = true }
 serde_json = { workspace = true }
@@ -22,7 +20,6 @@ tracing    = { workspace = true }
 chrono     = { workspace = true }
 
 r2s-config = { workspace = true }
-r2s-queue  = { workspace = true }
 
 [lib]
 path = "src/lib.rs"

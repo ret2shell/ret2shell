@@ -11,7 +11,6 @@ rust-version = { workspace = true }
 version      = { workspace = true }
 
 [dependencies]
-async-nats = { workspace = true }
 axum       = { workspace = true }
 chrono     = { workspace = true }
 futures    = { workspace = true }
@@ -22,7 +21,6 @@ tokio      = { workspace = true }
 tracing    = { workspace = true }
 
 r2s-database = { workspace = true }
-r2s-queue    = { workspace = true }
 
 [lib]
 path = "src/lib.rs"
