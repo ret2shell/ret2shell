@@ -1,6 +1,6 @@
 import { Splitter, type SplitterRootProps } from "@ark-ui/solid";
+import type { JSX } from "@solidjs/web";
 import clsx from "clsx";
-import type { JSX } from "solid-js";
 
 export default function (
   props: SplitterRootProps & {

@@ -5,12 +5,12 @@ import bgGameDefault from "@assets/imgs/bg-game-default.webp";
 import { mediaPath } from "@lib/utils/media";
 import { gameCoverStore } from "@routes/games/_blocks/cover";
 import { useParams } from "@solidjs/router";
+import type { ComponentProps } from "@solidjs/web";
 import { accountStore } from "@storage/account";
 import { t } from "@storage/theme";
 import Divider from "@widgets/divider";
 import clsx from "clsx";
-import { type ComponentProps, createEffect, createRoot, Show, untrack } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createRoot, createStore, createTrackedEffect, Show, untrack } from "solid-js";
 
 const teamCoverRoot = createRoot(() =>
   createStore<{
@@ -28,11 +28,13 @@ export default function TeamCover(props: ComponentProps<"div">) {
   const game = useGame({ id: () => gameId() });
   const team = useSelfTeam({ game_id: () => gameId(), silenced: true });
   const expanded = () => !!teamCoverStore.showTeamCover;
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (expanded()) {
       untrack(() => {
         setTimeout(() => {
-          setTeamCoverStore({ showTeamCover: false });
+          setTeamCoverStore((s) => {
+            s.showTeamCover = false;
+          });
         }, 3000);
       });
     }

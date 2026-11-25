@@ -1,18 +1,9 @@
 import { type CollectionItem, createListCollection, Select, type SelectRootProps } from "@ark-ui/solid";
+import { type ComponentProps, Portal } from "@solidjs/web";
 import { fullTheme, t } from "@storage/theme";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
 import clsx from "clsx";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import {
-  type ComponentProps,
-  createEffect,
-  createMemo,
-  createSignal,
-  Index,
-  Show,
-  splitProps,
-  untrack,
-} from "solid-js";
-import { Portal } from "solid-js/web";
+import { createMemo, createSignal, createTrackedEffect, For, omit, Show, untrack } from "solid-js";
 
 export type SelectProps = {
   label?: string;
@@ -35,19 +26,11 @@ export default function (
   props: Pick<SelectRootProps<SelectItemType>, Exclude<keyof SelectRootProps<SelectItemType>, "collection">> &
     SelectProps
 ) {
-  const [selectProps, others] = splitProps(props, [
-    "label",
-    "placeholder",
-    "size",
-    "ghost",
-    "error",
-    "inputProps",
-    "items",
-  ]);
+  const others = omit(props, "label", "placeholder", "size", "ghost", "error", "inputProps", "items");
 
   const collection = createMemo(() =>
     createListCollection({
-      items: selectProps.items,
+      items: props.items,
     })
   );
   let selectEl!: HTMLSelectElement;
@@ -55,7 +38,7 @@ export default function (
 
   const [proxiedValue, setProxiedValue] = createSignal<string[] | undefined>(others.value);
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (others.value) {
       untrack(() => {
         requestAnimationFrame(() => {
@@ -76,7 +59,7 @@ export default function (
       class={clsx("flex flex-col", others.class)}
       // immediate
       collection={collection()}
-      // value={JSON.parse(JSON.stringify([selectProps.inputProps?.value?.toString()]))}
+      // value={JSON.parse(JSON.stringify([props.inputProps?.value?.toString()]))}
       positioning={{
         sameWidth: true,
       }}
@@ -101,8 +84,8 @@ export default function (
         others.onValueChange?.(e);
       }}
     >
-      <Show when={selectProps.label}>
-        <Select.Label class="label mb-1">{selectProps.label}</Select.Label>
+      <Show when={props.label}>
+        <Select.Label class="label mb-1">{props.label}</Select.Label>
       </Show>
       <Select.Control class="w-full">
         <Select.Trigger
@@ -113,23 +96,18 @@ export default function (
             "gap-0",
             "items-center",
             "w-full",
-            selectProps.size === "sm" ? "btn-sm" : "btn-md",
-            selectProps.ghost && "btn-ghost",
-            selectProps.error && "border-error",
-            selectProps.size === "sm" ? "px-1" : "px-2"
+            props.size === "sm" ? "btn-sm" : "btn-md",
+            props.ghost && "btn-ghost",
+            props.error && "border-error",
+            props.size === "sm" ? "px-1" : "px-2"
           )}
         >
           <Show
             when={props.error}
             fallback={
               <Select.ValueText
-                class={clsx(
-                  selectProps.size === "sm" ? "px-1" : "px-2",
-                  "text-start",
-                  "truncate",
-                  !props.error && "flex-1"
-                )}
-                placeholder={selectProps.placeholder}
+                class={clsx(props.size === "sm" ? "px-1" : "px-2", "text-start", "truncate", !props.error && "flex-1")}
+                placeholder={props.placeholder}
               />
             }
           >
@@ -138,7 +116,7 @@ export default function (
           <Select.Indicator
             class={clsx(
               "btn btn-square btn-ghost items-center justify-center",
-              selectProps.size === "sm" ? "btn-xs" : "btn-sm"
+              props.size === "sm" ? "btn-xs" : "btn-sm"
             )}
             title={t("general.actions.select.title")}
           >
@@ -147,7 +125,7 @@ export default function (
           <Select.ClearTrigger
             class={clsx(
               "btn btn-square btn-ghost items-center justify-center",
-              selectProps.size === "sm" ? "btn-xs" : "btn-sm"
+              props.size === "sm" ? "btn-xs" : "btn-sm"
             )}
             title={t("general.actions.clear.title")}
           >
@@ -170,7 +148,7 @@ export default function (
             >
               <Select.ItemGroup class="card-content p-2">
                 <div class="flex flex-col space-y-2">
-                  <Index each={selectProps.items}>
+                  <For each={props.items} keyed={false}>
                     {(item) => (
                       <Select.Item
                         item={item()}
@@ -188,7 +166,7 @@ export default function (
                         </Select.ItemIndicator>
                       </Select.Item>
                     )}
-                  </Index>
+                  </For>
                 </div>
               </Select.ItemGroup>
             </OverlayScrollbarsComponent>

@@ -1,4 +1,5 @@
-import { type ComponentProps, onMount } from "solid-js";
+import type { ComponentProps } from "@solidjs/web";
+import { onSettled } from "solid-js";
 
 export default function (props: ComponentProps<"svg">) {
   let svgPath1!: SVGPathElement;
@@ -6,7 +7,7 @@ export default function (props: ComponentProps<"svg">) {
   let svgPath3!: SVGPathElement;
   let svgPath4!: SVGPathElement;
   const { width, height } = { width: 256, height: 256, ...props };
-  onMount(() => {
+  onSettled(() => {
     setTimeout(() => {
       svgPath1.classList.remove("logo-elem-1");
       svgPath2.classList.remove("logo-elem-2");

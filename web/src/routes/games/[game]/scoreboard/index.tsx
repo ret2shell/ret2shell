@@ -15,7 +15,7 @@ import Chart from "@widgets/chart";
 import Select from "@widgets/select";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { createEffect, createMemo, createSignal, Match, onMount, Show, Switch, untrack } from "solid-js";
+import { createMemo, createSignal, createTrackedEffect, Match, onSettled, Show, Switch, untrack } from "solid-js";
 import TeamDetails from "./_blocks/team-details";
 import TeamRanks from "./_blocks/team-ranks";
 import TeamSolves from "./_blocks/team-solves";
@@ -184,7 +184,7 @@ export default function () {
   const total = createMemo(() => activeTeamsQuery().data?.[1] ?? 0);
   const challengeList = createMemo(() => challenges.data?.[0] ?? []);
 
-  onMount(async () => {
+  onSettled(async () => {
     pageHeight = createElementSize(autoPageSizeWatcher!);
   });
 
@@ -232,7 +232,7 @@ export default function () {
     }));
   };
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (pageHeight?.height) {
       const p = Math.floor(pageHeight.height / 48);
       untrack(() => {

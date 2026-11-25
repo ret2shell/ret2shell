@@ -1,6 +1,7 @@
 import { Slider, type SliderRootProps } from "@ark-ui/solid";
+import type { ComponentProps } from "@solidjs/web";
 import clsx from "clsx";
-import { type ComponentProps, Show, splitProps } from "solid-js";
+import { omit, Show } from "solid-js";
 
 export type SliderProps = {
   label?: string;
@@ -11,15 +12,15 @@ export type SliderProps = {
 };
 
 export default function (props: SliderRootProps & SliderProps) {
-  const [sliderProps, others] = splitProps(props, ["label", "hideHeader", "inputProps"]);
+  const others = omit(props, "label", "hideHeader", "inputProps");
   return (
     <Slider.Root
       {...others}
       class={clsx("slider", others.orientation === "vertical" && "slider-vertical", others.class)}
     >
-      <Show when={!sliderProps.hideHeader}>
+      <Show when={!props.hideHeader}>
         <div class="label slider-label">
-          <Slider.Label>{sliderProps.label}</Slider.Label>
+          <Slider.Label>{props.label}</Slider.Label>
           <Slider.ValueText />
         </div>
       </Show>
@@ -28,7 +29,7 @@ export default function (props: SliderRootProps & SliderProps) {
           <Slider.Range class="slider-range" />
         </Slider.Track>
         <Slider.Thumb index={0} class="slider-thumb group-hover:border-2">
-          <Slider.HiddenInput {...sliderProps.inputProps} value={props.value?.[0] ?? 0} type="number" />
+          <Slider.HiddenInput {...props.inputProps} value={props.value?.[0] ?? 0} type="number" />
         </Slider.Thumb>
       </Slider.Control>
     </Slider.Root>

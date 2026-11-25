@@ -27,10 +27,10 @@ import LoadingTips from "@widgets/loading-tips";
 import Popover from "@widgets/popover";
 import TimeProgress from "@widgets/time-progress";
 import Timer from "@widgets/timer";
+import { Transition, TransitionGroup } from "@widgets/transition";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { createEffect, createMemo, createSignal, Match, Show, Switch, untrack } from "solid-js";
-import { Transition, TransitionGroup } from "solid-transition-group";
+import { createMemo, createSignal, createTrackedEffect, Match, Show, Switch, untrack } from "solid-js";
 import I18nBox, { I18nBoxContent } from "./i18n-box";
 import InstanceBox, { InstanceBoxContent } from "./instance-box";
 import NotificationBox, { NotificationBoxContent } from "./notification-box";
@@ -60,7 +60,7 @@ function TitleLink() {
   const [typedName, setTypedName] = createSignal("");
   const [inClear, setInClear] = createSignal(false);
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (name()) {
       untrack(() => {
         setInClear(true);

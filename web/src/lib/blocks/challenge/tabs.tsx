@@ -6,11 +6,11 @@ import { isAdminOfGame } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";
 import Button from "@widgets/button";
 import Divider from "@widgets/divider";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
+import { TransitionGroup } from "@widgets/transition";
 // import Link from "@widgets/link";
 import clsx from "clsx";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { createEffect, createMemo, createSignal, For, Show, untrack } from "solid-js";
-import { TransitionGroup } from "solid-transition-group";
+import { createMemo, createSignal, createTrackedEffect, For, Show, untrack } from "solid-js";
 
 export default function Tabs(props: { training?: boolean; archived?: boolean; gameId: number; challengeId?: number }) {
   const navigate = useNavigate();
@@ -63,7 +63,7 @@ export default function Tabs(props: { training?: boolean; archived?: boolean; ga
     setChallengeHistory([...challengeHistory().filter((s) => s.id !== challengeId)]);
   }
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!props.challengeId) return;
     if (challenge.isLoading || !challenge.data) return;
     untrack(() => appendChallengeHistory(challenge.data));

@@ -7,16 +7,16 @@ import {
 } from "@api/challenge";
 import { useGame } from "@api/game";
 import { useSearchParams } from "@solidjs/router";
+import { dynamic } from "@solidjs/web";
 import { isAdminOfGame } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Divider from "@widgets/divider";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
 import Popover from "@widgets/popover";
 import Splitter from "@widgets/splitter";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { createMemo, createSignal, Show } from "solid-js";
-import { Dynamic } from "solid-js/web";
 import Answer from "./answer";
 import Checker from "./checker";
 import Files from "./files";
@@ -76,6 +76,8 @@ function BottomPanel(props: ChallengeWidgetProps) {
     }
     return pages[page() as keyof typeof pages];
   };
+
+  const CurrentPage = dynamic(pageComponent);
 
   const challenge = useChallenge({
     game_id: () => props.gameId,
@@ -273,7 +275,7 @@ function BottomPanel(props: ChallengeWidgetProps) {
         class="relative w-full flex-1 print:h-auto print:overflow-auto"
         defer
       >
-        <Dynamic component={pageComponent()} {...props} />
+        <CurrentPage {...props} />
       </OverlayScrollbarsComponent>
     </div>
   );

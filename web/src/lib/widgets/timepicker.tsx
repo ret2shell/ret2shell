@@ -1,10 +1,10 @@
 import { Popover } from "@ark-ui/solid";
 import { type FormStore, setValue } from "@modular-forms/solid";
+import { type ComponentProps, Portal } from "@solidjs/web";
 import { t } from "@storage/theme";
 import clsx from "clsx";
 import { DateTime, type MonthNumbers } from "luxon";
-import { type ComponentProps, createEffect, createMemo, createSignal, Show } from "solid-js";
-import { Portal } from "solid-js/web";
+import { createMemo, createSignal, createTrackedEffect, Show } from "solid-js";
 import Button from "./button";
 import Card from "./card";
 import Divider from "./divider";
@@ -72,7 +72,7 @@ function TimePickerButton(props: {
           type="button"
         >
           <span
-            classList={{
+            class={{
               "opacity-30": !props.current,
               "text-primary": currentDate.equals(props.date),
             }}
@@ -399,18 +399,18 @@ function PickerCalendar(props: {
 export default function TimePicker(props: TimerPickerProps & ComponentProps<"div">) {
   const [time, setTime] = createSignal(null as DateTime | null);
   const [timeNext, setTimeNext] = createSignal(null as DateTime | null);
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (props.value) setTime(DateTime.fromSeconds(props.value));
     else setTime(null);
   });
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (props.range && props.valueNext) setTimeNext(DateTime.fromSeconds(props.valueNext));
     else setTimeNext(null);
   });
-  createEffect(() => {
+  createTrackedEffect(() => {
     setValue(props.form, props.name, time() ? time()!.toSeconds() : undefined);
   });
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (props.range) {
       setValue(props.form, props.nameNext, timeNext() ? timeNext()!.toSeconds() : undefined);
     }

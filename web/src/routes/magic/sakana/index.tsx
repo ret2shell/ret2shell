@@ -9,7 +9,7 @@ import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Link from "@widgets/link";
 import SakanaWidget from "sakana-widget";
-import { onMount } from "solid-js";
+import { onSettled } from "solid-js";
 
 export default function () {
   const xdsec = SakanaWidget.getCharacter("takina");
@@ -22,7 +22,7 @@ export default function () {
   SakanaWidget.registerCharacter("vidar", vidar!);
   SakanaWidget.registerCharacter("cnss", cnss!);
 
-  onMount(() => {
+  onSettled(() => {
     new SakanaWidget({
       character: "xdsec",
       controls: false,

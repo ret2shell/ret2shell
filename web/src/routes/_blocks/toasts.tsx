@@ -1,7 +1,7 @@
 import { setToastStore, toastStore } from "@storage/toast";
 import Toast from "@widgets/toast";
+import { TransitionGroup } from "@widgets/transition";
 import { For } from "solid-js";
-import { TransitionGroup } from "solid-transition-group";
 
 export default function () {
   const toasts = () => toastStore.toasts.filter((toast) => toast.shown !== false);
@@ -15,13 +15,8 @@ export default function () {
               toast={toast}
               selfDestroy
               onTimeout={() => {
-                setToastStore({
-                  toasts: toastStore.toasts.map((t) => {
-                    if (t.id === toast.id) {
-                      return { ...t, shown: false };
-                    }
-                    return t;
-                  }),
+                setToastStore((s) => {
+                  s.toasts = s.toasts.map((t) => (t.id === toast.id ? { ...t, shown: false } : t));
                 });
               }}
             />

@@ -6,7 +6,7 @@ import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Checkbox from "@widgets/checkbox";
-import { createEffect, createMemo, untrack } from "solid-js";
+import { createMemo, createTrackedEffect, untrack } from "solid-js";
 
 export function PoliciesEdit(props: {
   onDone: (result: ArchivePolicy) => void;
@@ -21,7 +21,7 @@ export function PoliciesEdit(props: {
       },
     },
   });
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (props.editSource) {
       untrack(() => {
         setValues(form, {

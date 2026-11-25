@@ -15,7 +15,7 @@ import { type DiagnosticMarker, EditorBare } from "@widgets/editor";
 import Input from "@widgets/input";
 import Popover from "@widgets/popover";
 import Select from "@widgets/select";
-import { createEffect, createMemo, createSignal, Show } from "solid-js";
+import { createMemo, createSignal, createTrackedEffect, Show } from "solid-js";
 import multiNodeDirect from "./scripts/multi_node_direct.rx";
 import singleNodeDirect from "./scripts/single_node_direct.rx";
 
@@ -70,13 +70,13 @@ export default function Traffic() {
       updateNodeSelectorMutation.isPending ||
       deleteNodeSelectorMutation.isPending
   );
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (preset()) {
       setScript(trafficMap[preset()!]);
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (game.data) {
       setScript(game.data.traffic || "");
       setNodeSelector(game.data.node_selector || "");

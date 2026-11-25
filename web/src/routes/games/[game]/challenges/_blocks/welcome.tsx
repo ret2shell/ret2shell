@@ -2,7 +2,7 @@ import { useGameDoc } from "@api/game";
 import { useParams } from "@solidjs/router";
 import { fullTheme } from "@storage/theme";
 import Article from "@widgets/article";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
 import { createMemo } from "solid-js";
 
 export default function () {

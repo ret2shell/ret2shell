@@ -1,14 +1,14 @@
 import { useDeleteWikiMutation, useWiki, useWikiTree } from "@api/wiki";
 import Spin from "@assets/animates/spin";
 import { Permission } from "@models/user";
-import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
+import { useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Article from "@widgets/article";
 import Divider from "@widgets/divider";
 import { HTTPError } from "ky";
-import { createEffect, Show } from "solid-js";
+import { createTrackedEffect, Show } from "solid-js";
 import EditForm from "../_blocks/form";
 
 export default function () {
@@ -33,7 +33,7 @@ export default function () {
     },
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (Number.isNaN(article_id())) navigate("/sigtrap/404", { replace: true });
   });
 
@@ -72,14 +72,14 @@ export default function () {
           </Show>
         </h1>
         <div class="flex flex-row items-center w-full max-w-5xl justify-start print:justify-center space-x-6 print:space-x-2 opacity-60 flex-wrap py-3">
-          <A
+          <a
             class="hover:underline font-bold flex flex-row space-x-2 items-center"
             title={wiki.data?.publisher_name || t("wiki.unknownPublisher")}
             href={`/users/${wiki.data?.publisher_id}`}
           >
             <span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5 print:hidden" />
             <span>{wiki.data?.publisher_name}</span>
-          </A>
+          </a>
           <div
             class="font-bold flex flex-row space-x-2 items-center"
             title={t("wiki.form.createdAt.label", {
@@ -102,13 +102,13 @@ export default function () {
             </div>
           </Show>
           <Show when={accountStore.permissions.includes(Permission.Wiki)}>
-            <A
+            <a
               class="font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
               href={`/wiki/${wiki.data?.id}?edit=true`}
             >
               <span class="shrink-0 icon-[fluent--edit-20-regular] w-5 h-5" />
               <span>{t("general.actions.edit.title")}</span>
-            </A>
+            </a>
             <button
               class="cursor-pointer font-bold hover:underline flex flex-row space-x-2 items-center print:hidden"
               onClick={onDelete}

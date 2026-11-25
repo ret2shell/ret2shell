@@ -1,7 +1,8 @@
 import { Avatar } from "@ark-ui/solid";
 import Spin from "@assets/animates/spin";
+import type { JSX } from "@solidjs/web";
 import clsx from "clsx";
-import { createSignal, type JSX, Show, splitProps } from "solid-js";
+import { createSignal, omit, Show } from "solid-js";
 
 export type AvatarProps = {
   fallback?: string;
@@ -13,14 +14,11 @@ export type AvatarProps = {
 };
 
 export default function (props: AvatarProps) {
-  const [avatarFunctionProps, _1] = splitProps(props, ["fallback", "loading"]);
-  const [children, root] = splitProps(_1, ["children"]);
+  const root = omit(props, "fallback", "loading", "children");
   const [imageLoading, setImageLoading] = createSignal(true);
   return (
     <Avatar.Root class={clsx("avatar", root.class)}>
-      <Avatar.Fallback class="avatar-fallback">
-        {avatarFunctionProps.fallback?.[0]?.toUpperCase() || "#"}
-      </Avatar.Fallback>
+      <Avatar.Fallback class="avatar-fallback">{props.fallback?.[0]?.toUpperCase() || "#"}</Avatar.Fallback>
       <Avatar.Image
         src={root.src}
         alt={root.alt}
@@ -34,8 +32,8 @@ export default function (props: AvatarProps) {
           setImageLoading(false);
         }}
       />
-      {children.children}
-      <Show when={avatarFunctionProps.loading || (root.src && imageLoading())}>
+      {props.children}
+      <Show when={props.loading || (root.src && imageLoading())}>
         <div class="absolute top-0 left-0 w-full h-full flex items-center justify-center">
           <Spin width={20} height={20} />
         </div>

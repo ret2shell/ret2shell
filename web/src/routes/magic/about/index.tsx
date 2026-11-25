@@ -6,8 +6,8 @@ import { platformStore } from "@storage/platform";
 import { fullTheme, t } from "@storage/theme";
 import Divider from "@widgets/divider";
 import Link from "@widgets/link";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
 import Tag from "@widgets/tag";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { Show } from "solid-js";
 
 export default function () {

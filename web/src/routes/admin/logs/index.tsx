@@ -3,7 +3,7 @@ import { type Log, usePlatformLogs, useQueryPlatformLog } from "@api/platform";
 import DownloadButton from "@blocks/download-button";
 import { createForm, getValue, setValue } from "@modular-forms/solid";
 import { createBreakpoints } from "@solid-primitives/media";
-import { A, useSearchParams } from "@solidjs/router";
+import { useSearchParams } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
 import Button from "@widgets/button";
@@ -12,7 +12,7 @@ import LoadingTips from "@widgets/loading-tips";
 import Select from "@widgets/select";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { createEffect, createSignal, For, Match, onCleanup, Show, Switch } from "solid-js";
+import { createSignal, createTrackedEffect, For, Match, onCleanup, Show, Switch } from "solid-js";
 import LogQueryInput from "./_blocks/query-input";
 
 function LogField(log: Log) {
@@ -115,7 +115,7 @@ export default function () {
     },
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (searchParams.trace) {
       setValue(form, "trace", searchParams.trace as string);
     } else {
@@ -297,35 +297,35 @@ export default function () {
                     {(log["span.user-account"] as string) && (
                       <span class="font-bold mr-2">
                         <span class="opacity-60 italic">user=</span>
-                        <A href={`/admin/logs?account=${log["span.user-account"]}`} class="hover:underline mr-1">
+                        <a href={`/admin/logs?account=${log["span.user-account"]}`} class="hover:underline mr-1">
                           {log["span.user-account"] as string}
-                        </A>
-                        <A href={`/admin/users?user=${log["span.user-id"]}`} class="hover:text-primary">
+                        </a>
+                        <a href={`/admin/users?user=${log["span.user-id"]}`} class="hover:text-primary">
                           <span class="icon-[fluent--open-16-regular] w-4 h-4" />
-                        </A>
+                        </a>
                       </span>
                     )}
                     {(log["span.from"] as string) && (
                       <>
                         <span class="opacity-60 italic">&nbsp;from=</span>
-                        <A href={`/admin/logs?from=${log["span.from"] as string}`} class="hover:underline mr-1">
+                        <a href={`/admin/logs?from=${log["span.from"] as string}`} class="hover:underline mr-1">
                           {log["span.from"] as string}
-                        </A>
-                        <A href={`/admin/users?filter=${log["span.from"]}`} class="hover:text-primary">
+                        </a>
+                        <a href={`/admin/users?filter=${log["span.from"]}`} class="hover:text-primary">
                           <span class="icon-[fluent--open-16-regular] w-4 h-4" />
-                        </A>
+                        </a>
                       </>
                     )}
                     {(log["span.trace"] as string) && (
                       <>
                         <span class="opacity-60 italic">&nbsp;trace=</span>
-                        <A
+                        <a
                           href={`/admin/logs?trace=${log["span.trace"] as string}`}
                           class="hover:underline mr-1"
                           title={log["span.trace"] as string}
                         >
                           [...]
-                        </A>
+                        </a>
                       </>
                     )}
                     <span class="opacity-60 italic">&nbsp;at=</span>

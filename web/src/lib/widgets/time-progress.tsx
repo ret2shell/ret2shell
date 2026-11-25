@@ -1,7 +1,8 @@
 import { Progress } from "@ark-ui/solid";
+import type { ComponentProps } from "@solidjs/web";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { type ComponentProps, createEffect, createSignal, onCleanup, splitProps, untrack } from "solid-js";
+import { createSignal, createTrackedEffect, omit, onCleanup, untrack } from "solid-js";
 import type { ProgressProps } from "./progress";
 
 export default function TimeProgress(
@@ -12,19 +13,17 @@ export default function TimeProgress(
   } & ProgressProps &
     ComponentProps<"div">
 ) {
-  const [progressProps, nativeProps] = splitProps(props, ["startAt", "endAt", "static"]);
+  const nativeProps = omit(props, "startAt", "endAt", "static");
   const [timeouted, setTimeouted] = createSignal(false);
   const [now, setNow] = createSignal(DateTime.now());
   const interval = setInterval(() => {
     setNow(DateTime.now());
   }, 1000);
   const progress = () => {
-    if (progressProps.startAt.diff(progressProps.endAt).milliseconds >= 0) {
+    if (props.startAt.diff(props.endAt).milliseconds >= 0) {
       return 0;
     }
-    const result =
-      (progressProps.startAt.diff(now()).milliseconds / progressProps.startAt.diff(progressProps.endAt).milliseconds) *
-      100;
+    const result = (props.startAt.diff(now()).milliseconds / props.startAt.diff(props.endAt).milliseconds) * 100;
     if (result > 100) {
       return 100;
     }
@@ -35,16 +34,16 @@ export default function TimeProgress(
   };
   const cleanup = () => clearInterval(interval);
   onCleanup(cleanup);
-  createEffect(() => {
-    if (now() > progressProps.endAt && !timeouted()) {
+  createTrackedEffect(() => {
+    if (now() > props.endAt && !timeouted()) {
       untrack(() => {
         setTimeouted(true);
         props.onTimeout?.();
       });
     }
   });
-  createEffect(() => {
-    if (progressProps.endAt > DateTime.now()) {
+  createTrackedEffect(() => {
+    if (props.endAt > DateTime.now()) {
       untrack(() => {
         setTimeouted(false);
       });

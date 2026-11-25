@@ -1,0 +1,48 @@
+diff --git a/dist/bindable.mjs b/dist/bindable.mjs
+index ee099dbe9d4ac9f5e914fdcd0416032f5cf59e70..ee685e3448e9502c645445690955d5e244495ff9 100644
+--- a/dist/bindable.mjs
++++ b/dist/bindable.mjs
+@@ -1,6 +1,6 @@
+ // src/bindable.ts
+ import { isFunction } from "@zag-js/utils";
+-import { createEffect, createMemo, createSignal, onCleanup } from "solid-js";
++import { createEffect, createMemo, createSignal, onCleanup } from "#solid-compat";
+ function createBindable(props) {
+   const initial = props().value ?? props().defaultValue;
+   const eq = props().isEqual ?? Object.is;
+diff --git a/dist/machine.mjs b/dist/machine.mjs
+index 0c83d38dc1e1156111b5772009cad56d7ad5b205..276b01651f38c7ed818863fedc2d29131737959b 100644
+--- a/dist/machine.mjs
++++ b/dist/machine.mjs
+@@ -13,7 +13,7 @@ import {
+   watchEffect
+ } from "@zag-js/core";
+ import { compact, ensure, isEqual, isFunction, isString, noop, toArray, warn } from "@zag-js/utils";
+-import { createMemo, mergeProps, onCleanup, onMount, untrack } from "solid-js";
++import { createMemo, mergeProps, onCleanup, onMount, untrack } from "#solid-compat";
+ import { createBindable } from "./bindable.mjs";
+ import { createRefs } from "./refs.mjs";
+ import { createEffectSync, createTrack } from "./track.mjs";
+diff --git a/dist/track.mjs b/dist/track.mjs
+index 02d6a0fdfb2ca0d5e583b393742326cee9944e18..c6dcb94abe5c5e7d543c36bcf8859ba9360bff95 100644
+--- a/dist/track.mjs
++++ b/dist/track.mjs
+@@ -1,6 +1,6 @@
+ // src/track.ts
+ import { isEqual, isFunction } from "@zag-js/utils";
+-import { createEffect, createSignal } from "solid-js";
++import { createEffect, createSignal } from "#solid-compat";
+ function access(v) {
+   if (isFunction(v)) return v();
+   return v;
+diff --git a/dist/use-sync-external-store.mjs b/dist/use-sync-external-store.mjs
+index a428a60e7e1973cd2b5723627d7a69edec1b4563..2760547d405d73694daae6a8c3834c34820bc0ec 100644
+--- a/dist/use-sync-external-store.mjs
++++ b/dist/use-sync-external-store.mjs
+@@ -1,5 +1,5 @@
+ // src/use-sync-external-store.ts
+-import { createSignal, onCleanup, onMount } from "solid-js";
++import { createSignal, onCleanup, onMount } from "#solid-compat";
+ function useSyncExternalStore(subscribe, getSnapshot, _getServerSnapshot) {
+   const [snapshot, setSnapshot] = createSignal(getSnapshot());
+   onMount(() => {

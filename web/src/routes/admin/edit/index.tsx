@@ -9,7 +9,7 @@ import Button from "@widgets/button";
 import Input from "@widgets/input";
 import Select from "@widgets/select";
 import { DateTime } from "luxon";
-import { createEffect, untrack } from "solid-js";
+import { createTrackedEffect, untrack } from "solid-js";
 
 type PlatformConfigForm = {
   name?: string;
@@ -61,7 +61,7 @@ export default function () {
     } as Config;
     mutation.mutate(mergedConfig);
   }
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (config.data)
       untrack(() => {
         setValues(form, {

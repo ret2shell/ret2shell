@@ -1,7 +1,6 @@
 import type { PlatformLicense } from "@api/platform";
 import { makePersisted } from "@solid-primitives/storage";
-import { createRoot } from "solid-js";
-import { createStore, type StoreReturn } from "solid-js/store";
+import { createRoot, createStore } from "solid-js";
 
 export const frontendCompatVersion = import.meta.env.VITE_COMPAT_VERSION as string;
 
@@ -17,7 +16,7 @@ type PlatformStoreShape = {
 };
 
 const platformRoot = createRoot(() =>
-  makePersisted<PlatformStoreShape, StoreReturn<PlatformStoreShape>>(
+  makePersisted(
     createStore<PlatformStoreShape>({
       version: `${frontendCompatVersion}-UNKNOWN-0.0.0`,
       accept_cookies: false,

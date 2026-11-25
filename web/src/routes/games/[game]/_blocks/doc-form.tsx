@@ -4,7 +4,7 @@ import { createForm, setValues } from "@modular-forms/solid";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Editor from "@widgets/editor";
-import { createEffect, createMemo, createSignal, untrack } from "solid-js";
+import { createMemo, createSignal, createTrackedEffect, untrack } from "solid-js";
 
 type GameDocFormValues = {
   content: string;
@@ -39,7 +39,7 @@ export default function GameDocForm(props: {
     },
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     untrack(() => {
       setValues(form, {
         content: doc.data ?? "",

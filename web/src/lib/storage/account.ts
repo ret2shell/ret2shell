@@ -1,8 +1,7 @@
 import type { Permission, Token } from "@models/user";
 import { base64urlnopad } from "@scure/base";
 import { makePersisted } from "@solid-primitives/storage";
-import { createRoot } from "solid-js";
-import { createStore, type StoreReturn } from "solid-js/store";
+import { createRoot, createStore } from "solid-js";
 
 type AccountStoreShape = {
   id: number | null;
@@ -14,7 +13,7 @@ type AccountStoreShape = {
 };
 
 const accountRoot = createRoot(() =>
-  makePersisted<AccountStoreShape, StoreReturn<AccountStoreShape>>(
+  makePersisted(
     createStore<AccountStoreShape>({
       id: null,
       account: null,
@@ -33,22 +32,22 @@ export const setAccountStore = accountRoot[1];
 export function storeToken(token: string) {
   const tokenRaw = new TextDecoder().decode(base64urlnopad.decode(token.split(".")[1]));
   const tokenJson = JSON.parse(tokenRaw) as Token;
-  setAccountStore({
-    id: tokenJson.id,
-    account: tokenJson.account,
-    nickname: tokenJson.nickname,
-    token,
-    permissions: tokenJson.permissions,
+  setAccountStore((s) => {
+    s.id = tokenJson.id;
+    s.account = tokenJson.account;
+    s.nickname = tokenJson.nickname;
+    s.token = token;
+    s.permissions = tokenJson.permissions;
   });
 }
 
 export function resetUser() {
-  setAccountStore({
-    id: null,
-    account: null,
-    nickname: null,
-    token: null,
-    permissions: [],
-    warnedCodeGeneration: false,
+  setAccountStore((s) => {
+    s.id = null;
+    s.account = null;
+    s.nickname = null;
+    s.token = null;
+    s.permissions = [];
+    s.warnedCodeGeneration = false;
   });
 }

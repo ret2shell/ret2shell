@@ -1,386 +1,389 @@
+import { defineRoutes } from "@solidjs/router";
 import { lazy } from "solid-js";
 
-export const routes = {
-  path: "/",
-  component: lazy(() => import("./layout")),
-  children: [
-    {
-      path: "/",
-      component: lazy(() => import("./index")),
-    },
-    {
-      path: "/account",
-      component: lazy(() => import("./account/layout")),
-      children: [
-        {
-          path: "/",
-          component: lazy(() => import("./account/index")),
-        },
-        {
-          path: "/login",
-          component: lazy(() => import("./account/login/index")),
-        },
-        {
-          path: "/register",
-          component: lazy(() => import("./account/register/index")),
-        },
-        {
-          path: "/forgot",
-          component: lazy(() => import("./account/forgot/index")),
-        },
-        {
-          path: "/reset",
-          component: lazy(() => import("./account/reset/index")),
-        },
-        {
-          path: "/oauth",
-          component: lazy(() => import("./account/oauth/index")),
-        },
-        {
-          path: "/verify",
-          component: lazy(() => import("./account/verify/index")),
-        },
-        {
-          path: "/settings",
-          component: lazy(() => import("./account/settings/layout")),
-          children: [
-            {
-              path: "/",
-              component: lazy(() => import("./account/settings/index")),
-            },
-            {
-              path: "/info",
-              component: lazy(() => import("./account/settings/info/index")),
-            },
-            {
-              path: "/password",
-              component: lazy(() => import("./account/settings/password/index")),
-            },
-            {
-              path: "/passkey",
-              component: lazy(() => import("./account/settings/passkey/index")),
-            },
-            {
-              path: "/oauth",
-              component: lazy(() => import("./account/settings/oauth/index")),
-            },
-            {
-              path: "/mov-esp-ebp-pop-ebp",
-              component: lazy(() => import("./account/settings/mov-esp-ebp-pop-ebp/index")),
-            },
-          ],
-        },
-      ],
-    },
-    {
-      path: "/wiki",
-      component: lazy(() => import("./wiki/layout")),
-      children: [
-        {
-          path: "/",
-          component: lazy(() => import("./wiki/index")),
-        },
-        {
-          path: "/create",
-          component: lazy(() => import("./wiki/create/index")),
-        },
-        {
-          path: "/:article",
-          component: lazy(() => import("./wiki/[article]/index")),
-        },
-      ],
-    },
-    {
-      path: "/training",
-      component: lazy(() => import("./training/layout")),
-      children: [
-        {
-          path: "/",
-          component: lazy(() => import("./training/index")),
-        },
-        {
-          path: "/:game",
-          component: lazy(() => import("./training/[game]/index")),
-        },
-      ],
-    },
-    {
-      path: "/games",
-      component: lazy(() => import("./games/layout")),
-      children: [
-        {
-          path: "/",
-          component: lazy(() => import("./games/index")),
-        },
-        {
-          path: "/:game",
-          component: lazy(() => import("./games/[game]/layout")),
-          children: [
-            {
-              path: "/",
-              component: lazy(() => import("./games/[game]/index")),
-            },
-            {
-              path: "/admin",
-              component: lazy(() => import("./games/[game]/admin/layout")),
-              children: [
-                {
-                  path: "/",
-                  component: lazy(() => import("./games/[game]/admin/index")),
-                },
-                {
-                  path: "/statistics",
-                  component: lazy(() => import("./games/[game]/admin/statistics/index")),
-                },
-                {
-                  path: "/edit",
-                  component: lazy(() => import("./games/[game]/admin/edit/index")),
-                },
-                {
-                  path: "/rules",
-                  component: lazy(() => import("./games/[game]/admin/rules/index")),
-                },
-                {
-                  path: "/policies",
-                  component: lazy(() => import("./games/[game]/admin/policies/index")),
-                },
-                {
-                  path: "/organize",
-                  component: lazy(() => import("./games/[game]/admin/organize/index")),
-                },
-                {
-                  path: "/hammers",
-                  component: lazy(() => import("./games/[game]/admin/hammers/index")),
-                },
-                {
-                  path: "/teams",
-                  component: lazy(() => import("./games/[game]/admin/teams/index")),
-                },
-                {
-                  path: "/monitor",
-                  component: lazy(() => import("./games/[game]/admin/monitor/index")),
-                },
-                {
-                  path: "/events",
-                  component: lazy(() => import("./games/[game]/admin/events/index")),
-                },
-                {
-                  path: "/git",
-                  component: lazy(() => import("./games/[game]/admin/git/index")),
-                },
-                {
-                  path: "/traffic",
-                  component: lazy(() => import("./games/[game]/admin/traffic/index")),
-                },
-                {
-                  path: "/lifecycle",
-                  component: lazy(() => import("./games/[game]/admin/lifecycle/index")),
-                },
-                {
-                  path: "/captures",
-                  component: lazy(() => import("./games/[game]/admin/captures/index")),
-                },
-                {
-                  path: "/timeline",
-                  component: lazy(() => import("./games/[game]/admin/timeline/index")),
-                },
-                {
-                  path: "/delete",
-                  component: lazy(() => import("./games/[game]/admin/delete/index")),
-                },
-              ],
-            },
-            {
-              path: "/scoreboard",
-              component: lazy(() => import("./games/[game]/scoreboard/index")),
-            },
-            {
-              path: "/challenges",
-              component: lazy(() => import("./games/[game]/challenges/index")),
-            },
-            {
-              path: "/teams",
-              component: lazy(() => import("./games/[game]/teams/layout")),
-              children: [
-                {
-                  path: "/",
-                  component: lazy(() => import("./games/[game]/teams/index")),
-                },
-                {
-                  path: "/:team",
-                  component: lazy(() => import("./games/[game]/teams/[team]/index")),
-                },
-                {
-                  path: "/create",
-                  component: lazy(() => import("./games/[game]/teams/create/index")),
-                },
-                {
-                  path: "/join",
-                  component: lazy(() => import("./games/[game]/teams/join/index")),
-                },
-                {
-                  path: "/choose",
-                  component: lazy(() => import("./games/[game]/teams/choose/index")),
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      path: "/bulletin",
-      component: lazy(() => import("./bulletin/layout")),
-      children: [
-        {
-          path: "/",
-          component: lazy(() => import("./bulletin/index")),
-        },
-        {
-          path: "/create",
-          component: lazy(() => import("./bulletin/create")),
-        },
-        {
-          path: "/:article",
-          component: lazy(() => import("./bulletin/[article]/index")),
-        },
-      ],
-    },
-    {
-      path: "/admin",
-      component: lazy(() => import("./admin/layout")),
-      children: [
-        {
-          path: "/",
-          component: lazy(() => import("./admin/index")),
-        },
-        {
-          path: "/users",
-          component: lazy(() => import("./admin/users/index")),
-        },
-        {
-          path: "/statistics",
-          component: lazy(() => import("./admin/statistics/index")),
-        },
-        {
-          path: "/captcha",
-          component: lazy(() => import("./admin/captcha/index")),
-        },
-        {
-          path: "/email",
-          component: lazy(() => import("./admin/email/index")),
-        },
-        {
-          path: "/edit",
-          component: lazy(() => import("./admin/edit/index")),
-        },
-        {
-          path: "/logs",
-          component: lazy(() => import("./admin/logs/index")),
-        },
-        {
-          path: "/cluster",
-          component: lazy(() => import("./admin/cluster/index")),
-        },
-        {
-          path: "/sync",
-          component: lazy(() => import("./admin/sync/index")),
-        },
-        {
-          path: "/media",
-          component: lazy(() => import("./admin/media/index")),
-        },
-        {
-          path: "/oauth",
-          component: lazy(() => import("./admin/oauth/index")),
-        },
-        {
-          path: "/traffic",
-          component: lazy(() => import("./admin/traffic/index")),
-        },
-        {
-          path: "/lifecycle",
-          component: lazy(() => import("./admin/lifecycle/index")),
-        },
-      ],
-    },
-    {
-      path: "/license",
-      component: lazy(() => import("./admin/license/index")),
-    },
-    {
-      path: "/users",
-      component: lazy(() => import("./users/layout")),
-      children: [
-        {
-          path: "/",
-          component: lazy(() => import("./users/index")),
-        },
-        {
-          path: "/:user",
-          component: lazy(() => import("./users/[user]/index")),
-        },
-      ],
-    },
-    {
-      path: "/magic",
-      component: lazy(() => import("./magic/layout")),
-      children: [
-        {
-          path: "/",
-          component: lazy(() => import("./magic/index")),
-        },
-        {
-          path: "/sakana",
-          component: lazy(() => import("./magic/sakana/index")),
-        },
-        {
-          path: "/about",
-          component: lazy(() => import("./magic/about/index")),
-        },
-      ],
-    },
-    {
-      path: "/sigtrap",
-      component: lazy(() => import("./sigtrap/layout")),
-      children: [
-        {
-          path: "/401",
-          component: lazy(() => import("./sigtrap/e401")),
-        },
-        {
-          path: "/403",
-          component: lazy(() => import("./sigtrap/e403")),
-        },
-        {
-          path: "/404",
-          component: lazy(() => import("./sigtrap/e404")),
-        },
-        {
-          path: "/412",
-          component: lazy(() => import("./sigtrap/e412")),
-        },
-        {
-          path: "/418",
-          component: lazy(() => import("./sigtrap/e418")),
-        },
-        {
-          path: "/500",
-          component: lazy(() => import("./sigtrap/e500")),
-        },
-        {
-          path: "/502",
-          component: lazy(() => import("./sigtrap/e502")),
-        },
-        {
-          path: "/unknown",
-          component: lazy(() => import("./sigtrap/unknown")),
-        },
-      ],
-    },
-    {
-      path: "*",
-      component: lazy(() => import("./sigtrap/e404")),
-    },
-  ],
-};
+export const routes = defineRoutes([
+  {
+    path: "/",
+    component: lazy(() => import("./layout")),
+    children: [
+      {
+        path: "/",
+        component: lazy(() => import("./index")),
+      },
+      {
+        path: "/account",
+        component: lazy(() => import("./account/layout")),
+        children: [
+          {
+            path: "/",
+            component: lazy(() => import("./account/index")),
+          },
+          {
+            path: "/login",
+            component: lazy(() => import("./account/login/index")),
+          },
+          {
+            path: "/register",
+            component: lazy(() => import("./account/register/index")),
+          },
+          {
+            path: "/forgot",
+            component: lazy(() => import("./account/forgot/index")),
+          },
+          {
+            path: "/reset",
+            component: lazy(() => import("./account/reset/index")),
+          },
+          {
+            path: "/oauth",
+            component: lazy(() => import("./account/oauth/index")),
+          },
+          {
+            path: "/verify",
+            component: lazy(() => import("./account/verify/index")),
+          },
+          {
+            path: "/settings",
+            component: lazy(() => import("./account/settings/layout")),
+            children: [
+              {
+                path: "/",
+                component: lazy(() => import("./account/settings/index")),
+              },
+              {
+                path: "/info",
+                component: lazy(() => import("./account/settings/info/index")),
+              },
+              {
+                path: "/password",
+                component: lazy(() => import("./account/settings/password/index")),
+              },
+              {
+                path: "/passkey",
+                component: lazy(() => import("./account/settings/passkey/index")),
+              },
+              {
+                path: "/oauth",
+                component: lazy(() => import("./account/settings/oauth/index")),
+              },
+              {
+                path: "/mov-esp-ebp-pop-ebp",
+                component: lazy(() => import("./account/settings/mov-esp-ebp-pop-ebp/index")),
+              },
+            ],
+          },
+        ],
+      },
+      {
+        path: "/wiki",
+        component: lazy(() => import("./wiki/layout")),
+        children: [
+          {
+            path: "/",
+            component: lazy(() => import("./wiki/index")),
+          },
+          {
+            path: "/create",
+            component: lazy(() => import("./wiki/create/index")),
+          },
+          {
+            path: "/:article",
+            component: lazy(() => import("./wiki/[article]/index")),
+          },
+        ],
+      },
+      {
+        path: "/training",
+        component: lazy(() => import("./training/layout")),
+        children: [
+          {
+            path: "/",
+            component: lazy(() => import("./training/index")),
+          },
+          {
+            path: "/:game",
+            component: lazy(() => import("./training/[game]/index")),
+          },
+        ],
+      },
+      {
+        path: "/games",
+        component: lazy(() => import("./games/layout")),
+        children: [
+          {
+            path: "/",
+            component: lazy(() => import("./games/index")),
+          },
+          {
+            path: "/:game",
+            component: lazy(() => import("./games/[game]/layout")),
+            children: [
+              {
+                path: "/",
+                component: lazy(() => import("./games/[game]/index")),
+              },
+              {
+                path: "/admin",
+                component: lazy(() => import("./games/[game]/admin/layout")),
+                children: [
+                  {
+                    path: "/",
+                    component: lazy(() => import("./games/[game]/admin/index")),
+                  },
+                  {
+                    path: "/statistics",
+                    component: lazy(() => import("./games/[game]/admin/statistics/index")),
+                  },
+                  {
+                    path: "/edit",
+                    component: lazy(() => import("./games/[game]/admin/edit/index")),
+                  },
+                  {
+                    path: "/rules",
+                    component: lazy(() => import("./games/[game]/admin/rules/index")),
+                  },
+                  {
+                    path: "/policies",
+                    component: lazy(() => import("./games/[game]/admin/policies/index")),
+                  },
+                  {
+                    path: "/organize",
+                    component: lazy(() => import("./games/[game]/admin/organize/index")),
+                  },
+                  {
+                    path: "/hammers",
+                    component: lazy(() => import("./games/[game]/admin/hammers/index")),
+                  },
+                  {
+                    path: "/teams",
+                    component: lazy(() => import("./games/[game]/admin/teams/index")),
+                  },
+                  {
+                    path: "/monitor",
+                    component: lazy(() => import("./games/[game]/admin/monitor/index")),
+                  },
+                  {
+                    path: "/events",
+                    component: lazy(() => import("./games/[game]/admin/events/index")),
+                  },
+                  {
+                    path: "/git",
+                    component: lazy(() => import("./games/[game]/admin/git/index")),
+                  },
+                  {
+                    path: "/traffic",
+                    component: lazy(() => import("./games/[game]/admin/traffic/index")),
+                  },
+                  {
+                    path: "/lifecycle",
+                    component: lazy(() => import("./games/[game]/admin/lifecycle/index")),
+                  },
+                  {
+                    path: "/captures",
+                    component: lazy(() => import("./games/[game]/admin/captures/index")),
+                  },
+                  {
+                    path: "/timeline",
+                    component: lazy(() => import("./games/[game]/admin/timeline/index")),
+                  },
+                  {
+                    path: "/delete",
+                    component: lazy(() => import("./games/[game]/admin/delete/index")),
+                  },
+                ],
+              },
+              {
+                path: "/scoreboard",
+                component: lazy(() => import("./games/[game]/scoreboard/index")),
+              },
+              {
+                path: "/challenges",
+                component: lazy(() => import("./games/[game]/challenges/index")),
+              },
+              {
+                path: "/teams",
+                component: lazy(() => import("./games/[game]/teams/layout")),
+                children: [
+                  {
+                    path: "/",
+                    component: lazy(() => import("./games/[game]/teams/index")),
+                  },
+                  {
+                    path: "/:team",
+                    component: lazy(() => import("./games/[game]/teams/[team]/index")),
+                  },
+                  {
+                    path: "/create",
+                    component: lazy(() => import("./games/[game]/teams/create/index")),
+                  },
+                  {
+                    path: "/join",
+                    component: lazy(() => import("./games/[game]/teams/join/index")),
+                  },
+                  {
+                    path: "/choose",
+                    component: lazy(() => import("./games/[game]/teams/choose/index")),
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        path: "/bulletin",
+        component: lazy(() => import("./bulletin/layout")),
+        children: [
+          {
+            path: "/",
+            component: lazy(() => import("./bulletin/index")),
+          },
+          {
+            path: "/create",
+            component: lazy(() => import("./bulletin/create")),
+          },
+          {
+            path: "/:article",
+            component: lazy(() => import("./bulletin/[article]/index")),
+          },
+        ],
+      },
+      {
+        path: "/admin",
+        component: lazy(() => import("./admin/layout")),
+        children: [
+          {
+            path: "/",
+            component: lazy(() => import("./admin/index")),
+          },
+          {
+            path: "/users",
+            component: lazy(() => import("./admin/users/index")),
+          },
+          {
+            path: "/statistics",
+            component: lazy(() => import("./admin/statistics/index")),
+          },
+          {
+            path: "/captcha",
+            component: lazy(() => import("./admin/captcha/index")),
+          },
+          {
+            path: "/email",
+            component: lazy(() => import("./admin/email/index")),
+          },
+          {
+            path: "/edit",
+            component: lazy(() => import("./admin/edit/index")),
+          },
+          {
+            path: "/logs",
+            component: lazy(() => import("./admin/logs/index")),
+          },
+          {
+            path: "/cluster",
+            component: lazy(() => import("./admin/cluster/index")),
+          },
+          {
+            path: "/sync",
+            component: lazy(() => import("./admin/sync/index")),
+          },
+          {
+            path: "/media",
+            component: lazy(() => import("./admin/media/index")),
+          },
+          {
+            path: "/oauth",
+            component: lazy(() => import("./admin/oauth/index")),
+          },
+          {
+            path: "/traffic",
+            component: lazy(() => import("./admin/traffic/index")),
+          },
+          {
+            path: "/lifecycle",
+            component: lazy(() => import("./admin/lifecycle/index")),
+          },
+        ],
+      },
+      {
+        path: "/license",
+        component: lazy(() => import("./admin/license/index")),
+      },
+      {
+        path: "/users",
+        component: lazy(() => import("./users/layout")),
+        children: [
+          {
+            path: "/",
+            component: lazy(() => import("./users/index")),
+          },
+          {
+            path: "/:user",
+            component: lazy(() => import("./users/[user]/index")),
+          },
+        ],
+      },
+      {
+        path: "/magic",
+        component: lazy(() => import("./magic/layout")),
+        children: [
+          {
+            path: "/",
+            component: lazy(() => import("./magic/index")),
+          },
+          {
+            path: "/sakana",
+            component: lazy(() => import("./magic/sakana/index")),
+          },
+          {
+            path: "/about",
+            component: lazy(() => import("./magic/about/index")),
+          },
+        ],
+      },
+      {
+        path: "/sigtrap",
+        component: lazy(() => import("./sigtrap/layout")),
+        children: [
+          {
+            path: "/401",
+            component: lazy(() => import("./sigtrap/e401")),
+          },
+          {
+            path: "/403",
+            component: lazy(() => import("./sigtrap/e403")),
+          },
+          {
+            path: "/404",
+            component: lazy(() => import("./sigtrap/e404")),
+          },
+          {
+            path: "/412",
+            component: lazy(() => import("./sigtrap/e412")),
+          },
+          {
+            path: "/418",
+            component: lazy(() => import("./sigtrap/e418")),
+          },
+          {
+            path: "/500",
+            component: lazy(() => import("./sigtrap/e500")),
+          },
+          {
+            path: "/502",
+            component: lazy(() => import("./sigtrap/e502")),
+          },
+          {
+            path: "/unknown",
+            component: lazy(() => import("./sigtrap/unknown")),
+          },
+        ],
+      },
+      {
+        path: "*",
+        component: lazy(() => import("./sigtrap/e404")),
+      },
+    ],
+  },
+]);

@@ -1,0 +1,12 @@
+diff --git a/dist/index.js b/dist/index.js
+index abf251dc9956ec5773374ae8b34face99eefd6c8..5c157fc7cca3a4ed671938d6e61d74237f0a0dcb 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -1,5 +1,5 @@
+-import { createMemo, createRoot, createSignal, on, onCleanup, untrack, $TRACK, mapArray, } from "solid-js";
+-import { isServer } from "solid-js/web";
++import { createMemo, createRoot, createSignal, on, onCleanup, untrack, $TRACK, mapArray, } from "#solid-compat";
++import { isServer } from "#solid-web-compat";
+ const FALLBACK = Symbol("fallback");
+ function dispose(list) {
+     for (const o of list)

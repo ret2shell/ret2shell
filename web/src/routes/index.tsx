@@ -8,7 +8,7 @@ import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Link from "@widgets/link";
 import Popover from "@widgets/popover";
-import { createEffect, onMount, Show } from "solid-js";
+import { createTrackedEffect, onSettled, Show } from "solid-js";
 // import Calendar from "./calendar";
 
 export default function () {
@@ -16,7 +16,7 @@ export default function () {
   const [searchParams] = useSearchParams();
   let calendarSection: HTMLElement;
   const navigate = useNavigate();
-  onMount(() => {
+  onSettled(() => {
     if (searchParams.event) {
       try {
         const result = Number.parseInt(searchParams.event as string, 10);
@@ -31,7 +31,7 @@ export default function () {
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (platformInfo.data?.zen_game) {
       navigate(`/games/${platformInfo.data.zen_game}`);
     }

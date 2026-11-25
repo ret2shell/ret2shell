@@ -8,7 +8,7 @@ import Card from "@widgets/card";
 import Checkbox from "@widgets/checkbox";
 import Select from "@widgets/select";
 import Slider from "@widgets/slider";
-import { createEffect, Show, untrack } from "solid-js";
+import { createTrackedEffect, Show, untrack } from "solid-js";
 
 export default function () {
   const config = usePlatformConfig();
@@ -25,7 +25,7 @@ export default function () {
     },
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (config.data)
       untrack(() => {
         setValues(

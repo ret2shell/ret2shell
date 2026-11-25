@@ -7,7 +7,7 @@ import Article from "@widgets/article";
 import Button from "@widgets/button";
 import { EditorBare } from "@widgets/editor";
 import LoadingTips from "@widgets/loading-tips";
-import { createSignal, Show, Suspense } from "solid-js";
+import { createSignal, Loading, Show } from "solid-js";
 import type { ChallengeWidgetProps } from ".";
 
 export default function (props: ChallengeWidgetProps) {
@@ -80,7 +80,7 @@ export default function (props: ChallengeWidgetProps) {
           />
         }
       >
-        <Suspense
+        <Loading
           fallback={
             <article class="article max-w-5xl! w-full">
               <p>
@@ -90,7 +90,7 @@ export default function (props: ChallengeWidgetProps) {
           }
         >
           <Article content={answerQuery.data || ""} extra />
-        </Suspense>
+        </Loading>
       </Show>
     </div>
   );

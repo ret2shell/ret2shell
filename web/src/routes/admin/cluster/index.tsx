@@ -8,7 +8,7 @@ import LoadingTips from "@widgets/loading-tips";
 import clsx from "clsx";
 import type { Node } from "kubernetes-types/core/v1";
 import { DateTime } from "luxon";
-import { createEffect, createSignal, For, Match, Show, Switch, untrack } from "solid-js";
+import { createSignal, createTrackedEffect, For, Match, Show, Switch, untrack } from "solid-js";
 
 export default function () {
   const [since, setSince] = createSignal("");
@@ -18,7 +18,7 @@ export default function () {
   const config = useClusterConfig();
   const nodes = useClusterNodes();
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (config.data) {
       untrack(() => {
         for (const c of config.data.items) {

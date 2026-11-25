@@ -1,6 +1,7 @@
 import Spin from "@assets/animates/spin";
+import type { ComponentProps, JSX } from "@solidjs/web";
 import clsx from "clsx";
-import { type ComponentProps, type JSX, Show, splitProps } from "solid-js";
+import { omit, Show } from "solid-js";
 
 export type ButtonProps = ComponentProps<"button"> & {
   active?: boolean;
@@ -15,7 +16,8 @@ export type ButtonProps = ComponentProps<"button"> & {
 };
 
 export default function (props: ButtonProps & { children?: JSX.Element }) {
-  const [buttonProps, _1] = splitProps(props, [
+  const nativeProps = omit(
+    props,
     "active",
     "level",
     "size",
@@ -25,10 +27,10 @@ export default function (props: ButtonProps & { children?: JSX.Element }) {
     "uppercase",
     "loading",
     "square",
-  ]);
-  const [children, nativeProps] = splitProps(_1, ["children"]);
+    "children"
+  );
 
-  const size = buttonProps.size === "sm" ? 16 : 20;
+  const size = props.size === "sm" ? 16 : 20;
 
   return (
     <button
@@ -36,25 +38,24 @@ export default function (props: ButtonProps & { children?: JSX.Element }) {
       class={clsx(
         "btn",
         // btn-primary btn-info btn-success btn-warning btn-error
-        !!buttonProps.level && `btn-${buttonProps.level}`,
+        !!props.level && `btn-${props.level}`,
         // btn-sm btn-md btn-xs
-        buttonProps.ghost && "btn-ghost",
-        buttonProps.bold && "btn-bold",
+        props.ghost && "btn-ghost",
+        props.bold && "btn-bold",
         // justify-start justify-center justify-end
-        (buttonProps.justify && `justify-${buttonProps.justify}`) ?? "justify-center",
-        (buttonProps.size && `btn-${buttonProps.size}`) ?? "btn-md",
-        buttonProps.uppercase && "uppercase",
-        buttonProps.square && "btn-square",
+        (props.justify && `justify-${props.justify}`) ?? "justify-center",
+        (props.size && `btn-${props.size}`) ?? "btn-md",
+        props.uppercase && "uppercase",
+        props.square && "btn-square",
         nativeProps.disabled && "btn-disabled",
         nativeProps.class,
-        nativeProps.classList,
-        buttonProps.active && "btn-active"
+        props.active && "btn-active"
       )}
     >
       <Show when={props.loading}>
         <Spin width={size} height={size} />
       </Show>
-      {children.children}
+      {props.children}
     </button>
   );
 }

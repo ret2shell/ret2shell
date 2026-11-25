@@ -14,7 +14,7 @@ import { type DiagnosticMarker, EditorBare } from "@widgets/editor";
 import Input from "@widgets/input";
 import Popover from "@widgets/popover";
 import Select from "@widgets/select";
-import { createEffect, createSignal, Show } from "solid-js";
+import { createSignal, createTrackedEffect, Show } from "solid-js";
 import multiNodeDirect from "./scripts/multi_node_direct.rx";
 import singleNodeDirect from "./scripts/single_node_direct.rx";
 
@@ -32,13 +32,13 @@ export default function Traffic() {
   const [nodeSelector, setNodeSelector] = createSignal("");
   const [lint, setLint] = createSignal([] as DiagnosticMarker[]);
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (preset()) {
       setScript(trafficMap[preset()!]);
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (config.data?.cluster) {
       setScript(config.data.cluster.traffic || "");
       setNodeSelector(config.data.cluster.node_selector || "");

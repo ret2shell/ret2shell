@@ -1,15 +1,15 @@
 /* @refresh reload */
-import { render } from "solid-js/web";
+import { render } from "@solidjs/web";
 import { routes } from "./routes/routes";
 import "overlayscrollbars/overlayscrollbars.css";
 import "@widgets/styles/base.css";
 import { inflyClient } from "@api";
-import { Router } from "@solidjs/router";
+import { createRouter } from "@solidjs/router";
 import { fullTheme, initTheme, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import { QueryClientProvider } from "@tanstack/solid-query";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { ErrorBoundary, onMount } from "solid-js";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
+import { Errored, onSettled } from "solid-js";
 
 function checkEdition() {
   const compact_edition: string = import.meta.env.VITE_COMPAT_EDITION as string;
@@ -93,18 +93,21 @@ function BoundarySection(props: { error: Error; reset: () => void }) {
   );
 }
 
+// `<A>` is gone in router 2: links are plain anchors, intercepted by delegation.
+const Router = createRouter({ routes });
+
 render(() => {
   checkEdition();
   initTheme();
   postUpdated();
-  onMount(() => {
+  onSettled(() => {
     setTimeout(() => {
       document.documentElement.classList.add("transition-colors", "duration-700");
       document.body.classList.add("transition-colors", "duration-700");
     }, 1000);
   });
   return (
-    <ErrorBoundary fallback={(error, reset) => <BoundarySection error={error} reset={reset} />}>
+    <Errored fallback={(error, reset) => <BoundarySection error={error()} reset={reset} />}>
       <QueryClientProvider client={inflyClient}>
         <OverlayScrollbarsComponent
           options={{
@@ -116,11 +119,9 @@ render(() => {
           class="relative w-screen h-screen print:h-auto print:overflow-auto"
           defer
         >
-          <div class="flex flex-col min-h-full min-w-fit">
-            <Router explicitLinks>{routes}</Router>
-          </div>
+          <Router>{(props) => <div class="flex flex-col min-h-full min-w-fit">{props.children}</div>}</Router>
         </OverlayScrollbarsComponent>
       </QueryClientProvider>
-    </ErrorBoundary>
+    </Errored>
   );
 }, document.getElementById("root") || document.body);

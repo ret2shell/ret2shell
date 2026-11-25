@@ -1,5 +1,6 @@
+import type { ComponentProps } from "@solidjs/web";
 import clsx from "clsx";
-import { type ComponentProps, splitProps } from "solid-js";
+import { omit } from "solid-js";
 
 export interface CardProps {
   solid?: boolean;
@@ -8,20 +9,14 @@ export interface CardProps {
 }
 
 export default function (props: CardProps & ComponentProps<"div">) {
-  const [cardProps, nativeProps] = splitProps(props, ["solid", "contentClass", "level"]);
+  const nativeProps = omit(props, "solid", "contentClass", "level");
   // card-info card-success card-warning card-error
   return (
     <div
       {...nativeProps}
-      class={clsx(
-        "card",
-        cardProps.solid && "card-solid",
-        cardProps.level && `card-${cardProps.level}`,
-        nativeProps.class,
-        nativeProps.classList
-      )}
+      class={clsx("card", props.solid && "card-solid", props.level && `card-${props.level}`, nativeProps.class)}
     >
-      <div class={clsx("card-content", cardProps.contentClass)}>{nativeProps.children}</div>
+      <div class={clsx("card-content", props.contentClass)}>{nativeProps.children}</div>
     </div>
   );
 }

@@ -1,7 +1,8 @@
 import { createBreakpoints } from "@solid-primitives/media";
+import type { JSX } from "@solidjs/web";
 import { breakpoints } from "@storage/theme";
-import { type JSX, Show } from "solid-js";
-import { Transition } from "solid-transition-group";
+import { Transition } from "@widgets/transition";
+import { Show } from "solid-js";
 
 export type SidebarLayoutProps = {
   leftBar?: () => JSX.Element;

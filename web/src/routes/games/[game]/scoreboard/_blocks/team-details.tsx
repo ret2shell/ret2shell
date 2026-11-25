@@ -1,6 +1,6 @@
 import type { Challenge } from "@models/challenge";
 import type { Team } from "@models/team";
-import { A } from "@solidjs/router";
+
 import { t } from "@storage/theme";
 import Progress from "@widgets/progress";
 import { For, Match, Switch } from "solid-js";
@@ -25,9 +25,9 @@ function TeamDetail(props: { gameId: number; team: Team; challenges: Challenge[]
       </div>
       <div class="flex-1 flex flex-col justify-center space-y-1">
         <h2 class="font-bold flex flex-row text-lg">
-          <A class="hover:underline flex-1" href={`/games/${props.gameId}/teams/${props.team.id}`}>
+          <a class="hover:underline flex-1" href={`/games/${props.gameId}/teams/${props.team.id}`}>
             {props.team.name}
-          </A>
+          </a>
           <span>
             <span class="text-primary">{props.team.score}</span>&nbsp;
             <span class="opacity-60">pts</span>

@@ -5,10 +5,10 @@ import { fullTheme, t } from "@storage/theme";
 import Button from "@widgets/button";
 import Input from "@widgets/input";
 import LoadingTips from "@widgets/loading-tips";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
 import TreeView, { type TreeNode } from "@widgets/treeview";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { createMemo, createSignal, Match, Show, Switch } from "solid-js";
 import type { ChallengeWidgetProps } from ".";
 

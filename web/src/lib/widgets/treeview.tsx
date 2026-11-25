@@ -1,6 +1,7 @@
 import { useSearchParams } from "@solidjs/router";
+import type { JSX } from "@solidjs/web";
 import clsx from "clsx";
-import { createEffect, createSignal, For, type JSX, Show, untrack } from "solid-js";
+import { createSignal, createTrackedEffect, For, Show, untrack } from "solid-js";
 import Button from "./button";
 import Link from "./link";
 
@@ -35,7 +36,7 @@ export default function TreeView(props: TreeViewProps) {
   const [searchParams, _] = useSearchParams();
   const renderNode = (node: TreeNode, level = 0) => {
     const [showChildren, setShowChildren] = createSignal(false);
-    createEffect(() => {
+    createTrackedEffect(() => {
       if (props.highlightPaths) {
         untrack(() => {
           if (props.highlightPaths?.at(level) === node.id.toString()) {

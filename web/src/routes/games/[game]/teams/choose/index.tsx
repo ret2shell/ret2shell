@@ -1,4 +1,4 @@
-import { A, useParams } from "@solidjs/router";
+import { useParams } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import Card from "@widgets/card";
@@ -18,7 +18,9 @@ export default function Choose() {
             <p class="opacity-60">{t("team.create.tips")}</p>
           </div>
           <span class="icon-[fluent--chevron-double-right-20-regular] w-0 group-hover:w-10 h-10 shrink-0 transition-all" />
-          <A href={`/games/${gameId()}/teams/create`} class="absolute top-0 left-0 w-full h-full" />
+          <a href={`/games/${gameId()}/teams/create`} class="absolute top-0 left-0 w-full h-full">
+            <span class="sr-only">{t("team.create.title")}</span>
+          </a>
         </Card>
         <Card class="relative w-full max-w-xl group" contentClass="p-6 flex flex-row items-center space-x-4">
           <span class="icon-[fluent-emoji-flat--clinking-beer-mugs] w-10 h-10 shrink-0" />
@@ -27,7 +29,9 @@ export default function Choose() {
             <p class="opacity-60">{t("team.join.tips")}</p>
           </div>
           <span class="icon-[fluent--chevron-double-right-20-regular] w-0 group-hover:w-10 h-10 shrink-0 transition-all" />
-          <A href={`/games/${gameId()}/teams/join`} class="absolute top-0 left-0 w-full h-full" />
+          <a href={`/games/${gameId()}/teams/join`} class="absolute top-0 left-0 w-full h-full">
+            <span class="sr-only">{t("team.join.title")}</span>
+          </a>
         </Card>
       </div>
     </>

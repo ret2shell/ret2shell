@@ -1,9 +1,9 @@
-import { onMount } from "solid-js";
+import { onSettled } from "solid-js";
 
 export default function () {
   let svgPath1: SVGPathElement;
   let svgPath2: SVGPathElement;
-  onMount(() => {
+  onSettled(() => {
     setTimeout(() => {
       svgPath1!.classList.remove("draw-line");
       svgPath2!.classList.remove("draw-line");

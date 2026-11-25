@@ -38,13 +38,13 @@ describe("account storage", () => {
   });
 
   it("resetUser clears session data and warning flags", () => {
-    setAccountStore({
-      id: 7,
-      account: "builder",
-      nickname: "Bug Fixer",
-      token: "token",
-      permissions: [9],
-      warnedCodeGeneration: true,
+    setAccountStore((s) => {
+      s.id = 7;
+      s.account = "builder";
+      s.nickname = "Bug Fixer";
+      s.token = "token";
+      s.permissions = [9];
+      s.warnedCodeGeneration = true;
     });
 
     resetUser();

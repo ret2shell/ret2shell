@@ -17,7 +17,7 @@ import SidebarLayout from "@blocks/sidebar-layout";
 import type { Team } from "@models/team";
 import { clearError, createForm, maxLength, required, reset as resetForm, setValues } from "@modular-forms/solid";
 import { createBreakpoints } from "@solid-primitives/media";
-import { A, useNavigate, useParams } from "@solidjs/router";
+import { useNavigate, useParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { isAdminOfGame } from "@storage/game";
 import { Title } from "@storage/header";
@@ -29,11 +29,11 @@ import Clipboard from "@widgets/clipboard";
 import Input from "@widgets/input";
 import Popover from "@widgets/popover";
 import Select from "@widgets/select";
+import { Transition } from "@widgets/transition";
 import clsx from "clsx";
 import { HTTPError } from "ky";
 import { DateTime } from "luxon";
-import { createEffect, createMemo, createSignal, For, Show, untrack } from "solid-js";
-import { Transition } from "solid-transition-group";
+import { createMemo, createSignal, createTrackedEffect, For, Show, untrack } from "solid-js";
 import Sidebar from "./_blocks/sidebar";
 
 type TeamAdminUpdateForm = {
@@ -55,7 +55,7 @@ function AdminManagement(props: { gameId: number; team: Team | null; onDone?: (t
     },
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (props.team) {
       untrack(() => {
         setValues(form, {
@@ -271,7 +271,7 @@ function SelfManagement(props: { gameId: number; onDone?: (team: Team) => void; 
       institute_id: team.data?.institute_id?.toString() || "0",
     },
   });
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (team.data) {
       untrack(() => {
         setValues(form, {
@@ -763,7 +763,7 @@ export default function () {
                 }
               >
                 {(submission) => (
-                  <A
+                  <a
                     class="h-12 flex items-center border-b border-b-layer-content/10 hover:bg-layer-content/5 space-x-2"
                     href={`/games/${gameId()}/challenges?challenge=${submission.challenge_id}`}
                   >
@@ -776,7 +776,7 @@ export default function () {
                     </span>
                     <span class="text-success font-bold">{submission.score} pts</span>
                     <span class="opacity-60">{submission.created_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
-                  </A>
+                  </a>
                 )}
               </For>
             </section>

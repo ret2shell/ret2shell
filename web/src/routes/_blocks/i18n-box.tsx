@@ -38,8 +38,8 @@ export function I18nBoxContent() {
               title={t("platform.ret2codec.title")}
               justify="center"
               onClick={() => {
-                setPlatformStore({
-                  enable_ret2codec: !platformStore.enable_ret2codec,
+                setPlatformStore((s) => {
+                  s.enable_ret2codec = !s.enable_ret2codec;
                 });
               }}
             >

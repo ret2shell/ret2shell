@@ -17,7 +17,7 @@ import Input from "@widgets/input";
 import Link from "@widgets/link";
 import Popover from "@widgets/popover";
 import clsx from "clsx";
-import { createEffect, createMemo, createSignal, Show, untrack } from "solid-js";
+import { createMemo, createSignal, createTrackedEffect, Show, untrack } from "solid-js";
 
 type TeamCreateForm = {
   name: string;
@@ -47,7 +47,7 @@ export default function () {
     return null;
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!game.data) return;
     const reason = blockReason();
     if (!reason) return;
@@ -60,7 +60,7 @@ export default function () {
   });
 
   const [form, { Form, Field }] = createForm<TeamCreateForm>();
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (game.data?.team_size === 1) {
       untrack(() => {
         setValue(form, "name", accountStore.nickname!);
@@ -70,7 +70,9 @@ export default function () {
 
   const createTeamMutation = useCreateTeamMutation({
     onSuccess: () => {
-      setTeamCoverStore({ showTeamCover: true });
+      setTeamCoverStore((s) => {
+        s.showTeamCover = true;
+      });
       setTimeout(() => {
         navigate(`/games/${gameId()}`);
       }, 2000);

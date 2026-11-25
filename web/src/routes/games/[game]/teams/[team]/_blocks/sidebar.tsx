@@ -1,12 +1,12 @@
 import { mediaPath } from "@lib/utils/media";
 import type { Team } from "@models/team";
 import type { User } from "@models/user";
-import { A, useParams } from "@solidjs/router";
+import { useParams } from "@solidjs/router";
 import { fullTheme, t } from "@storage/theme";
 import Avatar from "@widgets/avatar";
 import Divider from "@widgets/divider";
 import LoadingTips from "@widgets/loading-tips";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
 import { For, Show } from "solid-js";
 
 export default function (props: { team: Team | null; members: User[]; loading?: boolean }) {
@@ -52,7 +52,7 @@ export default function (props: { team: Team | null; members: User[]; loading?: 
           <For each={props.members}>
             {(member) => (
               <>
-                <A
+                <a
                   class="px-2 py-2 flex items-center font-bold space-x-4 group cursor-pointer"
                   href={`/users/${member.id}?game=${gameId()}`}
                 >
@@ -67,7 +67,7 @@ export default function (props: { team: Team | null; members: User[]; loading?: 
                       {member.account}#{member.id.toString(16).padStart(6, "0")}
                     </span>
                   </span>
-                </A>
+                </a>
                 <Divider />
               </>
             )}

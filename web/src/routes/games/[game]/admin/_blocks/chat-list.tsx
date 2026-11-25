@@ -3,8 +3,8 @@ import { useParams, useSearchParams } from "@solidjs/router";
 import { fullTheme, t } from "@storage/theme";
 import Avatar from "@widgets/avatar";
 import Link from "@widgets/link";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
 import Pagination from "@widgets/pagination";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { createMemo, For, onCleanup, Show } from "solid-js";
 
 export default function ChatList() {

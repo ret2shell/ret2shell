@@ -6,9 +6,9 @@ import { fullTheme, t } from "@storage/theme";
 import Button from "@widgets/button";
 import Editor from "@widgets/editor";
 import Input from "@widgets/input";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
 import Select from "@widgets/select";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { createEffect, Show, untrack } from "solid-js";
+import { createTrackedEffect, Show, untrack } from "solid-js";
 import type { ChallengeWidgetProps } from ".";
 import ScorePicker from "./score-picker";
 
@@ -54,7 +54,7 @@ export function FormBare(
     });
   }
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (challenge.data) {
       untrack(() => {
         setValues(form, {

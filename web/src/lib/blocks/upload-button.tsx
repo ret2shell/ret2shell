@@ -6,7 +6,7 @@ import { t } from "@storage/theme";
 import Button, { type ButtonProps } from "@widgets/button";
 import Progress from "@widgets/progress";
 import type { Progress as DownloadProgress } from "ky";
-import { createEffect, createSignal, Match, Show, Switch, splitProps, untrack } from "solid-js";
+import { createSignal, createTrackedEffect, Match, omit, Show, Switch, untrack } from "solid-js";
 
 export default function UploadButton(
   props: ButtonProps & {
@@ -15,7 +15,7 @@ export default function UploadButton(
     onDone?: () => void;
   }
 ) {
-  const [uploadProps, nativeProps] = splitProps(props, ["url", "onDone"]);
+  const nativeProps = omit(props, "url", "onDone");
   const [uploading, setUploading] = createSignal(false);
   const [selectedFile, setSelectedFile] = createSignal<File[]>([]);
   const [progress, setProgress] = createSignal(null as DownloadProgress | null);
@@ -39,18 +39,18 @@ export default function UploadButton(
     }
     setUploading(true);
     try {
-      await uploadFile(uploadProps.url, selectedFile()!, (progress) => {
+      await uploadFile(props.url, selectedFile()!, (progress) => {
         setProgress(progress);
       });
       setSelectedFile([]);
       setUploadComplete(true);
-      uploadProps.onDone?.();
+      props.onDone?.();
     } catch (err) {
       handleHttpError(err as Error, t("general.actions.upload.status.fail"));
     }
     setUploading(false);
   }
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (uploadComplete()) {
       untrack(() => {
         setTimeout(() => {

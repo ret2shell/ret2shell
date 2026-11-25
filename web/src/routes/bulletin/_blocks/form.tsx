@@ -8,7 +8,7 @@ import Editor from "@widgets/editor";
 import IconCheckbox from "@widgets/icon-checkbox";
 import Input from "@widgets/input";
 import { DateTime } from "luxon";
-import { createEffect, untrack } from "solid-js";
+import { createTrackedEffect, untrack } from "solid-js";
 
 type BulletinForm = {
   title: string;
@@ -38,7 +38,7 @@ export default function (props: { onDone: (calendar: Article) => void; articleId
     },
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (article.data) {
       untrack(() => {
         setValues(form, {

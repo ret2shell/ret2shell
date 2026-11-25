@@ -1,8 +1,9 @@
+import type { ComponentProps } from "@solidjs/web";
 import { CanvasAddon } from "@xterm/addon-canvas";
 import { FitAddon } from "@xterm/addon-fit";
 import { WebLinksAddon } from "@xterm/addon-web-links";
 import { type ITerminalOptions, Terminal } from "@xterm/xterm";
-import { type ComponentProps, createEffect, onCleanup, onMount, untrack } from "solid-js";
+import { createTrackedEffect, onCleanup, onSettled, untrack } from "solid-js";
 import { colorPalette, themeStore } from "../storage/theme";
 import { Shell } from "./shell";
 import "@xterm/xterm/css/xterm.css";
@@ -81,7 +82,7 @@ export default function (
   term.loadAddon(canvasAddon);
   term.loadAddon(webLinksAddon);
 
-  onMount(() => {
+  onSettled(() => {
     term.open(terminal!);
     term.focus();
     fitAddon.fit();
@@ -92,7 +93,7 @@ export default function (
     resizeObserver.observe(terminal!);
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (game.data && challenge.data) {
       untrack(() => {
         if (!shell) {
@@ -104,7 +105,7 @@ export default function (
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (themeStore.colorScheme) {
       term.options.theme = {
         foreground: colorPalette.fg(),

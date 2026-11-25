@@ -7,7 +7,7 @@ import { HostType } from "@models/game";
 import type { Team } from "@models/team";
 import type { User } from "@models/user";
 import { createBreakpoints } from "@solid-primitives/media";
-import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
+import { useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
 import Article from "@widgets/article";
@@ -15,9 +15,9 @@ import Button from "@widgets/button";
 import Chart from "@widgets/chart";
 import LoadingTips from "@widgets/loading-tips";
 import Select from "@widgets/select";
+import { Transition } from "@widgets/transition";
 import clsx from "clsx";
-import { createEffect, createMemo, createSignal, For, Match, Show, Switch, untrack } from "solid-js";
-import { Transition } from "solid-transition-group";
+import { createMemo, createSignal, createTrackedEffect, For, Match, Show, Switch, untrack } from "solid-js";
 import Sidebar from "./_blocks/sidebar";
 
 export default function () {
@@ -57,7 +57,7 @@ export default function () {
     enabled: () => !!selectedGameId(),
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!userId()) {
       navigate("/sigtrap/404", { replace: true });
     }
@@ -368,7 +368,7 @@ export default function () {
                 <Match when={!selectedGameId()}>
                   <For each={teams()}>
                     {(team) => (
-                      <A
+                      <a
                         class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2 hover:bg-layer-content/5 hover:cursor-pointer"
                         href={`/games/${team.game_id}/teams/${team.id}`}
                       >
@@ -380,7 +380,7 @@ export default function () {
                           })}
                         </span>
                         <span class="opacity-60">{team.last_active_at.toFormat("yyyy-MM-dd HH:mm:ss")}</span>
-                      </A>
+                      </a>
                     )}
                   </For>
                   <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2 opacity-60">
@@ -394,7 +394,7 @@ export default function () {
                 <Match when={filteredChallenges() && filteredChallenges()!.length > 0}>
                   <For each={filteredChallenges()!}>
                     {(item) => (
-                      <A
+                      <a
                         class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2 hover:bg-layer-content/5 hover:cursor-pointer"
                         href={item.link}
                       >
@@ -408,7 +408,7 @@ export default function () {
                         />
                         <span class="flex-1 text-start truncate">{item.challenge.name}</span>
                         <span class="opacity-60">{item.challenge.score} pts</span>
-                      </A>
+                      </a>
                     )}
                   </For>
                   <div class="h-12 flex items-center border-b border-b-layer-content/10 space-x-2 opacity-60">

@@ -10,7 +10,7 @@ import bgGameDefault from "@assets/imgs/bg-game-default.webp";
 import { randomTips } from "@lib/utils/loading-tips";
 import { mediaPath } from "@lib/utils/media";
 import { stringifyState, TeamState } from "@models/team";
-import { A, useParams, useSearchParams } from "@solidjs/router";
+import { useParams, useSearchParams } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import {
   isAdminOfGame,
@@ -372,7 +372,9 @@ export default function () {
                   <span class="text-primary">{teamRank.data ?? "NULL"}</span>
                 </span>
                 <span>{selfTeam.data?.score || 0} pts</span>
-                <A class="absolute top-0 left-0 w-full h-full" href={`/games/${gameId()}/teams/${selfTeam.data?.id}`} />
+                <a class="absolute top-0 left-0 w-full h-full" href={`/games/${gameId()}/teams/${selfTeam.data?.id}`}>
+                  <span class="sr-only">{t("team.status.title")}</span>
+                </a>
               </p>
             </Card>
           </Show>

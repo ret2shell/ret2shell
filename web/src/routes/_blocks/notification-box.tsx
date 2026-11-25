@@ -2,10 +2,10 @@ import { fullTheme, t } from "@storage/theme";
 import { clearToasts, toastStore } from "@storage/toast";
 import Button from "@widgets/button";
 import Card from "@widgets/card";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
 import Popover from "@widgets/popover";
 import Toast from "@widgets/toast";
 import clsx from "clsx";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show } from "solid-js";
 
 export function NotificationBoxContent() {

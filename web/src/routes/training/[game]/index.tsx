@@ -18,9 +18,9 @@ import { Title } from "@storage/header";
 import { fullTheme, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import LoadingTips from "@widgets/loading-tips";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
 import Tag from "@widgets/tag";
 import { DateTime } from "luxon";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { createMemo, Match, Switch } from "solid-js";
 import Intro from "../_blocks/intro";
 

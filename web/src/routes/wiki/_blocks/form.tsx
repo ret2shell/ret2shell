@@ -8,7 +8,7 @@ import Editor from "@widgets/editor";
 import IconCheckbox from "@widgets/icon-checkbox";
 import Input from "@widgets/input";
 import { DateTime } from "luxon";
-import { createEffect, createMemo, untrack } from "solid-js";
+import { createMemo, createTrackedEffect, untrack } from "solid-js";
 
 type WikiForm = {
   title: string;
@@ -43,7 +43,7 @@ export default function (props: { onDone: (article: Article) => void; editSource
   });
   const loading = createMemo(() => createWikiMutation.isPending || updateWikiMutation.isPending);
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (props.editSource) {
       untrack(() => {
         setValues(form, {

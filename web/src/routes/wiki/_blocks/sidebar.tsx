@@ -4,8 +4,8 @@ import { accountStore } from "@storage/account";
 import { fullTheme, t } from "@storage/theme";
 import Divider from "@widgets/divider";
 import Link from "@widgets/link";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
 import TreeView, { type TreeNode } from "@widgets/treeview";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { createMemo, Show } from "solid-js";
 
 function buildLinked(tree: TreeNode[], paths: string[], article: Article) {

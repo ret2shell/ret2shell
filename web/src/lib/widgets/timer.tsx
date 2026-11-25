@@ -1,5 +1,6 @@
+import type { ComponentProps } from "@solidjs/web";
 import { DateTime, Duration } from "luxon";
-import { type ComponentProps, createEffect, createSignal, onCleanup, untrack } from "solid-js";
+import { createSignal, createTrackedEffect, onCleanup, untrack } from "solid-js";
 
 const ZERO = Duration.fromObject({ seconds: 0 });
 
@@ -50,7 +51,7 @@ export default function (
     }, 1000);
   }
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     const end = props.end;
     untrack(() => setup(end));
   });

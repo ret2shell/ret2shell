@@ -9,7 +9,7 @@ import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import LoadingTips from "@widgets/loading-tips";
 import clsx from "clsx";
-import { createEffect, createSignal } from "solid-js";
+import { createSignal, createTrackedEffect } from "solid-js";
 
 export default function () {
   const [animate, setAnimate] = createSignal(false);
@@ -18,7 +18,7 @@ export default function () {
   const [searchParams, _] = useSearchParams();
   const oauthProviders = useOAuthProviders();
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!oauthProviders.isLoading && oauthProviders.data) {
       setTimeout(() => {
         setAnimate(true);

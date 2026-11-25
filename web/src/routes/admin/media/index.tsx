@@ -7,7 +7,7 @@ import Button from "@widgets/button";
 import Checkbox from "@widgets/checkbox";
 import Input from "@widgets/input";
 import Slider from "@widgets/slider";
-import { createEffect, untrack } from "solid-js";
+import { createTrackedEffect, untrack } from "solid-js";
 
 export default function () {
   const config = usePlatformConfig();
@@ -19,7 +19,7 @@ export default function () {
     },
   });
   const mutation = useUpdatePlatformConfigMutation();
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (config.data) {
       untrack(() => {
         setValues(form, {

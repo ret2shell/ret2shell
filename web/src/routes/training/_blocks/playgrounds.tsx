@@ -8,10 +8,10 @@ import { useInfiniteQuery } from "@tanstack/solid-query";
 import Button from "@widgets/button";
 import Divider from "@widgets/divider";
 import Link from "@widgets/link";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { createEffect, createMemo, createSignal, For, onCleanup, Show } from "solid-js";
+import { createMemo, createSignal, createTrackedEffect, For, onCleanup, Show } from "solid-js";
 
 export default function Playgrounds() {
   const pageSize = 6;
@@ -74,8 +74,8 @@ export default function Playgrounds() {
     onCleanup(() => observer.disconnect());
   }
 
-  createEffect(() => observeSentinel(playgroundSentinel, playgroundsQuery));
-  createEffect(() => observeSentinel(gameSentinel, gamesQuery));
+  createTrackedEffect(() => observeSentinel(playgroundSentinel, playgroundsQuery));
+  createTrackedEffect(() => observeSentinel(gameSentinel, gamesQuery));
 
   return (
     <div class="flex-1 overflow-hidden">

@@ -8,17 +8,16 @@ import { mergeChats } from "@blocks/challenge/hammer.utils";
 // import { stickerSet } from "@assets/stickers";
 import { mediaPath } from "@lib/utils/media";
 import type { Chat } from "@models/chat";
-import { A, useParams, useSearchParams } from "@solidjs/router";
+import { useParams, useSearchParams } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { fullTheme, t } from "@storage/theme";
 import Button from "@widgets/button";
 import { EditorBare } from "@widgets/editor";
 import Link from "@widgets/link";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { createEffect, createMemo, createSignal, For, onCleanup, Show } from "solid-js";
-import { createStore, reconcile } from "solid-js/store";
+import { createMemo, createSignal, createStore, createTrackedEffect, For, onCleanup, reconcile, Show } from "solid-js";
 
 export default function () {
   const params = useParams();
@@ -77,7 +76,7 @@ export default function () {
   }
   let chatBottomEl: HTMLDivElement | undefined;
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     const currentChallengeId = challengeId();
     const currentTeamId = teamId();
 
@@ -95,14 +94,14 @@ export default function () {
           chatsQuery.data,
           solves.data?.find((item) => item.challenge_id === currentChallengeId)?.created_at ?? null
         ),
-        { key: "id" }
+        "id"
       )
     );
   });
 
   const chatSignature = createMemo(() => chats.map((item) => `${item.id}:${item.checked ? 1 : 0}`).join("|"));
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!chatSignature()) return;
 
     const timeout = setTimeout(() => {
@@ -129,20 +128,20 @@ export default function () {
       <div class="flex-1 h-[calc(100vh-4rem)] overflow-hidden flex flex-col">
         <div class="h-16 flex flex-row px-4 space-x-2 items-center backdrop-blur-sm border-b border-b-layer-content/10">
           <span class="shrink-0 icon-[fluent--chat-20-regular] w-5 h-5" />
-          <A
+          <a
             class="flex-1 w-0 flex flex-row space-x-2 hover:underline items-center truncate"
             href={`/games/${gameId()}/teams/${teamId()}`}
           >
             {team.data ? team.data.name : t("challenge.hammer.title")}
-          </A>
+          </a>
           <Show when={challenge.data}>
-            <A
+            <a
               class="flex-1 w-0 flex flex-row justify-end space-x-2 hover:underline items-center truncate"
               href={`/games/${gameId()}/challenges?challenge=${challengeId()}`}
             >
               <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
               <span class="truncate">{challenge.data?.name}</span>
-            </A>
+            </a>
           </Show>
         </div>
         <OverlayScrollbarsComponent

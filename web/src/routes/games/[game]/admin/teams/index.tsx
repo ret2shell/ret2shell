@@ -2,7 +2,7 @@ import { useInstitutes } from "@api/account";
 import { useTeamList } from "@api/team";
 import { type Team, TeamState } from "@models/team";
 import { createBreakpoints } from "@solid-primitives/media";
-import { A, useParams, useSearchParams } from "@solidjs/router";
+import { useParams, useSearchParams } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
 import Input from "@widgets/input";
@@ -126,7 +126,7 @@ export default function () {
             }
           >
             {(team) => (
-              <A
+              <a
                 class="h-12 flex flex-row items-center border-b border-b-layer-content/10 font-bold space-x-4 px-2 hover:bg-layer-content/5 cursor-pointer"
                 href={`/games/${gameId()}/teams/${team.id}`}
               >
@@ -171,7 +171,7 @@ export default function () {
                     <Match when={matches.md}>{team.last_active_at.toFormat("MM-dd HH:mm:ss")}</Match>
                   </Switch>
                 </span>
-              </A>
+              </a>
             )}
           </For>
         </div>

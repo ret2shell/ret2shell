@@ -6,7 +6,7 @@ import { mediaPath } from "@lib/utils/media";
 import { checkSameOrigin } from "@lib/utils/url";
 import { isUserCancelled } from "@lib/utils/webauthn";
 import { createForm, minLength, pattern, required, setValue } from "@modular-forms/solid";
-import { A, useLocation, useNavigate } from "@solidjs/router";
+import { useLocation, useNavigate } from "@solidjs/router";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
@@ -141,10 +141,10 @@ export default function () {
                   placeholder={t("account.form.password.placeholder")}
                   title={t("account.form.password.label")}
                   extraLabel={
-                    <A href="/account/forgot" class="hover:underline flex items-center space-x-1">
+                    <a href="/account/forgot" class="hover:underline flex items-center space-x-1">
                       <span class="shrink-0 icon-[fluent--question-circle-16-regular] w-4 h-4 text-primary" />
                       <span>{t("account.forgot.title")}</span>
-                    </A>
+                    </a>
                   }
                   autocomplete="current-password"
                   {...props}

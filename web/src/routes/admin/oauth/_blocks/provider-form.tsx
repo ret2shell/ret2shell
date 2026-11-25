@@ -20,7 +20,7 @@ import Button from "@widgets/button";
 import Editor, { type DiagnosticMarker } from "@widgets/editor";
 import Input from "@widgets/input";
 import Select from "@widgets/select";
-import { createEffect, createSignal, Show, untrack } from "solid-js";
+import { createSignal, createTrackedEffect, Show, untrack } from "solid-js";
 import emailScript from "../scripts/email.rx";
 import oauth2AuthCodeScript from "../scripts/oauth2_auth_code.rx";
 import yaleCasScript from "../scripts/yale_cas.rx";
@@ -62,7 +62,7 @@ export default function ProviderForm(props: {
   const [avatarUploading, setAvatarUploading] = createSignal(false);
   const [lint, setLint] = createSignal([] as DiagnosticMarker[]);
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (oauthProvider.data) {
       untrack(async () => {
         const { item } = oauthProvider.data || {};

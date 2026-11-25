@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
-import { createMemo, onMount } from "solid-js";
+import { createMemo, onSettled } from "solid-js";
 
 export default function () {
   const [searchParams, _] = useSearchParams();
@@ -19,7 +19,7 @@ export default function () {
       navigate("/sigtrap/412", { replace: true });
     },
   });
-  onMount(() => {
+  onSettled(() => {
     setTimeout(async () => {
       if (email() && token()) {
         mutation.mutate({ email: email()!, token: token()! });

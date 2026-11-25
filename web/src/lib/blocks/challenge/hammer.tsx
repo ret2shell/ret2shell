@@ -4,7 +4,7 @@ import platformAvatar from "@assets/imgs/rx.webp";
 import { mediaPath } from "@lib/utils/media";
 import type { Chat } from "@models/chat";
 import { createBreakpoints } from "@solid-primitives/media";
-import { A } from "@solidjs/router";
+
 import { accountStore } from "@storage/account";
 import { isAdminOfGame, isGameInProgress } from "@storage/game";
 import { breakpoints, t } from "@storage/theme";
@@ -15,8 +15,19 @@ import { EditorBare } from "@widgets/editor";
 import Link from "@widgets/link";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { createEffect, createMemo, createSignal, For, Match, onCleanup, onMount, Show, Switch } from "solid-js";
-import { createStore, reconcile } from "solid-js/store";
+import {
+  createMemo,
+  createSignal,
+  createStore,
+  createTrackedEffect,
+  For,
+  Match,
+  onCleanup,
+  onSettled,
+  reconcile,
+  Show,
+  Switch,
+} from "solid-js";
 
 import type { ChallengeWidgetProps } from ".";
 import { mergeChats } from "./hammer.utils";
@@ -36,18 +47,18 @@ export function ChatBlock(props: {
   return (
     <div class={clsx("self-start flex-row flex items-center", matches.lg ? "w-[calc(100%-4rem)]" : "w-full")}>
       <Show when={props.showAvatar} fallback={<div class="w-10 h-10 shrink-0 self-start" />}>
-        <A class="w-10 h-10 shrink-0 self-start mt-2" href={props.link}>
+        <a class="w-10 h-10 shrink-0 self-start mt-2" href={props.link}>
           <Avatar class="w-full h-full" src={props.avatar} fallback={props.nameLabel} />
-        </A>
+        </a>
       </Show>
       <div class="w-2 shrink-0" />
       <div class="flex flex-col space-y-1 bg-transparent hover:bg-layer-content/5 flex-1 p-2 rounded-md group transition-colors duration-300">
         <Show when={props.showAvatar}>
           <header class="label">
-            <A href={props.link} class="space-x-2 hover:underline">
+            <a href={props.link} class="space-x-2 hover:underline">
               <span class={props.labelClasses}>[{props.roleLabel}]</span>
               <span>{props.nameLabel}</span>
-            </A>
+            </a>
           </header>
         </Show>
         <Article class="max-w-full!" content={props.content} noExtraPaddings compact extra />
@@ -94,7 +105,7 @@ export default function (props: ChallengeWidgetProps) {
     enabled: () => !props.training && !isAdminOfGame(game.data),
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!chatsQuery.data || !solvesQuery.data) {
       setChats(reconcile([]));
       return;
@@ -109,7 +120,7 @@ export default function (props: ChallengeWidgetProps) {
           chatsQuery.data,
           solvesQuery.data.find((v) => v.challenge_id === props.challengeId)?.created_at ?? null
         ),
-        { key: "id" }
+        "id"
       )
     );
   });
@@ -129,7 +140,7 @@ export default function (props: ChallengeWidgetProps) {
   });
   const [editorExpanded, setEditorExpanded] = createSignal(false);
 
-  onMount(() => {
+  onSettled(() => {
     // @ts-expect-error chatBottomEl is bound by SolidJS after rendered
     setTimeout(() => chatBottomEl?.scrollIntoView({ behavior: "smooth" }), 300);
   });

@@ -1,6 +1,5 @@
 import type { Chat } from "@models/chat";
 import { DateTime } from "luxon";
-import { reconcile } from "solid-js/store";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@storage/theme", () => ({
@@ -56,10 +55,8 @@ describe("mergeChats", () => {
     expect(merged[1]?.created_at.toSeconds()).toBe(3);
   });
 
-  it("produces a snapshot that reconcile can update in place", () => {
+  it("produces a plain snapshot that can be reconciled into a store", () => {
     const current = mergeChats(1, 10, 20, [createChat({ id: 1 })], null);
-    const firstChat = current[0];
-
     const next = mergeChats(
       1,
       10,
@@ -71,11 +68,11 @@ describe("mergeChats", () => {
       null
     );
 
-    const reconciled = reconcile(next, { key: "id" })(current);
-
-    expect(reconciled).toBe(current);
-    expect(current[0]).toBe(firstChat);
-    expect(current[0]).toMatchObject({ id: 1, checked: true });
-    expect(current[1]).toMatchObject({ id: 2, content: "next" });
+    // a fresh snapshot each time, so `reconcile(next, "id")` can diff it against
+    // the store's current value instead of mutating the previous one in place
+    expect(next).not.toBe(current);
+    expect(next[0]).not.toBe(current[0]);
+    expect(next[0]).toMatchObject({ id: 1, checked: true });
+    expect(next[1]).toMatchObject({ id: 2, content: "next" });
   });
 });

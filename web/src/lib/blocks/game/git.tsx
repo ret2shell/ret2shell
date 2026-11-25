@@ -4,7 +4,7 @@ import { deunicode } from "@api/rpc";
 import Spin from "@assets/animates/spin";
 import { transformGitmoji } from "@lib/utils/gitmoji";
 import type { ObjectInfo } from "@models/git";
-import { A, useSearchParams } from "@solidjs/router";
+import { useSearchParams } from "@solidjs/router";
 import { t } from "@storage/theme";
 import Card from "@widgets/card";
 import Clipboard from "@widgets/clipboard";
@@ -12,7 +12,7 @@ import Divider from "@widgets/divider";
 import Link from "@widgets/link";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { createEffect, createSignal, For, onCleanup, Show, untrack } from "solid-js";
+import { createSignal, createTrackedEffect, For, onCleanup, Show, untrack } from "solid-js";
 
 export default function (props: { gameId: number; basePath?: string; training?: boolean }) {
   const game = useGame({ id: () => props.gameId });
@@ -34,7 +34,7 @@ export default function (props: { gameId: number; basePath?: string; training?: 
   const segments = () => path().split("/");
   const [objects, setObjects] = createSignal<ObjectInfo[]>([]);
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (game.data) {
       untrack(async () => {
         setRepoName(await deunicode(game.data!.name, true));
@@ -42,7 +42,7 @@ export default function (props: { gameId: number; basePath?: string; training?: 
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     const currentGame = game.data;
     const currentPath = path();
     if (currentGame && currentPath) {
@@ -134,14 +134,14 @@ export default function (props: { gameId: number; basePath?: string; training?: 
       <Clipboard value={`${window.location.origin}/api/game/${game.data?.id}/repo/${repoName()}.git`} />
       <h3 class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-2">
         <span class="shrink-0 icon-[fluent--branch-fork-20-regular] w-5 h-5" />
-        <A class="font-bold" href={repoLink()}>
+        <a class="font-bold" href={repoLink()}>
           {repoName()}
-        </A>
+        </a>
         <span>/</span>
         <For each={segments()}>
           {(segment, index) => (
             <>
-              <A
+              <a
                 class="text-layer-content/60"
                 href={repoLink(
                   segments()
@@ -150,7 +150,7 @@ export default function (props: { gameId: number; basePath?: string; training?: 
                 )}
               >
                 {segment}
-              </A>
+              </a>
               <span>/</span>
             </>
           )}

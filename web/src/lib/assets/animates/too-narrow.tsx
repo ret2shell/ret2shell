@@ -1,4 +1,4 @@
-import type { ComponentProps } from "solid-js";
+import type { ComponentProps } from "@solidjs/web";
 
 export default function (props: ComponentProps<"svg">) {
   const { width, height } = { width: 256, height: 256, ...props };

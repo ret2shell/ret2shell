@@ -4,7 +4,7 @@ import { useUsers } from "@api/user";
 import { Popover as ArkPopover } from "@ark-ui/solid";
 import { mediaPath } from "@lib/utils/media";
 import { Permission, permissionToIcon, type User } from "@models/user";
-import { A } from "@solidjs/router";
+
 import { fullTheme, t } from "@storage/theme";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
@@ -13,10 +13,10 @@ import Dialog from "@widgets/dialog";
 import Divider from "@widgets/divider";
 import Input from "@widgets/input";
 import LoadingTips from "@widgets/loading-tips";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
 import Popover from "@widgets/popover";
 import Tag from "@widgets/tag";
 import clsx from "clsx";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { createSignal, For, Show } from "solid-js";
 
 export default function AdministratorsManagement(props: { gameId: number }) {
@@ -173,14 +173,14 @@ export default function AdministratorsManagement(props: { gameId: number }) {
                 src={(user.avatar && mediaPath(user.avatar)) || undefined}
                 fallback={user.account || undefined}
               />
-              <A class="flex truncate text-start hover:underline" href={`/users/${user.id}`}>
+              <a class="flex truncate text-start hover:underline" href={`/users/${user.id}`}>
                 <span class="flex-1 min-w-16 truncate">
                   <span>{user.nickname}</span>
                   <span class="font-normal px-2 opacity-60">
                     {user.account}#{user.id.toString(16).padStart(6, "0")}
                   </span>
                 </span>
-              </A>
+              </a>
               <span class="flex-1" />
               <span class="flex flex-row items-center justify-end space-x-4 overflow-auto">
                 <For each={user.permissions}>

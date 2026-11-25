@@ -15,7 +15,7 @@ import {
   setValue,
   setValues,
 } from "@modular-forms/solid";
-import { A } from "@solidjs/router";
+
 import { t } from "@storage/theme";
 import Avatar from "@widgets/avatar";
 import Button from "@widgets/button";
@@ -27,7 +27,7 @@ import Link from "@widgets/link";
 import Popover from "@widgets/popover";
 import Select from "@widgets/select";
 import Tag from "@widgets/tag";
-import { createEffect, createMemo, createSignal, For, Show, untrack } from "solid-js";
+import { createMemo, createSignal, createTrackedEffect, For, Show, untrack } from "solid-js";
 
 export type UserForm = {
   account: string;
@@ -74,7 +74,7 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
       permDevOps: compProps.editSource?.permissions.includes(Permission.DevOps) || false,
     },
   });
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (compProps.editSource) {
       untrack(async () => {
         setValues(form, {
@@ -482,7 +482,7 @@ export default function (compProps: { onDone?: (result: User) => void; editSourc
         <For each={ips.data}>
           {(ip) => (
             <Tag level="info" class="m-1">
-              <A href={`/admin/users?filter=${ip.address}`}>{ip.address}</A>
+              <a href={`/admin/users?filter=${ip.address}`}>{ip.address}</a>
             </Tag>
           )}
         </For>

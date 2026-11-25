@@ -14,22 +14,22 @@ import { usePlatformInfo } from "@api/platform";
 import { useSelfTeam } from "@api/team";
 import Spin from "@assets/animates/spin";
 import { getWsrxLink, wsrx } from "@lib/wsrx";
-import { A } from "@solidjs/router";
+
 import { isAdminOfGame, isGameInProgress } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";
 import Article from "@widgets/article";
 import Button from "@widgets/button";
 import ClipboardBtn from "@widgets/clipboard-btn";
 import Divider from "@widgets/divider";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
 import Tag from "@widgets/tag";
 import TimeProgress from "@widgets/time-progress";
 import Timer from "@widgets/timer";
 import { WsrxState } from "@xdsec/wsrx";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { passiveSupport } from "passive-events-support/src/utils";
-import { createEffect, createMemo, createSignal, For, Match, onCleanup, Show, Switch, untrack } from "solid-js";
+import { createMemo, createSignal, createTrackedEffect, For, Match, onCleanup, Show, Switch, untrack } from "solid-js";
 import DownloadButton from "../download-button";
 import type { ChallengeWidgetProps } from ".";
 import { usePrerequisiteGating } from "./prerequisites";
@@ -90,7 +90,7 @@ export default function (props: ChallengeWidgetProps) {
   });
   const gating = usePrerequisiteGating({ gameId: () => props.gameId, challengeId: () => props.challengeId });
   const [layerDismissed, setLayerDismissed] = createSignal(false);
-  createEffect(() => {
+  createTrackedEffect(() => {
     props.challengeId;
     setLayerDismissed(false);
   });
@@ -128,7 +128,7 @@ export default function (props: ChallengeWidgetProps) {
     clearInterval(timer);
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (wsrx.state() === WsrxState.Usable) {
       untrack(maintainInstances);
     }
@@ -567,7 +567,7 @@ export default function (props: ChallengeWidgetProps) {
             <span class="opacity-60">{t("challenge.status.locked.hint")}:</span>
             <For each={gating.lockedChallenges()}>
               {(prerequisite) => (
-                <A
+                <a
                   class="text-warning hover:underline font-bold"
                   href={
                     props.training
@@ -576,7 +576,7 @@ export default function (props: ChallengeWidgetProps) {
                   }
                 >
                   {prerequisite.name}
-                </A>
+                </a>
               )}
             </For>
           </span>

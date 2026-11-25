@@ -1,13 +1,13 @@
 import { mediaPath } from "@lib/utils/media";
 import { Permission, permissionToString, type User } from "@models/user";
-import { A } from "@solidjs/router";
+
 import { accountStore } from "@storage/account";
 import { fullTheme, t } from "@storage/theme";
 import Avatar from "@widgets/avatar";
 import Divider from "@widgets/divider";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
 import Tag from "@widgets/tag";
 import clsx from "clsx";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { For, Show } from "solid-js";
 
 export default function (props: { user: User | null; loading?: boolean }) {
@@ -71,9 +71,9 @@ export default function (props: { user: User | null; loading?: boolean }) {
           <div class="flex-1" />
           <Show when={accountStore.permissions.includes(Permission.User)}>
             <div class="h-12 flex items-center justify-center">
-              <A class="opacity-60 hover:underline" href={`/admin/users?user=${props.user?.id}`}>
+              <a class="opacity-60 hover:underline" href={`/admin/users?user=${props.user?.id}`}>
                 {t("user.gotoAdminPanel")}
-              </A>
+              </a>
             </div>
           </Show>
           <div class="h-12 flex items-center justify-center">

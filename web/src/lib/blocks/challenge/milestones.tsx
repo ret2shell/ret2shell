@@ -19,6 +19,7 @@ import type { Challenge } from "@models/challenge";
 import type { Game } from "@models/game";
 import type { Milestone } from "@models/milestone";
 import { useNavigate } from "@solidjs/router";
+import { Portal } from "@solidjs/web";
 import { isAdminOfGame } from "@storage/game";
 import { fullTheme, t, themeStore } from "@storage/theme";
 import { addToast } from "@storage/toast";
@@ -27,24 +28,23 @@ import Button from "@widgets/button";
 import Divider from "@widgets/divider";
 import Input from "@widgets/input";
 import LoadingTips from "@widgets/loading-tips";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
 import Tag from "@widgets/tag";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import {
   createEffect,
   createMemo,
   createSignal,
+  createTrackedEffect,
   For,
   Match,
-  on,
   onCleanup,
-  onMount,
+  onSettled,
   Show,
   Switch,
   untrack,
 } from "solid-js";
-import { Portal } from "solid-js/web";
 import UnlockLimitSlider from "./unlock-limit-slider";
 
 const NODE_W = 224;
@@ -1087,13 +1087,11 @@ export default function Milestones(props: { gameId: number }) {
   });
 
   // follow server state whenever there is no local unsaved edit
-  createEffect(
-    on(baseEdges, (server) => {
-      if (untrack(dirty)) return;
-      setBaseline(server);
-      setEdges(server);
-    })
-  );
+  createEffect(baseEdges, (server) => {
+    if (untrack(dirty)) return;
+    setBaseline(server);
+    setEdges(server);
+  });
 
   // node positions are intentionally session-only: every page open re-runs
   // the auto layout, so admins always preview the same graph players see
@@ -1104,16 +1102,14 @@ export default function Milestones(props: { gameId: number }) {
   // edge set and pile up in the first column. edges are derived from
   // baseEdges (a pure data memo) instead of the synced edge signal, because
   // the sync effect may run after this one within the same update
-  createEffect(
-    on(nodes, (ns) => {
-      if (!challenges.data || !milestones.data) return;
-      const current = untrack(() => baseEdges().filter(isValidEdge));
-      setPositions((prev) => {
-        if (ns.every((node) => prev[node.key])) return prev;
-        return autoLayout(ns, current, prev);
-      });
-    })
-  );
+  createEffect(nodes, (ns) => {
+    if (!challenges.data || !milestones.data) return;
+    const current = untrack(() => baseEdges().filter(isValidEdge));
+    setPositions((prev) => {
+      if (ns.every((node) => prev[node.key])) return prev;
+      return autoLayout(ns, current, prev);
+    });
+  });
 
   const [pan, setPan] = createSignal({ x: 0, y: 0 });
   const [zoom, setZoom] = createSignal(1);
@@ -1265,7 +1261,7 @@ export default function Milestones(props: { gameId: number }) {
   let draggingKey: string | null = null;
   // flow phase of the chevron texture, advanced by the rAF loop
   let flowPhase = 0;
-  createEffect(() => {
+  createTrackedEffect(() => {
     const edgeList = validEdges();
     const pos = positions();
     const nm = nodeMap();
@@ -1561,7 +1557,7 @@ export default function Milestones(props: { gameId: number }) {
     };
   }
 
-  onMount(() => {
+  onSettled(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setSelectedNode(null);
@@ -1588,7 +1584,7 @@ export default function Milestones(props: { gameId: number }) {
 
   // warn before leaving the page with unsaved prerequisite edits; the
   // listener is bound only while the edit is dirty
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!dirty()) return;
     const onBeforeUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault();
@@ -1600,7 +1596,7 @@ export default function Milestones(props: { gameId: number }) {
   // the chevron texture flows toward the targets: a requestAnimationFrame
   // loop advances the texture phase and redraws; rAF pauses automatically
   // when the tab is hidden
-  onMount(() => {
+  onSettled(() => {
     let raf = 0;
     let last = performance.now();
     const frame = (now: number) => {
@@ -1613,7 +1609,7 @@ export default function Milestones(props: { gameId: number }) {
     onCleanup(() => cancelAnimationFrame(raf));
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     fullTheme();
     const content = probeColor("text-layer-content", FALLBACK_TEXT_COLOR);
     const dark = themeStore.colorScheme === "dark";
@@ -1631,12 +1627,12 @@ export default function Milestones(props: { gameId: number }) {
     });
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     draw();
   });
 
   let fitted = false;
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (fitted || nodes().length === 0 || size().w === 0) return;
     if (Object.keys(positions()).length === 0) return;
     fitted = true;
@@ -2376,7 +2372,7 @@ function ChallengeFormDialog(props: {
   const [unlockLimit, setUnlockLimit] = createSignal(0);
   const updatePrerequisitesMutation = useUpdateChallengePrerequisitesMutation();
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!props.open) return;
     setUnlockLimit(props.challenge?.unlock_limit ?? 0);
   });
@@ -2542,7 +2538,7 @@ function MilestoneFormDialog(props: {
   const [nameError, setNameError] = createSignal("");
   const [descriptionError, setDescriptionError] = createSignal("");
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!props.open) return;
     setName(props.milestone?.name ?? "");
     setDescription(props.milestone?.description ?? "");

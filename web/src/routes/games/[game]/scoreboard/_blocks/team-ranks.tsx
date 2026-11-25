@@ -4,7 +4,7 @@ import type { Game } from "@models/game";
 import type { Institute } from "@models/institute";
 import { type Team, TeamState } from "@models/team";
 import { createBreakpoints } from "@solid-primitives/media";
-import { A } from "@solidjs/router";
+
 import { currentTimelinePeriod } from "@storage/game";
 import { breakpoints, t } from "@storage/theme";
 import Pagination from "@widgets/pagination";
@@ -79,9 +79,9 @@ export default function TeamRanks(props: {
                 </Switch>
               </span>
               <div class="flex flex-col flex-1 w-0">
-                <A class="font-bold hover:underline truncate" href={`/games/${props.gameId}/teams/${team.id}`}>
+                <a class="font-bold hover:underline truncate" href={`/games/${props.gameId}/teams/${team.id}`}>
                   {team.name}
-                </A>
+                </a>
                 <Show when={team.tag}>
                   <span class="truncate text-xs opacity-60" title={team.tag ?? ""}>
                     {team.tag}

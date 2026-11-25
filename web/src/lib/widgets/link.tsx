@@ -1,7 +1,8 @@
 import Spin from "@assets/animates/spin";
-import { A, useMatch } from "@solidjs/router";
+import { useMatch } from "@solidjs/router";
+import type { ComponentProps, JSX } from "@solidjs/web";
 import clsx from "clsx";
-import { type ComponentProps, children, type JSX, Show } from "solid-js";
+import { children, Show } from "solid-js";
 import type { ButtonProps } from "./button";
 
 export type LinkProps = {
@@ -26,8 +27,7 @@ export default function (props: ComponentProps<"a"> & ButtonProps & LinkProps & 
       props.uppercase && "uppercase",
       props.square && "btn-square",
       props.activeMatch ? Boolean(match()) && "btn-active" : props.active && "btn-active",
-      props.class,
-      props.classList
+      props.class
     );
   return (
     <Show
@@ -38,12 +38,12 @@ export default function (props: ComponentProps<"a"> & ButtonProps & LinkProps & 
         </div>
       }
     >
-      <A {...props} href={props.href ?? "#"} type={props.type} class={className()}>
+      <a {...props} href={props.href ?? "#"} type={props.type} class={className()}>
         <Show when={props.loading}>
           <Spin />
         </Show>
         {children(() => props.children)()}
-      </A>
+      </a>
     </Show>
   );
 }

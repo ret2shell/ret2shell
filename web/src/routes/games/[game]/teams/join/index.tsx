@@ -14,7 +14,7 @@ import Card from "@widgets/card";
 import Dialog from "@widgets/dialog";
 import Input from "@widgets/input";
 import Link from "@widgets/link";
-import { createEffect, createMemo, createSignal, Show } from "solid-js";
+import { createMemo, createSignal, createTrackedEffect, Show } from "solid-js";
 
 type TeamJoinForm = {
   token: string;
@@ -45,7 +45,7 @@ export default function () {
   });
 
   const [form, { Form, Field }] = createForm<TeamJoinForm>();
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!game.data) return;
     const reason = blockReason();
     if (!reason) return;
@@ -59,7 +59,9 @@ export default function () {
 
   const joinTeamMutation = useJoinTeamMutation({
     onSuccess: () => {
-      setTeamCoverStore({ showTeamCover: true });
+      setTeamCoverStore((s) => {
+        s.showTeamCover = true;
+      });
       setTimeout(() => {
         navigate(`/games/${gameId()}`);
       }, 2000);

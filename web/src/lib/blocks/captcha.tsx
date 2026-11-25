@@ -2,10 +2,11 @@ import { useCaptcha } from "@api/account";
 import Working from "@assets/animates/working";
 import { type FormStore, type Maybe, setValue } from "@modular-forms/solid";
 import { base64 } from "@scure/base";
+import type { ComponentProps } from "@solidjs/web";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Input, { type TextInputProps } from "@widgets/input";
-import { type ComponentProps, createEffect, createSignal, on, splitProps, untrack } from "solid-js";
+import { createEffect, createSignal, createTrackedEffect, omit, untrack } from "solid-js";
 
 export default function (
   props: TextInputProps &
@@ -19,7 +20,7 @@ export default function (
       timestamp?: number;
     }
 ) {
-  const [fieldProps, inputProps] = splitProps(props, ["idFieldValue", "answerFieldValue"]);
+  const inputProps = omit(props, "idFieldValue", "answerFieldValue");
   const [calculating, setCalculating] = createSignal(false);
   const [manuallyFill, setManuallyFill] = createSignal(true);
 
@@ -31,14 +32,12 @@ export default function (
   }
 
   createEffect(
-    on(
-      () => props.timestamp,
-      () => resetCaptchaFields(),
-      { defer: true }
-    )
+    () => props.timestamp,
+    () => resetCaptchaFields(),
+    { defer: true }
   );
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!captcha.isLoading && captcha.data) {
       untrack(() => {
         if (captcha.data.validator === "pow") startPow();
@@ -102,12 +101,12 @@ export default function (
 
   return (
     <>
-      <input class="hidden" name="captcha_id" value={fieldProps.idFieldValue} />
+      <input class="hidden" name="captcha_id" value={props.idFieldValue} />
       <Input
         icon={<span class="shrink-0 icon-[fluent--bot-20-regular] w-5 h-5" />}
         placeholder="0xDEADBEEF"
         title={t("captcha.title")}
-        value={fieldProps.answerFieldValue}
+        value={props.answerFieldValue}
         {...inputProps}
         disabled={!manuallyFill()}
         error={props.idFieldError || props.answerFieldError}

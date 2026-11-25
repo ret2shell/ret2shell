@@ -1,6 +1,7 @@
 import { isMobile } from "@solid-primitives/platform";
 import { mergeRefs } from "@solid-primitives/refs";
 import { createElementSize, type Size } from "@solid-primitives/resize-observer";
+import type { JSX } from "@solidjs/web";
 import { fullTheme } from "@storage/theme";
 import clsx from "clsx";
 import { BarChart, GaugeChart, LineChart, PieChart, RadarChart, SunburstChart } from "echarts/charts";
@@ -19,7 +20,7 @@ import { LabelLayout, UniversalTransition } from "echarts/features";
 import { CanvasRenderer, SVGRenderer } from "echarts/renderers";
 import { nanoid } from "nanoid";
 import { passiveSupport } from "passive-events-support/src/utils";
-import { createEffect, type JSX, on, onCleanup, onMount, type Ref } from "solid-js";
+import { createEffect, onCleanup, onSettled, type Ref } from "solid-js";
 import cyberDark from "./styles/echarts/cyber-dark.json";
 import cyberLight from "./styles/echarts/cyber-light.json";
 
@@ -123,7 +124,7 @@ export default function Chart(props: EChartsBaseProps) {
   registerTheme("cyber-dark", cyberDark);
   registerTheme("cyber-light", cyberLight);
 
-  onMount(() => {
+  onSettled(() => {
     size = createElementSize(chartElement);
   });
 
@@ -132,71 +133,61 @@ export default function Chart(props: EChartsBaseProps) {
   });
 
   createEffect(
-    on(
-      () => [size.width, size.height],
-      ([width, height]) => {
-        // console.log('resize', width, height)
-        chartInstance?.resize({ width, height, ...props.resizeOptions });
-      },
-      { defer: true }
-    )
+    () => [size.width, size.height],
+    ([width, height]) => {
+      // console.log('resize', width, height)
+      chartInstance?.resize({ width, height, ...props.resizeOptions });
+    },
+    { defer: true }
   );
 
   createEffect(
-    on(
-      () => props.option,
-      (option) => {
-        chartInstance?.setOption(option, props.notMerge, props.lazyUpdate);
-      },
-      { defer: true }
-    )
+    () => props.option,
+    (option) => {
+      chartInstance?.setOption(option, props.notMerge, props.lazyUpdate);
+    },
+    { defer: true }
   );
 
   createEffect(
-    on(
-      () => fullTheme(),
-      (theme) => {
-        chartInstance?.dispose();
-        chartInstance = init(chartElement, theme, {
-          width: size.width ?? 0,
-          height: size.height ?? 0,
-          renderer: isMobile ? "svg" : "canvas",
-          ...(props.initOptions ?? {}),
-        });
-        chartInstance.setOption(props.option, props.notMerge, props.lazyUpdate);
-        props.onInit?.(chartInstance);
+    () => fullTheme(),
+    (theme) => {
+      chartInstance?.dispose();
+      chartInstance = init(chartElement, theme, {
+        width: size.width ?? 0,
+        height: size.height ?? 0,
+        renderer: isMobile ? "svg" : "canvas",
+        ...(props.initOptions ?? {}),
+      });
+      chartInstance.setOption(props.option, props.notMerge, props.lazyUpdate);
+      props.onInit?.(chartInstance);
+    }
+  );
+
+  createEffect(
+    () => props.isLoading,
+    (isLoading) => {
+      if (isLoading) {
+        chartInstance.showLoading(props.loadingOptions as unknown as object | undefined);
+      } else {
+        chartInstance.hideLoading();
       }
-    )
+    },
+    { defer: true }
   );
 
   createEffect(
-    on(
-      () => props.isLoading,
-      (isLoading) => {
-        if (isLoading) {
-          chartInstance.showLoading(props.loadingOptions as unknown as object | undefined);
-        } else {
-          chartInstance.hideLoading();
-        }
-      },
-      { defer: true }
-    )
-  );
+    () => props.eventHandlers,
+    (eventHandlers, prevEventHandlers) => {
+      if (prevEventHandlers) {
+        unbindEvents(chartInstance, prevEventHandlers);
+      }
 
-  createEffect(
-    on(
-      () => props.eventHandlers,
-      (eventHandlers, prevEventHandlers) => {
-        if (prevEventHandlers) {
-          unbindEvents(chartInstance, prevEventHandlers);
-        }
-
-        if (eventHandlers) {
-          bindEvents(chartInstance, eventHandlers);
-        }
-      },
-      { defer: true }
-    )
+      if (eventHandlers) {
+        bindEvents(chartInstance, eventHandlers);
+      }
+    },
+    { defer: true }
   );
 
   return (

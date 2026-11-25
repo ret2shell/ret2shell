@@ -15,7 +15,7 @@ import TimeProgress from "@widgets/time-progress";
 import Timer from "@widgets/timer";
 import { WsrxError, WsrxErrorKind, WsrxState } from "@xdsec/wsrx";
 import clsx from "clsx";
-import { createEffect, createSignal, For, Show, untrack } from "solid-js";
+import { createSignal, createTrackedEffect, For, Show, untrack } from "solid-js";
 
 export function InstanceBoxContent() {
   const params = useParams();
@@ -81,7 +81,7 @@ export function InstanceBoxContent() {
     }, 1000);
   }
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (accountStore.token) untrack(tryConnect);
   });
 

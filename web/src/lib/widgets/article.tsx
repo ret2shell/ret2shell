@@ -1,9 +1,10 @@
 import type { Markdown } from "@lib/markdown";
+import type { ComponentProps } from "@solidjs/web";
 import { fullTheme } from "@storage/theme";
 import { addToast } from "@storage/toast";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
 import clsx from "clsx";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { type ComponentProps, createEffect, createSignal, Show, splitProps, untrack } from "solid-js";
+import { createSignal, createTrackedEffect, omit, Show, untrack } from "solid-js";
 import Card from "./card";
 import LoadingTips from "./loading-tips";
 import Popover from "./popover";
@@ -18,14 +19,7 @@ export type ArticleProps = {
 };
 
 export default function (props: ComponentProps<"article"> & ArticleProps) {
-  const [articleProps, nativeProps] = splitProps(props, [
-    "content",
-    "extra",
-    "headingAnchors",
-    "toc",
-    "noExtraPaddings",
-    "compact",
-  ]);
+  const nativeProps = omit(props, "content", "extra", "headingAnchors", "toc", "noExtraPaddings", "compact");
   const [ready, setReady] = createSignal(false);
   const [rendering, setRendering] = createSignal(false);
   const [markdown, setMarkdown] = createSignal(null as Markdown | null);
@@ -36,11 +30,11 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
       await markdownInst.init({
         type: "html",
         options: {
-          code: articleProps.extra,
-          math: articleProps.extra,
-          headingAnchors: articleProps.headingAnchors,
-          alertBlockquote: articleProps.extra,
-          toc: articleProps.toc,
+          code: props.extra,
+          math: props.extra,
+          headingAnchors: props.headingAnchors,
+          alertBlockquote: props.extra,
+          toc: props.toc,
         },
       });
       setMarkdown(markdownInst);
@@ -57,8 +51,8 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
         document.getElementById(decodeURI(location.hash.replace("#", "")))?.scrollIntoView({ behavior: "smooth" });
     }, 100);
   }
-  createEffect(() => {
-    if (articleProps.content) {
+  createTrackedEffect(() => {
+    if (props.content) {
       untrack(async () => {
         while (rendering()) {
           await new Promise((resolve) => setTimeout(resolve, 100));
@@ -66,7 +60,7 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
         setReady(false);
         setRendering(true);
         try {
-          await render(articleProps.content);
+          await render(props.content);
           setReady(true);
           scrollToView();
         } catch (err) {
@@ -91,13 +85,7 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
       fallback={
         <article
           {...nativeProps}
-          class={clsx(
-            "article",
-            articleProps.compact && "article-compact",
-            "max-w-5xl! w-full",
-            nativeProps.class,
-            nativeProps.classList
-          )}
+          class={clsx("article", props.compact && "article-compact", "max-w-5xl! w-full", nativeProps.class)}
         >
           <p>
             <LoadingTips />
@@ -107,19 +95,13 @@ export default function (props: ComponentProps<"article"> & ArticleProps) {
     >
       <article
         {...nativeProps}
-        class={clsx(
-          "article",
-          articleProps.compact && "article-compact",
-          "max-w-5xl! w-full",
-          nativeProps.class,
-          nativeProps.classList
-        )}
+        class={clsx("article", props.compact && "article-compact", "max-w-5xl! w-full", nativeProps.class)}
         innerHTML={markdown()?.html()}
       />
-      <Show when={!articleProps.noExtraPaddings}>
+      <Show when={!props.noExtraPaddings}>
         <div class="h-64" />
       </Show>
-      <Show when={articleProps.toc && ready() && markdown()?.toc()}>
+      <Show when={props.toc && ready() && markdown()?.toc()}>
         <Popover
           class="fixed right-3 bottom-16 lg:bottom-3 print:hidden"
           square

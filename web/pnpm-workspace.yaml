@@ -1,2 +1,15 @@
 allowBuilds:
   esbuild: true
+minimumReleaseAgeExclude:
+  - "@solid-primitives/i18n@3.0.1"
+  - "@solidjs/signals@2.0.4"
+  - "@solidjs/web@2.0.4"
+  - "@vitest/mocker@5.1.2"
+  - "@vitest/spy@5.1.2"
+  - solid-js@2.0.4
+  - vitest@5.1.2
+patchedDependencies:
+  "@ark-ui/solid@6.0.0-next.0": patches/@ark-ui__solid@6.0.0-next.0.patch
+  "@modular-forms/solid@0.25.1": patches/@modular-forms__solid@0.25.1.patch
+  "@solid-primitives/keyed@1.5.3": patches/@solid-primitives__keyed@1.5.3.patch
+  "@zag-js/solid@2.0.0-next.3": patches/@zag-js__solid@2.0.0-next.3.patch

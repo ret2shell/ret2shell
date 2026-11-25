@@ -5,7 +5,7 @@ import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import { type DiagnosticMarker, EditorBare } from "@widgets/editor";
 import Select from "@widgets/select";
-import { createEffect, createMemo, createSignal, untrack } from "solid-js";
+import { createMemo, createSignal, createTrackedEffect, untrack } from "solid-js";
 import type { ChallengeWidgetProps } from ".";
 import dynamicLeetChecker from "./scripts/dynamic-leet.rx";
 import dynamicUuidChecker from "./scripts/dynamic-uuid.rx";
@@ -89,7 +89,7 @@ export default function (props: ChallengeWidgetProps) {
     challenge_id: () => props.challengeId,
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (scriptRemote.data) {
       untrack(() => {
         setScript(scriptRemote.data?.script || "");
@@ -111,7 +111,7 @@ export default function (props: ChallengeWidgetProps) {
     setScript(scriptRemote.data?.script || "");
   }
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (presetChecker()) {
       untrack(() => {
         setScript(presetChecker()!);

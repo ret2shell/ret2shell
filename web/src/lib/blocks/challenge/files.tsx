@@ -7,7 +7,7 @@ import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Divider from "@widgets/divider";
 import LoadingTips from "@widgets/loading-tips";
-import { createSignal, For, Suspense } from "solid-js";
+import { createSignal, For, Loading } from "solid-js";
 import type { ChallengeWidgetProps } from ".";
 
 type FileType = "static" | "mapped" | "checker";
@@ -104,7 +104,7 @@ export default function (props: ChallengeWidgetProps) {
           <span class="shrink-0 icon-[fluent--info-20-regular] w-5 h-5" />
           <span>{folderTips()}</span>
         </Card>
-        <Suspense
+        <Loading
           fallback={
             <div class="min-h-12 py-1 border-b border-b-layer-content/10 flex items-center space-x-2 overflow-hidden">
               <LoadingTips />
@@ -146,7 +146,7 @@ export default function (props: ChallengeWidgetProps) {
               )}
             </For>
           </div>
-        </Suspense>
+        </Loading>
       </div>
     </div>
   );

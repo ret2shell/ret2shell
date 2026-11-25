@@ -2,12 +2,13 @@ import { useGame } from "@api/game";
 import SidebarLayout from "@blocks/sidebar-layout";
 import { createBreakpoints } from "@solid-primitives/media";
 import { useNavigate, useParams } from "@solidjs/router";
+import type { JSX } from "@solidjs/web";
 import { isAdminOfGame } from "@storage/game";
 import { breakpoints } from "@storage/theme";
 import Button from "@widgets/button";
+import { Transition } from "@widgets/transition";
 import clsx from "clsx";
-import { createEffect, createMemo, createSignal, type JSX, Show } from "solid-js";
-import { Transition } from "solid-transition-group";
+import { createMemo, createSignal, createTrackedEffect, Show } from "solid-js";
 import SideBar from "./_blocks/sidebar";
 
 export default function (props: { children?: JSX.Element }) {
@@ -16,7 +17,7 @@ export default function (props: { children?: JSX.Element }) {
   const gameId = createMemo(() => Number.parseInt(params.game ?? "", 10) || -1);
   const game = useGame({ id: gameId, enabled: () => gameId() > 0 });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (game.data && !isAdminOfGame(game.data)) navigate("/sigtrap/403");
   });
   const matches = createBreakpoints(breakpoints);

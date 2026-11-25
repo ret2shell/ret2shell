@@ -8,7 +8,7 @@ import Card from "@widgets/card";
 import { type DiagnosticMarker, EditorBare } from "@widgets/editor";
 import Popover from "@widgets/popover";
 import Select from "@widgets/select";
-import { createEffect, createMemo, createSignal, Show } from "solid-js";
+import { createMemo, createSignal, createTrackedEffect, Show } from "solid-js";
 
 export default function Lifecycle() {
   const params = useParams();
@@ -26,13 +26,13 @@ export default function Lifecycle() {
     }))
   );
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (preset()) {
       setScript(lifecyclePresetMap[preset()!]);
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (game.data) {
       setScript(game.data.lifecycle || "");
     }

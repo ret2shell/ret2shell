@@ -17,7 +17,7 @@ import { Popover as ArkPopover } from "@ark-ui/solid";
 import UploadButton from "@blocks/upload-button";
 import type { ChallengeImage } from "@models/challenge";
 import { createForm, getValue, pattern, required, setValue, setValues } from "@modular-forms/solid";
-import { A } from "@solidjs/router";
+
 import { fullTheme, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
@@ -27,11 +27,11 @@ import Dialog from "@widgets/dialog";
 import IconCheckbox from "@widgets/icon-checkbox";
 import Input from "@widgets/input";
 import LoadingTips from "@widgets/loading-tips";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
 import Popover from "@widgets/popover";
 import RangeSlider from "@widgets/range-slider";
 import Select from "@widgets/select";
 import { DateTime } from "luxon";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { createSignal, For, Match, onCleanup, Show, Switch } from "solid-js";
 import type { ChallengeWidgetProps } from ".";
 
@@ -604,20 +604,20 @@ function InstanceList(props: ChallengeWidgetProps) {
           <li class="h-12 flex flex-row space-x-2 items-center border-b border-b-layer-content/10">
             <span class="shrink-0 icon-[fluent--cube-20-regular] w-5 h-5" />
             <span>{pod.metadata?.name}</span>
-            <A
+            <a
               class="hover:underline flex items-center space-x-2"
               href={`/users/${pod.metadata?.labels?.["ret.sh.cn/user"]}`}
             >
               <span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5" />
               <span>{pod.metadata?.annotations?.["ret.sh.cn/user"]}</span>
-            </A>
-            <A
+            </a>
+            <a
               class="hover:underline flex items-center space-x-2"
               href={`/games/${props.gameId}/teams/${pod.metadata?.labels?.["ret.sh.cn/team"]}`}
             >
               <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
               <span>{pod.metadata?.annotations?.["ret.sh.cn/team"]}</span>
-            </A>
+            </a>
             <span class="flex-1" />
             <span class="opacity-60">{pod.status?.phase}</span>
             <Popover

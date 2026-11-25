@@ -10,7 +10,7 @@ import Slider from "@widgets/slider";
 import TimePicker from "@widgets/timepicker";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { createEffect, For, Show, untrack } from "solid-js";
+import { createTrackedEffect, For, Show, untrack } from "solid-js";
 
 const WEIGHT_OPTIONS = [
   { value: 1, corner: "rounded-r-none!" },
@@ -60,7 +60,7 @@ export default function GameEdit(props: { onDone: (result: GameForm) => void; ga
       outer_hammer_url: game.data?.hammer_policy?.outer_url || "",
     },
   });
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (game.data) {
       untrack(() => {
         setValues(form, {

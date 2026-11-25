@@ -4,7 +4,7 @@ import type { ButtonProps } from "@widgets/button";
 import Button from "@widgets/button";
 import clsx from "clsx";
 import type { Progress as DownloadProgress } from "ky";
-import { createSignal, Match, Show, Switch, splitProps } from "solid-js";
+import { createSignal, Match, omit, Show, Switch } from "solid-js";
 import { downloadFile } from "../api/file";
 import { humanFileSize } from "../utils/size";
 import Progress from "../widgets/progress";
@@ -19,14 +19,7 @@ export default function DownloadButton(
     searchParams?: { [key: string]: string };
   }
 ) {
-  const [downloadProps, btnProps] = splitProps(props, [
-    "icon",
-    "file",
-    "url",
-    "searchParams",
-    "withFileName",
-    "displayName",
-  ]);
+  const btnProps = omit(props, "icon", "file", "url", "searchParams", "withFileName", "displayName");
   const [downloading, setDownloading] = createSignal(false);
   const [downloadComplete, setDownloadComplete] = createSignal(false);
   const [progress, setProgress] = createSignal(null as DownloadProgress | null);
@@ -34,13 +27,13 @@ export default function DownloadButton(
   async function handleDownload() {
     setDownloading(true);
     try {
-      const blob = await downloadFile(downloadProps.url, downloadProps.searchParams, (progress) => {
+      const blob = await downloadFile(props.url, props.searchParams, (progress) => {
         setProgress(progress);
       });
       const url = window.URL.createObjectURL(blob as Blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = downloadProps.file;
+      a.download = props.file;
       a.type = blob.type;
       a.click();
       window.URL.revokeObjectURL(url);
@@ -58,14 +51,14 @@ export default function DownloadButton(
   return (
     <Button
       {...btnProps}
-      title={btnProps.title ?? downloadProps.displayName ?? downloadProps.file ?? t("general.actions.download.title")}
+      title={btnProps.title ?? props.displayName ?? props.file ?? t("general.actions.download.title")}
       square={btnProps.square && !downloading() && !downloadComplete()}
       class={clsx("relative", btnProps.class)}
       loading={downloading()}
       onClick={handleDownload}
       disabled={downloading()}
     >
-      <Switch fallback={<span class={downloadProps.icon} />}>
+      <Switch fallback={<span class={props.icon} />}>
         <Match when={downloading()}>{null}</Match>
         <Match when={downloadComplete()}>
           <span
@@ -77,8 +70,8 @@ export default function DownloadButton(
           />
         </Match>
       </Switch>
-      <Show when={downloadProps.withFileName}>
-        <span>{downloadProps.displayName ?? downloadProps.file}</span>
+      <Show when={props.withFileName}>
+        <span>{props.displayName ?? props.file}</span>
       </Show>
       <Show when={downloading()}>
         <span class="mx-2 text-primary">

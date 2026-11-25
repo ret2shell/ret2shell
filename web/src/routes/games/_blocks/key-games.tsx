@@ -20,7 +20,7 @@ import Popover from "@widgets/popover";
 import Tag from "@widgets/tag";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { createEffect, createMemo, For, Show } from "solid-js";
+import { createMemo, createTrackedEffect, For, Show } from "solid-js";
 import { setGameCoverStore } from "./cover";
 import CreateGame from "./create";
 
@@ -55,12 +55,17 @@ export default function () {
   const selectedGame = createMemo(() => {
     return games.data?.[0].find((game) => game.id === selectedGameId()) ?? games.data?.[0].at(0);
   });
-  createEffect(() => {
-    setGameCoverStore({ preload: selectedGame() || null });
+  createTrackedEffect(() => {
+    setGameCoverStore((s) => {
+      s.preload = selectedGame() || null;
+    });
   });
 
   function onCreated(game: Game) {
-    setGameCoverStore({ preload: game, goto: game.id });
+    setGameCoverStore((s) => {
+      s.preload = game;
+      s.goto = game.id;
+    });
   }
 
   return (
@@ -296,7 +301,11 @@ export default function () {
             <button
               class="absolute w-full h-full top-0 left-0 m-0! cursor-pointer"
               onClick={() => {
-                if (selectedGame()) setGameCoverStore({ goto: selectedGame()!.id });
+                if (selectedGame()) {
+                  setGameCoverStore((s) => {
+                    s.goto = selectedGame()?.id ?? null;
+                  });
+                }
                 return false;
               }}
               type="button"
@@ -346,7 +355,11 @@ export default function () {
             <button
               class="absolute w-full h-full top-0 left-0 m-0! cursor-pointer"
               onClick={() => {
-                if (selectedGame()) setGameCoverStore({ goto: selectedGame()!.id });
+                if (selectedGame()) {
+                  setGameCoverStore((s) => {
+                    s.goto = selectedGame()?.id ?? null;
+                  });
+                }
                 return false;
               }}
               type="button"

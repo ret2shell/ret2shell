@@ -4,7 +4,7 @@ import { fullTheme, t } from "@storage/theme";
 import Article from "@widgets/article";
 import Button from "@widgets/button";
 import LoadingTips from "@widgets/loading-tips";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
 import { createMemo, Show } from "solid-js";
 
 export default function Intro(props: { editable?: boolean; onEdit?: () => void }) {

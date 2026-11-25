@@ -12,7 +12,7 @@ import Button from "@widgets/button";
 import Card from "@widgets/card";
 import Editor from "@widgets/editor";
 import Input from "@widgets/input";
-import { createEffect, createSignal, Show, untrack } from "solid-js";
+import { createSignal, createTrackedEffect, Show, untrack } from "solid-js";
 
 export type UserForm = {
   nickname: string;
@@ -31,7 +31,7 @@ export default function () {
       description: profile.data?.description || undefined,
     },
   });
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (profile.data) {
       untrack(() => {
         setValues(

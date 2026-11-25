@@ -1,7 +1,8 @@
 import Spin from "@assets/animates/spin";
+import type { ComponentProps } from "@solidjs/web";
+import { Transition } from "@widgets/transition";
 import clsx from "clsx";
-import { type ComponentProps, createEffect, createSignal, Show, splitProps, untrack } from "solid-js";
-import { Transition } from "solid-transition-group";
+import { createSignal, createTrackedEffect, omit, Show, untrack } from "solid-js";
 
 export type ImageProps = {
   src?: string;
@@ -12,25 +13,25 @@ export type ImageProps = {
 };
 
 export default function (props: ImageProps & ComponentProps<"div">) {
-  const [imageProps, rest] = splitProps(props, ["src", "alt", "fallback", "width", "height"]);
+  const rest = omit(props, "src", "alt", "fallback", "width", "height");
   const [loading, setLoading] = createSignal(true);
   let cachedSrc = "" as string | undefined;
-  createEffect(() => {
-    if (imageProps.src && cachedSrc !== imageProps.src) {
+  createTrackedEffect(() => {
+    if (props.src && cachedSrc !== props.src) {
       untrack(() => {
         setLoading(true);
-        cachedSrc = imageProps.src;
+        cachedSrc = props.src;
       });
     }
   });
   return (
-    <div {...rest} class={clsx("overflow-hidden relative bg-layer", rest.class, rest.classList)}>
+    <div {...rest} class={clsx("overflow-hidden relative bg-layer", rest.class)}>
       <img
         class="w-full h-full object-cover"
-        width={imageProps.width}
-        height={imageProps.height}
-        src={imageProps.src}
-        alt={imageProps.alt}
+        width={props.width}
+        height={props.height}
+        src={props.src}
+        alt={props.alt}
         onLoad={() => {
           setTimeout(() => {
             setLoading(false);

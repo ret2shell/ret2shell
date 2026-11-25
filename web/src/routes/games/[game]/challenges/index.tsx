@@ -19,10 +19,10 @@ import { addToast, removeToast } from "@storage/toast";
 import Button from "@widgets/button";
 import Link from "@widgets/link";
 import LoadingTips from "@widgets/loading-tips";
+import { Transition } from "@widgets/transition";
 import clsx from "clsx";
 import { DateTime } from "luxon";
-import { createEffect, createMemo, createSignal, Match, onCleanup, Show, Switch } from "solid-js";
-import { Transition } from "solid-transition-group";
+import { createMemo, createSignal, createTrackedEffect, Match, onCleanup, Show, Switch } from "solid-js";
 import Notifications from "./_blocks/notifications";
 import Team from "./_blocks/team";
 import Welcome from "./_blocks/welcome";
@@ -69,7 +69,7 @@ export default function () {
     return (challenge.data?.archive_at?.toMillis() || Number.POSITIVE_INFINITY) < Date.now();
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (isGameInArchived(game.data)) {
       navigate(`/training/${gameId()}${location.search}`, { replace: true });
       // addToast({
@@ -81,7 +81,7 @@ export default function () {
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (game.data && game.data.start_at > DateTime.now() && !isAdminOfGame(game.data)) {
       addToast({
         level: "warning",
@@ -134,7 +134,7 @@ export default function () {
     enabled: () => canCheckUnread(),
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!canCheckUnread()) {
       prevUnreadChats = [];
       return;

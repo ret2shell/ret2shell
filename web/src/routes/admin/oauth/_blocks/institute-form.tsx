@@ -5,7 +5,7 @@ import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Input from "@widgets/input";
 import Select from "@widgets/select";
-import { createEffect, untrack } from "solid-js";
+import { createTrackedEffect, untrack } from "solid-js";
 
 type FormType = {
   name: string;
@@ -27,7 +27,7 @@ export default function InstituteForm(props: {
     },
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (props.editSource) {
       untrack(() => {
         setValues(form, {

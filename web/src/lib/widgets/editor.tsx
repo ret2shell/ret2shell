@@ -1,11 +1,13 @@
+import type { ComponentProps } from "@solidjs/web";
 import ace from "ace-builds";
-import { type ComponentProps, createEffect, createSignal, onMount, Show, splitProps } from "solid-js";
+import { createSignal, createTrackedEffect, omit, onSettled, Show } from "solid-js";
 import Card from "./card";
 import "ace-builds/esm-resolver";
 import { handleHttpError } from "@api";
 import { uploadMedia } from "@api/media";
 import Spin from "@assets/animates/spin";
 import { mediaPath } from "@lib/utils/media";
+import { pick } from "@lib/utils/pick";
 import { type FormStore, setValue } from "@modular-forms/solid";
 import { t, themeStore } from "@storage/theme";
 import clsx from "clsx";
@@ -45,7 +47,8 @@ export type EditorProps = {
 };
 
 export function EditorBare(props: EditorProps & ComponentProps<"div">) {
-  const [editorProps, native] = splitProps(props, [
+  const native = omit(
+    props,
     "value",
     "onValueChanged",
     "lang",
@@ -58,14 +61,14 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
     "error",
     "onFocusIn",
     "commands",
-    "lints",
-  ]);
+    "lints"
+  );
   const [imageFile, setImageFile] = createSignal<File | null>(null);
   const [uploading, setUploading] = createSignal(false);
   const [dragging, setDragging] = createSignal(false);
   let editorElement: HTMLPreElement;
   let editor: ace.Ace.Editor | null = null;
-  function applyLints(lints = editorProps.lints ?? []) {
+  function applyLints(lints = props.lints ?? []) {
     if (!editor) return;
     const annotations = lints.map((lint) => ({
       row: lint.start_line,
@@ -114,15 +117,15 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
     }
   }
   async function initEditor() {
-    const isRune = editorProps.lang === "rune";
+    const isRune = props.lang === "rune";
     if (isRune) {
       runeModePromise ??= import("./ace/rune");
       await runeModePromise;
     }
     editor = ace.edit(editorElement!, {
-      mode: isRune ? "ace/mode/rune" : `ace/mode/${editorProps.lang || "text"}`,
+      mode: isRune ? "ace/mode/rune" : `ace/mode/${props.lang || "text"}`,
       theme: `ace/theme/${themeStore.colorScheme === "light" ? "kuroir" : "github_dark"}`,
-      readOnly: editorProps.readonly,
+      readOnly: props.readonly,
       showPrintMargin: false,
       highlightActiveLine: false,
       highlightGutterLine: false,
@@ -131,7 +134,7 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
       tabSize: 2,
       useSoftTabs: true,
       wrap: true,
-      value: editorProps.value,
+      value: props.value,
       fontSize: 16,
       fontFamily: "Reverier Mono",
       cursorStyle: "smooth",
@@ -139,25 +142,25 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
       fadeFoldWidgets: true,
       hScrollBarAlwaysVisible: false,
       selectionStyle: "text",
-      placeholder: editorProps.placeholder,
+      placeholder: props.placeholder,
       useWorker: false,
     });
     editor.container.style.lineHeight = "1.6";
     editor.on("change", () => {
       const content = editor?.getValue();
-      editorProps.onValueChanged?.(content || "");
-      if (editorProps.form && editorProps.name) setValue(editorProps.form, editorProps.name, content);
+      props.onValueChanged?.(content || "");
+      if (props.form && props.name) setValue(props.form, props.name, content);
     });
 
     editor.on("blur", () => {
-      editorProps.onBlur?.();
+      props.onBlur?.();
     });
 
     editor.on("focus", () => {
-      editorProps.onFocusIn?.();
+      props.onFocusIn?.();
     });
 
-    for (const command of editorProps.commands || []) {
+    for (const command of props.commands || []) {
       editor.commands.addCommand({
         name: command.name,
         bindKey: command.bindKey,
@@ -201,34 +204,34 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
     });
     applyLints();
   }
-  createEffect(() => {
-    if (editorProps.value !== editor?.getValue()) {
-      editor?.setValue(editorProps.value || "");
+  createTrackedEffect(() => {
+    if (props.value !== editor?.getValue()) {
+      editor?.setValue(props.value || "");
     }
   });
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (themeStore.colorScheme && editor) {
       editor.setTheme(`ace/theme/${themeStore.colorScheme === "light" ? "kuroir" : "github_dark"}`);
     }
   });
-  createEffect(() => {
-    applyLints(editorProps.lints ?? []);
+  createTrackedEffect(() => {
+    applyLints(props.lints ?? []);
   });
 
-  onMount(() => {
+  onSettled(() => {
     setTimeout(() => {
       initEditor();
     });
   });
 
   return (
-    <div {...native} class={clsx("relative", native.class, native.classList)}>
+    <div {...native} class={clsx("relative", native.class)}>
       <div class="absolute left-0 top-0 bottom-0 right-0 p-2">
         <pre class="w-full min-h-full relative bg-transparent!" ref={editorElement!} />
       </div>
-      <Show when={editorProps.error}>
+      <Show when={props.error}>
         <Card class="absolute bottom-2 left-2 right-2" level="error" contentClass="z-50 px-4 p-2">
-          <p>{editorProps.error}</p>
+          <p>{props.error}</p>
         </Card>
       </Show>
       <Show when={uploading()}>
@@ -247,7 +250,7 @@ export function EditorBare(props: EditorProps & ComponentProps<"div">) {
 }
 
 export default function Editor(props: EditorProps & ComponentProps<"div">) {
-  const [editorProps, nativeProps] = splitProps(props, [
+  const editorPropsKeys = [
     "value",
     "onValueChanged",
     "lang",
@@ -262,17 +265,19 @@ export default function Editor(props: EditorProps & ComponentProps<"div">) {
     "lineNumbers",
     "commands",
     "lints",
-  ]);
+  ] as const;
+  const nativeProps = omit(props, ...editorPropsKeys);
+  const editorProps = pick(props, editorPropsKeys);
   const [focused, setFocused] = createSignal(false);
   return (
     <div {...nativeProps} class={clsx("flex flex-col space-y-1", nativeProps.class)}>
-      <Show when={editorProps.title}>
-        <label class="label" for={editorProps.name}>
-          {editorProps.title}
+      <Show when={props.title}>
+        <label class="label" for={props.name}>
+          {props.title}
         </label>
       </Show>
       <Card
-        class={clsx("flex-1 card-field", editorProps.error && "card-error", focused() && "card-focused")}
+        class={clsx("flex-1 card-field", props.error && "card-error", focused() && "card-focused")}
         contentClass="p-2"
       >
         <EditorBare
@@ -280,11 +285,11 @@ export default function Editor(props: EditorProps & ComponentProps<"div">) {
           class="w-full h-full"
           onBlur={() => {
             setFocused(false);
-            editorProps.onBlur?.();
+            props.onBlur?.();
           }}
           onFocusIn={() => {
             setFocused(true);
-            editorProps.onFocusIn?.();
+            props.onFocusIn?.();
           }}
           onFocusOut={() => {
             setFocused(false);

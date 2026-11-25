@@ -16,8 +16,8 @@ export function ThemeBoxContent() {
           size="sm"
           class="min-h-0! h-0! group-hover:min-h-8! group-hover:h-8! overflow-hidden border-none"
           onClick={() => {
-            setThemeStore({
-              colorSchemeFollowsSystem: !themeStore.colorSchemeFollowsSystem,
+            setThemeStore((s) => {
+              s.colorSchemeFollowsSystem = !s.colorSchemeFollowsSystem;
             });
           }}
         >

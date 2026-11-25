@@ -1,9 +1,9 @@
 import { getCompletions, highlight, parse, QUERY_PRESETS } from "@lib/logql";
 import type { Diagnostic, Suggestion } from "@lib/logql/types";
+import { Portal } from "@solidjs/web";
 import { t } from "@storage/theme";
 import clsx from "clsx";
-import { createEffect, createMemo, createSignal, For, onCleanup, Show } from "solid-js";
-import { Portal } from "solid-js/web";
+import { createMemo, createSignal, createTrackedEffect, For, onCleanup, Show } from "solid-js";
 
 type Mode = { type: "presets" } | { type: "suggestions"; from: number; to: number; items: Suggestion[] };
 
@@ -177,7 +177,7 @@ export default function LogQueryInput(props: {
   const firstError = createMemo(() => diagnostics()[0]);
 
   // keep the keyboard-highlighted option visible inside the scrollable menu
-  createEffect(() => {
+  createTrackedEffect(() => {
     const idx = selected();
     if (idx >= 0 && open()) {
       document.getElementById(`logql-suggestion-${idx}`)?.scrollIntoView({ block: "nearest" });
@@ -199,7 +199,7 @@ export default function LogQueryInput(props: {
     popup.style.width = `${rect.width}px`;
   }
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (open() && itemCount() > 0) {
       placePopup();
       window.addEventListener("scroll", placePopup, true);

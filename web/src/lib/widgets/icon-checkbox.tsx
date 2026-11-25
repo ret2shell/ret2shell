@@ -1,8 +1,8 @@
 import { Checkbox, type CheckboxRootProps, Popover } from "@ark-ui/solid";
+import { type JSX, Portal } from "@solidjs/web";
 import { t } from "@storage/theme";
 import clsx from "clsx";
-import { type JSX, splitProps } from "solid-js";
-import { Portal } from "solid-js/web";
+import { omit } from "solid-js";
 
 export type CheckboxProps = {
   ghost?: boolean;
@@ -18,17 +18,17 @@ export default function (
       children?: JSX.Element;
     }
 ) {
-  const [checkboxProps, rest] = splitProps(props, ["ghost", "error", "inputProps", "uncheckedIcon", "checkedIcon"]);
+  const rest = omit(props, "ghost", "error", "inputProps", "uncheckedIcon", "checkedIcon");
 
   return (
-    <Popover.Root autoFocus={false} open={!!checkboxProps.error} closeOnInteractOutside={false}>
+    <Popover.Root autoFocus={false} open={!!props.error} closeOnInteractOutside={false}>
       <Popover.Anchor class="flex flex-col">
         <Checkbox.Root
           {...rest}
           title={
             rest.title ??
-            checkboxProps.inputProps?.title ??
-            checkboxProps.inputProps?.["aria-label"] ??
+            props.inputProps?.title ??
+            props.inputProps?.["aria-label"] ??
             t("general.actions.select.title")
           }
           class={clsx(
@@ -37,17 +37,16 @@ export default function (
             "items-center",
             "justify-center",
             "btn-square",
-            checkboxProps.ghost && "btn-ghost",
+            props.ghost && "btn-ghost",
             rest.disabled && "btn-disabled",
-            rest.class,
-            rest.classList
+            rest.class
           )}
         >
           <Checkbox.Control class="w-5 h-5 relative">
-            <span class={clsx(checkboxProps.uncheckedIcon, "w-5! h-5! absolute top-0 left-0")} />
-            <Checkbox.Indicator class={clsx(checkboxProps.checkedIcon, "text-primary", "w-5!", "h-5!")} />
+            <span class={clsx(props.uncheckedIcon, "w-5! h-5! absolute top-0 left-0")} />
+            <Checkbox.Indicator class={clsx(props.checkedIcon, "text-primary", "w-5!", "h-5!")} />
           </Checkbox.Control>
-          <Checkbox.HiddenInput {...checkboxProps.inputProps} />
+          <Checkbox.HiddenInput {...props.inputProps} />
         </Checkbox.Root>
       </Popover.Anchor>
       <Portal>

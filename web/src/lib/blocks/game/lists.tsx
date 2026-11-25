@@ -1,7 +1,7 @@
 import { useGameAuditLogs, useGameSubmissions, useUpdateGameAuditLogMutation } from "@api/game";
 import { type Audit, AuditState } from "@models/audit";
 import { createBreakpoints } from "@solid-primitives/media";
-import { A, useSearchParams } from "@solidjs/router";
+import { useSearchParams } from "@solidjs/router";
 import { breakpoints, t } from "@storage/theme";
 import Button from "@widgets/button";
 import LoadingTips from "@widgets/loading-tips";
@@ -78,25 +78,25 @@ export function AuditList(props: { gameId: number }) {
             <div class="min-h-12 py-2 gap-y-2 px-2 border-b border-b-layer-content/10 flex flex-row flex-wrap justify-end space-x-2 items-center">
               <div class="flex flex-row">
                 <span class="inline space-x-2 text-wrap">
-                  <A class="font-bold" href={`/users/${audit.user_id}`}>
+                  <a class="font-bold" href={`/users/${audit.user_id}`}>
                     {audit.user_name}
-                  </A>
+                  </a>
                   <span class="text-info opacity-60">@</span>
-                  <A class="font-bold opacity-60" href={`/games/${props.gameId}/teams/${audit.team_id}`}>
+                  <a class="font-bold opacity-60" href={`/games/${props.gameId}/teams/${audit.team_id}`}>
                     {audit.team_name ?? "wheel"}
-                  </A>
+                  </a>
                   <span title={audit.reason}>{audit.reason}</span>
                 </span>
               </div>
               <span class="flex-1" />
               <div class="flex flex-row space-x-2 items-center flex-wrap">
-                <A
+                <a
                   class="hover:underline flex space-x-2 items-center"
                   href={`/games/${props.gameId}/challenges?challenge=${audit.challenge_id}`}
                 >
                   <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
                   <span>{audit.challenge_name}</span>
-                </A>
+                </a>
                 <Tag
                   level={
                     audit.state === AuditState.Pending
@@ -197,14 +197,14 @@ export function SubmissionList(props: { training?: boolean; archived?: boolean; 
           {(submission) => (
             <div class="min-h-12 py-2 gap-y-2 px-2 border-b border-b-layer-content/10 flex flex-row flex-wrap justify-end space-x-2 items-center">
               <div class="flex flex-row space-x-2 items-center overflow-hidden *:whitespace-nowrap mx-0">
-                <A class="font-bold" href={`/users/${submission.user_id}`}>
+                <a class="font-bold" href={`/users/${submission.user_id}`}>
                   {submission.user_name}
-                </A>
+                </a>
                 <Show when={!props.training}>
                   <span class="text-info opacity-60">@</span>
-                  <A class="font-bold opacity-60" href={`/games/${props.gameId}/teams/${submission.team_id}`}>
+                  <a class="font-bold opacity-60" href={`/games/${props.gameId}/teams/${submission.team_id}`}>
                     {submission.team_name ?? "wheel"}
-                  </A>
+                  </a>
                 </Show>
                 <span>{t("challenge.submission.submit")}</span>
                 <span class="flex-1 truncate py-1 px-2 rounded-lg bg-layer-content/5" title={submission.content || ""}>
@@ -219,7 +219,7 @@ export function SubmissionList(props: { training?: boolean; archived?: boolean; 
               </div>
               <span class="flex-1 mx-0" />
               <div class="gap-y-2 flex flex-row space-x-2 items-center flex-wrap justify-end">
-                <A
+                <a
                   class="hover:underline flex space-x-2 items-center"
                   href={
                     props.training || props.archived
@@ -229,7 +229,7 @@ export function SubmissionList(props: { training?: boolean; archived?: boolean; 
                 >
                   <span class="shrink-0 icon-[fluent--flag-20-regular] w-5 h-5" />
                   <span>{submission.challenge_name}</span>
-                </A>
+                </a>
                 <Tag level={submission.solved === null ? "info" : submission.solved ? "success" : "warning"}>
                   <span>
                     {submission.solved === null

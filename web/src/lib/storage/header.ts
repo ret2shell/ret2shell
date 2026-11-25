@@ -1,5 +1,5 @@
 import { useLocation } from "@solidjs/router";
-import { createEffect, untrack } from "solid-js";
+import { createTrackedEffect, untrack } from "solid-js";
 import { t } from "./theme";
 
 class RouteHeader {
@@ -65,7 +65,7 @@ export const headerStore = new RouteHeader();
 
 export function Title(props: { page?: string; route: string; domain?: string }) {
   const watchedLocation = useLocation();
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (props.page || props.domain || props.route) {
       const fullRoutes = props.route.split("/").filter((r) => r);
       untrack(() => headerStore.insert(fullRoutes, props.domain, props.page));

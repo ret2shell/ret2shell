@@ -1,5 +1,5 @@
+import type { ComponentProps } from "@solidjs/web";
 import { themeStore } from "@storage/theme";
-import type { ComponentProps } from "solid-js";
 
 export function Reverier(
   props: {

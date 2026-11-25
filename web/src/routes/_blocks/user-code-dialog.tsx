@@ -1,14 +1,14 @@
 import { handleHttpError } from "@api";
 import { generateAccountCode, getAccountCode } from "@api/account";
 import { Permission } from "@models/user";
-import { A } from "@solidjs/router";
+
 import { accountStore, setAccountStore } from "@storage/account";
 import { t } from "@storage/theme";
 import Button from "@widgets/button";
 import Dialog from "@widgets/dialog";
 import Timer from "@widgets/timer";
 import type { DateTime } from "luxon";
-import { createEffect, createSignal, Match, Switch, untrack } from "solid-js";
+import { createSignal, createTrackedEffect, Match, Switch, untrack } from "solid-js";
 
 export default function UserCodeDialog() {
   const [code, setCode] = createSignal(null as { code: number; generate_at: DateTime } | null);
@@ -28,7 +28,9 @@ export default function UserCodeDialog() {
   const verified = () => accountStore.permissions.includes(Permission.Verified);
   function refreshCode() {
     if (!accountStore.warnedCodeGeneration) {
-      setAccountStore({ warnedCodeGeneration: true });
+      setAccountStore((s) => {
+        s.warnedCodeGeneration = true;
+      });
     }
     setCode(null);
     setLoadingCode(true);
@@ -41,7 +43,7 @@ export default function UserCodeDialog() {
       setLoadingCode(false);
     }, 500);
   }
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (accountStore.token) {
       untrack(getCode);
     } else {
@@ -68,10 +70,10 @@ export default function UserCodeDialog() {
               <span class="text-warning inline-block align-middle">
                 <span>{t("account.code.status.unverified.message")}</span>
               </span>
-              <A href="/account/settings/info" class="flex items-center space-x-2">
+              <a href="/account/settings/info" class="flex items-center space-x-2">
                 <span class="shrink-0 icon-[fluent--open-20-regular] w-5 h-5" />
                 <span>{t("account.code.status.unverified.action")}</span>
-              </A>
+              </a>
             </Match>
             <Match when={!accountStore.warnedCodeGeneration}>
               <span class="shrink-0 icon-[fluent--warning-20-regular] w-10 h-10 text-warning" />

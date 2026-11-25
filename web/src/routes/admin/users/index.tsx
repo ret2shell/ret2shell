@@ -3,7 +3,7 @@ import { useUpdateUserMutation, useUser, useUsers } from "@api/user";
 import { mediaPath } from "@lib/utils/media";
 import { permissionToIcon } from "@models/user";
 import { createBreakpoints } from "@solid-primitives/media";
-import { A, useSearchParams } from "@solidjs/router";
+import { useSearchParams } from "@solidjs/router";
 import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
 import Avatar from "@widgets/avatar";
@@ -114,7 +114,7 @@ function UserList() {
       <div class="grid grid-cols-1">
         <For each={users.data?.[0]}>
           {(user) => (
-            <A
+            <a
               class="h-12 flex items-center border-b border-b-layer-content/10 font-bold space-x-4 px-2 hover:bg-layer-content/5 cursor-pointer"
               href={`/admin/users?user=${user.id}`}
             >
@@ -150,7 +150,7 @@ function UserList() {
                   <Match when={matches.md}>{user.registered_at.toFormat("MM-dd HH:mm:ss")}</Match>
                 </Switch>
               </span>
-            </A>
+            </a>
           )}
         </For>
       </div>

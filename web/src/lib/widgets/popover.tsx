@@ -1,7 +1,8 @@
 import { Popover, type PopoverRootProps } from "@ark-ui/solid";
+import { pick } from "@lib/utils/pick";
+import { type ComponentProps, type JSX, Portal } from "@solidjs/web";
 import clsx from "clsx";
-import { type ComponentProps, createSignal, type JSX, splitProps } from "solid-js";
-import { Portal } from "solid-js/web";
+import { createSignal, omit } from "solid-js";
 import type { ButtonProps } from "./button";
 export default function (
   props: PopoverRootProps & {
@@ -11,7 +12,8 @@ export default function (
   } & ButtonProps &
     ComponentProps<"button">
 ) {
-  const [buttonProps, _1] = splitProps(props, [
+  const _2 = omit(
+    props,
     "level",
     "size",
     "ghost",
@@ -20,8 +22,6 @@ export default function (
     "uppercase",
     "loading",
     "square",
-  ]);
-  const [dialogRootProps, _2] = splitProps(_1, [
     "closeOnEscape",
     "closeOnInteractOutside",
     "defaultOpen",
@@ -40,9 +40,23 @@ export default function (
     "persistentElements",
     "present",
     "role",
-    "unmountOnExit",
-  ]);
-  const [popoverProps, nativeProps] = splitProps(_1, ["children", "btnContent", "popContentClass"]);
+    "unmountOnExit"
+  );
+  const dialogRootPropsKeys = [
+    "level",
+    "size",
+    "ghost",
+    "bold",
+    "justify",
+    "uppercase",
+    "loading",
+    "square",
+    "children",
+    "btnContent",
+    "popContentClass",
+  ] as const;
+  const nativeProps = omit(props, ...dialogRootPropsKeys);
+  const dialogRootProps = pick(props, dialogRootPropsKeys);
   const [opened, setOpened] = createSignal(false);
 
   return (
@@ -58,18 +72,17 @@ export default function (
         class={clsx(
           "btn",
           // btn-primary btn-info btn-success btn-warning btn-error
-          !!buttonProps.level && `btn-${buttonProps.level}`,
+          !!props.level && `btn-${props.level}`,
           // btn-sm btn-md
-          `btn-${buttonProps.size || "md"}`,
-          buttonProps.ghost && !opened() && "btn-ghost",
-          buttonProps.bold && "btn-bold",
+          `btn-${props.size || "md"}`,
+          props.ghost && !opened() && "btn-ghost",
+          props.bold && "btn-bold",
           // justify-start justify-center justify-end
-          `justify-${buttonProps.justify || "center"}`,
-          buttonProps.uppercase && "uppercase",
+          `justify-${props.justify || "center"}`,
+          props.uppercase && "uppercase",
           nativeProps.disabled && "btn-disabled",
-          buttonProps.square && "btn-square",
-          nativeProps.class,
-          nativeProps.classList
+          props.square && "btn-square",
+          nativeProps.class
         )}
         title={nativeProps.title}
       >
@@ -77,9 +90,7 @@ export default function (
       </Popover.Trigger>
       <Portal>
         <Popover.Positioner>
-          <Popover.Content class={clsx("popover", popoverProps.popContentClass)}>
-            {popoverProps.children}
-          </Popover.Content>
+          <Popover.Content class={clsx("popover", props.popContentClass)}>{props.children}</Popover.Content>
         </Popover.Positioner>
       </Portal>
     </Popover.Root>

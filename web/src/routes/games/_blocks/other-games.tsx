@@ -69,10 +69,14 @@ export default function () {
                 type="button"
                 class="flex flex-col p-3 lg:p-6 w-full flex-1"
                 onClick={() => {
-                  setGameCoverStore({ preload: game });
+                  setGameCoverStore((s) => {
+                    s.preload = game;
+                  });
                   setLoadingGame(game.id);
                   setTimeout(() => {
-                    setGameCoverStore({ goto: game.id });
+                    setGameCoverStore((s) => {
+                      s.goto = game.id;
+                    });
                     setLoadingGame(null);
                   }, 300);
                 }}

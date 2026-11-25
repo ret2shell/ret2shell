@@ -1,7 +1,7 @@
 import path from "node:path";
+import solidPlugin from "@solidjs/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import viteCompression from "vite-plugin-compression";
-import solidPlugin from "vite-plugin-solid";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig(({ mode }) => {
@@ -10,22 +10,23 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [
-      solidPlugin(),
+      solidPlugin({
+        frontends: {
+          // `.rx` files in this project are data files rendered as text, not
+          // ReactiveScript modules, so they are exported verbatim.
+          ".rx": {
+            compile(source) {
+              return { code: `export default ${JSON.stringify(source)};` };
+            },
+          },
+        },
+      }),
       tailwindcss(),
       viteCompression(),
       {
         name: "markdown-loader",
         transform(code, id) {
           if (id.slice(-3) === ".md") {
-            // For .md files, get the raw content
-            return `export default ${JSON.stringify(code)};`;
-          }
-        },
-      },
-      {
-        name: "rune-loader",
-        transform(code, id) {
-          if (id.slice(-3) === ".rx") {
             // For .md files, get the raw content
             return `export default ${JSON.stringify(code)};`;
           }
@@ -66,6 +67,12 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": path.resolve(import.meta.dirname, "src"),
+        // Solid 1 compat shims for packages that still import the removed
+        // `solid-js` subpaths (`@modular-forms/solid`, `@ark-ui/solid`).
+        "#solid-compat": path.resolve(import.meta.dirname, "src/lib/vendor/solid-compat.ts"),
+        "#solid-web-compat": path.resolve(import.meta.dirname, "src/lib/vendor/solid-web-compat.tsx"),
+        "solid-js/web": path.resolve(import.meta.dirname, "src/lib/vendor/solid-web-compat.tsx"),
+        "solid-js/store": path.resolve(import.meta.dirname, "src/lib/vendor/solid-compat.ts"),
         "@lib": path.resolve(import.meta.dirname, "src/lib"),
         "@api": path.resolve(import.meta.dirname, "src/lib/api"),
         "@assets": path.resolve(import.meta.dirname, "src/lib/assets"),

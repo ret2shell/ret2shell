@@ -1,7 +1,7 @@
 import { Checkbox, type CheckboxRootProps, Popover } from "@ark-ui/solid";
+import { type JSX, Portal } from "@solidjs/web";
 import clsx from "clsx";
-import { type JSX, Show, splitProps } from "solid-js";
-import { Portal } from "solid-js/web";
+import { omit, Show } from "solid-js";
 
 export type CheckboxProps = {
   ghost?: boolean;
@@ -15,14 +15,13 @@ export default function (
       children?: JSX.Element;
     }
 ) {
-  const [checkboxProps, _1] = splitProps(props, ["ghost", "error", "inputProps"]);
-  const [{ children }, rest] = splitProps(_1, ["children"]);
+  const rest = omit(props, "ghost", "error", "inputProps", "children");
 
   return (
-    <Popover.Root autoFocus={false} open={!!checkboxProps.error} closeOnInteractOutside={false}>
+    <Popover.Root autoFocus={false} open={!!props.error} closeOnInteractOutside={false}>
       <Popover.Anchor class={clsx("flex flex-col space-y-1 flex-1", rest.class)}>
         <Show when={props.title}>
-          <label class="label" for={checkboxProps.inputProps?.id ?? "input_NOTPOSSIBLE"}>
+          <label class="label" for={props.inputProps?.id ?? "input_NOTPOSSIBLE"}>
             {props.title}
           </label>
         </Show>
@@ -30,19 +29,18 @@ export default function (
           {...rest}
           class={clsx(
             "btn",
-            checkboxProps.ghost && "btn-ghost",
+            props.ghost && "btn-ghost",
             rest.disabled && "btn-disabled",
             "data-[state=checked]:border-2 data-[state=checked]:border-primary",
-            rest.class,
-            rest.classList
+            rest.class
           )}
         >
-          <Checkbox.Label asChild={() => children} />
+          <Checkbox.Label asChild={() => props.children} />
           <Checkbox.Control class="w-5 h-5 relative">
             <span class="shrink-0 icon-[fluent--checkmark-circle-20-regular] w-5! h-5! absolute top-0 left-0" />
             <Checkbox.Indicator class="icon-[fluent--checkmark-circle-20-filled] text-primary w-5! h-5!" />
           </Checkbox.Control>
-          <Checkbox.HiddenInput {...checkboxProps.inputProps} />
+          <Checkbox.HiddenInput {...props.inputProps} />
         </Checkbox.Root>
       </Popover.Anchor>
       <Portal>

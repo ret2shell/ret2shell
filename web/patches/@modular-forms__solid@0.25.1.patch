@@ -1,0 +1,384 @@
+diff --git a/dist/source/components/Field.jsx b/dist/source/components/Field.jsx
+index aaa344b74f043af1fa42bec0f04c367d5bc0594f..86dbba44af4dfefd622f07be8296a4be539f3db8 100644
+--- a/dist/source/components/Field.jsx
++++ b/dist/source/components/Field.jsx
+@@ -1,4 +1,4 @@
+-import { createEffect, createMemo, untrack, mergeProps, } from 'solid-js';
++import { createTrackedEffect, createMemo, untrack, mergeProps, } from '#solid-compat';
+ import { createLifecycle } from '../primitives';
+ import { getElementInput, handleFieldEvent, initializeFieldStore, } from '../utils';
+ /**
+@@ -43,7 +43,7 @@ export function Field(props) {
+                 // Create effect that replaces initial input and input of field with
+                 // initial input of element if both is "undefined", so that dirty
+                 // state also resets to "false" when user removes input
+-                createEffect(() => {
++                createTrackedEffect(() => {
+                     if (element.type !== 'radio' &&
+                         getField().startValue.get() === undefined &&
+                         untrack(getField().value.get) === undefined) {
+diff --git a/dist/source/components/FieldArray.jsx b/dist/source/components/FieldArray.jsx
+index 9c92dc9324c48ea53fad0ca3879dadbb55979ca4..0cdfd6653243a891aaa1a754452f4629fdc2c7b1 100644
+--- a/dist/source/components/FieldArray.jsx
++++ b/dist/source/components/FieldArray.jsx
+@@ -1,4 +1,4 @@
+-import { createMemo, mergeProps } from 'solid-js';
++import { createMemo, mergeProps } from '#solid-compat';
+ import { createLifecycle } from '../primitives';
+ import { initializeFieldArrayStore } from '../utils';
+ /**
+diff --git a/dist/source/components/Form.jsx b/dist/source/components/Form.jsx
+index 1c97db4738b1f54b138a651e4d9ca3a4cc4fdd6a..1f1b1366fc700b35f0c5dc8c7b13ab6a5f745354 100644
+--- a/dist/source/components/Form.jsx
++++ b/dist/source/components/Form.jsx
+@@ -1,4 +1,4 @@
+-import { batch, splitProps } from 'solid-js';
++import { batch, splitProps } from '#solid-compat';
+ import { FormError } from '../exceptions';
+ import { getValues, setError, setResponse, validate } from '../methods';
+ /**
+diff --git a/dist/source/methods/focus.js b/dist/source/methods/focus.js
+index 29103feb708e0e23d71fa6ceb1cf05e566ff945c..c3c509cf6e13516d434095e0f80ba2b3e6b48c33 100644
+--- a/dist/source/methods/focus.js
++++ b/dist/source/methods/focus.js
+@@ -1,4 +1,4 @@
+-import { untrack } from 'solid-js';
++import { untrack } from '#solid-compat';
+ import { getFieldStore } from '../utils';
+ /**
+  * Focuses the specified field of the form.
+diff --git a/dist/source/methods/hasField.js b/dist/source/methods/hasField.js
+index c7f4a995d794ea35e7437f53a802a6b7210b1a3f..44433e531d13b517d77e1af94f26996d6ca2854b 100644
+--- a/dist/source/methods/hasField.js
++++ b/dist/source/methods/hasField.js
+@@ -1,4 +1,4 @@
+-import { createMemo } from 'solid-js';
++import { createMemo } from '#solid-compat';
+ import { getFieldStore } from '../utils';
+ /**
+  * Checks if the specified field is included in the form.
+diff --git a/dist/source/methods/hasFieldArray.js b/dist/source/methods/hasFieldArray.js
+index f9fb3839782a1e936a7fbe332a28d3cbe5a711c1..b370fab0c9ccc69a6ddb1e7012642e432de019c1 100644
+--- a/dist/source/methods/hasFieldArray.js
++++ b/dist/source/methods/hasFieldArray.js
+@@ -1,4 +1,4 @@
+-import { createMemo } from 'solid-js';
++import { createMemo } from '#solid-compat';
+ import { getFieldArrayStore } from '../utils';
+ /**
+  * Checks if the specified field array is included in the form.
+diff --git a/dist/source/methods/insert.js b/dist/source/methods/insert.js
+index aed83b327e5d69b1b1ff697600a1184c103095e8..d02f7b0bd44dbe35a49343e0ed54130f0072df72 100644
+--- a/dist/source/methods/insert.js
++++ b/dist/source/methods/insert.js
+@@ -1,4 +1,4 @@
+-import { batch, untrack } from 'solid-js';
++import { batch, untrack } from '#solid-compat';
+ import { getFieldArrayStore, getFieldArrayState, getFieldState, getPathIndex, getUniqueId, setFieldArrayState, setFieldArrayValue, setFieldState, sortArrayPathIndex, validateIfRequired, getFieldArrayNames, getFieldNames, } from '../utils';
+ /**
+  * Inserts a new item into the field array.
+diff --git a/dist/source/methods/move.js b/dist/source/methods/move.js
+index 5665399249f253ea459a804f75fb226735a7ba12..7b6d85c2182d72f64670fde18e17af4a46e457aa 100644
+--- a/dist/source/methods/move.js
++++ b/dist/source/methods/move.js
+@@ -1,4 +1,4 @@
+-import { batch, untrack } from 'solid-js';
++import { batch, untrack } from '#solid-compat';
+ import { getFieldArrayNames, getFieldArrayState, getFieldArrayStore, getFieldNames, getFieldState, getPathIndex, setFieldArrayState, setFieldState, sortArrayPathIndex, updateFieldArrayDirty, } from '../utils';
+ /**
+  * Moves a field of the field array to a new position and rearranges all fields
+diff --git a/dist/source/methods/remove.js b/dist/source/methods/remove.js
+index cac7e8a7b9bde19e316cfe6b2c692beb15731268..7f0f011eaba74431ba1e877c645e62ad24e35ef0 100644
+--- a/dist/source/methods/remove.js
++++ b/dist/source/methods/remove.js
+@@ -1,4 +1,4 @@
+-import { batch, untrack } from 'solid-js';
++import { batch, untrack } from '#solid-compat';
+ import { getFieldArrayNames, getFieldArrayState, getFieldArrayStore, getFieldNames, getFieldState, getPathIndex, setFieldArrayState, setFieldState, sortArrayPathIndex, updateFieldArrayDirty, validateIfRequired, } from '../utils';
+ /**
+  * Removes a item of the field array.
+diff --git a/dist/source/methods/replace.js b/dist/source/methods/replace.js
+index ea6e336b6b8d21841555cc10a04a7ed769407b97..0d260e71bc9576158d30248547c2763b9a416801 100644
+--- a/dist/source/methods/replace.js
++++ b/dist/source/methods/replace.js
+@@ -1,4 +1,4 @@
+-import { batch, untrack } from 'solid-js';
++import { batch, untrack } from '#solid-compat';
+ import { getFieldArrayStore, getUniqueId, setFieldArrayValue } from '../utils';
+ /**
+  * Replaces a item of the field array.
+diff --git a/dist/source/methods/reset.js b/dist/source/methods/reset.js
+index 638fe6e31da06f3ded5688a642b598b9d37dc1d7..73ff0e5af935609ff446feae36452382bb2c41a7 100644
+--- a/dist/source/methods/reset.js
++++ b/dist/source/methods/reset.js
+@@ -1,4 +1,4 @@
+-import { batch, untrack } from 'solid-js';
++import { batch, untrack } from '#solid-compat';
+ import { getFilteredNames, getOptions, getFieldStore, getPathValue, getFieldArrayStore, getUniqueId, updateFormState, } from '../utils';
+ export function reset(form, arg2, arg3) {
+     // Filter names between field and field arrays
+diff --git a/dist/source/methods/setError.js b/dist/source/methods/setError.js
+index 2068b4e2abafc26c13154b44b763666dad21a60c..4bd2e98382f010da6d214a6db96620186c0e8010 100644
+--- a/dist/source/methods/setError.js
++++ b/dist/source/methods/setError.js
+@@ -1,4 +1,4 @@
+-import { batch, untrack } from 'solid-js';
++import { batch, untrack } from '#solid-compat';
+ import { getFieldArrayStore, getFieldStore, updateFormInvalid } from '../utils';
+ import { focus } from './focus';
+ /**
+diff --git a/dist/source/methods/setResponse.js b/dist/source/methods/setResponse.js
+index 27bba7a461f5b3641879f99653b403d79cd2960b..dea98187a564c96d488c25bf35e3d89de6865b36 100644
+--- a/dist/source/methods/setResponse.js
++++ b/dist/source/methods/setResponse.js
+@@ -1,4 +1,4 @@
+-import { untrack } from 'solid-js';
++import { untrack } from '#solid-compat';
+ /**
+  * Sets the response of the form.
+  *
+diff --git a/dist/source/methods/setValue.js b/dist/source/methods/setValue.js
+index 9e8bc85e99b90d19401ab660fe1bff9c7cb58326..e905a40ffaf632aeb21e72702a04d40487198e73 100644
+--- a/dist/source/methods/setValue.js
++++ b/dist/source/methods/setValue.js
+@@ -1,4 +1,4 @@
+-import { batch } from 'solid-js';
++import { batch } from '#solid-compat';
+ import { initializeFieldStore, updateFieldDirty, validateIfRequired, } from '../utils';
+ export function setValue(form, name, value, { shouldTouched = true, shouldDirty = true, shouldValidate = true, shouldFocus = true, } = {}) {
+     batch(() => {
+diff --git a/dist/source/methods/setValues.js b/dist/source/methods/setValues.js
+index 35214adfda36e0801d6f1fa1d3bebdb83837824b..fa6bd31963ca7d9d400cc92a8ec31f9d8a11fe44 100644
+--- a/dist/source/methods/setValues.js
++++ b/dist/source/methods/setValues.js
+@@ -1,4 +1,4 @@
+-import { batch } from 'solid-js';
++import { batch } from '#solid-compat';
+ import { getUniqueId, initializeFieldArrayStore } from '../utils';
+ import { setValue } from './setValue';
+ import { validate } from './validate';
+diff --git a/dist/source/methods/submit.js b/dist/source/methods/submit.js
+index ec7ac39b48db4056d24319df4aa3a0719cf13b76..1ffcb756cb7436bd148d56d527dc6f10b0560e93 100644
+--- a/dist/source/methods/submit.js
++++ b/dist/source/methods/submit.js
+@@ -1,4 +1,4 @@
+-import { untrack } from 'solid-js';
++import { untrack } from '#solid-compat';
+ /**
+  * Validates and submits the form.
+  *
+diff --git a/dist/source/methods/swap.js b/dist/source/methods/swap.js
+index f13eeff19de2d8b5d6478958ddd408b97a608a06..919bf5dd3ab7d3e129fc40864d0f58603ac1b71c 100644
+--- a/dist/source/methods/swap.js
++++ b/dist/source/methods/swap.js
+@@ -1,4 +1,4 @@
+-import { batch, untrack } from 'solid-js';
++import { batch, untrack } from '#solid-compat';
+ import { getFieldArrayNames, getFieldArrayState, getFieldArrayStore, getFieldNames, getFieldState, getPathIndex, setFieldArrayState, setFieldState, updateFieldArrayDirty, } from '../utils';
+ /**
+  * Swaps two fields of a field array by their index.
+diff --git a/dist/source/methods/validate.js b/dist/source/methods/validate.js
+index 01eda1bdf7926e2a9c66d4627ccf015eaf417284..bddfa4954057df87e5dd34e977320ada9bc5b635 100644
+--- a/dist/source/methods/validate.js
++++ b/dist/source/methods/validate.js
+@@ -1,4 +1,4 @@
+-import { batch, untrack } from 'solid-js';
++import { batch, untrack } from '#solid-compat';
+ import { getFilteredNames, getOptions, getUniqueId, getFieldStore, getFieldArrayStore, setErrorResponse, updateFormInvalid, } from '../utils';
+ import { focus } from './focus';
+ import { getValues } from './getValues';
+diff --git a/dist/source/primitives/createForm.js b/dist/source/primitives/createForm.js
+index 5410921b476284d80e3e3183abbaa1aef715bac3..e14255f75d782e87df0dec9e19d5e930c88ceaa2 100644
+--- a/dist/source/primitives/createForm.js
++++ b/dist/source/primitives/createForm.js
+@@ -1,4 +1,4 @@
+-import { mergeProps } from 'solid-js';
++import { mergeProps } from '#solid-compat';
+ import { Form, Field, FieldArray } from '../components';
+ import { createFormStore } from './createFormStore';
+ export function createForm(options) {
+diff --git a/dist/source/primitives/createLifecycle.js b/dist/source/primitives/createLifecycle.js
+index b2686a1f19607328241827e64d046b38cfde53aa..35415f188a66f784ef1f29182b423c0198b0806b 100644
+--- a/dist/source/primitives/createLifecycle.js
++++ b/dist/source/primitives/createLifecycle.js
+@@ -1,8 +1,8 @@
+-import { batch, createEffect, onCleanup, untrack } from 'solid-js';
++import { batch, createTrackedEffect, onCleanup, untrack } from '#solid-compat';
+ import { reset } from '../methods';
+ import { getUniqueId, updateFormState } from '../utils';
+ export function createLifecycle({ of: form, name, getStore, validate, validateOn, revalidateOn, transform, keepActive = false, keepState = true, }) {
+-    createEffect(() => {
++    createTrackedEffect(() => {
+         // Get store of field or field array
+         const store = getStore();
+         // Add validation functions
+diff --git a/dist/source/primitives/createSignal.js b/dist/source/primitives/createSignal.js
+index 6ae632c1a69ac183e3889f0b4c39334cb6fc6b29..11761ca202291b3b7a614bbe8f85b4e3ee7e9543 100644
+--- a/dist/source/primitives/createSignal.js
++++ b/dist/source/primitives/createSignal.js
+@@ -1,4 +1,4 @@
+-import { createSignal as createSolidSignal } from 'solid-js';
++import { createSignal as createSolidSignal } from '#solid-compat';
+ export function createSignal(value) {
+     const [get, set] = createSolidSignal(value);
+     return { get, set };
+diff --git a/dist/source/utils/getElementInput.js b/dist/source/utils/getElementInput.js
+index ecf1bc017b9ed18fbe657a8a5d9b4b254a839312..0b15031d36deef7c0b619ff9d0db366117f3096b 100644
+--- a/dist/source/utils/getElementInput.js
++++ b/dist/source/utils/getElementInput.js
+@@ -1,4 +1,4 @@
+-import { untrack } from 'solid-js';
++import { untrack } from '#solid-compat';
+ /**
+  * Returns the current input of the element.
+  *
+diff --git a/dist/source/utils/getFieldArrayNames.js b/dist/source/utils/getFieldArrayNames.js
+index 89da713eb917d42ee8227d61f22ed6a78341887d..a8f810a307b0292333244dfd8d08171767df95b1 100644
+--- a/dist/source/utils/getFieldArrayNames.js
++++ b/dist/source/utils/getFieldArrayNames.js
+@@ -1,4 +1,4 @@
+-import { untrack } from 'solid-js';
++import { untrack } from '#solid-compat';
+ import { removeInvalidNames } from './removeInvalidNames';
+ /**
+  * Returns a list with the names of all field arrays.
+diff --git a/dist/source/utils/getFieldArrayState.js b/dist/source/utils/getFieldArrayState.js
+index a4d22dddc32de39bd3b9c71f499c01e422a2334d..6f4a321586169ea9eea53d0a13d0d96c7832f175 100644
+--- a/dist/source/utils/getFieldArrayState.js
++++ b/dist/source/utils/getFieldArrayState.js
+@@ -1,4 +1,4 @@
+-import { untrack } from 'solid-js';
++import { untrack } from '#solid-compat';
+ import { getFieldArrayStore } from './getFieldArrayStore';
+ /**
+  * Returns the RAW state of the field array.
+diff --git a/dist/source/utils/getFieldNames.js b/dist/source/utils/getFieldNames.js
+index 9ed99c5735a07192ad0735c312f0d51b6ffd4d3f..fa989aad595ab52a207e198d6f8787955c3e0121 100644
+--- a/dist/source/utils/getFieldNames.js
++++ b/dist/source/utils/getFieldNames.js
+@@ -1,4 +1,4 @@
+-import { untrack } from 'solid-js';
++import { untrack } from '#solid-compat';
+ import { removeInvalidNames } from './removeInvalidNames';
+ /**
+  * Returns a list with the names of all fields.
+diff --git a/dist/source/utils/getFieldState.js b/dist/source/utils/getFieldState.js
+index 54b059abda92ed9e804b12b694e6dbbe4f6ed48d..f6358d16383ff3f851d2b9da188ae13e051134e8 100644
+--- a/dist/source/utils/getFieldState.js
++++ b/dist/source/utils/getFieldState.js
+@@ -1,4 +1,4 @@
+-import { untrack } from 'solid-js';
++import { untrack } from '#solid-compat';
+ import { getFieldStore } from './getFieldStore';
+ /**
+  * Returns the RAW state of the field.
+diff --git a/dist/source/utils/getFilteredNames.js b/dist/source/utils/getFilteredNames.js
+index 521d2efda499dcca996fcce13297b2252a00d940..3557897e038191a1e50b7842e6218882d8972af3 100644
+--- a/dist/source/utils/getFilteredNames.js
++++ b/dist/source/utils/getFilteredNames.js
+@@ -1,4 +1,4 @@
+-import { untrack } from 'solid-js';
++import { untrack } from '#solid-compat';
+ import { getFieldArrayNames } from './getFieldArrayNames';
+ import { getFieldNames } from './getFieldNames';
+ /**
+diff --git a/dist/source/utils/handleFieldEvent.js b/dist/source/utils/handleFieldEvent.js
+index 5d1f40e6d972b5a9b090b4e116b0f6e0fd798164..683fccd4a51ed9e183936179d076ad751a9cb7b3 100644
+--- a/dist/source/utils/handleFieldEvent.js
++++ b/dist/source/utils/handleFieldEvent.js
+@@ -1,4 +1,4 @@
+-import { batch } from 'solid-js';
++import { batch } from '#solid-compat';
+ import { updateFieldDirty } from './updateFieldDirty';
+ import { validateIfRequired } from './validateIfRequired';
+ export function handleFieldEvent(form, field, name, event, validationModes, inputValue) {
+diff --git a/dist/source/utils/removeInvalidNames.js b/dist/source/utils/removeInvalidNames.js
+index ded4f5eb93ade37c674619dbe1296c6c74b86d6c..45e4a399582254d7665326cd12dbd90871529f68 100644
+--- a/dist/source/utils/removeInvalidNames.js
++++ b/dist/source/utils/removeInvalidNames.js
+@@ -1,4 +1,4 @@
+-import { untrack } from 'solid-js';
++import { untrack } from '#solid-compat';
+ import { getFieldArrayNames } from './getFieldArrayNames';
+ import { getFieldArrayStore } from './getFieldArrayStore';
+ import { getPathIndex } from './getPathIndex';
+diff --git a/dist/source/utils/setErrorResponse.js b/dist/source/utils/setErrorResponse.js
+index 2177f624303e788870d263b5ddc9a447450b603d..3128629ac9dda55c50e38e3fb53107fa084cc846 100644
+--- a/dist/source/utils/setErrorResponse.js
++++ b/dist/source/utils/setErrorResponse.js
+@@ -1,4 +1,4 @@
+-import { untrack } from 'solid-js';
++import { untrack } from '#solid-compat';
+ import { getFieldArrayStore } from './getFieldArrayStore';
+ import { getFieldStore } from './getFieldStore';
+ /**
+diff --git a/dist/source/utils/setFieldArrayValue.js b/dist/source/utils/setFieldArrayValue.js
+index 176c7758f9f94e46e5ae67673ff3ee8d9f3e13fd..2ddfd9be8e63bc4022befd45365688ccbb63e8e4 100644
+--- a/dist/source/utils/setFieldArrayValue.js
++++ b/dist/source/utils/setFieldArrayValue.js
+@@ -1,4 +1,4 @@
+-import { batch } from 'solid-js';
++import { batch } from '#solid-compat';
+ import { getUniqueId } from './getUniqueId';
+ import { setFieldArrayState } from './setFieldArrayState';
+ import { setFieldState } from './setFieldState';
+diff --git a/dist/source/utils/updateFieldArrayDirty.js b/dist/source/utils/updateFieldArrayDirty.js
+index b291775a015fd2c77baa4cf2e1d1d6fa457b4b40..864c8cb9322c589a340bfeede5cea1cb77d241a4 100644
+--- a/dist/source/utils/updateFieldArrayDirty.js
++++ b/dist/source/utils/updateFieldArrayDirty.js
+@@ -1,4 +1,4 @@
+-import { batch, untrack } from 'solid-js';
++import { batch, untrack } from '#solid-compat';
+ import { updateFormDirty } from './updateFormDirty';
+ /**
+  * Updates the dirty state of a field array.
+diff --git a/dist/source/utils/updateFieldDirty.js b/dist/source/utils/updateFieldDirty.js
+index 49b5e462783424dffda5d59a6e6be80b6eca36c6..348498471958d27d851a95216edda1e1dc02e367 100644
+--- a/dist/source/utils/updateFieldDirty.js
++++ b/dist/source/utils/updateFieldDirty.js
+@@ -1,4 +1,4 @@
+-import { batch, untrack } from 'solid-js';
++import { batch, untrack } from '#solid-compat';
+ import { isFieldDirty } from './isFieldDirty';
+ import { updateFormDirty } from './updateFormDirty';
+ /**
+diff --git a/dist/source/utils/updateFormDirty.js b/dist/source/utils/updateFormDirty.js
+index 30c0bcdb43f27e38eff6f45479d985aaa2f9cd57..6e478167a76c4e816aa0a4c1f502b98f33696c9c 100644
+--- a/dist/source/utils/updateFormDirty.js
++++ b/dist/source/utils/updateFormDirty.js
+@@ -1,4 +1,4 @@
+-import { untrack } from 'solid-js';
++import { untrack } from '#solid-compat';
+ import { getFieldAndArrayStores } from './getFieldAndArrayStores';
+ /**
+  * Updates the dirty state of the form.
+diff --git a/dist/source/utils/updateFormInvalid.js b/dist/source/utils/updateFormInvalid.js
+index 11f4188f52bc7a391a1254320dfc04e34c5a94b4..b91e473c4b9a9b449b52e72123f654b21a4d7876 100644
+--- a/dist/source/utils/updateFormInvalid.js
++++ b/dist/source/utils/updateFormInvalid.js
+@@ -1,4 +1,4 @@
+-import { untrack } from 'solid-js';
++import { untrack } from '#solid-compat';
+ import { getFieldAndArrayStores } from './getFieldAndArrayStores';
+ /**
+  * Updates the invalid state of the form.
+diff --git a/dist/source/utils/updateFormState.js b/dist/source/utils/updateFormState.js
+index e5ccb0cbb3e01f634afd66a90cc353436e5b2253..536501f1838e577fd489250dc62f40443680a832 100644
+--- a/dist/source/utils/updateFormState.js
++++ b/dist/source/utils/updateFormState.js
+@@ -1,4 +1,4 @@
+-import { batch, untrack } from 'solid-js';
++import { batch, untrack } from '#solid-compat';
+ import { getFieldAndArrayStores } from './getFieldAndArrayStores';
+ /**
+  * Updates the touched, dirty and invalid state of the form.
+diff --git a/dist/source/utils/validateIfRequired.js b/dist/source/utils/validateIfRequired.js
+index 15dbc981fe19b0ca1b0f3ed9de89936904a4c652..7bf95ea8083daef506127c65a7cb9a040ff1d9ec 100644
+--- a/dist/source/utils/validateIfRequired.js
++++ b/dist/source/utils/validateIfRequired.js
+@@ -1,4 +1,4 @@
+-import { untrack } from 'solid-js';
++import { untrack } from '#solid-compat';
+ import { validate } from '../methods';
+ /**
+  * Validates a field or field array only if required.

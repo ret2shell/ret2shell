@@ -1,9 +1,10 @@
 import { Dialog, type DialogRootProps } from "@ark-ui/solid";
+import { pick } from "@lib/utils/pick";
+import { type ComponentProps, type JSX, Portal } from "@solidjs/web";
 import { fullTheme, t } from "@storage/theme";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
 import clsx from "clsx";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
-import { type ComponentProps, type JSX, splitProps } from "solid-js";
-import { Portal } from "solid-js/web";
+import { omit } from "solid-js";
 import type { ButtonProps } from "./button";
 
 export default function (
@@ -15,7 +16,7 @@ export default function (
       stretched?: boolean;
     }
 ) {
-  const [buttonProps, _1] = splitProps(props, [
+  const dialogRootPropsKeys = [
     "level",
     "size",
     "ghost",
@@ -24,8 +25,6 @@ export default function (
     "uppercase",
     "loading",
     "square",
-  ]);
-  const [dialogRootProps, _2] = splitProps(_1, [
     "closeOnEscape",
     "closeOnInteractOutside",
     "defaultOpen",
@@ -49,8 +48,12 @@ export default function (
     "role",
     "trapFocus",
     "unmountOnExit",
-  ]);
-  const [contents, nativeProps] = splitProps(_2, ["btnContent", "children", "stretched"]);
+    "btnContent",
+    "children",
+    "stretched",
+  ] as const;
+  const nativeProps = omit(props, ...dialogRootPropsKeys);
+  const dialogRootProps = pick(props, dialogRootPropsKeys);
   return (
     <Dialog.Root {...dialogRootProps} lazyMount unmountOnExit>
       <Dialog.Trigger
@@ -58,21 +61,21 @@ export default function (
         class={clsx(
           "btn",
           // btn-primary btn-info btn-success btn-warning btn-error
-          !!buttonProps.level && `btn-${buttonProps.level}`,
+          !!props.level && `btn-${props.level}`,
           // btn-sm btn-md btn-xs
-          buttonProps.ghost && "btn-ghost",
-          buttonProps.bold && "btn-bold",
+          props.ghost && "btn-ghost",
+          props.bold && "btn-bold",
           // justify-start justify-center justify-end
-          (buttonProps.justify && `justify-${buttonProps.justify}`) ?? "justify-center",
-          (buttonProps.size && `btn-${buttonProps.size}`) ?? "btn-md",
-          buttonProps.uppercase && "uppercase",
-          buttonProps.square && "btn-square",
+          (props.justify && `justify-${props.justify}`) ?? "justify-center",
+          (props.size && `btn-${props.size}`) ?? "btn-md",
+          props.uppercase && "uppercase",
+          props.square && "btn-square",
           nativeProps.disabled && "btn-disabled",
           nativeProps.class
         )}
         title={nativeProps.title}
       >
-        {contents.btnContent}
+        {props.btnContent}
       </Dialog.Trigger>
       <Portal>
         <Dialog.Backdrop class="dialog-backdrop fixed backdrop-blur-sm bg-layer/60 top-0 left-0 w-screen h-screen" />
@@ -80,7 +83,7 @@ export default function (
           <Dialog.Content
             class={clsx(
               "dialog-content card relative max-h-[calc(100vh-2rem)]",
-              contents.stretched && "w-full max-w-5xl mx-4"
+              props.stretched && "w-full max-w-5xl mx-4"
             )}
           >
             <OverlayScrollbarsComponent
@@ -93,7 +96,7 @@ export default function (
               class="relative w-full max-w-full h-full max-h-[calc(100vh-2rem)] overflow-hidden"
               defer
             >
-              <div class="card-content p-3 lg:p-6">{contents.children}</div>
+              <div class="card-content p-3 lg:p-6">{props.children}</div>
             </OverlayScrollbarsComponent>
             <Dialog.CloseTrigger
               class="btn btn-sm btn-square flex items-center justify-center btn-ghost absolute right-2 top-2"

@@ -3,7 +3,7 @@ import type { Instance } from "@models/instance";
 import { t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import { Wsrx, WsrxError, WsrxFeature, type WsrxInstance, type WsrxOptions, WsrxState } from "@xdsec/wsrx";
-import { type Accessor, createEffect, createRoot, createSignal } from "solid-js";
+import { type Accessor, createRoot, createSignal, createTrackedEffect } from "solid-js";
 
 export class WsrxWrapper {
   apiAddr: Accessor<string>;
@@ -37,7 +37,7 @@ export class WsrxWrapper {
       this.setTraffics(data);
     });
 
-    createEffect(() => {
+    createTrackedEffect(() => {
       if (this.apiAddr() && platformInfo.data?.name) {
         this.wsrx.setOptions({
           api: this.apiAddr(),

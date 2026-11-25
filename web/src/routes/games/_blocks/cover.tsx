@@ -3,10 +3,10 @@ import bgGameDefault from "@assets/imgs/bg-game-default.webp";
 import { mediaPath } from "@lib/utils/media";
 import type { Game } from "@models/game";
 import { useNavigate } from "@solidjs/router";
+import type { ComponentProps } from "@solidjs/web";
 import LoadingTips from "@widgets/loading-tips";
 import clsx from "clsx";
-import { type ComponentProps, createEffect, createRoot, createSignal, Show, untrack } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createRoot, createSignal, createStore, createTrackedEffect, Show, untrack } from "solid-js";
 
 const gameCoverRoot = createRoot(() =>
   createStore<{
@@ -28,7 +28,7 @@ export default function (props: ComponentProps<"div">) {
   const [expanded, setExpanded] = createSignal(false);
   const _preloadImage = new Image();
   _preloadImage.src = bgGameDefault;
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (gameCoverStore.goto) {
       untrack(() => {
         if (gameCoverStore.visited.find((v) => v === gameCoverStore.preload?.id)) {
@@ -37,13 +37,13 @@ export default function (props: ComponentProps<"div">) {
         }
         setExpanded(true);
         // gameCoverStore.visited.push(gameCoverStore.preload!.id);
-        setGameCoverStore({
-          visited: [...gameCoverStore.visited, gameCoverStore.preload!.id],
+        setGameCoverStore((s) => {
+          s.visited = [...s.visited, gameCoverStore.preload!.id];
         });
       });
     }
   });
-  createEffect(() => {
+  createTrackedEffect(() => {
     // when the first navigate happens, we will fetch the game details that same with preload one,
     // this effect will be triggered in second times either, we don't want that. so we cache it.
     if (gameCoverStore.goto && expanded()) {
@@ -55,7 +55,10 @@ export default function (props: ComponentProps<"div">) {
           setExpanded(false);
         }, 3000);
         setTimeout(() => {
-          setGameCoverStore({ goto: null, preload: null });
+          setGameCoverStore((s) => {
+            s.goto = null;
+            s.preload = null;
+          });
         }, 4000);
       });
     }
@@ -66,8 +69,7 @@ export default function (props: ComponentProps<"div">) {
       class={clsx(
         "fixed w-full top-0 left-0 overflow-hidden lg:overflow-clip transition-all ease-in-out z-40 duration-500",
         expanded() ? "h-full" : "h-0",
-        props.class,
-        props.classList
+        props.class
       )}
     >
       <div class="w-screen h-screen relative bg-layer">

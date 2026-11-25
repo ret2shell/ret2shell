@@ -3,14 +3,15 @@ import { getVersion, usePlatformInfo } from "@api/platform";
 import Background from "@blocks/background";
 import { Permission } from "@models/user";
 import { useLocation, useNavigate, useSearchParams } from "@solidjs/router";
+import type { JSX } from "@solidjs/web";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
 import { frontendCompatVersion, platformStore, setPlatformStore } from "@storage/platform";
 import { t } from "@storage/theme";
 import { addToast, removeToast } from "@storage/toast";
+import { Transition } from "@widgets/transition";
 import { HTTPError } from "ky";
-import { createEffect, createMemo, createSignal, type JSX, onMount, Show, untrack } from "solid-js";
-import { Transition } from "solid-transition-group";
+import { createMemo, createSignal, createTrackedEffect, onSettled, Show, untrack } from "solid-js";
 import TitleBar from "./_blocks/title-bar";
 import Toasts from "./_blocks/toasts";
 
@@ -20,14 +21,18 @@ function checkCookiePolicy() {
       level: "info",
       description: t("platform.cookiePolicy"),
       accept: () => {
-        setPlatformStore({ accept_cookies: true });
+        setPlatformStore((s) => {
+          s.accept_cookies = true;
+        });
         setTimeout(() => {
           removeToast(toastId);
         }, 50);
       },
       acceptLabel: t("general.actions.ok.title"),
       reject: () => {
-        setPlatformStore({ accept_cookies: true });
+        setPlatformStore((s) => {
+          s.accept_cookies = true;
+        });
         setTimeout(() => {
           removeToast(toastId);
         }, 50);
@@ -57,13 +62,15 @@ export default function (props: { children?: JSX.Element }) {
     }
   }
 
-  onMount(async () => {
+  onSettled(async () => {
     try {
       await loadVersion();
     } catch (err) {
       // console.log(err);
       if (err instanceof HTTPError && err.response?.status === 503) {
-        setPlatformStore({ under_maintenance: true });
+        setPlatformStore((s) => {
+          s.under_maintenance = true;
+        });
       } else if (err instanceof HTTPError && err.response?.status === 502) {
         addToast({
           level: "error",
@@ -80,7 +87,9 @@ export default function (props: { children?: JSX.Element }) {
         handleHttpError(err as Error, t("platform.errors.internal.title"));
         navigate("/sigtrap/unknown");
       }
-      setPlatformStore({ backend_online: false });
+      setPlatformStore((s) => {
+        s.backend_online = false;
+      });
     }
     showAnimation = showAnimation && !platformInfo.data?.zen_game;
 
@@ -107,10 +116,10 @@ export default function (props: { children?: JSX.Element }) {
   async function loadVersion() {
     try {
       const version = await getVersion();
-      setPlatformStore({
-        version,
-        under_maintenance: false,
-        backend_online: true,
+      setPlatformStore((s) => {
+        s.version = version;
+        s.under_maintenance = false;
+        s.backend_online = true;
       });
       if (!version.startsWith(frontendCompatVersion)) {
         addToast({
@@ -137,16 +146,21 @@ export default function (props: { children?: JSX.Element }) {
         "color: currentColor;"
       );
     } catch (err) {
-      setPlatformStore({ version: `${frontendCompatVersion}-UNKNOWN-0.0.0` });
+      setPlatformStore((s) => {
+        s.version = `${frontendCompatVersion}-UNKNOWN-0.0.0`;
+      });
       if (err instanceof HTTPError && err.response?.status === 503) {
-        setPlatformStore({ under_maintenance: true, backend_online: false });
+        setPlatformStore((s) => {
+          s.under_maintenance = true;
+          s.backend_online = false;
+        });
         navigate("/");
       }
       throw err;
     }
   }
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (accountStore.token) {
       untrack(() => {
         setTimeout(() => {

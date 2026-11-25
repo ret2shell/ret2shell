@@ -2,7 +2,7 @@ import { useGame } from "@api/game";
 import { useCreateNotificationMutation, useDeleteNotificationMutation, useNotifications } from "@api/notification";
 import type { Notification } from "@models/notification";
 import { createForm, required, setValues } from "@modular-forms/solid";
-import { A } from "@solidjs/router";
+
 import { accountStore } from "@storage/account";
 import { isAdminOfGame } from "@storage/game";
 import { fullTheme, t } from "@storage/theme";
@@ -11,8 +11,8 @@ import Divider from "@widgets/divider";
 import Editor from "@widgets/editor";
 import Input from "@widgets/input";
 import LoadingTips from "@widgets/loading-tips";
+import { OverlayScrollbarsComponent } from "@widgets/overlay-scrollbars";
 import { DateTime } from "luxon";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-solid";
 import { createMemo, createSignal, For, onCleanup, Show } from "solid-js";
 
 type NotificationForm = {
@@ -171,9 +171,9 @@ export default function (props: { gameId: number }) {
                         "yyyy-MM-dd HH:mm:ss"
                       )}`}
                     />
-                    <A class="shrink-0 flex items-center" href={`/users/${notification.publisher_id}`}>
+                    <a class="shrink-0 flex items-center" href={`/users/${notification.publisher_id}`}>
                       <span class="shrink-0 icon-[fluent--person-20-regular] w-5 h-5" />
-                    </A>
+                    </a>
                     <Show when={isAdminOfGame(game.data)}>
                       <button
                         class="shrink-0 flex items-center cursor-pointer hover:text-error"

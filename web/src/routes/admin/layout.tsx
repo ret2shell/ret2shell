@@ -2,14 +2,15 @@ import SidebarLayout from "@blocks/sidebar-layout";
 import { Permission } from "@models/user";
 import { createBreakpoints } from "@solid-primitives/media";
 import { useNavigate } from "@solidjs/router";
+import type { JSX } from "@solidjs/web";
 import { accountStore } from "@storage/account";
 import { Title } from "@storage/header";
 import { breakpoints, t } from "@storage/theme";
 import { addToast } from "@storage/toast";
 import Button from "@widgets/button";
+import { Transition } from "@widgets/transition";
 import clsx from "clsx";
-import { createSignal, type JSX, Show } from "solid-js";
-import { Transition } from "solid-transition-group";
+import { createSignal, Show } from "solid-js";
 import SideBar from "./_blocks/sidebar";
 
 export default function (props: { children?: JSX.Element }) {
