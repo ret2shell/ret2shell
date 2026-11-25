@@ -333,11 +333,6 @@ pub(crate) async fn execute_update(
       }
     }
     SyncPlan::FastForward { old_oid, new_oid } => {
-      game_bucket
-        .git
-        .validate_sync_tree(&new_oid)
-        .await
-        .map_err(|error| UpdateError::Validation(error.to_string()))?;
       logger
         .info(format!(
           "Applying fast-forward update {} -> {}...",
@@ -363,6 +358,21 @@ pub(crate) async fn execute_update(
           cause: error.to_string(),
           rollback,
         });
+      }
+      // the tree is validated after the working tree carries it: path safety
+      // resolves every entry with canonicalize, which needs the files present
+      if let Err(error) = game_bucket.git.validate_sync_tree(&new_oid).await {
+        let validation = UpdateError::Validation(error.to_string());
+        return match restore_repository(&game_bucket.git, &head_ref, &old_oid, &new_oid).await {
+          Ok(()) => {
+            logger.error("Repository rollback completed.").await;
+            Err(validation)
+          }
+          Err(rollback_error) => Err(UpdateError::RollbackFailed {
+            cause: validation.message(),
+            rollback: rollback_error,
+          }),
+        };
       }
       let diff = game_bucket
         .git

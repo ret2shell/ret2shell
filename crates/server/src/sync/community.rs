@@ -1,6 +1,6 @@
 use std::{collections::BTreeMap, net::IpAddr, process::Stdio, str::FromStr};
 
-use r2s_bucket::{validate_bucket_id, validate_commit_hash};
+use r2s_bucket::{is_valid_bucket_id, validate_commit_hash};
 use serde::{Deserialize, Serialize};
 use tracing::warn;
 use url::Url;
@@ -286,8 +286,11 @@ pub(crate) async fn fetch_registry_index(
     .map_err(|error| format!("the registry index is not valid JSON: {error}"))?;
   let mut entries = BTreeMap::new();
   for (bucket_id, entry) in raw {
-    if let Err(error) = validate_bucket_id(&bucket_id) {
-      warn!(bucket_id, error=%error, "skipping registry entry with an invalid bucket id");
+    if !is_valid_bucket_id(&bucket_id) {
+      warn!(
+        bucket_id,
+        "skipping registry entry with an invalid bucket id"
+      );
       continue;
     }
     if let Err(error) = entry.validate() {

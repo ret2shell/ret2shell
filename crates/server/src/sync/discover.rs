@@ -1,6 +1,6 @@
 use std::{net::IpAddr, process::Stdio, str::FromStr};
 
-use r2s_bucket::{validate_bucket_id, validate_commit_hash};
+use r2s_bucket::{is_valid_bucket_id, validate_commit_hash};
 use serde::Deserialize;
 use tokio::io::AsyncWriteExt;
 use url::Url;
@@ -155,7 +155,12 @@ fn validate_repository_url(url: &Url) -> Result<(), String> {
 }
 
 fn resolve(descriptor: &SourceDescriptor, endpoint: &Url) -> Result<Url, String> {
-  validate_bucket_id(&descriptor.bucket_id).map_err(|error| error.to_string())?;
+  if !is_valid_bucket_id(&descriptor.bucket_id) {
+    return Err(format!(
+      "discovered bucket id is not a valid directory name: {}",
+      descriptor.bucket_id
+    ));
+  }
   if !validate_commit_hash(&descriptor.head) {
     return Err(format!(
       "discovered head is not a full commit hash: {}",

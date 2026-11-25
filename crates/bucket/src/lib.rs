@@ -41,23 +41,16 @@ fn game_bucket_name(game: &GameConfig) -> String {
   format!("{}_{:x}", game_name, game.start_at.timestamp())
 }
 
-/// Validates a bucket id adopted from a remote source instance. The bucket id
-/// becomes a local directory name, so it must stay within a conservative
-/// character set and length instead of being re-derived from the game config.
-pub fn validate_bucket_id(input: &str) -> Result<(), BucketError> {
-  let invalid = || BucketError::InvalidBucketId(input.to_owned());
-  if input.is_empty() || input.len() > 128 {
-    return Err(invalid());
-  }
-  let mut chars = input.chars();
-  let first = chars.next().expect("non-empty input");
-  if !first.is_ascii_alphanumeric() {
-    return Err(invalid());
-  }
-  if !chars.all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-') {
-    return Err(invalid());
-  }
-  Ok(())
+/// A bucket id adopted from another instance becomes a local directory name
+/// verbatim. Real ids are produced through deunicode transliteration, so any
+/// input deunicode would rewrite is rejected; the value must additionally not
+/// be a path (`/`, `\`, a leading `.`), because it is joined onto the bucket
+/// root. Length is bounded by the database column, not here.
+pub fn is_valid_bucket_id(input: &str) -> bool {
+  !input.is_empty()
+    && input == deunicode_with_tofu(input, "_")
+    && !input.contains(['/', '\\'])
+    && !input.starts_with('.')
 }
 
 /// A full Git commit hash (SHA-1 or SHA-256 object id) used as the admission
@@ -165,7 +158,9 @@ impl Bucket {
   pub async fn import_game(
     &self, repository_url: &str, bearer_token: Option<&str>, bucket_id: &str, head_ref: &str,
   ) -> Result<game::GameBucket, BucketError> {
-    validate_bucket_id(bucket_id)?;
+    if !is_valid_bucket_id(bucket_id) {
+      return Err(BucketError::InvalidBucketId(bucket_id.to_owned()));
+    }
     if !validate_commit_hash(head_ref) {
       return Err(BucketError::InvalidBucketId(format!(
         "head ref is not a full commit hash: {head_ref}"
@@ -284,8 +279,9 @@ mod import_tests {
   use crate::{
     Bucket,
     game::{AccessPolicy, GameConfig, HostType},
+    is_valid_bucket_id,
     traits::BucketError,
-    validate_bucket_id, validate_commit_hash,
+    validate_commit_hash,
   };
 
   fn temp_path(name: &str) -> PathBuf {
@@ -370,25 +366,25 @@ mod import_tests {
 
   #[test]
   fn bucket_id_validation_accepts_source_ids_and_rejects_paths() {
-    assert!(validate_bucket_id("imported_poc_19266d80").is_ok());
-    assert!(validate_bucket_id("A-b_3").is_ok());
-    for rejected in [
-      "",
-      ".hidden",
-      "..",
-      "../escape",
-      "slash/id",
-      "back\\slash",
-      "-leading-dash",
-      "_leading-underscore",
-      &"x".repeat(129),
-      "id with space",
-    ] {
+    // real source ids come out of deunicode transliteration
+    assert!(is_valid_bucket_id("imported_poc_19266d80"));
+    assert!(is_valid_bucket_id("A-b_3"));
+    // deunicode would rewrite these, so they cannot be source bucket ids
+    for rejected in ["中文bucket", "café", "naïve_bucket"] {
       assert!(
-        validate_bucket_id(rejected).is_err(),
-        "accepted invalid bucket id {rejected:?}"
+        !is_valid_bucket_id(rejected),
+        "accepted a bucket id deunicode would rewrite: {rejected:?}"
       );
     }
+    // deunicode leaves these untouched, but they are paths, not directory names
+    for rejected in ["", ".hidden", "..", "../escape", "slash/id", "back\\slash"] {
+      assert!(
+        !is_valid_bucket_id(rejected),
+        "accepted a bucket id that is a path: {rejected:?}"
+      );
+    }
+    // length is bounded by the database column, not by this check
+    assert!(is_valid_bucket_id(&"x".repeat(256)));
   }
 
   #[test]

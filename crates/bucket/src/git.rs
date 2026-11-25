@@ -644,12 +644,16 @@ impl Git {
   }
 
   /// Validates the tree of a revision adopted from a remote source before it
-  /// is materialized. Only the checks that protect the local filesystem are
-  /// applied: every entry must be a regular blob at a safe relative path.
-  /// Size and file-count limits are deliberately absent - a local git push
-  /// has none either, and the admission head_ref already pins the exact
-  /// content that was reviewed.
+  /// is materialized. Every entry must be a regular blob whose resolved path
+  /// stays inside the working tree: resolving with `canonicalize` covers
+  /// absolute entries, `..`, both separators and symlink escapes without a
+  /// hand-written character blacklist. A `.git` component is rejected
+  /// separately - it also resolves inside the tree but would let a repository
+  /// rewrite its own metadata. Size and file-count limits are deliberately
+  /// absent: a local git push has none either, and the admission `head_ref`
+  /// already pins the exact content that was reviewed.
   pub async fn validate_sync_tree(&self, rev: impl AsRef<str>) -> Result<(), BucketError> {
+    let root = self.path.canonicalize()?;
     let output = Command::new("git")
       .current_dir(&self.path)
       .arg("ls-tree")
@@ -677,16 +681,6 @@ impl Git {
         })?;
       let metadata = &record[..separator];
       let path = String::from_utf8(record[separator + 1..].to_vec())?;
-      if path.starts_with('/')
-        || path.contains('\\')
-        || path
-          .split('/')
-          .any(|part| matches!(part, "" | "." | ".." | ".git"))
-      {
-        return Err(BucketError::GitCommandFailed(format!(
-          "synchronized repository contains an unsafe path: {path}"
-        )));
-      }
       let mut fields = metadata
         .split(|byte| *byte == b' ')
         .filter(|field| !field.is_empty());
@@ -695,6 +689,21 @@ impl Git {
       if object_type != b"blob" || !matches!(mode, b"100644" | b"100755") {
         return Err(BucketError::GitCommandFailed(format!(
           "synchronized repository contains an unsupported file type at {path}"
+        )));
+      }
+      if path.split(['/', '\\']).any(|part| part == ".git") {
+        return Err(BucketError::GitCommandFailed(format!(
+          "synchronized repository writes into its own metadata: {path}"
+        )));
+      }
+      let resolved = self.path.join(&path).canonicalize().map_err(|error| {
+        BucketError::GitCommandFailed(format!(
+          "synchronized repository path `{path}` does not resolve: {error}"
+        ))
+      })?;
+      if !resolved.starts_with(&root) {
+        return Err(BucketError::GitCommandFailed(format!(
+          "synchronized repository path escapes the working tree: {path}"
         )));
       }
     }
