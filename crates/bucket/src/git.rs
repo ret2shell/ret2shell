@@ -643,11 +643,13 @@ impl Git {
       .collect()
   }
 
+  /// Validates the tree of a revision adopted from a remote source before it
+  /// is materialized. Only the checks that protect the local filesystem are
+  /// applied: every entry must be a regular blob at a safe relative path.
+  /// Size and file-count limits are deliberately absent - a local git push
+  /// has none either, and the admission head_ref already pins the exact
+  /// content that was reviewed.
   pub async fn validate_sync_tree(&self, rev: impl AsRef<str>) -> Result<(), BucketError> {
-    const MAX_FILES: usize = 50_000;
-    const MAX_FILE_SIZE: u64 = 512 * 1024 * 1024;
-    const MAX_TOTAL_SIZE: u64 = 2 * 1024 * 1024 * 1024;
-
     let output = Command::new("git")
       .current_dir(&self.path)
       .arg("ls-tree")
@@ -662,19 +664,11 @@ impl Git {
         output.stderr,
       )?));
     }
-    let mut files = 0usize;
-    let mut total_size = 0u64;
     for record in output
       .stdout
       .split(|byte| *byte == 0)
       .filter(|record| !record.is_empty())
     {
-      files += 1;
-      if files > MAX_FILES {
-        return Err(BucketError::GitCommandFailed(format!(
-          "synchronized repository contains more than {MAX_FILES} files"
-        )));
-      }
       let separator = record
         .iter()
         .position(|byte| *byte == b'\t')
@@ -698,27 +692,9 @@ impl Git {
         .filter(|field| !field.is_empty());
       let mode = fields.next().unwrap_or_default();
       let object_type = fields.next().unwrap_or_default();
-      let _object_id = fields.next().unwrap_or_default();
-      let size = fields.next().unwrap_or_default();
       if object_type != b"blob" || !matches!(mode, b"100644" | b"100755") {
         return Err(BucketError::GitCommandFailed(format!(
           "synchronized repository contains an unsupported file type at {path}"
-        )));
-      }
-      let size = String::from_utf8(size.to_vec())?
-        .parse::<u64>()
-        .map_err(|_| BucketError::GitCommandFailed("invalid synchronized file size".to_owned()))?;
-      if size > MAX_FILE_SIZE {
-        return Err(BucketError::GitCommandFailed(format!(
-          "synchronized file exceeds the {MAX_FILE_SIZE}-byte limit: {path}"
-        )));
-      }
-      total_size = total_size.checked_add(size).ok_or_else(|| {
-        BucketError::GitCommandFailed("synchronized repository size overflow".to_owned())
-      })?;
-      if total_size > MAX_TOTAL_SIZE {
-        return Err(BucketError::GitCommandFailed(format!(
-          "synchronized repository exceeds the {MAX_TOTAL_SIZE}-byte limit"
         )));
       }
     }
