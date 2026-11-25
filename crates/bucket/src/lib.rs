@@ -41,16 +41,18 @@ fn game_bucket_name(game: &GameConfig) -> String {
   format!("{}_{:x}", game_name, game.start_at.timestamp())
 }
 
-/// A bucket id adopted from another instance becomes a local directory name
-/// verbatim. Real ids are produced through deunicode transliteration, so any
-/// input deunicode would rewrite is rejected; the value must additionally not
-/// be a path (`/`, `\`, a leading `.`), because it is joined onto the bucket
-/// root. Length is bounded by the database column, not here.
+/// A bucket id adopted from another instance must already be in the exact
+/// shape local ids are produced in: deunicode transliteration, trimmed, then
+/// snake_case. Comparing against that normalization rejects everything else -
+/// paths and separators, whitespace, upper case, non-ASCII input - without a
+/// hand-written blacklist. Length is bounded by the database column, not here.
 pub fn is_valid_bucket_id(input: &str) -> bool {
   !input.is_empty()
-    && input == deunicode_with_tofu(input, "_")
-    && !input.contains(['/', '\\'])
-    && !input.starts_with('.')
+    && input
+      == deunicode_with_tofu(input, "_")
+        .trim()
+        .to_owned()
+        .to_snake_case()
 }
 
 /// A full Git commit hash (SHA-1 or SHA-256 object id) used as the admission
@@ -365,22 +367,35 @@ mod import_tests {
   }
 
   #[test]
-  fn bucket_id_validation_accepts_source_ids_and_rejects_paths() {
-    // real source ids come out of deunicode transliteration
-    assert!(is_valid_bucket_id("imported_poc_19266d80"));
-    assert!(is_valid_bucket_id("A-b_3"));
-    // deunicode would rewrite these, so they cannot be source bucket ids
-    for rejected in ["中文bucket", "café", "naïve_bucket"] {
-      assert!(
-        !is_valid_bucket_id(rejected),
-        "accepted a bucket id deunicode would rewrite: {rejected:?}"
-      );
+  fn bucket_id_validation_accepts_normalized_ids_only() {
+    // ids exactly as game_bucket_name produces them
+    for accepted in [
+      "imported_poc_19266d80",
+      "r2s_sync_po_c_6955b900",
+      "ui_smoke_game_5868_6955b900",
+    ] {
+      assert!(is_valid_bucket_id(accepted), "rejected {accepted:?}");
     }
-    // deunicode leaves these untouched, but they are paths, not directory names
-    for rejected in ["", ".hidden", "..", "../escape", "slash/id", "back\\slash"] {
+    for rejected in [
+      // not normalized: whitespace, case, non-ASCII
+      "",
+      "id with space",
+      "A-b_3",
+      "中文bucket",
+      "café",
+      " padded",
+      "trailing ",
+      // paths and separators are folded away by the normalization
+      ".hidden",
+      ".",
+      "..",
+      "../escape",
+      "slash/id",
+      "back\\slash",
+    ] {
       assert!(
         !is_valid_bucket_id(rejected),
-        "accepted a bucket id that is a path: {rejected:?}"
+        "accepted a non-normalized bucket id: {rejected:?}"
       );
     }
     // length is bounded by the database column, not by this check
