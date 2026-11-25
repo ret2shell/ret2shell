@@ -819,6 +819,11 @@ export function useRenamePasskeyMutation(props: { onSuccess?: () => void; onErro
   return useMutation(() => ({
     mutationFn: ({ id, name }: { id: number; name: string }) => renamePasskey(id, name),
     onSuccess: () => {
+      addToast({
+        level: "success",
+        description: t("general.actions.save.status.success"),
+        duration: 5000,
+      });
       props.onSuccess?.();
     },
     onError: (err: Error) => {
