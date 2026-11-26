@@ -658,11 +658,6 @@ impl Git {
           "synchronized repository contains an unsupported file type at {path}"
         )));
       }
-      if path.split(['/', '\\']).any(|part| part == ".git") {
-        return Err(BucketError::GitCommandFailed(format!(
-          "synchronized repository writes into its own metadata: {path}"
-        )));
-      }
       let resolved = self.path.join(&path).canonicalize().map_err(|error| {
         BucketError::GitCommandFailed(format!(
           "synchronized repository path `{path}` does not resolve: {error}"

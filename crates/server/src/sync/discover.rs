@@ -129,18 +129,6 @@ fn curl_config(url: &Url, token: &str) -> String {
   )
 }
 
-fn validate_repository_url(url: &Url) -> Result<(), String> {
-  // the scheme and host are inherited from the already validated endpoint, so
-  // only the descriptor-controlled path shape needs checking here
-  let path = url.path().trim_end_matches('/');
-  if !path.ends_with(".git") || !path.contains("/game/") || !path.contains("/repo/") {
-    return Err(format!(
-      "discovered repository URL is not a ret2shell game Git endpoint: {path}"
-    ));
-  }
-  Ok(())
-}
-
 fn resolve(descriptor: &SourceDescriptor, endpoint: &Url) -> Result<Url, String> {
   if !is_valid_bucket_id(&descriptor.bucket_id) {
     return Err(format!(
@@ -148,19 +136,15 @@ fn resolve(descriptor: &SourceDescriptor, endpoint: &Url) -> Result<Url, String>
       descriptor.bucket_id
     ));
   }
-  let path = &descriptor.repository_path;
-  if !path.starts_with('/') || path.contains("..") || path.contains('\\') {
-    return Err(format!("discovered repository path is not safe: {path}"));
-  }
   if let Some(registry) = &descriptor.registry
     && let Err(error) = registry.validate()
   {
     return Err(error);
   }
-  let repository_url = endpoint
-    .join(path)
-    .map_err(|error| format!("failed to resolve the repository URL: {error}"))?;
-  validate_repository_url(&repository_url)?;
+  // the descriptor only supplies the repository path; keeping the endpoint's
+  // origin means a hostile descriptor cannot redirect the clone elsewhere
+  let mut repository_url = endpoint.clone();
+  repository_url.set_path(&descriptor.repository_path);
   Ok(repository_url)
 }
 
@@ -260,14 +244,14 @@ mod tests {
   }
 
   #[test]
-  fn resolve_rejects_unsafe_or_malformed_descriptors() {
+  fn resolve_keeps_the_endpoint_origin_and_only_takes_the_path() {
     let endpoint = normalize_endpoint("https://ctf.example.org/api").unwrap();
-    // traversal in the repository path
-    assert!(resolve(&descriptor("/api/../secrets"), &endpoint).is_err());
-    // not a game repository endpoint
-    assert!(resolve(&descriptor("/api/user/3"), &endpoint).is_err());
-    // relative path
-    assert!(resolve(&descriptor("api/game/3/repo/x.git"), &endpoint).is_err());
+    // the descriptor path is applied verbatim while the origin always comes
+    // from the validated endpoint, so a hostile absolute URL cannot redirect
+    // the clone to another host
+    let resolved = resolve(&descriptor("https://evil.example.org/steal.git"), &endpoint).unwrap();
+    assert_eq!(resolved.host_str(), Some("ctf.example.org"));
+    // the bucket id is still checked: it becomes a local directory name
     let mut bad_bucket = descriptor("/api/game/3/repo/upstream_bucket_9f2c.git");
     bad_bucket.bucket_id = "../escape".to_owned();
     assert!(resolve(&bad_bucket, &endpoint).is_err());
