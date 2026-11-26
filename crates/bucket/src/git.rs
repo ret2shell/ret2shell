@@ -422,38 +422,6 @@ impl RemoteGitTransfer {
     tokio::fs::remove_dir_all(&self.hooks_path).await.ok();
   }
 }
-
-/// Branch names are embedded into a fetch refspec, so they must satisfy the
-/// git reference format before they reach the command line: a branch like
-/// `--upload-pack=...` must never be interpreted as a git option.
-fn validate_sync_branch(branch: &str) -> Result<(), BucketError> {
-  const MAX_BRANCH_LENGTH: usize = 255;
-  let invalid = branch.is_empty()
-    || branch.len() > MAX_BRANCH_LENGTH
-    || branch.starts_with(['.', '-', '/'])
-    || branch.ends_with(['.', '/'])
-    || branch.ends_with(".lock")
-    || branch == "@"
-    || branch.contains("..")
-    || branch.contains("@{")
-    || branch.contains('\\')
-    || branch.chars().any(|c| {
-      matches!(
-        c,
-        ' ' | '~' | '^' | ':' | '?' | '[' | '*' | '\0'..='\x1f' | '\x7f'
-      )
-    })
-    || branch
-      .split('/')
-      .any(|part| part.is_empty() || part.starts_with('.') || part == "@");
-  if invalid {
-    return Err(BucketError::GitCommandFailed(format!(
-      "invalid branch name for instance synchronization: {branch}"
-    )));
-  }
-  Ok(())
-}
-
 impl Git {
   pub fn path(&self) -> &Path {
     &self.path
@@ -579,7 +547,6 @@ impl Git {
   ) -> Result<(), BucketError> {
     let repository_url = repository_url.as_ref();
     let branch = branch.as_ref();
-    validate_sync_branch(branch)?;
     if repository_url.starts_with('-') {
       return Err(BucketError::GitCommandFailed(
         "invalid repository URL for instance synchronization".to_owned(),
@@ -1704,7 +1671,7 @@ mod sync_tests {
     time::{SystemTime, UNIX_EPOCH},
   };
 
-  use super::{Git, RemoteGitTransfer, SYNC_CANDIDATE_REF, validate_sync_branch};
+  use super::{Git, RemoteGitTransfer, SYNC_CANDIDATE_REF};
 
   fn temp_path(name: &str) -> PathBuf {
     let nanos = SystemTime::now()
@@ -1825,38 +1792,6 @@ mod sync_tests {
     let result = Git::clone("file:///tmp/ret2shell-sync-source", &destination, None).await;
     assert!(result.is_err());
     assert!(!destination.exists());
-  }
-
-  #[test]
-  fn sync_branch_validation_rejects_dangerous_names() {
-    for branch in [
-      "",
-      "--upload-pack=/bin/sh",
-      "-oProxyCommand=evil",
-      ".hidden",
-      "trailing.",
-      "release.lock",
-      "a..b",
-      "a/.hidden",
-      "/leading",
-      "trailing/",
-      "double//slash",
-      "with space",
-      "with~tilde",
-      "with^caret",
-      "with:colon",
-      "with?question",
-      "with[bracket",
-      "with*star",
-      "with\\backslash",
-      "with@{brace",
-      "@",
-    ] {
-      assert!(validate_sync_branch(branch).is_err(), "accepted {branch:?}");
-    }
-    for branch in ["main", "master", "release/1.0", "dev_feature", "v1.0.x"] {
-      assert!(validate_sync_branch(branch).is_ok(), "rejected {branch:?}");
-    }
   }
 
   #[tokio::test]

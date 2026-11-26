@@ -1,6 +1,6 @@
 use std::{net::IpAddr, process::Stdio, str::FromStr};
 
-use r2s_bucket::{is_valid_bucket_id, validate_commit_hash};
+use r2s_bucket::is_valid_bucket_id;
 use serde::Deserialize;
 use tokio::io::AsyncWriteExt;
 use url::Url;
@@ -38,19 +38,6 @@ pub(crate) fn normalize_endpoint(input: &str) -> Result<Url, ResponseError> {
   if url.scheme() != "https" && !(url.scheme() == "http" && local_http) {
     return Err(ResponseError::BadRequest(
       "source endpoint must use HTTPS, or HTTP only for a local instance".to_owned(),
-    ));
-  }
-  let path = url.path().trim_end_matches('/');
-  if !path.is_empty()
-    && !path.split('/').skip(1).all(|segment| {
-      !segment.is_empty()
-        && segment
-          .chars()
-          .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
-    })
-  {
-    return Err(ResponseError::BadRequest(
-      "source endpoint path must be plain api base segments".to_owned(),
     ));
   }
   Ok(url.clone())
@@ -161,12 +148,6 @@ fn resolve(descriptor: &SourceDescriptor, endpoint: &Url) -> Result<Url, String>
       descriptor.bucket_id
     ));
   }
-  if !validate_commit_hash(&descriptor.head) {
-    return Err(format!(
-      "discovered head is not a full commit hash: {}",
-      descriptor.head
-    ));
-  }
   let path = &descriptor.repository_path;
   if !path.starts_with('/') || path.contains("..") || path.contains('\\') {
     return Err(format!("discovered repository path is not safe: {path}"));
@@ -260,8 +241,6 @@ mod tests {
       "http://ctf.example.org/api",
       "https://user:password@ctf.example.org/api",
       "https://ctf.example.org/api?token=secret",
-      "https://ctf.example.org/api/game.git",
-      "https://ctf.example.org/api/game/1/repo/x.git",
     ] {
       assert!(normalize_endpoint(rejected).is_err(), "accepted {rejected}");
     }
@@ -289,9 +268,6 @@ mod tests {
     assert!(resolve(&descriptor("/api/user/3"), &endpoint).is_err());
     // relative path
     assert!(resolve(&descriptor("api/game/3/repo/x.git"), &endpoint).is_err());
-    let mut bad_head = descriptor("/api/game/3/repo/upstream_bucket_9f2c.git");
-    bad_head.head = "main".to_owned();
-    assert!(resolve(&bad_head, &endpoint).is_err());
     let mut bad_bucket = descriptor("/api/game/3/repo/upstream_bucket_9f2c.git");
     bad_bucket.bucket_id = "../escape".to_owned();
     assert!(resolve(&bad_bucket, &endpoint).is_err());

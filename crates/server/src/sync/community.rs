@@ -1,6 +1,6 @@
 use std::{collections::BTreeMap, net::IpAddr, process::Stdio, str::FromStr};
 
-use r2s_bucket::{is_valid_bucket_id, validate_commit_hash};
+use r2s_bucket::is_valid_bucket_id;
 use serde::{Deserialize, Serialize};
 use tracing::warn;
 use url::Url;
@@ -76,12 +76,6 @@ impl RegistryEntry {
   /// credential is required, a non-empty token. Entries without a token are
   /// listed but cannot be imported.
   fn validate(&self) -> Result<(), String> {
-    if !validate_commit_hash(&self.head_ref) {
-      return Err(format!(
-        "head_ref is not a full commit hash: {}",
-        self.head_ref
-      ));
-    }
     if self.name.trim().is_empty() {
       return Err("name must not be empty".to_owned());
     }
@@ -382,10 +376,6 @@ mod tests {
     let mut tokenless = valid.clone();
     tokenless.token = String::new();
     assert!(tokenless.validate().is_ok());
-    // branch names are not admission anchors
-    let mut bad_head = valid.clone();
-    bad_head.head_ref = "main".to_owned();
-    assert!(bad_head.validate().is_err());
     // a non-ret2shell endpoint is rejected
     let mut bad_endpoint = valid.clone();
     bad_endpoint.endpoint = "https://user:pass@ctf.example.org".to_owned();

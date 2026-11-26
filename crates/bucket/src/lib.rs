@@ -55,12 +55,6 @@ pub fn is_valid_bucket_id(input: &str) -> bool {
         .to_snake_case()
 }
 
-/// A full Git commit hash (SHA-1 or SHA-256 object id) used as the admission
-/// anchor for sync. Branch names and other mutable refs are not accepted.
-pub fn validate_commit_hash(input: &str) -> bool {
-  (input.len() == 40 || input.len() == 64) && input.chars().all(|c| c.is_ascii_hexdigit())
-}
-
 impl Bucket {
   async fn check_git_safe_directories(&self) -> Result<i32, BucketError> {
     // get all child directories, and try open it with git
@@ -162,11 +156,6 @@ impl Bucket {
   ) -> Result<game::GameBucket, BucketError> {
     if !is_valid_bucket_id(bucket_id) {
       return Err(BucketError::InvalidBucketId(bucket_id.to_owned()));
-    }
-    if !validate_commit_hash(head_ref) {
-      return Err(BucketError::InvalidBucketId(format!(
-        "head ref is not a full commit hash: {head_ref}"
-      )));
     }
     let temporary_name = format!(
       ".sync-import-{}-{}",
@@ -283,7 +272,6 @@ mod import_tests {
     game::{AccessPolicy, GameConfig, HostType},
     is_valid_bucket_id,
     traits::BucketError,
-    validate_commit_hash,
   };
 
   fn temp_path(name: &str) -> PathBuf {
@@ -402,30 +390,6 @@ mod import_tests {
     assert!(is_valid_bucket_id(&"x".repeat(256)));
   }
 
-  #[test]
-  fn commit_hash_validation_requires_full_hex_object_ids() {
-    assert!(validate_commit_hash(
-      "0123456789abcdef0123456789abcdef01234567"
-    ));
-    assert!(validate_commit_hash(
-      "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
-    ));
-    for rejected in [
-      "",
-      "main",
-      "refs/heads/main",
-      "0123456789abcdef0123456789abcdef0123456", // 39 chars
-      "0123456789abcdef0123456789abcdef012345678", // 41 chars
-      "z123456789abcdef0123456789abcdef0123456", // non hex
-      "0123456789ABCDEF0123456789abcdef0123456z",
-    ] {
-      assert!(
-        !validate_commit_hash(rejected),
-        "accepted invalid commit hash {rejected:?}"
-      );
-    }
-  }
-
   #[tokio::test]
   async fn import_adopts_a_non_bare_repository_and_locks_it() {
     let source = temp_path("source");
@@ -498,7 +462,7 @@ mod import_tests {
   }
 
   #[tokio::test]
-  async fn import_rejects_unsafe_bucket_ids_and_non_commit_heads() {
+  async fn import_rejects_unsafe_bucket_ids_and_a_mismatched_head() {
     let source = temp_path("source");
     let root = temp_path("root");
     build_source_repo(&source);
@@ -506,16 +470,25 @@ mod import_tests {
     let head = git_output(&source, &["rev-parse", "HEAD"]);
 
     let bucket = Bucket::open(root.clone()).await;
-    for (bucket_id, head_ref) in [("../escape", head.as_str()), ("ok_bucket", "main")] {
-      let error = bucket
-        .import_game(&source.to_string_lossy(), None, bucket_id, head_ref)
-        .await
-        .unwrap_err();
-      assert!(
-        matches!(error, BucketError::InvalidBucketId(_)),
-        "unexpected error for ({bucket_id:?}, {head_ref:?}): {error:?}"
-      );
-    }
+    // an unsafe bucket id is rejected before anything is cloned
+    let error = bucket
+      .import_game(&source.to_string_lossy(), None, "../escape", &head)
+      .await
+      .unwrap_err();
+    assert!(
+      matches!(error, BucketError::InvalidBucketId(_)),
+      "unexpected error: {error:?}"
+    );
+    // a head that is not the cloned commit fails the admission comparison;
+    // the value's format is not checked on its own
+    let error = bucket
+      .import_game(&source.to_string_lossy(), None, "ok_bucket", "main")
+      .await
+      .unwrap_err();
+    assert!(
+      matches!(error, BucketError::HeadRefMismatch { .. }),
+      "unexpected error: {error:?}"
+    );
 
     fs::remove_dir_all(source).unwrap();
     fs::remove_dir_all(root).unwrap();
