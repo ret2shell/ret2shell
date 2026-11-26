@@ -162,6 +162,7 @@ pub(super) async fn upload_challenge_attachment(
   Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
   Query(query): Query<UploadChallengeAttachmentQuery>, mut multipart: Multipart,
 ) -> Result<impl IntoResponse, ResponseError> {
+  crate::routes::game::ensure_not_managed(&game)?;
   super::check_challenge_publishing(&challenge)?;
   let (game_bucket, challenge_bucket) =
     super::get_challenge_bucket_mut(&bucket, &game, &challenge).await?;
@@ -201,6 +202,7 @@ pub(super) async fn delete_challenge_attachment(
   Extension(game): Extension<game::Model>, Extension(challenge): Extension<challenge::Model>,
   Query(query): Query<FileRequest>,
 ) -> Result<impl IntoResponse, ResponseError> {
+  crate::routes::game::ensure_not_managed(&game)?;
   super::check_challenge_publishing(&challenge)?;
   let (game_bucket, challenge_bucket) =
     super::get_challenge_bucket_mut(&bucket, &game, &challenge).await?;
